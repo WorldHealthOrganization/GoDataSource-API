@@ -1,6 +1,6 @@
 {
   "name": "syncLog",
-  "base": "PersistedModel",
+  "base": "extendedPersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true

@@ -107,5 +107,9 @@
   "labResult": {
     "dataSource": "mongoDb",
     "public": false
+  },
+  "extendedPersistedModel": {
+    "dataSource": "mongoDb",
+    "public": false
   }
 }

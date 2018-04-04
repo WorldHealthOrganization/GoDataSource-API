@@ -1,5 +1,7 @@
 'use strict';
 
-module.exports = function(Role) {
+const app = require('../../server/server');
 
+module.exports = function(Role) {
+  app.utils.remote.disableStandardRelationRemoteMethods(Role, 'principals');
 };

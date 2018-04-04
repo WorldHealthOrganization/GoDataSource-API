@@ -1,6 +1,6 @@
 {
   "name": "systemSettings",
-  "base": "PersistedModel",
+  "base": "extendedPersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
