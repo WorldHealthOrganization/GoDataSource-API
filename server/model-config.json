@@ -151,5 +151,9 @@
   "address": {
     "dataSource": null,
     "public": false
+  },
+  "relationship": {
+    "dataSource": "mongoDb",
+    "public": true
   }
 }

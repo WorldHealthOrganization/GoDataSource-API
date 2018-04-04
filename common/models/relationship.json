@@ -1,0 +1,51 @@
+{
+  "name": "relationship",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "contactDate": {
+      "type": "date",
+      "required": true
+    },
+    "certaintyLevel": {
+      "type": "number",
+      "required": true
+    },
+    "contactDateApproximate": {
+      "type": "boolean",
+      "required": true
+    },
+    "locationId": {
+      "type": "string",
+      "required": true
+    },
+    "eventId": {
+      "type": "string"
+    },
+    "exposureType": {
+      "type": "string",
+      "required": true
+    },
+    "exposureFrequency": {
+      "type": "string",
+      "required": true
+    },
+    "exposureDuration": {
+      "type": "string",
+      "required": true
+    },
+    "socialRelationshipType": {
+      "type": "string"
+    },
+    "fillGeolocation": {
+      "type": "geopoint"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

@@ -17,10 +17,6 @@
       "type": "date",
       "required": true
     },
-    "locationId": {
-      "type": "string",
-      "required": true
-    },
     "geolocation": {
       "type": "geopoint"
     },
