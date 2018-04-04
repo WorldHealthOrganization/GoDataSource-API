@@ -1,0 +1,42 @@
+{
+  "name": "templateQuestion",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "text": {
+      "type": "string",
+      "required": true
+    },
+    "variable": {
+      "type": "string",
+      "required": true
+    },
+    "category": {
+      "type": "string",
+      "required": true
+    },
+    "required": {
+      "type": "boolean",
+      "default": false
+    },
+    "order": {
+      "type": "number",
+      "required": true
+    },
+    "answers": {
+      "type": [
+        "templateQuestionAnswer"
+      ]
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

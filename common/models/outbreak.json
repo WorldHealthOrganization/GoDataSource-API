@@ -5,7 +5,113 @@
   "options": {
     "validateUpsert": true
   },
-  "properties": {},
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "string"
+    },
+    "disease": {
+      "type": "string",
+      "required": true
+    },
+    "country": {
+      "type": "string",
+      "required": true
+    },
+    "active": {
+      "type": "boolean",
+      "default": false
+    },
+    "statDate": {
+      "type": "date",
+      "required": true
+    },
+    "endDate": {
+      "type": "date"
+    },
+    "periodOfFollowup": {
+      "type": "number",
+      "required": true
+    },
+    "frequencyOfFollowUp": {
+      "type": "number",
+      "required": true
+    },
+    "numberFollowUpsDay": {
+      "type": "number",
+      "default": 1
+    },
+    "displayDateFormat": {
+      "type": "string",
+      "default": "Y-m-d"
+    },
+    "noDaysAmongContacts": {
+      "type": "number",
+      "required": true
+    },
+    "noDaysDaysInChains": {
+      "type": "number",
+      "required": true
+    },
+    "noDaysNotSeen": {
+      "type": "number",
+      "required": true
+    },
+    "noLessContacts": {
+      "type": "number",
+      "required": true
+    },
+    "highExposureDuration": {
+      "type": "number",
+      "required": true
+    },
+    "fieldsToDisplayNode": {
+      "type": "array"
+    },
+    "colorContactNode": {
+      "type": "string"
+    },
+    "colorCaseClassifications": {
+      "type": "array"
+    },
+    "iconPeopleDied": {
+      "type": "string"
+    },
+    "iconEvents": {
+      "type": "string"
+    },
+    "caseInvestigationTemplate": {
+      "type": "object",
+      "required": true
+    },
+    "contactFollowUpTemplate": {
+      "type": "object",
+      "required": true
+    },
+    "labResultsTemplate": {
+      "type": "object",
+      "required": true
+    },
+    "caseClassification": {
+      "type": "object",
+      "required": true
+    },
+    "vaccinationStatus": {
+      "type": "object",
+      "required": true
+    },
+    "nutritionalStatus": {
+      "type": "object",
+      "required": true
+    },
+    "pregnancyInformation": {
+      "type": "object",
+      "required": true
+    }
+  },
   "validations": [],
   "relations": {
     "cases": {

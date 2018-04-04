@@ -1,22 +1,30 @@
 {
-  "name": "referenceData",
+  "name": "helpItem",
   "base": "extendedPersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "label": {
+    "title": {
       "type": "string",
       "required": true
     },
-    "options": {
-      "type": [
-        "string"
-      ],
+    "content": {
+      "type": "string",
       "required": true
     },
-    "icon": {
+    "approved": {
+      "type": "boolean",
+      "default": false
+    },
+    "approvedBy": {
+      "type": "string"
+    },
+    "approvedDate": {
+      "type": "date"
+    },
+    "categoryId": {
       "type": "string",
       "required": true
     }

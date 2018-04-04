@@ -13,7 +13,63 @@
       "type": "contact"
     }
   },
-  "properties": {},
+  "properties": {
+    "type": {
+      "type": "string",
+      "default": "case",
+      "required": true
+    },
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "middleName": {
+      "type": "string"
+    },
+    "lastName": {
+      "type": "string"
+    },
+    "dob": {
+      "type": "date"
+    },
+    "age": {
+      "type": "number"
+    },
+    "gender": {
+      "type": "string",
+      "required": true
+    },
+    "phoneNumber": {
+      "type": "string"
+    },
+    "occupation": {
+      "type": "string"
+    },
+    "documentType": {
+      "type": "string"
+    },
+    "documentNumber": {
+      "type": "string"
+    },
+    "place": {
+      "type": "string"
+    },
+    "addressLine1": {
+      "type": "string"
+    },
+    "addressLine2": {
+      "type": "date"
+    },
+    "postalCode": {
+      "type": "date"
+    },
+    "location": {
+      "type": "geopoint"
+    },
+    "fillLocation": {
+      "type": "geopoint"
+    }
+  },
   "validations": [],
   "relations": {
     "followUps": {

@@ -1,28 +1,28 @@
 {
-  "name": "referenceData",
+  "name": "helpCategory",
   "base": "extendedPersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "label": {
+    "name": {
       "type": "string",
       "required": true
     },
-    "options": {
-      "type": [
-        "string"
-      ],
-      "required": true
-    },
-    "icon": {
-      "type": "string",
+    "order": {
+      "type": "number",
       "required": true
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "helpItems": {
+      "type": "hasMany",
+      "model": "helpItem",
+      "foreignKey": "categoryId"
+    }
+  },
   "acls": [],
   "methods": {}
 }

@@ -5,7 +5,43 @@
   "options": {
     "validateUpsert": true
   },
-  "properties": {},
+  "properties": {
+    "dateSampleTaken": {
+      "type": "date",
+      "required": true
+    },
+    "dateSampleDelivered": {
+      "type": "date",
+      "required": true
+    },
+    "dateTesting": {
+      "type": "date",
+      "required": true
+    },
+    "labName": {
+      "type": "string",
+      "required": true
+    },
+    "sampleType": {
+      "type": "string",
+      "required": true
+    },
+    "testType": {
+      "type": "string",
+      "required": true
+    },
+    "result": {
+      "type": "string",
+      "required": true
+    },
+    "notes": {
+      "type": "string",
+      "required": true
+    },
+    "additionalData": {
+      "type": "object"
+    }
+  },
   "validations": [],
   "relations": {},
   "acls": [],

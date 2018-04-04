@@ -1,24 +1,25 @@
 {
-  "name": "referenceData",
-  "base": "extendedPersistedModel",
+  "name": "templateQuestionAnswer",
+  "base": "Model",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
+  "hidden": [
+    "id"
+  ],
   "properties": {
     "label": {
       "type": "string",
       "required": true
     },
-    "options": {
-      "type": [
-        "string"
-      ],
-      "required": true
-    },
-    "icon": {
+    "value": {
       "type": "string",
       "required": true
+    },
+    "alert": {
+      "type": "boolean",
+      "default": false
     }
   },
   "validations": [],

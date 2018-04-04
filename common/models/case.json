@@ -13,7 +13,93 @@
       "type": "case"
     }
   },
-  "properties": {},
+  "properties": {
+    "type": {
+      "type": "string",
+      "default": "case",
+      "required": true
+    },
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "middleName": {
+      "type": "string"
+    },
+    "lastName": {
+      "type": "string"
+    },
+    "dob": {
+      "type": "date"
+    },
+    "age": {
+      "type": "number"
+    },
+    "gender": {
+      "type": "string",
+      "required": true
+    },
+    "phoneNumber": {
+      "type": "string"
+    },
+    "occupation": {
+      "type": "string"
+    },
+    "documentType": {
+      "type": "string"
+    },
+    "documentNumber": {
+      "type": "string"
+    },
+    "dateOfInfection": {
+      "type": "date"
+    },
+    "dateOfOnset": {
+      "type": "date"
+    },
+    "dateBecomeCase": {
+      "type": "date"
+    },
+    "dateOfOutcome": {
+      "type": "date"
+    },
+    "deceased": {
+      "type": "boolean",
+      "default": false
+    },
+    "dateDeceased": {
+      "type": "date"
+    },
+    "place": {
+      "type": "string"
+    },
+    "addressLine1": {
+      "type": "string"
+    },
+    "addressLine2": {
+      "type": "date"
+    },
+    "postalCode": {
+      "type": "date"
+    },
+    "location": {
+      "type": "geopoint"
+    },
+    "classification": {
+      "type": "string",
+      "required": true
+    },
+    "riskLevel": {
+      "type": "string",
+      "required": true
+    },
+    "riskReason": {
+      "type": "string"
+    },
+    "fillLocation": {
+      "type": "geopoint"
+    }
+  },
   "validations": [],
   "relations": {
     "labResults": {

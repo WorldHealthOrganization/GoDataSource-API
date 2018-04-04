@@ -1,22 +1,16 @@
 {
-  "name": "referenceData",
+  "name": "glossaryTerm",
   "base": "extendedPersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "label": {
+    "term": {
       "type": "string",
       "required": true
     },
-    "options": {
-      "type": [
-        "string"
-      ],
-      "required": true
-    },
-    "icon": {
+    "definition": {
       "type": "string",
       "required": true
     }

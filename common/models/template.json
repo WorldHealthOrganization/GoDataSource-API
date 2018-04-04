@@ -5,7 +5,18 @@
   "options": {
     "validateUpsert": true
   },
-  "properties": {},
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "questions": {
+      "type": [
+        "templateQuestion"
+      ],
+      "required": true
+    }
+  },
   "validations": [],
   "relations": {},
   "acls": [],

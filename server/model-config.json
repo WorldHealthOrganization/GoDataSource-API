@@ -100,7 +100,7 @@
     "dataSource": "mongoDb",
     "public": false
   },
-  "help": {
+  "helpCategory": {
     "dataSource": "mongoDb",
     "public": true
   },
@@ -109,6 +109,22 @@
     "public": false
   },
   "extendedPersistedModel": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "templateQuestion": {
+    "dataSource": null,
+    "public": false
+  },
+  "templateQuestionAnswer": {
+    "dataSource": null,
+    "public": false
+  },
+  "glossaryTerm": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "helpItem": {
     "dataSource": "mongoDb",
     "public": false
   }
