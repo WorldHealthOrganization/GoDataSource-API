@@ -24,6 +24,9 @@
     "geolocation": {
       "type": "geopoint"
     },
+    "fillGeolocation": {
+      "type": "geopoint"
+    },
     "questionnaireAnswers": {
       "type": [
         "object"
