@@ -16,7 +16,7 @@
   "properties": {
     "type": {
       "type": "string",
-      "default": "case",
+      "default": "contact",
       "required": true
     },
     "firstName": {
