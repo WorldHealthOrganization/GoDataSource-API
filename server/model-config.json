@@ -1,0 +1,111 @@
+{
+  "_meta": {
+    "sources": [
+      "loopback/common/models",
+      "loopback/server/models",
+      "../common/models",
+      "./models"
+    ],
+    "mixins": [
+      "loopback/common/mixins",
+      "loopback/server/mixins",
+      "../common/mixins",
+      "./mixins"
+    ]
+  },
+  "User": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "AccessToken": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "ACL": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "RoleMapping": {
+    "dataSource": "mongoDb",
+    "public": false,
+    "options": {
+      "strictObjectIDCoercion": true
+    }
+  },
+  "Role": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "user": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "role": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "permission": {
+    "dataSource": null,
+    "public": true
+  },
+  "location": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "team": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "auditLog": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "systemSettings": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "syncLog": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "template": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "outbreak": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "case": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "contact": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "referenceData": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "event": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "followUp": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "cluster": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "help": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "labResult": {
+    "dataSource": "mongoDb",
+    "public": false
+  }
+}

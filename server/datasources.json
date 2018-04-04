@@ -1,0 +1,12 @@
+{
+  "mongoDb": {
+    "host": "localhost",
+    "port": 27017,
+    "url": "",
+    "database": "go-data",
+    "password": "",
+    "name": "mongoDb",
+    "user": "root",
+    "connector": "mongodb"
+  }
+}

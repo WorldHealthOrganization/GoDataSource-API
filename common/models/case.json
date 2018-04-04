@@ -1,0 +1,27 @@
+{
+  "name": "case",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mongodb": {
+    "collection": "person"
+  },
+  "scope": {
+    "where": {
+      "type": "case"
+    }
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "labResults": {
+      "type": "hasMany",
+      "model": "labResult",
+      "foreignKey": "personId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

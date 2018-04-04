@@ -1,0 +1,27 @@
+{
+  "name": "contact",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mongodb": {
+    "collection": "person"
+  },
+  "scope": {
+    "where": {
+      "type": "contact"
+    }
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "followUps": {
+      "type": "hasMany",
+      "model": "followUp",
+      "foreignKey": "personId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

@@ -1,0 +1,19 @@
+{
+  "name": "location",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "parentLocation": {
+      "type": "belongsTo",
+      "model": "location",
+      "foreignKey": "parentLocationId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

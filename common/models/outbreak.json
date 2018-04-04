@@ -1,0 +1,39 @@
+{
+  "name": "outbreak",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "cases": {
+      "type": "hasMany",
+      "model": "case",
+      "foreignKey": "outbreakId"
+    },
+    "clusters": {
+      "type": "hasMany",
+      "model": "cluster",
+      "foreignKey": "outbreakId"
+    },
+    "contacts": {
+      "type": "hasMany",
+      "model": "contact",
+      "foreignKey": "outbreakId"
+    },
+    "events": {
+      "type": "hasMany",
+      "model": "event",
+      "foreignKey": "outbreakId"
+    },
+    "auditLogs": {
+      "type": "hasMany",
+      "model": "auditLog",
+      "foreignKey": "outbreakId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}
