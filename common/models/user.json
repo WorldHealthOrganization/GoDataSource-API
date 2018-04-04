@@ -5,7 +5,33 @@
   "options": {
     "validateUpsert": true
   },
-  "properties": {},
+  "properties": {
+    "id": {
+      "type": "string",
+      "id": true,
+      "defaultFn": "uuidv4",
+      "readOnly": true
+    },
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "lastName": {
+      "type": "string",
+      "required": true
+    },
+    "roleId": {
+      "type": "string",
+      "required": true
+    },
+    "locationId": {
+      "type": "string"
+    },
+    "language": {
+      "type": "string",
+      "required": true
+    }
+  },
   "validations": [],
   "relations": {
     "role": {

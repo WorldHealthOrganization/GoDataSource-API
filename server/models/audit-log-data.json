@@ -1,19 +1,24 @@
 {
-  "name": "role",
-  "base": "Role",
+  "name": "auditLogData",
+  "base": "Model",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
+  "hidden": [
+    "id"
+  ],
   "properties": {
-    "id": {
+    "field": {
       "type": "string",
-      "id": true,
-      "defaultFn": "uuidv4",
-      "readOnly": true
+      "required": true
     },
-    "permission": {
-      "type": "array",
+    "oldValue": {
+      "type": "string",
+      "required": true
+    },
+    "newValue": {
+      "type": "string",
       "required": true
     }
   },

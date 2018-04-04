@@ -1,34 +1,35 @@
 {
-  "name": "auditLog",
-  "base": "extendedPersistedModel",
+  "name": "upstreamServer",
+  "base": "Model",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
+  "hidden": [
+    "id"
+  ],
   "properties": {
-    "action": {
+    "name": {
       "type": "string",
       "required": true
     },
-    "modelName": {
+    "description": {
+      "type": "string"
+    },
+    "url": {
       "type": "string",
       "required": true
     },
-    "changedData": {
-      "type": [
-        "auditLogData"
-      ]
-    },
-    "userId": {
-      "type": "string",
+    "credentials": {
+      "type": "clientCredentials",
       "required": true
     },
-    "userRole": {
-      "type": "string",
+    "syncInterval": {
+      "type": "number",
       "required": true
     },
-    "userIPAddress": {
-      "type": "string",
+    "syncOnEveryChange": {
+      "type": "boolean",
       "required": true
     }
   },
