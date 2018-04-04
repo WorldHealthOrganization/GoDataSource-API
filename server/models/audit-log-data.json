@@ -5,6 +5,9 @@
   "options": {
     "validateUpsert": true
   },
+  "hidden": [
+    "id"
+  ],
   "properties": {
     "field": {
       "type": "string",
@@ -19,7 +22,6 @@
       "required": true
     }
   },
-  "hidden": ["id"],
   "validations": [],
   "relations": {},
   "acls": [],

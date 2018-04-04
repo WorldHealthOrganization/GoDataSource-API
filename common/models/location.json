@@ -30,6 +30,11 @@
       "type": "belongsTo",
       "model": "location",
       "foreignKey": "parentLocationId"
+    },
+    "teams": {
+      "type": "hasMany",
+      "model": "team",
+      "foreignKey": "locationId"
     }
   },
   "acls": [],
