@@ -51,22 +51,16 @@
     "documentNumber": {
       "type": "string"
     },
-    "place": {
+    "locationId": {
       "type": "string"
     },
-    "addressLine1": {
-      "type": "string"
+    "address": {
+      "type": "address"
     },
-    "addressLine2": {
-      "type": "date"
-    },
-    "postalCode": {
-      "type": "date"
-    },
-    "location": {
+    "geoLocation": {
       "type": "geopoint"
     },
-    "fillLocation": {
+    "fillGeoLocation": {
       "type": "geopoint"
     }
   },

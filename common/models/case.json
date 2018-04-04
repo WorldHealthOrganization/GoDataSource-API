@@ -70,19 +70,13 @@
     "dateDeceased": {
       "type": "date"
     },
-    "place": {
+    "locationId": {
       "type": "string"
     },
-    "addressLine1": {
-      "type": "string"
+    "address": {
+      "type": "address"
     },
-    "addressLine2": {
-      "type": "date"
-    },
-    "postalCode": {
-      "type": "date"
-    },
-    "location": {
+    "geoLocation": {
       "type": "geopoint"
     },
     "classification": {
@@ -96,7 +90,7 @@
     "riskReason": {
       "type": "string"
     },
-    "fillLocation": {
+    "fillGeoLocation": {
       "type": "geopoint"
     }
   },
