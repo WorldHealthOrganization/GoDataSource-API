@@ -5,6 +5,9 @@
   "options": {
     "validateUpsert": true
   },
+  "hidden": [
+    "id"
+  ],
   "properties": {
     "country": {
       "type": "string"
