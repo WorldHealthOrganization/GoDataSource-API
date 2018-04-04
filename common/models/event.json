@@ -5,7 +5,25 @@
   "options": {
     "validateUpsert": true
   },
-  "properties": {},
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "string"
+    },
+    "date": {
+      "type": "date",
+      "required": true
+    },
+    "geolocation": {
+      "type": "geopoint"
+    },
+    "fillGeolocation": {
+      "type": "geopoint"
+    }
+  },
   "validations": [],
   "relations": {},
   "acls": [],

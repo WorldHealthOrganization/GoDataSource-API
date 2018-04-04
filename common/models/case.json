@@ -16,8 +16,8 @@
   "properties": {
     "type": {
       "type": "string",
-      "default": "case",
-      "required": true
+      "required": true,
+      "default": "case"
     },
     "firstName": {
       "type": "string",
