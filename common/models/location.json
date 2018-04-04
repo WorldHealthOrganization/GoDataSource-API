@@ -5,7 +5,25 @@
   "options": {
     "validateUpsert": true
   },
-  "properties": {},
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "synonyms": {
+      "type": "array"
+    },
+    "active": {
+      "type": "boolean",
+      "required": true
+    },
+    "populationDensity": {
+      "type": "number"
+    },
+    "parentLocationId": {
+      "type": "string"
+    }
+  },
   "validations": [],
   "relations": {
     "parentLocation": {

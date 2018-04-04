@@ -1,23 +1,25 @@
 {
-  "name": "team",
-  "base": "extendedPersistedModel",
+  "name": "clientApplication",
+  "base": "Model",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
+  "hidden": [
+    "id"
+  ],
   "properties": {
     "name": {
       "type": "string",
       "required": true
     },
-    "userIds": {
-      "type": [
-        "string"
-      ],
+    "credentials": {
+      "type": "clientCredentials",
       "required": true
     },
-    "locationId": {
-      "type": "string"
+    "active": {
+      "type": "boolean",
+      "required": true
     }
   },
   "validations": [],

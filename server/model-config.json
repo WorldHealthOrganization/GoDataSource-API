@@ -111,5 +111,25 @@
   "extendedPersistedModel": {
     "dataSource": "mongoDb",
     "public": false
+  },
+  "upstreamServer": {
+    "dataSource": null,
+    "public": false
+  },
+  "clientCredentials": {
+    "dataSource": null,
+    "public": false
+  },
+  "clientApplication": {
+    "dataSource": null,
+    "public": false
+  },
+  "dataBackup": {
+    "dataSource": null,
+    "public": false
+  },
+  "auditLogData": {
+    "dataSource": null,
+    "public": false
   }
 }

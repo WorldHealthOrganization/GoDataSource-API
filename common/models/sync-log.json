@@ -5,7 +5,20 @@
   "options": {
     "validateUpsert": true
   },
-  "properties": {},
+  "properties": {
+    "syncServerUrl": {
+      "type": "string",
+      "required": true
+    },
+    "syncProcessStartData": {
+      "type": "date",
+      "required": true
+    },
+    "syncProcessCompletionDate": {
+      "type": "date",
+      "required": true
+    }
+  },
   "validations": [],
   "relations": {},
   "acls": [],

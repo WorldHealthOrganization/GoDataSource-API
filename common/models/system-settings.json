@@ -5,9 +5,74 @@
   "options": {
     "validateUpsert": true
   },
-  "properties": {},
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "longPeriodsBetweenOnsetDates": {
+      "type": "number"
+    },
+    "upstreamServer": {
+      "type": "upstreamServer"
+    },
+    "clientApplications": {
+      "type": [
+        {
+          "type": "clientApplication"
+        }
+      ]
+    },
+    "dataBackup": {
+      "type": "dataBackup"
+    }
+  },
   "validations": [],
   "relations": {},
   "acls": [],
-  "methods": {}
+  "methods": {
+    "getSystemSettings": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "systemSettings",
+          "type": "systemSettings",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Return System Settings",
+      "http": {
+        "verb": "get",
+        "path": "/"
+      }
+    },
+    "updateSystemSettings": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "systemSettings",
+          "description": "Model instance data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "systemSettings",
+          "type": "systemSettings",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Update System Settings",
+      "http": {
+        "verb": "put",
+        "path": "/"
+      }
+    }
+  }
 }
