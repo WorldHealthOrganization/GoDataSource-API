@@ -147,5 +147,9 @@
   "auditLogData": {
     "dataSource": null,
     "public": false
+  },
+  "address": {
+    "dataSource": null,
+    "public": false
   }
 }
