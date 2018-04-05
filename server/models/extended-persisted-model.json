@@ -6,11 +6,8 @@
     "validateUpsert": true
   },
   "mixins": {
-    "TimeStamp": {
-      "required": false,
-      "validateUpsert": true,
-      "silenceWarnings": false
-    }
+    "AuthorTimeStamp": {},
+    "AuditLogger": {}
   },
   "replaceOnPUT": false,
   "properties": {
