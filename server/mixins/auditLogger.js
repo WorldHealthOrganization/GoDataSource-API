@@ -57,7 +57,7 @@ function getRemoteAddressFromOptions(options) {
  * @returns {boolean}
  */
 function isMonitoredField(field) {
-  return ['createdAt', 'updatedAt'].indexOf(field) === -1;
+  return ['createdAt', 'createdBy', 'updatedAt', 'updatedBy'].indexOf(field) === -1;
 }
 
 /**
