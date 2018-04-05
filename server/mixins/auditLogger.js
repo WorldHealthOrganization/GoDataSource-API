@@ -57,7 +57,7 @@ function getRemoteAddressFromOptions(options) {
  * @returns {boolean}
  */
 function isMonitoredField(field) {
-  return ['createdAt', 'createdBy', 'updatedAt', 'updatedBy'].indexOf(field) === -1;
+  return ['createdAt', 'createdBy', 'updatedAt', 'updatedBy', 'deleted'].indexOf(field) === -1;
 }
 
 /**
@@ -96,6 +96,12 @@ module.exports = function (Model) {
 
       if (context.data) {
         if (context.currentInstance) {
+
+          if (context.data.deleted && context.data.deleted != context.currentInstance.deleted) {
+            context.options.deletedInstance = context.currentInstance.toJSON();
+            return callback();
+          }
+
           Object.keys(context.data).forEach(function (field) {
             if (isMonitoredField(field) && context.data[field] !== undefined && (context.currentInstance[field] !== context.data[field])) {
               changedFields.push({
@@ -142,7 +148,7 @@ module.exports = function (Model) {
         callback();
       } else {
         // for updated records, log only what was changed
-        if (context.options.changedFields.length) {
+        if (context.options.changedFields && context.options.changedFields.length) {
           let logData = {
             action: app.models.auditLog.actions.modified,
             modelName: Model.name,
@@ -151,6 +157,23 @@ module.exports = function (Model) {
             userIPAddress: user.iPAddress,
             changedData: context.options.changedFields
           };
+          app.models.auditLog
+            .create(logData);
+        } else if (context.options.deletedInstance) {
+          let logData = {
+            action: app.models.auditLog.actions.removed,
+            modelName: Model.name,
+            userId: user.id,
+            userRole: user.role,
+            userIPAddress: user.iPAddress,
+            changedData: []
+          };
+          Object.keys(context.options.deletedInstance).forEach(function (field) {
+            logData.changedData.push({
+              field: field,
+              oldValue: context.options.deletedInstance[field]
+            });
+          });
           app.models.auditLog
             .create(logData);
         }

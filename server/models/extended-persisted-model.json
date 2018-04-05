@@ -7,7 +7,8 @@
   },
   "mixins": {
     "AuthorTimeStamp": {},
-    "AuditLogger": {}
+    "AuditLogger": {},
+    "SoftDelete" : true
   },
   "replaceOnPUT": false,
   "properties": {
