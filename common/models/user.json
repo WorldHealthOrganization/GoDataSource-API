@@ -28,9 +28,13 @@
       "type": "string"
     },
     "language": {
-      "type": "string",
-      "required": true
+      "type": "string"
     }
+  },
+  "mixins": {
+    "AuthorTimeStamp": {},
+    "AuditLogger": {},
+    "SoftDelete" : true
   },
   "validations": [],
   "relations": {

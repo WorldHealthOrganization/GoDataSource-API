@@ -1,8 +1,18 @@
 'use strict';
 
+/**
+ * Check if a model is monitored for logging
+ * @param model
+ * @returns {boolean}
+ */
+function isMonitoredModel(model) {
+  return ['auditLog', 'extendedPersistedModel'].indexOf(model.name) === -1;
+}
+
 module.exports = function (Model) {
 
   const deletedFlag = 'deleted';
+  const deletedAt = 'deletedAt';
 
   Model.defineProperty(deletedFlag, {
     type: Boolean,
@@ -10,7 +20,50 @@ module.exports = function (Model) {
     default: false
   });
 
+  Model.defineProperty(deletedAt, {
+    type: Date
+  });
 
+  /**
+   * Soft Delete overwrites delete functionality, make sure 'before delete' hooks still work
+   */
+  Model.observe('before save', function (context, callback) {
+    if (isMonitoredModel(Model)) {
+      if (context.data) {
+        // single record update
+        if (context.currentInstance) {
+          if (context.data.deleted && context.data.deleted != context.currentInstance.deleted) {
+            context.options.softDeleteEvent = true;
+            return Model.notifyObserversOf('before delete', context, callback);
+          }
+        // batch update
+        } else if (context.data.deleted && context.where) {
+          context.options.softDeleteEvent = true;
+          return Model.notifyObserversOf('before delete', context, callback);
+        }
+      }
+    }
+    return callback();
+  });
+
+  /**
+   * Soft Delete overwrites delete functionality, make sure 'after delete' hooks still work
+   */
+  Model.observe('after save', function (context, callback) {
+    if (isMonitoredModel(Model)) {
+      if (context.options.softDeleteEvent) {
+        return Model.notifyObserversOf('after delete', context, callback);
+      }
+    }
+    return callback();
+  });
+
+  /**
+   * (internal)Next(step) callback
+   * @param error
+   * @param result
+   * @returns {*}
+   */
   function next(error, result) {
     if (this.cb === 'function') {
       return this.cb(error, result);
@@ -21,12 +74,17 @@ module.exports = function (Model) {
     return result;
   }
 
-  //TODO: handle destroyAll/updateAll in audit logger
+  /**
+   * Overwrite destroyAll with a soft destroyAll
+   * @param where
+   * @param cb
+   * @returns {Promise.<T>}
+   */
   Model.destroyAll = function softDestroyAll(where, cb) {
     let nextStep = next.bind({callback: cb});
 
     return Model
-      .updateAll(where, {[deletedFlag]: true})
+      .updateAll(where, {[deletedFlag]: true, [deletedAt]: new Date()})
       .then(function (result) {
         return nextStep(null, result);
       })
@@ -35,9 +93,16 @@ module.exports = function (Model) {
       });
   };
 
+  // also update aliases for destroyAll
   Model.remove = Model.destroyAll;
   Model.deleteAll = Model.destroyAll;
 
+  /**
+   * Overwrite destroyById with a soft destroyById
+   * @param id
+   * @param cb
+   * @returns {Promise.<TResult>}
+   */
   Model.destroyById = function softDestroyById(id, cb) {
     let nextStep = next.bind({callback: cb});
 
@@ -46,7 +111,7 @@ module.exports = function (Model) {
       .then(function (instance) {
         if (instance) {
           return instance
-            .updateAttributes({[deletedFlag]: true})
+            .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()})
             .then(function () {
               return {count: 1};
             });
@@ -61,14 +126,20 @@ module.exports = function (Model) {
       });
   };
 
+  // also update aliases for destroyById
   Model.removeById = Model.destroyById;
   Model.deleteById = Model.destroyById;
 
+  /**
+   * Overwrite destroy with a soft destroy
+   * @param cb
+   * @returns {Promise.<TResult>}
+   */
   Model.prototype.destroy = function softDestroy(cb) {
     let nextStep = next.bind({callback: cb});
 
     return this
-      .updateAttributes({[deletedFlag]: true})
+      .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()})
       .then(function () {
         return {count: 1};
       })
@@ -80,48 +151,73 @@ module.exports = function (Model) {
       });
   };
 
+  // also update aliases for destroy
   Model.prototype.remove = Model.prototype.destroy;
   Model.prototype.delete = Model.prototype.destroy;
 
-  const queryNonDeleted = {
+  const filterNonDeleted = {
     [deletedFlag]: {
       neq: true
     }
   };
 
   const _findOrCreate = Model.findOrCreate;
-  Model.findOrCreate = function findOrCreateDeleted(query = {}, ...rest) {
-    if (!query.where) query.where = {};
-
-    if (!query.deleted) {
-      query.where = {and: [query.where, queryNonDeleted]};
+  /**
+   * Overwrite findOrCreate to search for non-(soft)deleted records
+   * @param filter
+   * @param args
+   * @returns {*}
+   */
+  Model.findOrCreate = function findOrCreateDeleted(filter = {}, ...args) {
+    if (!filter.where) {
+      filter.where = {};
     }
-
-    return _findOrCreate.call(Model, query, ...rest);
+    if (!filter.deleted) {
+      filter.where = {and: [filter.where, filterNonDeleted]};
+    }
+    return _findOrCreate.call(Model, filter, ...args);
   };
 
   const _find = Model.find;
-  Model.find = function findDeleted(query = {}, ...rest) {
-    if (!query.where) query.where = {};
-
-    if (!query.deleted) {
-      query.where = {and: [query.where, queryNonDeleted]};
+  /**
+   * Overwrite find to search for non-(soft)deleted records
+   * @param filter
+   * @param args
+   * @returns {*}
+   */
+  Model.find = function findDeleted(filter = {}, ...args) {
+    if (!filter.where) {
+      filter.where = {};
     }
-
-    return _find.call(Model, query, ...rest);
+    if (!filter.deleted) {
+      filter.where = {and: [filter.where, filterNonDeleted]};
+    }
+    return _find.call(Model, filter, ...args);
   };
+
 
   const _count = Model.count;
-  Model.count = function countDeleted(where = {}, ...rest) {
-    // Because count only receives a 'where', there's nowhere to ask for the deleted entities.
-    const whereNotDeleted = {and: [where, queryNonDeleted]};
-    return _count.call(Model, whereNotDeleted, ...rest);
+  /**
+   * Overwrite count to count non-(soft)deleted records
+   * @param where
+   * @param args
+   * @returns {*}
+   */
+  Model.count = function countDeleted(where = {}, ...args) {
+    const whereNotDeleted = {and: [where, filterNonDeleted]};
+    return _count.call(Model, whereNotDeleted, ...args);
   };
 
+
   const _update = Model.update;
-  Model.update = Model.updateAll = function updateDeleted(where = {}, ...rest) {
-    // Because update/updateAll only receives a 'where', there's nowhere to ask for the deleted entities.
-    const whereNotDeleted = {and: [where, queryNonDeleted]};
-    return _update.call(Model, whereNotDeleted, ...rest);
+  /**
+   * Overwrite update/updateAll to update only non-(soft)deleted records
+   * @param where
+   * @param args
+   * @returns {*}
+   */
+  Model.update = Model.updateAll = function updateDeleted(where = {}, ...args) {
+    const whereNotDeleted = {and: [where, filterNonDeleted]};
+    return _update.call(Model, whereNotDeleted, ...args);
   };
 };

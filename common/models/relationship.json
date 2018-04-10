@@ -6,6 +6,10 @@
     "validateUpsert": true
   },
   "properties": {
+    "personId": {
+      "type": "string",
+      "required": true
+    },
     "contactDate": {
       "type": "date",
       "required": true

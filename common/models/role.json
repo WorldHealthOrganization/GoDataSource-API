@@ -12,13 +12,36 @@
       "defaultFn": "uuidv4",
       "readOnly": true
     },
-    "permission": {
-      "type": "array",
+    "permissions": {
+      "type": ["string"],
       "required": true
     }
+  },
+  "mixins": {
+    "AuthorTimeStamp": {},
+    "AuditLogger": {},
+    "SoftDelete" : true
   },
   "validations": [],
   "relations": {},
   "acls": [],
-  "methods": {}
+  "methods": {
+    "getAvailablePermissions": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "permissions",
+          "type": ["string"],
+          "description": "List of available permissions",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Retrieve the list of available permissions.",
+      "http": {
+        "verb": "get",
+        "path": "/available-permissions"
+      }
+    }
+  }
 }

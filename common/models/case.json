@@ -103,6 +103,11 @@
       "type": "hasMany",
       "model": "labResult",
       "foreignKey": "personId"
+    },
+    "relationships": {
+      "type": "hasMany",
+      "model": "relationship",
+      "foreignKey": "personId"
     }
   },
   "acls": [],

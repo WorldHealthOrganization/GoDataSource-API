@@ -154,6 +154,6 @@
   },
   "relationship": {
     "dataSource": "mongoDb",
-    "public": true
+    "public": false
   }
 }
