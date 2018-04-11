@@ -12,19 +12,73 @@
       "defaultFn": "uuidv4",
       "readOnly": true
     },
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
     "permissions": {
       "type": ["string"],
       "required": true
     }
   },
   "mixins": {
-    "AuthorTimeStamp": {},
-    "AuditLogger": {},
+    "UniqueValidator": true,
+    "AuthorTimeStamp": true,
+    "AuditLogger": true,
     "SoftDelete" : true
   },
   "validations": [],
   "relations": {},
-  "acls": [],
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_role",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_role",
+      "permission": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_role",
+      "permission": "ALLOW",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_role",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_role",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_role",
+      "permission": "ALLOW",
+      "property": "getAvailablePermissions"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_role",
+      "permission": "ALLOW",
+      "property": "count"
+    }
+  ],
   "methods": {
     "getAvailablePermissions": {
       "accepts": [],

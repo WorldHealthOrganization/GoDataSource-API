@@ -1,7 +1,5 @@
 'use strict';
 
-const disableCommonExtraRoutes = require('../../components/disableCommonExtraRoutes');
-
 module.exports = function (app) {
   /*
    * The `app` object provides access to a variety of LoopBack resources such as
@@ -12,6 +10,6 @@ module.exports = function (app) {
    */
 
   app.models().forEach(function (Model) {
-    app.utils.remote.disableCommonExtraRoutes(Model)
+    app.utils.remote.disableCommonExtraRoutes(Model);
   });
 };

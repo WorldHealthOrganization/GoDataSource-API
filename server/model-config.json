@@ -44,10 +44,6 @@
     "dataSource": "mongoDb",
     "public": true
   },
-  "permission": {
-    "dataSource": null,
-    "public": true
-  },
   "location": {
     "dataSource": "mongoDb",
     "public": true
@@ -154,6 +150,10 @@
   },
   "relationship": {
     "dataSource": "mongoDb",
+    "public": false
+  },
+  "Email": {
+    "dataSource": "email",
     "public": false
   }
 }

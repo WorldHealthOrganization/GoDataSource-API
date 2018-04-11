@@ -8,5 +8,21 @@
     "name": "mongoDb",
     "user": "root",
     "connector": "mongodb"
+  },
+  "email": {
+    "name": "email",
+    "connector": "mail",
+    "transports": [
+      {
+        "type": "SMTP",
+        "host": "smtp.gmail.com",
+        "secure": true,
+        "port": 465,
+        "auth": {
+          "user": "smtp@clarisoft.com",
+          "pass": "Tdp8$94#as"
+        }
+      }
+    ]
   }
 }

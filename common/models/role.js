@@ -50,6 +50,16 @@ module.exports = function (Role) {
   });
 
   /**
+   * Do not allow deletion of Roles that are in use
+   */
+  Role.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
+    if (context.instance.id === context.req.authData.user.roleId) {
+      return next(app.utils.apiError.getError('MODIFY_OWN_RECORD', {model: 'Role', id: context.instance.id}, 403));
+    }
+    next();
+  });
+
+  /**
    * Get available permissions
    * @param callback
    */

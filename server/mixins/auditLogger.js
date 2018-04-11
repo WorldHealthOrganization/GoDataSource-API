@@ -129,7 +129,7 @@ module.exports = function (Model) {
         };
         let instanceData = context.instance.toJSON();
         Object.keys(instanceData).forEach(function (field) {
-          if (isMonitoredField(field)) {
+          if (isMonitoredField(field) && instanceData[field] != undefined) {
             logData.changedData.push({
               field: field,
               newValue: instanceData[field]

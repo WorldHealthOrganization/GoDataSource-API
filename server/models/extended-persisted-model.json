@@ -6,8 +6,9 @@
     "validateUpsert": true
   },
   "mixins": {
-    "AuthorTimeStamp": {},
-    "AuditLogger": {},
+    "UniqueValidator": true,
+    "AuthorTimeStamp": true,
+    "AuditLogger": true,
     "SoftDelete" : true
   },
   "replaceOnPUT": false,

@@ -29,11 +29,15 @@
     },
     "language": {
       "type": "string"
+    },
+    "changePassword": {
+      "type": "boolean",
+      "default": false
     }
   },
   "mixins": {
-    "AuthorTimeStamp": {},
-    "AuditLogger": {},
+    "AuthorTimeStamp": true,
+    "AuditLogger": true,
     "SoftDelete" : true
   },
   "validations": [],
@@ -49,6 +53,43 @@
       "foreignKey": "locationId"
     }
   },
-  "acls": [],
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "DENY",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "DENY",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_user_account",
+      "permission": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_user_account",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_user_account",
+      "permission": "ALLOW",
+      "property": "patchAttributes"
+    }
+  ],
   "methods": {}
 }

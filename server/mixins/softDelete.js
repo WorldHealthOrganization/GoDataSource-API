@@ -25,6 +25,14 @@ module.exports = function (Model) {
   });
 
   /**
+   * Restore a soft-deleted record
+   * @param [callback]
+   */
+  Model.prototype.undoDelete = function (callback) {
+    return this.updateAttributes({[deletedFlag]: false, [deletedAt]: null}, callback);
+  };
+
+  /**
    * Soft Delete overwrites delete functionality, make sure 'before delete' hooks still work
    */
   Model.observe('before save', function (context, callback) {

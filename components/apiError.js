@@ -5,6 +5,9 @@ const _ = require('lodash');
 const errorMap = {
   MODEL_IN_USE: {
     messagePattern: 'Model "<%= model %>" id "<%= id %>" is in use.'
+  },
+  MODIFY_OWN_RECORD: {
+    messagePattern: 'Model "<%= model %>" id "<%= id %>" is used by current logged in user. Cannot modify own record.'
   }
 };
 
