@@ -22,6 +22,11 @@
       "required": true
     }
   },
+  "indexes": {
+    "name_index": {
+      "name": 1
+    }
+  },
   "mixins": {
     "UniqueValidator": true,
     "AuthorTimeStamp": true,

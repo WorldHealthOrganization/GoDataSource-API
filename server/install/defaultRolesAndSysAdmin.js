@@ -156,5 +156,6 @@ Promise.all(createRoles)
       })
       .then(function (status) {
         console.log(`Default System Administrator user ${status}`);
+        process.exit();
       });
   });

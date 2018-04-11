@@ -9,6 +9,10 @@ const config = require('../../server/config.json');
 module.exports = function (User) {
   // disable access to access tokens
   app.utils.remote.disableStandardRelationRemoteMethods(User, 'accessTokens');
+  // disable access to location
+  app.utils.remote.disableStandardRelationRemoteMethods(User, 'location');
+  // disable access to role
+  app.utils.remote.disableStandardRelationRemoteMethods(User, 'role');
   // disable email verification, confirm endpoints
   app.utils.remote.disableRemoteMethods(User, ['prototype.verify', 'confirm']);
 

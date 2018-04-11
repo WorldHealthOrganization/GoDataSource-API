@@ -14,11 +14,11 @@
     ]
   },
   "User": {
-    "dataSource": "mongoDb",
+    "dataSource": null,
     "public": false
   },
   "AccessToken": {
-    "dataSource": "mongoDb",
+    "dataSource": null,
     "public": false
   },
   "ACL": {
@@ -26,14 +26,14 @@
     "public": false
   },
   "RoleMapping": {
-    "dataSource": "mongoDb",
+    "dataSource": null,
     "public": false,
     "options": {
       "strictObjectIDCoercion": true
     }
   },
   "Role": {
-    "dataSource": "mongoDb",
+    "dataSource": null,
     "public": false
   },
   "user": {
@@ -105,7 +105,7 @@
     "public": false
   },
   "extendedPersistedModel": {
-    "dataSource": "mongoDb",
+    "dataSource": null,
     "public": false
   },
   "templateQuestion": {
@@ -154,6 +154,10 @@
   },
   "Email": {
     "dataSource": "email",
+    "public": false
+  },
+  "accessToken": {
+    "dataSource": "mongoDb",
     "public": false
   }
 }
