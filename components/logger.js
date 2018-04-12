@@ -22,4 +22,26 @@ console.info = winston.info;
 console.warn = winston.warn;
 console.error = winston.error;
 
+/**
+ * Get a contextual logger
+ * @param transactionId
+ * @return {{}}
+ */
+winston.getTransactionLogger = function (transactionId) {
+  // contextual logger logs transaction id
+  function log(level, message, metadata) {
+    message = `[TransactionID: ${transactionId}] ${message}`;
+    winston.log(level, message, metadata);
+  }
+
+  let logger = {};
+  ['debug', 'info', 'warn', 'error'].forEach(function (logMethod) {
+    logger[logMethod] = function (message, metadata) {
+      log(logMethod, message, metadata);
+    }
+  });
+
+  return logger;
+};
+
 module.exports = winston;

@@ -6,7 +6,7 @@
  */
 module.exports = function (app) {
   app.remotes().phases
-    .addBefore('auth', 'authentication-context')
+    .addAfter('request-response-logger', 'authentication-context')
     .use(function (context, next) {
       let accessToken;
 
@@ -26,7 +26,6 @@ module.exports = function (app) {
           };
           next();
         })
-        .catch(next)
-
+        .catch(next);
     });
 };
