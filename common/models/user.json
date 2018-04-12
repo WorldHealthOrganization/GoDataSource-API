@@ -87,9 +87,9 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "$owner",
-      "permission": "DENY",
-      "property": "patchAttributes"
+      "principalId": "write_user_account",
+      "permission": "ALLOW",
+      "property": "deleteById"
     },
     {
       "principalType": "ROLE",

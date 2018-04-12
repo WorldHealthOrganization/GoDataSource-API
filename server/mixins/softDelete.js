@@ -73,8 +73,8 @@ module.exports = function (Model) {
    * @returns {*}
    */
   function next(error, result) {
-    if (this.cb === 'function') {
-      return this.cb(error, result);
+    if (typeof this.callback === 'function') {
+      return this.callback(error, result);
     }
     if (error) {
       return Promise.reject(error)

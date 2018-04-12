@@ -8,7 +8,13 @@ const errorMap = {
   },
   MODIFY_OWN_RECORD: {
     messagePattern: 'Model "<%= model %>" id "<%= id %>" is used by current logged in user. Cannot modify own record.'
-  }
+  },
+  DELETE_OWN_RECORD: {
+    messagePattern: 'Model "<%= model %>" id "<%= id %>" is used by current logged in user. Cannot delete own record.'
+  },
+  MISSING_REQUIRED_PERMISSION: {
+    messagePattern: 'Logged in user does not have the required permission "<%= permission %>" to access this endpoint.'
+  },
 };
 
 module.exports = {

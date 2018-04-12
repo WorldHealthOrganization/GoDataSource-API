@@ -22,7 +22,11 @@ module.exports = function (app) {
     ){
       hasAccess = context.remotingContext.req.authData.user.role.permissions.indexOf(permission) !== -1;
     }
-    callback(null, hasAccess);
+    let accessError;
+    if (!hasAccess) {
+      accessError = app.utils.apiError.getError('MISSING_REQUIRED_PERMISSION', {permission: `${Role.availablePermissions[permission]} (${permission})`}, 403);
+    }
+    callback(accessError, hasAccess);
   }
 
   /**

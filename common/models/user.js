@@ -17,6 +17,16 @@ module.exports = function (User) {
   app.utils.remote.disableRemoteMethods(User, ['prototype.verify', 'confirm']);
 
   /**
+   * Do not allow deletion own user
+   */
+  User.beforeRemote('deleteById', function (context, modelInstance, next) {
+    if (context.args.id === context.req.authData.user.id) {
+      return next(app.utils.apiError.getError('DELETE_OWN_RECORD', {model: 'Role', id: context.args.id}, 403));
+    }
+    next();
+  });
+
+  /**
    * User cannot change its own role or location
    */
   User.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
