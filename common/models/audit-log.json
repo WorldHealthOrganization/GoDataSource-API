@@ -32,6 +32,29 @@
       "required": true
     }
   },
+  "indexes": {
+    "createdAt_index": {
+      "createdAt": 1
+    },
+    "action_index": {
+      "action": 1
+    },
+    "modelName_index": {
+      "modelName": 1
+    },
+    "changedData_index": {
+      "changedData": 1
+    },
+    "userId_index": {
+      "userId": 1
+    },
+    "userRole_index": {
+      "userRole": 1
+    },
+    "userIPAddress_index": {
+      "userIPAddress": 1
+    }
+  },
   "validations": [],
   "relations": {},
   "acls": [],

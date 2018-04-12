@@ -33,7 +33,10 @@ module.exports = {
       name: 'Error',
       code: errorCode,
       message: _.template(errorMap[errorCode].messagePattern)(info),
-      statusCode: statusCode
+      statusCode: statusCode,
+      toString: function () {
+        return JSON.stringify(this, null, 2);
+      }
     }
   }
 };

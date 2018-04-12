@@ -29,5 +29,10 @@
     "from": "no-reply@who.int",
     "subject": "Password Reset",
     "text": "Click <a href='<%= resetHref %>'>here</a> to reset your password."
+  },
+  "logging": {
+    "level": "info",
+    "maxSize": 1000000,
+    "maxFiles": 10
   }
 }

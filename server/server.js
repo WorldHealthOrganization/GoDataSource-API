@@ -1,21 +1,23 @@
 'use strict';
 
 const beforeBoot = require('./beforeBoot/beforeBoot');
+const logger = require('../components/logger');
 
-var loopback = require('loopback');
-var boot = require('loopback-boot');
+const loopback = require('loopback');
+const boot = require('loopback-boot');
 
-var app = module.exports = loopback();
+const app = module.exports = loopback();
+app.logger = logger;
 
 app.start = function () {
   // start the web server
   return app.listen(function () {
     app.emit('started');
-    var baseUrl = app.get('url').replace(/\/$/, '');
-    console.log('Web server listening at: %s', baseUrl);
+    const baseUrl = app.get('url').replace(/\/$/, '');
+    app.logger.info('Web server listening at: %s', baseUrl);
     if (app.get('loopback-component-explorer')) {
-      var explorerPath = app.get('loopback-component-explorer').mountPath;
-      console.log('Browse your REST API at %s%s', baseUrl, explorerPath);
+      const explorerPath = app.get('loopback-component-explorer').mountPath;
+      app.logger.info('Browse your REST API at %s%s', baseUrl, explorerPath);
     }
   });
 };
