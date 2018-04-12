@@ -133,11 +133,6 @@
       "type": "hasMany",
       "model": "event",
       "foreignKey": "outbreakId"
-    },
-    "auditLogs": {
-      "type": "hasMany",
-      "model": "auditLog",
-      "foreignKey": "outbreakId"
     }
   },
   "acls": [],
