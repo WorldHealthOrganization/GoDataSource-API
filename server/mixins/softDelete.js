@@ -6,7 +6,7 @@
  * @returns {boolean}
  */
 function isMonitoredModel(model) {
-  return ['auditLog', 'extendedPersistedModel'].indexOf(model.name) === -1;
+  return ['auditLog', 'extendedPersistedModel'].indexOf(model.modelName) === -1;
 }
 
 module.exports = function (Model) {

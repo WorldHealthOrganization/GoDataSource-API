@@ -66,7 +66,7 @@ function isMonitoredField(field) {
  * @returns {boolean}
  */
 function isMonitoredModel(model) {
-  return ['auditLog', 'extendedPersistedModel'].indexOf(model.name) === -1;
+  return ['auditLog', 'extendedPersistedModel'].indexOf(model.modelName) === -1;
 }
 
 module.exports = function (Model) {
@@ -121,7 +121,7 @@ module.exports = function (Model) {
       if (context.isNewInstance) {
         let logData = {
           action: app.models.auditLog.actions.created,
-          modelName: Model.name,
+          modelName: Model.modelName,
           userId: user.id,
           userRole: user.role,
           userIPAddress: user.iPAddress,
@@ -145,7 +145,7 @@ module.exports = function (Model) {
         if (context.options.changedFields && context.options.changedFields.length) {
           let logData = {
             action: app.models.auditLog.actions.modified,
-            modelName: Model.name,
+            modelName: Model.modelName,
             userId: user.id,
             userRole: user.role,
             userIPAddress: user.iPAddress,
@@ -184,7 +184,7 @@ module.exports = function (Model) {
         const user = getUserContextInformation(context);
         let logData = {
           action: app.models.auditLog.actions.removed,
-          modelName: Model.name,
+          modelName: Model.modelName,
           userId: user.id,
           userRole: user.role,
           userIPAddress: user.iPAddress,

@@ -10,7 +10,8 @@
       "type": "string",
       "id": true,
       "defaultFn": "uuidv4",
-      "readOnly": true
+      "readOnly": true,
+      "unique": true
     },
     "name": {
       "type": "string",
@@ -28,6 +29,7 @@
     }
   },
   "mixins": {
+    "ReadOnlyProperty": true,
     "UniqueValidator": true,
     "AuthorTimeStamp": true,
     "AuditLogger": true,

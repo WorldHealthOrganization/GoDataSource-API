@@ -17,7 +17,8 @@
     "type": {
       "type": "string",
       "required": true,
-      "default": "case"
+      "default": "case",
+      "readOnly": true
     },
     "firstName": {
       "type": "string",

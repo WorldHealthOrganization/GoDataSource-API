@@ -13,8 +13,6 @@ module.exports = function (app) {
   function hasPermission(permission, context, callback) {
     let hasAccess = false;
     if (
-      context.remotingContext &&
-      context.remotingContext.req &&
       context.remotingContext.req.authData &&
       context.remotingContext.req.authData.user &&
       context.remotingContext.req.authData.user.role &&
@@ -23,7 +21,7 @@ module.exports = function (app) {
       hasAccess = context.remotingContext.req.authData.user.role.permissions.indexOf(permission) !== -1;
     }
     let accessError;
-    if (!hasAccess) {
+    if (!hasAccess && context.remotingContext.req.authData) {
       accessError = app.utils.apiError.getError('MISSING_REQUIRED_PERMISSION', {permission: `${Role.availablePermissions[permission]} (${permission})`}, 403);
     }
     callback(accessError, hasAccess);

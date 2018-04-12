@@ -17,7 +17,8 @@
     "type": {
       "type": "string",
       "default": "contact",
-      "required": true
+      "required": true,
+      "readOnly": true
     },
     "firstName": {
       "type": "string",

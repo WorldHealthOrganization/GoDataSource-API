@@ -47,8 +47,7 @@
   "final:after": {
     "strong-error-handler": {
       "params": {
-        "log": true,
-        "debug": true
+        "log": true
       }
     }
   }

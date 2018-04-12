@@ -8,10 +8,10 @@ const migrations = [];
 
 app.models().forEach(function (Model) {
   const dataSource = Model.dataSource;
-  if (dataSource && Model.name.match(/^[a-z]/)) {
+  if (dataSource && Model.modelName.match(/^[a-z]/)) {
     migrations.push(function migrate(callback) {
-      console.log(`Migrating ${Model.name}...`);
-      dataSource.autoupdate(Model.name, callback);
+      console.log(`Migrating ${Model.modelName}...`);
+      dataSource.autoupdate(Model.modelName, callback);
     });
   }
 });
