@@ -50,7 +50,7 @@ module.exports = function (Role) {
   });
 
   /**
-   * Do not allow deletion of Roles that are in use
+   * Do not allow modifying own role
    */
   Role.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
     if (context.instance.id === context.req.authData.user.roleId) {

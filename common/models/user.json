@@ -44,6 +44,9 @@
     },
     "email_index": {
       "email": 1
+    },
+    "location_index": {
+      "locationId": 1
     }
   },
   "mixins": {

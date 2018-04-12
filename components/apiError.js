@@ -15,6 +15,9 @@ const errorMap = {
   MISSING_REQUIRED_PERMISSION: {
     messagePattern: 'Logged in user does not have the required permission "<%= permission %>" to access this endpoint.'
   },
+  DELETE_LAST_USER: {
+    messagePattern: 'Cannot delete the last user of the system. The system must have at least one user.'
+  }
 };
 
 module.exports = {
