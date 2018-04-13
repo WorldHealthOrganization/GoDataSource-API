@@ -46,7 +46,7 @@
     },
     "displayDateFormat": {
       "type": "string",
-      "default": "Y-m-d"
+      "default": "yyyy-mm-dd"
     },
     "noDaysAmongContacts": {
       "type": "number",
@@ -112,6 +112,20 @@
       "required": true
     }
   },
+  "indexes": {
+    "name_index": {
+      "name": 1
+    },
+    "disease_index": {
+      "disease": 1
+    },
+    "active_index": {
+      "active": 1
+    },
+    "startDate_index": {
+      "startDate": 1
+    }
+  },
   "validations": [],
   "relations": {
     "cases": {
@@ -135,6 +149,72 @@
       "foreignKey": "outbreakId"
     }
   },
-  "acls": [],
-  "methods": {}
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "getAvailableDateFormats"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "count"
+    }
+  ],
+  "methods": {
+    "getAvailableDateFormats": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "dateFormats",
+          "type": ["string"],
+          "description": "List of available date formats",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Retrieve the list of available date formats.",
+      "http": {
+        "verb": "get",
+        "path": "/available-date-formats"
+      }
+    }
+  }
 }

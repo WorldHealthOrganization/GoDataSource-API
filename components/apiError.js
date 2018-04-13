@@ -17,6 +17,12 @@ const errorMap = {
   },
   DELETE_LAST_USER: {
     messagePattern: 'Cannot delete the last user of the system. The system must have at least one user.'
+  },
+  DELETE_ACTIVE_OUTBREAK: {
+    messagePattern: 'The outbreak (id: "<%= id %>") is active. Cannot delete an active outbreak.'
+  },
+  ONE_ACTIVE_OUTBREAK: {
+    messagePattern: 'There is already an active outbreak (id: "<%= id %>") in the system. '
   }
 };
 
