@@ -17,7 +17,20 @@ module.exports = function(SystemSettings) {
    * @param cb
    */
   SystemSettings.getSystemSettings = function (cb) {
-    cb();
+    // There is only one entry in the system settings table; get it
+    SystemSettings.findOne()
+      .then(function (instance) {
+        if(instance) {
+          cb(null, instance);
+        } else {
+          // TODO use error module
+          cb("error: not found");
+        }
+      })
+      .catch(function (err) {
+        // TODO use error module
+        cb(err);
+      });
   };
 
   /**
@@ -26,6 +39,19 @@ module.exports = function(SystemSettings) {
    * @param cb
    */
   SystemSettings.updateSystemSettings = function (data, cb) {
-    cb(null, data);
+    // There is only one entry in the system settings table; get it and update it
+    SystemSettings.findOne()
+      .then(function (instance) {
+        if(instance) {
+          return instance.updateAttributes(data)
+            .then(function(instance) {
+              cb(null, instance);
+            });
+        } else {
+          // TODO use error module
+          throw "error: not found";
+        }
+      })
+      .catch(cb);
   };
 };

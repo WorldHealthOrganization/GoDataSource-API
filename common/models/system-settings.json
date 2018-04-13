@@ -9,9 +9,6 @@
     "id"
   ],
   "properties": {
-    "longPeriodsBetweenOnsetDates": {
-      "type": "number"
-    },
     "upstreamServer": {
       "type": "upstreamServer"
     },
@@ -28,7 +25,26 @@
   },
   "validations": [],
   "relations": {},
-  "acls": [],
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY",
+      "property": ["getSystemSettings", "updateSystemSettings"]
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "getSystemSettings"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "updateSystemSettings"
+    }
+  ],
   "methods": {
     "getSystemSettings": {
       "accepts": [],
