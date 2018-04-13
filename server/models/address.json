@@ -23,6 +23,12 @@
     },
     "postalCode": {
       "type": "string"
+    },
+    "locationId": {
+      "type": "string"
+    },
+    "geoLocation": {
+      "type": "geopoint"
     }
   },
   "validations": [],

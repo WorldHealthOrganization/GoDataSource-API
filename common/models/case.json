@@ -1,12 +1,9 @@
 {
   "name": "case",
-  "base": "extendedPersistedModel",
+  "base": "person",
   "idInjection": true,
   "options": {
     "validateUpsert": true
-  },
-  "mongodb": {
-    "collection": "person"
   },
   "scope": {
     "where": {
@@ -19,38 +16,6 @@
       "required": true,
       "default": "case",
       "readOnly": true
-    },
-    "firstName": {
-      "type": "string",
-      "required": true
-    },
-    "middleName": {
-      "type": "string"
-    },
-    "lastName": {
-      "type": "string"
-    },
-    "dob": {
-      "type": "date"
-    },
-    "age": {
-      "type": "number"
-    },
-    "gender": {
-      "type": "string",
-      "required": true
-    },
-    "phoneNumber": {
-      "type": "string"
-    },
-    "occupation": {
-      "type": "string"
-    },
-    "documentType": {
-      "type": "string"
-    },
-    "documentNumber": {
-      "type": "string"
     },
     "dateOfInfection": {
       "type": "date"
@@ -74,15 +39,6 @@
     "dateDeceased": {
       "type": "date"
     },
-    "locationId": {
-      "type": "string"
-    },
-    "address": {
-      "type": "address"
-    },
-    "geoLocation": {
-      "type": "geopoint"
-    },
     "classification": {
       "type": "string",
       "required": true
@@ -93,9 +49,6 @@
     },
     "riskReason": {
       "type": "string"
-    },
-    "fillGeoLocation": {
-      "type": "geopoint"
     }
   },
   "validations": [],

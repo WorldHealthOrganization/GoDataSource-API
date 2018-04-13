@@ -66,7 +66,7 @@ function isMonitoredField(field) {
  * @returns {boolean}
  */
 function isMonitoredModel(model) {
-  return ['auditLog', 'extendedPersistedModel'].indexOf(model.modelName) === -1;
+  return ['auditLog', 'extendedPersistedModel', 'person'].indexOf(model.modelName) === -1;
 }
 
 module.exports = function (Model) {

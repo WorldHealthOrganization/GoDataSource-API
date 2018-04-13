@@ -159,5 +159,13 @@
   "accessToken": {
     "dataSource": "mongoDb",
     "public": false
+  },
+  "person": {
+    "dataSource": null,
+    "public": false
+  },
+  "document": {
+    "dataSource": null,
+    "public": false
   }
 }

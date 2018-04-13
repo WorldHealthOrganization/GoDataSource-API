@@ -1,12 +1,9 @@
 {
   "name": "contact",
-  "base": "extendedPersistedModel",
+  "base": "person",
   "idInjection": true,
   "options": {
     "validateUpsert": true
-  },
-  "mongodb": {
-    "collection": "person"
   },
   "scope": {
     "where": {
@@ -19,50 +16,6 @@
       "default": "contact",
       "required": true,
       "readOnly": true
-    },
-    "firstName": {
-      "type": "string",
-      "required": true
-    },
-    "middleName": {
-      "type": "string"
-    },
-    "lastName": {
-      "type": "string"
-    },
-    "dob": {
-      "type": "date"
-    },
-    "age": {
-      "type": "number"
-    },
-    "gender": {
-      "type": "string",
-      "required": true
-    },
-    "phoneNumber": {
-      "type": "string"
-    },
-    "occupation": {
-      "type": "string"
-    },
-    "documentType": {
-      "type": "string"
-    },
-    "documentNumber": {
-      "type": "string"
-    },
-    "locationId": {
-      "type": "string"
-    },
-    "address": {
-      "type": "address"
-    },
-    "geoLocation": {
-      "type": "geopoint"
-    },
-    "fillGeoLocation": {
-      "type": "geopoint"
     }
   },
   "validations": [],

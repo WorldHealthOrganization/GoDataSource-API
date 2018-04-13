@@ -1,0 +1,63 @@
+{
+  "name": "person",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mongodb": {
+    "collection": "person"
+  },
+  "properties": {
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "middleName": {
+      "type": "string"
+    },
+    "lastName": {
+      "type": "string"
+    },
+    "dob": {
+      "type": "date"
+    },
+    "age": {
+      "type": "number"
+    },
+    "gender": {
+      "type": "string",
+      "required": true
+    },
+    "phoneNumber": {
+      "type": "string"
+    },
+    "occupation": {
+      "type": "string"
+    },
+    "document": {
+      "type": "document"
+    },
+    "address": {
+      "type": "address"
+    },
+    "fillGeoLocation": {
+      "type": "geopoint"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "labResults": {
+      "type": "hasMany",
+      "model": "labResult",
+      "foreignKey": "personId"
+    },
+    "relationships": {
+      "type": "hasMany",
+      "model": "relationship",
+      "foreignKey": "personId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}
