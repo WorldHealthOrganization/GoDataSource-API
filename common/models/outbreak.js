@@ -4,6 +4,18 @@ const app = require('../../server/server');
 
 module.exports = function (Outbreak) {
 
+  // disable bulk delete for related models
+  app.utils.remote.disableRemoteMethods(Outbreak, [
+    'prototype.__delete__cases',
+    'prototype.__delete__cases__labResults',
+    'prototype.__delete__cases__relationships',
+    'prototype.__delete__clusters',
+    'prototype.__delete__contacts',
+    'prototype.__delete__contacts__followUps',
+    'prototype.__delete__contacts__relationships',
+    'prototype.__delete__events',
+  ]);
+
   Outbreak.availableDateFormats = {
     'dd-mm-yyyy': 'dd-mm-yyyy',
     'yyyy-mm-dd': 'yyyy-mm-dd',

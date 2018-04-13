@@ -12,9 +12,6 @@ const errorMap = {
   DELETE_OWN_RECORD: {
     messagePattern: 'Model "<%= model %>" id "<%= id %>" is used by current logged in user. Cannot delete own record.'
   },
-  MISSING_REQUIRED_PERMISSION: {
-    messagePattern: 'Logged in user does not have the required permission "<%= permission %>" to access this endpoint.'
-  },
   DELETE_LAST_USER: {
     messagePattern: 'Cannot delete the last user of the system. The system must have at least one user.'
   },
@@ -22,7 +19,7 @@ const errorMap = {
     messagePattern: 'The outbreak (id: "<%= id %>") is active. Cannot delete an active outbreak.'
   },
   ONE_ACTIVE_OUTBREAK: {
-    messagePattern: 'There is already an active outbreak (id: "<%= id %>") in the system. '
+    messagePattern: 'There is already an active outbreak (id: "<%= id %>") in the system.'
   }
 };
 

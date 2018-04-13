@@ -196,6 +196,48 @@
       "principalId": "read_outbreak",
       "permission": "ALLOW",
       "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__get__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "__create__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__findById__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "__updateById__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_own_case",
+      "permission": "ALLOW",
+      "property": "__updateById__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "__destroyById__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_own_case",
+      "permission": "ALLOW",
+      "property": "__destroyById__cases"
     }
   ],
   "methods": {

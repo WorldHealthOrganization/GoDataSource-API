@@ -17,22 +17,88 @@ module.exports = function (app) {
       context.remotingContext.req.authData.user &&
       context.remotingContext.req.authData.user.role &&
       Array.isArray(context.remotingContext.req.authData.user.role.permissions)
-    ){
+    ) {
       hasAccess = context.remotingContext.req.authData.user.role.permissions.indexOf(permission) !== -1;
     }
-    let accessError;
-    if (!hasAccess && context.remotingContext.req.authData) {
-      accessError = app.utils.apiError.getError('MISSING_REQUIRED_PERMISSION', {permission: `${Role.availablePermissions[permission]} (${permission})`}, 403);
+    callback(null, hasAccess);
+  }
+
+  /**
+   * Verify resource ownership
+   * @param permission
+   * @param context
+   * @param callback
+   */
+  function verifyResourceOwnership(permission, context, callback) {
+
+    /**
+     * Check model ownership
+     * @param model
+     */
+    function checkOwnership(model) {
+      // define regex for extracting modelId, assume the model is case
+      let recordIdRegExp = /\/cases\/([^\/?]+)/;
+      // if the model is contact
+      if (model.modelName === 'contact') {
+        // update regex for contact model
+        recordIdRegExp = /\/contacts\/([^\/?]+)/;
+      }
+      // extract model if from request
+      const recordIdMatch = context.remotingContext.req.originalUrl.match(recordIdRegExp);
+
+      if (recordIdMatch && recordIdMatch[1]) {
+        let isOwner = false;
+        // try to find the requested record
+        model
+          .findById(recordIdMatch[1])
+          .then(function (record) {
+            // if the record is found
+            if (record) {
+              // verify ownership
+              isOwner = (record.createdBy === context.remotingContext.req.authData.user.id);
+            }
+            callback(null, isOwner);
+          })
+          .catch(callback);
+      } else {
+        // recordId not found, deny access
+        callback(null, false);
+      }
     }
-    callback(accessError, hasAccess);
+
+    // handle permissions that require ownership
+    switch (permission) {
+      case 'write_own_case':
+        checkOwnership(app.models.case);
+        break;
+      case 'write_own_contact':
+        checkOwnership(app.models.contact);
+        break;
+      default:
+        callback(null, false);
+        break;
+    }
   }
 
   /**
    * Roles are just groups of permissions, register role resolver for each permission
    */
   Object.keys(Role.availablePermissions).forEach(function (permission) {
+
     Role.registerResolver(permission, function (permission, context, callback) {
-      hasPermission(permission, context, callback);
+      let _callback = callback;
+      // if the permission requires ownership of the object
+      if (permission.indexOf('_own_') !== -1) {
+        // after verifying the user has the permission, also verify ownership
+        _callback = function (error, hasPermission) {
+          if (error || !hasPermission) {
+            return callback(error, hasPermission);
+          }
+          return verifyResourceOwnership(permission, context, callback);
+        }
+      }
+      // verify if the user has the permission
+      hasPermission(permission, context, _callback);
     });
   });
 };

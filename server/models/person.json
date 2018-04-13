@@ -46,18 +46,7 @@
     }
   },
   "validations": [],
-  "relations": {
-    "labResults": {
-      "type": "hasMany",
-      "model": "labResult",
-      "foreignKey": "personId"
-    },
-    "relationships": {
-      "type": "hasMany",
-      "model": "relationship",
-      "foreignKey": "personId"
-    }
-  },
+  "relations": {},
   "acls": [],
   "methods": {}
 }
