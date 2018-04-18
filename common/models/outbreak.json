@@ -211,6 +211,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "write_own_case",
+      "permission": "ALLOW",
+      "property": "__create__cases"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__findById__cases"
@@ -238,6 +244,168 @@
       "principalId": "write_own_case",
       "permission": "ALLOW",
       "property": "__destroyById__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__count__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "__get__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "__create__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_own_contact",
+      "permission": "ALLOW",
+      "property": "__create__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "__findById__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "__updateById__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_own_contact",
+      "permission": "ALLOW",
+      "property": "__updateById__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "__destroyById__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_own_contact",
+      "permission": "ALLOW",
+      "property": "__destroyById__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "__count__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__get__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "__create__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_own_case",
+      "permission": "ALLOW",
+      "property": "__create__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__findById__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "__updateById__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_own_case",
+      "permission": "ALLOW",
+      "property": "__updateById__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "__destroyById__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_own_case",
+      "permission": "ALLOW",
+      "property": "__destroyById__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__count__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "__get__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_followup",
+      "permission": "ALLOW",
+      "property": "__create__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "__findById__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_followup",
+      "permission": "ALLOW",
+      "property": "__updateById__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_followup",
+      "permission": "ALLOW",
+      "property": "__destroyById__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "__count__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "findCaseRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "findContactRelationships"
     }
   ],
   "methods": {
@@ -246,7 +414,9 @@
       "returns": [
         {
           "arg": "dateFormats",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "List of available date formats",
           "root": true,
           "required": true
@@ -256,6 +426,134 @@
       "http": {
         "verb": "get",
         "path": "/available-date-formats"
+      }
+    },
+    "prototype.findCaseRelationships": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationships",
+          "type": [
+            "relationship"
+          ],
+          "description": "Relationships of a cases",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries relationships of cases.",
+      "http": {
+        "verb": "get",
+        "path": "/case/:nk/relationships"
+      }
+    },
+    "prototype.createCaseRelationship": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "relationship",
+          "description": "Model instance data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationship",
+          "type": "relationship",
+          "description": "Created Relationship",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Creates a new instance in relationships of this model.",
+      "http": {
+        "verb": "post",
+        "path": "/case/:nk/relationships"
+      }
+    },
+    "prototype.findContactRelationships": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationships",
+          "type": [
+            "relationship"
+          ],
+          "description": "Relationships of a contacts",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries relationships of contacts.",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/relationships"
+      }
+    },
+    "prototype.createContactRelationship": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contact"
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "relationship",
+          "description": "Model instance data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationship",
+          "type": "relationship",
+          "description": "Created Relationship",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Creates a new instance in relationships of this model.",
+      "http": {
+        "verb": "post",
+        "path": "/contact/:nk/relationships"
       }
     }
   }

@@ -90,4 +90,191 @@ module.exports = function (Outbreak) {
   Outbreak.getAvailableDateFormats = function (callback) {
     callback(null, Outbreak.availableDateFormats);
   };
+
+
+  /**
+   * Find relations for a person
+   * @param personId
+   * @param filter
+   * @param callback
+   */
+  function findCaseContactRelationships(personId, filter, callback) {
+    callback(app.utils.apiError.getError('FUNCTIONALITY_NOT_IMPLEMENTED', {}, 501));
+  }
+
+  /**
+   * Find relations for a case
+   * @param caseId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findCaseRelationships = function (caseId, filter, callback) {
+    findCaseContactRelationships(caseId, filter, callback);
+  };
+
+  /**
+   * Find relations for a contact
+   * @param contactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findContactRelationships = function (contactId, filter, callback) {
+    findCaseContactRelationships(contactId, filter, callback);
+  };
+
+  /**
+   * Create relation for a person
+   * @param personId
+   * @param data
+   * @param callback
+   */
+  function createCaseContactRelationship(personId, data, callback) {
+    callback(app.utils.apiError.getError('FUNCTIONALITY_NOT_IMPLEMENTED', {}, 501));
+  }
+
+  /**
+   * Create relation for a case
+   * @param caseId
+   * @param data
+   * @param callback
+   */
+  Outbreak.prototype.createCaseRelationship = function (caseId, data, callback) {
+    createCaseContactRelationship(caseId, data, callback);
+  };
+
+  /**
+   * Create relation for a contact
+   * @param contactId
+   * @param data
+   * @param callback
+   */
+  Outbreak.prototype.createContactRelationship = function (contactId, data, callback) {
+    createCaseContactRelationship(contactId, data, callback);
+  };
+
+  /**
+   * Retrieve a relation for a person
+   * @param personId
+   * @param relationshipId
+   * @param callback
+   */
+  function getCaseContactRelationship(personId, relationshipId, callback) {
+    callback(app.utils.apiError.getError('FUNCTIONALITY_NOT_IMPLEMENTED', {}, 501));
+  }
+
+  /**
+   * Retrieve a relation for a case
+   * @param caseId
+   * @param relationshipId
+   * @param callback
+   */
+  Outbreak.prototype.getCaseRelationship = function (caseId, relationshipId, callback) {
+    getCaseContactRelationship(caseId, relationshipId, callback);
+  };
+
+  /**
+   * Retrieve a relation for a contact
+   * @param contactId
+   * @param relationshipId
+   * @param callback
+   */
+  Outbreak.prototype.getContactRelationship = function (contactId, relationshipId, callback) {
+    getCaseContactRelationship(contactId, relationshipId, callback);
+  };
+
+  /**
+   * Update a relation for a person
+   * @param personId
+   * @param relationshipId
+   * @param data
+   * @param callback
+   */
+  function updateCaseContactRelationship(personId, relationshipId, data, callback) {
+    callback(app.utils.apiError.getError('FUNCTIONALITY_NOT_IMPLEMENTED', {}, 501));
+  }
+
+  /**
+   * Update a relation for a case
+   * @param caseId
+   * @param relationshipId
+   * @param data
+   * @param callback
+   */
+  Outbreak.prototype.updateCaseRelationship = function (caseId, relationshipId, data, callback) {
+    updateCaseContactRelationship(caseId, relationshipId, data, callback);
+  };
+
+  /**
+   * Update a relation for a contact
+   * @param contactId
+   * @param relationshipId
+   * @param data
+   * @param callback
+   */
+  Outbreak.prototype.updateContactRelationship = function (contactId, relationshipId, data, callback) {
+    updateCaseContactRelationship(contactId, relationshipId, data, callback);
+  };
+
+  /**
+   * Delete a relation for a person
+   * @param personId
+   * @param relationshipId
+   * @param callback
+   */
+  function deleteCaseContactRelationship(personId, relationshipId, callback) {
+    callback(app.utils.apiError.getError('FUNCTIONALITY_NOT_IMPLEMENTED', {}, 501));
+  }
+
+  /**
+   * Delete a relation for a case
+   * @param caseId
+   * @param relationshipId
+   * @param callback
+   */
+  Outbreak.prototype.deleteCaseContactRelationship = function (caseId, relationshipId, callback) {
+    deleteCaseContactRelationship(caseId, relationshipId, callback);
+  };
+
+  /**
+   * Delete a relation for a contact
+   * @param contactId
+   * @param relationshipId
+   * @param callback
+   */
+  Outbreak.prototype.deleteCaseContactRelationship = function (contactId, relationshipId, callback) {
+    deleteCaseContactRelationship(contactId, relationshipId, callback);
+  };
+
+  /**
+   * Count relations for a person
+   * @param personId
+   * @param where
+   * @param data
+   * @param callback
+   */
+  function countCaseContactRelationships(personId, where, data, callback) {
+    callback(app.utils.apiError.getError('FUNCTIONALITY_NOT_IMPLEMENTED', {}, 501));
+  }
+
+  /**
+   * Count relations for a case
+   * @param caseId
+   * @param where
+   * @param data
+   * @param callback
+   */
+  Outbreak.prototype.countCaseContactRelationships = function (caseId, where, data, callback) {
+    countCaseContactRelationships(caseId, where, data, callback);
+  };
+
+  /**
+   * Count relations for a contact
+   * @param contactId
+   * @param where
+   * @param data
+   * @param callback
+   */
+  Outbreak.prototype.countCaseContactRelationships = function (contactId, where, data, callback) {
+    countCaseContactRelationships(contactId, where, data, callback);
+  };
 };

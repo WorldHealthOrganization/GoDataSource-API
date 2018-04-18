@@ -38,6 +38,11 @@
       "type": "string",
       "required": true
     },
+    "status": {
+      "type": "string",
+      "enum": ["inProgress", "completed"],
+      "required": true
+    },
     "additionalData": {
       "type": "object"
     }

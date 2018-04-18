@@ -20,6 +20,9 @@ const errorMap = {
   },
   ONE_ACTIVE_OUTBREAK: {
     messagePattern: 'There is already an active outbreak (id: "<%= id %>") in the system.'
+  },
+  FUNCTIONALITY_NOT_IMPLEMENTED: {
+    messagePattern: 'The requested functionality is not implemented.'
   }
 };
 

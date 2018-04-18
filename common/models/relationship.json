@@ -6,8 +6,8 @@
     "validateUpsert": true
   },
   "properties": {
-    "personId": {
-      "type": "string",
+    "persons": {
+      "type": ["string"],
       "required": true
     },
     "contactDate": {

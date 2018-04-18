@@ -24,11 +24,6 @@
       "type": "hasMany",
       "model": "followUp",
       "foreignKey": "personId"
-    },
-    "relationships": {
-      "type": "hasMany",
-      "model": "relationship",
-      "foreignKey": "personId"
     }
   },
   "acls": [],
