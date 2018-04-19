@@ -23,14 +23,12 @@ module.exports = function(SystemSettings) {
         if(instance) {
           cb(null, instance);
         } else {
-          // TODO use error module
-          cb("error: not found");
+          throw app.utils.apiError.getError('INTERNAL_ERROR', {
+            error: 'System settings are not initialized'
+          });
         }
       })
-      .catch(function (err) {
-        // TODO use error module
-        cb(err);
-      });
+      .catch(cb);
   };
 
   /**
