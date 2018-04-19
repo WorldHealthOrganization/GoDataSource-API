@@ -23,6 +23,14 @@ const errorMap = {
   },
   FUNCTIONALITY_NOT_IMPLEMENTED: {
     messagePattern: 'The requested functionality is not implemented.'
+  },
+  MODEL_NOT_FOUND: {
+    defaultStatusCode: 404,
+    messagePattern: 'Unknown "<%= model %>" id "<%= id %>"'
+  },
+  INTERNAL_ERROR: {
+    defaultStatusCode: 500,
+    messagePattern: 'Internal error: "<%= error %>"'
   }
 };
 
@@ -31,10 +39,12 @@ module.exports = {
    * Get normalized API error
    * @param errorCode
    * @param info
-   * @param statusCode
+   * @param [statusCode]
    * @return {{name: string, code: *, message: *, statusCode: *}}
    */
   getError: function (errorCode, info, statusCode) {
+    statusCode = statusCode || errorMap[errorCode].defaultStatusCode;
+
     return {
       name: 'Error',
       code: errorCode,
