@@ -91,7 +91,6 @@ module.exports = function (Outbreak) {
     callback(null, Outbreak.availableDateFormats);
   };
 
-
   /**
    * Find relations for a person
    * @param personId
@@ -99,7 +98,18 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   function findCaseContactRelationships(personId, filter, callback) {
-    callback(app.utils.apiError.getError('FUNCTIONALITY_NOT_IMPLEMENTED', {}, 501));
+    const _filter = app.utils.remote.mergeFilters({
+        where: {
+          persons: personId
+        },
+        filter
+      });
+    app.models.relationship
+      .find(_filter)
+      .then(function (relationships) {
+        callback(null, relationships);
+      })
+      .catch(callback);
   }
 
   /**

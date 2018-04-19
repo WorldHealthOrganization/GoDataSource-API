@@ -3,6 +3,7 @@
 const disableRemoteMethods = require('../../components/disableRemoteMethods');
 const disableStandardRelationRemoteMethods = require('../../components/disableStandardRelationRemoteMethods');
 const disableCommonExtraRoutes = require('../../components/disableCommonExtraRoutes');
+const mergeFilters = require('../../components/mergeFilters');
 const apiError = require('../../components/apiError');
 
 function init(app, callback) {
@@ -10,7 +11,8 @@ function init(app, callback) {
     remote: {
       disableRemoteMethods: disableRemoteMethods,
       disableStandardRelationRemoteMethods: disableStandardRelationRemoteMethods,
-      disableCommonExtraRoutes: disableCommonExtraRoutes
+      disableCommonExtraRoutes: disableCommonExtraRoutes,
+      mergeFilters: mergeFilters
     },
     apiError: apiError
   };
