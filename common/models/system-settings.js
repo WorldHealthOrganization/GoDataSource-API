@@ -17,7 +17,18 @@ module.exports = function(SystemSettings) {
    * @param cb
    */
   SystemSettings.getSystemSettings = function (cb) {
-    cb();
+    // There is only one entry in the system settings collection; get it
+    SystemSettings.findOne()
+      .then(function (instance) {
+        if(instance) {
+          cb(null, instance);
+        } else {
+          throw app.utils.apiError.getError('INTERNAL_ERROR', {
+            error: 'System settings are not initialized'
+          });
+        }
+      })
+      .catch(cb);
   };
 
   /**
@@ -26,6 +37,20 @@ module.exports = function(SystemSettings) {
    * @param cb
    */
   SystemSettings.updateSystemSettings = function (data, cb) {
-    cb(null, data);
+    // There is only one entry in the system settings collection; get it and update it
+    SystemSettings.findOne()
+      .then(function (instance) {
+        if(instance) {
+          return instance.updateAttributes(data)
+            .then(function(instance) {
+              cb(null, instance);
+            });
+        } else {
+          throw app.utils.apiError.getError('INTERNAL_ERROR', {
+            error: 'System settings are not initialized'
+          });
+        }
+      })
+      .catch(cb);
   };
 };
