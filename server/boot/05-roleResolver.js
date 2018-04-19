@@ -36,17 +36,15 @@ module.exports = function (app) {
      * @param model
      */
     function checkOwnership(model) {
-      // define regex for extracting modelId, assume the model is case
-      let recordIdRegExp = /\/cases\/([^\/?]+)/;
-      // if the model is contact
-      if (model.modelName === 'contact') {
-        // update regex for contact model
-        recordIdRegExp = /\/contacts\/([^\/?]+)/;
-      }
+
+      // define regex for extracting modelId
+      let recordIdRegExp = new RegExp(`^\\/api\\/outbreaks\\/[^\\/]+\\/${model.modelName}s(?:\\/([^\\/?]+)|(?:$|\\?))`);
+
       // extract model if from request
       const recordIdMatch = context.remotingContext.req.originalUrl.match(recordIdRegExp);
 
       if (recordIdMatch && recordIdMatch[1]) {
+        // recordId match found, check ownership
         let isOwner = false;
         // try to find the requested record
         model
@@ -60,6 +58,11 @@ module.exports = function (app) {
             callback(null, isOwner);
           })
           .catch(callback);
+
+      } else if (recordIdMatch && context.remotingContext.req.method.toLowerCase() === 'post'){
+        // create request, allow access
+        callback(null, true);
+
       } else {
         // recordId not found, deny access
         callback(null, false);
