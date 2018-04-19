@@ -17,7 +17,7 @@ module.exports = function(SystemSettings) {
    * @param cb
    */
   SystemSettings.getSystemSettings = function (cb) {
-    // There is only one entry in the system settings table; get it
+    // There is only one entry in the system settings collection; get it
     SystemSettings.findOne()
       .then(function (instance) {
         if(instance) {
@@ -39,7 +39,7 @@ module.exports = function(SystemSettings) {
    * @param cb
    */
   SystemSettings.updateSystemSettings = function (data, cb) {
-    // There is only one entry in the system settings table; get it and update it
+    // There is only one entry in the system settings collection; get it and update it
     SystemSettings.findOne()
       .then(function (instance) {
         if(instance) {
@@ -48,8 +48,9 @@ module.exports = function(SystemSettings) {
               cb(null, instance);
             });
         } else {
-          // TODO use error module
-          throw "error: not found";
+          throw app.utils.apiError.getError('INTERNAL_ERROR', {
+            error: 'System settings are not initialized'
+          });
         }
       })
       .catch(cb);

@@ -29,8 +29,7 @@
     {
       "principalType": "ROLE",
       "principalId": "$everyone",
-      "permission": "DENY",
-      "property": ["getSystemSettings", "updateSystemSettings"]
+      "permission": "DENY"
     },
     {
       "principalType": "ROLE",
