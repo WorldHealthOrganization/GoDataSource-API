@@ -98,12 +98,13 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   function findCaseContactRelationships(personId, filter, callback) {
-    const _filter = app.utils.remote.mergeFilters({
+    const _filter = app.utils.remote
+      .mergeFilters({
         where: {
           persons: personId
-        },
-        filter
-      });
+        }
+      }, filter);
+
     app.models.relationship
       .find(_filter)
       .then(function (relationships) {
@@ -139,7 +140,18 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   function createCaseContactRelationship(personId, data, callback) {
-    callback(app.utils.apiError.getError('FUNCTIONALITY_NOT_IMPLEMENTED', {}, 501));
+    if (Array.isArray(data.persons) && data.persons.length) {
+      if (data.persons.indexOf(personId) === -1) {
+        data.persons.push(personId);
+      }
+    }
+    app.models.relationship.removeReadOnlyProperties(data);
+    app.models.relationship
+      .create(data)
+      .then(function (createdRelation) {
+        callback(null, createdRelation);
+      })
+      .catch(callback);
   }
 
   /**

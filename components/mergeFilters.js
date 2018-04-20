@@ -12,7 +12,7 @@ function merge(filter, requestFilter = {}) {
     return ((requestFilter[filterName] !== undefined) || (filter[filterName] !== undefined));
   }
 
-  const _filter = filter;
+  const _filter = {};
 
   if (filterExists('where')) {
     _filter.where = {
@@ -21,6 +21,16 @@ function merge(filter, requestFilter = {}) {
         filter.where || {}
       ]
     };
+  }
+
+  if (filterExists('include')) {
+    _filter.include = [];
+    [filter, requestFilter].forEach(function (filterElement) {
+      if (Array.isArray(filterElement.include) && filterElement.length) {
+        _filter.include = _filter.include.concat(filterElement.include);
+      }
+    });
+
   }
 
   ['limit', 'order', 'skip'].forEach(function (filterName) {

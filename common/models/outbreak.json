@@ -406,6 +406,18 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "findContactRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "createCaseRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "createContactRelationship"
     }
   ],
   "methods": {
