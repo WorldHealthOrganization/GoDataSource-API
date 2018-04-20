@@ -33,7 +33,7 @@ function merge(filter, requestFilter = {}) {
 
   }
 
-  ['limit', 'order', 'skip'].forEach(function (filterName) {
+  ['fields', 'limit', 'order', 'skip'].forEach(function (filterName) {
     if (filterExists(filterName))
       _filter[filterName] = requestFilter[filterName] || filter[filterName];
   });

@@ -28,6 +28,10 @@ const errorMap = {
     defaultStatusCode: 404,
     messagePattern: 'Unknown "<%= model %>" id "<%= id %>"'
   },
+  MODEL_NOT_FOUND_IN_CONTEXT: {
+    defaultStatusCode: 404,
+    messagePattern: 'Unknown "<%= model %>" id "<%= id %>" in context of "<%= contextModel %>" id "<%= contextId %>"'
+  },
   INTERNAL_ERROR: {
     defaultStatusCode: 500,
     messagePattern: 'Internal error: "<%= error %>"'

@@ -418,6 +418,18 @@
       "principalId": "write_contact",
       "permission": "ALLOW",
       "property": "createContactRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "getCaseRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "getContactRelationship"
     }
   ],
   "methods": {
@@ -459,12 +471,12 @@
           "type": [
             "relationship"
           ],
-          "description": "Relationships of a cases",
+          "description": "Relationships of a case",
           "root": true,
           "required": true
         }
       ],
-      "description": "Queries relationships of cases.",
+      "description": "Queries relationships of case.",
       "http": {
         "verb": "get",
         "path": "/case/:nk/relationships"
@@ -504,6 +516,39 @@
         "path": "/case/:nk/relationships"
       }
     },
+    "prototype.getCaseRelationship": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for relationships."
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationship",
+          "type": "relationship",
+          "description": "Relationship of a case",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Find a related item by id for relationships.",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/relationships/:fk"
+      }
+    },
     "prototype.findContactRelationships": {
       "accepts": [
         {
@@ -523,7 +568,7 @@
           "type": [
             "relationship"
           ],
-          "description": "Relationships of a contacts",
+          "description": "Relationships of a contact",
           "root": true,
           "required": true
         }
@@ -566,6 +611,39 @@
       "http": {
         "verb": "post",
         "path": "/contact/:nk/relationships"
+      }
+    },
+    "prototype.getContactRelationship": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for relationships."
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationship",
+          "type": "relationship",
+          "description": "Relationship of a contact",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Find a related item by id for relationships.",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/relationships/:fk"
       }
     }
   }

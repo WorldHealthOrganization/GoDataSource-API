@@ -178,30 +178,54 @@ module.exports = function (Outbreak) {
    * Retrieve a relation for a person
    * @param personId
    * @param relationshipId
+   * @param filter
    * @param callback
    */
-  function getCaseContactRelationship(personId, relationshipId, callback) {
-    callback(app.utils.apiError.getError('FUNCTIONALITY_NOT_IMPLEMENTED', {}, 501));
+  function getCaseContactRelationship(personId, relationshipId, filter, callback) {
+    const _filter = app.utils.remote
+      .mergeFilters({
+        where: {
+          id: relationshipId,
+          persons: personId
+        }
+      }, filter);
+
+    app.models.relationship
+      .findOne(_filter)
+      .then(function (relationship) {
+        if (!relationship) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND_IN_CONTEXT', {
+            model: app.models.relationship.modelName,
+            id: relationshipId,
+            contextModel: app.models.case.modelName,
+            contextId: personId
+          });
+        }
+        callback(null, relationship);
+      })
+      .catch(callback);
   }
 
   /**
    * Retrieve a relation for a case
    * @param caseId
    * @param relationshipId
+   * @param filter
    * @param callback
    */
-  Outbreak.prototype.getCaseRelationship = function (caseId, relationshipId, callback) {
-    getCaseContactRelationship(caseId, relationshipId, callback);
+  Outbreak.prototype.getCaseRelationship = function (caseId, relationshipId, filter, callback) {
+    getCaseContactRelationship(caseId, relationshipId, filter, callback);
   };
 
   /**
    * Retrieve a relation for a contact
    * @param contactId
    * @param relationshipId
+   * @param filter
    * @param callback
    */
-  Outbreak.prototype.getContactRelationship = function (contactId, relationshipId, callback) {
-    getCaseContactRelationship(contactId, relationshipId, callback);
+  Outbreak.prototype.getContactRelationship = function (contactId, relationshipId, filter, callback) {
+    getCaseContactRelationship(contactId, relationshipId, filter, callback);
   };
 
   /**
