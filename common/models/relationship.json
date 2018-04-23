@@ -26,9 +26,6 @@
       "type": "string",
       "required": true
     },
-    "eventId": {
-      "type": "string"
-    },
     "exposureType": {
       "type": "string",
       "required": true

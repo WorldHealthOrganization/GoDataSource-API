@@ -12,8 +12,7 @@ module.exports = function (Outbreak) {
     'prototype.__delete__clusters',
     'prototype.__delete__contacts',
     'prototype.__delete__contacts__followUps',
-    'prototype.__delete__contacts__relationships',
-    'prototype.__delete__events',
+    'prototype.__delete__contacts__relationships'
   ]);
 
   Outbreak.availableDateFormats = {

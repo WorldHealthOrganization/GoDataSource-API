@@ -84,10 +84,6 @@
     "dataSource": "mongoDb",
     "public": true
   },
-  "event": {
-    "dataSource": "mongoDb",
-    "public": false
-  },
   "followUp": {
     "dataSource": "mongoDb",
     "public": false

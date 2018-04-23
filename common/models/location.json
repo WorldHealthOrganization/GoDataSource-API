@@ -35,11 +35,6 @@
       "type": "hasMany",
       "model": "team",
       "foreignKey": "locationId"
-    },
-    "events": {
-      "type": "hasMany",
-      "model": "event",
-      "foreignKey": "locationId"
     }
   },
   "acls": [],
