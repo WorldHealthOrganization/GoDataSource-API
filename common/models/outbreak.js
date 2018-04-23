@@ -236,7 +236,29 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   function updateCaseContactRelationship(personId, relationshipId, data, callback) {
-    callback(app.utils.apiError.getError('FUNCTIONALITY_NOT_IMPLEMENTED', {}, 501));
+    app.models.relationship
+      .findOne({
+        where: {
+          id: relationshipId,
+          persons: personId
+        }
+      })
+      .then(function (relationship) {
+        if (!relationship) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND_IN_CONTEXT', {
+            model: app.models.relationship.modelName,
+            id: relationshipId,
+            contextModel: app.models.case.modelName,
+            contextId: personId
+          });
+        }
+        app.models.relationship.removeReadOnlyProperties(data);
+        return relationship.updateAttributes(data);
+      })
+      .then(function (relationship) {
+        callback(null, relationship);
+      })
+      .catch(callback);
   }
 
   /**
@@ -268,7 +290,23 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   function deleteCaseContactRelationship(personId, relationshipId, callback) {
-    callback(app.utils.apiError.getError('FUNCTIONALITY_NOT_IMPLEMENTED', {}, 501));
+    app.models.relationship
+      .findOne({
+        where: {
+          id: relationshipId,
+          persons: personId
+        }
+      })
+      .then(function (relationship) {
+        if (!relationship) {
+          return {count: 0};
+        }
+        return relationship.destroy();
+      })
+      .then(function (relationship) {
+        callback(null, relationship);
+      })
+      .catch(callback);
   }
 
   /**
@@ -277,7 +315,7 @@ module.exports = function (Outbreak) {
    * @param relationshipId
    * @param callback
    */
-  Outbreak.prototype.deleteCaseContactRelationship = function (caseId, relationshipId, callback) {
+  Outbreak.prototype.deleteCaseRelationship = function (caseId, relationshipId, callback) {
     deleteCaseContactRelationship(caseId, relationshipId, callback);
   };
 
@@ -287,7 +325,7 @@ module.exports = function (Outbreak) {
    * @param relationshipId
    * @param callback
    */
-  Outbreak.prototype.deleteCaseContactRelationship = function (contactId, relationshipId, callback) {
+  Outbreak.prototype.deleteContactRelationship = function (contactId, relationshipId, callback) {
     deleteCaseContactRelationship(contactId, relationshipId, callback);
   };
 
@@ -295,32 +333,42 @@ module.exports = function (Outbreak) {
    * Count relations for a person
    * @param personId
    * @param where
-   * @param data
    * @param callback
    */
-  function countCaseContactRelationships(personId, where, data, callback) {
-    callback(app.utils.apiError.getError('FUNCTIONALITY_NOT_IMPLEMENTED', {}, 501));
+  function countCaseContactRelationships(personId, where, callback) {
+    const _filter = app.utils.remote
+      .mergeFilters({
+          where: {
+            persons: personId
+          }
+        },
+        {where: where});
+
+    app.models.relationship
+      .count(_filter.where)
+      .then(function (relationships) {
+        callback(null, relationships);
+      })
+      .catch(callback);
   }
 
   /**
    * Count relations for a case
    * @param caseId
    * @param where
-   * @param data
    * @param callback
    */
-  Outbreak.prototype.countCaseContactRelationships = function (caseId, where, data, callback) {
-    countCaseContactRelationships(caseId, where, data, callback);
+  Outbreak.prototype.countCaseRelationships = function (caseId, where, callback) {
+    countCaseContactRelationships(caseId, where, callback);
   };
 
   /**
    * Count relations for a contact
    * @param contactId
    * @param where
-   * @param data
    * @param callback
    */
-  Outbreak.prototype.countCaseContactRelationships = function (contactId, where, data, callback) {
-    countCaseContactRelationships(contactId, where, data, callback);
+  Outbreak.prototype.countContactRelationships = function (contactId, where, callback) {
+    countCaseContactRelationships(contactId, where, callback);
   };
 };

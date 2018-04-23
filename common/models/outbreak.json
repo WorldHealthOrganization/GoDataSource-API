@@ -415,7 +415,19 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "write_own_case",
+      "permission": "ALLOW",
+      "property": "createCaseRelationship"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "createContactRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_own_contact",
       "permission": "ALLOW",
       "property": "createContactRelationship"
     },
@@ -430,6 +442,66 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "getContactRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "updateCaseRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_own_case",
+      "permission": "ALLOW",
+      "property": "updateCaseRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "updateContactRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_own_contact",
+      "permission": "ALLOW",
+      "property": "updateContactRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "deleteCaseRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_own_case",
+      "permission": "ALLOW",
+      "property": "deleteCaseRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "deleteContactRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_own_contact",
+      "permission": "ALLOW",
+      "property": "deleteContactRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCaseRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactRelationships"
     }
   ],
   "methods": {
@@ -479,7 +551,7 @@
       "description": "Queries relationships of case.",
       "http": {
         "verb": "get",
-        "path": "/case/:nk/relationships"
+        "path": "/cases/:nk/relationships"
       }
     },
     "prototype.createCaseRelationship": {
@@ -513,7 +585,7 @@
       "description": "Creates a new instance in relationships of this model.",
       "http": {
         "verb": "post",
-        "path": "/case/:nk/relationships"
+        "path": "/cases/:nk/relationships"
       }
     },
     "prototype.getCaseRelationship": {
@@ -547,6 +619,99 @@
       "http": {
         "verb": "get",
         "path": "/cases/:nk/relationships/:fk"
+      }
+    },
+    "prototype.updateCaseRelationship": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for case"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for relationships."
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "relationship",
+          "description": "Model instance data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationship",
+          "type": "relationship",
+          "description": "Updated Relationship",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Update a related item by id for relationships.",
+      "http": {
+        "verb": "put",
+        "path": "/cases/:nk/relationships/:fk"
+      }
+    },
+    "prototype.deleteCaseRelationship": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for case"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for relationships."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "object",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Delete a related item by id for relationships.",
+      "http": {
+        "verb": "del",
+        "path": "/cases/:nk/relationships/:fk"
+      }
+    },
+    "prototype.countCaseRelationships": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationships of a case",
+          "required": true
+        }
+      ],
+      "description": "Counts relationships of case.",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/relationships/count"
       }
     },
     "prototype.findContactRelationships": {
@@ -610,7 +775,7 @@
       "description": "Creates a new instance in relationships of this model.",
       "http": {
         "verb": "post",
-        "path": "/contact/:nk/relationships"
+        "path": "/contacts/:nk/relationships"
       }
     },
     "prototype.getContactRelationship": {
@@ -644,6 +809,99 @@
       "http": {
         "verb": "get",
         "path": "/contacts/:nk/relationships/:fk"
+      }
+    },
+    "prototype.updateContactRelationship": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contact"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for relationships."
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "relationship",
+          "description": "Model instance data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationship",
+          "type": "relationship",
+          "description": "Updated Relationship",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Update a related item by id for relationships.",
+      "http": {
+        "verb": "put",
+        "path": "/contacts/:nk/relationships/:fk"
+      }
+    },
+    "prototype.deleteContactRelationship": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contact"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for relationships."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "object",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Delete a related item by id for relationships.",
+      "http": {
+        "verb": "del",
+        "path": "/contacts/:nk/relationships/:fk"
+      }
+    },
+    "prototype.countContactRelationships": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationships of a contact",
+          "required": true
+        }
+      ],
+      "description": "Counts relationships of contact.",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/relationships/count"
       }
     }
   }
