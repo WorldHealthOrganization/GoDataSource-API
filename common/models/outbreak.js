@@ -503,5 +503,5 @@ module.exports = function (Outbreak) {
         // restore default scope
         app.models.contact.defaultScope = defaultScope;
       });
-  }
+  };
 };
