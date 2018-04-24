@@ -35,6 +35,10 @@ const errorMap = {
   INTERNAL_ERROR: {
     defaultStatusCode: 500,
     messagePattern: 'Internal error: "<%= error %>"'
+  },
+  VALIDATION_ERROR: {
+    defaultStatusCode: 422,
+    messagePattern: 'The "<%= model %>" instance is not valid. Details: <%= details %>'
   }
 };
 

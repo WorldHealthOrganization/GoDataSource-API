@@ -163,5 +163,9 @@
   "document": {
     "dataSource": null,
     "public": false
+  },
+  "relationshipParticipant": {
+    "dataSource": null,
+    "public": false
   }
 }

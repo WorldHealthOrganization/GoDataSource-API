@@ -502,6 +502,18 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "countContactRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "convertContactToCase"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_own_contact",
+      "permission": "ALLOW",
+      "property": "convertContactToCase"
     }
   ],
   "methods": {
@@ -902,6 +914,29 @@
       "http": {
         "verb": "get",
         "path": "/contacts/:nk/relationships/count"
+      }
+    },
+    "prototype.convertContactToCase": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "case",
+          "type": "case",
+          "description": "Case resulted from the conversion",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Converts contact to case.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/:nk/convert-to-case"
       }
     }
   }

@@ -100,7 +100,7 @@ module.exports = function (Outbreak) {
     const _filter = app.utils.remote
       .mergeFilters({
         where: {
-          persons: personId
+          'persons.id': personId
         }
       }, filter);
 
@@ -133,24 +133,89 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Validate persons property
+   * @param personId
+   * @param type
+   * @param data
+   * @param callback
+   * @return {*}
+   */
+  function validateAndNormalizePersons(personId, type, data, callback) {
+    let currentPersonFound = false;
+
+    if (Array.isArray(data.persons) && data.persons.length) {
+
+      let errors;
+      let persons = [];
+
+      data.persons.forEach(function (person, index) {
+        // validate each person item
+        if (person.type === undefined || person.id === undefined) {
+          if (!errors) {
+            errors = [];
+          }
+          errors.push(`"persons[${index}]" must contain both "type" and "id"`);
+          // check if the person is current person
+        } else if (person.id === personId) {
+          // keep only one entry of the current person
+          if (!currentPersonFound) {
+            currentPersonFound = true;
+            persons.push(person);
+          }
+        } else {
+          persons.push(person);
+        }
+      });
+
+      if (errors) {
+        return callback(app.utils.apiError.getError('VALIDATION_ERROR', {
+          model: app.models.relationship.modelName,
+          details: errors.join(', ')
+        }));
+      }
+
+      data.persons = persons;
+
+      // another person must be specified for a relation to be valid
+      if (currentPersonFound && data.persons.length === 1) {
+        return callback(app.utils.apiError.getError('VALIDATION_ERROR', {
+          model: app.models.relationship.modelName,
+          details: 'you must specify the related person'
+        }));
+      }
+
+      // if current person was not added by front end, add it here
+      if (!currentPersonFound && data.persons.length) {
+        data.persons.push({
+          id: personId,
+          type: type
+        });
+      }
+    }
+    callback(null, data.persons);
+  }
+
+  /**
    * Create relation for a person
    * @param personId
+   * @param type
    * @param data
    * @param callback
    */
-  function createCaseContactRelationship(personId, data, callback) {
-    if (Array.isArray(data.persons) && data.persons.length) {
-      if (data.persons.indexOf(personId) === -1) {
-        data.persons.push(personId);
+  function createCaseContactRelationship(personId, type, data, callback) {
+    validateAndNormalizePersons(personId, type, data, function (error, persons) {
+      if (error) {
+        return callback(error);
       }
-    }
-    app.models.relationship.removeReadOnlyProperties(data);
-    app.models.relationship
-      .create(data)
-      .then(function (createdRelation) {
-        callback(null, createdRelation);
-      })
-      .catch(callback);
+      data.persons = persons;
+      app.models.relationship.removeReadOnlyProperties(data);
+      app.models.relationship
+        .create(data)
+        .then(function (createdRelation) {
+          callback(null, createdRelation);
+        })
+        .catch(callback);
+    });
   }
 
   /**
@@ -160,7 +225,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.createCaseRelationship = function (caseId, data, callback) {
-    createCaseContactRelationship(caseId, data, callback);
+    createCaseContactRelationship(caseId, 'case', data, callback);
   };
 
   /**
@@ -170,7 +235,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.createContactRelationship = function (contactId, data, callback) {
-    createCaseContactRelationship(contactId, data, callback);
+    createCaseContactRelationship(contactId, 'contact', data, callback);
   };
 
   /**
@@ -185,7 +250,7 @@ module.exports = function (Outbreak) {
       .mergeFilters({
         where: {
           id: relationshipId,
-          persons: personId
+          'persons.id': personId
         }
       }, filter);
 
@@ -231,33 +296,40 @@ module.exports = function (Outbreak) {
    * Update a relation for a person
    * @param personId
    * @param relationshipId
+   * @param type
    * @param data
    * @param callback
    */
-  function updateCaseContactRelationship(personId, relationshipId, data, callback) {
-    app.models.relationship
-      .findOne({
-        where: {
-          id: relationshipId,
-          persons: personId
-        }
-      })
-      .then(function (relationship) {
-        if (!relationship) {
-          throw app.utils.apiError.getError('MODEL_NOT_FOUND_IN_CONTEXT', {
-            model: app.models.relationship.modelName,
+  function updateCaseContactRelationship(personId, relationshipId, type, data, callback) {
+    validateAndNormalizePersons(personId, type, data, function (error, persons) {
+      if (error) {
+        return callback(error);
+      }
+      data.person = persons;
+      app.models.relationship
+        .findOne({
+          where: {
             id: relationshipId,
-            contextModel: app.models.case.modelName,
-            contextId: personId
-          });
-        }
-        app.models.relationship.removeReadOnlyProperties(data);
-        return relationship.updateAttributes(data);
-      })
-      .then(function (relationship) {
-        callback(null, relationship);
-      })
-      .catch(callback);
+            'persons.id': personId
+          }
+        })
+        .then(function (relationship) {
+          if (!relationship) {
+            throw app.utils.apiError.getError('MODEL_NOT_FOUND_IN_CONTEXT', {
+              model: app.models.relationship.modelName,
+              id: relationshipId,
+              contextModel: app.models.case.modelName,
+              contextId: personId
+            });
+          }
+          app.models.relationship.removeReadOnlyProperties(data);
+          return relationship.updateAttributes(data);
+        })
+        .then(function (relationship) {
+          callback(null, relationship);
+        })
+        .catch(callback);
+    });
   }
 
   /**
@@ -268,7 +340,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.updateCaseRelationship = function (caseId, relationshipId, data, callback) {
-    updateCaseContactRelationship(caseId, relationshipId, data, callback);
+    updateCaseContactRelationship(caseId, relationshipId, 'case', data, callback);
   };
 
   /**
@@ -279,7 +351,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.updateContactRelationship = function (contactId, relationshipId, data, callback) {
-    updateCaseContactRelationship(contactId, relationshipId, data, callback);
+    updateCaseContactRelationship(contactId, relationshipId, 'contact', data, callback);
   };
 
   /**
@@ -293,7 +365,7 @@ module.exports = function (Outbreak) {
       .findOne({
         where: {
           id: relationshipId,
-          persons: personId
+          'persons.id': personId
         }
       })
       .then(function (relationship) {
@@ -338,7 +410,7 @@ module.exports = function (Outbreak) {
     const _filter = app.utils.remote
       .mergeFilters({
           where: {
-            persons: personId
+            'persons.id': personId
           }
         },
         {where: where});
@@ -370,4 +442,66 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.countContactRelationships = function (contactId, where, callback) {
     countCaseContactRelationships(contactId, where, callback);
   };
+
+  /**
+   * Convert a contact to a case
+   * @param contactId
+   * @param callback
+   */
+  Outbreak.prototype.convertContactToCase = function (contactId, callback) {
+    let updateRelations = [];
+    let convertedCase;
+
+    // override default scope to allow switching the type
+    const defaultScope = app.models.contact.defaultScope;
+    app.models.contact.defaultScope = function (){};
+
+    app.models.contact
+      .findOne({
+        where: {
+          type: 'contact',
+          id: contactId
+        }
+      })
+      .then(function (contact) {
+        if (!contact) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: contactId});
+        }
+        return contact.updateAttribute('type', 'case');
+      })
+      .then(function (_case) {
+        convertedCase = _case;
+        // after updating the contact, find it's relations
+        return app.models.relationship
+          .find({
+            where: {
+              "persons.id": contactId
+            }
+          });
+      })
+      .then(function (relations) {
+        // update relations
+        relations.forEach(function (relation) {
+          let persons = [];
+          relation.persons.forEach(function (person) {
+            // for every occurrence of current contact
+            if (person.id === contactId) {
+              // update type to match the new one
+              person.type = 'case';
+            }
+            persons.push(person);
+          });
+          updateRelations.push(relation.updateAttributes({persons: persons}));
+        });
+        return Promise.all(updateRelations);
+      })
+      .then(function () {
+        callback(null, convertedCase);
+      })
+      .catch(callback)
+      .finally(function () {
+        // restore default scope
+        app.models.contact.defaultScope = defaultScope;
+      });
+  }
 };

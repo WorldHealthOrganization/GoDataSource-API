@@ -7,7 +7,7 @@
   },
   "properties": {
     "persons": {
-      "type": ["string"],
+      "type": ["relationshipParticipant"],
       "required": true
     },
     "contactDate": {
