@@ -45,6 +45,11 @@
       "type": "geopoint"
     }
   },
+  "indexes": {
+    "persons_index": {
+      "persons": 1
+    }
+  },
   "validations": [],
   "relations": {},
   "acls": [],
