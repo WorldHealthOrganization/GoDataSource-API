@@ -5,6 +5,8 @@ const disableStandardRelationRemoteMethods = require('../../components/disableSt
 const disableCommonExtraRoutes = require('../../components/disableCommonExtraRoutes');
 const mergeFilters = require('../../components/mergeFilters');
 const apiError = require('../../components/apiError');
+const aesCrypto = require('../../components/aesCrypto');
+const anonymizeDatasetFields = require('../../components/anonymizeDatasetFields');
 
 function init(app, callback) {
   app.utils = {
@@ -14,7 +16,9 @@ function init(app, callback) {
       disableCommonExtraRoutes: disableCommonExtraRoutes,
       mergeFilters: mergeFilters
     },
-    apiError: apiError
+    apiError: apiError,
+    aesCrypto: aesCrypto,
+    anonymizeDatasetFields: anonymizeDatasetFields
   };
   callback();
 }
