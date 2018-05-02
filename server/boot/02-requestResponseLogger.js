@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Intercept request and responses and log then for debugging purposes
+ * Intercept API requests and responses and log them for debugging purposes
  * @param app
  */
 module.exports = function (app) {
