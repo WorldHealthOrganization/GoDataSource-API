@@ -1,4 +1,19 @@
 'use strict';
+const Timer = require('../../components/Timer');
+
+/**
+ * Log outgoing response (if not already logged)
+ * @param data
+ * @param req
+ * @param res
+ */
+function logResponse(data, req, res) {
+  if (!req.loggedResponse) {
+    req.loggedResponse = true;
+    // log outgoing response
+    req.logger.debug(`Sent Response: ${res.statusCode} ${req.method} ${req.originalUrl} Headers: ${JSON.stringify(res._headers)}${data ? ` Body: ${data.toString()}` : ''}. Response time: ${req.timer.getElapsedMilliseconds()} msec`);
+  }
+}
 
 /**
  * Intercept API requests and responses and log them for debugging purposes
@@ -10,13 +25,22 @@ module.exports = function (app) {
     .use(function (context, next) {
       const req = context.req;
       const res = context.res;
+      req.timer = new Timer();
+      req.timer.start();
       // log incoming request
       req.logger.debug(`Received Request: ${req.method} ${req.originalUrl} Headers: ${JSON.stringify(req.headers)} Body: ${JSON.stringify(req.body)}`);
-      const _write = res.write;
-      res.write = function (data) {
-        // log outgoing response
-        req.logger.debug(`Sent Response: ${res.statusCode} ${req.method} ${req.originalUrl} Headers: ${JSON.stringify(res._headers)} Body: ${data.toString()}`);
-        _write.apply(this, arguments);
+
+      // intercept responses, some use send
+      const _send = res.send;
+      res.send = function (data) {
+        logResponse(data, req, res);
+        _send.apply(this, arguments);
+      };
+      // some use end
+      const _end = res.end;
+      res.end = function (data) {
+        logResponse(data, req, res);
+        _end.apply(this, arguments);
       };
       next();
     });

@@ -5,6 +5,18 @@ module.exports = function (app) {
   const Role = app.models.role;
 
   /**
+   * Store a missing permission in context for better authentication error handling
+   * @param permission
+   * @param context
+   */
+  function storeMissingPermissionInContext(permission, context) {
+    if (!context.remotingContext.req.missingPermissions) {
+      context.remotingContext.req.missingPermissions = [];
+    }
+    context.remotingContext.req.missingPermissions.push(permission);
+  }
+
+  /**
    * Verify if a user has the correct access permission
    * @param permission
    * @param context
@@ -19,6 +31,9 @@ module.exports = function (app) {
       Array.isArray(context.remotingContext.req.authData.user.role.permissions)
     ) {
       hasAccess = context.remotingContext.req.authData.user.role.permissions.indexOf(permission) !== -1;
+    }
+    if (!hasAccess) {
+      storeMissingPermissionInContext(permission, context);
     }
     callback(null, hasAccess);
   }
@@ -55,15 +70,19 @@ module.exports = function (app) {
               // verify ownership
               isOwner = (record.createdBy === context.remotingContext.req.authData.user.id);
             }
+            if (!isOwner) {
+              storeMissingPermissionInContext(`${permission} (not record owner)`, context);
+            }
             callback(null, isOwner);
           })
           .catch(callback);
 
-      } else if (recordIdMatch && context.remotingContext.req.method.toLowerCase() === 'post'){
+      } else if (recordIdMatch && context.remotingContext.req.method.toLowerCase() === 'post') {
         // create request, allow access
         callback(null, true);
 
       } else {
+        storeMissingPermissionInContext(`${permission} (not record owner)`, context);
         // recordId not found, deny access
         callback(null, false);
       }
