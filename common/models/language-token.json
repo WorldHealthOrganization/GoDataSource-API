@@ -1,0 +1,26 @@
+{
+  "name": "languageToken",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "token": {
+      "type": "string",
+      "required": true
+    },
+    "languageId": {
+      "type": "string",
+      "required": true
+    },
+    "translation": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

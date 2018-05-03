@@ -16,10 +16,10 @@ module.exports = function (Outbreak) {
   ]);
 
   Outbreak.availableDateFormats = {
-    'dd-mm-yyyy': 'dd-mm-yyyy',
-    'yyyy-mm-dd': 'yyyy-mm-dd',
-    'mm/dd/yyyy': 'mm/dd/yyyy',
-    'mm-dd-yyyy': 'mm-dd-yyyy'
+    'dd-mm-yyyy': 'LNG_OUTBREAK_AVAILABLE_DATE_FORMATS_DD-MM-YYYY',
+    'yyyy-mm-dd': 'LNG_OUTBREAK_AVAILABLE_DATE_FORMATS_YYYY-MM-DD',
+    'mm/dd/yyyy': 'LNG_OUTBREAK_AVAILABLE_DATE_FORMATS_MM/DD/YYYY',
+    'mm-dd-yyyy': 'LNG_OUTBREAK_AVAILABLE_DATE_FORMATS_MM-DD-YYYY'
   };
 
   /**

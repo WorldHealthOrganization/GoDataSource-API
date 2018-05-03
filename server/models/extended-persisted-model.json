@@ -11,7 +11,7 @@
     "UniqueValidator": true,
     "AuthorTimeStamp": true,
     "AuditLogger": true,
-    "SoftDelete" : true
+    "SoftDelete": true
   },
   "replaceOnPUT": false,
   "properties": {

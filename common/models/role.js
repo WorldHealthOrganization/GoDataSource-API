@@ -5,25 +5,24 @@ const app = require('../../server/server');
 module.exports = function (Role) {
 
   Role.availablePermissions = {
-    read_sys_config: 'Read System Configuration',
-    write_sys_config: 'Write System Configuration',
-    read_user_account: 'Read User Account',
-    write_user_account: 'Write User Account',
-    read_role: 'Read Role',
-    write_role: 'Write Role',
-    read_outbreak: 'Read Outbreak',
-    write_outbreak: 'Write Outbreak',
-    read_team: 'Read Team',
-    write_team: 'Write Team',
-    read_report: 'Read Report',
-    read_case: 'Read Case',
-    write_own_case: 'Write Own Case',
-    write_case: 'Write Case',
-    read_contact: 'Read Contact',
-    write_own_contact: 'Write Own Contact',
-    write_contact: 'Write Contact',
-    read_followup: 'Read Follow-up',
-    write_followup: 'Write Follow-up'
+    read_sys_config: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_SYS_CONFIG',
+    write_sys_config: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_SYS_CONFIG',
+    read_user_account: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_USER_ACCOUNT',
+    write_user_account: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_USER_ACCOUNT',
+    read_role: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_ROLE',
+    write_role: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_ROLE',
+    read_outbreak: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_OUTBREAK',
+    write_outbreak: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_OUTBREAK',
+    read_team: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_TEAM',
+    write_team: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_TEAM',
+    read_report: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_REPORT',
+    write_own_case: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_OWN_CASE',
+    write_case: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_CASE',
+    read_contact: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_CONTACT',
+    write_own_contact: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_OWN_CONTACT',
+    write_contact: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_CONTACT',
+    read_followup: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_FOLLOW_UP',
+    write_followup: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_FOLLOW_UP'
   };
 
   // disable access to principals

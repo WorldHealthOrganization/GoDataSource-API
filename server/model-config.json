@@ -167,5 +167,13 @@
   "relationshipParticipant": {
     "dataSource": null,
     "public": false
+  },
+  "language": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "languageToken": {
+    "dataSource": "mongoDb",
+    "public": true
   }
 }
