@@ -19,6 +19,14 @@
       "required": true
     }
   },
+  "indexes": {
+    "token_index": {
+      "token": 1
+    },
+    "languageId_index": {
+      "languageId": 1
+    }
+  },
   "validations": [],
   "relations": {},
   "acls": [],

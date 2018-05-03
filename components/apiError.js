@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const errorMap = require('../server/apiErrors');
+const errorMap = require('../server/config/apiErrors');
 
 module.exports = {
   /**
