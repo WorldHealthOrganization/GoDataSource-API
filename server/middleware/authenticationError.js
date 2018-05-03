@@ -10,7 +10,13 @@ const app = require('../server');
  * @param next
  */
 function authenticationErrorHandler(error, request, response, next) {
-  if (error && error.code == 'AUTHORIZATION_REQUIRED' && Array.isArray(request.missingPermissions) && request.missingPermissions.length) {
+  // rewrite authorization errors with missing permission errors when additional info is available
+  if (
+    error &&
+    error.code === 'AUTHORIZATION_REQUIRED' &&
+    Array.isArray(request.missingPermissions) &&
+    request.missingPermissions.length
+  ) {
     error = app.utils.apiError.getError('MISSING_REQUIRED_PERMISSION', {permissions: request.missingPermissions.join(', ')}, 403);
   }
   next(error);
