@@ -13,7 +13,13 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "languageTokens": {
+      "type": "hasMany",
+      "model": "languageToken",
+      "foreignKey": "languageId"
+    }
+  },
   "acls": [],
   "methods": {}
 }

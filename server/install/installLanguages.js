@@ -14,23 +14,54 @@ fs.readdirSync(`${__dirname}/../config/languages`).forEach(function (language) {
 // keep a list of languages to be created (for async lib)
 const createLanguages = [];
 languageList.forEach(function (language) {
-  // create language
+  // find/create language
   createLanguages.push(function (callback) {
+    // try to find the language
     app.models.language
-      .create({
-        name: language.name
+      .findOne({
+        where: {
+          name: language.name
+        }
+      })
+      .then(function (foundLanguage) {
+        if (!foundLanguage) {
+          // if not found, create it
+          return app.models.language
+            .create({
+              name: language.name
+            });
+        }
+        return foundLanguage;
       })
       .then(function (createdLanguage) {
         // keep a list of languages tokens to be created (for async lib)
         const createLanguageTokens = [];
         Object.keys(language.tokens).forEach(function (token) {
-          // create token for language
+          // create/update token for language
           createLanguageTokens.push(function (callback) {
+            // try to find the token
             app.models.languageToken
-              .create({
-                token: token,
-                languageId: createdLanguage.id,
-                translation: language.tokens[token]
+              .findOne({
+                where: {
+                  token: token,
+                  languageId: createdLanguage.id
+                }
+              })
+              .then(function (foundToken) {
+                if (foundToken) {
+                  // if found, update translation
+                  return foundToken.updateAttributes({
+                    translation: language.tokens[token]
+                  });
+                } else {
+                  // if not found, create it
+                  return app.models.languageToken
+                    .create({
+                      token: token,
+                      languageId: createdLanguage.id,
+                      translation: language.tokens[token]
+                    });
+                }
               })
               .then(function () {
                 callback();
