@@ -101,4 +101,19 @@ module.exports = function (User) {
     });
   });
 
+  /**
+   * Find geographic restrictions for an user (if any)
+   * @param callback (error, false|locations)
+   */
+  User.prototype.getGeographicRestrictions = function (callback) {
+    //  user has a location restriction
+    if (this.locationId) {
+      // find sub-locations for those location
+      app.models.location
+        .getSubLocations([this.locationId], [], callback);
+    } else {
+      // no locations restrictions
+      callback(null, false);
+    }
+  }
 };
