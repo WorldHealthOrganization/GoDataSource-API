@@ -31,7 +31,7 @@
     "language": {
       "type": "string"
     },
-    "changePassword": {
+    "passwordChange": {
       "type": "boolean",
       "default": false
     }

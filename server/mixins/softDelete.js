@@ -85,10 +85,16 @@ module.exports = function (Model) {
   /**
    * Overwrite destroyAll with a soft destroyAll
    * @param where
+   * @param [options]
    * @param cb
    * @returns {Promise.<T>}
    */
-  Model.destroyAll = function softDestroyAll(where, cb) {
+  Model.destroyAll = function softDestroyAll(where, options, cb) {
+
+    if (cb === undefined && typeof options === 'function') {
+      cb = options;
+    }
+
     let nextStep = next.bind({callback: cb});
 
     return Model

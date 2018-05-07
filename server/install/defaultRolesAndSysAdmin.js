@@ -18,10 +18,16 @@ const rolesMap = {
     permissions: [
       'read_sys_config',
       'write_sys_config',
+      'write_reference_data',
       'read_user_account',
       'write_user_account',
       'read_role',
-      'write_role',
+      'write_role'
+    ]
+  },
+  'GO.Data Administrator': {
+    description: 'This role has access to configuration of the Go.Data for specific outbreak.',
+    permissions: [
       'read_outbreak',
       'write_outbreak'
     ]
@@ -29,6 +35,7 @@ const rolesMap = {
   'Epidemiologist': {
     description: 'This is a built in role that analyses data to understand disease evolution and inform response.',
     permissions: [
+      'read_outbreak',
       'read_case',
       'write_case',
       'read_contact',
@@ -43,20 +50,21 @@ const rolesMap = {
       'read_outbreak',
       'write_outbreak',
       'read_case',
-      'write_case',
-      'read_report'
+      'read_contact',
+      'write_contact',
+      'read_report',
+      'read_followup'
     ]
   },
   'Contact Tracing Team Lead': {
     description: 'This is a built in role that coordinates the work of multiple Contact Tracers.',
     permissions: [
+      'read_outbreak',
       'read_report',
       'read_case',
       'write_case',
       'read_contact',
       'write_contact',
-      'read_followup',
-      'write_followup',
       'read_team',
       'write_team'
     ]
@@ -121,7 +129,7 @@ Object.keys(rolesMap).forEach(function (roleName) {
         }
       })
       .then(function (status) {
-        console.log(`Role ${roleName} ${status}`);
+        process.stdout.write(`Role ${roleName} ${status}\n`);
       })
   );
 });
@@ -155,7 +163,7 @@ Promise.all(createRoles)
         }
       })
       .then(function (status) {
-        console.log(`Default System Administrator user ${status}`);
+        process.stdout.write(`Default System Administrator user ${status}\n`);
         process.exit();
       });
   });
