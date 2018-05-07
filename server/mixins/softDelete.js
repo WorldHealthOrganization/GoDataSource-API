@@ -114,18 +114,30 @@ module.exports = function (Model) {
   /**
    * Overwrite destroyById with a soft destroyById
    * @param id
+   * @param options
    * @param cb
    * @returns {Promise.<TResult>}
    */
-  Model.destroyById = function softDestroyById(id, cb) {
+  Model.destroyById = function softDestroyById(id, options, cb) {
+    // initialize flag to know if the function has options sent
+    let hasOptions = true;
+
+    if (cb === undefined && typeof options === 'function') {
+      cb = options;
+      hasOptions = false;
+    }
+
     let nextStep = next.bind({callback: cb});
 
     return Model
       .findById(id)
       .then(function (instance) {
         if (instance) {
+          instance.options = instance.options || {};
+          instance.options.remotingContext = hasOptions ? options.remotingContext : {};
+
           return instance
-            .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()})
+            .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()}, options.remotingContext)
             .then(function () {
               return {count: 1};
             });
