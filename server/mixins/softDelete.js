@@ -133,11 +133,9 @@ module.exports = function (Model) {
       .findById(id)
       .then(function (instance) {
         if (instance) {
-          instance.options = instance.options || {};
-          instance.options.remotingContext = hasOptions ? options.remotingContext : {};
-
           return instance
-            .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()}, options.remotingContext)
+            // sending additional options in order to have access to the remoting context in the next hooks
+            .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()}, hasOptions ? options : {})
             .then(function () {
               return {count: 1};
             });
