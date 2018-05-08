@@ -3,6 +3,8 @@
 const app = require('../../server/server');
 
 module.exports = function(AuditLog) {
+  // set flag to not get controller
+  AuditLog.hasController = false;
 
   AuditLog.actions = {
     created: 'LNG_AUDIT_LOG_ACTIONS_CREATED',
@@ -12,5 +14,4 @@ module.exports = function(AuditLog) {
 
   // Audit Log has only read-only endpoints
   app.utils.remote.disableRemoteMethods(AuditLog, ['create', 'prototype.patchAttributes', 'findById', 'deleteById']);
-
 };

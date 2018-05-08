@@ -251,7 +251,4 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
-
-  // execute controller
-  require('./../controllers/outbreak')(Outbreak);
 };

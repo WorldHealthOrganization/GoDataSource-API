@@ -33,7 +33,8 @@
     "UniqueValidator": true,
     "AuthorTimeStamp": true,
     "AuditLogger": true,
-    "SoftDelete" : true
+    "SoftDelete" : true,
+    "AttachController": true
   },
   "validations": [],
   "relations": {},
