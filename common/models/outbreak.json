@@ -25,7 +25,7 @@
       "type": "boolean",
       "default": false
     },
-    "statDate": {
+    "startDate": {
       "type": "date",
       "required": true
     },
