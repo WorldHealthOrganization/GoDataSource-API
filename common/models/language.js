@@ -2,15 +2,6 @@
 
 const app = require('../../server/server');
 
-module.exports = function(Language) {
-
-  // language tokens should not be managed via API
-  app.utils.remote.disableRemoteMethods(Language, [
-    'prototype.__create__languageTokens',
-    'prototype.__delete__languageTokens',
-    'prototype.__findById__languageTokens',
-    'prototype.__updateById__languageTokens',
-    'prototype.__destroyById__languageTokens',
-  ]);
+module.exports = function (Language) {
 
 };

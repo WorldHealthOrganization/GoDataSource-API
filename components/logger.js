@@ -8,40 +8,61 @@ if (config.logging.level === 'warning') {
   config.logging.level = 'warn';
 }
 
-// configure winston file transport
-winston.add(winston.transports.File, {
-  filename: `${__dirname}/../logs/application.log`,
-  level: config.logging.level,
-  maxsize: config.logging.maxSize,
-  maxFiles: config.logging.maxFiles
+winston.loggers.add('fileLogger', {
+  file: {
+    filename: `${__dirname}/../logs/application.log`,
+    level: config.logging.level,
+    maxsize: config.logging.maxSize,
+    maxFiles: config.logging.maxFiles
+  }
 });
 
+let logger = winston.loggers.get('fileLogger');
+
 // redirect console output to winston
-console.log = winston.debug;
-console.info = winston.info;
-console.warn = winston.warn;
-console.error = winston.error;
+console.log = logger.debug;
+console.info = logger.info;
+console.warn = logger.warn;
+console.error = logger.error;
+
+// initialize flag to prevent attaching the transport flush handler multiple times
+let flushHandlerAdded = false;
+
+/**
+ * Stop process after logger flushes all messages
+ * @param code
+ */
+logger.exitProcessAfterFlush = function(code) {
+  // attach flush handler only once
+  if(!flushHandlerAdded) {
+    logger.transports.file.once('flush', function() {
+      process.exit(code);
+    });
+
+    flushHandlerAdded = true;
+  }
+};
 
 /**
  * Get a contextual logger
  * @param transactionId
  * @return {{}}
  */
-winston.getTransactionLogger = function (transactionId) {
+logger.getTransactionLogger = function (transactionId) {
   // contextual logger logs transaction id
   function log(level, message, metadata) {
     message = `[TransactionID: ${transactionId}] ${message}`;
-    winston.log(level, message, metadata);
+    logger.log(level, message, metadata);
   }
 
-  let logger = {};
+  let transactionLogger = {};
   ['debug', 'info', 'warn', 'error'].forEach(function (logMethod) {
-    logger[logMethod] = function (message, metadata) {
+    transactionLogger[logMethod] = function (message, metadata) {
       log(logMethod, message, metadata);
     }
   });
 
-  return logger;
+  return transactionLogger;
 };
 
-module.exports = winston;
+module.exports = logger;

@@ -11,7 +11,8 @@
     "UniqueValidator": true,
     "AuthorTimeStamp": true,
     "AuditLogger": true,
-    "SoftDelete": true
+    "SoftDelete": true,
+    "AttachController": true
   },
   "replaceOnPUT": false,
   "properties": {

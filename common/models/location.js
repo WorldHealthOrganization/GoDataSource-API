@@ -4,6 +4,9 @@ const app = require('../../server/server');
 
 module.exports = function (Location) {
 
+  // set flag to not get controller
+  Location.hasController = false;
+
   /**
    * Get sub-locations for a list of locations
    * @param parentLocations

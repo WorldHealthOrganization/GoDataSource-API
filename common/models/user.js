@@ -7,19 +7,18 @@ const fs = require('fs');
 const config = require('../../server/config.json');
 
 module.exports = function (User) {
-  // disable access to access tokens
-  app.utils.remote.disableStandardRelationRemoteMethods(User, 'accessTokens');
-  // disable access to role
-  app.utils.remote.disableStandardRelationRemoteMethods(User, 'role');
-  // disable email verification, confirm endpoints
-  app.utils.remote.disableRemoteMethods(User, ['prototype.verify', 'confirm']);
+  // set flag to force using the controller
+  User.hasController = true;
+
+  // initialize model helpers
+  User.helpers = {};
 
   /**
    * Validate password. It must match a minimum set of requirements
    * @param password
    * @param callback
    */
-  function validatePassword(password, callback) {
+  User.helpers.validatePassword = function (password, callback) {
     let error;
     if (password) {
       const regExp = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).+$/;
@@ -31,54 +30,7 @@ module.exports = function (User) {
       }
     }
     callback(error);
-  }
-
-  /**
-   * Do not allow deletion own user or the last user
-   */
-  User.beforeRemote('deleteById', function (context, modelInstance, next) {
-    if (context.args.id === context.req.authData.user.id) {
-      return next(app.utils.apiError.getError('DELETE_OWN_RECORD', {model: 'Role', id: context.args.id}, 403));
-    }
-    User.count()
-      .then(function (userCount) {
-        if (userCount < 2) {
-          next(app.utils.apiError.getError('DELETE_LAST_USER', {}, 422));
-        } else {
-          next();
-        }
-      })
-      .catch(next);
-  });
-
-  /**
-   * User cannot change its own role or location +
-   * Validate user password
-   */
-  User.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    if (context.instance.id === context.req.authData.user.id) {
-      delete context.args.data.roleId;
-      delete context.args.data.locationIds;
-    }
-    // validate password (if any)
-    validatePassword(context.args.data.password, next);
-  });
-
-  /**
-   * Validate user password
-   */
-  User.beforeRemote('create', function (context, modelInstance, next) {
-    // validate password (if any)
-    validatePassword(context.args.data.password, next);
-  });
-
-  /**
-   * Validate user password
-   */
-  User.beforeRemote('changePassword', function (context, modelInstance, next) {
-    // validate password (if any)
-    validatePassword(context.args.newPassword, next);
-  });
+  };
 
   /**
    * Send password reset email
