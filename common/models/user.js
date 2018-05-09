@@ -9,8 +9,6 @@ const config = require('../../server/config.json');
 module.exports = function (User) {
   // disable access to access tokens
   app.utils.remote.disableStandardRelationRemoteMethods(User, 'accessTokens');
-  // disable access to location
-  app.utils.remote.disableStandardRelationRemoteMethods(User, 'location');
   // disable access to role
   app.utils.remote.disableStandardRelationRemoteMethods(User, 'role');
   // disable email verification, confirm endpoints
@@ -106,11 +104,11 @@ module.exports = function (User) {
    * @param callback (error, false|locations)
    */
   User.prototype.getGeographicRestrictions = function (callback) {
-    //  user has a location restriction
-    if (this.locationId) {
-      // find sub-locations for those location
+    //  if user has a location restriction
+    if (this.locationIds) {
+      // find sub-locations for those locations
       app.models.location
-        .getSubLocations([this.locationId], [], callback);
+        .getSubLocations(this.locationIds, [], callback);
     } else {
       // no locations restrictions
       callback(null, false);

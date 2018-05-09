@@ -69,7 +69,7 @@ module.exports = function (Outbreak) {
   }
 
   /**
-   * Add geo-restriction conditions on filtes
+   * Add geo-restriction conditions on filters
    * @param context
    * @param isCount Whether the request is a count request or not
    * @param next
@@ -102,6 +102,9 @@ module.exports = function (Outbreak) {
                 'address.locationId': {
                   inq: geoRestrictions
                 }
+              },
+              {
+                'address.locationId': null
               },
               {
                 'address.locationId': {
