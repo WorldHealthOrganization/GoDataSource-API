@@ -21,7 +21,7 @@ module.exports = function (Outbreak) {
    * @param instanceId
    * @param next
    */
-  Outbreak.helpers.validateActiveOutbreak = function(context, instanceId, next) {
+  Outbreak.helpers.validateActiveOutbreak = function (context, instanceId, next) {
     if (context.args.data.active) {
       const query = {
         active: true
@@ -52,7 +52,7 @@ module.exports = function (Outbreak) {
    * @param filter
    * @param callback
    */
-  Outbreak.helpers.findCaseContactRelationships = function(personId, filter, callback) {
+  Outbreak.helpers.findCaseContactRelationships = function (personId, filter, callback) {
     const _filter = app.utils.remote
       .mergeFilters({
         where: {
@@ -76,7 +76,7 @@ module.exports = function (Outbreak) {
    * @param callback
    * @return {*}
    */
-  Outbreak.helpers.validateAndNormalizePersons = function(personId, type, data, callback) {
+  Outbreak.helpers.validateAndNormalizePersons = function (personId, type, data, callback) {
     let currentPersonFound = false;
 
     if (Array.isArray(data.persons) && data.persons.length) {
@@ -138,7 +138,7 @@ module.exports = function (Outbreak) {
    * @param filter
    * @param callback
    */
-  Outbreak.helpers.getCaseContactRelationship = function(personId, relationshipId, filter, callback) {
+  Outbreak.helpers.getCaseContactRelationship = function (personId, relationshipId, filter, callback) {
     const _filter = app.utils.remote
       .mergeFilters({
         where: {
@@ -171,7 +171,7 @@ module.exports = function (Outbreak) {
    * @param data
    * @param callback
    */
-  Outbreak.helpers.updateCaseContactRelationship = function(personId, relationshipId, type, data, callback) {
+  Outbreak.helpers.updateCaseContactRelationship = function (personId, relationshipId, type, data, callback) {
     validateAndNormalizePersons(personId, type, data, function (error, persons) {
       if (error) {
         return callback(error);
@@ -209,7 +209,7 @@ module.exports = function (Outbreak) {
    * @param relationshipId
    * @param callback
    */
-  Outbreak.helpers.deleteCaseContactRelationship = function(personId, relationshipId, callback) {
+  Outbreak.helpers.deleteCaseContactRelationship = function (personId, relationshipId, callback) {
     app.models.relationship
       .findOne({
         where: {
@@ -235,7 +235,7 @@ module.exports = function (Outbreak) {
    * @param where
    * @param callback
    */
-  Outbreak.helpers.countCaseContactRelationships = function(personId, where, callback) {
+  Outbreak.helpers.countCaseContactRelationships = function (personId, where, callback) {
     const _filter = app.utils.remote
       .mergeFilters({
           where: {

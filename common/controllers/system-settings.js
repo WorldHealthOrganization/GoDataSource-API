@@ -21,7 +21,7 @@ module.exports = function (SystemSettings) {
     // There is only one entry in the system settings collection; get it
     SystemSettings.findOne()
       .then(function (instance) {
-        if(instance) {
+        if (instance) {
           cb(null, instance);
         } else {
           throw app.utils.apiError.getError('INTERNAL_ERROR', {
@@ -41,9 +41,9 @@ module.exports = function (SystemSettings) {
     // There is only one entry in the system settings collection; get it and update it
     SystemSettings.findOne()
       .then(function (instance) {
-        if(instance) {
+        if (instance) {
           return instance.updateAttributes(data)
-            .then(function(instance) {
+            .then(function (instance) {
               cb(null, instance);
             });
         } else {

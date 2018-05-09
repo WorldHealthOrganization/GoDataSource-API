@@ -190,7 +190,8 @@ module.exports = function (Outbreak) {
 
     // override default scope to allow switching the type
     const defaultScope = app.models.contact.defaultScope;
-    app.models.contact.defaultScope = function (){};
+    app.models.contact.defaultScope = function () {
+    };
 
     app.models.contact
       .findOne({

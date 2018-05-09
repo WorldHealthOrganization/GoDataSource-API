@@ -18,7 +18,7 @@ module.exports = function (User) {
    * @param password
    * @param callback
    */
-  User.helpers.validatePassword = function(password, callback) {
+  User.helpers.validatePassword = function (password, callback) {
     let error;
     if (password) {
       const regExp = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).+$/;
