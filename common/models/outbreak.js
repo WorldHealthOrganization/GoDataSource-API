@@ -44,6 +44,113 @@ module.exports = function (Outbreak) {
     } else {
       next();
     }
+  }
+
+  /**
+   * Add geo-restriction conditions on filters
+   * @param context
+   * @param isCount Whether the request is a count request or not
+   * @param next
+   */
+  function queryWithGeoRestrictions(context, isCount, next) {
+    // get logged in user geo-restrictions
+    let geoRestrictions = context.req.authData.user.geographicRestrictions;
+    let query;
+    // count has only 'where'
+    if (isCount) {
+      query = {
+        where: context.args.where
+      };
+    } else {
+      // find requests use "filter"
+      query = context.args.filter;
+    }
+
+    // add restrictions filtering only if the user is geo-restricted
+    if (geoRestrictions) {
+      if (!query) {
+        query = {};
+      }
+      // merge request filters with geo-location restrictions
+      const _filter = app.utils.remote
+        .mergeFilters({
+          where: {
+            or: [
+              {
+                'address.locationId': {
+                  inq: geoRestrictions
+                }
+              },
+              {
+                'address.locationId': null
+              },
+              {
+                'address.locationId': {
+                  exists: false
+                }
+              }
+            ]
+          }
+        }, query);
+
+      // update arguments based on request type
+      if (isCount) {
+        context.args.where = _filter.where;
+      } else {
+        context.args.filter = _filter;
+      }
+    }
+    next();
+  }
+
+  /**
+   * Allow only one active outbreak on create
+   */
+  Outbreak.beforeRemote('create', function (context, modelInstance, next) {
+    validateActiveOutbreak(context, true, next);
+  });
+
+  /**
+   * Allow only one active outbreak on update
+   */
+  Outbreak.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
+    validateActiveOutbreak(context, context.instance.id, next);
+  });
+
+  /**
+   * Apply geo-restrictions on case list
+   */
+  Outbreak.beforeRemote('prototype.__get__cases', function (context, modelInstance, next) {
+    queryWithGeoRestrictions(context, false, next);
+  });
+
+  /**
+   * Apply geo-restrictions on case count
+   */
+  Outbreak.beforeRemote('prototype.__count__cases', function (context, modelInstance, next) {
+    queryWithGeoRestrictions(context, true, next);
+  });
+
+  /**
+   * Apply geo-restrictions on contact list
+   */
+  Outbreak.beforeRemote('prototype.__get__contacts', function (context, modelInstance, next) {
+    queryWithGeoRestrictions(context, false, next);
+  });
+
+  /**
+   * Apply geo-restrictions on contact count
+   */
+  Outbreak.beforeRemote('prototype.__count__contacts', function (context, modelInstance, next) {
+    queryWithGeoRestrictions(context, true, next);
+  });
+
+  /**
+   * Get available date formats
+   * @param callback
+   */
+  Outbreak.getAvailableDateFormats = function (callback) {
+    callback(null, Outbreak.availableDateFormats);
   };
 
   /**

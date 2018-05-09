@@ -33,6 +33,53 @@ module.exports = function (User) {
   };
 
   /**
+   * Do not allow deletion own user or the last user
+   */
+  User.beforeRemote('deleteById', function (context, modelInstance, next) {
+    if (context.args.id === context.req.authData.user.id) {
+      return next(app.utils.apiError.getError('DELETE_OWN_RECORD', {model: 'Role', id: context.args.id}, 403));
+    }
+    User.count()
+      .then(function (userCount) {
+        if (userCount < 2) {
+          next(app.utils.apiError.getError('DELETE_LAST_USER', {}, 422));
+        } else {
+          next();
+        }
+      })
+      .catch(next);
+  });
+
+  /**
+   * User cannot change its own role or location +
+   * Validate user password
+   */
+  User.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
+    if (context.instance.id === context.req.authData.user.id) {
+      delete context.args.data.roleId;
+      delete context.args.data.locationIds;
+    }
+    // validate password (if any)
+    validatePassword(context.args.data.password, next);
+  });
+
+  /**
+   * Validate user password
+   */
+  User.beforeRemote('create', function (context, modelInstance, next) {
+    // validate password (if any)
+    validatePassword(context.args.data.password, next);
+  });
+
+  /**
+   * Validate user password
+   */
+  User.beforeRemote('changePassword', function (context, modelInstance, next) {
+    // validate password (if any)
+    validatePassword(context.args.newPassword, next);
+  });
+
+  /**
    * Send password reset email
    */
   User.on('resetPasswordRequest', function (info) {
@@ -51,4 +98,19 @@ module.exports = function (User) {
     });
   });
 
+  /**
+   * Find geographic restrictions for an user (if any)
+   * @param callback (error, false|locations)
+   */
+  User.prototype.getGeographicRestrictions = function (callback) {
+    //  if user has a location restriction
+    if (this.locationIds) {
+      // find sub-locations for those locations
+      app.models.location
+        .getSubLocations(this.locationIds, [], callback);
+    } else {
+      // no locations restrictions
+      callback(null, false);
+    }
+  }
 };
