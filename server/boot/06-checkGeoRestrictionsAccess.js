@@ -8,6 +8,11 @@ module.exports = function (app) {
   app.remotes().phases
     .addAfter('authentication-context', 'check-geo-restrictions-access')
     .use(function (context, next) {
+      // no authentication information
+      if (!context.req.authData) {
+        // let next middleware handle this
+        return next();
+      }
       const geographicRestrictions = context.req.authData.user.geographicRestrictions;
       // if geographic restrictions do not apply, skip checks
       if (!geographicRestrictions) {
