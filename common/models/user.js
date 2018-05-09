@@ -58,7 +58,7 @@ module.exports = function (User) {
   User.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
     if (context.instance.id === context.req.authData.user.id) {
       delete context.args.data.roleId;
-      delete context.args.data.locationId;
+      delete context.args.data.locationIds;
     }
     // validate password (if any)
     validatePassword(context.args.data.password, next);
