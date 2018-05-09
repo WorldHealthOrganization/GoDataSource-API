@@ -51,19 +51,23 @@
     },
     "noDaysAmongContacts": {
       "type": "number",
-      "required": true
+      "required": true,
+      "description": "Number of days used to calculate the proportion of new cases detected among known contacts"
     },
     "noDaysDaysInChains": {
       "type": "number",
-      "required": true
+      "required": true,
+      "description": "Number of days used to calculate the proportion of new cases in known transmission chains"
     },
     "noDaysNotSeen": {
       "type": "number",
-      "required": true
+      "required": true,
+      "description": "Number of days used to filter a list of contacts not seen for a specific number of days"
     },
     "noLessContacts": {
       "type": "number",
-      "required": true
+      "required": true,
+      "description": "Number of contacts used to determine the proportion of cases with less than X contacts"
     },
     "highExposureDuration": {
       "type": "number",
