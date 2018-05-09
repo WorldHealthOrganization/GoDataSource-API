@@ -24,7 +24,11 @@ module.exports = function (app) {
           context.req.authData = {
             user: user.toJSON()
           };
-          next();
+          // add geographic restrictions on authentication context
+          user.getGeographicRestrictions(function (error, locationIds) {
+            context.req.authData.user.geographicRestrictions = locationIds;
+            next(error, locationIds);
+          });
         })
         .catch(next);
     });
