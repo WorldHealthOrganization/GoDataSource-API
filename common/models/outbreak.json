@@ -947,7 +947,7 @@
       }
     },
     "prototype.getLocations": {
-      "accepts": [ ],
+      "accepts": [],
       "returns": [
         {
           "arg": "locations",

@@ -90,7 +90,7 @@ module.exports = function (Location) {
           let foundLocationsIds = [];
           locations.forEach(function (location) {
             // check if the retrieved location is not a searched parent location
-            if(notRetrievedParentLocationsIds.indexOf(location.id) === -1) {
+            if (notRetrievedParentLocationsIds.indexOf(location.id) === -1) {
               // sublocation; avoid loops
               if (allLocationsIds.indexOf(location.id) === -1) {
                 foundLocationsIds.push(location.id);
