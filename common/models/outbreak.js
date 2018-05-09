@@ -44,7 +44,7 @@ module.exports = function (Outbreak) {
     } else {
       next();
     }
-  }
+  };
 
   /**
    * Add geo-restriction conditions on filters
@@ -52,7 +52,7 @@ module.exports = function (Outbreak) {
    * @param isCount Whether the request is a count request or not
    * @param next
    */
-  function queryWithGeoRestrictions(context, isCount, next) {
+  Outbreak.helpers.queryWithGeoRestrictions = function (context, isCount, next) {
     // get logged in user geo-restrictions
     let geoRestrictions = context.req.authData.user.geographicRestrictions;
     let query;
@@ -101,56 +101,6 @@ module.exports = function (Outbreak) {
       }
     }
     next();
-  }
-
-  /**
-   * Allow only one active outbreak on create
-   */
-  Outbreak.beforeRemote('create', function (context, modelInstance, next) {
-    validateActiveOutbreak(context, true, next);
-  });
-
-  /**
-   * Allow only one active outbreak on update
-   */
-  Outbreak.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    validateActiveOutbreak(context, context.instance.id, next);
-  });
-
-  /**
-   * Apply geo-restrictions on case list
-   */
-  Outbreak.beforeRemote('prototype.__get__cases', function (context, modelInstance, next) {
-    queryWithGeoRestrictions(context, false, next);
-  });
-
-  /**
-   * Apply geo-restrictions on case count
-   */
-  Outbreak.beforeRemote('prototype.__count__cases', function (context, modelInstance, next) {
-    queryWithGeoRestrictions(context, true, next);
-  });
-
-  /**
-   * Apply geo-restrictions on contact list
-   */
-  Outbreak.beforeRemote('prototype.__get__contacts', function (context, modelInstance, next) {
-    queryWithGeoRestrictions(context, false, next);
-  });
-
-  /**
-   * Apply geo-restrictions on contact count
-   */
-  Outbreak.beforeRemote('prototype.__count__contacts', function (context, modelInstance, next) {
-    queryWithGeoRestrictions(context, true, next);
-  });
-
-  /**
-   * Get available date formats
-   * @param callback
-   */
-  Outbreak.getAvailableDateFormats = function (callback) {
-    callback(null, Outbreak.availableDateFormats);
   };
 
   /**

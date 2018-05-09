@@ -48,6 +48,34 @@ module.exports = function (Outbreak) {
   });
 
   /**
+   * Apply geo-restrictions on case list
+   */
+  Outbreak.beforeRemote('prototype.__get__cases', function (context, modelInstance, next) {
+    helpers.queryWithGeoRestrictions(context, false, next);
+  });
+
+  /**
+   * Apply geo-restrictions on case count
+   */
+  Outbreak.beforeRemote('prototype.__count__cases', function (context, modelInstance, next) {
+    helpers.queryWithGeoRestrictions(context, true, next);
+  });
+
+  /**
+   * Apply geo-restrictions on contact list
+   */
+  Outbreak.beforeRemote('prototype.__get__contacts', function (context, modelInstance, next) {
+    helpers.queryWithGeoRestrictions(context, false, next);
+  });
+
+  /**
+   * Apply geo-restrictions on contact count
+   */
+  Outbreak.beforeRemote('prototype.__count__contacts', function (context, modelInstance, next) {
+    helpers.queryWithGeoRestrictions(context, true, next);
+  });
+
+  /**
    * Get available date formats
    * @param callback
    */

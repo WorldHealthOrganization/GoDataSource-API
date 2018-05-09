@@ -9,8 +9,6 @@ module.exports = function (User) {
 
   // disable access to access tokens
   app.utils.remote.disableStandardRelationRemoteMethods(User, 'accessTokens');
-  // disable access to location
-  app.utils.remote.disableStandardRelationRemoteMethods(User, 'location');
   // disable access to role
   app.utils.remote.disableStandardRelationRemoteMethods(User, 'role');
   // disable email verification, confirm endpoints
@@ -41,7 +39,7 @@ module.exports = function (User) {
   User.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
     if (context.instance.id === context.req.authData.user.id) {
       delete context.args.data.roleId;
-      delete context.args.data.locationId;
+      delete context.args.data.locationIds;
     }
     // validate password (if any)
     helpers.validatePassword(context.args.data.password, next);
