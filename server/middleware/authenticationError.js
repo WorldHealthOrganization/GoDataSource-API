@@ -14,6 +14,7 @@ function authenticationErrorHandler(error, request, response, next) {
   if (
     error &&
     error.code === 'AUTHORIZATION_REQUIRED' &&
+    request.authData &&
     Array.isArray(request.missingPermissions) &&
     request.missingPermissions.length
   ) {
