@@ -17,7 +17,7 @@
       "type": "string",
       "required": true
     },
-    "country": {
+    "locationId": {
       "type": "string",
       "required": true
     },
@@ -515,6 +515,12 @@
       "principalId": "write_own_contact",
       "permission": "ALLOW",
       "property": "convertContactToCase"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getLocations"
     }
   ],
   "methods": {
@@ -938,6 +944,25 @@
       "http": {
         "verb": "post",
         "path": "/contacts/:nk/convert-to-case"
+      }
+    },
+    "prototype.getLocations": {
+      "accepts": [ ],
+      "returns": [
+        {
+          "arg": "locations",
+          "type": [
+            "location"
+          ],
+          "description": "Locations for the Outbreak",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Retrieve the list of location + sublocations for the Outbreak",
+      "http": {
+        "verb": "get",
+        "path": "/locations"
       }
     }
   }
