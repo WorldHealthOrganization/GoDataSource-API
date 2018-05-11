@@ -4,12 +4,12 @@ const escapeRegExp = require('./escapeRegExp');
 const maskPattern = '(9*)(0+)|(9+)(0*)';
 
 /**
- * Check if a mask is valid. We only support numeric mask placeholders (9, 0)
+ * Check if a mask is valid. We only support numeric mask placeholders (9, 0). The string must not contain š (it's a special symbol used in the code)
  * @param mask
  * @return {boolean}
  */
 function maskIsValid(mask) {
-  const maskRegExp = new RegExp('9*0+|9+0*');
+  const maskRegExp = /^(?:(?!š).)*(?:9*0+|9+0*)[^š]*$/;
   return maskRegExp.test(mask);
 }
 
@@ -68,7 +68,7 @@ function resolveMask(mask, numericValue, callback) {
   if (!maskIsValid(mask)) {
     return callback({
       code: 'INVALID_MASK',
-      message: `Invalid mask. The mask does not match the following pattern: /9*0+|9+0/.`
+      message: `Invalid mask. The mask does not match the following pattern: /^(?:(?!š).)*(?:9*0+|9+0*)[^š]*$/.`
     });
   }
   let maskPlaceholders = getMaskPlaceholders(mask);
@@ -110,6 +110,8 @@ function resolveMask(mask, numericValue, callback) {
     if (stringValue.length === 0) {
       while (maskPlaceholders.length) {
         let placeholder = maskPlaceholders.pop();
+        // use a marker (safe symbol) for unchanged placeholders, it will help later to correctly resolve the mask (it prevents resolving same placeholder twice)
+        placeholder = placeholder.replace(/0/g, 'š');
         // remove all the unresolved 9s
         placeholder = placeholder.replace(/9*/, '');
         resolvedParts.unshift(placeholder);
@@ -124,6 +126,8 @@ function resolveMask(mask, numericValue, callback) {
       return resolvedParts.shift();
     });
   }
+  // replace marker with initial value
+  mask = mask.replace(/š/g, '0');
   callback(null, mask);
 }
 
