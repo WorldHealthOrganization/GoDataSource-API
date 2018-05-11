@@ -4,7 +4,9 @@ const escapeRegExp = require('./escapeRegExp');
 const maskPattern = '(9*)(0+)|(9+)(0*)';
 
 /**
- * Check if a mask is valid. We only support numeric mask placeholders (9, 0). The string must not contain š (it's a special symbol used in the code)
+ * Check if a mask is valid. We only support numeric mask placeholders (9, 0). The string must not contain š (it's a special symbol used in the code).
+ * 9 - optional digit placeholder
+ * 0 - digit placeholder
  * @param mask
  * @return {boolean}
  */
@@ -58,7 +60,9 @@ function convertMaskToSearchRegExp(mask) {
 }
 
 /**
- * Resolve mask
+ * Resolve mask. We only support numeric mask placeholders (9, 0). The string must not contain š (it's a special symbol used in the code).
+ * 9 - optional digit placeholder
+ * 0 - digit placeholder
  * @param mask
  * @param numericValue
  * @param callback
