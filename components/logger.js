@@ -14,6 +14,9 @@ winston.loggers.add('fileLogger', {
     level: config.logging.level,
     maxsize: config.logging.maxSize,
     maxFiles: config.logging.maxFiles
+  },
+  console: {
+    stderrLevels: ['error']
   }
 });
 

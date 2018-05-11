@@ -15,7 +15,8 @@
     },
     "variable": {
       "type": "string",
-      "required": true
+      "required": true,
+      "description": "Question identifier"
     },
     "category": {
       "type": "string",
@@ -28,6 +29,11 @@
     "order": {
       "type": "number",
       "required": true
+    },
+    "answerType": {
+      "type": "string",
+      "required": true,
+      "enum": ["freeText", "numeric", "dateTime", "singleAnswer", "multipleAnswer"]
     },
     "answers": {
       "type": [

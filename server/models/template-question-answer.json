@@ -20,6 +20,11 @@
     "alert": {
       "type": "boolean",
       "default": false
+    },
+    "additionalQuestions": {
+      "type": [
+        "templateQuestion"
+      ]
     }
   },
   "validations": [],
