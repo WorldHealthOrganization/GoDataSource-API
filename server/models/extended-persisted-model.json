@@ -9,6 +9,7 @@
     "EnumProperty": true,
     "ReadOnlyProperty": true,
     "UniqueValidator": true,
+    "PatternValidator": true,
     "AuthorTimeStamp": true,
     "AuditLogger": true,
     "SoftDelete": true,

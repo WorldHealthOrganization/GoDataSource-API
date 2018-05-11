@@ -7,6 +7,7 @@ const mergeFilters = require('../../components/mergeFilters');
 const apiError = require('../../components/apiError');
 const aesCrypto = require('../../components/aesCrypto');
 const anonymizeDatasetFields = require('../../components/anonymizeDatasetFields');
+const maskField = require('../../components/maskField');
 
 function init(app, callback) {
   app.utils = {
@@ -18,7 +19,8 @@ function init(app, callback) {
     },
     apiError: apiError,
     aesCrypto: aesCrypto,
-    anonymizeDatasetFields: anonymizeDatasetFields
+    anonymizeDatasetFields: anonymizeDatasetFields,
+    maskField: maskField
   };
   callback();
 }
