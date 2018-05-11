@@ -269,4 +269,12 @@ module.exports = function (Outbreak) {
         app.models.contact.defaultScope = defaultScope;
       });
   };
+
+  /**
+   * Retrieve the list of location + sublocations for the Outbreak
+   * @param callback
+   */
+  Outbreak.prototype.getLocations = function (callback) {
+    app.models.location.getSubLocationsWithDetails([this.locationId], [], callback);
+  };
 };

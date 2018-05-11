@@ -189,6 +189,29 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Create relation for a person
+   * @param personId
+   * @param type
+   * @param data
+   * @param callback
+   */
+  Outbreak.helpers.createCaseContactRelationship = function (personId, type, data, callback) {
+    Outbreak.helpers.validateAndNormalizePersons(personId, type, data, function (error, persons) {
+      if (error) {
+        return callback(error);
+      }
+      data.persons = persons;
+      app.models.relationship.removeReadOnlyProperties(data);
+      app.models.relationship
+        .create(data)
+        .then(function (createdRelation) {
+          callback(null, createdRelation);
+        })
+        .catch(callback);
+    });
+  };
+
+  /**
    * Retrieve a relation for a person
    * @param personId
    * @param relationshipId
