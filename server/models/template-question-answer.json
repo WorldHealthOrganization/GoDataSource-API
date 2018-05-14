@@ -1,7 +1,7 @@
 {
   "name": "templateQuestionAnswer",
   "base": "Model",
-  "idInjection": true,
+  "idInjection": false,
   "options": {
     "validateUpsert": true
   },
