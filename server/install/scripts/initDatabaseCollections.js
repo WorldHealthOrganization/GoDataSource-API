@@ -3,9 +3,12 @@
 /**
  * Init Database. WARNING - this should be run only post install as it recreates the collections
  */
-const app = require('../server');
+const app = require('../../server');
 const migrations = [];
 
+/**
+ * Set up collections
+ */
 app.models().forEach(function (Model) {
   const dataSource = Model.dataSource;
   if (dataSource && Model.modelName.match(/^[a-z]/)) {
@@ -16,17 +19,24 @@ app.models().forEach(function (Model) {
   }
 });
 
-(function migrate() {
+
+/**
+ * Run initiation
+ * @param callback
+ */
+function run(callback) {
   if (migrations.length) {
     const migration = migrations.shift();
     migration(function (error) {
       if (error) {
-        throw error;
+        return callback(error);
       }
-      migrate();
+      run(callback);
     });
   } else {
     console.log('Init complete.');
-    process.exit();
+    callback();
   }
-})();
+}
+
+module.exports = run;

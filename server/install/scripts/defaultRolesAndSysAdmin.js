@@ -1,6 +1,6 @@
 'use strict';
 
-const app = require('../server');
+const app = require('../../server');
 const Role = app.models.role;
 const User = app.models.user;
 const rewrite = false;
@@ -129,41 +129,52 @@ Object.keys(rolesMap).forEach(function (roleName) {
         }
       })
       .then(function (status) {
-        process.stdout.write(`Role ${roleName} ${status}\n`);
+        console.log(`Role ${roleName} ${status}`);
       })
   );
 });
 
+
 /**
- * Create default System Admin accounts
+ * Run initiation
+ * @param callback
  */
-Promise.all(createRoles)
-  .then(function () {
-    return User
-      .findOne({
-        where: {
-          email: defaultAdmin.email
-        }
-      })
-      .then(function (user) {
-        if (!user) {
-          return User
-            .create(defaultAdmin)
-            .then(function () {
-              return 'created.'
-            });
-        } else if (rewrite) {
-          return user
-            .updateAttributes(defaultAdmin)
-            .then(function () {
-              return 'updated.';
-            });
-        } else {
-          return 'skipped. User already exists.';
-        }
-      })
-      .then(function (status) {
-        process.stdout.write(`Default System Administrator user ${status}\n`);
-        process.exit();
-      });
-  });
+function run(callback) {
+
+  /**
+   * Create default System Admin accounts
+   */
+  Promise.all(createRoles)
+    .then(function () {
+      return User
+        .findOne({
+          where: {
+            email: defaultAdmin.email
+          }
+        })
+        .then(function (user) {
+          if (!user) {
+            return User
+              .create(defaultAdmin)
+              .then(function () {
+                return 'created.'
+              });
+          } else if (rewrite) {
+            return user
+              .updateAttributes(defaultAdmin)
+              .then(function () {
+                return 'updated.';
+              });
+          } else {
+            return 'skipped. User already exists.';
+          }
+        })
+        .then(function (status) {
+          console.log(`Default System Administrator user ${status}`);
+          callback();
+        })
+        .catch(callback);
+    });
+}
+
+module.exports = run;

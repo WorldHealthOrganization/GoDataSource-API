@@ -1,6 +1,6 @@
 'use strict';
 
-const app = require('../server');
+const app = require('../../server');
 const SystemSettings = app.models.systemSettings;
 const defaultSettings = {
   "upstreamServer": {
@@ -14,7 +14,7 @@ const defaultSettings = {
     "syncInterval": 0,
     "syncOnEveryChange": false
   },
-  "clientApplications": [ ],
+  "clientApplications": [],
   "dataBackup": {
     "modules": [
       "System Configuration",
@@ -26,12 +26,23 @@ const defaultSettings = {
   }
 };
 
+
 /**
- * Add default settings
+ * Run initiation
+ * @param callback
  */
-SystemSettings
-  .create(defaultSettings)
-  .then(function () {
-    process.stdout.write(`Added Default System Settings`);
-    process.exit();
-  });
+function run(callback) {
+
+  /**
+   * Add default settings
+   */
+  SystemSettings
+    .create(defaultSettings)
+    .then(function () {
+      console.log(`Added Default System Settings`);
+      callback();
+    })
+    .catch(callback);
+}
+
+module.exports = run;
