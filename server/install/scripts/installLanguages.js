@@ -1,14 +1,14 @@
 'use strict';
 
-const app = require('../server');
+const app = require('../../server');
 const fs = require('fs');
 const async = require('async');
 
 // keep a list of languages that need to be installed
 const languageList = [];
 // scan languages directory and read languages
-fs.readdirSync(`${__dirname}/../config/languages`).forEach(function (language) {
-  languageList.push(require(`${__dirname}/../config/languages/${language}`));
+fs.readdirSync(`${__dirname}/../../config/languages`).forEach(function (language) {
+  languageList.push(require(`${__dirname}/../../config/languages/${language}`));
 });
 
 // keep a list of languages to be created (for async lib)
@@ -74,14 +74,21 @@ languageList.forEach(function (language) {
       })
       .catch(callback);
   });
+});
 
+/**
+ * Run initiation
+ * @param callback
+ */
+function run(callback) {
   // start creating languages (and tokens)
   async.series(createLanguages, function (error) {
     if (error) {
-      process.stderr.write(JSON.stringify(error));
-      process.exit(1);
+      return callback(error);
     }
-    process.stdout.write('Languages installed');
-    process.exit();
+    console.log('Languages installed');
+    callback();
   });
-});
+}
+
+module.exports = run;
