@@ -14,13 +14,16 @@
       "description": "Reference data item category; eg: Ocupation",
       "required": true
     },
-    "name": {
+    "value": {
       "type": "string",
-      "description": "Reference data item value; eg: Ocupation",
+      "description": "Reference data item value; eg: Nurse",
       "required": true
+    },
+    "description": {
+      "type": "string",
+      "description": "Reference data item value description; eg: profession within the health care sector"
     }
   },
-  "validations": [],
   "validations": [],
   "relations": {},
   "acls": [],
