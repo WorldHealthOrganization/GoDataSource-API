@@ -105,15 +105,21 @@
       "required": true
     },
     "vaccinationStatus": {
-      "type": "object",
+      "type": [
+        "referenceDataItem"
+      ],
       "required": true
     },
     "nutritionalStatus": {
-      "type": "object",
+      "type": [
+        "referenceDataItem"
+      ],
       "required": true
     },
     "pregnancyInformation": {
-      "type": "object",
+      "type": [
+        "referenceDataItem"
+      ],
       "required": true
     },
     "caseIdMask": {

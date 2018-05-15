@@ -1,0 +1,31 @@
+{
+  "name": "referenceDataItem",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "category": {
+      "type": "string",
+      "description": "Reference data item category; eg: Ocupation",
+      "required": true
+    },
+    "value": {
+      "type": "string",
+      "description": "Reference data item value; eg: Nurse",
+      "required": true
+    },
+    "description": {
+      "type": "string",
+      "description": "Reference data item value description; eg: profession within the health care sector"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
