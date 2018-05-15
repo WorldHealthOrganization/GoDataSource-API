@@ -106,19 +106,19 @@
     },
     "vaccinationStatus": {
       "type": [
-        "referenceDataItem"
+        "referenceData"
       ],
       "required": true
     },
     "nutritionalStatus": {
       "type": [
-        "referenceDataItem"
+        "referenceData"
       ],
       "required": true
     },
     "pregnancyInformation": {
       "type": [
-        "referenceDataItem"
+        "referenceData"
       ],
       "required": true
     },

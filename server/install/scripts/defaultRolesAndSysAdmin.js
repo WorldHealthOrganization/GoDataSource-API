@@ -87,52 +87,55 @@ const createRoles = [];
 /**
  * Create default roles
  */
-Object.keys(rolesMap).forEach(function (roleName) {
-  createRoles.push(
-    Role
-      .findOne({
-        where: {
-          name: roleName
-        }
-      })
-      .then(function (role) {
-        if (!role) {
-          return Role
-            .create({
-              name: roleName,
-              description: rolesMap[roleName].description,
-              permissions: rolesMap[roleName].permissions
-            })
-            .then(function (role) {
-              if (roleName === 'System Administrator') {
-                defaultAdmin.roleId = role.id;
-              }
-              return 'created.';
-            });
-        } else if (rewrite) {
-          if (roleName === 'System Administrator') {
-            defaultAdmin.roleId = role.id;
+function initRolesCreation() {
+
+  Object.keys(rolesMap).forEach(function (roleName) {
+    createRoles.push(
+      Role
+        .findOne({
+          where: {
+            name: roleName
           }
-          return role
-            .updateAttributes({
-              description: rolesMap[roleName].description,
-              permissions: rolesMap[roleName].permissions
-            })
-            .then(function () {
-              return 'updated.';
-            });
-        } else {
-          if (roleName === 'System Administrator') {
-            defaultAdmin.roleId = role.id;
+        })
+        .then(function (role) {
+          if (!role) {
+            return Role
+              .create({
+                name: roleName,
+                description: rolesMap[roleName].description,
+                permissions: rolesMap[roleName].permissions
+              })
+              .then(function (role) {
+                if (roleName === 'System Administrator') {
+                  defaultAdmin.roleId = role.id;
+                }
+                return 'created.';
+              });
+          } else if (rewrite) {
+            if (roleName === 'System Administrator') {
+              defaultAdmin.roleId = role.id;
+            }
+            return role
+              .updateAttributes({
+                description: rolesMap[roleName].description,
+                permissions: rolesMap[roleName].permissions
+              })
+              .then(function () {
+                return 'updated.';
+              });
+          } else {
+            if (roleName === 'System Administrator') {
+              defaultAdmin.roleId = role.id;
+            }
+            return 'skipped. Role already exists.';
           }
-          return 'skipped. Role already exists.';
-        }
-      })
-      .then(function (status) {
-        console.log(`Role ${roleName} ${status}`);
-      })
-  );
-});
+        })
+        .then(function (status) {
+          console.log(`Role ${roleName} ${status}`);
+        })
+    );
+  });
+}
 
 
 /**
@@ -140,6 +143,8 @@ Object.keys(rolesMap).forEach(function (roleName) {
  * @param callback
  */
 function run(callback) {
+
+  initRolesCreation();
 
   /**
    * Create default System Admin accounts

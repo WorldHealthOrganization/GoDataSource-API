@@ -175,9 +175,5 @@
   "languageToken": {
     "dataSource": "mongoDb",
     "public": false
-  },
-  "referenceDataItem": {
-    "dataSource": null,
-    "public": false
   }
 }
