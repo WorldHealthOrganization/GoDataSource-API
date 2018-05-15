@@ -6,23 +6,150 @@
     "validateUpsert": true
   },
   "properties": {
-    "label": {
+    "category": {
+      "type": "string",
+      "description": "Reference data item category; eg: Occupation",
+      "required": true,
+      "enum": [
+        "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION",
+        "LNG_REFERENCE_DATA_CATEGORY_GENDER",
+        "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION",
+        "LNG_REFERENCE_DATA_CATEGORY_LAB_NAME",
+        "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE",
+        "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST",
+        "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT",
+        "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE",
+        "LNG_REFERENCE_DATA_CATEGORY_DISEASE",
+        "LNG_REFERENCE_DATA_CATEGORY_STATUS",
+        "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE",
+        "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY",
+        "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY",
+        "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL",
+        "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL",
+        "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION"
+      ]
+    },
+    "languageId": {
       "type": "string",
       "required": true
     },
-    "options": {
-      "type": [
-        "string"
-      ],
+    "value": {
+      "type": "string",
+      "description": "Reference data item value; eg: Nurse",
       "required": true
+    },
+    "description": {
+      "type": "string",
+      "description": "Reference data item value description; eg: profession within the health care sector"
     },
     "icon": {
-      "type": "string",
-      "required": true
+      "type": "string"
     }
   },
   "validations": [],
   "relations": {},
-  "acls": [],
-  "methods": {}
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getAvailableCategories"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "prototype.updateRecord"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    }
+  ],
+  "methods": {
+    "getAvailableCategories": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "categories",
+          "type": [
+            "string"
+          ],
+          "description": "List of available reference data categories",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Retrieve the list of available reference data categories.",
+      "http": {
+        "verb": "get",
+        "path": "/available-categories"
+      }
+    },
+    "prototype.updateRecord": {
+      "description": "Patch attributes for a model instance and persist it into the data source.",
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "referenceData",
+          "http": {
+            "source": "body"
+          },
+          "description": "An object of model property name/value pairs"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": {
+        "arg": "data",
+        "type": "referenceData",
+        "root": true
+      },
+      "http": [
+        {
+          "verb": "patch",
+          "path": "/"
+        },
+        {
+          "verb": "put",
+          "path": "/"
+        }
+      ]
+    }
+  }
 }

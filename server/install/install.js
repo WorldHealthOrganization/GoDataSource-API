@@ -11,7 +11,6 @@ function setupDatabaseInit() {
   console.log('Setting Up Database Initialisation...');
   [
     require('./scripts/initDatabaseCollections'),
-    require('./scripts/initDatabaseCollections'),
     require('./scripts/migrateDatabaseCollections'),
     require('./scripts/defaultRolesAndSysAdmin'),
     require('./scripts/installLanguages'),
