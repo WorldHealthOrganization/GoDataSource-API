@@ -1,7 +1,7 @@
 {
   "name": "templateQuestion",
   "base": "Model",
-  "idInjection": true,
+  "idInjection": false,
   "options": {
     "validateUpsert": true
   },
@@ -15,7 +15,8 @@
     },
     "variable": {
       "type": "string",
-      "required": true
+      "required": true,
+      "description": "Question identifier"
     },
     "category": {
       "type": "string",
@@ -28,6 +29,17 @@
     "order": {
       "type": "number",
       "required": true
+    },
+    "answerType": {
+      "type": "string",
+      "required": true,
+      "enum": [
+        "LNG_TEMPLATE_QUESTION_ANSWER_TYPE_FREE_TEXT",
+        "LNG_TEMPLATE_QUESTION_ANSWER_TYPE_NUMERIC",
+        "LNG_TEMPLATE_QUESTION_ANSWER_TYPE_DATE_TIME",
+        "LNG_TEMPLATE_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+        "LNG_TEMPLATE_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWER"
+      ]
     },
     "answers": {
       "type": [
