@@ -41,10 +41,6 @@
       "type": "number",
       "required": true
     },
-    "numberFollowUpsDay": {
-      "type": "number",
-      "default": 1
-    },
     "displayDateFormat": {
       "type": "string",
       "default": "yyyy-mm-dd"
@@ -74,7 +70,7 @@
       "required": true
     },
     "fieldsToDisplayNode": {
-      "type": "array"
+      "type": ["string"]
     },
     "colorContactNode": {
       "type": "string"
@@ -89,36 +85,44 @@
       "type": "string"
     },
     "caseInvestigationTemplate": {
-      "type": "object",
+      "type": [
+        "templateQuestion"
+      ],
       "required": true
     },
     "contactFollowUpTemplate": {
-      "type": "object",
+      "type": [
+        "templateQuestion"
+      ],
       "required": true
     },
     "labResultsTemplate": {
-      "type": "object",
+      "type": [
+        "templateQuestion"
+      ],
       "required": true
     },
     "caseClassification": {
-      "type": "object",
+      "type": [
+        "string"
+      ],
       "required": true
     },
     "vaccinationStatus": {
       "type": [
-        "referenceData"
+        "string"
       ],
       "required": true
     },
     "nutritionalStatus": {
       "type": [
-        "referenceData"
+        "string"
       ],
       "required": true
     },
     "pregnancyInformation": {
       "type": [
-        "referenceData"
+        "string"
       ],
       "required": true
     },
