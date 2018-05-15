@@ -1,9 +1,9 @@
 'use strict';
 const _ = require('lodash');
 
-
 module.exports = function (ReferenceData) {
 
+  // define available categories
   ReferenceData.availableCategories = [
     'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION',
     'LNG_REFERENCE_DATA_CATEGORY_GENDER',
@@ -23,7 +23,12 @@ module.exports = function (ReferenceData) {
     'LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION'
   ];
 
-
+  /**
+   * Generate a language/translatable identified for a category + value combination
+   * @param category
+   * @param value
+   * @return {string}
+   */
   ReferenceData.getTranslatableIdentifierForValue = function (category, value) {
     return `${category}_${_.snakeCase(value).toUpperCase()}`;
   };
