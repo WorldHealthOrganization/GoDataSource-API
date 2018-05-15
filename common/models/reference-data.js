@@ -1,5 +1,7 @@
 'use strict';
+
 const _ = require('lodash');
+const app = require('../../server/server');
 
 module.exports = function (ReferenceData) {
 
@@ -24,7 +26,47 @@ module.exports = function (ReferenceData) {
   ];
 
   /**
-   * Generate a language/translatable identified for a category + value combination
+   * Keep a list od places where reference data might be used so we can safely delete a record
+   * @type {{case: string[], contact: string[], outbreak: string[]}}
+   */
+  ReferenceData.possibleRecordUsage = {
+    'case': ['document.type'],
+    'contact': ['document.type'],
+    'outbreak': ['caseClassification', 'vaccinationStatus', 'nutritionalStatus', 'pregnancyInformation']
+  };
+
+  /**
+   * Check if a record is in use by checking all possible locations for usage
+   * @param recordId
+   * @param callback
+   */
+  ReferenceData.isRecordInUse = function (recordId, callback) {
+    const checkUsages = [];
+    // go through possible usage list
+    Object.keys(ReferenceData.possibleRecordUsage).forEach(function (modelName) {
+      const orQuery = [];
+      // build a search query using the fields that might contain the information
+      ReferenceData.possibleRecordUsage[modelName].forEach(function (field) {
+        orQuery.push({[field]: recordId});
+      });
+      // count the results
+      checkUsages.push(
+        app.models[modelName].count({or: orQuery})
+      );
+    });
+    Promise.all(checkUsages)
+      .then(function (results) {
+        callback(null,
+          // count all of the results, if > 0 then the record is used
+          results.reduce(function (a, b) {
+            return a + b;
+          }) > 0);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Generate a language/translatable identifier for a category + value combination
    * @param category
    * @param value
    * @return {string}
@@ -33,4 +75,25 @@ module.exports = function (ReferenceData) {
     return `${category}_${_.snakeCase(value).toUpperCase()}`;
   };
 
+  /**
+   * Check model usage before deleting the model
+   */
+  ReferenceData.observe('before delete', function (context, callback) {
+    if (context.where.id) {
+      ReferenceData.isRecordInUse(context.where.id, function (error, recordInUse) {
+        if (error) {
+          return callback(error);
+        }
+        // if the record is in use
+        if (recordInUse) {
+          // send back an error
+          callback(app.utils.apiError.getError('MODEL_IN_USE', {model: ReferenceData.modelName, id: context.where.id}));
+        } else {
+          callback();
+        }
+      })
+    } else {
+      callback();
+    }
+  });
 };
