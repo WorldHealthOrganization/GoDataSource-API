@@ -32,6 +32,11 @@
     "endDate": {
       "type": "date"
     },
+    "longPeriodsBetweenCaseOnset": {
+      "type": "number",
+      "description": "Number of days used for defining long periods in the dates of onset between cases in the chain of transmission",
+      "required": true
+    },
     "periodOfFollowup": {
       "type": "number",
       "description": "Duration for the follow-up period in days. Default: 6 weeks = 42 days",
