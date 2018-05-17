@@ -175,5 +175,9 @@
   "languageToken": {
     "dataSource": "mongoDb",
     "public": false
+  },
+  "log": {
+    "dataSource": "memory",
+    "public": true
   }
 }

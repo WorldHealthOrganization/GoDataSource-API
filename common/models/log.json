@@ -1,0 +1,73 @@
+{
+  "name": "log",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "mixins": {
+    "EnumProperty": true,
+    "AttachController": true
+  },
+  "properties": {
+    "messages": {
+      "type": [
+        {
+          "level": {
+            "type": "string",
+            "required": true,
+            "enum": [
+              "debug",
+              "info",
+              "notice",
+              "warning",
+              "error",
+              "crit",
+              "alert",
+              "emerg"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "required": true
+          }
+        }
+      ],
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {
+    "addLogs": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Write log messages",
+      "http": {
+        "verb": "post",
+        "path": "/"
+      }
+    }
+  }
+}
