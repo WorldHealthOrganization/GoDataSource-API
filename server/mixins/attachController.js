@@ -20,7 +20,7 @@ module.exports = function (Model) {
       require(`${__dirname}/../../common/controllers/${controllerName}`)(Model);
     }
     catch (e) {
-      app.logger.log('debug', `Controller ${controllerName} cannot be loaded`);
+      app.logger.log('error', `Controller "${controllerName}" cannot be loaded`, e);
       // stop process as the controller for the model cannot be found
       app.logger.exitProcessAfterFlush(1);
     }
