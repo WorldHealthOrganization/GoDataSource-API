@@ -179,5 +179,9 @@
   "log": {
     "dataSource": "memory",
     "public": true
+  },
+  "logData": {
+    "dataSource": null,
+    "public": false
   }
 }

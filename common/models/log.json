@@ -15,26 +15,7 @@
   "properties": {
     "messages": {
       "type": [
-        {
-          "level": {
-            "type": "string",
-            "required": true,
-            "enum": [
-              "debug",
-              "info",
-              "notice",
-              "warning",
-              "error",
-              "crit",
-              "alert",
-              "emerg"
-            ]
-          },
-          "message": {
-            "type": "string",
-            "required": true
-          }
-        }
+        "logData"
       ],
       "required": true
     }
