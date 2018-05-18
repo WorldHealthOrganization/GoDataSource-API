@@ -5,12 +5,20 @@
   "options": {
     "validateUpsert": true
   },
+  "hidden": [
+    "type",
+    "outbreakId"
+  ],
   "scope": {
     "where": {
       "type": "case"
     }
   },
   "properties": {
+    "outbreakId": {
+      "type": "string",
+      "readOnly": true
+    },
     "type": {
       "type": "string",
       "required": true,

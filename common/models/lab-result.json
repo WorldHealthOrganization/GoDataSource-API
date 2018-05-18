@@ -5,7 +5,14 @@
   "options": {
     "validateUpsert": true
   },
+  "hidden": [
+    "personId"
+  ],
   "properties": {
+    "personId": {
+      "type": "string",
+      "readOnly": true
+    },
     "dateSampleTaken": {
       "type": "date",
       "required": true
