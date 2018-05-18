@@ -36,7 +36,11 @@
       "default": false
     },
     "settings": {
-      "caseFields": ["string"]
+      "type": {
+        "caseFields": [
+          "string"
+        ]
+      }
     }
   },
   "indexes": {
