@@ -252,7 +252,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.helpers.updateCaseContactRelationship = function (personId, relationshipId, type, data, callback) {
-    validateAndNormalizePersons(personId, type, data, function (error, persons) {
+    Outbreak.helpers.validateAndNormalizePersons(personId, type, data, function (error, persons) {
       if (error) {
         return callback(error);
       }

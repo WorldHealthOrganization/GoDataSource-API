@@ -34,6 +34,13 @@
     "passwordChange": {
       "type": "boolean",
       "default": false
+    },
+    "settings": {
+      "type": {
+        "caseFields": [
+          "string"
+        ]
+      }
     }
   },
   "indexes": {
