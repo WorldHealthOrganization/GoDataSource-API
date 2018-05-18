@@ -545,6 +545,18 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "getLocations"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "restoreCase"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_own_case",
+      "permission": "ALLOW",
+      "property": "restoreCase"
     }
   ],
   "methods": {
@@ -987,6 +999,31 @@
       "http": {
         "verb": "get",
         "path": "/locations"
+      }
+    },
+    "prototype.restoreCase": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "case",
+          "type": [
+            "case"
+          ],
+          "description": "Case",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted case.",
+      "http": {
+        "verb": "post",
+        "path": "/cases/:nk/restore"
       }
     }
   }

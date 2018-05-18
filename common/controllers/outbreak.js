@@ -277,4 +277,29 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.getLocations = function (callback) {
     app.models.location.getSubLocationsWithDetails([this.locationId], [], callback);
   };
+
+  /**
+   * Restore a deleted case
+   * @param caseId
+   * @param callback
+   */
+  Outbreak.prototype.restoreCase = function (caseId, callback) {
+    app.models.case
+      .findOne({
+        deleted: true,
+        where: {
+          id: caseId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.case.modelName, id: caseId});
+        }
+
+        // undo case delete
+        instance.undoDelete(callback);
+      })
+      .catch(callback);
+  };
 };
