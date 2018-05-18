@@ -9,7 +9,6 @@ module.exports = function (ReferenceData) {
     'prototype.patchAttributes'
   ]);
 
-
   /**
    * Before create hook
    */
@@ -31,7 +30,6 @@ module.exports = function (ReferenceData) {
     }
     next();
   });
-
 
   /**
    * After update hook
@@ -64,7 +62,6 @@ module.exports = function (ReferenceData) {
     }
   });
 
-
   /**
    * Expose available categories via API
    * @param callback
@@ -72,7 +69,6 @@ module.exports = function (ReferenceData) {
   ReferenceData.getAvailableCategories = function (callback) {
     callback(null, ReferenceData.availableCategories);
   };
-
 
   /**
    * Update reference record. This actually only updates the icon and translations for value and description
@@ -142,7 +138,6 @@ module.exports = function (ReferenceData) {
     }
   };
 
-
   /**
    * Get usage for a reference data entry
    * @param filter
@@ -151,7 +146,6 @@ module.exports = function (ReferenceData) {
   ReferenceData.prototype.getUsage = function (filter, callback) {
     ReferenceData.findModelUsage(this.id, filter, false, callback);
   };
-
 
   /**
    * Count usage for a reference data entry

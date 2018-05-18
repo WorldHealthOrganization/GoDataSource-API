@@ -35,7 +35,6 @@ module.exports = function (ReferenceData) {
     'outbreak': ['caseClassification', 'vaccinationStatus', 'nutritionalStatus', 'pregnancyInformation']
   };
 
-
   /**
    * Get usage for a reference data
    * @param recordId
@@ -85,7 +84,6 @@ module.exports = function (ReferenceData) {
       .catch(callback);
   };
 
-
   /**
    * Check if a record is in use
    * @param recordId
@@ -104,7 +102,6 @@ module.exports = function (ReferenceData) {
     });
   };
 
-
   /**
    * Generate a language/translatable identifier for a category + value combination
    * @param category
@@ -114,7 +111,6 @@ module.exports = function (ReferenceData) {
   ReferenceData.getTranslatableIdentifierForValue = function (category, value) {
     return `${category}_${_.snakeCase(value).toUpperCase()}`;
   };
-
 
   /**
    * Check model usage before deleting the model
