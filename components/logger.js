@@ -13,7 +13,8 @@ winston.loggers.add('fileLogger', {
     filename: `${__dirname}/../logs/application.log`,
     level: config.logging.level,
     maxsize: config.logging.maxSize,
-    maxFiles: config.logging.maxFiles
+    maxFiles: config.logging.maxFiles,
+    tailable: true
   },
   console: {
     stderrLevels: ['error']
