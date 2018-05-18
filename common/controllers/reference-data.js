@@ -88,7 +88,7 @@ module.exports = function (ReferenceData) {
       if (data.icon) {
         // update it
         updateActions.push(
-          this.updateAttributes({
+          self.updateAttributes({
             icon: data.icon
           })
         );
@@ -100,8 +100,8 @@ module.exports = function (ReferenceData) {
           app.models.languageToken
             .findOne({
               where: {
-                token: this.id,
-                languageId: this.languageId
+                token: self.id,
+                languageId: self.languageId
               }
             })
             .then(function (languageToken) {
@@ -119,8 +119,8 @@ module.exports = function (ReferenceData) {
           app.models.languageToken
             .findOne({
               where: {
-                token: this.description,
-                languageId: this.languageId
+                token: self.description,
+                languageId: self.languageId
               }
             })
             .then(function (languageToken) {
@@ -140,5 +140,34 @@ module.exports = function (ReferenceData) {
     } else {
       callback(null, this);
     }
+  };
+
+
+  /**
+   * Get usage for a reference data entry
+   * @param filter
+   * @param callback
+   */
+  ReferenceData.prototype.getUsage = function (filter, callback) {
+    ReferenceData.findModelUsage(this.id, filter, false, callback);
+  };
+
+
+  /**
+   * Count usage for a reference data entry
+   * @param where
+   * @param callback
+   */
+  ReferenceData.prototype.countUsage = function (where, callback) {
+    ReferenceData.findModelUsage(this.id, {where: where}, true, function (error, results) {
+      if (error) {
+        return callback(error);
+      }
+      callback(null,
+        // count all of the results
+        Object.values(results).reduce(function (a, b) {
+          return a + b;
+        }));
+    });
   };
 };

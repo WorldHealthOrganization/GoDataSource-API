@@ -35,35 +35,75 @@ module.exports = function (ReferenceData) {
     'outbreak': ['caseClassification', 'vaccinationStatus', 'nutritionalStatus', 'pregnancyInformation']
   };
 
+
   /**
-   * Check if a record is in use by checking all possible locations for usage
+   * Get usage for a reference data
    * @param recordId
+   * @param filter
+   * @param justCount
    * @param callback
    */
-  ReferenceData.isRecordInUse = function (recordId, callback) {
+  ReferenceData.findModelUsage = function (recordId, filter, justCount, callback) {
     const checkUsages = [];
+    const modelNames = Object.keys(ReferenceData.possibleRecordUsage);
     // go through possible usage list
-    Object.keys(ReferenceData.possibleRecordUsage).forEach(function (modelName) {
+    modelNames.forEach(function (modelName) {
       const orQuery = [];
       // build a search query using the fields that might contain the information
       ReferenceData.possibleRecordUsage[modelName].forEach(function (field) {
         orQuery.push({[field]: recordId});
       });
-      // count the results
-      checkUsages.push(
-        app.models[modelName].count({or: orQuery})
-      );
+
+      // build filter
+      const _filter = app.utils.remote
+        .mergeFilters({
+          where: {
+            or: orQuery
+          }
+        }, filter);
+
+      // count/find the results
+      if (justCount) {
+        checkUsages.push(
+          app.models[modelName].count(_filter.where)
+        );
+      } else {
+        checkUsages.push(
+          app.models[modelName].find(_filter)
+        );
+      }
     });
     Promise.all(checkUsages)
       .then(function (results) {
-        callback(null,
-          // count all of the results, if > 0 then the record is used
-          results.reduce(function (a, b) {
-            return a + b;
-          }) > 0);
+        // associate the results with the queried models
+        const resultSet = {};
+        results.forEach(function (result, index) {
+          resultSet[modelNames[index]] = result;
+        });
+        callback(null, resultSet);
       })
       .catch(callback);
   };
+
+
+  /**
+   * Check if a record is in use
+   * @param recordId
+   * @param callback
+   */
+  ReferenceData.isRecordInUse = function (recordId, callback) {
+    ReferenceData.findModelUsage(recordId, {}, true, function (error, results) {
+      if (error) {
+        return callback(error);
+      }
+      callback(null,
+        // count all of the results, if > 0 then the record is used
+        Object.values(results).reduce(function (a, b) {
+          return a + b;
+        }) > 0);
+    });
+  };
+
 
   /**
    * Generate a language/translatable identifier for a category + value combination
@@ -74,6 +114,7 @@ module.exports = function (ReferenceData) {
   ReferenceData.getTranslatableIdentifierForValue = function (category, value) {
     return `${category}_${_.snakeCase(value).toUpperCase()}`;
   };
+
 
   /**
    * Check model usage before deleting the model
