@@ -26,7 +26,7 @@ module.exports = function (ReferenceData) {
   ];
 
   /**
-   * Keep a list od places where reference data might be used so we can safely delete a record
+   * Keep a list of places where reference data might be used so we can safely delete a record
    * @type {{case: string[], contact: string[], outbreak: string[]}}
    */
   ReferenceData.possibleRecordUsage = {
