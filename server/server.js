@@ -1,5 +1,13 @@
 'use strict';
 
+// catch exceptions on startup
+process.on('uncaughtException', function(e) {
+  app.logger.log('error', e);
+  // stop process and log error
+  app.logger.exitProcessAfterFlush(1);
+});
+
+
 const beforeBoot = require('./beforeBoot/beforeBoot');
 const logger = require('../components/logger');
 

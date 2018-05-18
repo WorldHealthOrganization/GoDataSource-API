@@ -17,11 +17,13 @@ module.exports = function (Model) {
   Model.defineProperty(deletedFlag, {
     type: Boolean,
     required: true,
-    default: false
+    default: false,
+    readOnly: true
   });
 
   Model.defineProperty(deletedAt, {
-    type: Date
+    type: Date,
+    readOnly: true
   });
 
   /**
@@ -44,7 +46,7 @@ module.exports = function (Model) {
             context.options.softDeleteEvent = true;
             return Model.notifyObserversOf('before delete', context, callback);
           }
-        // batch update
+          // batch update
         } else if (context.data.deleted && context.where) {
           context.options.softDeleteEvent = true;
           return Model.notifyObserversOf('before delete', context, callback);
@@ -156,14 +158,24 @@ module.exports = function (Model) {
 
   /**
    * Overwrite destroy with a soft destroy
+   * @param options
    * @param cb
    * @returns {Promise.<TResult>}
    */
-  Model.prototype.destroy = function softDestroy(cb) {
+  Model.prototype.destroy = function softDestroy(options, cb) {
+    // initialize flag to know if the function has options sent
+    let hasOptions = true;
+
+    if (cb === undefined && typeof options === 'function') {
+      cb = options;
+      hasOptions = false;
+    }
+
     let nextStep = next.bind({callback: cb});
 
     return this
-      .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()})
+      // sending additional options in order to have access to the remoting context in the next hooks
+      .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()}, hasOptions ? options : {})
       .then(function () {
         return {count: 1};
       })
