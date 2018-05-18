@@ -80,6 +80,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getUsage"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "countUsage"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_sys_config",
       "permission": "ALLOW",
       "property": "create"
@@ -88,7 +100,7 @@
       "principalType": "ROLE",
       "principalId": "write_sys_config",
       "permission": "ALLOW",
-      "property": "prototype.updateRecord"
+      "property": "updateRecord"
     },
     {
       "principalType": "ROLE",
@@ -148,6 +160,54 @@
         {
           "verb": "put",
           "path": "/"
+        }
+      ]
+    },
+    "prototype.getUsage": {
+      "description": "Find usage for a record.",
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": {
+        "description": "Record usage locations",
+        "arg": "data",
+        "type": {
+          "case":[],
+          "contact": [],
+          "outbreak": []
+        },
+        "root": true,
+        "required": true
+      },
+      "http": [
+        {
+          "verb": "get",
+          "path": "/usage"
+        }
+      ]
+    },
+    "prototype.countUsage": {
+      "description": "Count usage for a record.",
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": {
+        "arg": "count",
+        "type": "integer",
+        "required": true
+      },
+      "http": [
+        {
+          "verb": "get",
+          "path": "/usage/count"
         }
       ]
     }

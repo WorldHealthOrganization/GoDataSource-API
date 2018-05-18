@@ -79,7 +79,7 @@ module.exports = function (Model) {
       return this.callback(error, result);
     }
     if (error) {
-      return Promise.reject(error)
+      return Promise.reject(error);
     }
     return result;
   }
@@ -99,7 +99,7 @@ module.exports = function (Model) {
 
     let nextStep = next.bind({callback: cb});
 
-    return Model
+    const promise = Model
       .updateAll(where, {[deletedFlag]: true, [deletedAt]: new Date()})
       .then(function (result) {
         return nextStep(null, result);
@@ -107,6 +107,11 @@ module.exports = function (Model) {
       .catch(function (error) {
         return nextStep(error);
       });
+
+    // return the promise only when needed
+    if (typeof cb !== "function") {
+      return promise;
+    }
   };
 
   // also update aliases for destroyAll
@@ -131,18 +136,19 @@ module.exports = function (Model) {
 
     let nextStep = next.bind({callback: cb});
 
-    return Model
+    const promise = Model
       .findById(id)
       .then(function (instance) {
         if (instance) {
           return instance
-            // sending additional options in order to have access to the remoting context in the next hooks
+          // sending additional options in order to have access to the remoting context in the next hooks
             .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()}, hasOptions ? options : {})
             .then(function () {
               return {count: 1};
             });
+        } else {
+          return {count: 0};
         }
-        return {count: 0};
       })
       .then(function (result) {
         return nextStep(null, result);
@@ -150,6 +156,11 @@ module.exports = function (Model) {
       .catch(function (error) {
         return nextStep(error);
       });
+
+    // return the promise only when needed
+    if (typeof cb !== "function") {
+      return promise;
+    }
   };
 
   // also update aliases for destroyById
@@ -173,7 +184,7 @@ module.exports = function (Model) {
 
     let nextStep = next.bind({callback: cb});
 
-    return this
+    const promise = this
       // sending additional options in order to have access to the remoting context in the next hooks
       .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()}, hasOptions ? options : {})
       .then(function () {
@@ -185,6 +196,11 @@ module.exports = function (Model) {
       .catch(function (error) {
         return nextStep(error);
       });
+
+    // return the promise only when needed
+    if (typeof cb !== "function") {
+      return promise;
+    }
   };
 
   // also update aliases for destroy

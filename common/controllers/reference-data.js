@@ -9,7 +9,6 @@ module.exports = function (ReferenceData) {
     'prototype.patchAttributes'
   ]);
 
-
   /**
    * Before create hook
    */
@@ -31,7 +30,6 @@ module.exports = function (ReferenceData) {
     }
     next();
   });
-
 
   /**
    * After update hook
@@ -64,7 +62,6 @@ module.exports = function (ReferenceData) {
     }
   });
 
-
   /**
    * Expose available categories via API
    * @param callback
@@ -73,26 +70,34 @@ module.exports = function (ReferenceData) {
     callback(null, ReferenceData.availableCategories);
   };
 
-
   /**
-   * Update reference record. This actually only updates translations for value and description
+   * Update reference record. This actually only updates the icon and translations for value and description
    * @param data
    * @param options
    * @param callback
    */
   ReferenceData.prototype.updateRecord = function (data, options, callback) {
     const self = this;
+    const updateActions = [];
     if (data) {
-      const updateLanguageTokens = [];
+      // if icon was sent
+      if (data.icon) {
+        // update it
+        updateActions.push(
+          self.updateAttributes({
+            icon: data.icon
+          })
+        );
+      }
       // if the value was sent
       if (data.value) {
         // find the token associated with the value
-        updateLanguageTokens.push(
+        updateActions.push(
           app.models.languageToken
             .findOne({
               where: {
-                token: this.id,
-                languageId: this.languageId
+                token: self.id,
+                languageId: self.languageId
               }
             })
             .then(function (languageToken) {
@@ -105,13 +110,13 @@ module.exports = function (ReferenceData) {
       }
       // if the description was sent
       if (data.description) {
-        updateLanguageTokens.push(
+        updateActions.push(
           // find the token associated with the value
           app.models.languageToken
             .findOne({
               where: {
-                token: this.description,
-                languageId: this.languageId
+                token: self.description,
+                languageId: self.languageId
               }
             })
             .then(function (languageToken) {
@@ -123,7 +128,7 @@ module.exports = function (ReferenceData) {
         );
       }
       // perform update operations
-      Promise.all(updateLanguageTokens)
+      Promise.all(updateActions)
         .then(function () {
           callback(null, self);
         })
@@ -131,5 +136,32 @@ module.exports = function (ReferenceData) {
     } else {
       callback(null, this);
     }
+  };
+
+  /**
+   * Get usage for a reference data entry
+   * @param filter
+   * @param callback
+   */
+  ReferenceData.prototype.getUsage = function (filter, callback) {
+    ReferenceData.findModelUsage(this.id, filter, false, callback);
+  };
+
+  /**
+   * Count usage for a reference data entry
+   * @param where
+   * @param callback
+   */
+  ReferenceData.prototype.countUsage = function (where, callback) {
+    ReferenceData.findModelUsage(this.id, {where: where}, true, function (error, results) {
+      if (error) {
+        return callback(error);
+      }
+      callback(null,
+        // count all of the results
+        Object.values(results).reduce(function (a, b) {
+          return a + b;
+        }));
+    });
   };
 };

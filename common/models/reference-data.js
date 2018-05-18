@@ -1,5 +1,7 @@
 'use strict';
+
 const _ = require('lodash');
+const app = require('../../server/server');
 
 module.exports = function (ReferenceData) {
 
@@ -24,7 +26,84 @@ module.exports = function (ReferenceData) {
   ];
 
   /**
-   * Generate a language/translatable identified for a category + value combination
+   * Keep a list of places where reference data might be used so we can safely delete a record
+   * @type {{case: string[], contact: string[], outbreak: string[]}}
+   */
+  ReferenceData.possibleRecordUsage = {
+    'case': ['document.type'],
+    'contact': ['document.type'],
+    'outbreak': ['caseClassification', 'vaccinationStatus', 'nutritionalStatus', 'pregnancyInformation']
+  };
+
+  /**
+   * Get usage for a reference data
+   * @param recordId
+   * @param filter
+   * @param justCount
+   * @param callback
+   */
+  ReferenceData.findModelUsage = function (recordId, filter, justCount, callback) {
+    const checkUsages = [];
+    const modelNames = Object.keys(ReferenceData.possibleRecordUsage);
+    // go through possible usage list
+    modelNames.forEach(function (modelName) {
+      const orQuery = [];
+      // build a search query using the fields that might contain the information
+      ReferenceData.possibleRecordUsage[modelName].forEach(function (field) {
+        orQuery.push({[field]: recordId});
+      });
+
+      // build filter
+      const _filter = app.utils.remote
+        .mergeFilters({
+          where: {
+            or: orQuery
+          }
+        }, filter);
+
+      // count/find the results
+      if (justCount) {
+        checkUsages.push(
+          app.models[modelName].count(_filter.where)
+        );
+      } else {
+        checkUsages.push(
+          app.models[modelName].find(_filter)
+        );
+      }
+    });
+    Promise.all(checkUsages)
+      .then(function (results) {
+        // associate the results with the queried models
+        const resultSet = {};
+        results.forEach(function (result, index) {
+          resultSet[modelNames[index]] = result;
+        });
+        callback(null, resultSet);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Check if a record is in use
+   * @param recordId
+   * @param callback
+   */
+  ReferenceData.isRecordInUse = function (recordId, callback) {
+    ReferenceData.findModelUsage(recordId, {}, true, function (error, results) {
+      if (error) {
+        return callback(error);
+      }
+      callback(null,
+        // count all of the results, if > 0 then the record is used
+        Object.values(results).reduce(function (a, b) {
+          return a + b;
+        }) > 0);
+    });
+  };
+
+  /**
+   * Generate a language/translatable identifier for a category + value combination
    * @param category
    * @param value
    * @return {string}
@@ -33,4 +112,25 @@ module.exports = function (ReferenceData) {
     return `${category}_${_.snakeCase(value).toUpperCase()}`;
   };
 
+  /**
+   * Check model usage before deleting the model
+   */
+  ReferenceData.observe('before delete', function (context, callback) {
+    if (context.where.id) {
+      ReferenceData.isRecordInUse(context.where.id, function (error, recordInUse) {
+        if (error) {
+          return callback(error);
+        }
+        // if the record is in use
+        if (recordInUse) {
+          // send back an error
+          callback(app.utils.apiError.getError('MODEL_IN_USE', {model: ReferenceData.modelName, id: context.where.id}));
+        } else {
+          callback();
+        }
+      })
+    } else {
+      callback();
+    }
+  });
 };

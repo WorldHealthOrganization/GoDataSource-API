@@ -1,5 +1,6 @@
 {
   "MODEL_IN_USE": {
+    "defaultStatusCode": 422,
     "messagePattern": "Model \"<%= model %>\" id \"<%= id %>\" is in use."
   },
   "MODIFY_OWN_RECORD": {
