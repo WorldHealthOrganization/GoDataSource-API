@@ -6,6 +6,11 @@
     "validateUpsert": true
   },
   "properties": {
+    "outbreakId": {
+      "type": "string",
+      "readOnly": true,
+      "required": true
+    },
     "persons": {
       "type": ["relationshipParticipant"],
       "required": true

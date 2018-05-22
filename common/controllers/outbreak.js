@@ -34,6 +34,41 @@ module.exports = function (Outbreak) {
   });
 
   /**
+   * Enhance cases list request to support optional filtering of cases that don't have any relations
+   */
+  Outbreak.beforeRemote('prototype.__get__cases', function (context, modelInstance, next) {
+    // Retrieve all relationships of type case for the given outbreak
+    // Then filter cases based on relations count
+    if (context.args.filter && context.args.filter.noRelationships) {
+      app.models.relationship
+        .find({
+          where: {
+            outbreakId: context.instance.id,
+            'persons.type': 'case'
+          }
+        })
+        // build list of people that have relationships in the given outbreak
+        .then((relations) => [].concat(...relations.map((relation) => relation.persons.map(((person) => person.id)))))
+        .then((peopleWithRelation) => {
+          // attach additional filtering for cases that have no relationships
+          context.args.filter = app.utils.remote
+            .mergeFilters({
+              where: {
+                id: {
+                  nin: peopleWithRelation
+                }
+              }
+            }, context.args.filter);
+
+          return next();
+        })
+        .catch(next);
+    } else {
+      return next();
+    }
+  });
+
+  /**
    * Allow only one active outbreak on create
    */
   Outbreak.beforeRemote('create', function (context, modelInstance, next) {
@@ -110,7 +145,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.createCaseRelationship = function (caseId, data, callback) {
-    helpers.createCaseContactRelationship(caseId, 'case', data, callback);
+    helpers.createCaseContactRelationship(this.id, caseId, 'case', data, callback);
   };
 
   /**

@@ -190,12 +190,13 @@ module.exports = function (Outbreak) {
 
   /**
    * Create relation for a person
+   * @param outbreakId
    * @param personId
    * @param type
    * @param data
    * @param callback
    */
-  Outbreak.helpers.createCaseContactRelationship = function (personId, type, data, callback) {
+  Outbreak.helpers.createCaseContactRelationship = function (outbreakId, personId, type, data, callback) {
     Outbreak.helpers.validateAndNormalizePersons(personId, type, data, function (error, persons) {
       if (error) {
         return callback(error);
@@ -203,7 +204,7 @@ module.exports = function (Outbreak) {
       data.persons = persons;
       app.models.relationship.removeReadOnlyProperties(data);
       app.models.relationship
-        .create(data)
+        .create(Object.assign(data, { outbreakId: outbreakId }))
         .then(function (createdRelation) {
           callback(null, createdRelation);
         })
