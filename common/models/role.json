@@ -19,7 +19,9 @@
       "unique": true
     },
     "permissions": {
-      "type": ["string"],
+      "type": [
+        "string"
+      ],
       "required": true
     }
   },
@@ -33,7 +35,7 @@
     "UniqueValidator": true,
     "AuthorTimeStamp": true,
     "AuditLogger": true,
-    "SoftDelete" : true,
+    "SoftDelete": true,
     "AttachController": true
   },
   "validations": [],
@@ -93,7 +95,14 @@
       "returns": [
         {
           "arg": "permissions",
-          "type": ["string"],
+          "type": {
+            "permission": {
+              "type": {
+                "label": "string",
+                "description": "string"
+              }
+            }
+          },
           "description": "List of available permissions",
           "root": true,
           "required": true
