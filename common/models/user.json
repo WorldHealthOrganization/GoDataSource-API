@@ -114,6 +114,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_user_account",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_user_account",
       "permission": "ALLOW",
       "property": "patchAttributes"
