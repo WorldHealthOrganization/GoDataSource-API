@@ -45,6 +45,7 @@
     "loopback#urlNotFound": {}
   },
   "final:after": {
+    "./middleware/passwordResetError": {},
     "./middleware/authenticationError": {},
     "strong-error-handler": {
       "params": {
