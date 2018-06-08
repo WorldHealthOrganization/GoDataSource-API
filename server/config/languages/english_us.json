@@ -113,5 +113,10 @@
     "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL": "Certainty Level",
     "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL": "Risk Level",
     "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION": "Context of Transmission"
+
+    "LNG_SECURITY_QUESTION_1": "What was your childhood nickname?",
+    "LNG_SECURITY_QUESTION_2": "In what city or town did your mother and father meet?",
+    "LNG_SECURITY_QUESTION_3": "What is your favorite team?",
+    "LNG_SECURITY_QUESTION_4": "What was your favorite sport in high school?"
   }
 }

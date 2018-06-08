@@ -183,5 +183,9 @@
   "logData": {
     "dataSource": null,
     "public": false
+  },
+  "securityQuestion": {
+    "dataSource": "memory",
+    "public": true
   }
 }

@@ -5,6 +5,7 @@ const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
 const config = require('../../server/config.json');
+const bcrypt = require('bcrypt');
 
 module.exports = function (User) {
   // set flag to force using the controller
@@ -12,6 +13,35 @@ module.exports = function (User) {
 
   // initialize model helpers
   User.helpers = {};
+
+  /**
+   * Validate security questions
+   * @param questions
+   */
+  User.helpers.validateSecurityQuestions = function (questions) {
+    // make sure there are 2 questions
+    if (!questions || (questions && questions.length !== 2)) {
+      return false;
+    }
+
+    // make sure that question names are different
+    if (questions[0].question.toLowerCase() === questions[1].question.toLowerCase()) {
+      return false;
+    }
+
+    // make sure that each question has a name and an answer
+    // also question names should be different and answers not empty
+    let isValid = true;
+
+    questions.forEach((item) => {
+      if (!item.answer ||
+        (item.answer && (item.answer.length === 0 || !item.answer.trim()))) {
+        isValid = false;
+      }
+    });
+
+    return isValid;
+  };
 
   /**
    * Validate password. It must match a minimum set of requirements
@@ -30,6 +60,19 @@ module.exports = function (User) {
       }
     }
     callback(error);
+  };
+
+  /**
+   * Encrypt security questions answers with 10 sals rounds
+   * @param questions
+   */
+  User.helpers.encryptSecurityQuestions = function (questions) {
+    return questions.map((item) => {
+      return {
+        name: item.question,
+        answer: bcrypt.hashSync(item.answer, 10)
+      };
+    });
   };
 
   /**

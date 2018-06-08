@@ -55,5 +55,13 @@
   "INVALID_PASSWORD": {
     "defaultStatusCode": 400,
     "messagePattern": "The password must be at least <%= length %> characters in length and it must contain at least 1 lowercase letter, 1 uppercase letter, 1 digit and 1 special character."
+  },
+  "PASSWORD_RECOVERY_FAILED": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Information provided is incorrect"
+  },
+  "INVALID_SECURITY_QUESTIONS": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid security questions information"
   }
 }
