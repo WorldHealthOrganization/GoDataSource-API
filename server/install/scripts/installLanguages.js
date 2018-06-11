@@ -28,6 +28,7 @@ languageList.forEach(function (language) {
           // if not found, create it
           return app.models.language
             .create({
+              id: language.id,
               name: language.name
             });
         }
