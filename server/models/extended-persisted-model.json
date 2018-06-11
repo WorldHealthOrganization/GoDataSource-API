@@ -13,7 +13,8 @@
     "AuthorTimeStamp": true,
     "AuditLogger": true,
     "SoftDelete": true,
-    "AttachController": true
+    "AttachController": true,
+    "SearchByRelationProperty": true
   },
   "replaceOnPUT": false,
   "properties": {
