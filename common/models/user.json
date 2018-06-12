@@ -28,6 +28,9 @@
     "locationIds": {
       "type": ["string"]
     },
+    "outbreakIds": {
+      "type": ["string"]
+    },
     "language": {
       "type": "string"
     },

@@ -103,22 +103,67 @@ module.exports = function (app) {
   }
 
   /**
+   * Verify if the user has permission to access an outbreak
+   * @param permission
+   * @param context
+   * @param callback
+   */
+  function verifyOutbreakPermission(permission, context, callback) {
+    // cache user's authentication data ref
+    let userAuthData = context.remotingContext.req.authData.user;
+
+    // if user has no outbreak ids restrictions, allow for all
+    if (Array.isArray(userAuthData.outbreakIds) && !userAuthData.outbreakIds.length) {
+      return callback(null, true);
+    }
+
+    // define regex for extracting outbreak id
+    let outbreakIdRegExp = new RegExp(`^\\/api\\/outbreaks\\/([^\\/?]+)`);
+
+    // extract id from request
+    const outbreakIdMatch = context.remotingContext.req.originalUrl.match(outbreakIdRegExp);
+
+    if (outbreakIdMatch && outbreakIdMatch[1]) {
+      // outbreak id match found, check if user has access to the given outbreak
+      if (userAuthData.outbreakIds.indexOf(outbreakIdMatch[1]) === -1) {
+        storeMissingPermissionInContext(`${permission} (no access to the given outbreak)`, context);
+        return callback(null, false);
+      }
+    }
+
+    return callback(null, true);
+  }
+
+  /**
    * Roles are just groups of permissions, register role resolver for each permission
    */
   Object.keys(Role.availablePermissions).forEach(function (permission) {
 
     Role.registerResolver(permission, function (permission, context, callback) {
       let _callback = callback;
-      // if the permission requires ownership of the object
-      if (permission.indexOf('_own_') !== -1) {
-        // after verifying the user has the permission, also verify ownership
-        _callback = function (error, hasPermission) {
-          if (error || !hasPermission) {
-            return callback(error, hasPermission);
+
+      /**
+       * DEPRECATED feature
+        // if the permission requires ownership of the object
+        if (permission.indexOf('_own_') !== -1) {
+          // after verifying the user has the permission, also verify ownership
+          _callback = function (error, hasPermission) {
+            if (error || !hasPermission) {
+              return callback(error, hasPermission);
+            }
+            return verifyResourceOwnership(permission, context, callback);
           }
-          return verifyResourceOwnership(permission, context, callback);
         }
-      }
+       */
+
+      // after verifying the user has the permission, also verify ownership
+      _callback = function (error, hasPermission) {
+        if (error || !hasPermission) {
+          return callback(error, hasPermission);
+        }
+        return verifyOutbreakPermission(permission, context, callback);
+      };
+
       // verify if the user has the permission
       hasPermission(permission, context, _callback);
     });
