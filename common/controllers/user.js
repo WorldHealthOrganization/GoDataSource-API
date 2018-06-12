@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const config = require('../../server/config.json');
 const bcrypt = require('bcrypt');
+const async = require('async');
 
 module.exports = function (User) {
 
@@ -47,17 +48,31 @@ module.exports = function (User) {
       delete reqBody.locationIds;
     }
 
-    // check if security questions should be encoded
-    if (reqBody.securityQuestions) {
-      if (!helpers.validateSecurityQuestions(reqBody.securityQuestions)) {
-        return next(true);
+    // validation checks for password and security questions
+    async.series([
+      (done) => helpers.validatePassword(reqBody.password, (error) => helpers.collectErrorMessage(error, done)),
+      (done) => helpers.validateSecurityQuestions(reqBody.securityQuestions, (error) => helpers.collectErrorMessage(error, done))
+    ], (err, errorMessages) => {
+      if (err) {
+        return next(app.utils.apiError.getError('INTERNAL_ERROR', { error: 'Validation failed '} ));
       }
 
-      reqBody.securityQuestions = helpers.encryptSecurityQuestions(reqBody.securityQuestions);
-    }
+      if (errorMessages) {
+        // clear any undesirable values from error message (bugfix for undefined values returned by callbacks)
+        errorMessages = errorMessages.filter((e) => e);
 
-    // validate password (if any)
-    helpers.validatePassword(reqBody.password, next);
+        if (errorMessages.length) {
+          return next(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', { errorMessages: errorMessages.join() }));
+        }
+      }
+
+      // check if security questions should be encoded
+      if (reqBody.securityQuestions) {
+        reqBody.securityQuestions = helpers.encryptSecurityQuestions(reqBody.securityQuestions);
+      }
+
+      return next();
+    });
   });
 
   /**
@@ -67,17 +82,31 @@ module.exports = function (User) {
     // cache request body ref
     let reqBody = context.args.data;
 
-    // check if security questions should be encoded
-    if (reqBody.securityQuestions) {
-      if (!helpers.validateSecurityQuestions(reqBody.securityQuestions)) {
-        return next(app.utils.apiError.getError('INVALID_SECURITY_QUESTIONS'));
+    // validation checks for password and security questions
+    async.series([
+      (done) => helpers.validatePassword(reqBody.password, (error) => helpers.collectErrorMessage(error, done)),
+      (done) => helpers.validateSecurityQuestions(reqBody.securityQuestions, (error) => helpers.collectErrorMessage(error, done))
+    ], (err, errorMessages) => {
+      if (err) {
+        return next(app.utils.apiError.getError('INTERNAL_ERROR', { error: 'Validation failed '} ));
       }
 
-      reqBody.securityQuestions = helpers.encryptSecurityQuestions(reqBody.securityQuestions);
-    }
+      if (errorMessages) {
+        // clear any undesirable values from error message (bugfix for undefined values returned by callbacks)
+        errorMessages = errorMessages.filter((e) => e);
 
-    // validate password (if any)
-    helpers.validatePassword(context.args.data.password, next);
+        if (errorMessages.length) {
+          return next(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', { errorMessages: errorMessages.join() }));
+        }
+      }
+
+      // check if security questions should be encoded
+      if (reqBody.securityQuestions) {
+        reqBody.securityQuestions = helpers.encryptSecurityQuestions(reqBody.securityQuestions);
+      }
+
+      return next();
+    });
   });
 
   /**

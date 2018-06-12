@@ -58,10 +58,14 @@
   },
   "PASSWORD_RECOVERY_FAILED": {
     "defaultStatusCode": 400,
-    "messagePattern": "Information provided is incorrect"
+    "messagePattern": "Information provided is incorrect. Details: <%= details %>"
   },
   "INVALID_SECURITY_QUESTIONS": {
     "defaultStatusCode": 400,
-    "messagePattern": "Invalid security questions information"
+    "messagePattern": "Security questions must be different and answers can not be empty."
+  },
+  "REQUEST_VALIDATION_ERROR": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid request parameters. Details: <%= errorMessages %>"
   }
 }

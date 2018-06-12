@@ -17,16 +17,23 @@ module.exports = function (User) {
   /**
    * Validate security questions
    * @param questions
+   * @param callback
    */
-  User.helpers.validateSecurityQuestions = function (questions) {
+  User.helpers.validateSecurityQuestions = function (questions, callback) {
+    if (!questions) {
+      return callback();
+    }
+    // generate the generic error for security questions
+    let error = app.utils.apiError.getError('INVALID_SECURITY_QUESTIONS');
+
     // make sure there are 2 questions
     if (!questions || (questions && questions.length !== 2)) {
-      return false;
+      return callback(error);
     }
 
     // make sure that question names are different
     if (questions[0].question.toLowerCase() === questions[1].question.toLowerCase()) {
-      return false;
+      return callback(error);
     }
 
     // make sure that each question has a name and an answer
@@ -40,7 +47,7 @@ module.exports = function (User) {
       }
     });
 
-    return isValid;
+    return isValid ? callback() : callback(error);
   };
 
   /**
@@ -49,17 +56,13 @@ module.exports = function (User) {
    * @param callback
    */
   User.helpers.validatePassword = function (password, callback) {
-    let error;
     if (password) {
       const regExp = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).+$/;
-      if (
-        password.length < 6 ||
-        !(regExp.exec(password))
-      ) {
-        error = app.utils.apiError.getError('INVALID_PASSWORD', {length: 6});
+      if (password.length < 6 || !(regExp.exec(password))) {
+        return callback(app.utils.apiError.getError('INVALID_PASSWORD', {length: 6}));
       }
     }
-    callback(error);
+    return callback();
   };
 
   /**
@@ -73,6 +76,18 @@ module.exports = function (User) {
         answer: bcrypt.hashSync(item.answer, 10)
       };
     });
+  };
+
+  /**
+   * Collect error message from an api error
+   * @param error
+   * @param callback
+   */
+  User.helpers.collectErrorMessage = function (error, callback) {
+    if (error) {
+      return callback(null, error.message);
+    }
+    return callback();
   };
 
   /**
