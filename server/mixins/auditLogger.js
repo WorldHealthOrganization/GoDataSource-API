@@ -123,7 +123,7 @@ module.exports = function (Model) {
           action: app.models.auditLog.actions.created,
           modelName: Model.modelName,
           userId: user.id,
-          userRole: user.roles,
+          userRole: user.role,
           userIPAddress: user.iPAddress,
           changedData: []
         };
@@ -147,7 +147,7 @@ module.exports = function (Model) {
             action: app.models.auditLog.actions.modified,
             modelName: Model.modelName,
             userId: user.id,
-            userRole: user.roles,
+            userRole: user.role,
             userIPAddress: user.iPAddress,
             changedData: context.options.changedFields
           };
@@ -186,7 +186,7 @@ module.exports = function (Model) {
           action: app.models.auditLog.actions.removed,
           modelName: Model.modelName,
           userId: user.id,
-          userRole: user.roles,
+          userRole: user.role,
           userIPAddress: user.iPAddress,
           changedData: []
         };
