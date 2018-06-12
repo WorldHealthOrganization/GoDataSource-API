@@ -113,5 +113,16 @@
     "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL": "Certainty Level",
     "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL": "Risk Level",
     "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION": "Context of Transmission"
+
+    "LNG_SECURITY_QUESTION_1": "What was your childhood nickname?",
+    "LNG_SECURITY_QUESTION_2": "In what city or town did your mother and father meet?",
+    "LNG_SECURITY_QUESTION_3": "What is your favorite team?",
+    "LNG_SECURITY_QUESTION_4": "What was your favorite sport in high school?",
+    "LNG_SECURITY_QUESTION_5": "What was the house number and street name you lived in as a child?",
+    "LNG_SECURITY_QUESTION_6": "What primary school did you attend?",
+    "LNG_SECURITY_QUESTION_7": "What is your spouse or partner's mother's maiden name?",
+    "LNG_SECURITY_QUESTION_8": "What is the middle name of your oldest child?",
+    "LNG_SECURITY_QUESTION_9": "In what town or city was your first full time job?",
+    "LNG_SECURITY_QUESTION_10": "In what town or city did you meet your spouse/partner?"
   }
 }

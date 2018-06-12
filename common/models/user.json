@@ -44,7 +44,8 @@
           "string"
         ]
       }
-    }
+    },
+    "securityQuestions": ["securityQuestion"]
   },
   "indexes": {
     "firstName_index": {
@@ -121,7 +122,40 @@
       "principalId": "write_user_account",
       "permission": "ALLOW",
       "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "resetPassWithSecurityQuestion"
     }
   ],
-  "methods": {}
+  "methods": {
+    "resetPassWithSecurityQuestion": {
+      "accepts": [
+
+        {
+          "arg": "data",
+          "type": "object",
+          "http": {
+            "source": "body"
+          },
+          "description": "An object of model property name/value pairs"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "data",
+          "type": "object",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Return Security Questions",
+      "http": {
+        "verb": "post",
+        "path": "/reset-password-with-security-question"
+      }
+    }
+  }
 }
