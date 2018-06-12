@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const config = require('../../server/config.json');
+// used for encoding security questions
 const bcrypt = require('bcrypt');
 const async = require('async');
 
@@ -126,12 +127,20 @@ module.exports = function (User) {
     // shorter reference for error builder
     let buildError = app.utils.apiError.getError;
 
+    // validation error messages
+    let validationErrors = [];
+
     // make sure security questions/email are in the request
     if (!data.hasOwnProperty('questions')) {
-      return callback(buildError('PASSWORD_RECOVERY_FAILED', { details: 'Security questions are mandatory' }));
+      validationErrors.push('Security questions are mandatory');
     }
     if (!data.hasOwnProperty('email')) {
-      return callback(buildError('PASSWORD_RECOVERY_FAILED', { details: 'Email is mandatory' }));
+      validationErrors.push('Email is mandatory');
+    }
+
+    // if there are any validation errors, stop
+    if (validationErrors.length) {
+      return callback(buildError('REQUEST_VALIDATION_ERROR', { errorMessages: validationErrors.join() }));
     }
 
     // search for the user based on the email
