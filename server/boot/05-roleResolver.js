@@ -113,7 +113,7 @@ module.exports = function (app) {
     let userAuthData = context.remotingContext.req.authData.user;
 
     // if user has no outbreak ids restrictions, allow for all
-    if (Array.isArray(userAuthData.outbreakIds) && !userAuthData.outbreakIds.length) {
+    if (!userAuthData.outbreakIds || (Array.isArray(userAuthData.outbreakIds) && !userAuthData.outbreakIds.length)) {
       return callback(null, true);
     }
 
