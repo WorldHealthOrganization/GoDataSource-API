@@ -23,19 +23,25 @@ module.exports = function (app) {
    * @param callback
    */
   function hasPermission(permission, context, callback) {
+    // cache request authentication data reference
+    let authData = context.remotingContext.req.authData;
+
+    // flag that indicates whether the user has access to the given resource
+    // initially is assumed that the user has no access
     let hasAccess = false;
-    if (
-      context.remotingContext.req.authData &&
-      context.remotingContext.req.authData.user &&
-      context.remotingContext.req.authData.user.role &&
-      Array.isArray(context.remotingContext.req.authData.user.role.permissions)
-    ) {
-      hasAccess = context.remotingContext.req.authData.user.role.permissions.indexOf(permission) !== -1;
+
+    if (authData && authData.user && authData.user.roles && Array.isArray(authData.user.roles)) {
+      // accumulate user's permissions from all the roles in a single list
+      let userPermissions = authData.user.roles.reduce((permissions, role) => permissions.concat(role.permissions), []);
+
+      // check the permission against the user's permissions
+      hasAccess = userPermissions.indexOf(permission) !== -1;
     }
+
     if (!hasAccess) {
       storeMissingPermissionInContext(permission, context);
     }
-    callback(null, hasAccess);
+    return callback(null, hasAccess);
   }
 
   /**

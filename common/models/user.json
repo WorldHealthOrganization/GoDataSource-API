@@ -21,8 +21,8 @@
       "type": "string",
       "required": true
     },
-    "roleId": {
-      "type": "string",
+    "roleIds": {
+      "type": ["string"],
       "required": true
     },
     "locationIds": {
@@ -77,11 +77,6 @@
       "options": {
         "disableInclude": true
       }
-    },
-    "role": {
-      "type": "belongsTo",
-      "model": "role",
-      "foreignKey": "roleId"
     }
   },
   "acls": [
