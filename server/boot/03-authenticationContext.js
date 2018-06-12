@@ -1,5 +1,8 @@
 'use strict';
 
+// dependencies
+const async = require('async');
+
 /**
  * Build authentication context
  * @param app
@@ -19,16 +22,35 @@ module.exports = function (app) {
       }
 
       app.models.user
-        .findById(accessToken.userId, {include: 'role'})
+        .findById(accessToken.userId)
         .then(function (user) {
           context.req.authData = {
             user: user.toJSON()
           };
-          // add geographic restrictions on authentication context
-          user.getGeographicRestrictions(function (error, locationIds) {
-            context.req.authData.user.geographicRestrictions = locationIds;
-            next(error, locationIds);
-          });
+
+          async.parallel([
+            // add geographic restrictions on authentication context
+            (done) => user.getGeographicRestrictions((error, locationIds) => {
+              context.req.authData.user.geographicRestrictions = locationIds;
+              return done(error);
+            }),
+            // add roles and their permissions on authentication context
+            (done) => {
+              app.models.role
+                .find({
+                  where: {
+                    id: {
+                      inq: user.roleIds
+                    }
+                  }
+                })
+                .then((roles) => {
+                    context.req.authData.user.roles = roles;
+                    return done(null);
+                })
+                .catch(done);
+            }
+          ], (err) => next(err));
         })
         .catch(next);
     });

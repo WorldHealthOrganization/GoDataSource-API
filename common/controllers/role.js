@@ -31,7 +31,7 @@ module.exports = function (Role) {
    * Do not allow modifying own role
    */
   Role.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    if (context.instance.id === context.req.authData.user.roleId) {
+    if (context.req.authData.user.roleIds.indexOf(context.instance.id) !== -1) {
       return next(app.utils.apiError.getError('MODIFY_OWN_RECORD', {model: 'Role', id: context.instance.id}, 403));
     }
     next();

@@ -107,13 +107,13 @@ function initRolesCreation() {
               })
               .then(function (role) {
                 if (roleName === 'System Administrator') {
-                  defaultAdmin.roleId = role.id;
+                  defaultAdmin.roleIds = [role.id];
                 }
                 return 'created.';
               });
           } else if (rewrite) {
             if (roleName === 'System Administrator') {
-              defaultAdmin.roleId = role.id;
+              defaultAdmin.roleIds = [role.id];
             }
             return role
               .updateAttributes({
@@ -125,7 +125,7 @@ function initRolesCreation() {
               });
           } else {
             if (roleName === 'System Administrator') {
-              defaultAdmin.roleId = role.id;
+              defaultAdmin.roleIds = [role.id];
             }
             return 'skipped. Role already exists.';
           }

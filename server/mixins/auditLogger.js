@@ -83,7 +83,7 @@ module.exports = function (Model) {
     return {
       iPAddress: remoteAddress ? remoteAddress : 'unavailable',
       id: loggedInUser ? loggedInUser.id : 'unavailable',
-      role: loggedInUser ? loggedInUser.role.name : 'unavailable'
+      role: loggedInUser ? loggedInUser.roles.reduce((rolesStr, role) => rolesStr += `${role.name} `, ``) : 'unavailable'
     }
   }
 
@@ -123,7 +123,7 @@ module.exports = function (Model) {
           action: app.models.auditLog.actions.created,
           modelName: Model.modelName,
           userId: user.id,
-          userRole: user.role,
+          userRole: user.roles,
           userIPAddress: user.iPAddress,
           changedData: []
         };
@@ -147,7 +147,7 @@ module.exports = function (Model) {
             action: app.models.auditLog.actions.modified,
             modelName: Model.modelName,
             userId: user.id,
-            userRole: user.role,
+            userRole: user.roles,
             userIPAddress: user.iPAddress,
             changedData: context.options.changedFields
           };
@@ -186,7 +186,7 @@ module.exports = function (Model) {
           action: app.models.auditLog.actions.removed,
           modelName: Model.modelName,
           userId: user.id,
-          userRole: user.role,
+          userRole: user.roles,
           userIPAddress: user.iPAddress,
           changedData: []
         };
