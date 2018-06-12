@@ -22,7 +22,7 @@
       "required": true
     },
     "roleIds": {
-      "type": "string",
+      "type": ["string"],
       "required": true
     },
     "locationIds": {
