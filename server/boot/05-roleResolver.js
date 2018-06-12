@@ -137,7 +137,7 @@ module.exports = function (app) {
   /**
    * Roles are just groups of permissions, register role resolver for each permission
    */
-  Object.keys(Role.availablePermissions).forEach(function (permission) {
+  Role.availablePermissionsKeys.forEach(function (permission) {
 
     Role.registerResolver(permission, function (permission, context, callback) {
       let _callback = callback;
