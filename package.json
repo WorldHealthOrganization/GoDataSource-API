@@ -10,7 +10,8 @@
     "start": "node .",
     "posttest": "npm run lint && nsp check",
     "init-database": "node ./server/install/install.js init-database",
-    "migrate-database": "node ./server/install/install.js migrate-database"
+    "migrate-database": "node ./server/install/install.js migrate-database",
+    "reset-admin-password": "node ./server/install/install.js reset-admin-password"
   },
   "dependencies": {
     "async": "^2.6.0",

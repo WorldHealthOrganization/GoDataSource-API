@@ -109,7 +109,7 @@ module.exports = function (Role) {
   Role.validate('permissionIds', function available(error) {
     const allowedPermissions = Role.availablePermissionsKeys;
     const disallowedPermissions = [];
-    this.permissionIds.forEach(function (permission) {
+    this.permissionIds && Array.isArray(this.permissionIds) && this.permissionIds.forEach(function (permission) {
       if (allowedPermissions.indexOf(permission) === -1) {
         disallowedPermissions.push(permission);
       }

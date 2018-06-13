@@ -8,9 +8,8 @@ const defaultAdmin = {
   firstName: 'System',
   lastName: 'Administrator',
   email: 'admin@who.int',
-  username: 'admin',
   password: 'admin',
-  changePassword: true
+  passwordChange: true
 };
 const rolesMap = {
   'System Administrator': {
