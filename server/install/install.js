@@ -1,46 +1,56 @@
 'use strict';
 
 const async = require('async');
+const _ = require('lodash');
 const args = process.argv;
-const initDatabase = args.indexOf('init-database') !== -1;
-const migrateDatabase = args.indexOf('migrate-database') !== -1;
+// keep a list of supported install arguments
+const supportedArguments = ['init-database', 'migrate-database', 'reset-admin-password'];
+// keep a list of functions that will be run
+const runFunctions = [];
+// define a list of supported routines
+const routines = {
+  initDatabase: function () {
+    console.log('Setting Up Database Initialisation...');
+    [
+      require('./scripts/initDatabaseCollections'),
+      require('./scripts/migrateDatabaseCollections'),
+      require('./scripts/defaultRolesAndSysAdmin'),
+      require('./scripts/installLanguages'),
+      require('./scripts/defaultSystemSettings')
+    ].forEach(function (installScript) {
+      runFunctions.push(installScript);
+    });
+  },
+  migrateDatabase: function () {
+    console.log('Setting Up Database Migration...');
+    [
+      require('./scripts/migrateDatabaseCollections')
+    ].forEach(function (installScript) {
+      runFunctions.push(installScript);
+    });
+  },
+  resetAdminPassword: function () {
+    console.log('Resetting Administrative Password...');
+    [
+      require('./scripts/resetAdministrativePassword')
+    ].forEach(function (installScript) {
+      runFunctions.push(installScript);
+    });
+  }
+};
 
-const installFunctions = [];
+// check which routines should be run based on the passed arguments
+supportedArguments.forEach(function (supportedArgument) {
+  if (args.indexOf(supportedArgument) !== -1) {
+    routines[_.camelCase(supportedArgument)]();
+  }
+});
 
-function setupDatabaseInit() {
-  console.log('Setting Up Database Initialisation...');
-  [
-    require('./scripts/initDatabaseCollections'),
-    require('./scripts/migrateDatabaseCollections'),
-    require('./scripts/defaultRolesAndSysAdmin'),
-    require('./scripts/installLanguages'),
-    require('./scripts/defaultSystemSettings')
-  ].forEach(function (installScript) {
-    installFunctions.push(installScript);
-  });
-}
-
-function setupDatabaseMigration() {
-  console.log('Setting Up Database Migration...');
-  [
-    require('./scripts/migrateDatabaseCollections')
-  ].forEach(function (installScript) {
-    installFunctions.push(installScript);
-  });
-}
-
-if (initDatabase) {
-  setupDatabaseInit();
-}
-
-if (migrateDatabase) {
-  setupDatabaseMigration();
-}
-
-if (!installFunctions.length) {
-  console.log('No arguments passed. Nothing to do. Available arguments: init-database, migrate-database');
+// nothing set to run, no valid arguments passed
+if (!runFunctions.length) {
+  console.log(`No valid arguments passed. Nothing to do. Available arguments: ${supportedArguments.join(', ')}`);
 } else {
-  async.series(installFunctions, function (error) {
+  async.series(runFunctions, function (error) {
     if (error) {
       console.error(JSON.stringify(error));
       process.exit(1);
