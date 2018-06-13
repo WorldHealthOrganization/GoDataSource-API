@@ -24,6 +24,12 @@ module.exports = function (app) {
       app.models.user
         .findById(accessToken.userId)
         .then(function (user) {
+
+          // user not found, continue as if no token was sent
+          if (!user) {
+            return next();
+          }
+
           context.req.authData = {
             user: user.toJSON()
           };
@@ -45,8 +51,8 @@ module.exports = function (app) {
                   }
                 })
                 .then((roles) => {
-                    context.req.authData.user.roles = roles;
-                    return done(null);
+                  context.req.authData.user.roles = roles;
+                  return done(null);
                 })
                 .catch(done);
             }
