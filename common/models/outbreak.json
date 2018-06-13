@@ -40,7 +40,7 @@
     "periodOfFollowup": {
       "type": "number",
       "description": "Duration for the follow-up period in days. Default: 6 weeks = 42 days",
-      "default": 42
+      "required": true
     },
     "frequencyOfFollowUp": {
       "type": "number",
