@@ -14,7 +14,7 @@ module.exports = function (Role) {
     app.models.user
       .find({
         where: {
-          roleId: context.args.id
+          roleIds: context.args.id
         }
       })
       .then(function (users) {
