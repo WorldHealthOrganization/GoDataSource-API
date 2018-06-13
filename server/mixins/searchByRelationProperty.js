@@ -3,7 +3,7 @@
 const _ = require('lodash');
 
 /**
- * Attach controller for model
+ * Search by relation property
  * @param Model
  */
 module.exports = function (Model) {
