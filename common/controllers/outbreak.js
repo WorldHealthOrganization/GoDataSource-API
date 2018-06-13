@@ -24,7 +24,16 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('deleteById', function (context, modelInstance, next) {
     Outbreak.findById(context.args.id)
       .then(function (outbreak) {
-        if (outbreak && outbreak.active) {
+        if (outbreak) {
+          return app.models.User.count({
+            activeOutbreakId: outbreak.id
+          })
+        } else {
+          return 0;
+        }
+      })
+      .then(function (userCount) {
+        if (userCount) {
           next(app.utils.apiError.getError('DELETE_ACTIVE_OUTBREAK', {id: context.args.id}, 422));
         } else {
           next();
@@ -66,48 +75,6 @@ module.exports = function (Outbreak) {
     } else {
       return next();
     }
-  });
-
-  /**
-   * Allow only one active outbreak on create
-   */
-  Outbreak.beforeRemote('create', function (context, modelInstance, next) {
-    helpers.validateActiveOutbreak(context, null, next);
-  });
-
-  /**
-   * Allow only one active outbreak on update
-   */
-  Outbreak.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    helpers.validateActiveOutbreak(context, context.instance.id, next);
-  });
-
-  /**
-   * Apply geo-restrictions on case list
-   */
-  Outbreak.beforeRemote('prototype.__get__cases', function (context, modelInstance, next) {
-    helpers.queryWithGeoRestrictions(context, false, next);
-  });
-
-  /**
-   * Apply geo-restrictions on case count
-   */
-  Outbreak.beforeRemote('prototype.__count__cases', function (context, modelInstance, next) {
-    helpers.queryWithGeoRestrictions(context, true, next);
-  });
-
-  /**
-   * Apply geo-restrictions on contact list
-   */
-  Outbreak.beforeRemote('prototype.__get__contacts', function (context, modelInstance, next) {
-    helpers.queryWithGeoRestrictions(context, false, next);
-  });
-
-  /**
-   * Apply geo-restrictions on contact count
-   */
-  Outbreak.beforeRemote('prototype.__count__contacts', function (context, modelInstance, next) {
-    helpers.queryWithGeoRestrictions(context, true, next);
   });
 
   /**

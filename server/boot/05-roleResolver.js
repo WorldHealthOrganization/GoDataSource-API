@@ -110,6 +110,7 @@ module.exports = function (app) {
 
   /**
    * Verify if the user has permission to access an outbreak
+   * Verify if the user does POST/PUT/DELETE actions on the active outbreak
    * @param permission
    * @param context
    * @param callback
@@ -118,23 +119,34 @@ module.exports = function (app) {
     // cache user's authentication data ref
     let userAuthData = context.remotingContext.req.authData.user;
 
-    // if user has no outbreak ids restrictions, allow for all
-    if (!userAuthData.outbreakIds || (Array.isArray(userAuthData.outbreakIds) && !userAuthData.outbreakIds.length)) {
-      return callback(null, true);
-    }
+    // initialize access error
+    let accessErrors = [];
 
     // define regex for extracting outbreak id
     let outbreakIdRegExp = new RegExp(`^\\/api\\/outbreaks\\/([^\\/?]+)`);
-
     // extract id from request
-    const outbreakIdMatch = context.remotingContext.req.originalUrl.match(outbreakIdRegExp);
+    let outbreakIdMatch = context.remotingContext.req.originalUrl.match(outbreakIdRegExp);
 
+    // check if the request is for outbreak or subresource
     if (outbreakIdMatch && outbreakIdMatch[1]) {
-      // outbreak id match found, check if user has access to the given outbreak
-      if (userAuthData.outbreakIds.indexOf(outbreakIdMatch[1]) === -1) {
-        storeMissingPermissionInContext(`${permission} (no access to the given outbreak)`, context);
-        return callback(null, false);
+      // check if user has outbreak ids restrictions and check if he has access to the given outbreak
+      if (userAuthData.outbreakIds &&
+        Array.isArray(userAuthData.outbreakIds) &&
+        userAuthData.outbreakIds.length &&
+        userAuthData.outbreakIds.indexOf(outbreakIdMatch[1]) === -1
+      ) {
+        accessErrors.push(`no access to the given outbreak`);
       }
+
+      // check if the user tries to do POST/PUT/DELETE on another outbreak than the active one
+      if(context.remotingContext.req.method !== 'GET' && outbreakIdMatch[1] !== userAuthData.activeOutbreakId) {
+        accessErrors.push(`access to POST/PUT/DELETE actions is granted only for the active outbreak`);
+      }
+    }
+
+    if(accessErrors.length) {
+      storeMissingPermissionInContext(`${permission} (${accessErrors.join('; ')})`, context);
+      return callback(null, false);
     }
 
     return callback(null, true);
