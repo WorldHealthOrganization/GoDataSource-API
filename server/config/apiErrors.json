@@ -40,18 +40,6 @@
   "MISSING_REQUIRED_PERMISSION": {
     "messagePattern": "Logged in user must have (at least) one of the following permissions to access this endpoint: <%= permissions %>."
   },
-  "GEOGRAPHIC_ACCESS_RESTRICTION": {
-    "defaultStatusCode": 403,
-    "messagePattern": "Access denied to model \"<%= model %>\" id \"<%= id %>\" based on geographic access restrictions. Record belongs to location with id \"<%= locationId%>\" but user has access only to the following locations: \"<%= locationIds %>\""
-  },
-  "GEOGRAPHIC_CREATE_RESTRICTION": {
-    "defaultStatusCode": 403,
-    "messagePattern": "Cannot create model \"<%= model %>\" in the specified location (id \"<%= locationId%>\") based on geographic access restrictions. User has access only to the following locations: \"<%= locationIds %>\""
-  },
-  "GEOGRAPHIC_MODIFY_RESTRICTION": {
-    "defaultStatusCode": 403,
-    "messagePattern": "Cannot set location to id \"<%= locationId%>\" for data related to model \"<%= model %>\" id \"<%= id %>\" based on geographic access restrictions. User has access only to the following locations: \"<%= locationIds %>\""
-  },
   "INVALID_PASSWORD": {
     "defaultStatusCode": 400,
     "messagePattern": "The password must be at least <%= length %> characters in length and it must contain at least 1 lowercase letter, 1 uppercase letter, 1 digit and 1 special character."

@@ -25,9 +25,6 @@
       "type": ["string"],
       "required": true
     },
-    "locationIds": {
-      "type": ["string"]
-    },
     "outbreakIds": {
       "type": ["string"]
     },

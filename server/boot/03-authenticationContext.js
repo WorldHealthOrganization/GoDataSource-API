@@ -35,11 +35,6 @@ module.exports = function (app) {
           };
 
           async.parallel([
-            // add geographic restrictions on authentication context
-            (done) => user.getGeographicRestrictions((error, locationIds) => {
-              context.req.authData.user.geographicRestrictions = locationIds;
-              return done(error);
-            }),
             // add roles and their permissionIds on authentication context
             (done) => {
               app.models.role

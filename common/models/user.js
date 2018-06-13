@@ -117,20 +117,4 @@ module.exports = function (User) {
       })
     });
   });
-
-  /**
-   * Find geographic restrictions for an user (if any)
-   * @param callback (error, false|locations)
-   */
-  User.prototype.getGeographicRestrictions = function (callback) {
-    //  if user has a location restriction
-    if (this.locationIds) {
-      // find sub-locations for those locations
-      app.models.location
-        .getSubLocations(this.locationIds, [], callback);
-    } else {
-      // no locations restrictions
-      callback(null, false);
-    }
-  }
 };
