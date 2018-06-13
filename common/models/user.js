@@ -14,6 +14,15 @@ module.exports = function (User) {
   // initialize model helpers
   User.helpers = {};
 
+  // define a list of custom (non-loopback-supported) relations
+  User.customRelations = {
+    roles: {
+      type: 'belongsToMany',
+      model: 'role',
+      foreignKey: 'roleIds'
+    }
+  };
+
   /**
    * Validate security questions
    * @param questions
