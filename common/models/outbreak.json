@@ -42,10 +42,6 @@
       "type": "number",
       "required": true
     },
-    "displayDateFormat": {
-      "type": "string",
-      "default": "yyyy-mm-dd"
-    },
     "noDaysAmongContacts": {
       "type": "number",
       "required": true,
@@ -100,30 +96,6 @@
     "labResultsTemplate": {
       "type": [
         "templateQuestion"
-      ],
-      "required": true
-    },
-    "caseClassification": {
-      "type": [
-        "string"
-      ],
-      "required": true
-    },
-    "vaccinationStatus": {
-      "type": [
-        "string"
-      ],
-      "required": true
-    },
-    "nutritionalStatus": {
-      "type": [
-        "string"
-      ],
-      "required": true
-    },
-    "pregnancyInformation": {
-      "type": [
-        "string"
       ],
       "required": true
     },
