@@ -48,10 +48,10 @@ module.exports = function (app) {
     let hasAccess = false;
 
     if (authData && authData.user && authData.user.roles && Array.isArray(authData.user.roles)) {
-      // accumulate user's permissions from all the roles in a single list
-      let userPermissions = authData.user.roles.reduce((permissions, role) => permissions.concat(role.permissions), []);
+      // accumulate user's permissionIds from all the roles in a single list
+      let userPermissions = authData.user.roles.reduce((permissions, role) => permissions.concat(role.permissionIds), []);
 
-      // check the permission against the user's permissions
+      // check the permission against the user's permissionIds
       hasAccess = userPermissions.indexOf(permission) !== -1;
     }
 

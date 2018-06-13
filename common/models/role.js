@@ -104,12 +104,12 @@ module.exports = function (Role) {
   });
 
   /**
-   * Check the list of assigned permissions, make sure they are all valid
+   * Check the list of assigned permissionIds, make sure they are all valid
    */
-  Role.validate('permissions', function available(error) {
+  Role.validate('permissionIds', function available(error) {
     const allowedPermissions = Role.availablePermissionsKeys;
     const disallowedPermissions = [];
-    this.permissions.forEach(function (permission) {
+    this.permissionIds.forEach(function (permission) {
       if (allowedPermissions.indexOf(permission) === -1) {
         disallowedPermissions.push(permission);
       }
