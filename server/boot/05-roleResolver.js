@@ -17,6 +17,23 @@ module.exports = function (app) {
   }
 
   /**
+   * Store a business logic access errors in context for better authentication error handling
+   * @param permission
+   * @param context
+   */
+  function storeAccessErrorsInContext(accessError, context) {
+    if (!context.remotingContext.req.accessErrors) {
+      context.remotingContext.req.accessErrors = [];
+    }
+
+    if (Array.isArray(accessError)) {
+      context.remotingContext.req.accessErrors = context.remotingContext.req.accessErrors.concat(accessError)
+    } else {
+      context.remotingContext.req.accessErrors.push(accessError);
+    }
+  }
+
+  /**
    * Verify if a user has the correct access permission
    * @param permission
    * @param context
@@ -135,17 +152,18 @@ module.exports = function (app) {
         userAuthData.outbreakIds.length &&
         userAuthData.outbreakIds.indexOf(outbreakIdMatch[1]) === -1
       ) {
-        accessErrors.push(`no access to the given outbreak`);
+        accessErrors.push(`access denied to the given outbreak; the outbreak is not set as one of the user's accessible outbreaks`);
       }
 
       // check if the user tries to do POST/PUT/DELETE on another outbreak than the active one
-      if(context.remotingContext.req.method !== 'GET' && outbreakIdMatch[1] !== userAuthData.activeOutbreakId) {
+      if (context.remotingContext.req.method !== 'GET' && outbreakIdMatch[1] !== userAuthData.activeOutbreakId) {
         accessErrors.push(`access to POST/PUT/DELETE actions is granted only for the active outbreak`);
       }
     }
 
-    if(accessErrors.length) {
-      storeMissingPermissionInContext(`${permission} (${accessErrors.join('; ')})`, context);
+    // check if there are access errors
+    if (accessErrors.length) {
+      storeAccessErrorsInContext(accessErrors, context);
       return callback(null, false);
     }
 
@@ -162,8 +180,8 @@ module.exports = function (app) {
 
       /**
        * DEPRECATED feature
-        // if the permission requires ownership of the object
-        if (permission.indexOf('_own_') !== -1) {
+       // if the permission requires ownership of the object
+       if (permission.indexOf('_own_') !== -1) {
           // after verifying the user has the permission, also verify ownership
           _callback = function (error, hasPermission) {
             if (error || !hasPermission) {

@@ -67,5 +67,8 @@
   "REQUEST_VALIDATION_ERROR": {
     "defaultStatusCode": 400,
     "messagePattern": "Invalid request parameters. Details: <%= errorMessages %>"
+  },
+  "ACCESS_DENIED": {
+    "messagePattern": "Logged in user doesn't have access this endpoint: <%= accessErrors %>."
   }
 }
