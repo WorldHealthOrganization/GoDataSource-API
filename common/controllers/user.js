@@ -37,7 +37,7 @@ module.exports = function (User) {
   });
 
   /**
-   * User cannot change its own role or location +
+   * User cannot change its own roles +
    * Validate user password
    */
   User.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
@@ -45,8 +45,7 @@ module.exports = function (User) {
     let reqBody = context.args.data;
 
     if (context.instance.id === context.req.authData.user.id) {
-      delete reqBody.roleId;
-      delete reqBody.locationIds;
+      delete reqBody.roleIds;
     }
 
     // validation checks for password and security questions
