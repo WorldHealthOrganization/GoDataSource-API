@@ -197,12 +197,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_own_case",
-      "permission": "ALLOW",
-      "property": "__create__cases"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__findById__cases"
@@ -215,19 +209,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_own_case",
-      "permission": "ALLOW",
-      "property": "__updateById__cases"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__destroyById__cases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_own_case",
       "permission": "ALLOW",
       "property": "__destroyById__cases"
     },
@@ -251,12 +233,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_own_contact",
-      "permission": "ALLOW",
-      "property": "__create__contacts"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "__findById__contacts"
@@ -269,19 +245,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_own_contact",
-      "permission": "ALLOW",
-      "property": "__updateById__contacts"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "__destroyById__contacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_own_contact",
       "permission": "ALLOW",
       "property": "__destroyById__contacts"
     },
@@ -305,12 +269,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_own_case",
-      "permission": "ALLOW",
-      "property": "__create__cases__labResults"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__findById__cases__labResults"
@@ -323,19 +281,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_own_case",
-      "permission": "ALLOW",
-      "property": "__updateById__cases__labResults"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__destroyById__cases__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_own_case",
       "permission": "ALLOW",
       "property": "__destroyById__cases__labResults"
     },
@@ -401,19 +347,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_own_case",
-      "permission": "ALLOW",
-      "property": "createCaseRelationship"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "createContactRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_own_contact",
       "permission": "ALLOW",
       "property": "createContactRelationship"
     },
@@ -437,19 +371,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_own_case",
-      "permission": "ALLOW",
-      "property": "updateCaseRelationship"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "updateContactRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_own_contact",
       "permission": "ALLOW",
       "property": "updateContactRelationship"
     },
@@ -461,19 +383,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_own_case",
-      "permission": "ALLOW",
-      "property": "deleteCaseRelationship"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "deleteContactRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_own_contact",
       "permission": "ALLOW",
       "property": "deleteContactRelationship"
     },
@@ -497,9 +407,9 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_own_contact",
+      "principalId": "write_case",
       "permission": "ALLOW",
-      "property": "convertContactToCase"
+      "property": "convertCaseToContact"
     },
     {
       "principalType": "ROLE",
@@ -510,12 +420,6 @@
     {
       "principalType": "ROLE",
       "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "restoreCase"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_own_case",
       "permission": "ALLOW",
       "property": "restoreCase"
     }
@@ -941,6 +845,29 @@
       "http": {
         "verb": "post",
         "path": "/contacts/:nk/convert-to-case"
+      }
+    },
+    "prototype.convertCaseToContact": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "contact",
+          "type": "contact",
+          "description": "Contact resulted from the conversion",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Converts case to contact.",
+      "http": {
+        "verb": "post",
+        "path": "/cases/:nk/convert-to-contact"
       }
     },
     "prototype.getLocations": {

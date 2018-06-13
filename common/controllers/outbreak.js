@@ -273,6 +273,102 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Convert a case to a contact
+   * @param caseId
+   * @param callback
+   */
+  Outbreak.prototype.convertCaseToContact = function (caseId, callback) {
+    let updateRelations = [];
+    let convertedContact;
+    let caseInstance;
+
+    // override default scope to allow switching the type
+    const defaultScope = app.models.case.defaultScope;
+    app.models.case.defaultScope = function () {
+    };
+
+    app.models.case
+      .findOne({
+        where: {
+          type: 'case',
+          id: caseId
+        }
+      })
+      .then(function (caseModel) {
+        if (!caseModel) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.case.modelName, id: caseId});
+        }
+
+        // keep the caseModel as we will do actions on it
+        caseInstance = caseModel;
+
+        // in order for a case to be converted to a contact it must be related to at least another case
+        // check relations
+        return app.models.relationship
+          .count({
+            'and': [
+              {
+                'persons.id': caseId
+              },
+              {
+                'persons': {
+                  'elemMatch': {
+                    'type': 'case',
+                    'id': {
+                      '$ne': caseId
+                    }
+                  }
+                }
+              }
+            ]
+          });
+      })
+      .then(function (relationsNumber) {
+        if (!relationsNumber) {
+          // the case doesn't have relations with other cases; stop conversion
+          throw app.utils.apiError.getError('INVALID_CASE_RELATIONSHIP', {id: caseId});
+        }
+
+        // the case has relations with other cases; proceed with the conversion
+        return caseInstance.updateAttribute('type', 'contact');
+      })
+      .then(function (contact) {
+        convertedContact = contact;
+        // after updating the case, find it's relations
+        return app.models.relationship
+          .find({
+            where: {
+              "persons.id": caseId
+            }
+          });
+      })
+      .then(function (relations) {
+        // update relations
+        relations.forEach(function (relation) {
+          let persons = [];
+          relation.persons.forEach(function (person) {
+            // for every occurrence of current contact
+            if (person.id === caseId) {
+              // update type to match the new one
+              person.type = 'contact';
+            }
+            persons.push(person);
+          });
+          updateRelations.push(relation.updateAttributes({persons: persons}));
+        });
+        return Promise.all(updateRelations);
+      })
+      .then(function () {
+        callback(null, convertedContact);
+      })
+      .catch(callback)
+      .finally(function () {
+        // restore default scope
+        app.models.case.defaultScope = defaultScope;
+      });
+  };
+
+  /**
    * Retrieve the list of location + sublocations for the Outbreak
    * @param callback
    */
