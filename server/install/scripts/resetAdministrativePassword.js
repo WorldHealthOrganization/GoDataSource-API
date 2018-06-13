@@ -10,7 +10,7 @@ const defaultAdmin = {
   lastName: 'Administrator',
   email: 'admin@who.int',
   password: 'admin',
-  changePassword: true
+  passwordChange: true
 };
 
 const defaultSystemAdminRole = {
@@ -32,7 +32,7 @@ const defaultSystemAdminRole = {
  * @param callback
  */
 function run(callback) {
-  // try to fins built-in system admin role
+  // try to find built-in system admin role
   Role
     .findOne({
       where: {

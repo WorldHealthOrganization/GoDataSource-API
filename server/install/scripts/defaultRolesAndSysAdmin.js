@@ -9,7 +9,7 @@ const defaultAdmin = {
   lastName: 'Administrator',
   email: 'admin@who.int',
   password: 'admin',
-  changePassword: true
+  passwordChange: true
 };
 const rolesMap = {
   'System Administrator': {
