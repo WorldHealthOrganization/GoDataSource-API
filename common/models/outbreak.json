@@ -62,10 +62,6 @@
       "required": true,
       "description": "Number of contacts used to determine the proportion of cases with less than X contacts"
     },
-    "highExposureDuration": {
-      "type": "number",
-      "required": true
-    },
     "fieldsToDisplayNode": {
       "type": ["string"]
     },
