@@ -34,7 +34,7 @@ module.exports = function (app) {
               context.req.authData.user.geographicRestrictions = locationIds;
               return done(error);
             }),
-            // add roles and their permissions on authentication context
+            // add roles and their permissionIds on authentication context
             (done) => {
               app.models.role
                 .find({

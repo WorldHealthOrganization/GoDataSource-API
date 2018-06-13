@@ -15,7 +15,7 @@ const defaultAdmin = {
 const rolesMap = {
   'System Administrator': {
     description: 'This is a built in role that manages user accounts, and configuration of the system.',
-    permissions: [
+    permissionIds: [
       'read_sys_config',
       'write_sys_config',
       'write_reference_data',
@@ -27,14 +27,14 @@ const rolesMap = {
   },
   'GO.Data Administrator': {
     description: 'This role has access to configuration of the Go.Data for specific outbreak.',
-    permissions: [
+    permissionIds: [
       'read_outbreak',
       'write_outbreak'
     ]
   },
   'Epidemiologist': {
     description: 'This is a built in role that analyses data to understand disease evolution and inform response.',
-    permissions: [
+    permissionIds: [
       'read_outbreak',
       'read_case',
       'write_case',
@@ -46,7 +46,7 @@ const rolesMap = {
   },
   'Data Manager': {
     description: 'This is a built in role that provides support and coordinates the collection of all data related to the outbreak.',
-    permissions: [
+    permissionIds: [
       'read_outbreak',
       'write_outbreak',
       'read_case',
@@ -58,7 +58,7 @@ const rolesMap = {
   },
   'Contact Tracing Team Lead': {
     description: 'This is a built in role that coordinates the work of multiple Contact Tracers.',
-    permissions: [
+    permissionIds: [
       'read_outbreak',
       'read_report',
       'read_case',
@@ -71,7 +71,7 @@ const rolesMap = {
   },
   'Contact Tracer': {
     description: 'This is a built in role that follows up with contacts and monitors their health.',
-    permissions: [
+    permissionIds: [
       'read_case',
       'write_case',
       'read_contact',
@@ -103,7 +103,7 @@ function initRolesCreation() {
               .create({
                 name: roleName,
                 description: rolesMap[roleName].description,
-                permissions: rolesMap[roleName].permissions
+                permissionIds: rolesMap[roleName].permissionIds
               })
               .then(function (role) {
                 if (roleName === 'System Administrator') {
@@ -118,7 +118,7 @@ function initRolesCreation() {
             return role
               .updateAttributes({
                 description: rolesMap[roleName].description,
-                permissions: rolesMap[roleName].permissions
+                permissionIds: rolesMap[roleName].permissionIds
               })
               .then(function () {
                 return 'updated.';
