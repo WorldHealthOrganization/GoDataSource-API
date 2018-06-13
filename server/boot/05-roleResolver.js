@@ -17,6 +17,23 @@ module.exports = function (app) {
   }
 
   /**
+   * Store a business logic access errors in context for better authentication error handling
+   * @param permission
+   * @param context
+   */
+  function storeAccessErrorsInContext(accessError, context) {
+    if (!context.remotingContext.req.accessErrors) {
+      context.remotingContext.req.accessErrors = [];
+    }
+
+    if (Array.isArray(accessError)) {
+      context.remotingContext.req.accessErrors = context.remotingContext.req.accessErrors.concat(accessError)
+    } else {
+      context.remotingContext.req.accessErrors.push(accessError);
+    }
+  }
+
+  /**
    * Verify if a user has the correct access permission
    * @param permission
    * @param context
@@ -110,6 +127,7 @@ module.exports = function (app) {
 
   /**
    * Verify if the user has permission to access an outbreak
+   * Verify if the user does POST/PUT/DELETE actions on the active outbreak
    * @param permission
    * @param context
    * @param callback
@@ -118,23 +136,35 @@ module.exports = function (app) {
     // cache user's authentication data ref
     let userAuthData = context.remotingContext.req.authData.user;
 
-    // if user has no outbreak ids restrictions, allow for all
-    if (!userAuthData.outbreakIds || (Array.isArray(userAuthData.outbreakIds) && !userAuthData.outbreakIds.length)) {
-      return callback(null, true);
-    }
+    // initialize access error
+    let accessErrors = [];
 
     // define regex for extracting outbreak id
     let outbreakIdRegExp = new RegExp(`^\\/api\\/outbreaks\\/([^\\/?]+)`);
-
     // extract id from request
-    const outbreakIdMatch = context.remotingContext.req.originalUrl.match(outbreakIdRegExp);
+    let outbreakIdMatch = context.remotingContext.req.originalUrl.match(outbreakIdRegExp);
 
+    // check if the request is for outbreak or subresource
     if (outbreakIdMatch && outbreakIdMatch[1]) {
-      // outbreak id match found, check if user has access to the given outbreak
-      if (userAuthData.outbreakIds.indexOf(outbreakIdMatch[1]) === -1) {
-        storeMissingPermissionInContext(`${permission} (no access to the given outbreak)`, context);
-        return callback(null, false);
+      // check if user has outbreak ids restrictions and check if he has access to the given outbreak
+      if (userAuthData.outbreakIds &&
+        Array.isArray(userAuthData.outbreakIds) &&
+        userAuthData.outbreakIds.length &&
+        userAuthData.outbreakIds.indexOf(outbreakIdMatch[1]) === -1
+      ) {
+        accessErrors.push(`access denied to the given outbreak; the outbreak is not set as one of the user's accessible outbreaks`);
       }
+
+      // check if the user tries to do POST/PUT/DELETE on another outbreak than the active one
+      if (context.remotingContext.req.method !== 'GET' && outbreakIdMatch[1] !== userAuthData.activeOutbreakId) {
+        accessErrors.push(`access to POST/PUT/DELETE actions is granted only for the active outbreak`);
+      }
+    }
+
+    // check if there are access errors
+    if (accessErrors.length) {
+      storeAccessErrorsInContext(accessErrors, context);
+      return callback(null, false);
     }
 
     return callback(null, true);
@@ -150,8 +180,8 @@ module.exports = function (app) {
 
       /**
        * DEPRECATED feature
-        // if the permission requires ownership of the object
-        if (permission.indexOf('_own_') !== -1) {
+       // if the permission requires ownership of the object
+       if (permission.indexOf('_own_') !== -1) {
           // after verifying the user has the permission, also verify ownership
           _callback = function (error, hasPermission) {
             if (error || !hasPermission) {

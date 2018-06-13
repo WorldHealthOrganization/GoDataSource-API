@@ -21,10 +21,6 @@
       "type": "string",
       "required": true
     },
-    "active": {
-      "type": "boolean",
-      "default": false
-    },
     "startDate": {
       "type": "date",
       "required": true
@@ -143,9 +139,6 @@
     },
     "disease_index": {
       "disease": 1
-    },
-    "active_index": {
-      "active": 1
     },
     "startDate_index": {
       "startDate": 1

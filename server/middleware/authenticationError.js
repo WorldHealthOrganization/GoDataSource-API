@@ -14,11 +14,23 @@ function authenticationErrorHandler(error, request, response, next) {
   if (
     error &&
     error.code === 'AUTHORIZATION_REQUIRED' &&
-    request.authData &&
-    Array.isArray(request.missingPermissions) &&
-    request.missingPermissions.length
+    request.authData
   ) {
-    error = app.utils.apiError.getError('MISSING_REQUIRED_PERMISSION', {permissions: request.missingPermissions.join(', ')}, 403);
+    // check for missing permission
+    if (
+      Array.isArray(request.missingPermissions) &&
+      request.missingPermissions.length
+    ) {
+      error = app.utils.apiError.getError('MISSING_REQUIRED_PERMISSION', {permissions: request.missingPermissions.join(', ')}, 403);
+    }
+
+    // check for access errors
+    if (
+      Array.isArray(request.accessErrors) &&
+      request.accessErrors.length
+    ) {
+      error = app.utils.apiError.getError('ACCESS_DENIED', {accessErrors: request.accessErrors.join(', ')}, 403);
+    }
   }
   next(error);
 }

@@ -31,6 +31,9 @@
     "outbreakIds": {
       "type": ["string"]
     },
+    "activeOutbreakId": {
+      "type": "string"
+    },
     "language": {
       "type": "string"
     },
@@ -78,6 +81,11 @@
       "options": {
         "disableInclude": true
       }
+    },
+    "activeOutbreak": {
+      "type": "belongsTo",
+      "model": "outbreak",
+      "foreignKey": "activeOutbreakId"
     }
   },
   "acls": [
