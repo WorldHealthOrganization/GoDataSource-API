@@ -58,5 +58,9 @@
   },
   "ACCESS_DENIED": {
     "messagePattern": "Logged in user doesn't have access this endpoint: <%= accessErrors %>."
+  },
+  "INVALID_CASE_RELATIONSHIP": {
+    "defaultStatusCode": 422,
+    "messagePattern": "The case \"<%= id %>\" needs to be related to another case in order to be able to convert it to a contact"
   }
 }
