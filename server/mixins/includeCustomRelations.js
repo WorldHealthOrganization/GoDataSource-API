@@ -114,12 +114,12 @@ module.exports = function (Model) {
   // if the model has custom relations defined
   if (Model.customRelations) {
     // on access, prepare custom relations
-    Model.observe('access', function p(context, next){
+    Model.observe('access', function prepareRelations(context, next){
       prepareCustomRelations(context, next);
     });
 
     // on load, include custom relations
-    Model.observe('loaded', function z(context, next){
+    Model.observe('loaded', function includeRelations(context, next){
       includeCustomRelations(context, context.data)
         .then(function () {
           next();
