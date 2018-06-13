@@ -17,8 +17,8 @@
       "type": "string",
       "required": true
     },
-    "locationId": {
-      "type": "string",
+    "countries": {
+      "type": ["string"],
       "required": true
     },
     "startDate": {
@@ -35,7 +35,7 @@
     },
     "periodOfFollowup": {
       "type": "number",
-      "description": "Duration for the follow-up period in days. Default: 6 weeks = 42 days",
+      "description": "Duration for the follow-up period in days",
       "required": true
     },
     "frequencyOfFollowUp": {
