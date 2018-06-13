@@ -39,7 +39,7 @@
     },
     "passwordChange": {
       "type": "boolean",
-      "default": false
+      "default": true
     },
     "settings": {
       "type": {

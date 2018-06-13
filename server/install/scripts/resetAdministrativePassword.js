@@ -87,12 +87,14 @@ function run(callback) {
             // if it does not, update roles and set default password
             return systemAdmin.updateAttributes({
               roleIds: systemAdmin.roleIds.concat([systemAdminRole.id]),
-              password: defaultAdmin.password
+              password: defaultAdmin.password,
+              passwordChange: true
             });
           }
           // system admin has all the required permissions, update only the password
           return systemAdmin.updateAttributes({
-            password: defaultAdmin.password
+            password: defaultAdmin.password,
+            passwordChange: true
           });
         })
     })
