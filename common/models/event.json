@@ -25,22 +25,14 @@
       "default": "event",
       "readOnly": true
     },
-    "dateOfInfection": {
-      "type": "date"
-    },
     "dateOfOnset": {
       "type": "date"
     },
     "isDateOfOnsetApproximate": {
       "type": "boolean"
     },
-    "dateOfOutcome": {
-      "type": "date"
-    },
-    "incubationDates": ["date"],
-    "classification": {
-      "type": "string",
-      "required": false
+    "description": {
+      "type": "string"
     },
     "gender": {
       "type": "string",
