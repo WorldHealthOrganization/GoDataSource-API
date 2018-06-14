@@ -26,7 +26,7 @@
   },
   "passwordReset": {
     "ttl": 900,
-    "path": "/reset-password",
+    "path": "/auth/reset-password",
     "from": "no-reply@who.int",
     "subject": "Password Reset",
     "text": "Click <a href='<%= resetHref %>'>here</a> to reset your password."
