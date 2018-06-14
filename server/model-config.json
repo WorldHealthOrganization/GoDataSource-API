@@ -157,7 +157,7 @@
     "public": false
   },
   "person": {
-    "dataSource": null,
+    "dataSource": "mongoDb",
     "public": false
   },
   "document": {
@@ -187,5 +187,9 @@
   "securityQuestion": {
     "dataSource": "memory",
     "public": true
+  },
+  "event": {
+    "dataSource": "mongoDb",
+    "public": false
   }
 }

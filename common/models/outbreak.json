@@ -175,12 +175,6 @@
       "principalType": "ROLE",
       "principalId": "read_outbreak",
       "permission": "ALLOW",
-      "property": "getAvailableDateFormats"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
       "property": "count"
     },
     {
@@ -341,6 +335,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "findEventRelationships"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_case",
       "permission": "ALLOW",
       "property": "createCaseRelationship"
@@ -353,6 +353,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "createEventRelationship"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "getCaseRelationship"
@@ -362,6 +368,12 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "getContactRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "getEventRelationship"
     },
     {
       "principalType": "ROLE",
@@ -379,6 +391,12 @@
       "principalType": "ROLE",
       "principalId": "write_case",
       "permission": "ALLOW",
+      "property": "updateEventRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
       "property": "deleteCaseRelationship"
     },
     {
@@ -386,6 +404,12 @@
       "principalId": "write_contact",
       "permission": "ALLOW",
       "property": "deleteContactRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "deleteEventRelationship"
     },
     {
       "principalType": "ROLE",
@@ -398,6 +422,12 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "countContactRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countEventRelationships"
     },
     {
       "principalType": "ROLE",
@@ -422,28 +452,45 @@
       "principalId": "write_case",
       "permission": "ALLOW",
       "property": "restoreCase"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__get__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "__create__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__findById__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "__updateById__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "__destroyById__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__count__events"
     }
   ],
   "methods": {
-    "getAvailableDateFormats": {
-      "accepts": [],
-      "returns": [
-        {
-          "arg": "dateFormats",
-          "type": [
-            "string"
-          ],
-          "description": "List of available date formats",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Retrieve the list of available date formats.",
-      "http": {
-        "verb": "get",
-        "path": "/available-date-formats"
-      }
-    },
     "prototype.findCaseRelationships": {
       "accepts": [
         {
@@ -822,6 +869,196 @@
       "http": {
         "verb": "get",
         "path": "/contacts/:nk/relationships/count"
+      }
+    },
+    "prototype.findEventRelationships": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationships",
+          "type": [
+            "relationship"
+          ],
+          "description": "Relationships of a event",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries relationships of event.",
+      "http": {
+        "verb": "get",
+        "path": "/events/:nk/relationships"
+      }
+    },
+    "prototype.createEventRelationship": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "relationship",
+          "description": "Model instance data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationship",
+          "type": "relationship",
+          "description": "Created Relationship",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Creates a new instance in relationships of this model.",
+      "http": {
+        "verb": "post",
+        "path": "/events/:nk/relationships"
+      }
+    },
+    "prototype.getEventRelationship": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for relationships."
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationship",
+          "type": "relationship",
+          "description": "Relationship of a event",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Find a related item by id for relationships.",
+      "http": {
+        "verb": "get",
+        "path": "/events/:nk/relationships/:fk"
+      }
+    },
+    "prototype.updateEventRelationship": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for event"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for relationships."
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "relationship",
+          "description": "Model instance data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationship",
+          "type": "relationship",
+          "description": "Updated Relationship",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Update a related item by id for relationships.",
+      "http": {
+        "verb": "put",
+        "path": "/events/:nk/relationships/:fk"
+      }
+    },
+    "prototype.deleteEventRelationship": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for event"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for relationships."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "object",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Delete a related item by id for relationships.",
+      "http": {
+        "verb": "del",
+        "path": "/events/:nk/relationships/:fk"
+      }
+    },
+    "prototype.countEventRelationships": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        },
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationships of a event",
+          "required": true
+        }
+      ],
+      "description": "Counts relationships of event.",
+      "http": {
+        "verb": "get",
+        "path": "/events/:nk/relationships/count"
       }
     },
     "prototype.convertContactToCase": {

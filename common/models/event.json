@@ -1,0 +1,41 @@
+{
+  "name": "event",
+  "base": "case",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "type",
+    "outbreakId"
+  ],
+  "scope": {
+    "where": {
+      "type": "event"
+    }
+  },
+  "properties": {
+    "type": {
+      "type": "string",
+      "required": true,
+      "default": "event",
+      "readOnly": true
+    },
+    "classification": {
+      "type": "string",
+      "required": false
+    },
+    "riskLevel": {
+      "type": "string",
+      "required": false
+    },
+    "gender": {
+      "type": "string",
+      "required": false
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

@@ -78,21 +78,13 @@ module.exports = function (Outbreak) {
   });
 
   /**
-   * Get available date formats
-   * @param callback
-   */
-  Outbreak.getAvailableDateFormats = function (callback) {
-    callback(null, Outbreak.availableDateFormats);
-  };
-
-  /**
    * Find relations for a case
    * @param caseId
    * @param filter
    * @param callback
    */
   Outbreak.prototype.findCaseRelationships = function (caseId, filter, callback) {
-    helpers.findCaseContactRelationships(caseId, filter, callback);
+    helpers.findPersonRelationships(caseId, filter, callback);
   };
 
   /**
@@ -102,7 +94,17 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.findContactRelationships = function (contactId, filter, callback) {
-    helpers.findCaseContactRelationships(contactId, filter, callback);
+    helpers.findPersonRelationships(contactId, filter, callback);
+  };
+
+  /**
+   * Find relations for a event
+   * @param eventId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findEventRelationships = function (eventId, filter, callback) {
+    helpers.findPersonRelationships(eventId, filter, callback);
   };
 
   /**
@@ -112,7 +114,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.createCaseRelationship = function (caseId, data, callback) {
-    helpers.createCaseContactRelationship(this.id, caseId, 'case', data, callback);
+    helpers.createPersonRelationship(this.id, caseId, 'case', data, callback);
   };
 
   /**
@@ -122,7 +124,17 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.createContactRelationship = function (contactId, data, callback) {
-    helpers.createCaseContactRelationship(contactId, 'contact', data, callback);
+    helpers.createPersonRelationship(this.id, contactId, 'contact', data, callback);
+  };
+
+  /**
+   * Create relation for a event
+   * @param eventId
+   * @param data
+   * @param callback
+   */
+  Outbreak.prototype.createEventRelationship = function (eventId, data, callback) {
+    helpers.createPersonRelationship(this.id, eventId, 'event', data, callback);
   };
 
   /**
@@ -133,7 +145,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getCaseRelationship = function (caseId, relationshipId, filter, callback) {
-    helpers.getCaseContactRelationship(caseId, relationshipId, filter, callback);
+    helpers.getPersonRelationship(caseId, relationshipId, 'case', filter, callback);
   };
 
   /**
@@ -144,7 +156,18 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getContactRelationship = function (contactId, relationshipId, filter, callback) {
-    helpers.getCaseContactRelationship(contactId, relationshipId, filter, callback);
+    helpers.getPersonRelationship(contactId, relationshipId, 'contact', filter, callback);
+  };
+
+  /**
+   * Retrieve a relation for a event
+   * @param eventId
+   * @param relationshipId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.getEventRelationship = function (eventId, relationshipId, filter, callback) {
+    helpers.getPersonRelationship(eventId, relationshipId, 'event', filter, callback);
   };
 
   /**
@@ -155,7 +178,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.updateCaseRelationship = function (caseId, relationshipId, data, callback) {
-    helpers.updateCaseContactRelationship(caseId, relationshipId, 'case', data, callback);
+    helpers.updatePersonRelationship(caseId, relationshipId, 'case', data, callback);
   };
 
   /**
@@ -166,7 +189,18 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.updateContactRelationship = function (contactId, relationshipId, data, callback) {
-    helpers.updateCaseContactRelationship(contactId, relationshipId, 'contact', data, callback);
+    helpers.updatePersonRelationship(contactId, relationshipId, 'contact', data, callback);
+  };
+
+  /**
+   * Update a relation for a event
+   * @param eventId
+   * @param relationshipId
+   * @param data
+   * @param callback
+   */
+  Outbreak.prototype.updateEventRelationship = function (eventId, relationshipId, data, callback) {
+    helpers.updatePersonRelationship(eventId, relationshipId, 'event', data, callback);
   };
 
   /**
@@ -176,7 +210,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.deleteCaseRelationship = function (caseId, relationshipId, callback) {
-    helpers.deleteCaseContactRelationship(caseId, relationshipId, callback);
+    helpers.deletePersonRelationship(caseId, relationshipId, callback);
   };
 
   /**
@@ -186,7 +220,17 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.deleteContactRelationship = function (contactId, relationshipId, callback) {
-    helpers.deleteCaseContactRelationship(contactId, relationshipId, callback);
+    helpers.deletePersonRelationship(contactId, relationshipId, callback);
+  };
+
+  /**
+   * Delete a relation for a event
+   * @param eventId
+   * @param relationshipId
+   * @param callback
+   */
+  Outbreak.prototype.deleteEventRelationship = function (eventId, relationshipId, callback) {
+    helpers.deletePersonRelationship(eventId, relationshipId, callback);
   };
 
   /**
@@ -196,7 +240,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countCaseRelationships = function (caseId, where, callback) {
-    helpers.countCaseContactRelationships(caseId, where, callback);
+    helpers.countPersonRelationships(caseId, where, callback);
   };
 
   /**
@@ -206,7 +250,17 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactRelationships = function (contactId, where, callback) {
-    helpers.countCaseContactRelationships(contactId, where, callback);
+    helpers.countPersonRelationships(contactId, where, callback);
+  };
+
+  /**
+   * Count relations for a event
+   * @param eventId
+   * @param where
+   * @param callback
+   */
+  Outbreak.prototype.countEventRelationships = function (eventId, where, callback) {
+    helpers.countPersonRelationships(eventId, where, callback);
   };
 
   /**
