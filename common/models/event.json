@@ -1,6 +1,6 @@
 {
   "name": "event",
-  "base": "case",
+  "base": "person",
   "idInjection": true,
   "options": {
     "validateUpsert": true
@@ -15,17 +15,30 @@
     }
   },
   "properties": {
+    "outbreakId": {
+      "type": "string",
+      "readOnly": true
+    },
     "type": {
       "type": "string",
       "required": true,
       "default": "event",
       "readOnly": true
     },
-    "classification": {
-      "type": "string",
-      "required": false
+    "dateOfInfection": {
+      "type": "date"
     },
-    "riskLevel": {
+    "dateOfOnset": {
+      "type": "date"
+    },
+    "isDateOfOnsetApproximate": {
+      "type": "boolean"
+    },
+    "dateOfOutcome": {
+      "type": "date"
+    },
+    "incubationDates": ["date"],
+    "classification": {
       "type": "string",
       "required": false
     },
