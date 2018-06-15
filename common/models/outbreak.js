@@ -37,7 +37,7 @@ module.exports = function (Outbreak) {
    * @param callback
    * @return {*}
    */
-  Outbreak.helpers.validateAndNormalizePersons = function (personId, type, data, callback) {
+  Outbreak.helpers.validateAndNormalizePeople = function (personId, type, data, callback) {
     if (Array.isArray(data.persons) && data.persons.length) {
 
       let errors;
@@ -125,7 +125,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.helpers.createPersonRelationship = function (outbreakId, personId, type, data, callback) {
-    Outbreak.helpers.validateAndNormalizePersons(personId, type, data, function (error, persons) {
+    Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error, persons) {
       if (error) {
         return callback(error);
       }
@@ -182,7 +182,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.helpers.updatePersonRelationship = function (personId, relationshipId, type, data, callback) {
-    Outbreak.helpers.validateAndNormalizePersons(personId, type, data, function (error, persons) {
+    Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error, persons) {
       if (error) {
         return callback(error);
       }
