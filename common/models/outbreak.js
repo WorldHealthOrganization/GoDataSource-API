@@ -261,4 +261,24 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Parsing the properties that are of type '["date"]' as Loopback doesn't save them correctly
+   * Need to parse the date strings to actual date objects
+   * Note: data object is altered by this function
+   * @param data Data received in the req (req.body)
+   */
+  Outbreak.helpers.parseArrayOfDates = function (data) {
+    // initialize list of properties that are of type array of dates
+    let props = ['isolationDates', 'hospitalizationDates', 'incubationDates'];
+
+    // loop through the array of dates properties and parse them
+    props.forEach(function(prop) {
+      if(Array.isArray(data[prop]) && data[prop].length) {
+        data[prop].forEach(function (dateString, index) {
+          data[prop][index] = new Date(dateString);
+        });
+      }
+    });
+  };
 };
