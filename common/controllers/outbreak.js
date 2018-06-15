@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const uuid = require('uuid');
 const _ = require('lodash');
+const templateParser = require('./../../components/templateParser');
 
 module.exports = function (Outbreak) {
 
@@ -551,4 +552,23 @@ module.exports = function (Outbreak) {
       callback(null, qrCode, `image/png`, `attachment;filename=event-${eventId}.png`);
     });
   };
+
+  /**
+   * Before create hook
+   */
+  Outbreak.beforeRemote('create', function (context, modelInstance, next) {
+    // initialize identifier
+    let identifier = `LNG_OUTBREAK_${_.snakeCase(context.args.data.name).toUpperCase()}`;
+    // in order to translate dynamic data, don't store values in the database, but translatable language tokens
+    // parse outbreak
+    templateParser.beforeCreateHook(context, modelInstance, identifier, next);
+  });
+
+  /**
+   * After update hook
+   */
+  Outbreak.afterRemote('create', function (context, modelInstance, next) {
+    // after successfully creating outbreak, also create translations for it.
+    templateParser.afterCreateHook(context, modelInstance, next);
+  });
 };

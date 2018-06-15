@@ -10,14 +10,17 @@
       "type": "string",
       "required": true
     },
+    "languageId": {
+      "type": "string",
+      "required": true
+    },
     "disease": {
       "type": "string",
       "required": true
     },
     "periodOfFollowup": {
       "type": "number",
-      "description": "Duration for the follow-up period in days. Default: 6 weeks = 42 days",
-      "default": 42
+      "description": "Duration for the follow-up period in days"
     },
     "frequencyOfFollowUp": {
       "type": "number"
@@ -37,26 +40,6 @@
     "noLessContacts": {
       "type": "number",
       "description": "Number of contacts used to determine the proportion of cases with less than X contacts"
-    },
-    "caseClassification": {
-      "type": [
-        "string"
-      ]
-    },
-    "vaccinationStatus": {
-      "type": [
-        "string"
-      ]
-    },
-    "nutritionalStatus": {
-      "type": [
-        "string"
-      ]
-    },
-    "pregnancyInformation": {
-      "type": [
-        "string"
-      ]
     },
     "caseInvestigationTemplate": {
       "type": [

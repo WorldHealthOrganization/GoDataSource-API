@@ -13,12 +13,18 @@
     "description": {
       "type": "string"
     },
+    "languageId": {
+      "type": "string",
+      "required": true
+    },
     "disease": {
       "type": "string",
       "required": true
     },
     "countries": {
-      "type": ["string"],
+      "type": [
+        "string"
+      ],
       "required": true
     },
     "startDate": {
@@ -63,7 +69,9 @@
       "description": "Number of contacts used to determine the proportion of cases with less than X contacts"
     },
     "fieldsToDisplayNode": {
-      "type": ["string"]
+      "type": [
+        "string"
+      ]
     },
     "colorContactNode": {
       "type": "string"
