@@ -106,7 +106,7 @@ module.exports = function (User) {
 
     const template = _.template(fs.readFileSync(path.resolve(`${__dirname}/../../server/views/passwordResetEmail.ejs`)));
     const url = `${config.public.protocol}://${config.public.host}:${config.public.port}${config.passwordReset.path}`;
-    const html = _.template(config.passwordReset.text)({resetHref: `${url}?access_token=${info.accessToken.id}`});
+    const html = _.template(config.passwordReset.text)({resetHref: `${url}?token=${info.accessToken.id}`});
 
     app.models.Email.send({
       to: info.email,

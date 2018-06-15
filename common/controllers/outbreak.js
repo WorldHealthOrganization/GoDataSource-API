@@ -1,6 +1,7 @@
 'use strict';
 
 const app = require('../../server/server');
+const _ = require('lodash');
 
 module.exports = function (Outbreak) {
 
@@ -75,6 +76,27 @@ module.exports = function (Outbreak) {
     } else {
       return next();
     }
+  });
+
+  /**
+   * Restrict the list of outbreaks only to what's accessible to current logged in user
+   */
+  Outbreak.beforeRemote('find', function (context, modelInstance, next) {
+    // get logged in user outbreak restrictions
+    const restrictedOutbreakIds = _.get(context, 'req.authData.user.outbreakIds', []);
+    // if there are any restrictions set
+    if (restrictedOutbreakIds.length) {
+      // update filters to search only in the outbreaks accessible to the user
+      context.args.filter = app.utils.remote
+        .mergeFilters({
+          where: {
+            id: {
+              in: restrictedOutbreakIds
+            }
+          }
+        }, context.args.filter || {});
+    }
+    next();
   });
 
   /**
