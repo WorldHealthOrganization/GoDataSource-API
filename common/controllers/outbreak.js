@@ -84,6 +84,26 @@ module.exports = function (Outbreak) {
   });
 
   /**
+   * Parsing the properties that are of type '["date"]' as Loopback doesn't save them correctly
+   */
+  Outbreak.beforeRemote('prototype.__create__cases', function (context, modelInstance, next) {
+    // parse array of dates properties
+    helpers.parseArrayOfDates(context.args.data);
+
+    next();
+  });
+
+  /**
+   * Parsing the properties that are of type '["date"]' as Loopback doesn't save them correctly
+   */
+  Outbreak.beforeRemote('prototype.__updateById__cases', function (context, modelInstance, next) {
+    // parse array of dates properties
+    helpers.parseArrayOfDates(context.args.data);
+
+    next();
+  });
+
+  /**
    * Restrict the list of outbreaks only to what's accessible to current logged in user
    */
   Outbreak.beforeRemote('find', function (context, modelInstance, next) {
