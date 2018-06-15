@@ -4,14 +4,6 @@ const app = require('../../server/server');
 
 module.exports = function (Outbreak) {
 
-  // initialize available date formats
-  Outbreak.availableDateFormats = {
-    'dd-mm-yyyy': 'LNG_OUTBREAK_AVAILABLE_DATE_FORMATS_DD-MM-YYYY',
-    'yyyy-mm-dd': 'LNG_OUTBREAK_AVAILABLE_DATE_FORMATS_YYYY-MM-DD',
-    'mm/dd/yyyy': 'LNG_OUTBREAK_AVAILABLE_DATE_FORMATS_MM/DD/YYYY',
-    'mm-dd-yyyy': 'LNG_OUTBREAK_AVAILABLE_DATE_FORMATS_MM-DD-YYYY'
-  };
-
   // initialize model helpers
   Outbreak.helpers = {};
 
@@ -21,7 +13,7 @@ module.exports = function (Outbreak) {
    * @param filter
    * @param callback
    */
-  Outbreak.helpers.findCaseContactRelationships = function (personId, filter, callback) {
+  Outbreak.helpers.findPersonRelationships = function (personId, filter, callback) {
     const _filter = app.utils.remote
       .mergeFilters({
         where: {
@@ -45,9 +37,7 @@ module.exports = function (Outbreak) {
    * @param callback
    * @return {*}
    */
-  Outbreak.helpers.validateAndNormalizePersons = function (personId, type, data, callback) {
-    let currentPersonFound = false;
-
+  Outbreak.helpers.validateAndNormalizePeople = function (personId, type, data, callback) {
     if (Array.isArray(data.persons) && data.persons.length) {
 
       let errors;
@@ -55,23 +45,20 @@ module.exports = function (Outbreak) {
 
       data.persons.forEach(function (person, index) {
         // validate each person item
-        if (person.type === undefined || person.id === undefined) {
+        if (person.id === undefined) {
           if (!errors) {
             errors = [];
           }
-          errors.push(`"persons[${index}]" must contain both "type" and "id"`);
-          // check if the person is current person
-        } else if (person.id === personId) {
-          // keep only one entry of the current person
-          if (!currentPersonFound) {
-            currentPersonFound = true;
-            persons.push(person);
-          }
-        } else {
+          errors.push(`"persons[${index}]" must contain "id"`);
+          // add only other people
+        } else if (person.id !== personId) {
+          // make sure type is not set (it will be set later on)
+          delete person.type;
           persons.push(person);
         }
       });
 
+      // check validation errors
       if (errors) {
         return callback(app.utils.apiError.getError('VALIDATION_ERROR', {
           model: app.models.relationship.modelName,
@@ -82,22 +69,51 @@ module.exports = function (Outbreak) {
       data.persons = persons;
 
       // another person must be specified for a relation to be valid
-      if (currentPersonFound && data.persons.length === 1) {
+      if (!data.persons.length) {
         return callback(app.utils.apiError.getError('VALIDATION_ERROR', {
           model: app.models.relationship.modelName,
           details: 'you must specify the related person'
         }));
       }
 
-      // if current person was not added by front end, add it here
-      if (!currentPersonFound && data.persons.length) {
+      // add current person
+      if (data.persons.length) {
         data.persons.push({
           id: personId,
           type: type
         });
       }
+
+      // keep a list of promises for finding person types
+      let personPromises = [];
+      data.persons.forEach(function (person, index) {
+        if (!person.type) {
+          // find each person
+          personPromises.push(
+            app.models.person
+              .findById(person.id)
+              .then(function (foundPerson) {
+                if (!foundPerson) {
+                  throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+                    model: app.models.person.modelName,
+                    id: person.id
+                  })
+                }
+                // set its type
+                data.persons[index].type = foundPerson.type;
+              })
+          );
+        }
+      });
+      // wait for all the searches to finis
+      Promise.all(personPromises)
+        .then(function () {
+          callback(null, data.persons);
+        })
+        .catch(callback);
+    } else {
+      callback(null, data.persons);
     }
-    callback(null, data.persons);
   };
 
   /**
@@ -108,15 +124,15 @@ module.exports = function (Outbreak) {
    * @param data
    * @param callback
    */
-  Outbreak.helpers.createCaseContactRelationship = function (outbreakId, personId, type, data, callback) {
-    Outbreak.helpers.validateAndNormalizePersons(personId, type, data, function (error, persons) {
+  Outbreak.helpers.createPersonRelationship = function (outbreakId, personId, type, data, callback) {
+    Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error, persons) {
       if (error) {
         return callback(error);
       }
       data.persons = persons;
       app.models.relationship.removeReadOnlyProperties(data);
       app.models.relationship
-        .create(Object.assign(data, { outbreakId: outbreakId }))
+        .create(Object.assign(data, {outbreakId: outbreakId}))
         .then(function (createdRelation) {
           callback(null, createdRelation);
         })
@@ -128,10 +144,11 @@ module.exports = function (Outbreak) {
    * Retrieve a relation for a person
    * @param personId
    * @param relationshipId
+   * @param type
    * @param filter
    * @param callback
    */
-  Outbreak.helpers.getCaseContactRelationship = function (personId, relationshipId, filter, callback) {
+  Outbreak.helpers.getPersonRelationship = function (personId, relationshipId, type, filter, callback) {
     const _filter = app.utils.remote
       .mergeFilters({
         where: {
@@ -147,7 +164,7 @@ module.exports = function (Outbreak) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND_IN_CONTEXT', {
             model: app.models.relationship.modelName,
             id: relationshipId,
-            contextModel: app.models.case.modelName,
+            contextModel: app.models[type].modelName,
             contextId: personId
           });
         }
@@ -164,8 +181,8 @@ module.exports = function (Outbreak) {
    * @param data
    * @param callback
    */
-  Outbreak.helpers.updateCaseContactRelationship = function (personId, relationshipId, type, data, callback) {
-    Outbreak.helpers.validateAndNormalizePersons(personId, type, data, function (error, persons) {
+  Outbreak.helpers.updatePersonRelationship = function (personId, relationshipId, type, data, callback) {
+    Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error, persons) {
       if (error) {
         return callback(error);
       }
@@ -182,7 +199,7 @@ module.exports = function (Outbreak) {
             throw app.utils.apiError.getError('MODEL_NOT_FOUND_IN_CONTEXT', {
               model: app.models.relationship.modelName,
               id: relationshipId,
-              contextModel: app.models.case.modelName,
+              contextModel: app.models[type].modelName,
               contextId: personId
             });
           }
@@ -202,7 +219,7 @@ module.exports = function (Outbreak) {
    * @param relationshipId
    * @param callback
    */
-  Outbreak.helpers.deleteCaseContactRelationship = function (personId, relationshipId, callback) {
+  Outbreak.helpers.deletePersonRelationship = function (personId, relationshipId, callback) {
     app.models.relationship
       .findOne({
         where: {
@@ -228,7 +245,7 @@ module.exports = function (Outbreak) {
    * @param where
    * @param callback
    */
-  Outbreak.helpers.countCaseContactRelationships = function (personId, where, callback) {
+  Outbreak.helpers.countPersonRelationships = function (personId, where, callback) {
     const _filter = app.utils.remote
       .mergeFilters({
           where: {

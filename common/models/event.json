@@ -1,0 +1,46 @@
+{
+  "name": "event",
+  "base": "person",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "type",
+    "outbreakId"
+  ],
+  "scope": {
+    "where": {
+      "type": "event"
+    }
+  },
+  "properties": {
+    "outbreakId": {
+      "type": "string",
+      "readOnly": true
+    },
+    "type": {
+      "type": "string",
+      "required": true,
+      "default": "event",
+      "readOnly": true
+    },
+    "dateOfOnset": {
+      "type": "date"
+    },
+    "isDateOfOnsetApproximate": {
+      "type": "boolean"
+    },
+    "description": {
+      "type": "string"
+    },
+    "gender": {
+      "type": "string",
+      "required": false
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

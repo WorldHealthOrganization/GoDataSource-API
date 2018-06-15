@@ -2,6 +2,8 @@
 
 module.exports = function(Person) {
 
+  Person.hasController = false;
+
   // define a list of custom (non-loopback-supported) relations
   Person.customRelations = {
     relationships: {

@@ -12,7 +12,7 @@ module.exports = function (Model) {
   const controllerName = _.kebabCase(modelName);
 
   // check for controller flag
-  if(Model.hasController) {
+  if (Model.hasController) {
     app.logger.debug(`'Model.hasController' flag is true. Requiring controller for model ${modelName}`);
 
     try {
