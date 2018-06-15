@@ -8,19 +8,19 @@ const _ = require('lodash');
  * Applying a filter on related model properties Loopback only filters the related model inclusion in the result
  * This hook removes from the result the items that don't contain the filtered related model if the relation scope.filterParent flag is sent and true
  * eg filter: {
-        "include": [
-          {
-            "relation": "role",
-            "scope": {
-              "where": {"name": "System Administrator"},
-              "filterParent": true
-            }
-          },
-          {
-            "relation": "accessTokens"
-          }
-        ]
-      }
+ *      "include": [
+ *        {
+ *          "relation": "role",
+ *          "scope": {
+ *            "where": {"name": "System Administrator"},
+ *            "filterParent": true
+ *          }
+ *        },
+ *        {
+ *          "relation": "accessTokens"
+ *        }
+ *      ]
+ *    }
  * Based on the above example the hook removes the entries that don't contain the embedded role model (this is already filtered by Loopback)
  */
 
