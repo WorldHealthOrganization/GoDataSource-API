@@ -10,10 +10,6 @@
       "type": "string",
       "required": true
     },
-    "languageId": {
-      "type": "string",
-      "required": true
-    },
     "disease": {
       "type": "string",
       "required": true

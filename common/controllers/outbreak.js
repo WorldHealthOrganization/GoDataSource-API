@@ -557,18 +557,33 @@ module.exports = function (Outbreak) {
    * Before create hook
    */
   Outbreak.beforeRemote('create', function (context, modelInstance, next) {
-    // initialize identifier
-    let identifier = `LNG_OUTBREAK_${_.snakeCase(context.args.data.name).toUpperCase()}`;
     // in order to translate dynamic data, don't store values in the database, but translatable language tokens
     // parse outbreak
-    templateParser.beforeCreateHook(context, modelInstance, identifier, next);
+    templateParser.beforeHook(context, modelInstance, next);
+  });
+
+  /**
+   * After create hook
+   */
+  Outbreak.afterRemote('create', function (context, modelInstance, next) {
+    // after successfully creating outbreak, also create translations for it.
+    templateParser.afterHook(context, modelInstance, next);
+  });
+
+  /**
+   * Before update hook
+   */
+  Outbreak.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
+    // in order to translate dynamic data, don't store values in the database, but translatable language tokens
+    // parse outbreak
+    templateParser.beforeHook(context, modelInstance, next);
   });
 
   /**
    * After update hook
    */
-  Outbreak.afterRemote('create', function (context, modelInstance, next) {
+  Outbreak.afterRemote('prototype.patchAttributes', function (context, modelInstance, next) {
     // after successfully creating outbreak, also create translations for it.
-    templateParser.afterCreateHook(context, modelInstance, next);
+    templateParser.afterHook(context, modelInstance, next);
   });
 };

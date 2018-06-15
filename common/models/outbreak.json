@@ -13,10 +13,6 @@
     "description": {
       "type": "string"
     },
-    "languageId": {
-      "type": "string",
-      "required": true
-    },
     "disease": {
       "type": "string",
       "required": true
