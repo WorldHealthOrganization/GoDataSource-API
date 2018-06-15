@@ -19,6 +19,11 @@ module.exports = function (Outbreak) {
     'prototype.__delete__contacts__relationships'
   ]);
 
+  // attach search by relation property behavior on get contacts
+  app.utils.remote.searchByRelationProperty.attachOnRemotes(Outbreak, [
+    'prototype.__get__contacts'
+  ]);
+
   /**
    * Do not allow deletion of a active Outbreak
    */

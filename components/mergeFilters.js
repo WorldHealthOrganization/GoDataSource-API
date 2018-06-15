@@ -28,9 +28,10 @@ function merge(filter, requestFilter = {}) {
     [filter, requestFilter].forEach(function (filterElement) {
       if (Array.isArray(filterElement.include) && filterElement.length) {
         _filter.include = _filter.include.concat(filterElement.include);
+      } else if (typeof filterElement.include === 'string' || typeof filterElement.include === 'object') {
+        _filter.include.push(filterElement.include)
       }
     });
-
   }
 
   ['fields', 'limit', 'order', 'skip', 'deleted'].forEach(function (filterName) {

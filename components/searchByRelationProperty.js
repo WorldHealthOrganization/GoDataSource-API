@@ -3,10 +3,12 @@
 const _ = require('lodash');
 
 /**
- * Search by relation property
+ * Attach behavior or a Model remote
  * @param Model
+ * @param remote
  */
-module.exports = function (Model) {
+function attachOnRemote(Model, remote) {
+
   /**
    * Filter results by related model properties
    * Applying a filter on related model properties Loopback only filters the related model inclusion in the result
@@ -27,9 +29,11 @@ module.exports = function (Model) {
       }
    * Based on the above example the hook removes the entries that don't contain the embedded role model (this is already filtered by Loopback)
    */
-  Model.afterRemote('find', function (context, models, next) {
+  Model.afterRemote(remote, function (context, models, next) {
     // check for include filter
     let includeFilter = _.get(context, 'args.filter.include', []);
+    // also include custom relations
+    includeFilter = includeFilter.concat(_.get(context, 'args.filter.includeCustom', []));
     // normalize the include filter as an array
     includeFilter = Array.isArray(includeFilter) ? includeFilter : [includeFilter];
 
@@ -50,7 +54,7 @@ module.exports = function (Model) {
       results = models.filter(function (model) {
         model = model.toJSON();
         return props.filter(function (prop) {
-          return !!model[prop];
+          return !!model[prop] && (!Array.isArray(model[prop]) || model[prop].length);
         }).length === props.length;
       });
     } else {
@@ -61,5 +65,21 @@ module.exports = function (Model) {
     context.result = results;
 
     next();
-  })
+  });
+}
+
+module.exports = {
+  /**
+   * Attach the behavior on a list of remotes that belong to a Model
+   * @param model
+   * @param remotes
+   */
+  attachOnRemotes: function (model, remotes) {
+    if (!Array.isArray(remotes)) {
+      remotes = [remotes];
+    }
+    remotes.forEach(function (remote) {
+      attachOnRemote(model, remote);
+    });
+  }
 };
