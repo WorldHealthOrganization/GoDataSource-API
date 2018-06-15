@@ -273,8 +273,8 @@ module.exports = function (Outbreak) {
     let props = ['isolationDates', 'hospitalizationDates', 'incubationDates'];
 
     // loop through the array of dates properties and parse them
-    props.forEach(function(prop) {
-      if(Array.isArray(data[prop]) && data[prop].length) {
+    props.forEach(function (prop) {
+      if (Array.isArray(data[prop]) && data[prop].length) {
         data[prop].forEach(function (dateString, index) {
           data[prop][index] = new Date(dateString);
         });
