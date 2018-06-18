@@ -14,9 +14,9 @@ module.exports = function (ReferenceData) {
    */
   ReferenceData.beforeRemote('create', function (context, modelInstance, next) {
     // in order to translate dynamic data, don't store values in the database, but translatable language tokens
-    if (context.args.data && context.args.data.category && context.args.data.value) {
+    if (context.args.data && context.args.data.categoryId && context.args.data.value) {
       // build a language token based on the available data
-      const identifier = ReferenceData.getTranslatableIdentifierForValue(context.args.data.category, context.args.data.value);
+      const identifier = ReferenceData.getTranslatableIdentifierForValue(context.args.data.categoryId, context.args.data.value);
       // also store original values to be used for translations
       context.req._original = {
         value: context.args.data.value,

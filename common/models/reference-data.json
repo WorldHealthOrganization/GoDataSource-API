@@ -6,7 +6,7 @@
     "validateUpsert": true
   },
   "properties": {
-    "category": {
+    "categoryId": {
       "type": "string",
       "description": "Reference data item category; eg: Occupation",
       "required": true,
@@ -20,13 +20,13 @@
         "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT",
         "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_DISEASE",
-        "LNG_REFERENCE_DATA_CATEGORY_STATUS",
         "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY",
         "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY",
         "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL",
         "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL",
-        "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION"
+        "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION",
+        "LNG_REFERENCE_DATA_CATEGORY_OUTCOME"
       ]
     },
     "languageId": {
