@@ -311,7 +311,7 @@ module.exports = function (Outbreak) {
     if (context.args.filter && context.args.filter.noRelationships) {
       app.models.relationship
         .find({
-          fields: ['id'],
+          fields: ['persons'],
           where: {
             outbreakId: context.instance.id,
             'persons.type': type
