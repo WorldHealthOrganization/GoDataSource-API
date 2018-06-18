@@ -31,8 +31,9 @@
     "activeOutbreakId": {
       "type": "string"
     },
-    "language": {
-      "type": "string"
+    "languageId": {
+      "type": "string",
+      "required": true
     },
     "passwordChange": {
       "type": "boolean",
