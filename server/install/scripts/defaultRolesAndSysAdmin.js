@@ -9,6 +9,7 @@ const defaultAdmin = {
   lastName: 'Administrator',
   email: 'admin@who.int',
   password: 'admin',
+  languageId: 'english_us',
   passwordChange: true
 };
 const rolesMap = {
