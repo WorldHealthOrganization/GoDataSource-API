@@ -29,10 +29,6 @@
         "LNG_REFERENCE_DATA_CATEGORY_OUTCOME"
       ]
     },
-    "languageId": {
-      "type": "string",
-      "required": true
-    },
     "value": {
       "type": "string",
       "description": "Reference data item value; eg: Nurse",

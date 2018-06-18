@@ -15,7 +15,7 @@ module.exports = function (ReferenceData) {
   ReferenceData.beforeRemote('create', function (context, modelInstance, next) {
     // in order to translate dynamic data, don't store values in the database, but translatable language tokens
     if (context.args.data && context.args.data.categoryId && context.args.data.value) {
-      // build a language token based on the available data
+      // build a language token based on the available data; no languageId set as we will create a token for each installed language
       const identifier = ReferenceData.getTranslatableIdentifierForValue(context.args.data.categoryId, context.args.data.value);
       // also store original values to be used for translations
       context.req._original = {
@@ -37,21 +37,34 @@ module.exports = function (ReferenceData) {
   ReferenceData.afterRemote('create', function (context, modelInstance, next) {
     // after successfully creating reference data record, also create translations for it.
     if (context.req._original) {
-      // create token for value
-      app.models.languageToken
-        .create({
-          token: modelInstance.id,
-          languageId: context.req._original.languageId,
-          translation: context.req._original.value
+      // initialize array that will contain the promises for token creation
+      let tokenPromises = [];
+
+      // get installed languages and create tokens for each one
+      app.models.language
+        .find()
+        .then(function (languages) {
+          // loop through all the languages and create new token promises for each language for each new token
+          return languages.forEach(function (language) {
+            // create token for value
+            tokenPromises.push(app.models.languageToken
+              .create({
+                token: modelInstance.id,
+                languageId: language.id,
+                translation: context.req._original.value
+              }));
+            // create token for description
+            tokenPromises.push(app.models.languageToken
+              .create({
+                token: modelInstance.description,
+                languageId: language.id,
+                translation: context.req._original.description
+              }));
+          });
         })
         .then(function () {
-          // create token for description
-          return app.models.languageToken
-            .create({
-              token: modelInstance.description,
-              languageId: context.req._original.languageId,
-              translation: context.req._original.description
-            });
+          // resolve promises
+          return Promise.all(tokenPromises);
         })
         .then(function () {
           next();
@@ -79,6 +92,9 @@ module.exports = function (ReferenceData) {
   ReferenceData.prototype.updateRecord = function (data, options, callback) {
     const self = this;
     const updateActions = [];
+    // get logged user languageId
+    let languageId = options.remotingContext.req.authData.user.languageId;
+
     if (data) {
       // if icon was sent
       if (data.icon) {
@@ -97,7 +113,7 @@ module.exports = function (ReferenceData) {
             .findOne({
               where: {
                 token: self.id,
-                languageId: self.languageId
+                languageId: languageId
               }
             })
             .then(function (languageToken) {
@@ -116,7 +132,7 @@ module.exports = function (ReferenceData) {
             .findOne({
               where: {
                 token: self.description,
-                languageId: self.languageId
+                languageId: languageId
               }
             })
             .then(function (languageToken) {
