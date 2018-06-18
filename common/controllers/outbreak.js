@@ -47,35 +47,14 @@ module.exports = function (Outbreak) {
    * Enhance cases list request to support optional filtering of cases that don't have any relations
    */
   Outbreak.beforeRemote('prototype.__get__cases', function (context, modelInstance, next) {
-    // Retrieve all relationships of type case for the given outbreak
-    // Then filter cases based on relations count
-    if (context.args.filter && context.args.filter.noRelationships) {
-      app.models.relationship
-        .find({
-          where: {
-            outbreakId: context.instance.id,
-            'persons.type': 'case'
-          }
-        })
-        // build list of people that have relationships in the given outbreak
-        .then((relations) => [].concat(...relations.map((relation) => relation.persons.map(((person) => person.id)))))
-        .then((peopleWithRelation) => {
-          // attach additional filtering for cases that have no relationships
-          context.args.filter = app.utils.remote
-            .mergeFilters({
-              where: {
-                id: {
-                  nin: peopleWithRelation
-                }
-              }
-            }, context.args.filter);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation('case', context, modelInstance, next);
+  });
 
-          return next();
-        })
-        .catch(next);
-    } else {
-      return next();
-    }
+  /**
+   * Enhance events list request to support optional filtering of events that don't have any relations
+   */
+  Outbreak.beforeRemote('prototype.__get__events', function (context, modelInstance, next) {
+    Outbreak.helpers.attachFilterPeopleWithoutRelation('event', context, modelInstance, next);
   });
 
   /**

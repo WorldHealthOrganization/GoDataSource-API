@@ -19,35 +19,34 @@
       "type": "date",
       "required": true
     },
-    "certaintyLevel": {
+    "contactDateEstimated": {
+      "type": "date",
+      "required": true
+    },
+    "certaintyLevelId": {
       "type": "number",
       "required": true
     },
-    "contactDateApproximate": {
-      "type": "boolean",
-      "required": true
-    },
-    "locationId": {
+    "exposureTypeId": {
       "type": "string",
       "required": true
     },
-    "exposureType": {
+    "exposureFrequencyId": {
       "type": "string",
       "required": true
     },
-    "exposureFrequency": {
+    "exposureDurationId": {
       "type": "string",
       "required": true
     },
-    "exposureDuration": {
-      "type": "string",
-      "required": true
-    },
-    "socialRelationshipType": {
+    "socialRelationshipTypeId": {
       "type": "string"
     },
-    "fillGeolocation": {
-      "type": "geopoint"
+    "clusterId": {
+      "type": "string"
+    },
+    "comment": {
+      "type": "string"
     }
   },
   "indexes": {

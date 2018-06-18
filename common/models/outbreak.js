@@ -99,6 +99,21 @@ module.exports = function (Outbreak) {
                     id: person.id
                   })
                 }
+
+                // do not allow event-event relationships
+                if (type === 'event' && foundPerson.type === 'event') {
+                  throw callback(app.utils.apiError.getError('INVALID_EVENT_EVENT_RELATIONSHIP', {
+                    id: person.id
+                  }));
+                }
+
+                // do not allow contact-contact relationships
+                if (type === 'contact' && foundPerson.type === 'contact') {
+                  throw callback(app.utils.apiError.getError('INVALID_CONTACT_CONTACT_RELATIONSHIP', {
+                    id: person.id
+                  }));
+                }
+
                 // set its type
                 data.persons[index].type = foundPerson.type;
               })
@@ -280,5 +295,46 @@ module.exports = function (Outbreak) {
         });
       }
     });
+  };
+
+  /**
+   * Attach filter people without relation behavior (before remote hook)
+   * @param type
+   * @param context
+   * @param modelInstance
+   * @param next
+   * @return {*}
+   */
+  Outbreak.helpers.attachFilterPeopleWithoutRelation = function (type, context, modelInstance, next) {
+    // Retrieve all relationships of requested type for the given outbreak
+    // Then filter cases based on relations count
+    if (context.args.filter && context.args.filter.noRelationships) {
+      app.models.relationship
+        .find({
+          fields: ['id'],
+          where: {
+            outbreakId: context.instance.id,
+            'persons.type': type
+          }
+        })
+        // build list of people that have relationships in the given outbreak
+        .then((relations) => [].concat(...relations.map((relation) => relation.persons.map(((person) => person.id)))))
+        .then((peopleWithRelation) => {
+          // attach additional filtering for cases that have no relationships
+          context.args.filter = app.utils.remote
+            .mergeFilters({
+              where: {
+                id: {
+                  nin: peopleWithRelation
+                }
+              }
+            }, context.args.filter);
+
+          return next();
+        })
+        .catch(next);
+    } else {
+      return next();
+    }
   };
 };
