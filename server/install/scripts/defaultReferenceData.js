@@ -2,7 +2,6 @@
 
 const app = require('../../server');
 const referenceData = app.models.referenceData;
-const languageToken = app.models.languageToken;
 
 const defaultReferenceData = {
   "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION": [
