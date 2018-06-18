@@ -33,7 +33,8 @@
     },
     "languageId": {
       "type": "string",
-      "required": true
+      "required": true,
+      "default": "english_us"
     },
     "passwordChange": {
       "type": "boolean",
