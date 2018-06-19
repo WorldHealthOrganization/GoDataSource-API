@@ -350,6 +350,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "write_followup",
+      "permission": "ALLOW",
+      "property": "restoreContactFollowUp"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "findCaseRelationships"
@@ -653,6 +659,12 @@
       "principalId": "read_outbreak",
       "permission": "ALLOW",
       "property": "countNewContactsByExposure"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "generateFollowups"
     }
   ],
   "methods": {
@@ -1506,6 +1518,56 @@
       "http": {
         "verb": "get",
         "path": "/contacts/count-new-contacts-by-exposure-type"
+      }
+    },
+    "prototype.restoreContactFollowUp": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for followUps"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "followUp",
+          "type": [
+            "followUp"
+          ],
+          "description": "Follow Up",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted contact follow-up.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/:nk/follow-ups/:fk/restore"
+      }
+    },
+    "prototype.generateFollowups": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "description": "Follow up period in days",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [],
+      "description": "Generate a list of follow-ups",
+      "http": {
+        "verb": "post",
+        "path": "/generate-followups"
       }
     }
   }

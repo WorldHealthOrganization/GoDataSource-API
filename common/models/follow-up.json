@@ -14,15 +14,11 @@
       "type": "boolean",
       "required": true
     },
-    "locationId": {
-      "type": "string",
-      "required": true
+    "lostToFollowUp": {
+      "type": "boolean"
     },
     "address": {
       "type": "address"
-    },
-    "geolocation": {
-      "type": "geopoint"
     },
     "fillGeolocation": {
       "type": "geopoint"
@@ -31,6 +27,9 @@
       "type": [
         "object"
       ]
+    },
+    "additionalData": {
+      "type": "object"
     }
   },
   "validations": [],

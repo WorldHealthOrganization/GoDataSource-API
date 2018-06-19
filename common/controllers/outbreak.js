@@ -1,5 +1,6 @@
 'use strict';
 
+const moment = require('moment');
 const app = require('../../server/server');
 const uuid = require('uuid');
 const _ = require('lodash');
@@ -525,6 +526,103 @@ module.exports = function (Outbreak) {
     helpers.getSystemAndOwnReferenceData(this.id, filter)
       .then((data) => callback(null, data))
       .catch(callback);
+  };
+
+  /**
+   * Restore a deleted contact's follow up
+   * @param contactId
+   * @param followUpId
+   * @param callback
+   */
+  Outbreak.prototype.restoreContactFollowUp = function (contactId, followUpId, callback) {
+    app.models.followUp
+      .findOne({
+        deleted: true,
+        where: {
+          id: followUpId,
+          personId: contactId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', { model: app.models.followUp.modelName, id: followUpId });
+        }
+        instance.undoDelete(callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Generate list of follow ups
+   * @param data Contains number of days used to perform the generation
+   */
+  Outbreak.prototype.generateFollowups = function (data) {
+    // cache outbreak's follow up period
+    let outbreakFollowUpPeriod = this.periodOfFollowup;
+
+    // retrieve list of contacts that has a relationship with events/contacts and is eligible for generation
+    return app.models.contact
+      .find({
+        include: {
+          relation: 'relationships',
+          scope: {
+              where: {
+                or: [
+                  {
+                    'persons.type': 'case'
+                  },
+                  {
+                    'persons.type': 'event'
+                  }
+                ]
+              },
+              order: 'contactDate DESC'
+            }
+          }
+      })
+      .then((contacts) => {
+        // follow up add statements
+        let followsUpsToAdd = [];
+
+        // filter cases that have no relationships
+        contacts = contacts.filter((item) => item.relationships.length);
+
+        // check how many follow ups should be generated for each contact
+        // based on how many follow up days were sent in the request body
+        contacts.forEach((contact) => {
+          // follow ups to be added for the given contact
+          // choose contact date from the latest relationship with a case/event
+          let contactDate = contact.relationships[0].contactDate;
+
+          // follow ups to be generated for the given contact
+          // each one contains a specific date
+          let contactFollowUpsToAdd = [];
+
+          // initialize the current date and increment it with a day for each follow up day
+          let currentDate = moment();
+
+          // check each follow up day against contact's date
+          // one follow up is generated for each day
+          for (let day = 1; day <= data.followUpDays; day++) {
+            if (day > 1) {
+              currentDate = currentDate.add(1, 'd');
+            }
+
+            if (helpers.isContactValidForFollowup(++outbreakFollowUpPeriod, contactDate, currentDate)) {
+              followUpsToBeGenerated.push({
+                personId: contact.id
+              });
+            }
+          }
+
+          if (contactFollowUpsToAdd.length) {
+            followsUpsToAdd.push(Promise.all(contactFollowUpsToAdd));
+          }
+        });
+
+        return Promise.all(followsUpsToAdd);
+      });
   };
 
   /**

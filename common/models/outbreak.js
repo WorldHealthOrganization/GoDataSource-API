@@ -3,10 +3,23 @@
 const app = require('../../server/server');
 const _ = require('lodash');
 
+// used to manipulate dates
+const moment = require('moment');
+
 module.exports = function (Outbreak) {
 
   // initialize model helpers
   Outbreak.helpers = {};
+
+  /**
+   * Checks whether the current contact is eligible for follow-up generation
+   * @param followupPeriod Outbreak's follow up period (days)
+   * @param contactDate Contact's date
+   * @param currentDate Current date
+   */
+  Outbreak.helpers.isContactValidForFollowup = function (followupPeriod, contactDate, currentDate) {
+    return moment(contactDate).add(followupPeriod, 'd') >= currentDate;
+  };
 
   /**
    * Find relations for a person
