@@ -113,25 +113,65 @@ module.exports = function (ReferenceData) {
   };
 
   /**
-   * Check if an entry is editable
+   * Check if an entry is editable (!readOnly + !inUse)
    * @param referenceData|referenceDataId
    * @param callback
    * @return {*}
    */
   ReferenceData.isEntryEditable = function (referenceData, callback) {
+    let referenceDataId;
+
+    /**
+     * Check if a writable model is in use
+     * @param error
+     * @param writable
+     * @return {*}
+     */
+    function _callback(error, writable) {
+      if (error) {
+        return callback(error);
+      }
+      // if it's not writable, stop here
+      if (!writable) {
+        return callback(app.utils.apiError.getError('MODEL_NOT_EDITABLE', {
+          model: ReferenceData.modelName,
+          id: referenceDataId
+        }));
+      }
+      // record is writable, check usage
+      ReferenceData.isRecordInUse(referenceDataId, function (error, recordInUse) {
+        if (error) {
+          return callback(error);
+        }
+        // record in use
+        if (recordInUse) {
+          // send back an error
+          return callback(app.utils.apiError.getError('MODEL_IN_USE', {
+            model: ReferenceData.modelName,
+            id: referenceDataId
+          }));
+        }
+        return callback(null, true);
+      });
+    }
+
     // if this a reference data item, check readOnly field
     if (typeof referenceData === 'object') {
-      return callback(null, !referenceData.readOnly);
+      referenceDataId = referenceData.id;
+      // then check usage
+      return _callback(null, !referenceData.readOnly);
     }
-    // this is only an ID, find the actual record and check if it's editable
+    // this is only an ID, find the actual record and check if it's writable
     ReferenceData.findById(referenceData)
       .then(function (referenceData) {
+        referenceDataId = referenceData.id;
         let editable = true;
         if (!referenceData || referenceData.readOnly) {
           editable = false
         }
-        callback(null, editable);
+        //then check usage
+        _callback(null, editable);
       })
-      .catch(callback);
+      .catch(_callback);
   };
 };

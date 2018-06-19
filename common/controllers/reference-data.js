@@ -35,69 +35,17 @@ module.exports = function (ReferenceData) {
    * Check if a model is editable before updating it
    */
   ReferenceData.beforeRemote('prototype.updateRecord', function (context, modelInstance, next) {
-    ReferenceData.isEntryEditable(modelInstance, function (error, editable) {
-      if (error) {
-        return next(error);
-      }
-      // if the record is not editable
-      if (!editable) {
-        // send back an error
-        return next(app.utils.apiError.getError('MODEL_NOT_EDITABLE', {
-          model: ReferenceData.modelName,
-          id: context.where.id
-        }));
-      }
-      // check if record is in use
-      ReferenceData.isRecordInUse(context.where.id, function (error, recordInUse) {
-        if (error) {
-          return next(error);
-        }
-        // if the record is in use
-        if (recordInUse) {
-          // send back an error
-          return next(app.utils.apiError.getError('MODEL_IN_USE', {
-            model: ReferenceData.modelName,
-            id: context.where.id
-          }));
-        }
-        next();
-    })
+    // if its not editable, it will send an error to the callback
+    ReferenceData.isEntryEditable(modelInstance, next);
   });
-
 
   /**
    * Check if model is editable & model usage before deleting the model
    */
   ReferenceData.observe('before delete', function (context, next) {
     if (context.where.id) {
-      ReferenceData.isEntryEditable(context.where.id, function (error, editable) {
-        if (error) {
-          return next(error);
-        }
-        // if the record is not editable
-        if (!editable) {
-          // send back an error
-          return next(app.utils.apiError.getError('MODEL_NOT_EDITABLE', {
-            model: ReferenceData.modelName,
-            id: context.where.id
-          }));
-        }
-        // check if record is in use
-        ReferenceData.isRecordInUse(context.where.id, function (error, recordInUse) {
-          if (error) {
-            return next(error);
-          }
-          // if the record is in use
-          if (recordInUse) {
-            // send back an error
-            return next(app.utils.apiError.getError('MODEL_IN_USE', {
-              model: ReferenceData.modelName,
-              id: context.where.id
-            }));
-          }
-          next();
-        });
-      });
+      // if its not editable, it will send an error to the callback
+      ReferenceData.isEntryEditable(context.where.id, next);
     } else {
       next();
     }
