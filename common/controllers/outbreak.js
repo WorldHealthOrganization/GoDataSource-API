@@ -16,7 +16,10 @@ module.exports = function (Outbreak) {
     'prototype.__delete__clusters',
     'prototype.__delete__contacts',
     'prototype.__delete__contacts__followUps',
-    'prototype.__delete__contacts__relationships'
+    'prototype.__delete__contacts__relationships',
+    'prototype.__get__referenceData',
+    'prototype.__delete__referenceData',
+    'prototype.__count__referenceData'
   ]);
 
   // attach search by relation property behavior on get contacts
@@ -479,5 +482,14 @@ module.exports = function (Outbreak) {
         instance.undoDelete(callback);
       })
       .catch(callback);
+  };
+
+  /**
+   * Retrieve system and own reference data
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.getReferenceData = function (filter, callback) {
+    helpers.getSystemAndOwnReferenceData(this.id, filter, callback);
   };
 };

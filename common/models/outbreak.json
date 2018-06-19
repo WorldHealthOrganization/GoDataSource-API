@@ -133,6 +133,11 @@
       "type": "hasMany",
       "model": "event",
       "foreignKey": "outbreakId"
+    },
+    "referenceData": {
+      "type": "hasMany",
+      "model": "referenceData",
+      "foreignKey": "outbreakId"
     }
   },
   "acls": [
@@ -488,6 +493,36 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__count__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "getReferenceData"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "__create__referenceData"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "__findById__referenceData"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "__updateById__referenceData"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "__destroyById__referenceData"
     }
   ],
   "methods": {
@@ -1149,6 +1184,31 @@
       "http": {
         "verb": "post",
         "path": "/cases/:nk/restore"
+      }
+    },
+    "prototype.getReferenceData": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "referenceData",
+          "type": [
+            "referenceData"
+          ],
+          "description": "System and outbreak specific reference data",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries system and outbreak specific reference data list.",
+      "http": {
+        "verb": "get",
+        "path": "/reference-data"
       }
     }
   }
