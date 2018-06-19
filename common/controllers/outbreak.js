@@ -535,7 +535,7 @@ module.exports = function (Outbreak) {
    * @param contactId
    * @param callback
    */
-  Outbreak.prototype.getContectQRResourceLink = function (contactId, callback) {
+  Outbreak.prototype.getContactQRResourceLink = function (contactId, callback) {
     Outbreak.helpers.getPersonQRResourceLink(this, 'contact', contactId, function (error, qrCode) {
       callback(null, qrCode, `image/png`, `attachment;filename=contact-${contactId}.png`);
     });
