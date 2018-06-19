@@ -610,9 +610,13 @@ module.exports = function (Outbreak) {
             }
 
             if (helpers.isContactValidForFollowup(++outbreakFollowUpPeriod, contactDate, currentDate)) {
-              followUpsToBeGenerated.push({
-                personId: contact.id
-              });
+              contactFollowUpsToAdd.push(
+                app.models.followUp.create({
+                  personId: contact.id,
+                  date: currentDate.toDate(),
+                  performed: false
+                })
+              );
             }
           }
 
