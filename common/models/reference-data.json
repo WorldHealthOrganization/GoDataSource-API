@@ -44,6 +44,15 @@
     },
     "icon": {
       "type": "string"
+    },
+    "readOnly": {
+      "type": "boolean",
+      "readOnly": true,
+      "default": false
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
     }
   },
   "validations": [],

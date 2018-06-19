@@ -70,5 +70,9 @@
   "INVALID_CONTACT_CONTACT_RELATIONSHIP": {
     "defaultStatusCode": 422,
     "messagePattern": "Related person \"<%= id %>\" is a contact. Cannot create relationships between two contacts."
+  },
+  "MODEL_NOT_EDITABLE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Model \"<%= model %>\" id \"<%= id %>\" is not editable (read-only)."
   }
 }

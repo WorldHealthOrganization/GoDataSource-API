@@ -113,24 +113,25 @@ module.exports = function (ReferenceData) {
   };
 
   /**
-   * Check model usage before deleting the model
+   * Check if an entry is editable
+   * @param referenceData|referenceDataId
+   * @param callback
+   * @return {*}
    */
-  ReferenceData.observe('before delete', function (context, callback) {
-    if (context.where.id) {
-      ReferenceData.isRecordInUse(context.where.id, function (error, recordInUse) {
-        if (error) {
-          return callback(error);
-        }
-        // if the record is in use
-        if (recordInUse) {
-          // send back an error
-          callback(app.utils.apiError.getError('MODEL_IN_USE', {model: ReferenceData.modelName, id: context.where.id}));
-        } else {
-          callback();
-        }
-      })
-    } else {
-      callback();
+  ReferenceData.isEntryEditable = function (referenceData, callback) {
+    // if this a reference data item, check readOnly field
+    if (typeof referenceData === 'object') {
+      return callback(null, !referenceData.readOnly);
     }
-  });
+    // this is only an ID, find the actual record and check if it's editable
+    ReferenceData.findById(referenceData)
+      .then(function (referenceData) {
+        let editable = true;
+        if (!referenceData || referenceData.readOnly) {
+          editable = false
+        }
+        callback(null, editable);
+      })
+      .catch(callback);
+  };
 };
