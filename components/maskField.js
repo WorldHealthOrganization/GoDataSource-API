@@ -147,6 +147,7 @@ function extractValueFromMaskedField(mask, value) {
   let matches = maskRegExp.exec(value);
   if (matches) {
     matches.forEach(function (match, index) {
+      // 0 is full match, we're only interested in group matches (1+)
       if (index) {
         extractedValue += match;
       }
