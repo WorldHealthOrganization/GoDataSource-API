@@ -339,6 +339,48 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Get the next available visual id
+   * @param outbreak
+   * @param callback
+   */
+  Outbreak.helpers.getAvailableVisualId = function (outbreak, callback) {
+    let maskRegExp = app.utils.maskField.convertMaskToSearchRegExp(outbreak.caseIdMask);
+    app.models.person
+      .findOne({
+        where: {
+          outbreakId: outbreak.id,
+          visualId: {
+            regexp: maskRegExp
+          }
+        },
+        deleted: true,
+        order: 'visualId DESC'
+      })
+      .then(function (person) {
+        let index = 0;
+        if (person) {
+          index = app.utils.maskField.extractValueFromMaskedField(outbreak.caseIdMask, person.visualId);
+        }
+        index++;
+        app.utils.maskField.resolveMask(outbreak.caseIdMask, index, callback);
+      }).catch(callback);
+  };
+
+  /**
+   * Get a resource link embedded in a QR Code Image (png) for a person
+   * @param outbreak
+   * @param type
+   * @param personId
+   * @param callback
+   */
+  Outbreak.helpers.getPersonQRResourceLink = function (outbreak, type, personId, callback) {
+    callback(null, app.utils.qrCode.createResourceLink(type, {
+      outbreakId: outbreak.id,
+      [`${type}Id`]: personId
+    }));
+  };
+
+  /**
    * Retrieve list of system reference data and outbreak's specific reference data
    * @param outbreakId
    * @param filter

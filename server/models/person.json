@@ -9,6 +9,10 @@
     "collection": "person"
   },
   "properties": {
+    "visualId": {
+      "type": "string",
+      "unique": true
+    },
     "firstName": {
       "type": "string",
       "required": true
@@ -39,6 +43,23 @@
     "addresses": ["address"],
     "fillGeoLocation": {
       "type": "geopoint"
+    }
+  },
+  "indexes": {
+    "visualId_index": {
+      "visualId": 1
+    },
+    "firstName_index": {
+      "firstName": 1
+    },
+    "middleName_index": {
+      "middleName": 1
+    },
+    "lastName_index": {
+      "lastName": 1
+    },
+    "documents_index": {
+      "documents": 1
     }
   },
   "validations": [],
