@@ -16,7 +16,7 @@ module.exports = function (Model) {
    */
   function prepareCustomRelations(context, next) {
     // keep a list of custom relations
-    const customRelations = [];
+    const customRelations = _.get(context, 'options.includeCustom', []);
     // get included relations
     let includeQuery = _.get(context, 'query.include', []);
     // always work with arrays
@@ -54,8 +54,9 @@ module.exports = function (Model) {
     });
     // update query include to contain only the relations supported by loopback
     _.set(context, 'query.include', loopbackIncludeFilter);
-    // set custom include on the context
+    // set custom include on the context (use options for 'loaded' event and query for making them available in other contexts such as before/afterRemote)
     _.set(context, 'options.includeCustom', customRelations);
+    _.set(context, 'query.includeCustom', customRelations);
     next();
   }
 
@@ -78,7 +79,24 @@ module.exports = function (Model) {
           query = {
             where: {
               id: {
-                inq: modelInstance[customRelation.definition.foreignKey]
+                inq: _.get(modelInstance, customRelation.definition.foreignKey)
+              }
+            }
+          };
+          break;
+        // base model contains a list of references to related model
+        case 'belongsToManyComplex':
+          const foreignKeyContainer = modelInstance[customRelation.definition.foreignKeyContainer];
+          const referencedIds = [];
+          // build list of referenced ids
+          Array.isArray(foreignKeyContainer) && foreignKeyContainer.forEach(function (property) {
+            referencedIds.push(_.get(property, customRelation.definition.foreignKey));
+          });
+          // build query
+          query = {
+            where: {
+              id: {
+                inq: referencedIds
               }
             }
           };

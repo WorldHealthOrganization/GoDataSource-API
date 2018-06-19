@@ -378,5 +378,36 @@ module.exports = function (Outbreak) {
       outbreakId: outbreak.id,
       [`${type}Id`]: personId
     }));
-  }
+  };
+
+  /**
+   * Retrieve list of system reference data and outbreak's specific reference data
+   * @param outbreakId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.helpers.getSystemAndOwnReferenceData = function (outbreakId, filter, callback) {
+    const _filter = app.utils.remote
+      .mergeFilters({
+          where: {
+            or: [
+              {
+                outbreakId: {
+                  exists: false
+                }
+              },
+              {
+                outbreakId: outbreakId
+              }
+            ]
+          }
+        },
+        filter
+      );
+
+    app.models.referenceData
+      .find(_filter)
+      .then((data) => callback(null, data))
+      .catch(callback);
+  };
 };

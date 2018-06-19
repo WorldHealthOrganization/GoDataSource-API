@@ -25,6 +25,9 @@
       "type": "date",
       "required": true
     },
+    "dateOfResult": {
+      "type": "date"
+    },
     "labName": {
       "type": "string",
       "required": true
@@ -40,6 +43,9 @@
     "result": {
       "type": "string",
       "required": true
+    },
+    "quantitativeResult": {
+      "type": "string"
     },
     "notes": {
       "type": "string",

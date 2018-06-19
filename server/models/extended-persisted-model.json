@@ -14,8 +14,7 @@
     "AuditLogger": true,
     "SoftDelete": true,
     "AttachController": true,
-    "IncludeCustomRelations": true,
-    "SearchByRelationProperty": true
+    "IncludeCustomRelations": true
   },
   "replaceOnPUT": false,
   "properties": {
