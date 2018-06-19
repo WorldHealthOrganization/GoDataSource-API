@@ -79,11 +79,14 @@ function saveLanguageTokens(context, next) {
                 translation: originalValues[qindex].text
               });
             } else {
+              context.req.logger.debug(`Language token "${questions[qindex].text}" doesn't exist in DB. Should have been in the DB. Recreating it.`);
               // shouldn't get here
-              return tokens.new.push({
-                token: questions[qindex].text,
-                translation: originalValues[qindex].text
-              });
+              return tokens.notFound.push(app.models.languageToken
+                .create({
+                  token: questions[qindex].text,
+                  translation: originalValues[qindex].text,
+                  languageId: languageId
+                }));
             }
           })
         );
@@ -116,11 +119,14 @@ function saveLanguageTokens(context, next) {
                     translation: originalValues[qindex].answers[aindex].label
                   });
                 } else {
+                  context.req.logger.debug(`Language token "${answers[aindex].label}" doesn't exist in DB. Should have been in the DB. Recreating it only for the user's language.`);
                   // shouldn't get here
-                  return tokens.new.push({
-                    token: answers[aindex].label,
-                    translation: originalValues[qindex].answers[aindex].label
-                  });
+                  return tokens.notFound.push(app.models.languageToken
+                    .create({
+                      token: answers[aindex].label,
+                      translation: originalValues[qindex].answers[aindex].label,
+                      languageId: languageId
+                    }));
                 }
               })
             );
@@ -142,9 +148,11 @@ function saveLanguageTokens(context, next) {
   // initialize object containing arrays of token resources that will need to be created/updated
   // promises for created tokens will be created after checking all questions/answers;
   // promises for token update will be created on the fly
+  // promises for not found tokens will be added after the new/updated promises are executed
   let tokens = {
     new: [],
-    updated: []
+    updated: [],
+    notFound: []
   };
 
   // in the template only properties from subtemplates need to be translated
@@ -166,7 +174,7 @@ function saveLanguageTokens(context, next) {
       .find()
       .then(function (languages) {
         // loop through all the languages and create new token promises for each language for each new token
-        return languages.forEach(function (language) {
+        languages.forEach(function (language) {
           tokens.new.forEach(function (token) {
             // add languageId and create token
             token.languageId = language.id;
@@ -174,10 +182,18 @@ function saveLanguageTokens(context, next) {
               .create(token));
           });
         });
-      })
-      .then(function () {
+
         // resolve promises
         return Promise.all(tokenPromises);
+      })
+      .then(function () {
+        // check if there are tokens that need to be recreated (were not found in DB)
+        if(tokens.notFound.length) {
+          // resolve promises
+          return Promise.all(tokens.notFound);
+        }
+
+        return tokens.notFound.length;
       })
       .then(function () {
         next();
@@ -186,6 +202,15 @@ function saveLanguageTokens(context, next) {
   } else if (tokenPromises.length) {
     // no new token but there are tokens to be updated
     Promise.all(tokenPromises)
+      .then(function () {
+        // check if there are tokens that need to be recreated (were not found in DB)
+        if(tokens.notFound.length) {
+          // resolve promises
+          return Promise.all(tokens.notFound);
+        }
+
+        return tokens.notFound.length;
+      })
       .then(function () {
         next();
       })
