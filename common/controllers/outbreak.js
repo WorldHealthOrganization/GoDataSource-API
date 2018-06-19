@@ -1,6 +1,7 @@
 'use strict';
 
 const app = require('../../server/server');
+const uuid = require('uuid');
 const _ = require('lodash');
 
 module.exports = function (Outbreak) {
@@ -59,12 +60,21 @@ module.exports = function (Outbreak) {
 
   /**
    * Parsing the properties that are of type '["date"]' as Loopback doesn't save them correctly
+   * Also set visual id
    */
   Outbreak.beforeRemote('prototype.__create__cases', function (context, modelInstance, next) {
     // parse array of dates properties
     helpers.parseArrayOfDates(context.args.data);
-
-    next();
+    // if the visual id was not passed
+    if (context.args.data.visualId === undefined) {
+      // set it automatically
+      Outbreak.helpers.getAvailableVisualId(context.instance, function (error, visualId) {
+        context.args.data.visualId = visualId;
+        return next(error);
+      });
+    } else {
+      next();
+    }
   });
 
   /**
@@ -474,5 +484,54 @@ module.exports = function (Outbreak) {
         instance.undoDelete(callback);
       })
       .catch(callback);
+  };
+
+  /**
+   * Generate (next available) visual id
+   * @param callback
+   */
+  Outbreak.prototype.generateVisualId = function (callback) {
+    Outbreak.helpers.getAvailableVisualId(this, callback);
+  };
+
+  /**
+   * Generate a globally unique id
+   * @param callback
+   */
+  Outbreak.generateUniqueId = function (callback) {
+    callback(null, uuid.v4())
+  };
+
+  /**
+   * Get a resource link embedded in a QR Code Image (png) for a case
+   * @param caseId
+   * @param callback
+   */
+  Outbreak.prototype.getCaseQRResourceLink = function (caseId, callback) {
+    Outbreak.helpers.getPersonQRResourceLink(this, 'case', caseId, function (error, qrCode) {
+      callback(null, qrCode, `image/png`, `attachment;filename=case-${caseId}.png`);
+    });
+  };
+
+  /**
+   * Get a resource link embedded in a QR Code Image (png) for a contact
+   * @param contactId
+   * @param callback
+   */
+  Outbreak.prototype.getContectQRResourceLink = function (contactId, callback) {
+    Outbreak.helpers.getPersonQRResourceLink(this, 'contact', contactId, function (error, qrCode) {
+      callback(null, qrCode, `image/png`, `attachment;filename=contact-${contactId}.png`);
+    });
+  };
+
+  /**
+   * Get a resource link embedded in a QR Code Image (png) for a event
+   * @param eventId
+   * @param callback
+   */
+  Outbreak.prototype.getEventQRResourceLink = function (eventId, callback) {
+    Outbreak.helpers.getPersonQRResourceLink(this, 'event', eventId, function (error, qrCode) {
+      callback(null, qrCode, `image/png`, `attachment;filename=event-${eventId}.png`);
+    });
   };
 };

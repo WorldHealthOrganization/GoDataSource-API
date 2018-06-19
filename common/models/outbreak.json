@@ -488,6 +488,42 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__count__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "generateVisualId"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "generateVisualId"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "generateUniqueId"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "getCaseQRResourceLink"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "getContactQRResourceLink"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "getEventQRResourceLink"
     }
   ],
   "methods": {
@@ -1149,6 +1185,154 @@
       "http": {
         "verb": "post",
         "path": "/cases/:nk/restore"
+      }
+    },
+    "prototype.generateVisualId": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "visualId",
+          "type": "string",
+          "description": "Visual ID",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Generates the next (available) visual ID based on the outbreak mask.",
+      "http": {
+        "verb": "post",
+        "path": "/generate-visual-id"
+      }
+    },
+    "generateUniqueId": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "uniqueId",
+          "type": "string",
+          "description": "Unique ID",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Generates a globally unique ID (UUID).",
+      "http": {
+        "verb": "post",
+        "path": "/generate-unique-id"
+      }
+    },
+    "prototype.getCaseQRResourceLink": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Get a resource link embedded in a QR Code Image (png) for a case.",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/qr-resource-link"
+      }
+    },
+    "prototype.getContactQRResourceLink": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Get a resource link embedded in a QR Code Image (png) for a contact.",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/qr-resource-link"
+      }
+    },
+    "prototype.getEventQRResourceLink": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Get a resource link embedded in a QR Code Image (png) for a event.",
+      "http": {
+        "verb": "get",
+        "path": "/events/:nk/qr-resource-link"
       }
     }
   }

@@ -49,10 +49,10 @@ function convertMaskToSearchRegExp(mask) {
   let maskPlaceholders = getMaskPlaceholders(mask);
   maskPlaceholders.forEach(function (placeholder) {
     // assume the digits are required
-    let replacer = '\\d+';
+    let replacer = '(\\d+)';
     // if the digits are optional, update replacer
     if (/9+/.test(placeholder)) {
-      replacer = '\\d*';
+      replacer = '(\\d*)';
     }
     mask = mask.replace(placeholder, replacer);
   });
@@ -135,9 +135,32 @@ function resolveMask(mask, numericValue, callback) {
   callback(null, mask);
 }
 
+/**
+ * Extract value from a masked field
+ * @param mask
+ * @param value
+ * @return {number}
+ */
+function extractValueFromMaskedField(mask, value) {
+  let extractedValue = '';
+  let maskRegExp = convertMaskToSearchRegExp(mask);
+  let matches = maskRegExp.exec(value);
+  if (matches) {
+    matches.forEach(function (match, index) {
+      if (index) {
+        extractedValue += match;
+      }
+    });
+  } else {
+    extractedValue = 0;
+  }
+  return parseInt(extractedValue);
+}
+
 module.exports = {
   maskIsValid: maskIsValid,
   getMaskPlaceholders: getMaskPlaceholders,
   convertMaskToSearchRegExp: convertMaskToSearchRegExp,
-  resolveMask: resolveMask
+  resolveMask: resolveMask,
+  extractValueFromMaskedField: extractValueFromMaskedField
 };
