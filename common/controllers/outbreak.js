@@ -558,8 +558,13 @@ module.exports = function (Outbreak) {
    * @param data Contains number of days used to perform the generation
    */
   Outbreak.prototype.generateFollowups = function (data) {
-    // cache outbreak's follow up period
+    // if no followup period was sent in request, assume its just for one day
+    data = data || {};
+    data.followUpDays = data.followUpDays || 1;
+
+    // cache outbreak's follow up options
     let outbreakFollowUpPeriod = this.periodOfFollowup;
+    let outbreakFollowUpFreq = this.frequencyOfFollowUp;
 
     // retrieve list of contacts that has a relationship with events/contacts and is eligible for generation
     return app.models.contact
@@ -610,13 +615,16 @@ module.exports = function (Outbreak) {
             }
 
             if (helpers.isContactValidForFollowup(++outbreakFollowUpPeriod, contactDate, currentDate)) {
-              contactFollowUpsToAdd.push(
-                app.models.followUp.create({
-                  personId: contact.id,
-                  date: currentDate.toDate(),
-                  performed: false
-                })
-              );
+              // add multiple follow up per day if follow up frequency is higher than 1
+              for (let i = 0; i < outbreakFollowUpFreq; i++) {
+                contactFollowUpsToAdd.push(
+                  app.models.followUp.create({
+                    personId: contact.id,
+                    date: currentDate.toDate(),
+                    performed: false
+                  })
+                );
+              }
             }
           }
 
