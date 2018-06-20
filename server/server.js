@@ -1,10 +1,18 @@
 'use strict';
 
+let app;
+
 // catch exceptions on startup
 process.on('uncaughtException', function(e) {
-  app.logger.log('error', e);
-  // stop process and log error
-  app.logger.exitProcessAfterFlush(1);
+  // check if app is initialized
+  if(typeof app !== 'undefined') {
+    app.logger.log('error', e);
+    // stop process and log error
+    app.logger.exitProcessAfterFlush(1);
+  } else {
+    console.error(e);
+    process.exit(1);
+  }
 });
 
 
@@ -14,7 +22,7 @@ const logger = require('../components/logger');
 const loopback = require('loopback');
 const boot = require('loopback-boot');
 
-const app = module.exports = loopback();
+app = module.exports = loopback();
 app.logger = logger;
 
 app.start = function () {
