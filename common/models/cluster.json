@@ -5,9 +5,26 @@
   "options": {
     "validateUpsert": true
   },
-  "properties": {},
+  "hidden": [
+    "outbreakId"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "string"
+    }
+  },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "relationships": {
+      "type": "hasMany",
+      "model": "relationship",
+      "foreignKey": "clusterId"
+    }
+  },
   "acls": [],
   "methods": {}
 }
