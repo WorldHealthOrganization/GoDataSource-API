@@ -26,11 +26,12 @@ function merge(filter, requestFilter = {}) {
   if (filterExists('include')) {
     _filter.include = [];
     [filter, requestFilter].forEach(function (filterElement) {
-      if (Array.isArray(filterElement.include) && filterElement.length) {
+      if (Array.isArray(filterElement.include) && filterElement.include.length) {
         _filter.include = _filter.include.concat(filterElement.include);
+      } else if (typeof filterElement.include === 'string' || typeof filterElement.include === 'object') {
+        _filter.include.push(filterElement.include)
       }
     });
-
   }
 
   ['fields', 'limit', 'order', 'skip', 'deleted'].forEach(function (filterName) {

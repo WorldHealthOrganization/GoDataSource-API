@@ -18,7 +18,9 @@
       "required": true
     },
     "countries": {
-      "type": ["string"],
+      "type": [
+        "string"
+      ],
       "required": true
     },
     "startDate": {
@@ -63,7 +65,9 @@
       "description": "Number of contacts used to determine the proportion of cases with less than X contacts"
     },
     "fieldsToDisplayNode": {
-      "type": ["string"]
+      "type": [
+        "string"
+      ]
     },
     "colorContactNode": {
       "type": "string"
@@ -132,6 +136,11 @@
     "events": {
       "type": "hasMany",
       "model": "event",
+      "foreignKey": "outbreakId"
+    },
+    "referenceData": {
+      "type": "hasMany",
+      "model": "referenceData",
       "foreignKey": "outbreakId"
     }
   },
@@ -488,6 +497,72 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__count__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "getReferenceData"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "__create__referenceData"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "__findById__referenceData"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "__updateById__referenceData"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "__destroyById__referenceData"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "generateVisualId"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "generateVisualId"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "generateUniqueId"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "getCaseQRResourceLink"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "getContactQRResourceLink"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "getEventQRResourceLink"
     },
     {
       "principalType": "ROLE",
@@ -1173,6 +1248,179 @@
       "http": {
         "verb": "post",
         "path": "/cases/:nk/restore"
+      }
+    },
+    "prototype.getReferenceData": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "referenceData",
+          "type": [
+            "referenceData"
+          ],
+          "description": "System and outbreak specific reference data",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries system and outbreak specific reference data list.",
+      "http": {
+        "verb": "get",
+        "path": "/reference-data"
+      }
+    },
+    "prototype.generateVisualId": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "visualId",
+          "type": "string",
+          "description": "Visual ID",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Generates the next (available) visual ID based on the outbreak mask.",
+      "http": {
+        "verb": "post",
+        "path": "/generate-visual-id"
+      }
+    },
+    "generateUniqueId": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "uniqueId",
+          "type": "string",
+          "description": "Unique ID",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Generates a globally unique ID (UUID).",
+      "http": {
+        "verb": "post",
+        "path": "/generate-unique-id"
+      }
+    },
+    "prototype.getCaseQRResourceLink": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Get a resource link embedded in a QR Code Image (png) for a case.",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/qr-resource-link"
+      }
+    },
+    "prototype.getContactQRResourceLink": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Get a resource link embedded in a QR Code Image (png) for a contact.",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/qr-resource-link"
+      }
+    },
+    "prototype.getEventQRResourceLink": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Get a resource link embedded in a QR Code Image (png) for a event.",
+      "http": {
+        "verb": "get",
+        "path": "/events/:nk/qr-resource-link"
       }
     }
   }

@@ -16,7 +16,8 @@ const routines = {
       require('./scripts/migrateDatabaseCollections'),
       require('./scripts/defaultRolesAndSysAdmin'),
       require('./scripts/installLanguages'),
-      require('./scripts/defaultSystemSettings')
+      require('./scripts/defaultSystemSettings'),
+      require('./scripts/defaultReferenceData')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });

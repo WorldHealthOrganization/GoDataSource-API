@@ -14,11 +14,11 @@
       "required": true
     },
     "oldValue": {
-      "type": "string",
+      "type": "any",
       "required": true
     },
     "newValue": {
-      "type": "string",
+      "type": "any",
       "required": true
     }
   },
