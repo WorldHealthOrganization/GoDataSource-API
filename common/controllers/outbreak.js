@@ -63,7 +63,7 @@ module.exports = function (Outbreak) {
 
         return;
       })
-      .then(function() {
+      .then(function () {
         next();
       })
       .catch(next);
