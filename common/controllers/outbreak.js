@@ -44,11 +44,25 @@ module.exports = function (Outbreak) {
         }
       })
       .then(function (userCount) {
-        if (userCount) {
-          next(app.utils.apiError.getError('DELETE_ACTIVE_OUTBREAK', {id: context.args.id}, 422));
-        } else {
-          next();
+        // if there is only one user that has the outbreak active check if it's the logged user; We allow deletion in this case
+        if (userCount === 1 && context.args.id === context.req.authData.user.activeOutbreakId) {
+          // update user data and remove the activeOutbreakId
+          return context.req.authData.userInstance
+            .updateAttributes({
+              activeOutbreakId: null
+            });
         }
+        // if there are other users create error
+        else if (userCount) {
+          throw app.utils.apiError.getError('DELETE_ACTIVE_OUTBREAK', {id: context.args.id}, 422);
+        } else {
+          // nothing to do; proceed with deletion
+        }
+
+        return;
+      })
+      .then(function () {
+        next();
       })
       .catch(next);
   });
