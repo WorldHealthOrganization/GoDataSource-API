@@ -103,16 +103,6 @@ module.exports = function (ReferenceData) {
   };
 
   /**
-   * Generate a language/translatable identifier for a category + value combination
-   * @param category
-   * @param value
-   * @return {string}
-   */
-  ReferenceData.getTranslatableIdentifierForValue = function (category, value) {
-    return `${category}_${_.snakeCase(value).toUpperCase()}`;
-  };
-
-  /**
    * Check model usage before deleting the model
    */
   ReferenceData.observe('before delete', function (context, callback) {

@@ -96,7 +96,7 @@
       "principalType": "ROLE",
       "principalId": "write_sys_config",
       "permission": "ALLOW",
-      "property": "updateRecord"
+      "property": "patchAttributes"
     },
     {
       "principalType": "ROLE",
@@ -124,40 +124,6 @@
         "verb": "get",
         "path": "/available-categories"
       }
-    },
-    "prototype.updateRecord": {
-      "description": "Patch attributes for a model instance and persist it into the data source.",
-      "accepts": [
-        {
-          "arg": "data",
-          "type": "object",
-          "model": "referenceData",
-          "http": {
-            "source": "body"
-          },
-          "description": "An object of model property name/value pairs"
-        },
-        {
-          "arg": "options",
-          "type": "object",
-          "http": "optionsFromRequest"
-        }
-      ],
-      "returns": {
-        "arg": "data",
-        "type": "referenceData",
-        "root": true
-      },
-      "http": [
-        {
-          "verb": "patch",
-          "path": "/"
-        },
-        {
-          "verb": "put",
-          "path": "/"
-        }
-      ]
     },
     "prototype.getUsage": {
       "description": "Find usage for a record.",
