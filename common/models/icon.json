@@ -1,0 +1,83 @@
+{
+  "name": "icon",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "path": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {
+    "upload": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "name",
+          "type": "string"
+        },
+        {
+          "arg": "icon",
+          "type": "file"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "icon",
+          "type": "icon",
+          "root": true
+        }
+      ],
+      "description": "Create a new instance of the model and persist it into the data source.",
+      "http": {
+        "verb": "post",
+        "path": "/"
+      }
+    },
+    "prototype.download": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Download an icon.",
+      "http": {
+        "verb": "get",
+        "path": "/download"
+      }
+    }
+  }
+}

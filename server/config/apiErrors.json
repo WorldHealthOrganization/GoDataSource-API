@@ -74,5 +74,9 @@
   "MODEL_NOT_EDITABLE": {
     "defaultStatusCode": 422,
     "messagePattern": "Model \"<%= model %>\" id \"<%= id %>\" is not editable (read-only)."
+  },
+  "MISSING_REQUIRED_PROPERTY": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Model \"<%= model %>\" is missing required properties: <%= properties %>."
   }
 }

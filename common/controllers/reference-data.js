@@ -36,7 +36,7 @@ module.exports = function (ReferenceData) {
    */
   ReferenceData.beforeRemote('prototype.updateRecord', function (context, modelInstance, next) {
     // if its not editable, it will send an error to the callback
-    ReferenceData.isEntryEditable(modelInstance, next);
+    ReferenceData.isEntryEditable(context.instance, next);
   });
 
   /**
@@ -91,7 +91,7 @@ module.exports = function (ReferenceData) {
   };
 
   /**
-   * Update reference record. This actually only updates the icon and translations for value and description
+   * Update reference record. This actually only updates the icon, active and translations for value and description
    * @param data
    * @param options
    * @param callback
@@ -100,15 +100,13 @@ module.exports = function (ReferenceData) {
     const self = this;
     const updateActions = [];
     if (data) {
-      // if icon was sent
-      if (data.icon) {
-        // update it
-        updateActions.push(
-          self.updateAttributes({
-            icon: data.icon
-          })
-        );
-      }
+      // update own properties
+      updateActions.push(
+        self.updateAttributes({
+          icon: data.icon,
+          active: data.active
+        })
+      );
       // if the value was sent
       if (data.value) {
         // find the token associated with the value

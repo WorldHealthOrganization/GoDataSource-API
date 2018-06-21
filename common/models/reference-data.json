@@ -42,7 +42,7 @@
       "type": "string",
       "description": "Reference data item value description; eg: profession within the health care sector"
     },
-    "icon": {
+    "iconId": {
       "type": "string"
     },
     "readOnly": {

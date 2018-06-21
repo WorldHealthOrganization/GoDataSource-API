@@ -191,5 +191,13 @@
   "event": {
     "dataSource": "mongoDb",
     "public": false
+  },
+  "icon": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "storage": {
+    "dataSource": null,
+    "public": true
   }
 }
