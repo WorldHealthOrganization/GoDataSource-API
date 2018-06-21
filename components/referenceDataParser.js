@@ -104,8 +104,8 @@ function beforeUpdateHook(context, modelInstance, next) {
     // initialize original values storage
     let originalValues = {};
     // store original request values and remove them from the body as they shouldn't be changed. Translations will be changed
-    ['value', 'description'].forEach(function(prop) {
-      if(data[prop]) {
+    ['value', 'description'].forEach(function (prop) {
+      if (data[prop]) {
         originalValues[prop] = data[prop];
         delete data[prop];
       }
@@ -124,7 +124,7 @@ function beforeUpdateHook(context, modelInstance, next) {
  */
 function afterUpdateHook(context, modelInstance, next) {
   // check if value or description was sent in the req body; context.req._original exists only if at leaset one of these properties were sent
-  if(context.req._original) {
+  if (context.req._original) {
     // get logged user languageId
     let languageId = context.req.authData.user.languageId;
     // get language token; depending on model it is either the ID (for system reference data) or the FK (for outbreak reference data)
@@ -133,8 +133,8 @@ function afterUpdateHook(context, modelInstance, next) {
     let updateActions = [];
 
     // create update promises
-    ['value', 'description'].forEach(function(prop) {
-      if(context.req._original[prop]) {
+    ['value', 'description'].forEach(function (prop) {
+      if (context.req._original[prop]) {
         // find the token associated with the value
         updateActions.push(
           app.models.languageToken
@@ -156,7 +156,7 @@ function afterUpdateHook(context, modelInstance, next) {
 
     // perform update operations
     Promise.all(updateActions)
-      .then(function() {
+      .then(function () {
         next();
       })
       .catch(next);
