@@ -78,5 +78,9 @@
   "MISSING_REQUIRED_PROPERTY": {
     "defaultStatusCode": 400,
     "messagePattern": "Model \"<%= model %>\" is missing required properties: <%= properties %>."
+  },
+  "DUPLICATE_TEMPLATE_QUESTION_VARIABLE_OR_ANSWER_VALUE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "A template cannot contain duplicate question variables and a template question cannot contain duplicate answer value"
   }
 }

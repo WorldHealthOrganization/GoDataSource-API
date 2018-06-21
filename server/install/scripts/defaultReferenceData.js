@@ -295,6 +295,32 @@ const defaultReferenceData = {
       value: 'Deceased',
       description: ''
     }
+  ],
+  "LNG_REFERENCE_DATA_QUESTION_ANSWER_TYPE": [
+    {
+      value: 'Free Text',
+      description: ''
+    },
+    {
+      value: 'Numeric',
+      description: ''
+    },
+    {
+      value: 'Date/Time',
+      description: ''
+    },
+    {
+      value: 'Single Answer',
+      description: ''
+    },
+    {
+      value: 'Multiple Answers',
+      description: ''
+    },
+    {
+      value: 'File Upload',
+      description: ''
+    }
   ]
 };
 

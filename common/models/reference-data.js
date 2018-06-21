@@ -75,6 +75,10 @@ module.exports = function (ReferenceData) {
       {
         "id": "LNG_REFERENCE_DATA_OUTCOME",
         "description": "LNG_REFERENCE_DATA_OUTCOME_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_QUESTION_ANSWER_TYPE",
+        "description": "LNG_REFERENCE_DATA_QUESTION_ANSWER_TYPE_DESCRIPTION"
       }
     ]
   ];
