@@ -9,6 +9,11 @@
     "id"
   ],
   "properties": {
+    "new": {
+      "type": "boolean",
+      "required": true,
+      "description": "Flag wo specify whether the question is new in the template"
+    },
     "text": {
       "type": "string",
       "required": true

@@ -3,6 +3,8 @@
 const app = require('../../server/server');
 const uuid = require('uuid');
 const _ = require('lodash');
+const templateParser = require('./../../components/templateParser');
+const referenceDataParser = require('./../../components/referenceDataParser');
 
 module.exports = function (Outbreak) {
 
@@ -17,6 +19,12 @@ module.exports = function (Outbreak) {
     'prototype.__delete__clusters',
     'prototype.__delete__contacts',
     'prototype.__delete__contacts__followUps',
+    'prototype.__delete__contacts__relationships',
+    'prototype.__create__clusters__relationships',
+    'prototype.__delete__clusters__relationships',
+    'prototype.__findById__clusters__relationships',
+    'prototype.__updateById__clusters__relationships',
+    'prototype.__destroyById__clusters__relationships',
     'prototype.__delete__contacts__relationships',
     'prototype.__get__referenceData',
     'prototype.__delete__referenceData',
@@ -43,11 +51,25 @@ module.exports = function (Outbreak) {
         }
       })
       .then(function (userCount) {
-        if (userCount) {
-          next(app.utils.apiError.getError('DELETE_ACTIVE_OUTBREAK', {id: context.args.id}, 422));
-        } else {
-          next();
+        // if there is only one user that has the outbreak active check if it's the logged user; We allow deletion in this case
+        if (userCount === 1 && context.args.id === context.req.authData.user.activeOutbreakId) {
+          // update user data and remove the activeOutbreakId
+          return context.req.authData.userInstance
+            .updateAttributes({
+              activeOutbreakId: null
+            });
         }
+        // if there are other users create error
+        else if (userCount) {
+          throw app.utils.apiError.getError('DELETE_ACTIVE_OUTBREAK', {id: context.args.id}, 422);
+        } else {
+          // nothing to do; proceed with deletion
+        }
+
+        return;
+      })
+      .then(function () {
+        next();
       })
       .catch(next);
   });
@@ -551,4 +573,70 @@ module.exports = function (Outbreak) {
       callback(null, qrCode, `image/png`, `attachment;filename=event-${eventId}.png`);
     });
   };
+
+  /**
+   * Before create hook
+   */
+  Outbreak.beforeRemote('create', function (context, modelInstance, next) {
+    // in order to translate dynamic data, don't store values in the database, but translatable language tokens
+    // parse outbreak
+    templateParser.beforeHook(context, modelInstance, next);
+  });
+
+  /**
+   * After create hook
+   */
+  Outbreak.afterRemote('create', function (context, modelInstance, next) {
+    // after successfully creating outbreak, also create translations for it.
+    templateParser.afterHook(context, modelInstance, next);
+  });
+
+  /**
+   * Before update hook
+   */
+  Outbreak.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
+    // in order to translate dynamic data, don't store values in the database, but translatable language tokens
+    // parse outbreak
+    templateParser.beforeHook(context, modelInstance, next);
+  });
+
+  /**
+   * After update hook
+   */
+  Outbreak.afterRemote('prototype.patchAttributes', function (context, modelInstance, next) {
+    // after successfully creating outbreak, also create translations for it.
+    templateParser.afterHook(context, modelInstance, next);
+  });
+
+  /**
+   * Before create reference data hook
+   */
+  Outbreak.beforeRemote('prototype.__create__referenceData', function (context, modelInstance, next) {
+    // parse referenceData to create language tokens
+    referenceDataParser.beforeCreateHook(context, modelInstance, next);
+  });
+
+  /**
+   * After create reference data hook
+   */
+  Outbreak.afterRemote('prototype.__create__referenceData', function (context, modelInstance, next) {
+    // after successfully creating reference data, also create translations for it.
+    referenceDataParser.afterCreateHook(context, modelInstance, next);
+  });
+
+  /**
+   * Before update reference data hook
+   */
+  Outbreak.beforeRemote('prototype.__updateById__referenceData', function (context, modelInstance, next) {
+    // parse referenceData to update language tokens
+    referenceDataParser.beforeUpdateHook(context, modelInstance, next);
+  });
+
+  /**
+   * After update reference data hook
+   */
+  Outbreak.afterRemote('prototype.__updateById__referenceData', function (context, modelInstance, next) {
+    // after successfully updating reference data, also update translations for it.
+    referenceDataParser.afterUpdateHook(context, modelInstance, next);
+  });
 };

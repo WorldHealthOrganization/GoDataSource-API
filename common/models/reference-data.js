@@ -157,16 +157,6 @@ module.exports = function (ReferenceData) {
   };
 
   /**
-   * Generate a language/translatable identifier for a category + value combination
-   * @param category
-   * @param value
-   * @return {string}
-   */
-  ReferenceData.getTranslatableIdentifierForValue = function (category, value) {
-    return `${category}_${_.snakeCase(value).toUpperCase()}`;
-  };
-
-  /**
    * Check if an entry is editable (!readOnly + !inUse)
    * @param referenceData|referenceDataId
    * @param callback
