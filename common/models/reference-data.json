@@ -11,6 +11,7 @@
       "description": "Reference data item category; eg: Occupation",
       "required": true,
       "enum": [
+        "LNG_REFERENCE_DATA_CATEGORY_GLOSSARY_TERM",
         "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION",
         "LNG_REFERENCE_DATA_CATEGORY_GENDER",
         "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION",
@@ -38,8 +39,24 @@
       "type": "string",
       "description": "Reference data item value description; eg: profession within the health care sector"
     },
-    "icon": {
+    "iconId": {
       "type": "string"
+    },
+    "code": {
+      "type": "string"
+    },
+    "colorCode": {
+      "type": "string"
+    },
+    "readOnly": {
+      "type": "boolean",
+      "readOnly": true,
+      "default": false
+    },
+    "active": {
+      "type": "boolean",
+      "required": true,
+      "default": true
     }
   },
   "validations": [],
@@ -88,19 +105,19 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_sys_config",
+      "principalId": "write_reference_data",
       "permission": "ALLOW",
       "property": "create"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_sys_config",
+      "principalId": "write_reference_data",
       "permission": "ALLOW",
       "property": "patchAttributes"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_sys_config",
+      "principalId": "write_reference_data",
       "permission": "ALLOW",
       "property": "deleteById"
     }
@@ -112,7 +129,12 @@
         {
           "arg": "categories",
           "type": [
-            "string"
+            {
+              "type": {
+                "id": "string",
+                "description": "string"
+              }
+            }
           ],
           "description": "List of available reference data categories",
           "root": true,
@@ -138,7 +160,7 @@
         "description": "Record usage locations",
         "arg": "data",
         "type": {
-          "case":[],
+          "case": [],
           "contact": [],
           "outbreak": []
         },

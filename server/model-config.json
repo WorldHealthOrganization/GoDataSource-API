@@ -112,10 +112,6 @@
     "dataSource": null,
     "public": false
   },
-  "glossaryTerm": {
-    "dataSource": "mongoDb",
-    "public": true
-  },
   "helpItem": {
     "dataSource": "mongoDb",
     "public": false
@@ -190,6 +186,14 @@
   },
   "event": {
     "dataSource": "mongoDb",
+    "public": false
+  },
+  "icon": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "storage": {
+    "dataSource": null,
     "public": false
   }
 }

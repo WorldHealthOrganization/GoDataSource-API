@@ -25,8 +25,14 @@ module.exports = function (ReferenceData) {
    * Before update reference data hook
    */
   ReferenceData.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    // parse referenceData to update language tokens
-    referenceDataParser.beforeUpdateHook(context, modelInstance, next);
+    // if its not editable, it will send an error to the callback
+    ReferenceData.isEntryEditable(context.instance, function (error) {
+      if (error) {
+        return next(error);
+      }
+      // parse referenceData to update language tokens
+      referenceDataParser.beforeUpdateHook(context, modelInstance, next);
+    });
   });
 
   /**

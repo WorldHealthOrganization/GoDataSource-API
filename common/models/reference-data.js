@@ -7,22 +7,76 @@ module.exports = function (ReferenceData) {
 
   // define available categories
   ReferenceData.availableCategories = [
-    'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION',
-    'LNG_REFERENCE_DATA_CATEGORY_GENDER',
-    'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
-    'LNG_REFERENCE_DATA_CATEGORY_LAB_NAME',
-    'LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE',
-    'LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST',
-    'LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT',
-    'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
-    'LNG_REFERENCE_DATA_CATEGORY_DISEASE',
-    'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE',
-    'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY',
-    'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY',
-    'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL',
-    'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL',
-    'LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION',
-    'LNG_REFERENCE_DATA_OUTCOME'
+    [
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_GLOSSARY_TERM",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_GLOSSARY_TERM_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_GENDER",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_GENDER_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_LAB_NAME",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_LAB_NAME_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_DISEASE",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_OUTCOME",
+        "description": "LNG_REFERENCE_DATA_OUTCOME_DESCRIPTION"
+      }
+    ]
   ];
 
   /**
@@ -34,6 +88,18 @@ module.exports = function (ReferenceData) {
     'contact': ['document.type'],
     'outbreak': ['caseClassification', 'vaccinationStatus', 'nutritionalStatus', 'pregnancyInformation']
   };
+
+  /**
+   * Check if model is editable & model usage before deleting the model
+   */
+  ReferenceData.observe('before delete', function (context, next) {
+    if (context.where.id) {
+      // if its not editable, it will send an error to the callback
+      ReferenceData.isEntryEditable(context.where.id, next);
+    } else {
+      next();
+    }
+  });
 
   /**
    * Get usage for a reference data
@@ -103,24 +169,65 @@ module.exports = function (ReferenceData) {
   };
 
   /**
-   * Check model usage before deleting the model
+   * Check if an entry is editable (!readOnly + !inUse)
+   * @param referenceData|referenceDataId
+   * @param callback
+   * @return {*}
    */
-  ReferenceData.observe('before delete', function (context, callback) {
-    if (context.where.id) {
-      ReferenceData.isRecordInUse(context.where.id, function (error, recordInUse) {
+  ReferenceData.isEntryEditable = function (referenceData, callback) {
+    let referenceDataId;
+
+    /**
+     * Check if a writable model is in use
+     * @param error
+     * @param writable
+     * @return {*}
+     */
+    function _callback(error, writable) {
+      if (error) {
+        return callback(error);
+      }
+      // if it's not writable, stop here
+      if (!writable) {
+        return callback(app.utils.apiError.getError('MODEL_NOT_EDITABLE', {
+          model: ReferenceData.modelName,
+          id: referenceDataId
+        }));
+      }
+      // record is writable, check usage
+      ReferenceData.isRecordInUse(referenceDataId, function (error, recordInUse) {
         if (error) {
           return callback(error);
         }
-        // if the record is in use
+        // record in use
         if (recordInUse) {
           // send back an error
-          callback(app.utils.apiError.getError('MODEL_IN_USE', {model: ReferenceData.modelName, id: context.where.id}));
-        } else {
-          callback();
+          return callback(app.utils.apiError.getError('MODEL_IN_USE', {
+            model: ReferenceData.modelName,
+            id: referenceDataId
+          }));
         }
-      })
-    } else {
-      callback();
+        return callback(null, true);
+      });
     }
-  });
+
+    // if this a reference data item, check readOnly field
+    if (typeof referenceData === 'object') {
+      referenceDataId = referenceData.id;
+      // then check usage
+      return _callback(null, !referenceData.readOnly);
+    }
+    // this is only an ID, find the actual record and check if it's writable
+    ReferenceData.findById(referenceData)
+      .then(function (referenceData) {
+        referenceDataId = referenceData.id;
+        let writable = true;
+        if (!referenceData || referenceData.readOnly) {
+          writable = false
+        }
+        //then check usage
+        _callback(null, writable);
+      })
+      .catch(_callback);
+  };
 };
