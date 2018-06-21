@@ -4,14 +4,14 @@ const fs = require('fs');
 const path = require('path');
 
 const relativePath = '/../../server/storage';
-const CONTAINERS = {
-  ICONS: 'icons'
+const containers = {
+  icons: 'icons'
 };
 
 module.exports = function (Storage) {
 
   // expose containers
-  Storage.CONTAINERS = CONTAINERS;
+  Storage.containers = containers;
 
   /**
    * Store a file in a container on the disk
@@ -22,7 +22,7 @@ module.exports = function (Storage) {
    */
   Storage.save = function (container, fileName, data) {
     return new Promise(function (resolve, reject) {
-      if (Object.values(CONTAINERS).indexOf(container) === -1) {
+      if (Object.values(containers).indexOf(container) === -1) {
         return reject(new Error(`Invalid storage container: ${container}`));
       }
       const filePath = `${relativePath}/${container}/${fileName}`;

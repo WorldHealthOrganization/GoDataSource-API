@@ -90,6 +90,18 @@ module.exports = function (ReferenceData) {
   };
 
   /**
+   * Check if model is editable & model usage before deleting the model
+   */
+  ReferenceData.observe('before delete', function (context, next) {
+    if (context.where.id) {
+      // if its not editable, it will send an error to the callback
+      ReferenceData.isEntryEditable(context.where.id, next);
+    } else {
+      next();
+    }
+  });
+
+  /**
    * Get usage for a reference data
    * @param recordId
    * @param filter
@@ -209,12 +221,12 @@ module.exports = function (ReferenceData) {
     ReferenceData.findById(referenceData)
       .then(function (referenceData) {
         referenceDataId = referenceData.id;
-        let editable = true;
+        let writable = true;
         if (!referenceData || referenceData.readOnly) {
-          editable = false
+          writable = false
         }
         //then check usage
-        _callback(null, editable);
+        _callback(null, writable);
       })
       .catch(_callback);
   };

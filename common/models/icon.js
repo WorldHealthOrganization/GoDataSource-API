@@ -30,7 +30,7 @@ module.exports = function (Icon) {
                 return reject(error);
               }
               return app.models.storage
-                .save(app.models.storage.CONTAINERS.ICONS, `${uuid.v4()}.${image.getExtension()}`, buffer)
+                .save(app.models.storage.containers.icons, `${uuid.v4()}.${image.getExtension()}`, buffer)
                 .then(resolve);
             });
         })

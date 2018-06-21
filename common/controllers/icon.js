@@ -22,7 +22,7 @@ module.exports = function (Icon) {
       })
       .then(function (count) {
         if (count) {
-          return next(app.utils.apiError.getError('MODEL_IN_USE', {model: Icon.modelName, id: context.args.id}));
+          throw app.utils.apiError.getError('MODEL_IN_USE', {model: Icon.modelName, id: context.args.id});
         }
         next();
       })

@@ -14,18 +14,6 @@ module.exports = function (ReferenceData) {
   });
 
   /**
-   * Check if model is editable & model usage before deleting the model
-   */
-  ReferenceData.observe('before delete', function (context, next) {
-    if (context.where.id) {
-      // if its not editable, it will send an error to the callback
-      ReferenceData.isEntryEditable(context.where.id, next);
-    } else {
-      next();
-    }
-  });
-
-  /**
    * After update hook
    */
   ReferenceData.afterRemote('create', function (context, modelInstance, next) {

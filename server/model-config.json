@@ -194,6 +194,6 @@
   },
   "storage": {
     "dataSource": null,
-    "public": true
+    "public": false
   }
 }
