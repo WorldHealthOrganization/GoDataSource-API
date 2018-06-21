@@ -45,6 +45,9 @@
     "iconId": {
       "type": "string"
     },
+    "colorCode": {
+      "type": "string"
+    },
     "readOnly": {
       "type": "boolean",
       "readOnly": true,
@@ -102,19 +105,19 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_sys_config",
+      "principalId": "write_reference_data",
       "permission": "ALLOW",
       "property": "create"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_sys_config",
+      "principalId": "write_reference_data",
       "permission": "ALLOW",
       "property": "updateRecord"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_sys_config",
+      "principalId": "write_reference_data",
       "permission": "ALLOW",
       "property": "deleteById"
     }
@@ -126,7 +129,12 @@
         {
           "arg": "categories",
           "type": [
-            "string"
+            {
+              "type": {
+                "id": "string",
+                "description": "string"
+              }
+            }
           ],
           "description": "List of available reference data categories",
           "root": true,
@@ -186,7 +194,7 @@
         "description": "Record usage locations",
         "arg": "data",
         "type": {
-          "case":[],
+          "case": [],
           "contact": [],
           "outbreak": []
         },

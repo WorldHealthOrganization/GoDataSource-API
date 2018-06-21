@@ -95,14 +95,15 @@
       "returns": [
         {
           "arg": "permissions",
-          "type": {
-            "permission": {
+          "type": [
+            {
               "type": {
+                "id": "string",
                 "label": "string",
                 "description": "string"
               }
             }
-          },
+          ],
           "description": "List of available permissions",
           "root": true,
           "required": true
