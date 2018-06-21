@@ -599,7 +599,7 @@ module.exports = function (Outbreak) {
     let outbreakFollowUpFreq = this.frequencyOfFollowUp;
 
     // cache outbreak's last day of follow up period
-    let outbreakLastDay = moment().add(outbreakFollowUpPeriod, 'd');
+    let outbreakLastDay = moment().utc().add(outbreakFollowUpPeriod, 'd').startOf('day');
 
     // retrieve list of contacts that has a relationship with events/contacts and is eligible for generation
     return app.models.contact
@@ -653,10 +653,10 @@ module.exports = function (Outbreak) {
 
               // follow ups to be added for the given contact
               // choose contact date from the latest relationship with a case/event
-              let contactDate = moment(contact.relationships[0].contactDate);
+              let contactDate = moment(contact.relationships[0].contactDate).utc();
 
               // initialize the current date and increment it with a day for each follow up day
-              let currentDate = moment();
+              let currentDate = moment.utc().startOf('day');
 
               // check a weird case when the last follow up was yesterday and not performed
               // but today is the last day of outbreak's follow up period
@@ -666,7 +666,7 @@ module.exports = function (Outbreak) {
 
                 if (moment(lastFollowUp.createdAt).isSame(moment(lastFollowUp.updatedAt), 'd')
                   && (!lastFollowUp.performed && !lastFollowUp.lostToFollowUp)
-                  && moment(lastFollowUp.date).isSame(outbreakLastDay, 'd')) {
+                  && moment(lastFollowUp.date).utc().isSame(outbreakLastDay, 'd')) {
                   contactFollowUpsToAdd.push(
                     app.models.followUp.create({
                       personId: contact.id,
@@ -681,6 +681,9 @@ module.exports = function (Outbreak) {
                 }
               }
 
+              // last follow up day for the contact
+              let contactLastDay = contactDate.add(outbreakFollowUpPeriod, 'd');
+
               // check each follow up day against contact's date
               // one follow up is generated for each day
               for (let day = 1; day <= data.followUpDays; day++) {
@@ -688,7 +691,7 @@ module.exports = function (Outbreak) {
                   currentDate = currentDate.add(1, 'd');
                 }
 
-                if (contactDate.add(outbreakFollowUpPeriod, 'd') >= currentDate) {
+                if (contactLastDay >= currentDate) {
                   // check if frequency is one of the constants defined per outbreak
                   if (constants.followUpFreqs.hasOwnProperty(outbreakFollowUpFreq)) {
                     // make a clone of the date used to build the follow up
