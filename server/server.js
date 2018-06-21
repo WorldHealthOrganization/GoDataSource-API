@@ -3,9 +3,9 @@
 let app;
 
 // catch exceptions on startup
-process.on('uncaughtException', function(e) {
+process.on('uncaughtException', function (e) {
   // check if app is initialized
-  if(typeof app !== 'undefined') {
+  if (typeof app !== 'undefined') {
     app.logger.log('error', e);
     // stop process and log error
     app.logger.exitProcessAfterFlush(1);

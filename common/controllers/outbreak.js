@@ -47,10 +47,8 @@ module.exports = function (Outbreak) {
         // if there is only one user that has the outbreak active check if it's the logged user; We allow deletion in this case
         if (userCount === 1 && context.args.id === context.req.authData.user.activeOutbreakId) {
           // update user data and remove the activeOutbreakId
-          return app.models.user
-            .updateAll({
-              id: context.req.authData.user.id
-            }, {
+          return context.req.authData.userInstance
+            .updateAttributes({
               activeOutbreakId: null
             });
         }

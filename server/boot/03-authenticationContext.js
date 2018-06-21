@@ -31,7 +31,9 @@ module.exports = function (app) {
           }
 
           context.req.authData = {
-            user: user.toJSON()
+            user: user.toJSON(),
+            // keeping also the user model instance as we might need to do some actions on it
+            userInstance: user
           };
 
           async.parallel([
