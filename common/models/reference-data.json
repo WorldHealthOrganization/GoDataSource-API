@@ -11,6 +11,7 @@
       "description": "Reference data item category; eg: Occupation",
       "required": true,
       "enum": [
+        "LNG_REFERENCE_DATA_CATEGORY_GLOSSARY_TERM",
         "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION",
         "LNG_REFERENCE_DATA_CATEGORY_GENDER",
         "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION",

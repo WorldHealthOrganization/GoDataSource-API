@@ -112,10 +112,6 @@
     "dataSource": null,
     "public": false
   },
-  "glossaryTerm": {
-    "dataSource": "mongoDb",
-    "public": true
-  },
   "helpItem": {
     "dataSource": "mongoDb",
     "public": false

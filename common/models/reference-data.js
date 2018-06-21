@@ -9,6 +9,10 @@ module.exports = function (ReferenceData) {
   ReferenceData.availableCategories = [
     [
       {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_GLOSSARY_TERM",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_GLOSSARY_TERM_DESCRIPTION"
+      },
+      {
         "id": "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION",
         "description": "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_DESCRIPTION"
       },
