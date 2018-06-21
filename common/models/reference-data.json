@@ -46,6 +46,9 @@
     "iconId": {
       "type": "string"
     },
+    "code": {
+      "type": "string"
+    },
     "colorCode": {
       "type": "string"
     },

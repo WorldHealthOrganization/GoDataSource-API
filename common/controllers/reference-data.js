@@ -91,7 +91,7 @@ module.exports = function (ReferenceData) {
   };
 
   /**
-   * Update reference record. This actually only updates the icon, active and translations for value and description
+   * Update reference record. Value & Descriptions are not updated, only their translations are
    * @param data
    * @param options
    * @param callback
@@ -104,7 +104,9 @@ module.exports = function (ReferenceData) {
       updateActions.push(
         self.updateAttributes({
           icon: data.icon,
-          active: data.active
+          active: data.active,
+          code: data.code,
+          colorCode: data.colorCode
         })
       );
       // if the value was sent
