@@ -578,6 +578,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "__count__clusters"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__get__clusters__relationships"
@@ -587,6 +593,18 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "__get__clusters__relationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__count__clusters__relationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "__count__clusters__relationships"
     }
   ],
   "methods": {

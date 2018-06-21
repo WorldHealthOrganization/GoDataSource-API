@@ -23,7 +23,7 @@ module.exports = function (Outbreak) {
     'prototype.__delete__clusters__relationships',
     'prototype.__findById__clusters__relationships',
     'prototype.__updateById__clusters__relationships',
-    'prototype.__destroyById__clusters__relationships'
+    'prototype.__destroyById__clusters__relationships',
     'prototype.__delete__contacts__relationships',
     'prototype.__get__referenceData',
     'prototype.__delete__referenceData',
