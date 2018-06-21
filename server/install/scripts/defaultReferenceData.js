@@ -2,6 +2,7 @@
 
 const app = require('../../server');
 const referenceData = app.models.referenceData;
+const referenceDataParser = require('./../../../components/referenceDataParser');
 
 const defaultReferenceData = {
   "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION": [
@@ -310,7 +311,7 @@ function run(callback) {
     // go through all reference data items
     defaultReferenceData[referenceDataCategory].forEach(function (referenceDataItem) {
       // build item key
-      let referenceDataItemKey = referenceData.getTranslatableIdentifierForValue(referenceDataCategory, referenceDataItem.value);
+      let referenceDataItemKey = referenceDataParser.getTranslatableIdentifierForValue(referenceDataCategory, referenceDataItem.value);
       // create reference data item (if not already there
       promises.push(
         referenceData.findById(referenceDataItemKey)

@@ -4,6 +4,7 @@ const app = require('../../server/server');
 const uuid = require('uuid');
 const _ = require('lodash');
 const templateParser = require('./../../components/templateParser');
+const referenceDataParser = require('./../../components/referenceDataParser');
 
 module.exports = function (Outbreak) {
 
@@ -585,5 +586,37 @@ module.exports = function (Outbreak) {
   Outbreak.afterRemote('prototype.patchAttributes', function (context, modelInstance, next) {
     // after successfully creating outbreak, also create translations for it.
     templateParser.afterHook(context, modelInstance, next);
+  });
+
+  /**
+   * Before create reference data hook
+   */
+  Outbreak.beforeRemote('prototype.__create__referenceData', function (context, modelInstance, next) {
+    // parse referenceData to create language tokens
+    referenceDataParser.beforeCreateHook(context, modelInstance, next);
+  });
+
+  /**
+   * After create reference data hook
+   */
+  Outbreak.afterRemote('prototype.__create__referenceData', function (context, modelInstance, next) {
+    // after successfully creating reference data, also create translations for it.
+    referenceDataParser.afterCreateHook(context, modelInstance, next);
+  });
+
+  /**
+   * Before update reference data hook
+   */
+  Outbreak.beforeRemote('prototype.__updateById__referenceData', function (context, modelInstance, next) {
+    // parse referenceData to update language tokens
+    referenceDataParser.beforeUpdateHook(context, modelInstance, next);
+  });
+
+  /**
+   * After update reference data hook
+   */
+  Outbreak.afterRemote('prototype.__updateById__referenceData', function (context, modelInstance, next) {
+    // after successfully updating reference data, also update translations for it.
+    referenceDataParser.afterUpdateHook(context, modelInstance, next);
   });
 };
