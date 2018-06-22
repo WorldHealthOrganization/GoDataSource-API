@@ -44,7 +44,10 @@
       "type": {
         "caseFields": [
           "string"
-        ]
+        ],
+        "dashboard": {
+          "type": "any"
+        }
       }
     },
     "securityQuestions": ["securityQuestion"]
