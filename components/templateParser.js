@@ -290,8 +290,8 @@ function beforeHook(context, modelInstance, next) {
             if (counters[questionVariable].answers[answerValue] > 1) {
               // answer value is used multiple times in question
               duplicateError = true;
-              duplicateErrors.answers[subTemplate] = duplicateErrors.answers[subTemplate] || {[questionVariable]: []};
-              duplicateErrors.answers[subTemplate][questionVariable].push(answerValue);
+              duplicateErrors.answers[subTemplate] = duplicateErrors.answers[subTemplate] || {[`question ${questionVariable}`]: []};
+              duplicateErrors.answers[subTemplate][`question ${questionVariable}`].push(answerValue);
             }
           });
         }

@@ -19,6 +19,7 @@ module.exports = {
       code: errorCode,
       message: _.template(errorMap[errorCode].messagePattern)(info),
       statusCode: statusCode,
+      details: info,
       toString: function () {
         return JSON.stringify(this, null, 2);
       }

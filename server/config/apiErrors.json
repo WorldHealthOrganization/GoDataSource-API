@@ -49,7 +49,7 @@
     "messagePattern": "Information provided is incorrect. Details: <%= details %>"
   },
   "INVALID_SECURITY_QUESTIONS": {
-    "defaultStatusCode": 400,
+    "defaultStatusCode": 422,
     "messagePattern": "Security questions must be different and answers can not be empty."
   },
   "REQUEST_VALIDATION_ERROR": {
