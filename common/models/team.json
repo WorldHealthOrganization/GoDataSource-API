@@ -16,12 +16,62 @@
       ],
       "required": true
     },
-    "locationId": {
-      "type": "string"
+    "locationIds": {
+      "type": [
+        "string"
+      ]
     }
   },
   "validations": [],
-  "relations": {},
-  "acls": [],
+  "relations": {
+    "followUps": {
+      "type": "hasMany",
+      "model": "followUp",
+      "foreignKey": "teamId"
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_team",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_team",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_team",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_team",
+      "permission": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_team",
+      "permission": "ALLOW",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_team",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    }
+  ],
   "methods": {}
 }
