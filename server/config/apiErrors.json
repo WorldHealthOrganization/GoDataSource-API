@@ -49,7 +49,7 @@
     "messagePattern": "Information provided is incorrect. Details: <%= details %>"
   },
   "INVALID_SECURITY_QUESTIONS": {
-    "defaultStatusCode": 400,
+    "defaultStatusCode": 422,
     "messagePattern": "Security questions must be different and answers can not be empty."
   },
   "REQUEST_VALIDATION_ERROR": {
@@ -78,5 +78,9 @@
   "MISSING_REQUIRED_PROPERTY": {
     "defaultStatusCode": 400,
     "messagePattern": "Model \"<%= model %>\" is missing required properties: <%= properties %>."
+  },
+  "DUPLICATE_TEMPLATE_QUESTION_VARIABLE_OR_ANSWER_VALUE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "A template cannot contain duplicate question variables and a template question cannot contain duplicate answer value"
   }
 }
