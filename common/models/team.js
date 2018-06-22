@@ -1,6 +1,18 @@
 'use strict';
 
 module.exports = function (Team) {
-  // set flag to not get controller
-  Team.hasController = false;
+
+  // define a list of custom (non-loopback-supported) relations
+  Team.customRelations = {
+    members: {
+      type: 'belongsToMany',
+      model: 'user',
+      foreignKey: 'userIds'
+    },
+    locations: {
+      type: 'belongsToMany',
+      model: 'location',
+      foreignKey: 'locationIds'
+    }
+  };
 };
