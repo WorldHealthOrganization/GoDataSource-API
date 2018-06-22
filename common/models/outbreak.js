@@ -23,6 +23,15 @@ module.exports = function (Outbreak) {
   Outbreak.helpers = {};
 
   /**
+   * Convert a given date to UTC and reset time to start of the day
+   * If no date is given, the current time is returned
+   * @param date
+   */
+  Outbreak.helpers.getUTCDate = function (date) {
+    return date ? moment(date).utc().startOf('day') : moment.utc().startOf('day');
+  };
+
+  /**
    * Checks whether the given follow up model is generated
    * Checks that update/create dates are on the same
    * Checks that it is not performed

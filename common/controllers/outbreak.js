@@ -557,35 +557,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Generates new follow up for a given contact
-   * Checks whether the contact is already generated on the given day
-   * If so, replaces that follow up
-   * @param contact
-   * @param followUpDate
-   */
-  let generateFollowUp = function (contact, followUpDate) {
-    // if there is generated follow up on that day, delete it and re-create
-    let existingFollowup = contact.followUpsLists.find((followUp) => moment(followUp.date).isSame(followUpDate, 'd'));
-    if (existingFollowup && helpers.isGeneratedFollowup(existingFollowup)) {
-      return Promise.all(
-        [
-          app.models.followUp.destroyById(existingFollowup.id),
-          app.models.followUp.create({
-            personId: contact.id,
-            date: followUpDate.toDate(),
-            performed: false
-          })
-        ]
-      );
-    }
-    return app.models.followUp.create({
-      personId: contact.id,
-      date: followUpDate.toDate(),
-      performed: false
-    });
-  };
-
-  /**
    * Generate list of follow ups
    * @param data Contains number of days used to perform the generation
    */
@@ -598,8 +569,10 @@ module.exports = function (Outbreak) {
     let outbreakFollowUpPeriod = ++this.periodOfFollowup;
     let outbreakFollowUpFreq = this.frequencyOfFollowUp;
 
-    // cache outbreak's last day of follow up period
-    let outbreakLastDay = moment().utc().add(outbreakFollowUpPeriod, 'd').startOf('day');
+    // make sure follow up period given in the request do not overflows outbreak's follow up period
+    if (data.followUpDays > outbreakFollowUpPeriod) {
+      data.followUpDays = outbreakFollowUpPeriod;
+    }
 
     // retrieve list of contacts that has a relationship with events/contacts and is eligible for generation
     return app.models.contact
@@ -653,25 +626,28 @@ module.exports = function (Outbreak) {
 
               // follow ups to be added for the given contact
               // choose contact date from the latest relationship with a case/event
-              let contactDate = moment(contact.relationships[0].contactDate).utc();
+              let lastSickDate = helpers.getUTCDate(contact.relationships[0].contactDate);
 
-              // initialize the current date and increment it with a day for each follow up day
-              let currentDate = moment.utc().startOf('day');
+              // build the contact's last date of follow up, based on the days count given in the request
+              let incubationLastDay = helpers.getUTCDate(lastSickDate).add(data.followUpDays, 'd');
 
               // check a weird case when the last follow up was yesterday and not performed
-              // but today is the last day of outbreak's follow up period
+              // but today is the last day of incubation
               // it should generate a follow up for today, no matter the follow up period sent in request
               if (contact.followUpsLists.length) {
                 let lastFollowUp = contact.followUpsLists[0];
 
+                // build the contact's last date of follow up, no matter the period given in the request
+                let incubationLastDay = helpers.getUTCDate(lastSickDate).add(outbreakFollowUpPeriod, 'd');
+
                 if (moment(lastFollowUp.createdAt).isSame(moment(lastFollowUp.updatedAt), 'd')
                   && (!lastFollowUp.performed && !lastFollowUp.lostToFollowUp)
-                  && moment(lastFollowUp.date).utc().isSame(outbreakLastDay, 'd')) {
+                  && helpers.getUTCDate(lastFollowUp.date).isSame(incubationLastDay, 'd')) {
                   contactFollowUpsToAdd.push(
                     app.models.followUp.create({
                       personId: contact.id,
                       // schedule for today
-                      date: currentDate.toDate(),
+                      date: helpers.getUTCDate().toDate(),
                       performed: false
                     })
                   );
@@ -681,38 +657,58 @@ module.exports = function (Outbreak) {
                 }
               }
 
-              // last follow up day for the contact
-              let contactLastDay = contactDate.add(outbreakFollowUpPeriod, 'd');
+              // build follow up frequency
+              // case 1:
+              // if frequency is one of the predefined values
+              // generate it once every X days
+              // case 2:
+              // note: assumed by default
+              // if frequency is an integer, then frequency is every day
+              // also the amount of follow ups generated per day will equal the frequency amount
+              let followUpFreq = !isNaN(outbreakFollowUpFreq) ? 1 : null;
+              // if frequency is a number, then generate as many follow up per day
+              let followUpCountPerDay = outbreakFollowUpFreq;
 
-              // check each follow up day against contact's date
-              // one follow up is generated for each day
-              for (let day = 1; day <= data.followUpDays; day++) {
-                if (day > 1) {
-                  currentDate = currentDate.add(1, 'd');
+              // check if the frequency and count meet case 1 requirements
+              // if so, overwrite the default behavior
+              let predefinedFreq = constants.followUpFreqs[outbreakFollowUpFreq];
+              if (predefinedFreq) {
+                followUpFreq = predefinedFreq;
+                followUpCountPerDay = 1;
+              }
+
+              // generate follow up forms, starting from today
+              for (let now = helpers.getUTCDate(); now <= incubationLastDay; now.add(followUpFreq, 'day')) {
+                let generatedFollowUps = [];
+                for (let i = 0; i < followUpCountPerDay; i++) {
+                  generatedFollowUps.push(
+                    app.models.followUp.create({
+                      personId: contact.id,
+                      date: now.toDate(),
+                      performed: false
+                    })
+                  );
                 }
 
-                if (contactLastDay >= currentDate) {
-                  // check if frequency is one of the constants defined per outbreak
-                  if (constants.followUpFreqs.hasOwnProperty(outbreakFollowUpFreq)) {
-                    // make a clone of the date used to build the follow up
-                    // to not alter the global current date counter
-                    let currentDateClone = currentDate.clone();
+                // if there is generated follow ups on that day, delete it and re-create
+                let existingFollowups = contact.followUpsLists.filter((followUp) => {
+                  return moment(followUp.date).isSame(now, 'd') && helpers.isGeneratedFollowup(followUp);
+                });
 
-                    // make sure that the date does not overflows the outbreak's last day of follow up period
-                    // if so, set the date to last day of the outbreak's follow up period
-                    if (currentDateClone.add(constants.followUpFreqs[outbreakFollowUpFreq], 'd') > outbreakLastDay) {
-                      currentDateClone = outbreakLastDay.clone();
-                    }
-
-                    // prepare the generated follow up for storage
-                    contactFollowUpsToAdd.push(generateFollowUp(contact, currentDateClone));
-                  } else {
-                    // add multiple follow up per day if follow up frequency is higher than 1
-                    for (let i = 0; i < outbreakFollowUpFreq; i++) {
-                      // prepare the generated follow up for storage
-                      contactFollowUpsToAdd.push(generateFollowUp(contact, currentDate));
-                    }
-                  }
+                if (existingFollowups.length) {
+                  // schedule the generated follow up for database add op
+                  contactFollowUpsToAdd.push(Promise.all(
+                    [
+                      app.models.followUp.destroyAll({
+                        id: {
+                          inq: existingFollowups.map((f) => f.id)
+                        }
+                      }),
+                      Promise.all(generatedFollowUps)
+                    ])
+                  );
+                } else {
+                  contactFollowUpsToAdd.push(...generatedFollowUps);
                 }
               }
 
