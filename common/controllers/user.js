@@ -5,6 +5,7 @@ const config = require('../../server/config.json');
 // used for encoding security questions
 const bcrypt = require('bcrypt');
 const async = require('async');
+const _ = require('lodash');
 
 module.exports = function (User) {
 
@@ -34,6 +35,27 @@ module.exports = function (User) {
         }
       })
       .catch(next);
+  });
+
+  /**
+   * Make sure that whenever email appears, in a user related request, it is forced to be lowercase.
+  */
+  User.beforeRemote('**', function (context, modelInstance, next) {
+    if (_.get(context, 'args.data.email')) {
+      context.args.data.email = context.args.data.email.toLowerCase();
+    }
+
+    // In the login's case, loopback adds the email to the credentials property instead of data
+    if(_.get(context, 'args.credentials.email')) {
+      context.args.credentials.email = context.args.credentials.email.toLowerCase();
+    }
+
+    // In the reset password with email's case, loopback adds the email to the options property instead of data
+    if(_.get(context, 'args.options.email')) {
+      context.args.options.email = context.args.options.email.toLowerCase();
+    }
+
+    next();
   });
 
   /**
