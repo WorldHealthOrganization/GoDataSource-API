@@ -6,6 +6,28 @@ module.exports = function (Role) {
   // set flag to force using the controller
   Role.hasController = true;
 
+  // define a list of custom (non-loopback-supported) relations
+  Role.customRelations = {
+    permissions: {
+      type: 'function',
+      fn: function (instance) {
+        return new Promise(function (resolve) {
+          let permissions = [];
+          // if the role has a list of permission IDs
+          if (instance.permissionIds && instance.permissionIds.length) {
+            // go through the permissions and populate the list
+            Role.availablePermissions.forEach(function (permission) {
+              if (instance.permissionIds.indexOf(permission.id) !== -1) {
+                permissions.push(permission);
+              }
+            });
+          }
+          resolve(permissions);
+        });
+      }
+    }
+  };
+
   Role.availablePermissions = [
     {
       id: 'read_sys_config',
