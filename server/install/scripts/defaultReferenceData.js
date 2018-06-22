@@ -5,322 +5,120 @@ const referenceData = app.models.referenceData;
 const referenceDataParser = require('./../../../components/referenceDataParser');
 
 const defaultReferenceData = {
-  "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION": [
-    {
-      value: 'Confirmed',
-      description: ''
-    },
-    {
-      value: 'Probable',
-      description: ''
-    },
-    {
-      value: 'Suspect',
-      description: ''
-    },
-    {
-      value: 'Not a case (discarded)',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION': [
+    'Confirmed',
+    'Probable',
+    'Suspect',
+    'Not a case (discarded)'
   ],
-  "LNG_REFERENCE_DATA_CATEGORY_GENDER": [
-    {
-      value: 'Male',
-      description: ''
-    },
-    {
-      value: 'Female',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_CONFIRMED_BY_LAB_RESULT': [
+    'Confirmed by PCR',
+    'Confirmed by Serology (IgC or IgM)'
   ],
-  "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION": [
-    {
-      value: 'Health Care Worker',
-      description: ''
-    },
-    {
-      value: 'Civil Servant',
-      description: ''
-    },
-    {
-      value: 'Farmer',
-      description: ''
-    },
-    {
-      value: 'Teacher',
-      description: ''
-    },
-    {
-      value: 'Child',
-      description: ''
-    },
-    {
-      value: 'Student',
-      description: ''
-    },
-    {
-      value: 'Traditional Healer',
-      description: ''
-    },
-    {
-      value: 'Religious Leader',
-      description: ''
-    },
-    {
-      value: 'Hunter',
-      description: ''
-    },
-    {
-      value: 'Butcher',
-      description: ''
-    },
-    {
-      value: 'Taxi Driver',
-      description: ''
-    },
-    {
-      value: 'Other',
-      description: ''
-    },
-    {
-      value: 'Unknown',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_GENDER': [
+    'Male',
+    'Female'
   ],
-  "LNG_REFERENCE_DATA_CATEGORY_LAB_NAME": [],
-  "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE": [
-    {
-      value: 'Blood',
-      description: ''
-    },
-    {
-      value: 'Skin Biopsy',
-      description: ''
-    },
-    {
-      value: 'Throat swab',
-      description: ''
-    },
-    {
-      value: 'Sputum',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION': [
+    'Health Care Worker',
+    'Civil Servant',
+    'Farmer',
+    'Teacher',
+    'Child',
+    'Student',
+    'Traditional Healer',
+    'Religious Leader',
+    'Hunter',
+    'Butcher',
+    'Taxi Driver',
+    'Other',
+    'Unknown'
   ],
-  "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST": [
-    {
-      value: 'RT-PCR',
-      description: ''
-    },
-    {
-      value: 'IgC or IgM',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE': [
+    'Blood',
+    'Skin Biopsy',
+    'Throat swab',
+    'Sputum'
   ],
-  "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT": [
-    {
-      value: 'Positive',
-      description: ''
-    },
-    {
-      value: 'Negative',
-      description: ''
-    },
-    {
-      value: 'Inconclusive',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST': [
+    'RT-PCR',
+    'IgC or IgM'
   ],
-  "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE": [
-    {
-      value: 'National ID Card',
-      description: ''
-    },
-    {
-      value: 'Passport',
-      description: ''
-    },
-    {
-      value: 'Vaccination Card',
-      description: ''
-    },
-    {
-      value: 'Other',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT': [
+    'Positive',
+    'Negative',
+    'Inconclusive'
   ],
-  "LNG_REFERENCE_DATA_CATEGORY_DISEASE": [
-    {
-      value: 'Ebola Virus disease',
-      description: ''
-    },
-    {
-      value: 'Marburg virus disease',
-      description: ''
-    },
-    {
-      value: 'Plague, pneumonic',
-      description: ''
-    },
-    {
-      value: 'Middle Easi Respiratory Syndrome Coronavirus (MERS-CoV)',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE': [
+    'National ID Card',
+    'Passport',
+    'Vaccination Card',
+    'Other'
   ],
-  "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE": [
-    {
-      value: 'Touched Body Fluids',
-      description: ''
-    },
-    {
-      value: 'Direct Physical contact',
-      description: ''
-    },
-    {
-      value: 'Touched Or Shared Linens, Clothes, Dishes',
-      description: ''
-    },
-    {
-      value: 'Slept, Ate Or Spend Time In Same Household',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_DISEASE': [
+    'Ebola Virus disease',
+    'Marburg virus disease',
+    'Plague, pneumonic',
+    'Middle Easi Respiratory Syndrome Coronavirus (MERS-CoV)'
   ],
-  "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY": [
-    {
-      value: '1 - Low',
-      description: ''
-    },
-    {
-      value: '2 - Medium',
-      description: ''
-    },
-    {
-      value: '3 - High',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE': [
+    'Touched Body Fluids',
+    'Direct Physical contact',
+    'Touched Or Shared Linens, Clothes, Dishes',
+    'Slept, Ate Or Spend Time In Same Household'
   ],
-  "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY": [
-    {
-      value: '1-5 Times',
-      description: ''
-    },
-    {
-      value: '6-10 Times',
-      description: ''
-    },
-    {
-      value: '11-20 Times',
-      description: ''
-    },
-    {
-      value: 'Over 21 Times',
-      description: ''
-    },
-    {
-      value: 'Unknown',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY': [
+    '1 - Low',
+    '2 - Medium',
+    '3 - High'
   ],
-  "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL": [
-    {
-      value: '1 - Low',
-      description: ''
-    },
-    {
-      value: '2 - Medium',
-      description: ''
-    },
-    {
-      value: '3 - High',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY': [
+    '1-5 Times',
+    '6-10 Times',
+    '11-20 Times',
+    'Over 21 Times',
+    'Unknown'
   ],
-  "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL": [
-    {
-      value: '1 - Low',
-      description: ''
-    },
-    {
-      value: '2 - Medium',
-      description: ''
-    },
-    {
-      value: '3 - High',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL': [
+    '1 - Low',
+    '2 - Medium',
+    '3 - High'
   ],
-  "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION": [
-    {
-      value: 'Family',
-      description: ''
-    },
-    {
-      value: 'Neighbor',
-      description: ''
-    },
-    {
-      value: 'Nosocomial Transmission',
-      description: ''
-    },
-    {
-      value: 'Co-workers',
-      description: ''
-    },
-    {
-      value: 'Friends',
-      description: ''
-    },
-    {
-      value: 'Funeral',
-      description: ''
-    },
-    {
-      value: 'Travel To Outbreak Area',
-      description: ''
-    },
-    {
-      value: 'Unknown',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL': [
+    '1 - Low',
+    '2 - Medium',
+    '3 - High'
   ],
-  "LNG_REFERENCE_DATA_CATEGORY_OUTCOME": [
-    {
-      value: 'Alive',
-      description: ''
-    },
-    {
-      value: 'Recovered',
-      description: ''
-    },
-    {
-      value: 'Deceased',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION': [
+    'Family',
+    'Neighbor',
+    'Nosocomial Transmission',
+    'Co-workers',
+    'Friends',
+    'Funeral',
+    'Travel To Outbreak Area',
+    'Unknown'
   ],
-  "LNG_REFERENCE_DATA_QUESTION_ANSWER_TYPE": [
-    {
-      value: 'Free Text',
-      description: ''
-    },
-    {
-      value: 'Numeric',
-      description: ''
-    },
-    {
-      value: 'Date/Time',
-      description: ''
-    },
-    {
-      value: 'Single Answer',
-      description: ''
-    },
-    {
-      value: 'Multiple Answers',
-      description: ''
-    },
-    {
-      value: 'File Upload',
-      description: ''
-    }
+  'LNG_REFERENCE_DATA_CATEGORY_OUTCOME': [
+    'Alive',
+    'Recovered',
+    'Deceased'
+  ],
+  'LNG_REFERENCE_DATA_QUESTION_ANSWER_TYPE': [
+    'Free Text',
+    'Numeric',
+    'Date/Time',
+    'Single Answer',
+    'Multiple Answers',
+    'File Upload'
+  ],
+  'LNG_REFERENCE_DATA_MISCELLANEOUS_CUSTOMIZABLE_UI_ELEMENT': [
+    'Hospitalized Case'
+  ],
+  'LNG_REFERENCE_DATA_PERSON_TYPE': [
+    'Case',
+    'Contact',
+    'Event'
   ]
 };
 
@@ -337,7 +135,7 @@ function run(callback) {
     // go through all reference data items
     defaultReferenceData[referenceDataCategory].forEach(function (referenceDataItem) {
       // build item key
-      let referenceDataItemKey = referenceDataParser.getTranslatableIdentifierForValue(referenceDataCategory, referenceDataItem.value);
+      let referenceDataItemKey = referenceDataParser.getTranslatableIdentifierForValue(referenceDataCategory, referenceDataItem);
       // create reference data item (if not already there
       promises.push(
         referenceData.findById(referenceDataItemKey)
