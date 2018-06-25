@@ -24,6 +24,12 @@
       "default": "contact",
       "required": true,
       "readOnly": true
+    },
+    "riskLevel": {
+      "type": "string"
+    },
+    "riskReason": {
+      "type": "string"
     }
   },
   "validations": [],
