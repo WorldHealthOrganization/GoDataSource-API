@@ -20,7 +20,7 @@ module.exports = function (Team) {
   Team.helpers = {};
 
   // get matching teams for a list of location/sub locations
-  Team.helpers.getTeamsByLocationIds = function (locationIds, callback) {
+  Team.helpers.getTeamsByLocationId = function (locationId, callback) {
 
   };
 };
