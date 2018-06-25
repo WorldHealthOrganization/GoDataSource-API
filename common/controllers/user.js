@@ -186,7 +186,7 @@ module.exports = function (User) {
             let userQuestion = user.securityQuestions[i];
 
             // position of the user question in the request body
-            let questionPos = data.questions.findIndex((q) => q.question === userQuestion.name);
+            let questionPos = data.questions.findIndex((q) => q.question === userQuestion.question);
 
             // if any of the question are not matching, stop
             if (questionPos === -1) {
