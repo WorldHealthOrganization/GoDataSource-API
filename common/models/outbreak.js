@@ -475,7 +475,7 @@ module.exports = function (Outbreak) {
     // get the list of permissions
     const permissions = _.get(context, 'req.authData.user.permissionsList', []);
     // get existing filter
-    const filter = _.get(context, 'args.filter', {});
+    let filter = _.get(context, 'args.filter', {});
     // create a map of required permissions for each type
     let requiredPermissionMap = {
       'case': 'read_case',
@@ -485,7 +485,9 @@ module.exports = function (Outbreak) {
     // if the required permission is missing
     if (permissions.indexOf(requiredPermissionMap[type]) === -1) {
       // use restricted field
-      createRestrictedFilter(filter, ['id', 'relationships', 'persons', 'people']);
+      filter = createRestrictedFilter(filter, ['id', 'relationships', 'persons', 'people']);
+      // update filter
+      _.set(context, 'args.filter', filter);
     }
   }
 };
