@@ -28,7 +28,7 @@ module.exports = function (ReferenceData) {
     // if its not editable, it will send an error to the callback
     ReferenceData.isEntryEditable(context.instance, function (error) {
       // if the error says the instance is not editable
-      if (error && ['MODEL_NOT_EDITABLE', 'MODEL_IN_USE'].indexOf(error.code)) {
+      if (error && ['MODEL_NOT_EDITABLE', 'MODEL_IN_USE'].indexOf(error.code) !== -1) {
         // and if data was sent
         if (context.args.data) {
           // allow customizing some safe properties
