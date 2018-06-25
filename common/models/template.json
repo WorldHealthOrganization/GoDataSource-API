@@ -37,6 +37,10 @@
       "type": "number",
       "description": "Number of contacts used to determine the proportion of cases with less than X contacts"
     },
+    "noDaysNewContacts": {
+      "type": "number",
+      "description": "Number of days used to determine if a contact is new"
+    },
     "caseInvestigationTemplate": {
       "type": [
         "templateQuestion"
