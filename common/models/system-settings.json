@@ -21,6 +21,9 @@
     },
     "dataBackup": {
       "type": "dataBackup"
+    },
+    "nodeFields": {
+      "type": ["string"]
     }
   },
   "validations": [],
