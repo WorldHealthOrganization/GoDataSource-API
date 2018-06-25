@@ -55,8 +55,7 @@
       "required": true
     },
     "riskLevel": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "riskReason": {
       "type": "string"
