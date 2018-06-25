@@ -412,6 +412,12 @@ module.exports = function (Outbreak) {
       .catch(callback);
   };
 
+
+  /**
+   * Restrict what users can see based on their assigned permissions
+   * @param type
+   * @param context
+   */
   Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions = function (type, context) {
     /**
      * Create a restricted filter that will allow returning only the data from allowed fields

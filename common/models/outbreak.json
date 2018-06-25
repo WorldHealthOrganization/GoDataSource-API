@@ -188,7 +188,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "__get__cases"
     },
@@ -224,7 +224,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "__get__contacts"
     },
@@ -464,7 +464,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "__get__events"
     },
