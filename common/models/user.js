@@ -81,7 +81,7 @@ module.exports = function (User) {
   User.helpers.encryptSecurityQuestions = function (questions) {
     return questions.map((item) => {
       return {
-        name: item.question,
+        question: item.question,
         answer: bcrypt.hashSync(item.answer, 10)
       };
     });
