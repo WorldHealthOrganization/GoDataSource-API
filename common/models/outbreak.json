@@ -194,6 +194,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "__get__cases"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_case",
       "permission": "ALLOW",
       "property": "__create__cases"
@@ -225,6 +231,12 @@
     {
       "principalType": "ROLE",
       "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "__get__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
       "permission": "ALLOW",
       "property": "__get__contacts"
     },
@@ -465,6 +477,12 @@
     {
       "principalType": "ROLE",
       "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__get__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
       "permission": "ALLOW",
       "property": "__get__events"
     },

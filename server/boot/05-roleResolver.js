@@ -47,12 +47,9 @@ module.exports = function (app) {
     // initially is assumed that the user has no access
     let hasAccess = false;
 
-    if (authData && authData.user && authData.user.roles && Array.isArray(authData.user.roles)) {
-      // accumulate user's permissionIds from all the roles in a single list
-      let userPermissions = authData.user.roles.reduce((permissions, role) => permissions.concat(role.permissionIds), []);
-
+    if (authData && authData.user && authData.user.permissionsList) {
       // check the permission against the user's permissionIds
-      hasAccess = userPermissions.indexOf(permission) !== -1;
+      hasAccess = authData.user.permissionsList.indexOf(permission) !== -1;
     }
 
     if (!hasAccess) {

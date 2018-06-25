@@ -65,8 +65,6 @@ module.exports = function (Outbreak) {
         } else {
           // nothing to do; proceed with deletion
         }
-
-        return;
       })
       .then(function () {
         next();
@@ -75,17 +73,32 @@ module.exports = function (Outbreak) {
   });
 
   /**
-   * Enhance cases list request to support optional filtering of cases that don't have any relations
+   * Attach before remote (GET outbreaks/{id}/cases) hooks
    */
   Outbreak.beforeRemote('prototype.__get__cases', function (context, modelInstance, next) {
+    // filter information based on available permissions
+    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('case', context);
+    // Enhance events list request to support optional filtering of events that don't have any relations
     Outbreak.helpers.attachFilterPeopleWithoutRelation('case', context, modelInstance, next);
   });
 
   /**
-   * Enhance events list request to support optional filtering of events that don't have any relations
+   * Attach before remote (GET outbreaks/{id}/events) hooks
    */
   Outbreak.beforeRemote('prototype.__get__events', function (context, modelInstance, next) {
+    // filter information based on available permissions
+    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('event', context);
+    // Enhance events list request to support optional filtering of events that don't have any relations
     Outbreak.helpers.attachFilterPeopleWithoutRelation('event', context, modelInstance, next);
+  });
+
+  /**
+   * Attach before remote (GET outbreaks/{id}/contacts) hooks
+   */
+  Outbreak.beforeRemote('prototype.__get__contacts', function (context, modelInstance, next) {
+    // filter information based on available permissions
+    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('contact', context);
+    next();
   });
 
   /**
