@@ -49,6 +49,8 @@ module.exports = function (app) {
                 })
                 .then((roles) => {
                   context.req.authData.user.roles = roles;
+                  // also store the list of permissions
+                  context.req.authData.user.permissionsList = roles.reduce((permissions, role) => permissions.concat(role.permissionIds), []);
                   return done(null);
                 })
                 .catch(done);

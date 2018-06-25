@@ -1,6 +1,7 @@
 'use strict';
 
 const app = require('../../server/server');
+const _ = require('lodash');
 
 module.exports = function (Outbreak) {
 
@@ -410,4 +411,75 @@ module.exports = function (Outbreak) {
       .then((data) => callback(null, data))
       .catch(callback);
   };
+
+  Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions = function (type, context) {
+    /**
+     * Create a restricted filter that will allow returning only the data from allowed fields
+     * @param filter
+     * @param allowedFields
+     * @return {*}
+     */
+    function createRestrictedFilter(filter, allowedFields) {
+      // restrict allowed fields
+      filter.fields = allowedFields;
+      // if there's a nested relation
+      if (filter.include) {
+        // always work with lists
+        if (!Array.isArray(filter.include)) {
+          filter.include = [filter.include];
+        }
+        let includes = [];
+        // go through each relation
+        filter.include.forEach(function (include) {
+          // simple relation, restrict allowed fields
+          if (typeof include === 'string') {
+            includes.push({
+              relation: include,
+              scope: {
+                fields: allowedFields
+              }
+            });
+            // complex relation
+          } else {
+            // complex relation with scope
+            if (include.scope) {
+              // remove queries (as they may query unavailable data)
+              delete include.scope.where;
+              if (include.scope) {
+                // process sub-scope
+                include.scope = createRestrictedFilter(include.scope, allowedFields);
+              }
+              // no scope on relation, restrict allowed fields
+            } else {
+              include.scope = {
+                fields: allowedFields
+              };
+            }
+            // update includes
+            includes.push(include);
+          }
+        });
+        // update filter
+        filter.include = includes;
+      }
+      // return processed filter
+      return filter;
+    }
+
+    // get the list of permissions
+    const permissions = _.get(context, 'req.authData.user.permissionsList', []);
+    // get existing filter
+    const filter = _.get(context, 'args.filter', {});
+    // create a map of required permissions for each type
+    let requiredPermissionMap = {
+      'case': 'read_case',
+      'event': 'read_case',
+      'contact': 'read_contact'
+    };
+    // if the required permission is missing
+    if (permissions.indexOf(requiredPermissionMap[type]) === -1) {
+      // use restricted field
+      createRestrictedFilter(filter, ['id', 'relationships', 'persons', 'people']);
+    }
+  }
 };
