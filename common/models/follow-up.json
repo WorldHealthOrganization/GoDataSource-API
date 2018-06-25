@@ -30,6 +30,9 @@
     },
     "additionalData": {
       "type": "object"
+    },
+    "index": {
+      "type": "number"
     }
   },
   "validations": [],
