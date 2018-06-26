@@ -28,6 +28,7 @@
     "loopback-connector-mongodb": "^1.18.1",
     "moment": "^2.22.2",
     "qr-image": "^3.2.0",
+    "rr": "^0.1.0",
     "serve-favicon": "^2.0.1",
     "strong-error-handler": "^2.0.0",
     "uuid": "^3.2.1",

@@ -1553,9 +1553,9 @@
     "prototype.generateFollowups": {
       "accepts": [
         {
-          "arg": "data",
+          "arg": "body",
           "type": "object",
-          "description": "Follow up period in days",
+          "description": "Follow up period in days. Property: followUpDays [number]",
           "http": {
             "source": "body"
           },
@@ -1563,7 +1563,28 @@
           "required": true
         }
       ],
-      "returns": [],
+      "returns": [
+        {
+          "arg": "generatedFollowUps",
+          "type": [
+            {
+              "type": {
+                "contactId": {
+                  "type": "string"
+                },
+                "followUps": {
+                  "type": [
+                    "followUp"
+                  ]
+                }
+              }
+            }
+          ],
+          "description": "Generated Follow Ups",
+          "root": true,
+          "required": true
+        }
+      ],
       "description": "Generate a list of follow-ups",
       "http": {
         "verb": "post",

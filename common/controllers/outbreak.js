@@ -4,6 +4,7 @@ const moment = require('moment');
 const app = require('../../server/server');
 const uuid = require('uuid');
 const _ = require('lodash');
+const rr = require('rr');
 const templateParser = require('./../../components/templateParser');
 const referenceDataParser = require('./../../components/referenceDataParser');
 
@@ -559,8 +560,9 @@ module.exports = function (Outbreak) {
   /**
    * Generate list of follow ups
    * @param data Contains number of days used to perform the generation
+   * @param callback
    */
-  Outbreak.prototype.generateFollowups = function (data) {
+  Outbreak.prototype.generateFollowups = function (data, callback) {
     // if no followup period was sent in request, assume its just for one day
     data = data || {};
     data.followUpDays = data.followUpDays || 1;
@@ -569,13 +571,17 @@ module.exports = function (Outbreak) {
     let outbreakFollowUpPeriod = ++this.periodOfFollowup;
     let outbreakFollowUpFreq = this.frequencyOfFollowUp;
 
+    // list of generated follow ups to be returned in the response
+    // grouped per contact
+    let generateResponse = [];
+
     // make sure follow up period given in the request do not overflows outbreak's follow up period
     if (data.followUpDays > outbreakFollowUpPeriod) {
       data.followUpDays = outbreakFollowUpPeriod;
     }
 
     // retrieve list of contacts that has a relationship with events/contacts and is eligible for generation
-    return app.models.contact
+    app.models.contact
       .find({
         include: {
           relation: 'relationships',
@@ -617,108 +623,163 @@ module.exports = function (Outbreak) {
               });
           }))
           .then((contacts) => {
-            // check how many follow ups should be generated for each contact
-            // based on how many follow up days were sent in the request body
-            contacts.forEach((contact) => {
-              // follow ups to be generated for the given contact
-              // each one contains a specific date
-              let contactFollowUpsToAdd = [];
-
-              // follow ups to be added for the given contact
-              // choose contact date from the latest relationship with a case/event
-              let lastSickDate = helpers.getUTCDate(contact.relationships[0].contactDate);
-
-              // build the contact's last date of follow up, based on the days count given in the request
-              let incubationLastDay = helpers.getUTCDate(lastSickDate).add(data.followUpDays, 'd');
-
-              // check a weird case when the last follow up was yesterday and not performed
-              // but today is the last day of incubation
-              // it should generate a follow up for today, no matter the follow up period sent in request
-              if (contact.followUpsLists.length) {
-                let lastFollowUp = contact.followUpsLists[0];
-
-                // build the contact's last date of follow up, no matter the period given in the request
-                let incubationLastDay = helpers.getUTCDate(lastSickDate).add(outbreakFollowUpPeriod, 'd');
-
-                if (moment(lastFollowUp.createdAt).isSame(moment(lastFollowUp.updatedAt), 'd')
-                  && (!lastFollowUp.performed && !lastFollowUp.lostToFollowUp)
-                  && helpers.getUTCDate(lastFollowUp.date).isSame(incubationLastDay, 'd')) {
-                  contactFollowUpsToAdd.push(
-                    app.models.followUp.create({
-                      personId: contact.id,
-                      // schedule for today
-                      date: helpers.getUTCDate().toDate(),
-                      performed: false
-                    })
-                  );
-
-                  // skip to next contact
-                  return;
-                }
-              }
-
-              // build follow up frequency
-              // case 1:
-              // if frequency is one of the predefined values
-              // generate it once every X days
-              // case 2:
-              // note: assumed by default
-              // if frequency is an integer, then frequency is every day
-              // also the amount of follow ups generated per day will equal the frequency amount
-              let followUpFreq = !isNaN(outbreakFollowUpFreq) ? 1 : null;
-              // if frequency is a number, then generate as many follow up per day
-              let followUpCountPerDay = outbreakFollowUpFreq;
-
-              // check if the frequency and count meet case 1 requirements
-              // if so, overwrite the default behavior
-              let predefinedFreq = constants.followUpFreqs[outbreakFollowUpFreq];
-              if (predefinedFreq) {
-                followUpFreq = predefinedFreq;
-                followUpCountPerDay = 1;
-              }
-
-              // generate follow up forms, starting from today
-              for (let now = helpers.getUTCDate(); now <= incubationLastDay; now.add(followUpFreq, 'day')) {
-                let generatedFollowUps = [];
-                for (let i = 0; i < followUpCountPerDay; i++) {
-                  generatedFollowUps.push(
-                    app.models.followUp.create({
-                      personId: contact.id,
-                      date: now.toDate(),
-                      performed: false
-                    })
-                  );
-                }
-
-                // if there is generated follow ups on that day, delete it and re-create
-                let existingFollowups = contact.followUpsLists.filter((followUp) => {
-                  return moment(followUp.date).isSame(now, 'd') && helpers.isGeneratedFollowup(followUp);
-                });
-
-                if (existingFollowups.length) {
-                  // schedule the generated follow up for database add op
-                  contactFollowUpsToAdd.push(Promise.all(
-                    [
-                      app.models.followUp.destroyAll({
-                        id: {
-                          inq: existingFollowups.map((f) => f.id)
+            if (contacts.length) {
+              // retrieve all teams and their location/sub locations
+              return app.models.team.find()
+                .then((teams) => Promise.all(teams.map((team) => {
+                  return new Promise((resolve, reject) => {
+                    return app.models.location
+                      .getSubLocations(team.locationIds, [], (err, locations) => {
+                        if (err) {
+                          return reject(err);
                         }
-                      }),
-                      Promise.all(generatedFollowUps)
-                    ])
-                  );
-                } else {
-                  contactFollowUpsToAdd.push(...generatedFollowUps);
-                }
-              }
+                        return resolve(locations);
+                      })
+                    })
+                    .then((locations) => {
+                      team.locations = locations;
+                      return team;
+                    });
+                })))
+                .then((teams) => {
+                  contacts.forEach((contact) => {
+                    // generate response entry for the given contact
+                    generateResponse.push({
+                      contactId: contact.id,
+                      followUps: []
+                    });
 
-              if (contactFollowUpsToAdd.length) {
-                followsUpsToAdd.push(Promise.all(contactFollowUpsToAdd));
-              }
-            });
+                    // store index of the contact entry in response, to easily reference it down below
+                    let genResponseIndex = generateResponse.length - 1;
 
-            return Promise.all(followsUpsToAdd);
-          });
+                    // find all the teams that are matching the contact's location ids from addresses
+                    // stop at first address that has a matching team
+                    let eligibleTeams = [];
+                    for (let i = 0; i < contact.addresses.length; i++) {
+                      // try to find index of the address location in teams locations
+                      let filteredTeams = teams.filter((team) => team.locations.indexOf(contact.addresses[i].locationId) !== -1);
+                      if (filteredTeams.length) {
+                        eligibleTeams = eligibleTeams.concat(filteredTeams.map((team) => team.id));
+                        break;
+                      }
+                    }
+
+                    // follow ups to be generated for the given contact
+                    // each one contains a specific date
+                    let contactFollowUpsToAdd = [];
+
+                    // follow ups to be added for the given contact
+                    // choose contact date from the latest relationship with a case/event
+                    let lastSickDate = helpers.getUTCDate(contact.relationships[0].contactDate);
+
+                    // build the contact's last date of follow up, based on the days count given in the request
+                    let incubationLastDay = helpers.getUTCDate(lastSickDate).add(data.followUpDays, 'd');
+
+                    // check a weird case when the last follow up was yesterday and not performed
+                    // but today is the last day of incubation
+                    // it should generate a follow up for today, no matter the follow up period sent in request
+                    if (contact.followUpsLists.length) {
+                      let lastFollowUp = contact.followUpsLists[0];
+
+                      // build the contact's last date of follow up, no matter the period given in the request
+                      let incubationLastDay = helpers.getUTCDate(lastSickDate).add(outbreakFollowUpPeriod, 'd');
+
+                      if (moment(lastFollowUp.createdAt).isSame(moment(lastFollowUp.updatedAt), 'd')
+                        && (!lastFollowUp.performed && !lastFollowUp.lostToFollowUp)
+                        && helpers.getUTCDate(lastFollowUp.date).isSame(incubationLastDay, 'd')) {
+                        contactFollowUpsToAdd.push(
+                          app.models.followUp
+                            .create({
+                              personId: contact.id,
+                              // schedule for today
+                              date: helpers.getUTCDate().toDate(),
+                              performed: false,
+                              // choose first team, it will be only this follow up generated
+                              // so no randomness is required
+                              teamId: eligibleTeams[0]
+                            })
+                            .then((createdFollowUp) => {
+                              generateResponse[genResponseIndex].followUps.push(createdFollowUp);
+                            })
+                        );
+
+                        // skip to next contact
+                        return;
+                      }
+                    }
+
+                    // build follow up frequency
+                    // case 1:
+                    // if frequency is one of the predefined values
+                    // generate it once every X days
+                    // case 2:
+                    // note: assumed by default
+                    // if frequency is an integer, then frequency is every day
+                    // also the amount of follow ups generated per day will equal the frequency amount
+                    let followUpFreq = !isNaN(outbreakFollowUpFreq) ? 1 : null;
+                    // if frequency is a number, then generate as many follow up per day
+                    let followUpCountPerDay = outbreakFollowUpFreq;
+
+                    // check if the frequency and count meet case 1 requirements
+                    // if so, overwrite the default behavior
+                    let predefinedFreq = constants.followUpFreqs[outbreakFollowUpFreq];
+                    if (predefinedFreq) {
+                      followUpFreq = predefinedFreq;
+                      followUpCountPerDay = 1;
+                    }
+
+                    // generate follow up forms, starting from today
+                    for (let now = helpers.getUTCDate(); now <= incubationLastDay; now.add(followUpFreq, 'day')) {
+                      let generatedFollowUps = [];
+                      for (let i = 0; i < followUpCountPerDay; i++) {
+                        generatedFollowUps.push(
+                          app.models.followUp
+                            .create({
+                              personId: contact.id,
+                              date: now.toDate(),
+                              performed: false,
+                              // split the follow ups work equally across teams
+                              teamId: rr(eligibleTeams)
+                            })
+                            .then((createdFollowUp) => {
+                              generateResponse[genResponseIndex].followUps.push(createdFollowUp);
+                            })
+                        );
+                      }
+
+                      // if there is generated follow ups on that day, delete it and re-create
+                      let existingFollowups = contact.followUpsLists.filter((followUp) => {
+                        return moment(followUp.date).isSame(now, 'd') && helpers.isGeneratedFollowup(followUp);
+                      });
+
+                      if (existingFollowups.length) {
+                        // schedule the generated follow up for database add op
+                        contactFollowUpsToAdd.push(Promise.all(
+                          [
+                            app.models.followUp.destroyAll({
+                              id: {
+                                inq: existingFollowups.map((f) => f.id)
+                              }
+                            }),
+                            Promise.all(generatedFollowUps)
+                          ])
+                        );
+                      } else {
+                        contactFollowUpsToAdd.push(...generatedFollowUps);
+                      }
+                    }
+
+                    if (contactFollowUpsToAdd.length) {
+                      followsUpsToAdd.push(Promise.all(contactFollowUpsToAdd));
+                    }
+                  });
+
+                  return Promise.all(followsUpsToAdd).then(() => generateResponse);
+                });
+            }
+          })
+          .then((response) => callback(null, response))
+          .catch((err) => callback(err));
       });
   };
 
