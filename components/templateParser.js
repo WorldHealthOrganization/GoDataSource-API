@@ -228,6 +228,8 @@ function saveLanguageTokens(context, next) {
         next();
       })
       .catch(next);
+  } else {
+    next();
   }
 }
 

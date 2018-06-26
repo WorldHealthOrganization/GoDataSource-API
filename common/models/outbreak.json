@@ -628,6 +628,12 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "__count__clusters__relationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "countNewContactsByExposure"
     }
   ],
   "methods": {
@@ -1462,6 +1468,25 @@
       "http": {
         "verb": "get",
         "path": "/events/:nk/qr-resource-link"
+      }
+    },
+    "prototype.countNewContactsByExposure": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "{exposureTypeId}": "number"
+          },
+          "description": "Object containing new contacts counters for each found exposure type",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the new contacts and groups them by exposure type",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/count-new-contacts-by-exposure-type"
       }
     }
   }
