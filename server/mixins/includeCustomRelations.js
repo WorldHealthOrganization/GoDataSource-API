@@ -109,6 +109,12 @@ module.exports = function (Model) {
             }
           };
           break;
+        // related model contains a list of references to base model
+        case 'function':
+          query = {
+            fn: customRelation.definition.fn
+          };
+          break;
         // other types are not supported
         default:
           throw new Error(`Unsupported custom relation type: ${customRelation.definition.type}`);
@@ -118,13 +124,24 @@ module.exports = function (Model) {
         // merge it in the query
         query = app.utils.remote.mergeFilters(query, customRelation.scope);
       }
-      // search for the related information
-      promises.push(
-        app.models[customRelation.definition.model]
-          .find(query)
-          .then(function (results) {
-            modelInstance[customRelation.relation] = results;
-          }));
+      // regular relation, execute search
+      if (customRelation.definition.type !== 'function') {
+        // search for the related information
+        promises.push(
+          app.models[customRelation.definition.model]
+            .find(query)
+            .then(function (results) {
+              modelInstance[customRelation.relation] = results;
+            }));
+      } else {
+        // custom function (promise) execution
+        promises.push(
+          query.fn(modelInstance)
+            .then(function (results) {
+              modelInstance[customRelation.relation] = results;
+            })
+        );
+      }
     });
     return Promise.all(promises);
   }
@@ -132,12 +149,12 @@ module.exports = function (Model) {
   // if the model has custom relations defined
   if (Model.customRelations) {
     // on access, prepare custom relations
-    Model.observe('access', function prepareRelations(context, next){
+    Model.observe('access', function prepareRelations(context, next) {
       prepareCustomRelations(context, next);
     });
 
     // on load, include custom relations
-    Model.observe('loaded', function includeRelations(context, next){
+    Model.observe('loaded', function includeRelations(context, next) {
       includeCustomRelations(context, context.data)
         .then(function () {
           next();

@@ -25,20 +25,35 @@
       "default": "event",
       "readOnly": true
     },
-    "dateOfOnset": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "date": {
       "type": "date"
     },
-    "isDateOfOnsetApproximate": {
+    "dateApproximate": {
       "type": "boolean"
     },
     "description": {
       "type": "string"
     },
-    "gender": {
-      "type": "string",
-      "required": false
+    "address": {
+      "type": "address"
     }
   },
+  "excludeBaseProperties": [
+    "firstName",
+    "middleName",
+    "lastName",
+    "dateOfBirth",
+    "age",
+    "dob",
+    "gender",
+    "phoneNumber",
+    "occupation",
+    "addresses"
+  ],
   "validations": [],
   "relations": {},
   "acls": [],

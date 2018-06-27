@@ -17,6 +17,10 @@ module.exports = function (ReferenceData) {
         "description": "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_DESCRIPTION"
       },
       {
+        "id": "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_CONFIRMED_BY_LAB_RESULT",
+        "description": "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_CONFIRMED_BY_LAB_RESULT_DESCRIPTION"
+      },
+      {
         "id": "LNG_REFERENCE_DATA_CATEGORY_GENDER",
         "description": "LNG_REFERENCE_DATA_CATEGORY_GENDER_DESCRIPTION"
       },
@@ -75,6 +79,18 @@ module.exports = function (ReferenceData) {
       {
         "id": "LNG_REFERENCE_DATA_OUTCOME",
         "description": "LNG_REFERENCE_DATA_OUTCOME_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_QUESTION_ANSWER_TYPE",
+        "description": "LNG_REFERENCE_DATA_QUESTION_ANSWER_TYPE_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_MISCELLANEOUS_CUSTOMIZABLE_UI_ELEMENT",
+        "description": "LNG_REFERENCE_DATA_MISCELLANEOUS_CUSTOMIZABLE_UI_ELEMENT_DESCRIPTION"
+      },
+      {
+        "id": "LNG_REFERENCE_DATA_PERSON_TYPE",
+        "description": "LNG_REFERENCE_DATA_PERSON_TYPE_DESCRIPTION"
       }
     ]
   ];

@@ -65,8 +65,6 @@ module.exports = function (Outbreak) {
         } else {
           // nothing to do; proceed with deletion
         }
-
-        return;
       })
       .then(function () {
         next();
@@ -75,17 +73,32 @@ module.exports = function (Outbreak) {
   });
 
   /**
-   * Enhance cases list request to support optional filtering of cases that don't have any relations
+   * Attach before remote (GET outbreaks/{id}/cases) hooks
    */
   Outbreak.beforeRemote('prototype.__get__cases', function (context, modelInstance, next) {
+    // filter information based on available permissions
+    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('case', context);
+    // Enhance events list request to support optional filtering of events that don't have any relations
     Outbreak.helpers.attachFilterPeopleWithoutRelation('case', context, modelInstance, next);
   });
 
   /**
-   * Enhance events list request to support optional filtering of events that don't have any relations
+   * Attach before remote (GET outbreaks/{id}/events) hooks
    */
   Outbreak.beforeRemote('prototype.__get__events', function (context, modelInstance, next) {
+    // filter information based on available permissions
+    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('event', context);
+    // Enhance events list request to support optional filtering of events that don't have any relations
     Outbreak.helpers.attachFilterPeopleWithoutRelation('event', context, modelInstance, next);
+  });
+
+  /**
+   * Attach before remote (GET outbreaks/{id}/contacts) hooks
+   */
+  Outbreak.beforeRemote('prototype.__get__contacts', function (context, modelInstance, next) {
+    // filter information based on available permissions
+    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('contact', context);
+    next();
   });
 
   /**
@@ -522,7 +535,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getReferenceData = function (filter, callback) {
-    helpers.getSystemAndOwnReferenceData(this.id, filter, callback);
+    helpers.getSystemAndOwnReferenceData(this.id, filter)
+      .then((data) => callback(null, data))
+      .catch(callback);
   };
 
   /**
@@ -639,4 +654,57 @@ module.exports = function (Outbreak) {
     // after successfully updating reference data, also update translations for it.
     referenceDataParser.afterUpdateHook(context, modelInstance, next);
   });
+
+  /**
+   * Count the new contacts and groups them by exposure type
+   * @param callback
+   */
+  Outbreak.prototype.countNewContactsByExposure = function (callback) {
+    // get outbreak
+    let outbreak = this;
+    // initialize noDaysNewContacts
+    let noDaysNewContacts = outbreak.noDaysNewContacts;
+    // initialize result
+    let result = {};
+
+    // get exposureTypes from reference data
+    helpers.getSystemAndOwnReferenceData(outbreak.id, {
+      where: {
+        categoryId: 'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE'
+      }
+    })
+      .then(function (exposureTypes) {
+        // loop through exposure types and initialize the counters in the result
+        exposureTypes.forEach(function (exposureType) {
+          result[exposureType.value] = 0;
+        });
+
+        // get now date
+        let now = new Date();
+
+        // get the new contacts in the outbreak
+        return app.models.contact.find({
+          include: ['relationships'],
+          where: {
+            createdAt: {
+              gte: now.setDate(now.getDate() - noDaysNewContacts)
+            }
+          }
+        });
+      })
+      .then(function (contacts) {
+        // loop through the contacts and check relationships exposure types to increase the counters in the result
+        contacts.forEach(function (contact) {
+          contact.relationships.forEach(function (relationship) {
+            // increasing counter for all the contact relationships
+            // Note: The result counters total will not equal number of contacts as contacts may have multiple relationships
+            result[relationship.exposureTypeId]++;
+          });
+        });
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
+  };
 };

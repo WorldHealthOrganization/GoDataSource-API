@@ -64,6 +64,11 @@
       "required": true,
       "description": "Number of contacts used to determine the proportion of cases with less than X contacts"
     },
+    "noDaysNewContacts": {
+      "type": "number",
+      "description": "Number of days used to determine if a contact is new",
+      "default": 1
+    },
     "fieldsToDisplayNode": {
       "type": [
         "string"
@@ -194,6 +199,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "__get__cases"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_case",
       "permission": "ALLOW",
       "property": "__create__cases"
@@ -225,6 +236,12 @@
     {
       "principalType": "ROLE",
       "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "__get__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
       "permission": "ALLOW",
       "property": "__get__contacts"
     },
@@ -470,6 +487,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "__get__events"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_case",
       "permission": "ALLOW",
       "property": "__create__events"
@@ -623,6 +646,12 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "__count__clusters__relationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "countNewContactsByExposure"
     }
   ],
   "methods": {
@@ -1457,6 +1486,25 @@
       "http": {
         "verb": "get",
         "path": "/events/:nk/qr-resource-link"
+      }
+    },
+    "prototype.countNewContactsByExposure": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "{exposureTypeId}": "number"
+          },
+          "description": "Object containing new contacts counters for each found exposure type",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the new contacts and groups them by exposure type",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/count-new-contacts-by-exposure-type"
       }
     }
   }

@@ -50,6 +50,7 @@ const rolesMap = {
       'read_outbreak',
       'write_outbreak',
       'read_case',
+      'write_case',
       'read_contact',
       'write_contact',
       'read_report',

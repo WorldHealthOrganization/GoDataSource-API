@@ -9,11 +9,17 @@ const subTemplates = ['caseInvestigationTemplate', 'contactFollowUpTemplate', 'l
  * Parse template questions to replace text/labels with language tokens
  * @param questions Array of questions
  * @param identifier Language token identifier prefix
+ * @param counters Container for question variable/answer value counters
  */
-function parseQuestions(questions, identifier) {
+function parseQuestions(questions, identifier, counters) {
   identifier = identifier || '';
 
   questions.forEach(function (question, qindex) {
+    // increase question variable counter
+    counters[question.variable] = counters[question.variable] || {count: 0};
+    // increase usage counter
+    counters[question.variable].count++;
+
     // set question identifier
     let questionIdentifier = `${identifier}_QUESTION_${_.snakeCase(question.variable).toUpperCase()}`;
 
@@ -22,8 +28,15 @@ function parseQuestions(questions, identifier) {
 
     // check for question answers as the label for each answer needs to be translated
     if (question.answers && Array.isArray(question.answers) && question.answers.length) {
+      // initialize question answer values counter
+      counters[question.variable].answers = counters[question.variable].answers || {};
+
       let answers = questions[qindex].answers;
       answers.forEach(function (answer, aindex) {
+        // increase answer counter
+        counters[question.variable].answers[answer.value] = counters[question.variable].answers[answer.value] || 0;
+        counters[question.variable].answers[answer.value]++;
+
         // set answer identifier
         let answerIdentifier = `${questionIdentifier}_ANSWER_${_.snakeCase(answer.value).toUpperCase()}`;
 
@@ -32,7 +45,7 @@ function parseQuestions(questions, identifier) {
 
         // check for additional questions
         if (answer.additionalQuestions && Array.isArray(answer.additionalQuestions) && answer.additionalQuestions.length) {
-          parseQuestions(answers[aindex].additionalQuestions, answerIdentifier);
+          parseQuestions(answers[aindex].additionalQuestions, answerIdentifier, counters);
         }
       });
     }
@@ -188,7 +201,7 @@ function saveLanguageTokens(context, next) {
       })
       .then(function () {
         // check if there are tokens that need to be recreated (were not found in DB)
-        if(tokens.notFound.length) {
+        if (tokens.notFound.length) {
           // resolve promises
           return Promise.all(tokens.notFound);
         }
@@ -204,7 +217,7 @@ function saveLanguageTokens(context, next) {
     Promise.all(tokenPromises)
       .then(function () {
         // check if there are tokens that need to be recreated (were not found in DB)
-        if(tokens.notFound.length) {
+        if (tokens.notFound.length) {
           // resolve promises
           return Promise.all(tokens.notFound);
         }
@@ -215,6 +228,8 @@ function saveLanguageTokens(context, next) {
         next();
       })
       .catch(next);
+  } else {
+    next();
   }
 }
 
@@ -236,6 +251,13 @@ function beforeHook(context, modelInstance, next) {
   // initialize identifier
   let identifier = `LNG_${context.method.sharedClass.name.toUpperCase()}_${modelId.toUpperCase()}`;
 
+  // initialize duplicate question variable / answer value errors container
+  let duplicateError = false;
+  let duplicateErrors = {
+    questions: {},
+    answers: {}
+  };
+
   // in order to translate dynamic data, don't store values in the database, but translatable language tokens
   // in the template only properties from subtemplates need to be translated
   subTemplates.forEach(function (subTemplate) {
@@ -250,12 +272,44 @@ function beforeHook(context, modelInstance, next) {
       // loop through the subtemplate questions to replace
       let questions = context.args.data[subTemplate];
 
+      // question variable must be unique in a template and answer value must be unique per question
+      // initialize container with question variable/answer value counters
+      let counters = {};
+
       // parse questions to replate text/answer label with tokens
-      parseQuestions(questions, templateIdentifier);
+      parseQuestions(questions, templateIdentifier, counters);
+
+      // check counters
+      Object.keys(counters).forEach(function (questionVariable) {
+        if (counters[questionVariable].count > 1) {
+          // question variable is used multiple times; add questionVariable to errors container
+          duplicateError = true;
+          duplicateErrors.questions[subTemplate] = duplicateErrors.questions[subTemplate] || [];
+          duplicateErrors.questions[subTemplate].push(questionVariable);
+
+          // check question answers
+          counters[questionVariable].answers && Object.keys(counters[questionVariable].answers).forEach(function (answerValue) {
+            if (counters[questionVariable].answers[answerValue] > 1) {
+              // answer value is used multiple times in question
+              duplicateError = true;
+              duplicateErrors.answers[subTemplate] = duplicateErrors.answers[subTemplate] || {[`question ${questionVariable}`]: []};
+              duplicateErrors.answers[subTemplate][`question ${questionVariable}`].push(answerValue);
+            }
+          });
+        }
+      });
     }
   });
 
-  next();
+  // check for duplicate questions/answers error
+  if (duplicateError) {
+    next(app.utils.apiError.getError('DUPLICATE_TEMPLATE_QUESTION_VARIABLE_OR_ANSWER_VALUE', {
+      duplicateQuestionVariable: duplicateErrors.questions,
+      duplicateAnswerValue: duplicateErrors.answers
+    }))
+  } else {
+    next();
+  }
 }
 
 /**

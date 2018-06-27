@@ -39,6 +39,11 @@ function merge(filter, requestFilter = {}) {
       _filter[filterName] = requestFilter[filterName] || filter[filterName];
   });
 
+  // this should only be used internally
+  if (filter.fn) {
+    _filter.fn = filter.fn;
+  }
+
   return _filter;
 }
 
