@@ -18,7 +18,7 @@ module.exports = function (app) {
 
   /**
    * Store a business logic access errors in context for better authentication error handling
-   * @param permission
+   * @param accessError
    * @param context
    */
   function storeAccessErrorsInContext(accessError, context) {
@@ -137,7 +137,7 @@ module.exports = function (app) {
     let accessErrors = [];
 
     // define regex for extracting outbreak id
-    let outbreakIdRegExp = new RegExp(`^\\/api\\/outbreaks\\/([^\\/?]+)`);
+    let outbreakIdRegExp = new RegExp(`^\\/api\\/outbreaks\\/([^\\/?]+)(\\/[^\\/?]+)?`);
     // extract id from request
     let outbreakIdMatch = context.remotingContext.req.originalUrl.match(outbreakIdRegExp);
 
@@ -152,9 +152,9 @@ module.exports = function (app) {
         accessErrors.push(`access denied to the given outbreak; the outbreak is not set as one of the user's accessible outbreaks`);
       }
 
-      // check if the user tries to do POST/PUT/DELETE on another outbreak than the active one
-      if (context.remotingContext.req.method !== 'GET' && outbreakIdMatch[1] !== userAuthData.activeOutbreakId) {
-        accessErrors.push(`access to POST/PUT/DELETE actions is granted only for the active outbreak`);
+      // check if the user tries to do POST/PUT/DELETE on another outbreak related data than the active one (you can modify & delete inactive outbreaks)
+      if (outbreakIdMatch[2] && context.remotingContext.req.method !== 'GET' && outbreakIdMatch[1] !== userAuthData.activeOutbreakId) {
+        accessErrors.push(`access to POST/PUT/DELETE actions on outbreak related data is granted only for the active outbreak`);
       }
     }
 
