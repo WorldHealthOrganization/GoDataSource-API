@@ -565,19 +565,20 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.generateFollowups = function (data, callback) {
     // if no followup period was sent in request, assume its just for one day
     data = data || {};
-    data.followUpDays = data.followUpDays || 1;
+    data.followUpPeriod = data.followUpPeriod || 1;
 
     // cache outbreak's follow up options
     let outbreakFollowUpPeriod = ++this.periodOfFollowup;
     let outbreakFollowUpFreq = this.frequencyOfFollowUp;
+    let outbreakFollowUpPerDay = this.frequencyOfFollowUpPerDay;
 
     // list of generated follow ups to be returned in the response
     // grouped per contact
     let generateResponse = [];
 
     // make sure follow up period given in the request do not overflows outbreak's follow up period
-    if (data.followUpDays > outbreakFollowUpPeriod) {
-      data.followUpDays = outbreakFollowUpPeriod;
+    if (data.followUpPeriod > outbreakFollowUpPeriod) {
+      data.followUpPeriod = outbreakFollowUpPeriod;
     }
 
     // retrieve list of contacts that has a relationship with events/contacts and is eligible for generation
@@ -673,7 +674,7 @@ module.exports = function (Outbreak) {
                     let lastSickDate = helpers.getUTCDate(contact.relationships[0].contactDate);
 
                     // build the contact's last date of follow up, based on the days count given in the request
-                    let incubationLastDay = helpers.getUTCDate(lastSickDate).add(data.followUpDays, 'd');
+                    let incubationLastDay = helpers.getUTCDate(lastSickDate).add(data.followUpPeriod, 'd');
 
                     // check a weird case when the last follow up was yesterday and not performed
                     // but today is the last day of incubation
@@ -708,30 +709,10 @@ module.exports = function (Outbreak) {
                       }
                     }
 
-                    // build follow up frequency
-                    // case 1:
-                    // if frequency is one of the predefined values
-                    // generate it once every X days
-                    // case 2:
-                    // note: assumed by default
-                    // if frequency is an integer, then frequency is every day
-                    // also the amount of follow ups generated per day will equal the frequency amount
-                    let followUpFreq = !isNaN(outbreakFollowUpFreq) ? 1 : null;
-                    // if frequency is a number, then generate as many follow up per day
-                    let followUpCountPerDay = outbreakFollowUpFreq;
-
-                    // check if the frequency and count meet case 1 requirements
-                    // if so, overwrite the default behavior
-                    let predefinedFreq = constants.followUpFreqs[outbreakFollowUpFreq];
-                    if (predefinedFreq) {
-                      followUpFreq = predefinedFreq;
-                      followUpCountPerDay = 1;
-                    }
-
                     // generate follow up forms, starting from today
-                    for (let now = helpers.getUTCDate(); now <= incubationLastDay; now.add(followUpFreq, 'day')) {
+                    for (let now = helpers.getUTCDate(); now <= incubationLastDay; now.add(outbreakFollowUpFreq, 'day')) {
                       let generatedFollowUps = [];
-                      for (let i = 0; i < followUpCountPerDay; i++) {
+                      for (let i = 0; i < outbreakFollowUpPerDay; i++) {
                         generatedFollowUps.push(
                           app.models.followUp
                             .create({

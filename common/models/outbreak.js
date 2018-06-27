@@ -8,17 +8,6 @@ const moment = require('moment');
 
 module.exports = function (Outbreak) {
 
-  // model's constants
-  Outbreak.constants = {};
-
-  // follow up generation for once every x days frequency
-  Outbreak.constants.followUpFreqs = {
-    'ONCE_EVERY_2_DAYS': 2,
-    'ONCE_EVERY_3_DAYS': 3,
-    'ONCE_EVERY_4_DAYS': 4,
-    'ONCE_EVERY_5_DAYS': 5
-  };
-
   // initialize model helpers
   Outbreak.helpers = {};
 

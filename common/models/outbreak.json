@@ -42,7 +42,13 @@
     },
     "frequencyOfFollowUp": {
       "type": "number",
-      "required": true
+      "required": true,
+      "description": "Frequency of follow ups in days (once every X days/daily)"
+    },
+    "frequencyOfFollowUpPerDay": {
+      "type": "number",
+      "required": true,
+      "description": "Number of follow ups to be generated per day"
     },
     "noDaysAmongContacts": {
       "type": "number",
@@ -1555,7 +1561,7 @@
         {
           "arg": "body",
           "type": "object",
-          "description": "Follow up period in days. Property: followUpDays [number]",
+          "description": "Follow up period in days. Property: followUpPeriod [number]",
           "http": {
             "source": "body"
           },
