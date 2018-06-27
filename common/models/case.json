@@ -61,7 +61,8 @@
       "type": "string"
     },
     "transferRefused": {
-      "type": "boolean"
+      "type": "boolean",
+      "default": false
     }
   },
   "validations": [],
