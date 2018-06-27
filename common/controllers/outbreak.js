@@ -694,4 +694,61 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  Outbreak.prototype.countIndependentTransmissionChains = function (callback) {
+    let transmissionChains = [[]];
+
+    app.models.relationships
+      .find({
+        where: {
+          outbreakId: this.id
+        }
+      })
+      .then(function (relationships) {
+        relationships.forEach(function (relationship) {
+          let foundChain;
+          for (let chainIndex = 0; chainIndex < transmissionChains.length && !foundChain; chainIndex++) {
+            let transmissionChain = transmissionChains[chainIndex];
+            relationship.persons.forEach(function (person) {
+              if (transmissionChain.indexOf(person.id) !== -1) {
+                foundChain = transmissionChain;
+              }
+            });
+          }
+          if (foundChain) {
+            foundChain.push(...[relationship.persons[0].id, relationship.persons[1].id]);
+          } else {
+            if (!transmissionChains[0].length) {
+              transmissionChains[0].push(...[relationship.persons[0].id, relationship.persons[1].id]);
+            } else {
+              transmissionChains.push([relationship.persons[0].id, relationship.persons[1].id]);
+            }
+          }
+        });
+        let changesMade = true;
+
+        while (changesMade) {
+          changesMade = false;
+          for (let chainIndex = 0; chainIndex < transmissionChains.length - 1; chainIndex++) {
+            for (let compareChainIndex = chainIndex + 1; compareChainIndex < transmissionChains.length; compareChainIndex++) {
+              let foundChain;
+              for (let personId = 0; personId < transmissionChains[compareChainIndex].length && !foundChain; personId++) {
+                if (transmissionChains[chainIndex].indexOf(transmissionChains[compareChainIndex][personId]) !== -1) {
+                  foundChain = transmissionChains[chainIndex];
+                }
+              }
+              if (foundChain) {
+                foundChain.push(...transmissionChains[compareChainIndex]);
+                transmissionChains[compareChainIndex] = [];
+                changesMade = true;
+              }
+            }
+          }
+        }
+
+        transmissionChains = transmissionChains.filter(function (item) {
+          return item.length;
+        });
+      })
+  }
 };
