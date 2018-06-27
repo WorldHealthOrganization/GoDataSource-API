@@ -137,7 +137,7 @@ module.exports = function (app) {
     let accessErrors = [];
 
     // define regex for extracting outbreak id
-    let outbreakIdRegExp = new RegExp(`^\\/api\\/outbreaks\\/([^\\/?]+)(\\/[^\\/?]+)`);
+    let outbreakIdRegExp = new RegExp(`^\\/api\\/outbreaks\\/([^\\/?]+)(\\/[^\\/?]+)?`);
     // extract id from request
     let outbreakIdMatch = context.remotingContext.req.originalUrl.match(outbreakIdRegExp);
 
