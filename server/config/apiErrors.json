@@ -1,41 +1,41 @@
 {
   "MODEL_IN_USE": {
     "defaultStatusCode": 422,
-    "messagePattern": "Model \"<%= model %>\" id \"<%= id %>\" is in use."
+    "messagePattern": "Model `<%= model %>` id `<%= id %>` is in use."
   },
   "MODIFY_OWN_RECORD": {
-    "messagePattern": "Model \"<%= model %>\" id \"<%= id %>\" is used by current logged in user. Cannot modify own record."
+    "messagePattern": "Model `<%= model %>` id `<%= id %>` is used by current logged in user. Cannot modify own record."
   },
   "DELETE_OWN_RECORD": {
-    "messagePattern": "Model \"<%= model %>\" id \"<%= id %>\" is used by current logged in user. Cannot delete own record."
+    "messagePattern": "Model `<%= model %>` id `<%= id %>` is used by current logged in user. Cannot delete own record."
   },
   "DELETE_LAST_USER": {
     "messagePattern": "Cannot delete the last user of the system. The system must have at least one user."
   },
   "DELETE_ACTIVE_OUTBREAK": {
-    "messagePattern": "The outbreak (id: \"<%= id %>\") is active for at least another user. Cannot delete an active outbreak."
+    "messagePattern": "The outbreak (id: `<%= id %>`) is active for at least another user. Cannot delete an active outbreak."
   },
   "ONE_ACTIVE_OUTBREAK": {
-    "messagePattern": "There is already an active outbreak (id: \"<%= id %>\") in the system."
+    "messagePattern": "There is already an active outbreak (id: `<%= id %>`) in the system."
   },
   "FUNCTIONALITY_NOT_IMPLEMENTED": {
     "messagePattern": "The requested functionality is not implemented."
   },
   "MODEL_NOT_FOUND": {
     "defaultStatusCode": 404,
-    "messagePattern": "Unknown \"<%= model %>\" id \"<%= id %>\""
+    "messagePattern": "Unknown `<%= model %>` id `<%= id %>`"
   },
   "MODEL_NOT_FOUND_IN_CONTEXT": {
     "defaultStatusCode": 404,
-    "messagePattern": "Unknown \"<%= model %>\" id \"<%= id %>\" in context of \"<%= contextModel %>\" id \"<%= contextId %>\""
+    "messagePattern": "Unknown `<%= model %>` id `<%= id %>` in context of `<%= contextModel %>` id `<%= contextId %>`"
   },
   "INTERNAL_ERROR": {
     "defaultStatusCode": 500,
-    "messagePattern": "Internal error: \"<%= error %>\""
+    "messagePattern": "Internal error: `<%= error %>`"
   },
   "VALIDATION_ERROR": {
     "defaultStatusCode": 422,
-    "messagePattern": "The \"<%= model %>\" instance is not valid. Details: <%= details %>"
+    "messagePattern": "The `<%= model %>` instance is not valid. Details: <%= details %>"
   },
   "MISSING_REQUIRED_PERMISSION": {
     "messagePattern": "Logged in user must have (at least) one of the following permissions to access this endpoint: <%= permissions %>."
@@ -61,26 +61,38 @@
   },
   "INVALID_CASE_RELATIONSHIP": {
     "defaultStatusCode": 422,
-    "messagePattern": "The case \"<%= id %>\" needs to be related to another case in order to be able to convert it to a contact"
+    "messagePattern": "The case `<%= id %>` needs to be related to another case in order to be able to convert it to a contact"
   },
   "INVALID_EVENT_EVENT_RELATIONSHIP": {
     "defaultStatusCode": 422,
-    "messagePattern": "Related person \"<%= id %>\" is a event. Cannot create relationships between two events."
+    "messagePattern": "Related person `<%= id %>` is a event. Cannot create relationships between two events."
   },
   "INVALID_CONTACT_CONTACT_RELATIONSHIP": {
     "defaultStatusCode": 422,
-    "messagePattern": "Related person \"<%= id %>\" is a contact. Cannot create relationships between two contacts."
+    "messagePattern": "Related person `<%= id %>` is a contact. Cannot create relationships between two contacts."
   },
   "MODEL_NOT_EDITABLE": {
     "defaultStatusCode": 422,
-    "messagePattern": "Model \"<%= model %>\" id \"<%= id %>\" is not editable (read-only)."
+    "messagePattern": "Model `<%= model %>` id `<%= id %>` is not editable (read-only)."
   },
   "MISSING_REQUIRED_PROPERTY": {
     "defaultStatusCode": 400,
-    "messagePattern": "Model \"<%= model %>\" is missing required properties: <%= properties %>."
+    "messagePattern": "Model `<%= model %>` is missing required properties: <%= properties %>."
   },
   "DUPLICATE_TEMPLATE_QUESTION_VARIABLE_OR_ANSWER_VALUE": {
     "defaultStatusCode": 422,
     "messagePattern": "A template cannot contain duplicate question variables and a template question cannot contain duplicate answer value"
+  },
+  "MODEL_IDENTIFIERS_ARE_NOT_UNIQUE_IN_CONTEXT": {
+    "defaultStatusCode": 400,
+    "messagePattern": "The `<%= model %>` is invalid. Details: <%= details %>"
+  },
+  "DELETE_PARENT_MODEL": {
+    "defaultStatusCode": 400,
+    "messagePattern": "This `<%= model %>` still has sub models linked to it. Please make sure to delete all child models before deleting a parent model."
+  },
+  "DEACTIVATE_PARENT_MODEL": {
+    "defaultStatusCode": 400,
+    "messagePattern": "This `<%= model %>` still has sub models that are active. Please make sure to deactivate all child models before deactivating a parent model."
   }
 }

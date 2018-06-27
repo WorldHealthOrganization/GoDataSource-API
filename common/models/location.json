@@ -11,7 +11,7 @@
       "required": true
     },
     "synonyms": {
-      "type": "array"
+      "type": ["string"]
     },
     "active": {
       "type": "boolean",
@@ -21,7 +21,8 @@
       "type": "number"
     },
     "parentLocationId": {
-      "type": "string"
+      "type": "string",
+      "default": null
     }
   },
   "validations": [],
@@ -32,6 +33,48 @@
       "foreignKey": "parentLocationId"
     }
   },
-  "acls": [],
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permissions": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permissions": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permissions": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permissions": "ALLOW",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "count"
+    }
+  ],
   "methods": {}
 }
