@@ -32,6 +32,10 @@
     },
     "geoLocation": {
       "type": "geopoint"
+    },
+    "date": {
+      "type": "date",
+      "defaultFn": "now"
     }
   },
   "validations": [],
