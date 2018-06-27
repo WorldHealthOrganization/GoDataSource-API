@@ -202,18 +202,16 @@ module.exports = function (Location) {
    * this check is done only for the direct sub-locations and not recurrently for all sub-locations.
    */
   Location.checkIfCanDeactivate = function (data, locationId) {
-    if(data.active === false) {
-      return Location.findOne({
-        where: {
-          parentLocationId: locationId,
-          active: true
-        }
-      })
-      .then((location) => {
-        if (location) {
-          throw(app.utils.apiError.getError("DEACTIVATE_PARENT_MODEL", {model: Location.modelName}));
-        }
-      })
-    }
+    return Location.findOne({
+      where: {
+        parentLocationId: locationId,
+        active: true
+      }
+    })
+    .then((location) => {
+      if (location) {
+        throw(app.utils.apiError.getError("DEACTIVATE_PARENT_MODEL", {model: Location.modelName}));
+      }
+    })
   };
 };
