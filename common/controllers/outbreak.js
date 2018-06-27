@@ -522,7 +522,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getReferenceData = function (filter, callback) {
-    helpers.getSystemAndOwnReferenceData(this.id, filter, callback);
+    helpers.getSystemAndOwnReferenceData(this.id, filter)
+      .then((data) => callback(null, data))
+      .catch(callback);
   };
 
   /**
@@ -645,37 +647,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countNewContactsByExposure = function (callback) {
+    // get outbreak
+    let outbreak = this;
     // initialize noDaysNewContacts
-    let noDaysNewContacts;
+    let noDaysNewContacts = outbreak.noDaysNewContacts;
     // initialize result
     let result = {};
 
-    // get outbreak to get noDaysNewContacts
-    Outbreak.findById(this.id)
-      .then(function (outbreak) {
-        // get noDaysNewContacts
-        noDaysNewContacts = outbreak.noDaysNewContacts;
-
-        // get exposureTypes from reference data
-        return app.models.referenceData.find({
-          where: {
-            and: [{
-              or: [
-                {
-                  outbreakId: {
-                    exists: false
-                  }
-                },
-                {
-                  outbreakId: outbreak.id
-                }
-              ]
-            }, {
-              categoryId: 'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE'
-            }]
-          }
-        });
-      })
+    // get exposureTypes from reference data
+    helpers.getSystemAndOwnReferenceData(outbreak.id, {
+      where: {
+        categoryId: 'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE'
+      }
+    })
       .then(function (exposureTypes) {
         // loop through exposure types and initialize the counters in the result
         exposureTypes.forEach(function (exposureType) {

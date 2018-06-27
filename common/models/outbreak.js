@@ -381,19 +381,18 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Retrieve list of system reference data and outbreak's specific reference data
+   * Retrieve list of system reference data and outbreak's specific reference data; Returns the promise
    * @param outbreakId
-   * @param filter
-   * @param callback
+   * @param filter Optional additional filter for the reference data
    */
-  Outbreak.helpers.getSystemAndOwnReferenceData = function (outbreakId, filter, callback) {
+  Outbreak.helpers.getSystemAndOwnReferenceData = function (outbreakId, filter) {
     const _filter = app.utils.remote
       .mergeFilters({
           where: {
             or: [
               {
                 outbreakId: {
-                  exists: false
+                  eq: null
                 }
               },
               {
@@ -405,9 +404,7 @@ module.exports = function (Outbreak) {
         filter
       );
 
-    app.models.referenceData
-      .find(_filter)
-      .then((data) => callback(null, data))
-      .catch(callback);
+    return app.models.referenceData
+      .find(_filter);
   };
 };
