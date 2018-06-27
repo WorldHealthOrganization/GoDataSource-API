@@ -59,6 +59,10 @@
     },
     "riskReason": {
       "type": "string"
+    },
+    "transferRefused": {
+      "type": "boolean",
+      "default": false
     }
   },
   "validations": [],
