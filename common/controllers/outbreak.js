@@ -362,7 +362,10 @@ module.exports = function (Outbreak) {
         if (!contact) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: contactId});
         }
-        return contact.updateAttribute('type', 'case');
+        return contact.updateAttributes({
+          type: "case",
+          dateBecomeCase: new Date
+        });
       })
       .then(function (_case) {
         convertedCase = _case;

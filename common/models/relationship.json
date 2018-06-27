@@ -20,7 +20,7 @@
       "required": true
     },
     "contactDateEstimated": {
-      "type": "date",
+      "type": "boolean",
       "required": true
     },
     "certaintyLevelId": {
