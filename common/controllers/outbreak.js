@@ -33,8 +33,18 @@ module.exports = function (Outbreak) {
 
   // attach search by relation property behavior on get contacts
   app.utils.remote.searchByRelationProperty.attachOnRemotes(Outbreak, [
-    'prototype.__get__contacts'
+    'prototype.__get__contacts',
+    'prototype.__get__cases'
   ]);
+
+  Outbreak.prototype.extendedCountCases = function(filter, callback) {
+    this.__get__cases(filter, function (err, res) {
+      if (err) {
+       return callback(err);
+      }
+      callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
+    })
+  };
 
   /**
    * Do not allow deletion of a active Outbreak

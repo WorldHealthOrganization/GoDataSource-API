@@ -37,7 +37,7 @@ function deepSearchByRelationPropertyOnModel(model, filter) {
     model = model.toJSON();
   }
   // check if there's a filter
-  if (filter.include) {
+  if (filter && filter.include) {
     // always use arrays (normalize filters)
     if (!Array.isArray(filter.include)) {
       filter.include = [filter.include];
