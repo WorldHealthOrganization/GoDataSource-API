@@ -37,6 +37,10 @@ module.exports = function (Outbreak) {
     'prototype.__get__cases'
   ]);
 
+  /**
+   * Allows count requests with advanced filters (like the ones we can use on GET requests)
+   * to be made on outbreak/{id}/cases.
+   */
   Outbreak.prototype.extendedCountCases = function(filter, callback) {
     this.__get__cases(filter, function (err, res) {
       if (err) {
