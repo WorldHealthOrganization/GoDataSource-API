@@ -1550,7 +1550,7 @@
           "required": true
         }
       ],
-      "description": "Restores a deleted contact follow-up.",
+      "description": "Restores a deleted follow-up.",
       "http": {
         "verb": "post",
         "path": "/contacts/:nk/follow-ups/:fk/restore"

@@ -691,13 +691,16 @@ module.exports = function (Outbreak) {
                         contactFollowUpsToAdd.push(
                           app.models.followUp
                             .create({
+                              // used to easily trace all follow ups for a given outbreak
+                              outbreakId: contact.outbreakId,
                               personId: contact.id,
                               // schedule for today
                               date: genericHelpers.getUTCDate().toDate(),
                               performed: false,
                               // choose first team, it will be only this follow up generated
                               // so no randomness is required
-                              teamId: eligibleTeams[0]
+                              teamId: eligibleTeams[0],
+                              isGenerated: true
                             })
                             .then((createdFollowUp) => {
                               generateResponse[genResponseIndex].followUps.push(createdFollowUp);
@@ -716,11 +719,14 @@ module.exports = function (Outbreak) {
                         generatedFollowUps.push(
                           app.models.followUp
                             .create({
+                              // used to easily trace all follow ups for a given outbreak
+                              outbreakId: contact.outbreakId,
                               personId: contact.id,
                               date: now.toDate(),
                               performed: false,
                               // split the follow ups work equally across teams
-                              teamId: rr(eligibleTeams)
+                              teamId: rr(eligibleTeams),
+                              isGenerated: true
                             })
                             .then((createdFollowUp) => {
                               generateResponse[genResponseIndex].followUps.push(createdFollowUp);
