@@ -701,6 +701,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countIndependentTransmissionChains = function (filter, callback) {
+    // build a filter
     filter = app.utils.remote
       .mergeFilters({
         where: {
@@ -708,10 +709,13 @@ module.exports = function (Outbreak) {
         }
       }, filter || {});
 
+    // search relations
     app.models.relationship
       .find(filter)
       .then(function (relationships) {
+        // add 'filterParent' capability
         relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
+        // count transmission chains
         app.models.relationship
           .countTransmissionChains(relationships, function (error, noOfChains) {
             if (error) {
@@ -745,7 +749,9 @@ module.exports = function (Outbreak) {
     app.models.relationship
       .find(filter)
       .then(function (relationships) {
+        // add 'filterParent' capability
         relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
+        // build transmission chains
         app.models.relationship
           .getTransmissionChains(relationships, function (error, noOfChains) {
             if (error) {
