@@ -31,7 +31,12 @@ module.exports = function (Outbreak) {
     'prototype.__delete__contacts__relationships',
     'prototype.__get__referenceData',
     'prototype.__delete__referenceData',
-    'prototype.__count__referenceData'
+    'prototype.__count__referenceData',
+    'prototype.__create__followUps',
+    'prototype.__delete__followUps',
+    'prototype.__findById__followUps',
+    'prototype.__updateById__followUps',
+    'prototype.__destroyById__followUps'
   ]);
 
   // attach search by relation property behavior on get contacts
@@ -551,7 +556,7 @@ module.exports = function (Outbreak) {
       })
       .then(function (instance) {
         if (!instance) {
-          throw app.utils.apiError.getError('MODEL_NOT_FOUND', { model: app.models.followUp.modelName, id: followUpId });
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.followUp.modelName, id: followUpId});
         }
         instance.undoDelete(callback);
       })
@@ -588,19 +593,19 @@ module.exports = function (Outbreak) {
         include: {
           relation: 'relationships',
           scope: {
-              where: {
-                or: [
-                  {
-                    'persons.type': 'case'
-                  },
-                  {
-                    'persons.type': 'event'
-                  }
-                ]
-              },
-              order: 'contactDate DESC'
-            }
+            where: {
+              or: [
+                {
+                  'persons.type': 'case'
+                },
+                {
+                  'persons.type': 'event'
+                }
+              ]
+            },
+            order: 'contactDate DESC'
           }
+        }
       })
       .then((contacts) => {
         // follow up add statements
@@ -637,7 +642,7 @@ module.exports = function (Outbreak) {
                         }
                         return resolve(locations);
                       })
-                    })
+                  })
                     .then((locations) => {
                       team.locations = locations;
                       return team;

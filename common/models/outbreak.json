@@ -154,6 +154,11 @@
       "type": "hasMany",
       "model": "referenceData",
       "foreignKey": "outbreakId"
+    },
+    "followUps": {
+      "type": "hasMany",
+      "model": "followUp",
+      "foreignKey": "outbreakId"
     }
   },
   "acls": [
@@ -683,6 +688,18 @@
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "getIndependentTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "__get__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "__count__followUps"
     }
   ],
   "methods": {
@@ -1535,7 +1552,7 @@
       "description": "Count the new contacts and groups them by exposure type",
       "http": {
         "verb": "get",
-        "path": "/contacts/count-new-contacts-by-exposure-type"
+        "path": "/contacts/new-by-exposure-type/count"
       }
     },
     "prototype.restoreContactFollowUp": {
