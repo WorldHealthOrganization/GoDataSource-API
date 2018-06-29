@@ -3,10 +3,27 @@
 const app = require('../../server/server');
 const _ = require('lodash');
 
+// used to manipulate dates
+const moment = require('moment');
+
 module.exports = function (Outbreak) {
 
   // initialize model helpers
   Outbreak.helpers = {};
+
+  /**
+   * Checks whether the given follow up model is generated
+   * Checks that update/create dates are on the same
+   * Checks that it is not performed or lost
+   * @param model
+   * @returns {boolean}
+   */
+  Outbreak.helpers.isNewGeneratedFollowup = function (model) {
+    return moment(model.createdAt).isSame(moment(model.updatedAt))
+      && model.isGenerated
+      && !model.performed
+      && !model.lostToFollowUp;
+  };
 
   /**
    * Find relations for a person
