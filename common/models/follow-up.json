@@ -5,6 +5,9 @@
   "options": {
     "validateUpsert": true
   },
+  "hidden": [
+    "isGenerated"
+  ],
   "properties": {
     "date": {
       "type": "date",
@@ -36,6 +39,10 @@
     },
     "teamId": {
       "type": "number"
+    },
+    "isGenerated": {
+      "description": "Hidden flag that indicates whether the follow up is generated or not",
+      "type": "boolean"
     }
   },
   "validations": [],

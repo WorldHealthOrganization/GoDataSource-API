@@ -7,14 +7,12 @@ const _ = require('lodash');
 const rr = require('rr');
 const templateParser = require('./../../components/templateParser');
 const referenceDataParser = require('./../../components/referenceDataParser');
+const genericHelpers = require('../../components/helpers');
 
 module.exports = function (Outbreak) {
 
   // get model helpers
   const helpers = Outbreak.helpers;
-
-  // get model constants
-  const constants = Outbreak.constants;
 
   // disable bulk delete for related models
   app.utils.remote.disableRemoteMethods(Outbreak, [
@@ -533,7 +531,7 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Restore a deleted contact's follow up
+   * Restore a deleted follow up
    * @param contactId
    * @param followUpId
    * @param callback
@@ -576,12 +574,12 @@ module.exports = function (Outbreak) {
     // grouped per contact
     let generateResponse = [];
 
-    // make sure follow up period given in the request do not overflows outbreak's follow up period
+    // make sure follow up period given in the request does not exceed outbreak's follow up period
     if (data.followUpPeriod > outbreakFollowUpPeriod) {
       data.followUpPeriod = outbreakFollowUpPeriod;
     }
 
-    // retrieve list of contacts that has a relationship with events/contacts and is eligible for generation
+    // retrieve list of contacts that has a relationship with events/cases and is eligible for generation
     app.models.contact
       .find({
         include: {
@@ -605,7 +603,7 @@ module.exports = function (Outbreak) {
         // follow up add statements
         let followsUpsToAdd = [];
 
-        // filter cases that have no relationships
+        // filter contacts that have no relationships
         contacts = contacts.filter((item) => item.relationships.length);
 
         // retrieve the last follow up that is brand new for contacts
@@ -625,7 +623,7 @@ module.exports = function (Outbreak) {
           }))
           .then((contacts) => {
             if (contacts.length) {
-              // retrieve all teams and their location/sub locations
+              // retrieve all teams and their locations/sublocations
               return app.models.team.find()
                 .then((teams) => Promise.all(teams.map((team) => {
                   return new Promise((resolve, reject) => {
@@ -671,10 +669,10 @@ module.exports = function (Outbreak) {
 
                     // follow ups to be added for the given contact
                     // choose contact date from the latest relationship with a case/event
-                    let lastSickDate = helpers.getUTCDate(contact.relationships[0].contactDate);
+                    let lastSickDate = genericHelpers.getUTCDate(contact.relationships[0].contactDate);
 
                     // build the contact's last date of follow up, based on the days count given in the request
-                    let incubationLastDay = helpers.getUTCDate(lastSickDate).add(data.followUpPeriod, 'd');
+                    let incubationLastDay = genericHelpers.getUTCDate(lastSickDate).add(data.followUpPeriod, 'd');
 
                     // check a weird case when the last follow up was yesterday and not performed
                     // but today is the last day of incubation
@@ -683,17 +681,19 @@ module.exports = function (Outbreak) {
                       let lastFollowUp = contact.followUpsLists[0];
 
                       // build the contact's last date of follow up, no matter the period given in the request
-                      let incubationLastDay = helpers.getUTCDate(lastSickDate).add(outbreakFollowUpPeriod, 'd');
+                      let incubationLastDay = genericHelpers.getUTCDate(lastSickDate).add(outbreakFollowUpPeriod, 'd');
 
-                      if (moment(lastFollowUp.createdAt).isSame(moment(lastFollowUp.updatedAt), 'd')
-                        && (!lastFollowUp.performed && !lastFollowUp.lostToFollowUp)
-                        && helpers.getUTCDate(lastFollowUp.date).isSame(incubationLastDay, 'd')) {
+                      // check if last follow up is generated and not performed
+                      // also checks that, the scheduled date is the same last day of incubation
+                      if (helpers.isNewGeneratedFollowup(lastFollowUp)
+                        && genericHelpers.getUTCDate(lastFollowUp.date).isSame(incubationLastDay, 'd')) {
+
                         contactFollowUpsToAdd.push(
                           app.models.followUp
                             .create({
                               personId: contact.id,
                               // schedule for today
-                              date: helpers.getUTCDate().toDate(),
+                              date: genericHelpers.getUTCDate().toDate(),
                               performed: false,
                               // choose first team, it will be only this follow up generated
                               // so no randomness is required
@@ -709,8 +709,8 @@ module.exports = function (Outbreak) {
                       }
                     }
 
-                    // generate follow up forms, starting from today
-                    for (let now = helpers.getUTCDate(); now <= incubationLastDay; now.add(outbreakFollowUpFreq, 'day')) {
+                    // generate follow up, starting from today
+                    for (let now = genericHelpers.getUTCDate(); now <= incubationLastDay; now.add(outbreakFollowUpFreq, 'day')) {
                       let generatedFollowUps = [];
                       for (let i = 0; i < outbreakFollowUpPerDay; i++) {
                         generatedFollowUps.push(
@@ -730,7 +730,7 @@ module.exports = function (Outbreak) {
 
                       // if there is generated follow ups on that day, delete it and re-create
                       let existingFollowups = contact.followUpsLists.filter((followUp) => {
-                        return moment(followUp.date).isSame(now, 'd') && helpers.isGeneratedFollowup(followUp);
+                        return moment(followUp.date).isSame(now, 'd') && helpers.isNewGeneratedFollowup(followUp);
                       });
 
                       if (existingFollowups.length) {
