@@ -6,6 +6,9 @@ const worker = {
     let transmissionChains = [];
     // keep a map of people to chains
     let personIdToChainMap = [];
+    // keep information about nodes and edges
+    let nodes = {};
+    let edges = {};
 
     /**
      * Merge two chains
@@ -50,6 +53,22 @@ const worker = {
           person2 = personIds[1],
           indexPerson1 = personIdToChainMap[person1],
           indexPerson2 = personIdToChainMap[person2];
+
+        // if it's more than a count and information is available
+        if (!countOnly && relationship.people && relationship.people[0] && relationship.people[1]) {
+          // get information about first person
+          if (!nodes[relationship.people[0].id]) {
+            nodes[relationship.people[0].id] = relationship.people[0];
+          }
+          // get information about second person
+          if (!nodes[relationship.people[1].id]) {
+            nodes[relationship.people[1].id] = relationship.people[1];
+          }
+          // remove extra info
+          relationship.people = undefined;
+          // add information about edges
+          edges[relationship.id] = relationship;
+        }
 
         // treat each scenario separately
         switch (true) {
@@ -124,6 +143,12 @@ const worker = {
     if (countOnly) {
       // just count the chains
       result = result.length;
+    } else {
+      // return info about nodes and edges
+      result = {
+        nodes: nodes,
+        edges: edges
+      };
     }
     // send back result
     return result;

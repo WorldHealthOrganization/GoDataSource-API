@@ -120,5 +120,13 @@ module.exports = {
       attachOnRemote(model, remote);
     });
   },
-  deepSearchByRelationProperty: deepSearchByRelationProperty
+  deepSearchByRelationProperty: function (resource, filter) {
+    // get regular includes
+    let include =_.get(filter, 'include', []);
+    // merge in custom ones
+    include = include.concat(_.get(filter, 'includeCustom', []));
+    // update filter
+    _.set(filter, 'include', include);
+    return deepSearchByRelationProperty(resource, filter);
+  }
 };

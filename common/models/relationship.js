@@ -1,6 +1,6 @@
 'use strict';
 
-const transmissionChain = require('../components/workerRunner').transmissionChain;
+const transmissionChain = require('../../components/workerRunner').transmissionChain;
 
 module.exports = function (Relationship) {
   // set flag to not get controller

@@ -711,11 +711,45 @@ module.exports = function (Outbreak) {
     app.models.relationship
       .find(filter)
       .then(function (relationships) {
-        relationships = app.utils.remote.deepSearchByRelationProperty(relationships, filter);
+        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
         app.models.relationship
           .countTransmissionChains(relationships, function (error, noOfChains) {
             if (error) {
               throw error;
+            }
+            callback(null, noOfChains)
+          });
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Get independent transmission chains
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.getIndependentTransmissionChains = function (filter, callback) {
+    // start with a basic filter
+    let _filter = {
+      where: {
+        outbreakId: this.id
+      }
+    };
+    // if people relation was not included, include it
+    if (!filter || !filter.include || JSON.stringify(filter.include).indexOf('people') === -1) {
+      _filter.include = 'people'
+    }
+    // merge filters
+    filter = app.utils.remote.mergeFilters(_filter, filter || {});
+
+    app.models.relationship
+      .find(filter)
+      .then(function (relationships) {
+        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
+        app.models.relationship
+          .getTransmissionChains(relationships, function (error, noOfChains) {
+            if (error) {
+              return callback(error);
             }
             callback(null, noOfChains)
           });
