@@ -364,7 +364,7 @@ module.exports = function (Outbreak) {
         }
         return contact.updateAttributes({
           type: "case",
-          dateBecomeCase: new Date
+          dateBecomeCase: new Date()
         });
       })
       .then(function (_case) {
