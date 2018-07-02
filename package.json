@@ -25,7 +25,7 @@
     "loopback": "^3.20.0",
     "loopback-boot": "^2.6.5",
     "loopback-component-explorer": "^5.0.0",
-    "loopback-connector-mongodb": "^1.18.1",
+    "loopback-connector-mongodb": "^3.4.4",
     "moment": "^2.22.2",
     "qr-image": "^3.2.0",
     "rr": "^0.1.0",
