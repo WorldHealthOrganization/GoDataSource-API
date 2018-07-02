@@ -42,7 +42,13 @@
     },
     "frequencyOfFollowUp": {
       "type": "number",
-      "required": true
+      "required": true,
+      "description": "Frequency of follow ups in days (once every X days/daily)"
+    },
+    "frequencyOfFollowUpPerDay": {
+      "type": "number",
+      "required": true,
+      "description": "Number of follow ups to be generated per day"
     },
     "noDaysAmongContacts": {
       "type": "number",
@@ -350,6 +356,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "write_followup",
+      "permission": "ALLOW",
+      "property": "restoreContactFollowUp"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "findCaseRelationships"
@@ -653,6 +665,12 @@
       "principalId": "read_outbreak",
       "permission": "ALLOW",
       "property": "countNewContactsByExposure"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "generateFollowups"
     },
     {
       "principalType": "ROLE",
@@ -1540,6 +1558,77 @@
       "http": {
         "verb": "get",
         "path": "/cases/extendedCount"
+      }
+    },
+    "prototype.restoreContactFollowUp": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for followUps"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "followUp",
+          "type": [
+            "followUp"
+          ],
+          "description": "Follow Up",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted follow-up.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/:nk/follow-ups/:fk/restore"
+      }
+    },
+    "prototype.generateFollowups": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "description": "Follow up period in days. Property: followUpPeriod [number]",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "generatedFollowUps",
+          "type": [
+            {
+              "type": {
+                "contactId": {
+                  "type": "string"
+                },
+                "followUps": {
+                  "type": [
+                    "followUp"
+                  ]
+                }
+              }
+            }
+          ],
+          "description": "Generated Follow Ups",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Generate a list of follow-ups",
+      "http": {
+        "verb": "post",
+        "path": "/generate-followups"
       }
     }
   }

@@ -5,6 +5,9 @@
   "options": {
     "validateUpsert": true
   },
+  "hidden": [
+    "isGenerated"
+  ],
   "properties": {
     "date": {
       "type": "date",
@@ -14,15 +17,11 @@
       "type": "boolean",
       "required": true
     },
-    "locationId": {
-      "type": "string",
-      "required": true
+    "lostToFollowUp": {
+      "type": "boolean"
     },
     "address": {
       "type": "address"
-    },
-    "geolocation": {
-      "type": "geopoint"
     },
     "fillGeolocation": {
       "type": "geopoint"
@@ -31,6 +30,19 @@
       "type": [
         "object"
       ]
+    },
+    "additionalData": {
+      "type": "object"
+    },
+    "index": {
+      "type": "number"
+    },
+    "teamId": {
+      "type": "number"
+    },
+    "isGenerated": {
+      "description": "Hidden flag that indicates whether the follow up is generated or not",
+      "type": "boolean"
     }
   },
   "validations": [],
