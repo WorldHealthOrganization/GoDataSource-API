@@ -31,6 +31,10 @@ module.exports = function (Model) {
    * @param [callback]
    */
   Model.prototype.undoDelete = function (callback) {
+    // skip model validation
+    this.isValid = function (callback) {
+      callback(true);
+    };
     return this.updateAttributes({[deletedFlag]: false, [deletedAt]: null}, callback);
   };
 
@@ -140,6 +144,10 @@ module.exports = function (Model) {
       .findById(id)
       .then(function (instance) {
         if (instance) {
+          // skip model validation
+          instance.isValid = function (callback) {
+            callback(true);
+          };
           return instance
           // sending additional options in order to have access to the remoting context in the next hooks
             .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()}, hasOptions ? options : {})
@@ -183,9 +191,12 @@ module.exports = function (Model) {
     }
 
     let nextStep = next.bind({callback: cb});
-
+    // skip model validation
+    this.isValid = function (callback) {
+      callback(true);
+    };
     const promise = this
-      // sending additional options in order to have access to the remoting context in the next hooks
+    // sending additional options in order to have access to the remoting context in the next hooks
       .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()}, hasOptions ? options : {})
       .then(function () {
         return {count: 1};

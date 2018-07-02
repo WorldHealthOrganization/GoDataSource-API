@@ -39,8 +39,12 @@
     "occupation": {
       "type": "string"
     },
-    "documents": ["document"],
-    "addresses": ["address"],
+    "documents": [
+      "document"
+    ],
+    "addresses": [
+      "address"
+    ],
     "fillGeoLocation": {
       "type": "geopoint"
     }

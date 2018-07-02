@@ -5,6 +5,18 @@
   "options": {
     "validateUpsert": true
   },
+  "mixins": {
+    "CascadeDelete": {
+      "awaitCompletion": false,
+      "relations": [
+        "cases",
+        "clusters",
+        "contacts",
+        "events",
+        "referenceData"
+      ]
+    }
+  },
   "properties": {
     "name": {
       "type": "string",

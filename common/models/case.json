@@ -5,6 +5,14 @@
   "options": {
     "validateUpsert": true
   },
+  "mixins": {
+    "CascadeDelete": {
+      "relations": [
+        "relationships",
+        "labResults"
+      ]
+    }
+  },
   "hidden": [
     "type",
     "outbreakId"
