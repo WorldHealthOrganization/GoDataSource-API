@@ -1628,7 +1628,7 @@
       "description": "Count the number of independent transmission chains",
       "http": {
         "verb": "get",
-        "path": "/relations/independent-transmission-chains/filtered-count"
+        "path": "/relationships/independent-transmission-chains/filtered-count"
       }
     },
     "prototype.getIndependentTransmissionChains": {
@@ -1659,7 +1659,7 @@
       "description": "Get independent transmission chains",
       "http": {
         "verb": "get",
-        "path": "/relations/independent-transmission-chains"
+        "path": "/relationships/independent-transmission-chains"
       }
     }
   }
