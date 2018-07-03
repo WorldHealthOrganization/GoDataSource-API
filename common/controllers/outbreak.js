@@ -34,7 +34,6 @@ module.exports = function (Outbreak) {
     'prototype.__count__referenceData',
     'prototype.__create__followUps',
     'prototype.__delete__followUps',
-    'prototype.__findById__followUps',
     'prototype.__updateById__followUps',
     'prototype.__destroyById__followUps'
   ]);
@@ -1056,7 +1055,12 @@ module.exports = function (Outbreak) {
     };
 
     // get all the followups for the filtered period
-    app.models.followUp.find(filter)
+    app.models.followUp.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: this.id
+        }
+      }, filter || {}))
       .then(function (followups) {
         // initialize map of contacts to not count same contact twice
         let contacts = {};

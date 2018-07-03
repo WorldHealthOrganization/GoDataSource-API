@@ -699,6 +699,12 @@
       "principalType": "ROLE",
       "principalId": "read_followup",
       "permission": "ALLOW",
+      "property": "__findById__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
       "property": "__count__followUps"
     },
     {
