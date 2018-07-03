@@ -154,6 +154,11 @@
       "type": "hasMany",
       "model": "referenceData",
       "foreignKey": "outbreakId"
+    },
+    "followUps": {
+      "type": "hasMany",
+      "model": "followUp",
+      "foreignKey": "outbreakId"
     }
   },
   "acls": [
@@ -683,6 +688,30 @@
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "getIndependentTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "__get__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "__findById__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "__count__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countSeenContacts"
     }
   ],
   "methods": {
@@ -1535,7 +1564,7 @@
       "description": "Count the new contacts and groups them by exposure type",
       "http": {
         "verb": "get",
-        "path": "/contacts/count-new-contacts-by-exposure-type"
+        "path": "/contacts/new-by-exposure-type/count"
       }
     },
     "prototype.restoreContactFollowUp": {
@@ -1667,6 +1696,35 @@
       "http": {
         "verb": "get",
         "path": "/relationships/independent-transmission-chains"
+      }
+    },
+    "prototype.countSeenContacts": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "seenContacts": "number",
+            "teams": [{
+              "id": "teamId/null",
+              "seenContacts": "number"
+            }]
+          },
+          "description": "Object containing counters for seen contacts",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of seen contacts",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/count-seen-contacts"
       }
     }
   }

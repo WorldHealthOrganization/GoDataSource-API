@@ -31,7 +31,11 @@ module.exports = function (Outbreak) {
     'prototype.__delete__contacts__relationships',
     'prototype.__get__referenceData',
     'prototype.__delete__referenceData',
-    'prototype.__count__referenceData'
+    'prototype.__count__referenceData',
+    'prototype.__create__followUps',
+    'prototype.__delete__followUps',
+    'prototype.__updateById__followUps',
+    'prototype.__destroyById__followUps'
   ]);
 
   // attach search by relation property behavior on get contacts
@@ -551,7 +555,7 @@ module.exports = function (Outbreak) {
       })
       .then(function (instance) {
         if (!instance) {
-          throw app.utils.apiError.getError('MODEL_NOT_FOUND', { model: app.models.followUp.modelName, id: followUpId });
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.followUp.modelName, id: followUpId});
         }
         instance.undoDelete(callback);
       })
@@ -588,19 +592,19 @@ module.exports = function (Outbreak) {
         include: {
           relation: 'relationships',
           scope: {
-              where: {
-                or: [
-                  {
-                    'persons.type': 'case'
-                  },
-                  {
-                    'persons.type': 'event'
-                  }
-                ]
-              },
-              order: 'contactDate DESC'
-            }
+            where: {
+              or: [
+                {
+                  'persons.type': 'case'
+                },
+                {
+                  'persons.type': 'event'
+                }
+              ]
+            },
+            order: 'contactDate DESC'
           }
+        }
       })
       .then((contacts) => {
         // follow up add statements
@@ -637,7 +641,7 @@ module.exports = function (Outbreak) {
                         }
                         return resolve(locations);
                       })
-                    })
+                  })
                     .then((locations) => {
                       team.locations = locations;
                       return team;
@@ -1024,6 +1028,121 @@ module.exports = function (Outbreak) {
             }
             callback(null, transmissionChains)
           });
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Set outbreakId for created follow-ups
+   */
+  Outbreak.beforeRemote('prototype.__create__contacts__followUps', function (context, modelInstance, next) {
+    // set outbreakId
+    context.args.data.outbreakId = context.instance.id;
+    next();
+  });
+
+  /**
+   * Count the seen contacts
+   * Note: The contacts are counted in total and per team. If a contact is seen by 2 teams it will be counted once in total and once per each team.
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countSeenContacts = function (filter, callback) {
+    // initialize result
+    let results = {
+      seenContacts: 0,
+      teams: []
+    };
+
+    // get all the followups for the filtered period
+    app.models.followUp.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: this.id
+        }
+      }, filter || {}))
+      .then(function (followups) {
+        // initialize map of contacts to not count same contact twice
+        let contacts = {};
+        // initialize map of teams
+        let teams = {};
+
+        followups.forEach(function (followup) {
+          // get contactId
+          let contactId = followup.personId;
+          // get teamId; there might be no team id, set null
+          let teamId = followup.teamId || null;
+
+          // check if a followup for the same contact was already parsed
+          if (contacts[contactId]) {
+            // check if there was another followup for the same team
+            // if so check for the cached performed flag;
+            // if the previous followup was performed there is no need to update any counter;
+            // seen counter will not be incremented even though the new followup was also performed
+            // updates needed only for the case where the previous followup was not performed and the current one was
+            if (contacts[contactId].teams[teamId]) {
+              if (!contacts[contactId].teams[teamId].performed && followup.performed === true) {
+                // update performed flag
+                contacts[contactId].teams[teamId].performed = true;
+                // increase seen counter for team
+                teams[teamId].seenContacts++;
+              }
+            } else {
+              // new teamId
+              // cache followup performed information for contact in team
+              contacts[contactId].teams[teamId] = {
+                performed: followup.performed
+              };
+
+              // initialize team entry if doesn't already exist
+              teams[teamId] = teams[teamId] || {
+                id: teamId,
+                seenContacts: 0
+              };
+
+              // increase seen counter for the team
+              followup.performed && teams[teamId].seenContacts++;
+            }
+
+            // check if contact didn't have a succesful followup and the current one was performed
+            // as specified above for teams this is the only case where updates are needed
+            if (!contacts[contactId].performed && followup.performed === true) {
+              // update overall performed flag
+              contacts[contactId].performed = true;
+              // increase successful total counter
+              results.seenContacts++;
+            }
+          } else {
+            // first followup for the contact
+            // cache followup performed information for contact in team and overall
+            contacts[contactId] = {
+              teams: {
+                [teamId]: {
+                  performed: followup.performed
+                }
+              },
+              performed: followup.performed
+            };
+
+            // initialize team entry if doesn't already exist
+            teams[teamId] = teams[teamId] || {
+              id: teamId,
+              seenContacts: 0
+            };
+
+            // increase counters if the contact was seen
+            if (followup.performed) {
+              results.seenContacts++;
+              teams[teamId].seenContacts++;
+            }
+          }
+        });
+
+        // update results.teams; sending array with teams information
+        results.teams = _.values(teams);
+
+        // send response
+        callback(null, results);
       })
       .catch(callback);
   };
