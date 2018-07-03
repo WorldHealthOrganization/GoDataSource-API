@@ -671,6 +671,18 @@
       "principalId": "write_outbreak",
       "permission": "ALLOW",
       "property": "generateFollowups"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countIndependentTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "getIndependentTransmissionChains"
     }
   ],
   "methods": {
@@ -1595,6 +1607,66 @@
       "http": {
         "verb": "post",
         "path": "/generate-followups"
+      }
+    },
+    "prototype.countIndependentTransmissionChains": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of independent transmission chains",
+          "required": true
+        }
+      ],
+      "description": "Count the number of independent transmission chains",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/independent-transmission-chains/filtered-count"
+      }
+    },
+    "prototype.getIndependentTransmissionChains": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "chains",
+          "type": {
+            "nodes":{
+              "type":{
+                "<personId>": {
+                  "type": "person"
+                }
+              }
+            },
+            "edges":{
+              "type":{
+                "<relationshipId>": {
+                  "type": "relationship"
+                }
+              }
+            }
+          },
+          "description": "Independent transmission chains",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Get independent transmission chains",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/independent-transmission-chains"
       }
     }
   }
