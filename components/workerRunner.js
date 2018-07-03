@@ -26,7 +26,7 @@ function invokeWorkerMethod(workerName, method, args, callback) {
     cb = function noOp(){};
   }
   // fork the worker
-  const worker = fork(`${workersPath}/${workerName}`, [], {execArgv: ["--inspect=" + (Math.floor(Math.random()*999 + 9000))]});
+  const worker = fork(`${workersPath}/${workerName}`, [], {execArgv: []});
   // invoke it
   worker.send({fn: method, args});
   // wait for it's response and process it
@@ -59,8 +59,8 @@ module.exports = {
     deleteOneByOne: function (modelName, where, callback) {
       invokeWorkerMethod('bulkModelOperation', 'deleteOneByOne', [modelName, where], callback);
     },
-    undoDeleteOneByOne: function (modelName, where, callback) {
-      invokeWorkerMethod('bulkModelOperation', 'undoDeleteOneByOne', [modelName, where], callback);
+    restoreOneByOne: function (modelName, where, callback) {
+      invokeWorkerMethod('bulkModelOperation', 'restoreOneByOne', [modelName, where], callback);
     }
   }
 };

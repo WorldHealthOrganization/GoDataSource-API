@@ -28,14 +28,47 @@ module.exports = function (Model) {
 
   /**
    * Restore a soft-deleted record
-   * @param [callback]
+   * @param [options]
+   * @param callback
    */
-  Model.prototype.undoDelete = function (callback) {
-    // skip model validation
-    this.isValid = function (callback) {
-      callback(true);
-    };
-    return this.updateAttributes({[deletedFlag]: false, [deletedAt]: null}, callback);
+  Model.prototype.undoDelete = function (options, callback) {
+    // options is optional
+    if (typeof options === 'function' && callback === undefined) {
+      callback = options;
+      options = {};
+    }
+    // make context available for others
+    const self = this;
+    // build a before/after hook context
+    let context = Object.assign({}, options, {
+      model: Model,
+      instance: self,
+      where: {
+        id: self.id
+      }
+    });
+    // notify listeners that a restore operation begins
+    Model.notifyObserversOf('before restore', context, function (error) {
+      // if error occurred, stop
+      if (error) {
+        return callback(error);
+      }
+      // skip model validation
+      self.isValid = function (callback) {
+        callback(true);
+      };
+      // restore the instance
+      self.updateAttributes({[deletedFlag]: false, [deletedAt]: null}, function (error, result) {
+        // if error occurred, stop
+        if (error) {
+          return callback(error);
+        }
+        // notify listeners that a restore was completed
+        Model.notifyObserversOf('after restore', context, function (error) {
+          callback(error, result);
+        });
+      });
+    });
   };
 
   /**
@@ -46,7 +79,7 @@ module.exports = function (Model) {
       if (context.data) {
         // single record update
         if (context.currentInstance) {
-          if (context.data.deleted && context.data.deleted != context.currentInstance.deleted) {
+          if (context.data.deleted && context.data.deleted !== context.currentInstance.deleted) {
             context.options.softDeleteEvent = true;
             return Model.notifyObserversOf('before delete', context, callback);
           }
