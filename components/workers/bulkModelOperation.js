@@ -42,18 +42,18 @@ const worker = {
         where: where,
         deleted: true
       })
-      .then(function (deletedInstances) {
+      .then(function (instancesToRestore) {
         // create a list of restore operations
         let restoreOperations = [];
         // for each instance, schedule a restore
-        deletedInstances.forEach(function (instance) {
+        instancesToRestore.forEach(function (instance) {
           restoreOperations.push(function (callback) {
             instance.undoDelete(callback);
           });
         });
         // restore them (in series) and send back the number of restored records
         async.series(restoreOperations, function (error) {
-          callback(error, deletedInstances.length)
+          callback(error, instancesToRestore.length)
         });
       })
       .catch(callback);
