@@ -976,18 +976,37 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getIndependentTransmissionChains = function (filter, callback) {
+    filter = filter || {};
     // start with a basic filter
     let _filter = {
       where: {
         outbreakId: this.id
       }
     };
-    // if people relation was not included, include it
-    if (!filter || !filter.include || JSON.stringify(filter.include).indexOf('people') === -1) {
-      _filter.include = 'people'
+    // get include filter
+    let includeFilter = _.get(filter, 'include', []);
+    // normalize filters
+    if (!Array.isArray(includeFilter)) {
+      includeFilter = [includeFilter];
     }
+    // check of the filter has people relation included (is needed for transmission chains)
+    let hasPeopleRelation = false;
+    includeFilter.forEach(function (singleInclude) {
+      if (
+        (typeof singleInclude === 'string' && singleInclude === 'people') ||
+        (typeof singleInclude === 'object' && singleInclude.relation === 'people')) {
+        hasPeopleRelation = true;
+      }
+    });
+    // if the relation was not included
+    if (!hasPeopleRelation) {
+      // include it
+      includeFilter.push('people');
+    }
+    // update filter
+    _.set(filter, 'include', includeFilter);
     // merge filters
-    filter = app.utils.remote.mergeFilters(_filter, filter || {});
+    filter = app.utils.remote.mergeFilters(_filter, filter);
 
     app.models.relationship
       .find(filter)
@@ -996,11 +1015,11 @@ module.exports = function (Outbreak) {
         relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
         // build transmission chains
         app.models.relationship
-          .getTransmissionChains(relationships, function (error, noOfChains) {
+          .getTransmissionChains(relationships, function (error, transmissionChains) {
             if (error) {
               return callback(error);
             }
-            callback(null, noOfChains)
+            callback(null, transmissionChains)
           });
       })
       .catch(callback);
