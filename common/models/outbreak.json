@@ -1654,15 +1654,22 @@
       "returns": [
         {
           "arg": "chains",
-          "type": [
-            {
-              "type": [
-                {
-                  "type": ["string"]
+          "type": {
+            "nodes":{
+              "type":{
+                "<personId>": {
+                  "type": "person"
                 }
-              ]
+              }
+            },
+            "edges":{
+              "type":{
+                "<relationshipId>": {
+                  "type": "relationship"
+                }
+              }
             }
-          ],
+          },
           "description": "Independent transmission chains",
           "required": true,
           "root": true
