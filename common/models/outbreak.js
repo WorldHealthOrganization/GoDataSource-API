@@ -577,7 +577,7 @@ module.exports = function (Outbreak) {
             // as specified above for teams this is the only case where updates are needed
             if (!contacts[contactId][followUpFlag] && followup[followUpFlag] === true) {
               // update overall follow-up flag
-              contacts[contactId][followUpFlag]= true;
+              contacts[contactId][followUpFlag] = true;
               // increase successful total counter
               results[resultProperty]++;
             }

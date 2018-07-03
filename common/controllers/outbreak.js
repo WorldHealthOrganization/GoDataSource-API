@@ -1048,7 +1048,11 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactsSeen = function (filter, callback) {
-    helpers.countContactsByFollowUpFlag({outbreakId: this.id, followUpFlag: 'performed', resultProperty: 'contactsSeen'}, filter, callback);
+    helpers.countContactsByFollowUpFlag({
+      outbreakId: this.id,
+      followUpFlag: 'performed',
+      resultProperty: 'contactsSeen'
+    }, filter, callback);
   };
 
   /**
@@ -1058,6 +1062,10 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactsLostToFollowup = function (filter, callback) {
-    helpers.countContactsByFollowUpFlag({outbreakId: this.id, followUpFlag: 'lostToFollowUp', resultProperty: 'contactsLostToFollowup'}, filter, callback);
+    helpers.countContactsByFollowUpFlag({
+      outbreakId: this.id,
+      followUpFlag: 'lostToFollowUp',
+      resultProperty: 'contactsLostToFollowup'
+    }, filter, callback);
   };
 };
