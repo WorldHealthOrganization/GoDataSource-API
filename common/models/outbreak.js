@@ -99,7 +99,7 @@ module.exports = function (Outbreak) {
         data.persons.push({
           id: personId,
           type: type,
-          source: true,
+          source: true
         });
       }
 
@@ -708,5 +708,102 @@ module.exports = function (Outbreak) {
           id: visualId
         });
       });
+  };
+
+  /**
+   * Merge 2 or more 'person' models of the same type
+   * @base base model to be merged upon
+   * @people list of 'person' models to be merged into 'base'
+   * @type person type: case/contact supported
+   */
+  Outbreak.helpers.mergePersonModels = function (base, people, type) {
+    // declare list of properties specific for case/contacts
+    const contactProps = [
+      'riskLevel',
+      'riskReason'
+    ];
+    const caseProps = [
+      'dateOfInfection',
+      'dateOfOnset',
+      'isDateOfOnsetApproximate',
+      'dateBecomeCase',
+      'dateOfOutcome',
+      'deceased',
+      'dateDeceased',
+      'classification',
+      'riskLevel',
+      'riskReason',
+      'transferRefused'
+    ];
+    // the follow case props are array and should be treated differently
+    const caseArrayProps = [
+      'isolationDates',
+      'hospitalizationDates',
+      'incubationDates',
+    ];
+
+    // decide which type of properties map to use, based on given type
+    let propsMap = type === 'case' ? caseProps : contactProps;
+
+    // get reference to properties of the base model
+    let baseProps = base.__data;
+
+    // list of properties that should be looked upon, levels below
+    let missingProps = [];
+
+    // iterate over case predefined props map
+    for (let propName in propsMap) {
+      // make sure the property is belonging to the model
+      // note: undefined, null are taken into consideration as well
+      // doing abstract equality, to check for both undefined/null values
+      if (!baseProps.hasOwnProperty(propName) || baseProps[propName] == null) {
+        missingProps.push(propName);
+      }
+    }
+
+    // start working the properties that were missing in the base case
+    missingProps.forEach((prop) => {
+      for (let i = 1; i < people.length; i++) {
+        let props = people[i].__data;
+        if (props.hasOwnProperty(prop) && props[prop] !== null) {
+          baseProps[prop] = props[prop];
+          break;
+        }
+      }
+    });
+
+    // merge all case array props
+    if (type === 'case') {
+      caseArrayProps.forEach((arrayProp) => {
+        baseProps[arrayProp] = baseProps[arrayProp] || [];
+        baseProps[arrayProp] = baseProps[arrayProp].concat(...
+          people
+            .filter((item) => item[arrayProp])
+            .map((item) => item[arrayProp])
+        );
+      });
+    }
+
+    // merge all address
+    baseProps.addresses = baseProps.addresses || [];
+    baseProps.addresses = baseProps.addresses.concat(
+      ...people
+        .filter((item) => item.addresses)
+        .map((item) => item.addresses)
+    );
+
+    // merge all documents, accept only unique type,number combination
+    baseProps.documents = baseProps.documents || [];
+    baseProps.documents = baseProps.documents.concat(
+      ...people
+        .filter((item) => item.documents)
+        .map((item) => {
+          return item.documents.filter((doc) => baseProps.documents.findIndex((resultItem) => {
+            return resultItem.type === doc.type && resultItem.number === doc.number;
+          }) === -1);
+        })
+    );
+
+    return base;
   };
 };
