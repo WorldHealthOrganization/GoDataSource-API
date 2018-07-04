@@ -1,11 +1,17 @@
 'use strict';
 
 const worker = {
-  buildOrCount: function (relationships, countOnly) {
+  buildOrCount: function (relationships, followUpPeriod, countOnly) {
+    // define the start date of active chains (today - (the follow-up period + 1))
+    let activeChainStartDate = new Date();
+    activeChainStartDate.setDate(activeChainStartDate.getDate() - (followUpPeriod + 1));
     // keep a list o chains
     let transmissionChains = [];
     // keep a map of people to chains
     let personIdToChainMap = [];
+    // keep information about active transmission chains
+    let activeTransmissionChains = {};
+
     // keep information about nodes and edges
     let nodes = {};
     let edges = {};
@@ -19,6 +25,12 @@ const worker = {
       let sourceLength = transmissionChains[sourceIndex].length;
       let targetLength = transmissionChains[targetIndex].length;
       let index = 0;
+
+      // if either of the chains were active
+      if (activeTransmissionChains[targetIndex] || activeTransmissionChains[sourceIndex]) {
+        // mark resulting chain as active
+        activeTransmissionChains[targetIndex] = true;
+      }
 
       // while there are source items to process
       while (index < sourceLength) {
@@ -35,6 +47,8 @@ const worker = {
       }
       // remove the source
       transmissionChains[sourceIndex] = null;
+      // remove source from active transmission chains list
+      activeTransmissionChains[sourceIndex] = null;
     }
 
     let relationsLength = relationships.length;
@@ -43,6 +57,9 @@ const worker = {
     // go through all relationships
     while (relationsIndex < relationsLength) {
       let relationship = relationships[relationsIndex];
+
+      // check if the relation is active
+      let isRelationActive = ((new Date(relationship.contactDate)) > activeChainStartDate);
 
       // build a list of (two) person ids
       let personIds = [relationship.persons[0].id, relationship.persons[1].id];
@@ -82,6 +99,11 @@ const worker = {
                 transmissionChains[indexPerson1].push([person1, person2]);
                 // set their map
                 personIdToChainMap[person1] = personIdToChainMap[person2] = indexPerson1;
+                // if the relation is active
+                if (isRelationActive) {
+                  // mark resulting chain as active
+                  activeTransmissionChains[indexPerson1] = true;
+                }
                 // merge the smaller chain into the bigger one
                 mergeChains(indexPerson1, indexPerson2);
               } else {
@@ -89,6 +111,11 @@ const worker = {
                 transmissionChains[indexPerson2].push([person1, person2]);
                 // set their map
                 personIdToChainMap[person1] = personIdToChainMap[person2] = indexPerson2;
+                // if the relation is active
+                if (isRelationActive) {
+                  // mark resulting chain as active
+                  activeTransmissionChains[indexPerson2] = true;
+                }
                 // merge the smaller chain into the bigger one
                 mergeChains(indexPerson2, indexPerson1);
               }
@@ -100,6 +127,11 @@ const worker = {
             transmissionChains[indexPerson1].push([person1, person2]);
             // set their map
             personIdToChainMap[person1] = personIdToChainMap[person2] = indexPerson1;
+            // if the relation is active
+            if (isRelationActive) {
+              // mark resulting chain as active
+              activeTransmissionChains[indexPerson1] = true;
+            }
             break;
           // only person2 was already present
           case indexPerson2 !== undefined:
@@ -107,6 +139,11 @@ const worker = {
             transmissionChains[indexPerson2].push([person1, person2]);
             // set their map
             personIdToChainMap[person1] = personIdToChainMap[person2] = indexPerson2;
+            // if the relation is active
+            if (isRelationActive) {
+              // mark resulting chain as active
+              activeTransmissionChains[indexPerson2] = true;
+            }
             break;
           // first appearance of both people
           default:
@@ -114,6 +151,11 @@ const worker = {
             let length = transmissionChains.push([[person1, person2]]);
             // set their map
             personIdToChainMap[person1] = personIdToChainMap[person2] = length - 1;
+            // if the relation is active
+            if (isRelationActive) {
+              // mark resulting chain as active
+              activeTransmissionChains[length - 1] = true;
+            }
             break;
         }
       }
@@ -127,6 +169,7 @@ const worker = {
     };
     // store lengths for each chain
     let chainsLengths = [];
+    let activeChainsLength = 0;
 
     // filter out invalid data (chain == null) from the chains list
     let resultIndex = 0;
@@ -138,10 +181,17 @@ const worker = {
       let transmissionChain = transmissionChains[chainIndex];
       // if the chain is valid
       if (transmissionChain !== null) {
+        // check if the chain is active
+        let isChainActive = !!activeTransmissionChains[chainIndex];
+        // if the chain is active
+        if (isChainActive) {
+          // update the number of active chains
+          activeChainsLength++;
+        }
         // add it to the list of chains
-        _chains.chains[resultIndex] = transmissionChain;
+        _chains.chains[resultIndex] = {chain: transmissionChain, active: isChainActive};
         // store length for each chain
-        chainsLengths[resultIndex] = {length: transmissionChain.length};
+        chainsLengths[resultIndex] = {length: transmissionChain.length, active: isChainActive};
         resultIndex++;
       }
       chainIndex++;
@@ -156,7 +206,8 @@ const worker = {
     if (countOnly) {
       result = {
         chains: chainsLengths,
-        length: _chains.length
+        length: _chains.length,
+        activeChains: activeChainsLength
       };
     } else {
       // return info about nodes, edges and the actual chains
@@ -169,11 +220,11 @@ const worker = {
     // send back result
     return result;
   },
-  build: function (relationships) {
-    return this.buildOrCount(relationships);
+  build: function (relationships, followUpPeriod) {
+    return this.buildOrCount(relationships, followUpPeriod);
   },
-  count: function (relationships) {
-    return this.buildOrCount(relationships, true);
+  count: function (relationships, followUpPeriod) {
+    return this.buildOrCount(relationships, followUpPeriod, true);
   }
 };
 

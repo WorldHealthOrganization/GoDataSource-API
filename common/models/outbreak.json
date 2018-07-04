@@ -1659,11 +1659,13 @@
             "chains": [
               {
                 "type": {
-                  "length": "number"
+                  "length": "number",
+                  "active": "boolean"
                 }
               }
             ],
-            "length": "number"
+            "length": "number",
+            "activeChains": "number"
           },
           "description": "Number of transmission chains and the length of each chain",
           "required": true,
@@ -1704,19 +1706,16 @@
             },
             "transmissionChains": {
               "type": {
-                "chains": {
-                  "type": [
-                    {
-                      "type": [
-                        {
-                          "type": [
-                            "string"
-                          ]
-                        }
-                      ]
+                "chains": [
+                  {
+                    "type": {
+                      "chain": [
+                        "string"
+                      ],
+                      "active": "boolean"
                     }
-                  ]
-                },
+                  }
+                ],
                 "length": "number"
               }
             }

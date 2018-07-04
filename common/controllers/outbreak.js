@@ -959,6 +959,9 @@ module.exports = function (Outbreak) {
         }
       }, filter || {});
 
+    // get follow-up period (is needed by transmission chain builder to decide if a chain is active)
+    let followUpPeriod = this.periodOfFollowup;
+
     // search relations
     app.models.relationship
       .find(filter)
@@ -967,7 +970,7 @@ module.exports = function (Outbreak) {
         relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
         // count transmission chains
         app.models.relationship
-          .countTransmissionChains(relationships, function (error, noOfChains) {
+          .countTransmissionChains(relationships, followUpPeriod, function (error, noOfChains) {
             if (error) {
               throw error;
             }
@@ -1015,6 +1018,9 @@ module.exports = function (Outbreak) {
     // merge filters
     filter = app.utils.remote.mergeFilters(_filter, filter);
 
+    // get follow-up period (is needed by transmission chain builder to decide if a chain is active)
+    let followUpPeriod = this.periodOfFollowup;
+
     app.models.relationship
       .find(filter)
       .then(function (relationships) {
@@ -1022,7 +1028,7 @@ module.exports = function (Outbreak) {
         relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
         // build transmission chains
         app.models.relationship
-          .getTransmissionChains(relationships, function (error, transmissionChains) {
+          .getTransmissionChains(relationships, followUpPeriod, function (error, transmissionChains) {
             if (error) {
               return callback(error);
             }

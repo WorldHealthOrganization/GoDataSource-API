@@ -19,18 +19,20 @@ module.exports = function (Relationship) {
   /**
    * Build transmission chains from a list of relationships
    * @param relationships {[relationship]}
+   * @param followUpPeriod
    * @param callback
    */
-  Relationship.getTransmissionChains = function (relationships, callback) {
-    transmissionChain.build(relationships, callback);
+  Relationship.getTransmissionChains = function (relationships, followUpPeriod, callback) {
+    transmissionChain.build(relationships, followUpPeriod, callback);
   };
 
   /**
    * Count transmission chains from a list of relationships
    * @param relationships {[relationship]}
+   * @param followUpPeriod
    * @param callback
    */
-  Relationship.countTransmissionChains = function (relationships, callback) {
-    transmissionChain.count(relationships, callback);
+  Relationship.countTransmissionChains = function (relationships, followUpPeriod, callback) {
+    transmissionChain.count(relationships, followUpPeriod, callback);
   };
 };
