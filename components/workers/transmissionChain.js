@@ -120,8 +120,11 @@ const worker = {
       relationsIndex++;
     }
 
-    // prepare the result
-    let result = [];
+    // process the chains
+    let _chains = {
+      chains: [],
+      length: 0
+    };
 
     // filter out invalid data (chain == null) from the chains list
     let resultIndex = 0;
@@ -134,20 +137,35 @@ const worker = {
       // if the chain is valid
       if (transmissionChain !== null) {
         // add it to the list of chains
-        result[resultIndex] = transmissionChain;
+        _chains.chains[resultIndex] = transmissionChain;
         resultIndex++;
       }
       chainIndex++;
     }
+    // set the number of results
+    _chains.length = resultIndex;
 
+    // prepare the result
+    let result;
+
+    // only need counters
     if (countOnly) {
-      // just count the chains
-      result = result.length;
+      result = {
+        chains: [],
+        length: _chains.length
+      };
+      // add length information for each chain
+      _chains.chains.forEach(function (chain, index) {
+        result.chains[index] = {
+          length: chain.length
+        };
+      });
     } else {
-      // return info about nodes and edges
+      // return info about nodes, edges and the actual chains
       result = {
         nodes: nodes,
-        edges: edges
+        edges: edges,
+        transmissionChains: _chains
       };
     }
     // send back result

@@ -1648,10 +1648,20 @@
       ],
       "returns": [
         {
-          "arg": "count",
-          "type": "number",
-          "description": "Number of independent transmission chains",
-          "required": true
+          "arg": "chains",
+          "type": {
+              "chains": [
+                {
+                  "type": {
+                    "length": "number"
+                  }
+                }
+              ],
+              "length": "number"
+          },
+          "description": "Number of transmission chains and the length of each chain",
+          "required": true,
+          "root": true
         }
       ],
       "description": "Count the number of independent transmission chains",
@@ -1672,18 +1682,36 @@
         {
           "arg": "chains",
           "type": {
-            "nodes":{
-              "type":{
+            "nodes": {
+              "type": {
                 "<personId>": {
                   "type": "person"
                 }
               }
             },
-            "edges":{
-              "type":{
+            "edges": {
+              "type": {
                 "<relationshipId>": {
                   "type": "relationship"
                 }
+              }
+            },
+            "transmissionChains": {
+              "type": {
+                "chains": {
+                  "type": [
+                    {
+                      "type": [
+                        {
+                          "type": [
+                            "string"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "length": "number"
               }
             }
           },
@@ -1711,10 +1739,12 @@
           "arg": "counters",
           "type": {
             "seenContacts": "number",
-            "teams": [{
-              "id": "teamId/null",
-              "seenContacts": "number"
-            }]
+            "teams": [
+              {
+                "id": "teamId/null",
+                "seenContacts": "number"
+              }
+            ]
           },
           "description": "Object containing counters for seen contacts",
           "root": true,
