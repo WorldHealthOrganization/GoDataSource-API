@@ -24,6 +24,8 @@ const worker = {
           });
         });
         // delete them (in series) and send back the number of deleted records
+        // use series (instead of parallel) because we may have deep cascade (relations that cascade other relations)
+        // and that can result in a lot of children processes being spawn
         async.series(deleteOperations, function (error) {
           callback(error, instancesToDelete.length)
         });
@@ -52,6 +54,8 @@ const worker = {
           });
         });
         // restore them (in series) and send back the number of restored records
+        // use series (instead of parallel) because we may have deep cascade (relations that cascade other relations)
+        // and that can result in a lot of children processes being spawn
         async.series(restoreOperations, function (error) {
           callback(error, instancesToRestore.length)
         });
