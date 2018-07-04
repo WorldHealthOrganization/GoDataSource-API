@@ -1730,7 +1730,7 @@
       "description": "Count the total number of seen contacts as well as per team",
       "http": {
         "verb": "get",
-        "path": "/follow-ups/count-contacts-seen"
+        "path": "/follow-ups/contacts-seen/count"
       }
     },
     "prototype.countContactsLostToFollowup": {
@@ -1759,7 +1759,7 @@
       "description": "Count the total number of contacts lost to follow-up as well as per team",
       "http": {
         "verb": "get",
-        "path": "/follow-ups/count-contacts-lost-to-followup"
+        "path": "/follow-ups/contacts-lost-to-follow-up/count"
       }
     }
   }
