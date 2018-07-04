@@ -15,7 +15,8 @@
     },
     "active": {
       "type": "boolean",
-      "required": true
+      "required": true,
+      "default": true
     },
     "populationDensity": {
       "type": "number"
