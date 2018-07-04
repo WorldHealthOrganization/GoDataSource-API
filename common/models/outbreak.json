@@ -718,6 +718,12 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "countContactsLostToFollowup"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCasesWithLessThanXContacts"
     }
   ],
   "methods": {
@@ -1760,6 +1766,34 @@
       "http": {
         "verb": "get",
         "path": "/follow-ups/contacts-lost-to-follow-up/count"
+      }
+    },
+    "prototype.countCasesWithLessThanXContacts": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of cases with less than X contacts",
+          "required": true
+        },
+        {
+          "arg": "caseIDs",
+          "type": ["string"],
+          "description": "Array with IDs of cases with less than X contacts",
+          "required": true
+        }
+      ],
+      "description": "Count the number of cases with less than X contacts; Also return the case IDs",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/cases-with-less-than-x-contacts/count"
       }
     }
   }
