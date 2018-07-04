@@ -1072,7 +1072,7 @@ module.exports = function (Outbreak) {
   /**
    * Count the cases with less than X contacts
    * Note: Besides the count the response also contains a list with the counted cases IDs
-   * @param filter
+   * @param filter Besides the default filter properties this request also accepts 'numberContactsLessThan': number on the first level in 'where'
    * @param callback
    */
   Outbreak.prototype.countCasesWithLessThanXContacts = function (filter, callback) {
