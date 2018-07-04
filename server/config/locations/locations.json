@@ -1,0 +1,2212 @@
+[
+  {
+    "name": "Algeria",
+    "children": [
+      {
+        "name": "Algiers"
+      },
+      {
+        "name": "Annaba"
+      },
+      {
+        "name": "Azazga"
+      },
+      {
+        "name": "Batna City"
+      },
+      {
+        "name": "Blida"
+      },
+      {
+        "name": "Bordj"
+      },
+      {
+        "name": "Bordj Bou Arreridj"
+      },
+      {
+        "name": "Bougara"
+      },
+      {
+        "name": "Cheraga"
+      },
+      {
+        "name": "Chlef"
+      },
+      {
+        "name": "Constantine"
+      },
+      {
+        "name": "Djelfa"
+      },
+      {
+        "name": "Draria"
+      },
+      {
+        "name": "El Tarf"
+      },
+      {
+        "name": "Hussein Dey"
+      },
+      {
+        "name": "Illizi"
+      },
+      {
+        "name": "Jijel"
+      },
+      {
+        "name": "Kouba"
+      },
+      {
+        "name": "Laghouat"
+      },
+      {
+        "name": "Oran"
+      },
+      {
+        "name": "Ouargla"
+      },
+      {
+        "name": "Oued Smar"
+      },
+      {
+        "name": "Relizane"
+      },
+      {
+        "name": "Rouiba"
+      },
+      {
+        "name": "Saida"
+      },
+      {
+        "name": "Souk Ahras"
+      },
+      {
+        "name": "Tamanghasset"
+      },
+      {
+        "name": "Tiaret"
+      },
+      {
+        "name": "Tissemsilt"
+      },
+      {
+        "name": "Tizi"
+      },
+      {
+        "name": "Tizi Ouzou"
+      },
+      {
+        "name": "Tlemcen"
+      }
+    ]
+  },
+  {
+    "name": "Angola",
+    "children": [
+      {
+        "name": "Ambriz"
+      },
+      {
+        "name": "Benguela"
+      },
+      {
+        "name": "Cabinda"
+      },
+      {
+        "name": "Cacole"
+      },
+      {
+        "name": "Camabatela"
+      },
+      {
+        "name": "Cazeta"
+      },
+      {
+        "name": "Huambo"
+      },
+      {
+        "name": "Kuito"
+      },
+      {
+        "name": "Lobito"
+      },
+      {
+        "name": "Luanda"
+      },
+      {
+        "name": "Lubango"
+      },
+      {
+        "name": "Lucapa"
+      },
+      {
+        "name": "Lumeje"
+      },
+      {
+        "name": "Malanje"
+      },
+      {
+        "name": "Menongue"
+      },
+      {
+        "name": "Muxaluando"
+      },
+      {
+        "name": "Namibe"
+      },
+      {
+        "name": "Ondjiva"
+      },
+      {
+        "name": "Piri"
+      },
+      {
+        "name": "Saurimo"
+      },
+      {
+        "name": "Talatona"
+      }
+    ]
+  },
+  {
+    "name": "Botswana",
+    "children": [
+      {
+        "name": "Francistown"
+      },
+      {
+        "name": "Gaborone"
+      },
+      {
+        "name": "Orapa"
+      },
+      {
+        "name": "Serowe"
+      },
+      {
+        "name": "Village"
+      }
+    ]
+  },
+  {
+    "name": "Cameroon",
+    "children": [
+      {
+        "name": "Bafia"
+      },
+      {
+        "name": "Bafoussam"
+      },
+      {
+        "name": "Bamenda"
+      },
+      {
+        "name": "Buea"
+      },
+      {
+        "name": "Douala"
+      },
+      {
+        "name": "Kribi"
+      },
+      {
+        "name": "Kumba"
+      },
+      {
+        "name": "Ringo"
+      },
+      {
+        "name": "Tibati"
+      }
+    ]
+  },
+  {
+    "name": "Congo",
+    "children": [
+      {
+        "name": "Banana"
+      },
+      {
+        "name": "Goma"
+      },
+      {
+        "name": "Kinshasa"
+      },
+      {
+        "name": "Likasi"
+      },
+      {
+        "name": "Lubumbashi"
+      }
+    ]
+  },
+  {
+    "name": "Egypt",
+    "children": [
+      {
+        "name": "Abu Hammad"
+      },
+      {
+        "name": "Al Mahallah al Kubra"
+      },
+      {
+        "name": "Al Mansurah"
+      },
+      {
+        "name": "Al Marj"
+      },
+      {
+        "name": "Alexandria"
+      },
+      {
+        "name": "Almazah"
+      },
+      {
+        "name": "Ar Rawdah"
+      },
+      {
+        "name": "Assiut"
+      },
+      {
+        "name": "Az Zamalik"
+      },
+      {
+        "name": "Badr"
+      },
+      {
+        "name": "Banha"
+      },
+      {
+        "name": "Bani Suwayf"
+      },
+      {
+        "name": "Cairo"
+      },
+      {
+        "name": "Damietta"
+      },
+      {
+        "name": "Faraskur"
+      },
+      {
+        "name": "Flaminj"
+      },
+      {
+        "name": "Giza"
+      },
+      {
+        "name": "Heliopolis"
+      },
+      {
+        "name": "Helwan"
+      },
+      {
+        "name": "Hurghada"
+      },
+      {
+        "name": "Ismailia"
+      },
+      {
+        "name": "Kafr ash Shaykh"
+      },
+      {
+        "name": "Luxor"
+      },
+      {
+        "name": "Madinat an Nasr"
+      },
+      {
+        "name": "Madinat as Sadis min Uktubar"
+      },
+      {
+        "name": "Minya"
+      },
+      {
+        "name": "Nasr"
+      },
+      {
+        "name": "New Cairo"
+      },
+      {
+        "name": "Port Said"
+      },
+      {
+        "name": "Rafah"
+      },
+      {
+        "name": "Ramsis"
+      },
+      {
+        "name": "Sadat"
+      },
+      {
+        "name": "Shirbin"
+      },
+      {
+        "name": "Shubra"
+      },
+      {
+        "name": "Sohag"
+      },
+      {
+        "name": "Suez"
+      },
+      {
+        "name": "Tanta"
+      },
+      {
+        "name": "Toukh"
+      },
+      {
+        "name": "Zagazig"
+      }
+    ]
+  },
+  {
+    "name": "Gabon",
+    "children": [
+      {
+        "name": "Gamba"
+      },
+      {
+        "name": "Libreville"
+      },
+      {
+        "name": "Mamagnia"
+      },
+      {
+        "name": "Moanda"
+      },
+      {
+        "name": "Port-Gentil"
+      }
+    ]
+  },
+  {
+    "name": "Georgia",
+    "children": [
+      {
+        "name": "Gogolesubani"
+      },
+      {
+        "name": "Kutaisi"
+      },
+      {
+        "name": "Lentekhi"
+      },
+      {
+        "name": "Qazbegi"
+      },
+      {
+        "name": "Samtredia"
+      },
+      {
+        "name": "Sukhumi"
+      },
+      {
+        "name": "Tbilisi"
+      },
+      {
+        "name": "Zemo-Avchala"
+      },
+      {
+        "name": "Zugdidi"
+      }
+    ]
+  },
+  {
+    "name": "Ghana",
+    "children": [
+      {
+        "name": "Accra"
+      },
+      {
+        "name": "Bawku"
+      },
+      {
+        "name": "Berekum"
+      },
+      {
+        "name": "Bolgatanga"
+      },
+      {
+        "name": "Cape Coast"
+      },
+      {
+        "name": "Home"
+      },
+      {
+        "name": "Koforidua"
+      },
+      {
+        "name": "Kumasi"
+      },
+      {
+        "name": "Legon"
+      },
+      {
+        "name": "Mampong"
+      },
+      {
+        "name": "Navrongo"
+      },
+      {
+        "name": "Sunyani"
+      },
+      {
+        "name": "Takoradi"
+      },
+      {
+        "name": "Tema"
+      },
+      {
+        "name": "Wa"
+      },
+      {
+        "name": "Winneba"
+      }
+    ]
+  },
+  {
+    "name": "Guinea",
+    "children": [
+      {
+        "name": "Conakry"
+      },
+      {
+        "name": "Dabola"
+      },
+      {
+        "name": "Kalia"
+      },
+      {
+        "name": "Kankan"
+      },
+      {
+        "name": "Lola"
+      },
+      {
+        "name": "Mamou"
+      },
+      {
+        "name": "Port Kamsar"
+      },
+      {
+        "name": "Sangaredi"
+      }
+    ]
+  },
+  {
+    "name": "Kenya",
+    "children": [
+      {
+        "name": "Bondo"
+      },
+      {
+        "name": "Chuka"
+      },
+      {
+        "name": "Eldoret"
+      },
+      {
+        "name": "Kabete"
+      },
+      {
+        "name": "Kaiboi"
+      },
+      {
+        "name": "Karatina"
+      },
+      {
+        "name": "Kiambu"
+      },
+      {
+        "name": "Kikuyu"
+      },
+      {
+        "name": "Kisii"
+      },
+      {
+        "name": "Kisumu"
+      },
+      {
+        "name": "Kitale"
+      },
+      {
+        "name": "Kitui"
+      },
+      {
+        "name": "Machakos"
+      },
+      {
+        "name": "Maseno"
+      },
+      {
+        "name": "Mbita"
+      },
+      {
+        "name": "Mombasa"
+      },
+      {
+        "name": "Nairobi"
+      },
+      {
+        "name": "Nakuru"
+      },
+      {
+        "name": "Sawa Sawa"
+      },
+      {
+        "name": "Siaya"
+      },
+      {
+        "name": "Thika"
+      },
+      {
+        "name": "Turbo"
+      },
+      {
+        "name": "Wote"
+      }
+    ]
+  },
+  {
+    "name": "Libya",
+    "children": [
+      {
+        "name": "Benghazi"
+      },
+      {
+        "name": "Misratah"
+      },
+      {
+        "name": "Sabha"
+      },
+      {
+        "name": "Tripoli"
+      },
+      {
+        "name": "Zliten"
+      }
+    ]
+  },
+  {
+    "name": "Madagascar",
+    "children": [
+      {
+        "name": "Ambanja"
+      },
+      {
+        "name": "Antananarivo"
+      },
+      {
+        "name": "Antsirabe"
+      },
+      {
+        "name": "Antsiranana"
+      },
+      {
+        "name": "Fianarantsoa"
+      },
+      {
+        "name": "Toamasina"
+      },
+      {
+        "name": "Toliara"
+      }
+    ]
+  },
+  {
+    "name": "Morocco",
+    "children": [
+      {
+        "name": "Afourer"
+      },
+      {
+        "name": "Agadir"
+      },
+      {
+        "name": "Ait Melloul"
+      },
+      {
+        "name": "Al Hoceima"
+      },
+      {
+        "name": "Assa"
+      },
+      {
+        "name": "Benguerir"
+      },
+      {
+        "name": "Beni Mellal"
+      },
+      {
+        "name": "Berrechid"
+      },
+      {
+        "name": "Casablanca"
+      },
+      {
+        "name": "Deroua"
+      },
+      {
+        "name": "El Gara"
+      },
+      {
+        "name": "El Hajeb"
+      },
+      {
+        "name": "El Jadida"
+      },
+      {
+        "name": "Erfoud"
+      },
+      {
+        "name": "Fes"
+      },
+      {
+        "name": "Fkih Ben Salah"
+      },
+      {
+        "name": "Kenitra"
+      },
+      {
+        "name": "Khemisset"
+      },
+      {
+        "name": "Khouribga"
+      },
+      {
+        "name": "Ksar el Kebir"
+      },
+      {
+        "name": "Larache"
+      },
+      {
+        "name": "Mansour"
+      },
+      {
+        "name": "Marrakesh"
+      },
+      {
+        "name": "Mehediyah"
+      },
+      {
+        "name": "Meknes"
+      },
+      {
+        "name": "Mohammedia"
+      },
+      {
+        "name": "Nador"
+      },
+      {
+        "name": "Ouazzane"
+      },
+      {
+        "name": "Oued Zem"
+      },
+      {
+        "name": "Oujda"
+      },
+      {
+        "name": "Oulad Teima"
+      },
+      {
+        "name": "Rabat"
+      },
+      {
+        "name": "Safi"
+      },
+      {
+        "name": "Sefrou"
+      },
+      {
+        "name": "Settat"
+      },
+      {
+        "name": "Sidi Bennour"
+      },
+      {
+        "name": "Sidi Slimane"
+      },
+      {
+        "name": "Skhirat"
+      },
+      {
+        "name": "Tahala"
+      },
+      {
+        "name": "Tan-Tan"
+      },
+      {
+        "name": "Tangier"
+      },
+      {
+        "name": "Tarfaya"
+      },
+      {
+        "name": "Taza"
+      },
+      {
+        "name": "Temara"
+      },
+      {
+        "name": "Tiflet"
+      },
+      {
+        "name": "Tiznit"
+      },
+      {
+        "name": "Touissite"
+      }
+    ]
+  },
+  {
+    "name": "Mozambique",
+    "children": [
+      {
+        "name": "Beira"
+      },
+      {
+        "name": "Maputo"
+      },
+      {
+        "name": "Matola"
+      },
+      {
+        "name": "Mozambique"
+      },
+      {
+        "name": "Nampula"
+      },
+      {
+        "name": "Pemba"
+      },
+      {
+        "name": "Quelimane"
+      },
+      {
+        "name": "Tete"
+      }
+    ]
+  },
+  {
+    "name": "Nigeria",
+    "children": [
+      {
+        "name": "Aba"
+      },
+      {
+        "name": "Abakaliki"
+      },
+      {
+        "name": "Abeokuta"
+      },
+      {
+        "name": "Abraka"
+      },
+      {
+        "name": "Abraka"
+      },
+      {
+        "name": "Abuja"
+      },
+      {
+        "name": "Ado-Ekiti"
+      },
+      {
+        "name": "Adodo"
+      },
+      {
+        "name": "Aganga"
+      },
+      {
+        "name": "Agege"
+      },
+      {
+        "name": "Agidingbi"
+      },
+      {
+        "name": "Ajegunle"
+      },
+      {
+        "name": "Ajuwon"
+      },
+      {
+        "name": "Akure"
+      },
+      {
+        "name": "Alimosho"
+      },
+      {
+        "name": "Anambra"
+      },
+      {
+        "name": "Apapa"
+      },
+      {
+        "name": "Ayobo"
+      },
+      {
+        "name": "Benin City"
+      },
+      {
+        "name": "Birnin Kebbi"
+      },
+      {
+        "name": "Bonny"
+      },
+      {
+        "name": "Burutu"
+      },
+      {
+        "name": "Bwari"
+      },
+      {
+        "name": "Calabar"
+      },
+      {
+        "name": "Chafe"
+      },
+      {
+        "name": "Damaturu"
+      },
+      {
+        "name": "Egbeda"
+      },
+      {
+        "name": "Ekpoma"
+      },
+      {
+        "name": "Enugu"
+      },
+      {
+        "name": "Forum"
+      },
+      {
+        "name": "Funtua"
+      },
+      {
+        "name": "Ibadan"
+      },
+      {
+        "name": "Ido"
+      },
+      {
+        "name": "Ifako"
+      },
+      {
+        "name": "Igando"
+      },
+      {
+        "name": "Igueben"
+      },
+      {
+        "name": "Ikeja"
+      },
+      {
+        "name": "Ikorodu"
+      },
+      {
+        "name": "Ikotun"
+      },
+      {
+        "name": "Ile-Ife"
+      },
+      {
+        "name": "Ilesa"
+      },
+      {
+        "name": "Ilorin"
+      },
+      {
+        "name": "Ipaja"
+      },
+      {
+        "name": "Iseri-Oke"
+      },
+      {
+        "name": "Isolo"
+      },
+      {
+        "name": "Jalingo"
+      },
+      {
+        "name": "Jos"
+      },
+      {
+        "name": "Kaduna"
+      },
+      {
+        "name": "Kano"
+      },
+      {
+        "name": "Kebbi"
+      },
+      {
+        "name": "Lagos"
+      },
+      {
+        "name": "Lekki"
+      },
+      {
+        "name": "Lokoja"
+      },
+      {
+        "name": "Magodo"
+      },
+      {
+        "name": "Makurdi"
+      },
+      {
+        "name": "Maryland"
+      },
+      {
+        "name": "Minna"
+      },
+      {
+        "name": "Mogho"
+      },
+      {
+        "name": "Mowe"
+      },
+      {
+        "name": "Mushin"
+      },
+      {
+        "name": "Nsukka"
+      },
+      {
+        "name": "Obafemi"
+      },
+      {
+        "name": "Obudu"
+      },
+      {
+        "name": "Odau"
+      },
+      {
+        "name": "Ojo"
+      },
+      {
+        "name": "Ojota"
+      },
+      {
+        "name": "Ondo"
+      },
+      {
+        "name": "Onigbongbo"
+      },
+      {
+        "name": "Orile Oshodi"
+      },
+      {
+        "name": "Oshodi"
+      },
+      {
+        "name": "Osogbo"
+      },
+      {
+        "name": "Ota"
+      },
+      {
+        "name": "Owerri"
+      },
+      {
+        "name": "Oworonsoki"
+      },
+      {
+        "name": "Port Harcourt"
+      },
+      {
+        "name": "Shomolu"
+      },
+      {
+        "name": "Suleja"
+      },
+      {
+        "name": "Suru-Lere"
+      },
+      {
+        "name": "Tara"
+      },
+      {
+        "name": "Ughelli"
+      },
+      {
+        "name": "Ungwan Madaki"
+      },
+      {
+        "name": "Uyo"
+      },
+      {
+        "name": "Warri"
+      },
+      {
+        "name": "Warri"
+      },
+      {
+        "name": "Yaba"
+      },
+      {
+        "name": "Yola"
+      },
+      {
+        "name": "Zaria"
+      }
+    ]
+  },
+  {
+    "name": "Senegal",
+    "children": [
+      {
+        "name": "Boussinki"
+      },
+      {
+        "name": "Camberene"
+      },
+      {
+        "name": "Dakar"
+      },
+      {
+        "name": "Dodji"
+      },
+      {
+        "name": "Guediawaye"
+      },
+      {
+        "name": "Kaolack"
+      },
+      {
+        "name": "Kedougou"
+      },
+      {
+        "name": "Louga"
+      },
+      {
+        "name": "Madina Kokoun"
+      },
+      {
+        "name": "Saint-Louis"
+      },
+      {
+        "name": "Sama"
+      },
+      {
+        "name": "Tanaf"
+      }
+    ]
+  },
+  {
+    "name": "South Africa",
+    "children": [
+      {
+        "name": "Alberton"
+      },
+      {
+        "name": "Alice"
+      },
+      {
+        "name": "Alrode"
+      },
+      {
+        "name": "Amanzimtoti"
+      },
+      {
+        "name": "Ashton"
+      },
+      {
+        "name": "Atlantis"
+      },
+      {
+        "name": "Balfour"
+      },
+      {
+        "name": "Bathurst"
+      },
+      {
+        "name": "Beaufort West"
+      },
+      {
+        "name": "Bedfordview"
+      },
+      {
+        "name": "Belhar"
+      },
+      {
+        "name": "Bellville"
+      },
+      {
+        "name": "Benoni"
+      },
+      {
+        "name": "Bergvliet"
+      },
+      {
+        "name": "Bethal"
+      },
+      {
+        "name": "Bethlehem"
+      },
+      {
+        "name": "Bloemfontein"
+      },
+      {
+        "name": "Boksburg"
+      },
+      {
+        "name": "Bothasig"
+      },
+      {
+        "name": "Botshabelo"
+      },
+      {
+        "name": "Braamfontein"
+      },
+      {
+        "name": "Brackenfell"
+      },
+      {
+        "name": "Brakpan"
+      },
+      {
+        "name": "Bredasdorp"
+      },
+      {
+        "name": "Brits"
+      },
+      {
+        "name": "Bronkhorstspruit"
+      },
+      {
+        "name": "Brooklyn"
+      },
+      {
+        "name": "Bryanston"
+      },
+      {
+        "name": "Buffalo"
+      },
+      {
+        "name": "Butterworth"
+      },
+      {
+        "name": "Cape Town"
+      },
+      {
+        "name": "Capital Park"
+      },
+      {
+        "name": "Carletonville"
+      },
+      {
+        "name": "Carolina"
+      },
+      {
+        "name": "Centurion"
+      },
+      {
+        "name": "City of Cape Town"
+      },
+      {
+        "name": "Clanwilliam"
+      },
+      {
+        "name": "Claremont"
+      },
+      {
+        "name": "Coega"
+      },
+      {
+        "name": "Coligny"
+      },
+      {
+        "name": "Constantia"
+      },
+      {
+        "name": "Craighall"
+      },
+      {
+        "name": "Cullinan"
+      },
+      {
+        "name": "De Aar"
+      },
+      {
+        "name": "Delmas"
+      },
+      {
+        "name": "Deneysville"
+      },
+      {
+        "name": "Despatch"
+      },
+      {
+        "name": "Doornfontein"
+      },
+      {
+        "name": "Dube Location"
+      },
+      {
+        "name": "Duiwelskloof"
+      },
+      {
+        "name": "Dullstroom"
+      },
+      {
+        "name": "Dundee"
+      },
+      {
+        "name": "Durban"
+      },
+      {
+        "name": "Durbanville"
+      },
+      {
+        "name": "East London"
+      },
+      {
+        "name": "Edenburg"
+      },
+      {
+        "name": "Edenvale"
+      },
+      {
+        "name": "Eersterivier"
+      },
+      {
+        "name": "Elandsfontein"
+      },
+      {
+        "name": "Elarduspark"
+      },
+      {
+        "name": "Eloff"
+      },
+      {
+        "name": "Elsburg"
+      },
+      {
+        "name": "Elsenburg"
+      },
+      {
+        "name": "Emerald Hill"
+      },
+      {
+        "name": "Emnambithi-Ladysmith"
+      },
+      {
+        "name": "Empangeni"
+      },
+      {
+        "name": "Erasmia"
+      },
+      {
+        "name": "Ermelo"
+      },
+      {
+        "name": "Eshowe"
+      },
+      {
+        "name": "Evander"
+      },
+      {
+        "name": "Faure"
+      },
+      {
+        "name": "Florida Glen"
+      },
+      {
+        "name": "Fochville"
+      },
+      {
+        "name": "Fordsburg"
+      },
+      {
+        "name": "Fort Cox"
+      },
+      {
+        "name": "Franschhoek"
+      },
+      {
+        "name": "Gansbaai"
+      },
+      {
+        "name": "Ganspan"
+      },
+      {
+        "name": "George"
+      },
+      {
+        "name": "Germiston"
+      },
+      {
+        "name": "Gezina"
+      },
+      {
+        "name": "Gillitts"
+      },
+      {
+        "name": "Gingindlovu"
+      },
+      {
+        "name": "Glen Austin"
+      },
+      {
+        "name": "Goodwood"
+      },
+      {
+        "name": "Graaff Reinet"
+      },
+      {
+        "name": "Grabouw"
+      },
+      {
+        "name": "Grahamstown"
+      },
+      {
+        "name": "Greytown"
+      },
+      {
+        "name": "Groblersdal"
+      },
+      {
+        "name": "Haenertsburg"
+      },
+      {
+        "name": "Harrismith"
+      },
+      {
+        "name": "Hartbeespoort"
+      },
+      {
+        "name": "Hartenbos"
+      },
+      {
+        "name": "Hartswater"
+      },
+      {
+        "name": "Hatfield"
+      },
+      {
+        "name": "Hawston"
+      },
+      {
+        "name": "Hazyview"
+      },
+      {
+        "name": "Heidelberg"
+      },
+      {
+        "name": "Hekpoort"
+      },
+      {
+        "name": "Henley on Klip"
+      },
+      {
+        "name": "Hennenman"
+      },
+      {
+        "name": "Hermanus"
+      },
+      {
+        "name": "Hillcrest"
+      },
+      {
+        "name": "Hilton"
+      },
+      {
+        "name": "Himeville"
+      },
+      {
+        "name": "Hluhluwe"
+      },
+      {
+        "name": "Hoedspruit"
+      },
+      {
+        "name": "Hogsback"
+      },
+      {
+        "name": "Houghton Estate"
+      },
+      {
+        "name": "Hout Bay"
+      },
+      {
+        "name": "Howick"
+      },
+      {
+        "name": "Humansdorp"
+      },
+      {
+        "name": "Hyde Park"
+      },
+      {
+        "name": "Irene"
+      },
+      {
+        "name": "Isando"
+      },
+      {
+        "name": "Ixopo"
+      },
+      {
+        "name": "Johannesburg"
+      },
+      {
+        "name": "Kalkbaai"
+      },
+      {
+        "name": "Katlehong"
+      },
+      {
+        "name": "Kempton Park"
+      },
+      {
+        "name": "Kimberley"
+      },
+      {
+        "name": "Kingsborough"
+      },
+      {
+        "name": "Kingsley"
+      },
+      {
+        "name": "Kingsmead"
+      },
+      {
+        "name": "Kinross"
+      },
+      {
+        "name": "Kleinmond"
+      },
+      {
+        "name": "Klerksdorp"
+      },
+      {
+        "name": "Kloof"
+      },
+      {
+        "name": "Knysna"
+      },
+      {
+        "name": "Kokstad"
+      },
+      {
+        "name": "Kraaifontein"
+      },
+      {
+        "name": "Kranskop"
+      },
+      {
+        "name": "Kriel"
+      },
+      {
+        "name": "Kroonstad"
+      },
+      {
+        "name": "Krugersdorp"
+      },
+      {
+        "name": "Kuils River"
+      },
+      {
+        "name": "KwaDukuza"
+      },
+      {
+        "name": "La Lucia"
+      },
+      {
+        "name": "La Motte"
+      },
+      {
+        "name": "Ladybrand"
+      },
+      {
+        "name": "Lansdowne"
+      },
+      {
+        "name": "Laudium"
+      },
+      {
+        "name": "Lephalale"
+      },
+      {
+        "name": "Lichtenburg"
+      },
+      {
+        "name": "Lombardy East"
+      },
+      {
+        "name": "London"
+      },
+      {
+        "name": "Louis Trichardt"
+      },
+      {
+        "name": "Lutzville"
+      },
+      {
+        "name": "Lydenburg"
+      },
+      {
+        "name": "Lyndhurst"
+      },
+      {
+        "name": "Lynnwood"
+      },
+      {
+        "name": "Lyttelton"
+      },
+      {
+        "name": "Machadodorp"
+      },
+      {
+        "name": "Mafikeng"
+      },
+      {
+        "name": "Maidstone"
+      },
+      {
+        "name": "Majuba"
+      },
+      {
+        "name": "Malmesbury"
+      },
+      {
+        "name": "Malvern"
+      },
+      {
+        "name": "Maraisburg"
+      },
+      {
+        "name": "Margate"
+      },
+      {
+        "name": "Marshalltown"
+      },
+      {
+        "name": "Meadowridge"
+      },
+      {
+        "name": "Medunsa"
+      },
+      {
+        "name": "Melkbosstrand"
+      },
+      {
+        "name": "Merrivale"
+      },
+      {
+        "name": "Messina"
+      },
+      {
+        "name": "Meyerton"
+      },
+      {
+        "name": "Middelburg"
+      },
+      {
+        "name": "Middelburg"
+      },
+      {
+        "name": "Midrand"
+      },
+      {
+        "name": "Milnerton"
+      },
+      {
+        "name": "Mmabatho"
+      },
+      {
+        "name": "Mobeni"
+      },
+      {
+        "name": "Modderfontein"
+      },
+      {
+        "name": "Mokopane"
+      },
+      {
+        "name": "Montagu"
+      },
+      {
+        "name": "Monument Park"
+      },
+      {
+        "name": "Mooi River"
+      },
+      {
+        "name": "Mookgophong"
+      },
+      {
+        "name": "Moorreesburg"
+      },
+      {
+        "name": "Morningside Manor"
+      },
+      {
+        "name": "Mossel Bay"
+      },
+      {
+        "name": "Mount Edgecombe"
+      },
+      {
+        "name": "Mthatha"
+      },
+      {
+        "name": "Muizenberg"
+      },
+      {
+        "name": "Napier"
+      },
+      {
+        "name": "Nelspruit"
+      },
+      {
+        "name": "New Germany"
+      },
+      {
+        "name": "Newcastle"
+      },
+      {
+        "name": "Newlands"
+      },
+      {
+        "name": "Nigel"
+      },
+      {
+        "name": "Northcliff"
+      },
+      {
+        "name": "Odendaalsrus"
+      },
+      {
+        "name": "Ogies"
+      },
+      {
+        "name": "Olifantsfontein"
+      },
+      {
+        "name": "Onderstepoort"
+      },
+      {
+        "name": "Onverwacht"
+      },
+      {
+        "name": "Oranjeville"
+      },
+      {
+        "name": "Oranjezicht"
+      },
+      {
+        "name": "Ottosdal"
+      },
+      {
+        "name": "Oudtshoorn"
+      },
+      {
+        "name": "Overport"
+      },
+      {
+        "name": "Paarl"
+      },
+      {
+        "name": "Panorama"
+      },
+      {
+        "name": "Parktown"
+      },
+      {
+        "name": "Parkview"
+      },
+      {
+        "name": "Parow"
+      },
+      {
+        "name": "Peninsula"
+      },
+      {
+        "name": "Phalaborwa"
+      },
+      {
+        "name": "Philadelphia"
+      },
+      {
+        "name": "Philipstown"
+      },
+      {
+        "name": "Phoenix"
+      },
+      {
+        "name": "Phokeng"
+      },
+      {
+        "name": "Pietermaritzburg"
+      },
+      {
+        "name": "Pinelands"
+      },
+      {
+        "name": "Pinetown"
+      },
+      {
+        "name": "Plettenberg Bay"
+      },
+      {
+        "name": "Plumstead"
+      },
+      {
+        "name": "Polokwane"
+      },
+      {
+        "name": "Pongola"
+      },
+      {
+        "name": "Port Alfred"
+      },
+      {
+        "name": "Port Elizabeth"
+      },
+      {
+        "name": "Port Shepstone"
+      },
+      {
+        "name": "Potchefstroom"
+      },
+      {
+        "name": "Pretoria"
+      },
+      {
+        "name": "Prieska"
+      },
+      {
+        "name": "Primrose"
+      },
+      {
+        "name": "Pringle Bay"
+      },
+      {
+        "name": "Queensburgh"
+      },
+      {
+        "name": "Queenstown"
+      },
+      {
+        "name": "Queenswood"
+      },
+      {
+        "name": "Randburg"
+      },
+      {
+        "name": "Randfontein"
+      },
+      {
+        "name": "Rawsonville"
+      },
+      {
+        "name": "Rhodes"
+      },
+      {
+        "name": "Richards Bay"
+      },
+      {
+        "name": "Richmond"
+      },
+      {
+        "name": "Riebeek-Kasteel"
+      },
+      {
+        "name": "Rivonia"
+      },
+      {
+        "name": "Roggebaai"
+      },
+      {
+        "name": "Roodepoort"
+      },
+      {
+        "name": "Rooigrond"
+      },
+      {
+        "name": "Rooihuiskraal"
+      },
+      {
+        "name": "Rosebank"
+      },
+      {
+        "name": "Rosettenville"
+      },
+      {
+        "name": "Rosslyn"
+      },
+      {
+        "name": "Rustenburg"
+      },
+      {
+        "name": "Sabie"
+      },
+      {
+        "name": "Saint Helena Bay"
+      },
+      {
+        "name": "Saint James"
+      },
+      {
+        "name": "Saldanha"
+      },
+      {
+        "name": "Salt Rock"
+      },
+      {
+        "name": "Sandown"
+      },
+      {
+        "name": "Sandton"
+      },
+      {
+        "name": "Sasolburg"
+      },
+      {
+        "name": "Schweizer-Reneke"
+      },
+      {
+        "name": "Scottburgh"
+      },
+      {
+        "name": "Sebokeng"
+      },
+      {
+        "name": "Secunda"
+      },
+      {
+        "name": "Sedgefield"
+      },
+      {
+        "name": "Senekal"
+      },
+      {
+        "name": "Shelly Beach"
+      },
+      {
+        "name": "Silverton"
+      },
+      {
+        "name": "Sinoville"
+      },
+      {
+        "name": "Somerset West"
+      },
+      {
+        "name": "Soshanguve"
+      },
+      {
+        "name": "Soweto"
+      },
+      {
+        "name": "Springs"
+      },
+      {
+        "name": "Standerton"
+      },
+      {
+        "name": "Stanford"
+      },
+      {
+        "name": "Stellenbosch"
+      },
+      {
+        "name": "Stilfontein"
+      },
+      {
+        "name": "Strand"
+      },
+      {
+        "name": "Sun Valley"
+      },
+      {
+        "name": "Swartkops"
+      },
+      {
+        "name": "Temba"
+      },
+      {
+        "name": "Tembisa"
+      },
+      {
+        "name": "Thabazimbi"
+      },
+      {
+        "name": "The Rest"
+      },
+      {
+        "name": "Thohoyandou"
+      },
+      {
+        "name": "Three Anchor Bay"
+      },
+      {
+        "name": "Three Rivers"
+      },
+      {
+        "name": "Tokai"
+      },
+      {
+        "name": "Tongaat"
+      },
+      {
+        "name": "Tzaneen"
+      },
+      {
+        "name": "Uitenhage"
+      },
+      {
+        "name": "Umbogintwini"
+      },
+      {
+        "name": "Umdloti"
+      },
+      {
+        "name": "Umhlanga"
+      },
+      {
+        "name": "Umkomaas"
+      },
+      {
+        "name": "Umtentweni"
+      },
+      {
+        "name": "Upington"
+      },
+      {
+        "name": "Vaalbank"
+      },
+      {
+        "name": "Vaalpark"
+      },
+      {
+        "name": "Vanderbijlpark"
+      },
+      {
+        "name": "Vereeniging"
+      },
+      {
+        "name": "Verulam"
+      },
+      {
+        "name": "Villiersdorp"
+      },
+      {
+        "name": "Virginia"
+      },
+      {
+        "name": "Vosloorus"
+      },
+      {
+        "name": "Vrededorp"
+      },
+      {
+        "name": "Vredenburg"
+      },
+      {
+        "name": "Vryheid"
+      },
+      {
+        "name": "Walkerville"
+      },
+      {
+        "name": "Walmer Heights"
+      },
+      {
+        "name": "Warner Beach"
+      },
+      {
+        "name": "Wartburg"
+      },
+      {
+        "name": "Waverley"
+      },
+      {
+        "name": "Waverley"
+      },
+      {
+        "name": "Welgelegen"
+      },
+      {
+        "name": "Welgemoed"
+      },
+      {
+        "name": "Welkom"
+      },
+      {
+        "name": "Welkom"
+      },
+      {
+        "name": "Wellington"
+      },
+      {
+        "name": "Weltevreden"
+      },
+      {
+        "name": "Weltevreedenpark"
+      },
+      {
+        "name": "Westonaria"
+      },
+      {
+        "name": "Westville"
+      },
+      {
+        "name": "White River"
+      },
+      {
+        "name": "Wilderness"
+      },
+      {
+        "name": "Winterton"
+      },
+      {
+        "name": "Witbank"
+      },
+      {
+        "name": "Witpoortjie"
+      },
+      {
+        "name": "Wonderboom"
+      },
+      {
+        "name": "Worcester"
+      },
+      {
+        "name": "Wynberg"
+      },
+      {
+        "name": "Zeerust"
+      }
+    ]
+  },
+  {
+    "name": "Sudan",
+    "children": [
+      {
+        "name": "Kassala"
+      },
+      {
+        "name": "Khartoum"
+      },
+      {
+        "name": "Nyala"
+      },
+      {
+        "name": "Shendi"
+      },
+      {
+        "name": "Thabit"
+      },
+      {
+        "name": "Umm Durman"
+      }
+    ]
+  },
+  {
+    "name": "Tanzania",
+    "children": [
+      {
+        "name": "Arusha"
+      },
+      {
+        "name": "Bukoba"
+      },
+      {
+        "name": "Dar es Salaam"
+      },
+      {
+        "name": "Dodoma"
+      },
+      {
+        "name": "Morogoro"
+      },
+      {
+        "name": "Mwanza"
+      },
+      {
+        "name": "Njombe"
+      },
+      {
+        "name": "Raha"
+      },
+      {
+        "name": "Tanga"
+      },
+      {
+        "name": "Zanzibar"
+      }
+    ]
+  },
+  {
+    "name": "Zambia",
+    "children": [
+      {
+        "name": "Kalomo"
+      },
+      {
+        "name": "Kitwe"
+      },
+      {
+        "name": "Livingstone"
+      },
+      {
+        "name": "Lusaka"
+      },
+      {
+        "name": "Macha"
+      },
+      {
+        "name": "Mumbwa"
+      },
+      {
+        "name": "Ndola"
+      },
+      {
+        "name": "Siavonga"
+      },
+      {
+        "name": "Solwezi"
+      }
+    ]
+  },
+  {
+    "name": "Zimbabwe",
+    "children": [
+      {
+        "name": "Bulawayo"
+      },
+      {
+        "name": "Chinhoyi"
+      },
+      {
+        "name": "Greendale"
+      },
+      {
+        "name": "Gwanda"
+      },
+      {
+        "name": "Harare"
+      },
+      {
+        "name": "Kwekwe"
+      },
+      {
+        "name": "Mufakose"
+      },
+      {
+        "name": "Mutare"
+      },
+      {
+        "name": "Victoria Falls"
+      }
+    ]
+  }
+]
