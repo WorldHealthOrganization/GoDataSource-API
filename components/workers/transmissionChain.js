@@ -125,6 +125,8 @@ const worker = {
       chains: [],
       length: 0
     };
+    // store lengths for each chain
+    let chainsLengths = [];
 
     // filter out invalid data (chain == null) from the chains list
     let resultIndex = 0;
@@ -138,6 +140,8 @@ const worker = {
       if (transmissionChain !== null) {
         // add it to the list of chains
         _chains.chains[resultIndex] = transmissionChain;
+        // store length for each chain
+        chainsLengths[resultIndex] = {length: transmissionChain.length};
         resultIndex++;
       }
       chainIndex++;
@@ -151,15 +155,9 @@ const worker = {
     // only need counters
     if (countOnly) {
       result = {
-        chains: [],
+        chains: chainsLengths,
         length: _chains.length
       };
-      // add length information for each chain
-      _chains.chains.forEach(function (chain, index) {
-        result.chains[index] = {
-          length: chain.length
-        };
-      });
     } else {
       // return info about nodes, edges and the actual chains
       result = {
