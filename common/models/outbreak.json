@@ -42,7 +42,13 @@
     },
     "frequencyOfFollowUp": {
       "type": "number",
-      "required": true
+      "required": true,
+      "description": "Frequency of follow ups in days (once every X days/daily)"
+    },
+    "frequencyOfFollowUpPerDay": {
+      "type": "number",
+      "required": true,
+      "description": "Number of follow ups to be generated per day"
     },
     "noDaysAmongContacts": {
       "type": "number",
@@ -147,6 +153,11 @@
     "referenceData": {
       "type": "hasMany",
       "model": "referenceData",
+      "foreignKey": "outbreakId"
+    },
+    "followUps": {
+      "type": "hasMany",
+      "model": "followUp",
       "foreignKey": "outbreakId"
     }
   },
@@ -347,6 +358,12 @@
       "principalId": "read_followup",
       "permission": "ALLOW",
       "property": "__count__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_followup",
+      "permission": "ALLOW",
+      "property": "restoreContactFollowUp"
     },
     {
       "principalType": "ROLE",
@@ -653,6 +670,54 @@
       "principalId": "read_outbreak",
       "permission": "ALLOW",
       "property": "countNewContactsByExposure"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "generateFollowups"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countIndependentTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "getIndependentTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "__get__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "__findById__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "__count__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactsSeen"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactsLostToFollowup"
     }
   ],
   "methods": {
@@ -1565,7 +1630,228 @@
       "description": "Count the new contacts and groups them by exposure type",
       "http": {
         "verb": "get",
-        "path": "/contacts/count-new-contacts-by-exposure-type"
+        "path": "/contacts/new-by-exposure-type/count"
+      }
+    },
+    "prototype.restoreContactFollowUp": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for followUps"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "followUp",
+          "type": [
+            "followUp"
+          ],
+          "description": "Follow Up",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted follow-up.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/:nk/follow-ups/:fk/restore"
+      }
+    },
+    "prototype.generateFollowups": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "description": "Follow up period in days. Property: followUpPeriod [number]",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "generatedFollowUps",
+          "type": [
+            {
+              "type": {
+                "contactId": {
+                  "type": "string"
+                },
+                "followUps": {
+                  "type": [
+                    "followUp"
+                  ]
+                }
+              }
+            }
+          ],
+          "description": "Generated Follow Ups",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Generate a list of follow-ups",
+      "http": {
+        "verb": "post",
+        "path": "/generate-followups"
+      }
+    },
+    "prototype.countIndependentTransmissionChains": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "chains",
+          "type": {
+            "chains": [
+              {
+                "type": {
+                  "length": "number"
+                }
+              }
+            ],
+            "length": "number"
+          },
+          "description": "Number of transmission chains and the length of each chain",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Count the number of independent transmission chains",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/independent-transmission-chains/filtered-count"
+      }
+    },
+    "prototype.getIndependentTransmissionChains": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "chains",
+          "type": {
+            "nodes": {
+              "type": {
+                "<personId>": {
+                  "type": "person"
+                }
+              }
+            },
+            "edges": {
+              "type": {
+                "<relationshipId>": {
+                  "type": "relationship"
+                }
+              }
+            },
+            "transmissionChains": {
+              "type": {
+                "chains": {
+                  "type": [
+                    {
+                      "type": [
+                        {
+                          "type": [
+                            "string"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "length": "number"
+              }
+            }
+          },
+          "description": "Independent transmission chains",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Get independent transmission chains",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/independent-transmission-chains"
+      }
+    },
+    "prototype.countContactsSeen": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "contactsSeen": "number",
+            "teams": [
+              {
+                "id": "teamId/null",
+                "contactsSeen": "number"
+              }
+            ]
+          },
+          "description": "Object containing counters for seen contacts",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of seen contacts as well as per team",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/contacts-seen/count"
+      }
+    },
+    "prototype.countContactsLostToFollowup": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "contactsLostToFollowup": "number",
+            "teams": [
+              {
+                "id": "teamId/null",
+                "contactsLostToFollowup": "number"
+              }
+            ]
+          },
+          "description": "Object containing counters for contacts lost to follow-up",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of contacts lost to follow-up as well as per team",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/contacts-lost-to-follow-up/count"
       }
     }
   }

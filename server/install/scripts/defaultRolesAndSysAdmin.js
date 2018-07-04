@@ -73,6 +73,7 @@ const rolesMap = {
   'Contact Tracer': {
     description: 'This is a built in role that follows up with contacts and monitors their health.',
     permissionIds: [
+      'read_outbreak',
       'read_case',
       'write_case',
       'read_contact',

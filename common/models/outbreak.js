@@ -3,10 +3,27 @@
 const app = require('../../server/server');
 const _ = require('lodash');
 
+// used to manipulate dates
+const moment = require('moment');
+
 module.exports = function (Outbreak) {
 
   // initialize model helpers
   Outbreak.helpers = {};
+
+  /**
+   * Checks whether the given follow up model is generated
+   * Checks that update/create dates are on the same
+   * Checks that it is not performed or lost
+   * @param model
+   * @returns {boolean}
+   */
+  Outbreak.helpers.isNewGeneratedFollowup = function (model) {
+    return moment(model.createdAt).isSame(moment(model.updatedAt))
+      && model.isGenerated
+      && !model.performed
+      && !model.lostToFollowUp;
+  };
 
   /**
    * Find relations for a person
@@ -409,7 +426,6 @@ module.exports = function (Outbreak) {
       .find(_filter);
   };
 
-
   /**
    * Restrict what users can see based on their assigned permissions
    * @param type
@@ -486,5 +502,118 @@ module.exports = function (Outbreak) {
       // update filter
       _.set(context, 'args.filter', filter);
     }
-  }
+  };
+
+  /**
+   * Count the contacts by follow-up flag (eg: performed, lostToFollowUp)
+   * Note: The contacts are counted in total and per team. If a contact is lost to follow-up by 2 teams it will be counted once in total and once per each team.
+   * @param options Object containing outbreakId, follow-up flag name and result property
+   * @param filter
+   * @param callback
+   */
+  Outbreak.helpers.countContactsByFollowUpFlag = function (options, filter, callback) {
+    // get options
+    let followUpFlag = options.followUpFlag;
+    let resultProperty = options.resultProperty;
+
+    // initialize result
+    let results = {
+      [resultProperty]: 0,
+      teams: []
+    };
+
+    // get all the followups for the filtered period
+    app.models.followUp.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: options.outbreakId
+        }
+      }, filter || {}))
+      .then(function (followups) {
+        // initialize map of contacts to not count same contact twice
+        let contacts = {};
+        // initialize map of teams
+        let teams = {};
+
+        followups.forEach(function (followup) {
+          // get contactId
+          let contactId = followup.personId;
+          // get teamId; there might be no team id, set null
+          let teamId = followup.teamId || null;
+
+          // check if a followup for the same contact was already parsed
+          if (contacts[contactId]) {
+            // check if there was another followup for the same team
+            // if so check for the cached follow-up flag value; eg: check for the cached lostToFollowUp flag
+            // if the previous followup flag was true there is no need to update any counter;
+            // counter will not be incremented even though the new followup flag was also true; eg: will not increment even though the new follow-up is also lostToFollowUp
+            // updates needed only for the case where the previous followup flag was false and the current one is true; eg: previous follow-up was not lostToFollowUp and the current one is
+            if (contacts[contactId].teams[teamId]) {
+              if (!contacts[contactId].teams[teamId][followUpFlag] && followup[followUpFlag] === true) {
+                // update follow-up flag
+                contacts[contactId].teams[teamId][followUpFlag] = true;
+                // increase counter for team
+                teams[teamId][resultProperty]++;
+              }
+            } else {
+              // new teamId
+              // cache followup flag information for contact in team
+              contacts[contactId].teams[teamId] = {
+                [followUpFlag]: followup[followUpFlag]
+              };
+
+              // initialize team entry if doesn't already exist
+              teams[teamId] = teams[teamId] || {
+                id: teamId,
+                [resultProperty]: 0
+              };
+
+              // increase counter for the team
+              followup[followUpFlag] && teams[teamId][resultProperty]++;
+            }
+
+            // check if the previous flag value was  false and the current one is true
+            // eg: check if contact didn't have a lostToFollowUp followup and the current one was lostToFollowUp
+            // as specified above for teams this is the only case where updates are needed
+            if (!contacts[contactId][followUpFlag] && followup[followUpFlag] === true) {
+              // update overall follow-up flag
+              contacts[contactId][followUpFlag] = true;
+              // increase successful total counter
+              results[resultProperty]++;
+            }
+          } else {
+            // first followup for the contact
+            // cache followup flag information for contact in team and overall; eg: cache lostToFollowUp flag
+            contacts[contactId] = {
+              teams: {
+                [teamId]: {
+                  [followUpFlag]: followup[followUpFlag]
+                }
+              },
+              [followUpFlag]: followup[followUpFlag]
+            };
+
+            // initialize team entry if doesn't already exist
+            teams[teamId] = teams[teamId] || {
+              id: teamId,
+              [resultProperty]: 0
+            };
+
+            // increase counters if the follow-up flag is true
+            // eg: if the contact was lost to follow-up
+            if (followup[followUpFlag]) {
+              results[resultProperty]++;
+              teams[teamId][resultProperty]++;
+            }
+          }
+        });
+
+        // update results.teams; sending array with teams information
+        results.teams = _.values(teams);
+
+        // send response
+        callback(null, results);
+      })
+      .catch(callback);
+  };
 };
