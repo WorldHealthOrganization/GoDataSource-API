@@ -48,11 +48,11 @@ function invokeWorkerMethod(workerName, method, args, callback) {
 
 module.exports = {
   transmissionChain: {
-    build: function (relationships, callback) {
-      invokeWorkerMethod('transmissionChain', 'build', [relationships], callback);
+    build: function (relationships, followUpPeriod, callback) {
+      invokeWorkerMethod('transmissionChain', 'build', [relationships, followUpPeriod], callback);
     },
-    count: function (relationships, callback) {
-      invokeWorkerMethod('transmissionChain', 'count', [relationships], callback);
+    count: function (relationships, followUpPeriod, callback) {
+      invokeWorkerMethod('transmissionChain', 'count', [relationships, followUpPeriod], callback);
     }
   },
   bulkModelOperation: {
