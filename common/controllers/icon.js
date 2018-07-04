@@ -58,7 +58,7 @@ module.exports = function (Icon) {
    * @param icon
    * @param callback
    */
-  Icon.upload = function (req, name, icon, callback) {
+  Icon.upload = function (req, name, icon, options, callback) {
     const form = new formidable.IncomingForm();
     form.parse(req, function (error, fields, files) {
       if (error) {
@@ -87,7 +87,7 @@ module.exports = function (Icon) {
           return Icon.create({
             name: fields.name,
             path: savePath
-          });
+          }, options);
         })
         .then(function (image) {
           callback(null, image);

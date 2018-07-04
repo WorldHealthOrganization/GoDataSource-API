@@ -30,8 +30,8 @@ module.exports = function (Model) {
    * Restore a soft-deleted record
    * @param [callback]
    */
-  Model.prototype.undoDelete = function (callback) {
-    return this.updateAttributes({[deletedFlag]: false, [deletedAt]: null}, callback);
+  Model.prototype.undoDelete = function (options = {}, callback) {
+    return this.updateAttributes({[deletedFlag]: false, [deletedAt]: null}, options, callback);
   };
 
   /**

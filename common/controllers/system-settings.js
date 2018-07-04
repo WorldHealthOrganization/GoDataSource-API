@@ -37,12 +37,12 @@ module.exports = function (SystemSettings) {
    * @param data
    * @param cb
    */
-  SystemSettings.updateSystemSettings = function (data, cb) {
+  SystemSettings.updateSystemSettings = function (data, options, cb) {
     // There is only one entry in the system settings collection; get it and update it
     SystemSettings.findOne()
       .then(function (instance) {
         if (instance) {
-          return instance.updateAttributes(data)
+          return instance.updateAttributes(data, options)
             .then(function (instance) {
               cb(null, instance);
             });

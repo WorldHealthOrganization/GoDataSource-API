@@ -137,7 +137,7 @@ module.exports = function (Model) {
           }
         });
         app.models.auditLog
-          .create(logData);
+          .create(logData, context.options);
         // call the callback without waiting for the audit log changes to be persisted
         callback();
       } else {
@@ -152,7 +152,8 @@ module.exports = function (Model) {
             changedData: context.options.changedFields
           };
           app.models.auditLog
-            .create(logData);
+            .create(logData, context.options);
+
         }
         // call the callback without waiting for the audit log changes to be persisted
         callback();
@@ -199,7 +200,7 @@ module.exports = function (Model) {
           }
         });
         app.models.auditLog
-          .create(logData);
+          .create(logData, context.options);
         // call the callback without waiting for the audit log changes to be persisted
         callback();
       } else {
