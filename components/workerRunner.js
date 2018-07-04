@@ -54,5 +54,13 @@ module.exports = {
     count: function (relationships, callback) {
       invokeWorkerMethod('transmissionChain', 'count', [relationships], callback);
     }
+  },
+  bulkModelOperation: {
+    deleteOneByOne: function (modelName, where, callback) {
+      invokeWorkerMethod('bulkModelOperation', 'deleteOneByOne', [modelName, where], callback);
+    },
+    restoreOneByOne: function (modelName, where, callback) {
+      invokeWorkerMethod('bulkModelOperation', 'restoreOneByOne', [modelName, where], callback);
+    }
   }
 };
