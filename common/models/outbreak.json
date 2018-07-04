@@ -711,7 +711,13 @@
       "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
-      "property": "countSeenContacts"
+      "property": "countContactsSeen"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactsLostToFollowup"
     }
   ],
   "methods": {
@@ -1698,7 +1704,7 @@
         "path": "/relationships/independent-transmission-chains"
       }
     },
-    "prototype.countSeenContacts": {
+    "prototype.countContactsSeen": {
       "accepts": [
         {
           "arg": "filter",
@@ -1710,10 +1716,10 @@
         {
           "arg": "counters",
           "type": {
-            "seenContacts": "number",
+            "contactsSeen": "number",
             "teams": [{
               "id": "teamId/null",
-              "seenContacts": "number"
+              "contactsSeen": "number"
             }]
           },
           "description": "Object containing counters for seen contacts",
@@ -1721,10 +1727,39 @@
           "required": true
         }
       ],
-      "description": "Count the total number of seen contacts",
+      "description": "Count the total number of seen contacts as well as per team",
       "http": {
         "verb": "get",
-        "path": "/follow-ups/count-seen-contacts"
+        "path": "/follow-ups/contacts-seen/count"
+      }
+    },
+    "prototype.countContactsLostToFollowup": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "contactsLostToFollowup": "number",
+            "teams": [{
+              "id": "teamId/null",
+              "contactsLostToFollowup": "number"
+            }]
+          },
+          "description": "Object containing counters for contacts lost to follow-up",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of contacts lost to follow-up as well as per team",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/contacts-lost-to-follow-up/count"
       }
     }
   }
