@@ -1656,14 +1656,14 @@
         {
           "arg": "chains",
           "type": {
-              "chains": [
-                {
-                  "type": {
-                    "length": "number"
-                  }
+            "chains": [
+              {
+                "type": {
+                  "length": "number"
                 }
-              ],
-              "length": "number"
+              }
+            ],
+            "length": "number"
           },
           "description": "Number of transmission chains and the length of each chain",
           "required": true,
@@ -1745,10 +1745,12 @@
           "arg": "counters",
           "type": {
             "contactsSeen": "number",
-            "teams": [{
-              "id": "teamId/null",
-              "contactsSeen": "number"
-            }]
+            "teams": [
+              {
+                "id": "teamId/null",
+                "contactsSeen": "number"
+              }
+            ]
           },
           "description": "Object containing counters for seen contacts",
           "root": true,
@@ -1774,10 +1776,12 @@
           "arg": "counters",
           "type": {
             "contactsLostToFollowup": "number",
-            "teams": [{
-              "id": "teamId/null",
-              "contactsLostToFollowup": "number"
-            }]
+            "teams": [
+              {
+                "id": "teamId/null",
+                "contactsLostToFollowup": "number"
+              }
+            ]
           },
           "description": "Object containing counters for contacts lost to follow-up",
           "root": true,
