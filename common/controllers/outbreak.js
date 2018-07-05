@@ -1213,4 +1213,100 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Count the new contacts for each event
+   * @param filter Besides the default filter properties this request also accepts 'noDaysNewContacts': number on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countEventNewContacts = function (filter, callback) {
+    // initialize noDaysNewContacts filter
+    let noDaysNewContacts;
+    // check if the noDaysNewContacts filter was sent; accepting it only on the first level
+    noDaysNewContacts = _.get(filter, 'where.noDaysNewContacts');
+    if (typeof noDaysNewContacts !== "undefined") {
+      // noDaysNewContacts was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.noDaysNewContacts;
+    } else {
+      // get the outbreak noDaysNewContacts as the default noDaysNewContacts value
+      noDaysNewContacts = this.noDaysNewContacts;
+    }
+
+    // get now date
+    let now = new Date();
+
+    // get all events and include the relationships with contacts which were created sooner than 'noDaysNewContacts' ago
+    app.models.event.find({
+      where: {
+        outbreakId: this.id
+      },
+      include: {
+        relation: 'relationships',
+        scope: app.utils.remote
+          .mergeFilters({
+            where: {
+              'persons.type': 'contact',
+              contactDate: {
+                gte: now.setDate(now.getDate() - noDaysNewContacts)
+              }
+            }
+          }, filter || {})
+      }
+    })
+      .then(function (events) {
+        // initialize results
+        let results = {
+          newContacts: 0,
+          events: {}
+        };
+
+        // initialize events map and contacts map
+        let eventsMap = {};
+        let contactsMap = {};
+
+        // loop through the events and count the contacts
+        // Note that the event can have multiple relations with the same contact
+        events.forEach(function (event) {
+          eventsMap[event.id] = {
+            id: event.id,
+            newContacts: 0,
+            // helper property to keep the contacts already counted
+            contacts: {}
+          };
+
+          // loop through the relationships to count the contacts; cannot take the length as there might be multiple relationships between an event and the same contact
+          if (event.relationships && event.relationships.length) {
+            event.relationships.forEach(function (relationship) {
+              // get contactId
+              let contactId = relationship.persons[relationship.persons.findIndex(elem => elem.type === 'contact')].id;
+
+              // count the contact only if not already counted
+              if (!eventsMap[event.id].contacts[contactId]) {
+                // get contactId flag in order to not count it twice for the event
+                eventsMap[event.id].contacts[contactId] = true;
+                // increase counter
+                eventsMap[event.id].newContacts++;
+              }
+
+              if (!contactsMap[contactId]) {
+                // get contactId flag in order to not count it twice in total
+                contactsMap[contactId] = true;
+                // increase total counter
+                results.newContacts++;
+              }
+            });
+          }
+
+          // relationships were parsed, no need to keep the contacts helper property in an event entry
+          delete eventsMap[event.id].contacts;
+        });
+
+        // update results.events; sending array with events information
+        results.events = _.values(eventsMap);
+
+        // send response
+        callback(null, results);
+      })
+      .catch(callback);
+  };
 };

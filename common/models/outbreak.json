@@ -742,6 +742,12 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "countCasesWithLessThanXContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countEventNewContacts"
     }
   ],
   "methods": {
@@ -1892,6 +1898,37 @@
       "http": {
         "verb": "get",
         "path": "/relationships/new-cases-in-transmission-chains/count"
+      }
+    },
+    "prototype.countEventNewContacts": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'noDaysNewContacts' number on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "newContacts": "number",
+            "events": [
+              {
+                "id": "eventId",
+                "newContacts": "number"
+              }
+            ]
+          },
+          "description": "Object containing counters for new contacts for each event",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the number of new contacts for each event",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/events-new-contacts/count"
       }
     }
   }
