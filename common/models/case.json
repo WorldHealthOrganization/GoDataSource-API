@@ -48,9 +48,9 @@
     "dateOfOutcome": {
       "type": "date"
     },
-    "isolationDates": ["date"],
-    "hospitalizationDates": ["date"],
-    "incubationDates": ["date"],
+    "isolationDates": ["dateRange"],
+    "hospitalizationDates": ["dateRange"],
+    "incubationDates": ["dateRange"],
     "deceased": {
       "type": "boolean",
       "default": false

@@ -100,8 +100,6 @@ module.exports = function (Outbreak) {
    * Also set visual id
    */
   Outbreak.beforeRemote('prototype.__create__cases', function (context, modelInstance, next) {
-    // parse array of dates properties
-    helpers.parseArrayOfDates(context.args.data);
     // if the visual id was not passed
     if (context.args.data.visualId === undefined) {
       // set it automatically
@@ -112,16 +110,6 @@ module.exports = function (Outbreak) {
     } else {
       next();
     }
-  });
-
-  /**
-   * Parsing the properties that are of type '["date"]' as Loopback doesn't save them correctly
-   */
-  Outbreak.beforeRemote('prototype.__updateById__cases', function (context, modelInstance, next) {
-    // parse array of dates properties
-    helpers.parseArrayOfDates(context.args.data);
-
-    next();
   });
 
   /**
@@ -1144,4 +1132,39 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  //
+  /**
+   * Convert filter date attributes from string to date
+   * @param obj
+   */
+  let convertPropsToDate = function (obj) {
+    for (let prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
+        if (typeof obj[prop] == 'object' && obj[prop] !== null) {
+          convertPropsToDate(obj[prop]);
+        } else {
+          // we're only looking for strings properties to convert
+          if (typeof obj[prop] === 'string') {
+            // try to convert the string value to date, if valid, replace the old value
+            let convertedDate = moment(obj[prop]);
+            if (convertedDate.isValid()) {
+              obj[prop] = convertedDate.toDate();
+            }
+          }
+        }
+      }
+    }
+  };
+
+  /**
+   * Convert any date attribute that is string to 'Date' instance
+   * Needed because mongodb doesn't always filter as expected when date is string
+   */
+  Outbreak.beforeRemote('**', function (context, modelInstance, next) {
+    if (context.args.filter) {
+      convertPropsToDate(context.args.filter);
+    }
+    return next();
+  });
 };
