@@ -954,9 +954,27 @@ module.exports = function (Outbreak) {
     app.models.relationship
       .countTransmissionChains(this.id, filter, function (error, noOfChains) {
         if (error) {
-          throw error;
+          return callback(error);
         }
-        callback(null, noOfChains);
+        const nodeIds = Object.keys(noOfChains.nodes);
+        app.models.case
+          .count({
+            where: {
+              outbreakId: self.id,
+              classification: {
+                inq: app.models.case.nonDiscardedCaseClassifications
+              },
+              id: {
+                nin: nodeIds
+              }
+            }
+          })
+          .then(function (isolatedCasesNo) {
+            noOfChains.isolatedCases = isolatedCasesNo + nodeIds.length;
+            delete noOfChains.nodes;
+            callback(null, noOfChains);
+          })
+          .catch(callback)
       });
   };
 
@@ -966,12 +984,31 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getIndependentTransmissionChains = function (filter, callback) {
+    const self = this;
     app.models.relationship
       .getTransmissionChains(this.id, filter, function (error, transmissionChains) {
         if (error) {
           return callback(error);
         }
-        callback(null, transmissionChains);
+        app.models.case
+          .find({
+            where: {
+              outbreakId: self.id,
+              classification: {
+                inq: app.models.case.nonDiscardedCaseClassifications
+              },
+              id: {
+                nin: Object.keys(transmissionChains.nodes)
+              }
+            }
+          })
+          .then(function (isolatedCases) {
+            isolatedCases.forEach(function (isolatedCase) {
+              transmissionChains.nodes[isolatedCase.id] = isolatedCase;
+            });
+            callback(null, transmissionChains);
+          })
+          .catch(callback);
       });
   };
 

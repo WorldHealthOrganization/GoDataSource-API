@@ -1669,7 +1669,8 @@
                 }
               }
             ],
-            "length": "number"
+            "length": "number",
+            "isolatedCases": "number"
           },
           "description": "Number of transmission chains and the length of each chain",
           "required": true,

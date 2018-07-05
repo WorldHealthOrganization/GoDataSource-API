@@ -194,6 +194,7 @@ const worker = {
     // only need counters
     if (countOnly) {
       result = {
+        nodes: nodes,
         chains: chainsLengths,
         length: _chains.length
       };
