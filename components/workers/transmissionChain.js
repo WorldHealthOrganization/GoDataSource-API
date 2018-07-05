@@ -48,33 +48,40 @@ const worker = {
       let personIds = [relationship.persons[0].id, relationship.persons[1].id];
       // check if we actually have a valid relation (should always be the case)
       if (personIds.length === 2) {
+        // define shortcuts
+        let relationshipPerson1;
+        let relationshipPerson2;
 
         // if people information is available
         if (relationship.people && relationship.people.length) {
 
+          // build defined shortcuts
+          relationshipPerson1 = relationship.people[0];
+          relationshipPerson2 = relationship.people[1];
+
           // add edge only when there is information about both people
           // there can be only one person in the relationship because some filtering was applied
-          if (relationship.people[0] && relationship.people[1]) {
+          if (relationshipPerson1 && relationshipPerson2) {
             // add information about edges
             edges[relationship.id] = relationship;
 
             // get information about first person
-            if (!nodes[relationship.people[0].id]) {
-              nodes[relationship.people[0].id] = relationship.people[0];
+            if (!nodes[relationshipPerson1.id]) {
+              nodes[relationshipPerson1.id] = relationshipPerson1;
             }
             // get information about second person
-            if (!nodes[relationship.people[1].id]) {
-              nodes[relationship.people[1].id] = relationship.people[1];
+            if (!nodes[relationshipPerson2.id]) {
+              nodes[relationshipPerson2.id] = relationshipPerson2;
             }
           } else {
             // if the relationship does not contain information about both people, skip contacts (they cannot exist unlinked from a chain)
             // get information about first person (if it exists and it's not a contact)
-            if (relationship.people[0] && relationship.people[0].type !== 'contact' && !nodes[relationship.people[0].id]) {
-              nodes[relationship.people[0].id] = relationship.people[0];
+            if (relationshipPerson1 && relationshipPerson1.type !== 'contact' && !nodes[relationshipPerson1.id]) {
+              nodes[relationshipPerson1.id] = relationshipPerson1;
             }
             // get information about second person (if it exists and it's not a contact)
-            if (relationship.people[1] && relationship.people[1].type !== 'contact' && !nodes[relationship.people[1].id]) {
-              nodes[relationship.people[1].id] = relationship.people[1];
+            if (relationshipPerson2 && relationshipPerson2.type !== 'contact' && !nodes[relationshipPerson2.id]) {
+              nodes[relationshipPerson2.id] = relationshipPerson2;
             }
 
             // skip adding nodes to the chain when the relation is incomplete
@@ -91,7 +98,7 @@ const worker = {
         }
 
         // transmission chains are build only by case-case relationships
-        if (relationship.people[0].type !== 'case' || relationship.people[1].type !== 'case') {
+        if (relationshipPerson1.type !== 'case' || relationshipPerson2.type !== 'case') {
           relationsIndex++;
           continue;
         }
