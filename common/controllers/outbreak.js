@@ -2241,8 +2241,8 @@ module.exports = function (Outbreak) {
         )
     ])
     // retrieve all relationships belonging to the case/contacts
-      .then((items) => Promise
-        .all(items.map((item) => Promise
+      .then((listOfCaseAndContacts) => Promise
+        .all(listOfCaseAndContacts.map((item) => Promise
           .all(item.map((model) => _findRelations(model.id)
             .then((relations) => {
               model.relationships = relations;
