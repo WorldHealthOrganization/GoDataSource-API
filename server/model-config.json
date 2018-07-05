@@ -215,5 +215,9 @@
   "securityQuestionTemplate": {
     "dataSource": null,
     "public": false
+  },
+  "dateRange": {
+    "dataSource": null,
+    "public": false
   }
 }
