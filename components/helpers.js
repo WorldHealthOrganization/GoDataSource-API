@@ -123,11 +123,35 @@ const remapProperties = function (list, fieldsMap) {
   return results;
 };
 
+/**
+ * Convert filter date attributes from string to date
+ * @param obj
+ */
+const convertPropsToDate = function (obj) {
+  for (let prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      if (typeof obj[prop] == 'object' && obj[prop] !== null) {
+        convertPropsToDate(obj[prop]);
+      } else {
+        // we're only looking for strings properties to convert
+        if (typeof obj[prop] === 'string') {
+          // try to convert the string value to date, if valid, replace the old value
+          let convertedDate = moment(obj[prop]);
+          if (convertedDate.isValid()) {
+            obj[prop] = convertedDate.toDate();
+          }
+        }
+      }
+    }
+  }
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamToBuffer,
   remapProperties: remapProperties,
   getUTCDateEndOfDay: getUTCDateEndOfDay,
   getAsciiString: getAsciiString,
-  getChunksForInterval: getChunksForInterval
+  getChunksForInterval: getChunksForInterval,
+  convertPropsToDate: convertPropsToDate
 };
