@@ -681,13 +681,13 @@
       "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
-      "property": "extendedCountCases"
+      "property": "filteredCountCases"
     },
     {
       "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
-      "property": "extendedCountCases"
+      "property": "filteredCountCases"
     },
     {
       "principalType": "ROLE",
@@ -1591,7 +1591,7 @@
         "path": "/contacts/new-by-exposure-type/count"
       }
     },
-    "prototype.extendedCountCases": {
+    "prototype.filteredCountCases": {
       "accepts":[
         {
           "arg": "filter",
@@ -1610,7 +1610,7 @@
       "description": "Counts the cases that pass a filter (which now can accept relations)",
       "http": {
         "verb": "get",
-        "path": "/cases/extendedCount"
+        "path": "/cases/filtered-count"
       }
     },
     "prototype.restoreContactFollowUp": {
