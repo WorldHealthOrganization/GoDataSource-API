@@ -2272,9 +2272,9 @@ module.exports = function (Outbreak) {
         // store reference to the properties that belong to the result model
         let resultModelProps = resultModel.__data;
 
-        // start merging basic properties based on the pre-defined map of properties above
+        // start merging basic properties
         // go levels below to the most last updatedAt one, if any property is missing
-        // we start we case because it has priority
+        // we start with case because it has priority
         // in case, a base case was not found we consider it being a contact to contact merge
         // hence ignoring case merge feature whatsoever
         if (!isCase) {
@@ -2314,12 +2314,11 @@ module.exports = function (Outbreak) {
         }
 
         // get all the ids for case/contact, needed to verify that there are no relations between 2 cases that should be merged
-        // also make an alternate lists of ids and based on their type, used when updating database records\
+        // also make a list of ids and based on their type, used when updating database records
         let caseIds = cases.map((item) => item.id);
         let contactIds = contacts.map((item) => item.id);
 
         // take follow ups from all the contacts and change their contact id to point to result model
-        // prepare lab results
         let followUps = [];
         contacts.forEach((contact) => {
           if (contact.followUps().length) {
@@ -2364,19 +2363,19 @@ module.exports = function (Outbreak) {
             }
 
             // otherwise try check which of the candidates is a from the merging list and replace it with base's id
-            firstMember = firstMember === -1 ? relation.persons[0].id : ids[firstMember];
-            secondMember = secondMember === -1 ? relation.persons[1].id : ids[secondMember];
+            firstMember = firstMember === -1 ? relation.persons[0].id : resultModel.id;
+            secondMember = secondMember === -1 ? relation.persons[1].id : resultModel.id;
 
             relations.push({
               id: relation.id,
               persons: [
                 {
                   id: firstMember,
-                  type: relation.persons[0].type
+                  type: firstMember === resultModel.id ? resultModel.type : relation.persons[0].type
                 },
                 {
                   id: secondMember,
-                  type: relation.persons[1].type
+                  type: firstMember === resultModel.id ? resultModel.type : relation.persons[1].type
                 }
               ]
             });

@@ -735,7 +735,7 @@ module.exports = function (Outbreak) {
       'riskReason',
       'transferRefused'
     ];
-    // the follow case props are array and should be treated differently
+    // the following case props are array and should be treated differently
     const caseArrayProps = [
       'isolationDates',
       'hospitalizationDates',
