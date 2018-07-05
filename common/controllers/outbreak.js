@@ -951,6 +951,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countIndependentTransmissionChains = function (filter, callback) {
+    const self = this;
     app.models.relationship
       .countTransmissionChains(this.id, filter, function (error, noOfChains) {
         if (error) {
@@ -959,14 +960,12 @@ module.exports = function (Outbreak) {
         const nodeIds = Object.keys(noOfChains.nodes);
         app.models.case
           .count({
-            where: {
-              outbreakId: self.id,
-              classification: {
-                inq: app.models.case.nonDiscardedCaseClassifications
-              },
-              id: {
-                nin: nodeIds
-              }
+            outbreakId: self.id,
+            classification: {
+              inq: app.models.case.nonDiscardedCaseClassifications
+            },
+            id: {
+              nin: nodeIds
             }
           })
           .then(function (isolatedCasesNo) {
