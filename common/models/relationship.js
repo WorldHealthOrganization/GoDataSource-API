@@ -18,21 +18,78 @@ module.exports = function (Relationship) {
   };
 
   /**
-   * Build transmission chains from a list of relationships
-   * @param relationships {[relationship]}
+   * Build or count transmission chains for an outbreak
+   * @param outbreakId
+   * @param filter
+   * @param countOnly
    * @param callback
    */
-  Relationship.getTransmissionChains = function (relationships, callback) {
-    transmissionChain.build(relationships, callback);
+  Relationship.buildOrCountTransmissionChains = function (outbreakId, filter, countOnly, callback) {
+    // build a filter: get all relations between non-discarded cases and contacts + events from current outbreak
+    filter = app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId
+        },
+        include: {
+          relation: 'people',
+          scope: {
+            where: {
+              or: [
+                {
+                  type: 'case',
+                  classification: {
+                    inq: app.models.case.nonDiscardedCaseClassifications
+                  }
+                },
+                {
+                  type: {
+                    inq: ['contact', 'event']
+                  }
+                }
+              ]
+            },
+            filterParent: true
+          }
+        }
+      }, filter || {});
+
+    // search relations
+    app.models.relationship
+      .find(filter)
+      .then(function (relationships) {
+        // add 'filterParent' capability
+        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
+        if (countOnly) {
+          // count transmission chain
+          transmissionChain.count(relationships, callback);
+        } else {
+          // build transmission chain
+          transmissionChain.build(relationships, callback);
+        }
+
+      })
+      .catch(callback);
   };
 
   /**
-   * Count transmission chains from a list of relationships
-   * @param relationships {[relationship]}
+   * Build transmission chains for an outbreak
+   * @param outbreakId
+   * @param filter
    * @param callback
    */
-  Relationship.countTransmissionChains = function (relationships, callback) {
-    transmissionChain.count(relationships, callback);
+  Relationship.getTransmissionChains = function (outbreakId, filter, callback) {
+    Relationship.buildOrCountTransmissionChains(outbreakId, filter, false, callback);
+  };
+
+  /**
+   * Count transmission chains for an outbreak
+   * @param outbreakId
+   * @param filter
+   * @param callback
+   */
+  Relationship.countTransmissionChains = function (outbreakId, filter, callback) {
+    Relationship.buildOrCountTransmissionChains(outbreakId, filter, true, callback);
   };
 
   /**
@@ -53,11 +110,7 @@ module.exports = function (Relationship) {
           scope: {
             where: {
               classification: {
-                inq: [
-                  'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_CONFIRMED',
-                  'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_PROBABLE',
-                  'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT'
-                ]
+                inq: app.models.case.nonDiscardedCaseClassifications
               }
             },
             filterParent: true
@@ -69,7 +122,11 @@ module.exports = function (Relationship) {
     return Relationship
       .find(_filter)
       .then(function (relationships) {
-        return app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, _filter);
+        return app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, _filter)
+        // some relations may be invalid after applying scope filtering, remove invalid ones
+          .filter(function (relationship) {
+            return relationship.people.length === 2;
+          });
       });
   }
 };

@@ -951,30 +951,13 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countIndependentTransmissionChains = function (filter, callback) {
-    // build a filter
-    filter = app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: this.id
-        }
-      }, filter || {});
-
-    // search relations
     app.models.relationship
-      .find(filter)
-      .then(function (relationships) {
-        // add 'filterParent' capability
-        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
-        // count transmission chains
-        app.models.relationship
-          .countTransmissionChains(relationships, function (error, noOfChains) {
-            if (error) {
-              throw error;
-            }
-            callback(null, noOfChains)
-          });
-      })
-      .catch(callback);
+      .countTransmissionChains(this.id, filter, function (error, noOfChains) {
+        if (error) {
+          throw error;
+        }
+        callback(null, noOfChains);
+      });
   };
 
   /**
@@ -983,53 +966,13 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getIndependentTransmissionChains = function (filter, callback) {
-    filter = filter || {};
-    // start with a basic filter
-    let _filter = {
-      where: {
-        outbreakId: this.id
-      }
-    };
-    // get include filter
-    let includeFilter = _.get(filter, 'include', []);
-    // normalize filters
-    if (!Array.isArray(includeFilter)) {
-      includeFilter = [includeFilter];
-    }
-    // check of the filter has people relation included (is needed for transmission chains)
-    let hasPeopleRelation = false;
-    includeFilter.forEach(function (singleInclude) {
-      if (
-        (typeof singleInclude === 'string' && singleInclude === 'people') ||
-        (typeof singleInclude === 'object' && singleInclude.relation === 'people')) {
-        hasPeopleRelation = true;
-      }
-    });
-    // if the relation was not included
-    if (!hasPeopleRelation) {
-      // include it
-      includeFilter.push('people');
-    }
-    // update filter
-    _.set(filter, 'include', includeFilter);
-    // merge filters
-    filter = app.utils.remote.mergeFilters(_filter, filter);
-
     app.models.relationship
-      .find(filter)
-      .then(function (relationships) {
-        // add 'filterParent' capability
-        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
-        // build transmission chains
-        app.models.relationship
-          .getTransmissionChains(relationships, function (error, transmissionChains) {
-            if (error) {
-              return callback(error);
-            }
-            callback(null, transmissionChains)
-          });
-      })
-      .catch(callback);
+      .getTransmissionChains(this.id, filter, function (error, transmissionChains) {
+        if (error) {
+          return callback(error);
+        }
+        callback(null, transmissionChains);
+      });
   };
 
   /**

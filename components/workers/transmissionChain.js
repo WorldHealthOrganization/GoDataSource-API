@@ -48,27 +48,59 @@ const worker = {
       let personIds = [relationship.persons[0].id, relationship.persons[1].id];
       // check if we actually have a valid relation (should always be the case)
       if (personIds.length === 2) {
+
+        // if people information is available
+        if (relationship.people && relationship.people.length) {
+
+          // add edge only when there is information about both people
+          // there can be only one person in the relationship because some filtering was applied
+          if (relationship.people[0] && relationship.people[1]) {
+            // add information about edges
+            edges[relationship.id] = relationship;
+
+            // get information about first person
+            if (!nodes[relationship.people[0].id]) {
+              nodes[relationship.people[0].id] = relationship.people[0];
+            }
+            // get information about second person
+            if (!nodes[relationship.people[1].id]) {
+              nodes[relationship.people[1].id] = relationship.people[1];
+            }
+          } else {
+            // if the relationship does not contain information about both people, skip contacts (they cannot exist unlinked from a chain)
+            // get information about first person (if it exists and it's not a contact)
+            if (relationship.people[0] && relationship.people[0].type !== 'contact' && !nodes[relationship.people[0].id]) {
+              nodes[relationship.people[0].id] = relationship.people[0];
+            }
+            // get information about second person (if it exists and it's not a contact)
+            if (relationship.people[1] && relationship.people[1].type !== 'contact' && !nodes[relationship.people[1].id]) {
+              nodes[relationship.people[1].id] = relationship.people[1];
+            }
+
+            // skip adding nodes to the chain when the relation is incomplete
+            relationsIndex++;
+            continue;
+          }
+
+          // remove extra info
+          relationship.people = undefined;
+        } else {
+          // relationship does not contain people information (is invalid)
+          relationsIndex++;
+          continue;
+        }
+
+        // transmission chains are build only by case-case relationships
+        if (relationship.people[0].type !== 'case' || relationship.people[1].type !== 'case') {
+          relationsIndex++;
+          continue;
+        }
+
         // define some shortcuts
         const person1 = personIds[0],
           person2 = personIds[1],
           indexPerson1 = personIdToChainMap[person1],
           indexPerson2 = personIdToChainMap[person2];
-
-        // if it's more than a count and information is available
-        if (!countOnly && relationship.people && relationship.people[0] && relationship.people[1]) {
-          // get information about first person
-          if (!nodes[relationship.people[0].id]) {
-            nodes[relationship.people[0].id] = relationship.people[0];
-          }
-          // get information about second person
-          if (!nodes[relationship.people[1].id]) {
-            nodes[relationship.people[1].id] = relationship.people[1];
-          }
-          // remove extra info
-          relationship.people = undefined;
-          // add information about edges
-          edges[relationship.id] = relationship;
-        }
 
         // treat each scenario separately
         switch (true) {
