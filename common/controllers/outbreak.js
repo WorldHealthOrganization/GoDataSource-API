@@ -100,6 +100,8 @@ module.exports = function (Outbreak) {
    * Also set visual id
    */
   Outbreak.beforeRemote('prototype.__create__cases', function (context, modelInstance, next) {
+    // parse array of dates properties
+    helpers.parseArrayOfDates(context.args.data);
     // if the visual id was not passed
     if (context.args.data.visualId === undefined) {
       // set it automatically
@@ -110,6 +112,16 @@ module.exports = function (Outbreak) {
     } else {
       next();
     }
+  });
+
+  /**
+   * Parsing the properties that are of type '["date"]' as Loopback doesn't save them correctly
+   */
+  Outbreak.beforeRemote('prototype.__updateById__cases', function (context, modelInstance, next) {
+    // parse array of dates properties
+    helpers.parseArrayOfDates(context.args.data);
+
+    next();
   });
 
   /**
@@ -1132,15 +1144,4 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
-
-  /**
-   * Convert any date attribute that is string to 'Date' instance
-   * Needed because mongodb doesn't always filter as expected when date is string
-   */
-  Outbreak.beforeRemote('**', function (context, modelInstance, next) {
-    if (context.args.filter) {
-      genericHelpers.convertPropsToDate(context.args.filter);
-    }
-    return next();
-  });
 };
