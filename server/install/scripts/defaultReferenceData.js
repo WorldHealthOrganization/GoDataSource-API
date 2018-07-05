@@ -53,6 +53,7 @@ const defaultReferenceData = {
     'National ID Card',
     'Passport',
     'Vaccination Card',
+    "External ID",
     'Other'
   ],
   'LNG_REFERENCE_DATA_CATEGORY_DISEASE': [

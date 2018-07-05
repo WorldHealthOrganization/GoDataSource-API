@@ -17,7 +17,8 @@ const routines = {
       require('./scripts/defaultRolesAndSysAdmin'),
       require('./scripts/installLanguages'),
       require('./scripts/defaultSystemSettings'),
-      require('./scripts/defaultReferenceData')
+      require('./scripts/defaultReferenceData'),
+      require('./scripts/defaultLocations')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });

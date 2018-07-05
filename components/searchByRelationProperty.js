@@ -36,24 +36,51 @@ function deepSearchByRelationPropertyOnModel(model, filter) {
   if (typeof model.toJSON === 'function') {
     model = model.toJSON();
   }
-  // check if there's a filter
-  if (filter && filter.include) {
-    // always use arrays (normalize filters)
-    if (!Array.isArray(filter.include)) {
-      filter.include = [filter.include];
-    }
-    filter.include.forEach(function (include) {
-      // if the include filter has a scope
-      if (include.relation && include.scope) {
-        // perform the search (apply filtering)
-        model[include.relation] = deepSearchByRelationProperty(model[include.relation], include.scope);
-        // if the parent needs to be filtered and the relation was not found, clear the parent (set null)
-        if (include.scope.filterParent && (!model[include.relation] || (Array.isArray(model[include.relation]) && !model[include.relation].length))) {
-          model = null;
-        }
-      }
-    });
+  // get standard include filter
+  let include = _.get(filter, 'include', []);
+  // get custom include filter
+  let includeCustom = _.get(filter, 'includeCustom', []);
+  // standard include filter may not always be an array
+  if (!Array.isArray(include)) {
+    include = [include];
   }
+  // merge the two filters
+  include = include.concat(includeCustom);
+
+  // include same relation only once
+  const includedRelNames = [];
+  // go through all relations
+  include = include.filter(function (relation) {
+    // get relation na,e
+    let relationName;
+    if (typeof relation === 'string') {
+      relationName = relation;
+    } else {
+      relationName = relation.relation;
+    }
+    // if the relation was not included, include it now
+    if (includedRelNames.indexOf(relationName) === -1) {
+      includedRelNames.push(relationName);
+      return true;
+    }
+    // otherwise skip it
+    return false;
+  });
+
+  // update filter property
+  filter.include = include;
+  // process each filter
+  filter.include.forEach(function (include) {
+    // if the include filter has a scope
+    if (include.relation && include.scope) {
+      // perform the search (apply filtering)
+      model[include.relation] = deepSearchByRelationProperty(model[include.relation], include.scope);
+      // if the parent needs to be filtered and the relation was not found, clear the parent (set null)
+      if (include.scope.filterParent && (!model[include.relation] || (Array.isArray(model[include.relation]) && !model[include.relation].length))) {
+        model = null;
+      }
+    }
+  });
   return model;
 }
 
@@ -94,14 +121,8 @@ function attachOnRemote(Model, remote) {
    * Attach the behavior on specified remote
    */
   Model.afterRemote(remote, function (context, model, next) {
-    // check for include filter
-    let includeFilter = _.get(context, 'args.filter.include', []);
-    // also include custom relations
-    includeFilter = includeFilter.concat(_.get(context, 'args.filter.includeCustom', []));
-    // normalize the include filter as an array
-    includeFilter = Array.isArray(includeFilter) ? includeFilter : [includeFilter];
     // overwrite the found results
-    context.result = deepSearchByRelationProperty(context.result, {include: includeFilter});
+    context.result = deepSearchByRelationProperty(context.result, _.get(context, 'args.filter', {}));
     next();
   });
 }

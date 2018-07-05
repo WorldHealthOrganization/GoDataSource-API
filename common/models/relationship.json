@@ -20,7 +20,7 @@
       "required": true
     },
     "contactDateEstimated": {
-      "type": "date",
+      "type": "boolean",
       "required": true
     },
     "certaintyLevelId": {
@@ -50,8 +50,14 @@
     }
   },
   "indexes": {
-    "persons_index": {
-      "persons": 1
+    "persons_type_index": {
+      "persons.type": 1
+    },
+    "persons_id_index": {
+      "persons.id": 1
+    },
+    "outbreakId_index": {
+      "outbreakId": 1
     }
   },
   "validations": [],

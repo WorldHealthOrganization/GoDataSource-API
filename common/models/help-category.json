@@ -5,6 +5,13 @@
   "options": {
     "validateUpsert": true
   },
+  "mixins": {
+    "CascadeDelete": {
+      "relations": [
+        "helpItems"
+      ]
+    }
+  },
   "properties": {
     "name": {
       "type": "string",

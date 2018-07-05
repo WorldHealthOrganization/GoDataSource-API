@@ -31,7 +31,11 @@ module.exports = function (Outbreak) {
     'prototype.__delete__contacts__relationships',
     'prototype.__get__referenceData',
     'prototype.__delete__referenceData',
-    'prototype.__count__referenceData'
+    'prototype.__count__referenceData',
+    'prototype.__create__followUps',
+    'prototype.__delete__followUps',
+    'prototype.__updateById__followUps',
+    'prototype.__destroyById__followUps'
   ]);
 
   // attach search by relation property behavior on get contacts
@@ -366,7 +370,10 @@ module.exports = function (Outbreak) {
         if (!contact) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: contactId});
         }
-        return contact.updateAttribute('type', 'case');
+        return contact.updateAttributes({
+          type: "case",
+          dateBecomeCase: new Date()
+        });
       })
       .then(function (_case) {
         convertedCase = _case;
@@ -562,7 +569,7 @@ module.exports = function (Outbreak) {
       })
       .then(function (instance) {
         if (!instance) {
-          throw app.utils.apiError.getError('MODEL_NOT_FOUND', { model: app.models.followUp.modelName, id: followUpId });
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.followUp.modelName, id: followUpId});
         }
         instance.undoDelete(callback);
       })
@@ -599,19 +606,19 @@ module.exports = function (Outbreak) {
         include: {
           relation: 'relationships',
           scope: {
-              where: {
-                or: [
-                  {
-                    'persons.type': 'case'
-                  },
-                  {
-                    'persons.type': 'event'
-                  }
-                ]
-              },
-              order: 'contactDate DESC'
-            }
+            where: {
+              or: [
+                {
+                  'persons.type': 'case'
+                },
+                {
+                  'persons.type': 'event'
+                }
+              ]
+            },
+            order: 'contactDate DESC'
           }
+        }
       })
       .then((contacts) => {
         // follow up add statements
@@ -648,7 +655,7 @@ module.exports = function (Outbreak) {
                         }
                         return resolve(locations);
                       })
-                    })
+                  })
                     .then((locations) => {
                       team.locations = locations;
                       return team;
@@ -948,6 +955,206 @@ module.exports = function (Outbreak) {
 
         // send response
         callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count independent transmission chains
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countIndependentTransmissionChains = function (filter, callback) {
+    // build a filter
+    filter = app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: this.id
+        }
+      }, filter || {});
+
+    // get follow-up period (is needed by transmission chain builder to decide if a chain is active)
+    let followUpPeriod = this.periodOfFollowup;
+
+    // search relations
+    app.models.relationship
+      .find(filter)
+      .then(function (relationships) {
+        // add 'filterParent' capability
+        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
+        // count transmission chains
+        app.models.relationship
+          .countTransmissionChains(relationships, followUpPeriod, function (error, noOfChains) {
+            if (error) {
+              throw error;
+            }
+            callback(null, noOfChains)
+          });
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Get independent transmission chains
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.getIndependentTransmissionChains = function (filter, callback) {
+    filter = filter || {};
+    // start with a basic filter
+    let _filter = {
+      where: {
+        outbreakId: this.id
+      }
+    };
+    // get include filter
+    let includeFilter = _.get(filter, 'include', []);
+    // normalize filters
+    if (!Array.isArray(includeFilter)) {
+      includeFilter = [includeFilter];
+    }
+    // check of the filter has people relation included (is needed for transmission chains)
+    let hasPeopleRelation = false;
+    includeFilter.forEach(function (singleInclude) {
+      if (
+        (typeof singleInclude === 'string' && singleInclude === 'people') ||
+        (typeof singleInclude === 'object' && singleInclude.relation === 'people')) {
+        hasPeopleRelation = true;
+      }
+    });
+    // if the relation was not included
+    if (!hasPeopleRelation) {
+      // include it
+      includeFilter.push('people');
+    }
+    // update filter
+    _.set(filter, 'include', includeFilter);
+    // merge filters
+    filter = app.utils.remote.mergeFilters(_filter, filter);
+
+    // get follow-up period (is needed by transmission chain builder to decide if a chain is active)
+    let followUpPeriod = this.periodOfFollowup;
+
+    app.models.relationship
+      .find(filter)
+      .then(function (relationships) {
+        // add 'filterParent' capability
+        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
+        // build transmission chains
+        app.models.relationship
+          .getTransmissionChains(relationships, followUpPeriod, function (error, transmissionChains) {
+            if (error) {
+              return callback(error);
+            }
+            callback(null, transmissionChains)
+          });
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Set outbreakId for created follow-ups
+   */
+  Outbreak.beforeRemote('prototype.__create__contacts__followUps', function (context, modelInstance, next) {
+    // set outbreakId
+    context.args.data.outbreakId = context.instance.id;
+    next();
+  });
+
+  /**
+   * Count the seen contacts
+   * Note: The contacts are counted in total and per team. If a contact is seen by 2 teams it will be counted once in total and once per each team.
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countContactsSeen = function (filter, callback) {
+    helpers.countContactsByFollowUpFlag({
+      outbreakId: this.id,
+      followUpFlag: 'performed',
+      resultProperty: 'contactsSeen'
+    }, filter, callback);
+  };
+
+  /**
+   * Count the contacts that are lost to follow-up
+   * Note: The contacts are counted in total and per team. If a contact is lost to follow-up by 2 teams it will be counted once in total and once per each team.
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countContactsLostToFollowup = function (filter, callback) {
+    helpers.countContactsByFollowUpFlag({
+      outbreakId: this.id,
+      followUpFlag: 'lostToFollowUp',
+      resultProperty: 'contactsLostToFollowup'
+    }, filter, callback);
+  };
+
+  /**
+   * Count the cases with less than X contacts
+   * Note: Besides the count the response also contains a list with the counted cases IDs
+   * @param filter Besides the default filter properties this request also accepts 'numberContactsLessThan': number on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countCasesWithLessThanXContacts = function (filter, callback) {
+    // initialize numberContactsLessThan filter
+    let numberContactsLessThan;
+    // check if the numberContactsLessThan filter was sent; accepting it only on the first level
+    numberContactsLessThan = _.get(filter, 'where.numberContactsLessThan');
+    if (typeof numberContactsLessThan !== "undefined") {
+      // numberContactsLessThan was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.numberContactsLessThan;
+    } else {
+      // get the outbreak noLessContacts as the default numberContactsLessThan value
+      numberContactsLessThan = this.noLessContacts;
+    }
+
+    // initialize map of case IDs to map of contacts IDs to true value (doing this in order to prevent an indexOf search in an array of contact IDs)
+    // this is a helper map to not loop multiple times through the relationships
+    // eg: {"caseId": {"contactId": numberOfRelationships}}
+    let caseIDsMap = {};
+
+    // in order to count the cases with less than X contacts get the relationships and count unique contacts per case
+    app.models.relationship.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: this.id,
+          and: [{
+            'persons.type': 'case'
+          }, {
+            'persons.type': 'contact'
+          }]
+        }
+      }, filter || {}))
+      .then(function (relationships) {
+        // loop through the relationships to count
+        relationships.forEach(function (relationship) {
+          // get caseId and contactId from relationship; the relationship only has 2 elements
+          // getting caseId index as it can be 0 or 1 so the contactId will be the other index
+          let caseIdIndex = relationship.persons.findIndex(elem => elem.type === 'case');
+          let caseId = relationship.persons[caseIdIndex].id;
+          let contactId = relationship.persons[caseIdIndex ? 0 : 1].id;
+
+          // if there is already an entry in caseIDsMap[caseId] map for the contactId they is nothing to do; a relation with the same persons was already parsed
+          if (caseIDsMap[caseId] && caseIDsMap[caseId][contactId]) {
+            // nothing to do
+          } else {
+            // initialize caseId entry in the caseIDsMap if there is no entry yet
+            if (!caseIDsMap[caseId]) {
+              caseIDsMap[caseId] = {};
+            }
+
+            // add the contactId entry in the caseIDsMap[caseId] map if not already added
+            if (!caseIDsMap[caseId][contactId]) {
+              caseIDsMap[caseId][contactId] = true;
+            }
+          }
+        });
+
+        // filter the caseIDsContactsCounter to get the caseIDs with less than numberContactsLessThan contacts
+        let resultCases = Object.keys(caseIDsMap).filter(caseId => Object.keys(caseIDsMap[caseId]).length < numberContactsLessThan);
+
+        // send response
+        callback(null, resultCases.length, resultCases);
       })
       .catch(callback);
   };

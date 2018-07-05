@@ -16,7 +16,7 @@ module.exports = function (app) {
     context.req.queryId = uuid.v4();
     context.req.timer = new Timer();
     context.req.timer.start();
-    app.logger.debug(`[QueryId: ${context.req.queryId}] Performing MongoDB request: ${context.req.command} ${JSON.stringify(context.req.params)}`);
+    app.logger.debug(`[QueryId: ${context.req.queryId}] Performing MongoDB request on model '${context.model}': ${context.req.command} ${JSON.stringify(context.req.params)}`);
     next();
   });
 

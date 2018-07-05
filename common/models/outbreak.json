@@ -154,6 +154,11 @@
       "type": "hasMany",
       "model": "referenceData",
       "foreignKey": "outbreakId"
+    },
+    "followUps": {
+      "type": "hasMany",
+      "model": "followUp",
+      "foreignKey": "outbreakId"
     }
   },
   "acls": [
@@ -683,6 +688,54 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "extendedCountCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countIndependentTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "getIndependentTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "__get__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "__findById__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "__count__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactsSeen"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactsLostToFollowup"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCasesWithLessThanXContacts"
     }
   ],
   "methods": {
@@ -1535,7 +1588,7 @@
       "description": "Count the new contacts and groups them by exposure type",
       "http": {
         "verb": "get",
-        "path": "/contacts/count-new-contacts-by-exposure-type"
+        "path": "/contacts/new-by-exposure-type/count"
       }
     },
     "prototype.extendedCountCases": {
@@ -1629,6 +1682,183 @@
       "http": {
         "verb": "post",
         "path": "/generate-followups"
+      }
+    },
+    "prototype.countIndependentTransmissionChains": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "chains",
+          "type": {
+            "chains": [
+              {
+                "type": {
+                  "length": "number",
+                  "active": "boolean"
+                }
+              }
+            ],
+            "length": "number",
+            "activeChains": "number"
+          },
+          "description": "Number of transmission chains and the length of each chain",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Count the number of independent transmission chains",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/independent-transmission-chains/filtered-count"
+      }
+    },
+    "prototype.getIndependentTransmissionChains": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "chains",
+          "type": {
+            "nodes": {
+              "type": {
+                "<personId>": {
+                  "type": "person"
+                }
+              }
+            },
+            "edges": {
+              "type": {
+                "<relationshipId>": {
+                  "type": "relationship"
+                }
+              }
+            },
+            "transmissionChains": {
+              "type": {
+                "chains": [
+                  {
+                    "type": {
+                      "chain": [
+                        "string"
+                      ],
+                      "active": "boolean"
+                    }
+                  }
+                ],
+                "length": "number"
+              }
+            }
+          },
+          "description": "Independent transmission chains",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Get independent transmission chains",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/independent-transmission-chains"
+      }
+    },
+    "prototype.countContactsSeen": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "contactsSeen": "number",
+            "teams": [
+              {
+                "id": "teamId/null",
+                "contactsSeen": "number"
+              }
+            ]
+          },
+          "description": "Object containing counters for seen contacts",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of seen contacts as well as per team",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/contacts-seen/count"
+      }
+    },
+    "prototype.countContactsLostToFollowup": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "contactsLostToFollowup": "number",
+            "teams": [
+              {
+                "id": "teamId/null",
+                "contactsLostToFollowup": "number"
+              }
+            ]
+          },
+          "description": "Object containing counters for contacts lost to follow-up",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of contacts lost to follow-up as well as per team",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/contacts-lost-to-follow-up/count"
+      }
+    },
+    "prototype.countCasesWithLessThanXContacts": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'numberContactsLessThan' number on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of cases with less than X contacts",
+          "required": true
+        },
+        {
+          "arg": "caseIDs",
+          "type": ["string"],
+          "description": "Array with IDs of cases with less than X contacts",
+          "required": true
+        }
+      ],
+      "description": "Count the number of cases with less than X contacts; Also return the case IDs",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/cases-with-less-than-x-contacts/count"
       }
     }
   }
