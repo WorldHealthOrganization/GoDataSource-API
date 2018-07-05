@@ -718,6 +718,12 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "countContactsLostToFollowup"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countNewCasesInKnownTransmissionChains"
     }
   ],
   "methods": {
@@ -1799,27 +1805,22 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'noDaysDaysInChains' number on the first level in 'where'"
         }
       ],
       "returns": [
         {
-          "arg": "counters",
+          "arg": "count",
           "type": {
-            "contactsLostToFollowup": "number",
-            "teams": [
-              {
-                "id": "teamId/null",
-                "contactsLostToFollowup": "number"
-              }
-            ]
+            "newCases": "number",
+            "total": "number"
           },
-          "description": "Object containing counters for contacts lost to follow-up",
+          "description": "Retrieve number of new cases in known transmission chains",
           "root": true,
           "required": true
         }
       ],
-      "description": "Count the total number of contacts lost to follow-up as well as per team",
+      "description": "Count the number of new cases vs total number of cases in known transmission chains",
       "http": {
         "verb": "get",
         "path": "/relationships/new-cases-in-transmission-chains/count"

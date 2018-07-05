@@ -35,14 +35,41 @@ module.exports = function (Relationship) {
     transmissionChain.count(relationships, callback);
   };
 
+  /**
+   * Filter known transmission chains
+   * @param filter
+   * @return {*|PromiseLike<T>|Promise<T>}
+   */
   Relationship.filterKnownTransmissionChains = function (filter) {
-    return Relationship
-      .find(app.utils.remote
-        .mergeFilters({
-          where: {
-            "persons.0.type": "case",
-            "persons.1.type": "case"
+    // transmission chains are formed by case-case relations of non-discarded cases
+    let _filter = app.utils.remote
+      .mergeFilters({
+        where: {
+          'persons.0.type': 'case',
+          'persons.1.type': 'case'
+        },
+        include: {
+          relation: 'people',
+          scope: {
+            where: {
+              classification: {
+                inq: [
+                  'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_CONFIRMED',
+                  'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_PROBABLE',
+                  'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT'
+                ]
+              }
+            },
+            filterParent: true
           }
-        }, filter || {}))
+        }
+      }, filter || {});
+
+    // find relationships
+    return Relationship
+      .find(_filter)
+      .then(function (relationships) {
+        return app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, _filter);
+      });
   }
 };

@@ -1071,7 +1071,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Count new cases in known transmission chains
-   * @param filter
+   * @param filter Besides the default filter properties this request also accepts 'noDaysDaysInChains': number on the first level in 'where'
    * @param callback
    */
   Outbreak.prototype.countNewCasesInKnownTransmissionChains = function (filter, callback) {
@@ -1085,8 +1085,7 @@ module.exports = function (Outbreak) {
     // start building a result
     const result = {
       newCases: 0,
-      totalCases: 0,
-      noDaysDaysInChains: noDaysDaysInChains
+      total: 0
     };
 
     // use a cases index to make sure we don't count a case multiple times
@@ -1095,18 +1094,20 @@ module.exports = function (Outbreak) {
     const newCasesFromDate = new Date();
     newCasesFromDate.setDate(newCasesFromDate.getDate() - noDaysDaysInChains);
 
+    // get known transmission chains (case-case relationships)
     app.models.relationship
-      .filterKnownTransmissionChains((app.utils.remote
-        .mergeFilters({
-          include: "people"
-        }, filter || {})))
+      .filterKnownTransmissionChains(filter)
       .then(function (relationships) {
+        // go trough all relations
         relationships.forEach(function (relation) {
+          // go trough all the people
           if (Array.isArray(relation.people)) {
             relation.people.forEach(function (person) {
+              // count each case only once
               if (!casesIndex[person.id]) {
                 casesIndex[person.id] = true;
-                result.totalCases++;
+                result.total++;
+                // check if the case is new (date of symptoms is later than the threshold date)
                 if ((new Date(person.dateOfOnset)) >= newCasesFromDate) {
                   result.newCases++;
                 }
@@ -1116,6 +1117,6 @@ module.exports = function (Outbreak) {
         });
         callback(null, result);
       })
-      .catch(callback)
+      .catch(callback);
   }
 };
