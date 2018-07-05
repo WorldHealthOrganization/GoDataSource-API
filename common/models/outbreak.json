@@ -1644,6 +1644,11 @@
           "arg": "fk",
           "type": "string",
           "description": "Foreign key for followUps"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [

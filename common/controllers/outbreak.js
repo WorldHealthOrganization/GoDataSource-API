@@ -543,7 +543,7 @@ module.exports = function (Outbreak) {
    * @param followUpId
    * @param callback
    */
-  Outbreak.prototype.restoreContactFollowUp = function (contactId, followUpId, callback) {
+  Outbreak.prototype.restoreContactFollowUp = function (contactId, followUpId, options, callback) {
     app.models.followUp
       .findOne({
         deleted: true,
@@ -557,7 +557,7 @@ module.exports = function (Outbreak) {
         if (!instance) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.followUp.modelName, id: followUpId});
         }
-        instance.undoDelete(callback);
+        instance.undoDelete(options, callback);
       })
       .catch(callback);
   };
