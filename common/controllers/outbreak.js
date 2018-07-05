@@ -1068,4 +1068,54 @@ module.exports = function (Outbreak) {
       resultProperty: 'contactsLostToFollowup'
     }, filter, callback);
   };
+
+  /**
+   * Count new cases in known transmission chains
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countNewCasesInKnownTransmissionChains = function (filter, callback) {
+    // default number of day used to determine new cases
+    let noDaysDaysInChains = this.noDaysDaysInChains;
+    // check if a different number was sent in the filter
+    if (filter && filter.where && filter.where.noDaysDaysInChains) {
+      noDaysDaysInChains = filter.where.noDaysDaysInChains;
+      delete filter.where.noDaysDaysInChains;
+    }
+    // start building a result
+    const result = {
+      newCases: 0,
+      totalCases: 0,
+      noDaysDaysInChains: noDaysDaysInChains
+    };
+
+    // use a cases index to make sure we don't count a case multiple times
+    const casesIndex = {};
+    // calculate date used to compare contact date of onset with
+    const newCasesFromDate = new Date();
+    newCasesFromDate.setDate(newCasesFromDate.getDate() - noDaysDaysInChains);
+
+    app.models.relationship
+      .filterKnownTransmissionChains((app.utils.remote
+        .mergeFilters({
+          include: "people"
+        }, filter || {})))
+      .then(function (relationships) {
+        relationships.forEach(function (relation) {
+          if (Array.isArray(relation.people)) {
+            relation.people.forEach(function (person) {
+              if (!casesIndex[person.id]) {
+                casesIndex[person.id] = true;
+                result.totalCases++;
+                if ((new Date(person.dateOfOnset)) >= newCasesFromDate) {
+                  result.newCases++;
+                }
+              }
+            })
+          }
+        });
+        callback(null, result);
+      })
+      .catch(callback)
+  }
 };

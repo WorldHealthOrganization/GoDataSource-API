@@ -1,6 +1,7 @@
 'use strict';
 
 const transmissionChain = require('../../components/workerRunner').transmissionChain;
+const app = require('../../server/server');
 
 module.exports = function (Relationship) {
   // set flag to not get controller
@@ -33,4 +34,15 @@ module.exports = function (Relationship) {
   Relationship.countTransmissionChains = function (relationships, callback) {
     transmissionChain.count(relationships, callback);
   };
+
+  Relationship.filterKnownTransmissionChains = function (filter) {
+    return Relationship
+      .find(app.utils.remote
+        .mergeFilters({
+          where: {
+            "persons.0.type": "case",
+            "persons.1.type": "case"
+          }
+        }, filter || {}))
+  }
 };
