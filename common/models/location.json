@@ -42,7 +42,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_sys_config",
+      "principalId": "$authenticated",
       "permissions": "ALLOW",
       "property": "find"
     },
