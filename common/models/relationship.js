@@ -94,14 +94,16 @@ module.exports = function (Relationship) {
 
   /**
    * Filter known transmission chains
+   * @param outbreakId
    * @param filter
    * @return {*|PromiseLike<T>|Promise<T>}
    */
-  Relationship.filterKnownTransmissionChains = function (filter) {
+  Relationship.filterKnownTransmissionChains = function (outbreakId, filter) {
     // transmission chains are formed by case-case relations of non-discarded cases
     let _filter = app.utils.remote
       .mergeFilters({
         where: {
+          outbreakId: outbreakId,
           'persons.0.type': 'case',
           'persons.1.type': 'case'
         },

@@ -1106,7 +1106,7 @@ module.exports = function (Outbreak) {
 
     // get known transmission chains (case-case relationships)
     app.models.relationship
-      .filterKnownTransmissionChains(filter)
+      .filterKnownTransmissionChains(this.id, filter)
       .then(function (relationships) {
         // go trough all relations
         relationships.forEach(function (relation) {
