@@ -32,6 +32,8 @@ module.exports = function (app) {
 
       // set the Transaction-Id header in the response
       res.setHeader('Transaction-Id', req.transactionId);
+      // expose the Transaction-Id header to the client
+      res.setHeader('Access-Control-Expose-Headers', 'Transaction-Id');
 
       // intercept responses, some use send
       const _send = res.send;
