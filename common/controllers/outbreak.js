@@ -1213,4 +1213,129 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Count the new contacts for each event
+   * @param filter Besides the default filter properties this request also accepts 'noDaysNewContacts': number on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countEventNewContacts = function (filter, callback) {
+    // initialize noDaysNewContacts filter
+    let noDaysNewContacts;
+    // check if the noDaysNewContacts filter was sent; accepting it only on the first level
+    noDaysNewContacts = _.get(filter, 'where.noDaysNewContacts');
+    if (typeof noDaysNewContacts !== "undefined") {
+      // noDaysNewContacts was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.noDaysNewContacts;
+    } else {
+      // get the outbreak noDaysNewContacts as the default noDaysNewContacts value
+      noDaysNewContacts = this.noDaysNewContacts;
+    }
+
+    // get now date
+    let now = new Date();
+
+    // initialize results
+    let results = {
+      newContacts: 0,
+      events: {}
+    };
+
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // get all relationships between events and contacts which were created sooner than 'noDaysNewContacts' ago
+    app.models.relationship.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId,
+          and: [
+            {'persons.type': 'contact'},
+            {'persons.type': 'event'}
+          ],
+          contactDate: {
+            gte: now.setDate(now.getDate() - noDaysNewContacts)
+          }
+        }
+      }, filter || {})
+    )
+      .then(function (relationships) {
+        // initialize events map and contacts map
+        let eventsMap = {};
+        let contactsMap = {};
+        // helper property to keep the contacts already counted
+        let eventContactsMap = {};
+
+        // loop through the relationships and populate the eventsMap;
+        // Note: This loop will only add the events that have relationships. Will need to do another query to get the events without relationships
+        relationships.forEach(function (relationship) {
+          // get event index from persons
+          let eventIndex = relationship.persons.findIndex(elem => elem.type === 'event');
+          // get eventId, contactId
+          // there are only 2 persons so the indexes are 0 or 1
+          let eventId = relationship.persons[eventIndex].id;
+          let contactId = relationship.persons[eventIndex ? 0 : 1].id;
+
+          // create entry for the event in the eventsMap if not already created
+          if (!eventsMap[eventId]) {
+            eventsMap[eventId] = {
+              id: eventId,
+              newContacts: 0,
+              contactIDs: []
+            };
+
+            // also create entry for the eventContactsMap
+            eventContactsMap[eventId] = {};
+          }
+
+          // count the contact only if not already counted
+          if (!eventContactsMap[eventId][contactId]) {
+            // get contactId flag in order to not count it twice for the event
+            eventContactsMap[eventId][contactId] = true;
+            // increase counter
+            eventsMap[eventId].newContacts++;
+            // add contactId
+            eventsMap[eventId].contactIDs.push(contactId);
+          }
+
+          if (!contactsMap[contactId]) {
+            // get contactId flag in order to not count it twice in total
+            contactsMap[contactId] = true;
+            // increase total counter
+            results.newContacts++;
+          }
+        });
+
+        // update results.events; sending array with events information
+        results.events = _.values(eventsMap);
+
+        // get events without relationships
+        return app.models.event.find({
+          where: {
+            outbreakId: outbreakId,
+            id: {
+              nin: Object.keys(eventContactsMap)
+            }
+          },
+          fields: {
+            id: true
+          }
+        });
+      })
+      .then(function(events) {
+        // parse the events to create entries for the result
+        let parsedEvents = events.map(event => { return {
+          id: event.id,
+          newContacts: 0,
+          contactIDs: []
+        }});
+
+        // add the parsed events in the result
+        results.events = results.events.concat(parsedEvents);
+
+        // send response
+        callback(null, results);
+      })
+      .catch(callback);
+  };
 };

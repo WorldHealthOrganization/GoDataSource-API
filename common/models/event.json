@@ -13,8 +13,7 @@
     }
   },
   "hidden": [
-    "type",
-    "outbreakId"
+    "type"
   ],
   "scope": {
     "where": {
@@ -22,10 +21,6 @@
     }
   },
   "properties": {
-    "outbreakId": {
-      "type": "string",
-      "readOnly": true
-    },
     "type": {
       "type": "string",
       "required": true,
