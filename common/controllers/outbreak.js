@@ -952,24 +952,44 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countIndependentTransmissionChains = function (filter, callback) {
     const self = this;
+    // count transmission chains
     app.models.relationship
       .countTransmissionChains(this.id, filter, function (error, noOfChains) {
         if (error) {
           return callback(error);
         }
+        // get node IDs
         const nodeIds = Object.keys(noOfChains.nodes);
-        app.models.case
+        // count isolated nodes
+        const isolatedNodesNo = Object.keys(noOfChains.isolatedNodes).reduce(function (accumulator, currentValue) {
+          if (noOfChains.isolatedNodes[currentValue]) {
+            accumulator++;
+          }
+          return accumulator;
+        }, 0);
+        // find other isolated nodes (nodes that were never in a relationship)
+        app.models.person
           .count({
             outbreakId: self.id,
-            classification: {
-              inq: app.models.case.nonDiscardedCaseClassifications
-            },
+            or: [
+              {
+                type: 'case',
+                classification: {
+                  inq: app.models.case.nonDiscardedCaseClassifications
+                }
+              },
+              {
+                type: 'event'
+              }
+            ],
             id: {
               nin: nodeIds
             }
           })
-          .then(function (isolatedCasesNo) {
-            noOfChains.isolatedCases = isolatedCasesNo + nodeIds.length;
+          .then(function (isolatedNodesCount) {
+            // total list of isolated nodes is composed by the nodes that were never in a relationship + the ones that
+            // come from relationships that were invalidated as part of the chain
+            noOfChains.isolatedNodes = isolatedNodesCount + isolatedNodesNo;
             delete noOfChains.nodes;
             callback(null, noOfChains);
           })
@@ -984,25 +1004,36 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.getIndependentTransmissionChains = function (filter, callback) {
     const self = this;
+    // get transmission chains
     app.models.relationship
       .getTransmissionChains(this.id, filter, function (error, transmissionChains) {
         if (error) {
           return callback(error);
         }
-        app.models.case
+        // get isolated nodes as well (nodes that were never part of a relationship)
+        app.models.person
           .find({
             where: {
               outbreakId: self.id,
-              classification: {
-                inq: app.models.case.nonDiscardedCaseClassifications
-              },
+              or: [
+                {
+                  type: 'case',
+                  classification: {
+                    inq: app.models.case.nonDiscardedCaseClassifications
+                  }
+                },
+                {
+                  type: 'event'
+                }
+              ],
               id: {
                 nin: Object.keys(transmissionChains.nodes)
               }
             }
           })
-          .then(function (isolatedCases) {
-            isolatedCases.forEach(function (isolatedCase) {
+          .then(function (isolatedNodes) {
+            // add all the isolated nodes to the complete list of nodes
+            isolatedNodes.forEach(function (isolatedCase) {
               transmissionChains.nodes[isolatedCase.id] = isolatedCase;
             });
             callback(null, transmissionChains);

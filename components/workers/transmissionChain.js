@@ -9,6 +9,8 @@ const worker = {
     // keep information about nodes and edges
     let nodes = {};
     let edges = {};
+    // keep a list of isolated nodes
+    let isolatedNodes = {};
 
     /**
      * Merge two chains
@@ -73,15 +75,44 @@ const worker = {
             if (!nodes[relationshipPerson2.id]) {
               nodes[relationshipPerson2.id] = relationshipPerson2;
             }
+
+            // if none of the people are contacts, mark both nodes as not being isolated
+            if (relationshipPerson1.type !== 'contact' && relationshipPerson2.type !== 'contact') {
+              if (isolatedNodes[relationshipPerson1.id] === undefined || isolatedNodes[relationshipPerson1.id]) {
+                isolatedNodes[relationshipPerson1.id] = false;
+              }
+              if (isolatedNodes[relationshipPerson2.id] === undefined || isolatedNodes[relationshipPerson2.id]) {
+                isolatedNodes[relationshipPerson2.id] = false;
+              }
+
+            } else {
+              // only person 1 is not a contact, mark the node as isolated (if it was not previously marked otherwise)
+              if (relationshipPerson1.type !== 'contact' && isolatedNodes[relationshipPerson1.id] === undefined) {
+                isolatedNodes[relationshipPerson1.id] = true;
+              }
+              // only person 2 is not a contact, mark rhe node as isolated (if it was not previously marked otherwise)
+              if (relationshipPerson2.type !== 'contact' && isolatedNodes[relationshipPerson2.id] === undefined) {
+                isolatedNodes[relationshipPerson2.id] = true;
+              }
+            }
+
           } else {
             // if the relationship does not contain information about both people, skip contacts (they cannot exist unlinked from a chain)
             // get information about first person (if it exists and it's not a contact)
             if (relationshipPerson1 && relationshipPerson1.type !== 'contact' && !nodes[relationshipPerson1.id]) {
               nodes[relationshipPerson1.id] = relationshipPerson1;
+              // this seems like an isolated node, mark it as isolated, if no other info was available
+              if (isolatedNodes[relationshipPerson1.id] === undefined) {
+                isolatedNodes[relationshipPerson1.id] = true;
+              }
             }
             // get information about second person (if it exists and it's not a contact)
             if (relationshipPerson2 && relationshipPerson2.type !== 'contact' && !nodes[relationshipPerson2.id]) {
               nodes[relationshipPerson2.id] = relationshipPerson2;
+              // this seems like an isolated node, mark it as isolated, if no other info was available
+              if (isolatedNodes[relationshipPerson2.id] === undefined) {
+                isolatedNodes[relationshipPerson2.id] = true;
+              }
             }
 
             // skip adding nodes to the chain when the relation is incomplete
@@ -97,8 +128,8 @@ const worker = {
           continue;
         }
 
-        // transmission chains are build only by case-case relationships
-        if (relationshipPerson1.type !== 'case' || relationshipPerson2.type !== 'case') {
+        // transmission chains are build only by case/event-case/event relationships
+        if (relationshipPerson1.type === 'contact' || relationshipPerson2.type === 'contact') {
           relationsIndex++;
           continue;
         }
@@ -194,7 +225,9 @@ const worker = {
     // only need counters
     if (countOnly) {
       result = {
+        // also add nodes and isolated nodes info
         nodes: nodes,
+        isolatedNodes: isolatedNodes,
         chains: chainsLengths,
         length: _chains.length
       };
