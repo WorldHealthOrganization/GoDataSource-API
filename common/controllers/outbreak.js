@@ -332,7 +332,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countCaseRelationships = function (caseId, where, callback) {
-    helpers.countPersonRelationships(caseId, where, callback);
+    // make sure there contact is valid, before trying to create any relations
+    app.models.case
+      .findById(caseId)
+      .then((caseModel) => {
+        if (!caseModel) {
+          return callback(app.utils.apiError.getError('VALIDATION_ERROR', {
+            model: app.models.case.modelName,
+            details: `Case with id: ${caseId} not found`
+          }));
+        }
+        helpers.countPersonRelationships(caseId, where, callback);
+      })
+      .catch(callback);
   };
 
   /**
@@ -342,7 +354,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactRelationships = function (contactId, where, callback) {
-    helpers.countPersonRelationships(contactId, where, callback);
+    // make sure there contact is valid, before trying to create any relations
+    app.models.contact
+      .findById(contactId)
+      .then((contact) => {
+        if (!contact) {
+          return callback(app.utils.apiError.getError('VALIDATION_ERROR', {
+            model: app.models.contact.modelName,
+            details: `Contact with id: ${contactId} not found`
+          }));
+        }
+        helpers.countPersonRelationships(contactId, where, callback);
+      })
+      .catch(callback);
   };
 
   /**
