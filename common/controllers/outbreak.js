@@ -1220,32 +1220,33 @@ module.exports = function (Outbreak) {
   /**
    * Count the cases with less than X contacts
    * Note: Besides the count the response also contains a list with the counted cases IDs
-   * @param filter Besides the default filter properties this request also accepts 'numberContactsLessThan': number on the first level in 'where'
+   * @param filter Besides the default filter properties this request also accepts 'noLessContacts': number on the first level in 'where'
    * @param callback
    */
   Outbreak.prototype.countCasesWithLessThanXContacts = function (filter, callback) {
-    // initialize numberContactsLessThan filter
-    let numberContactsLessThan;
-    // check if the numberContactsLessThan filter was sent; accepting it only on the first level
-    numberContactsLessThan = _.get(filter, 'where.numberContactsLessThan');
-    if (typeof numberContactsLessThan !== "undefined") {
-      // numberContactsLessThan was sent; remove it from the filter as it shouldn't reach DB
-      delete filter.where.numberContactsLessThan;
+    // initialize noLessContacts filter
+    let noLessContacts;
+    // check if the noLessContacts filter was sent; accepting it only on the first level
+    noLessContacts = _.get(filter, 'where.noLessContacts');
+    if (typeof noLessContacts !== "undefined") {
+      // noLessContacts was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.noLessContacts;
     } else {
-      // get the outbreak noLessContacts as the default numberContactsLessThan value
-      numberContactsLessThan = this.noLessContacts;
+      // get the outbreak noLessContacts as the default noLessContacts value
+      noLessContacts = this.noLessContacts;
     }
 
-    // initialize map of case IDs to map of contacts IDs to true value (doing this in order to prevent an indexOf search in an array of contact IDs)
-    // this is a helper map to not loop multiple times through the relationships
-    // eg: {"caseId": {"contactId": numberOfRelationships}}
-    let caseIDsMap = {};
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // initialize result
+    let result = {};
 
     // in order to count the cases with less than X contacts get the relationships and count unique contacts per case
     app.models.relationship.find(app.utils.remote
       .mergeFilters({
         where: {
-          outbreakId: this.id,
+          outbreakId: outbreakId,
           and: [{
             'persons.type': 'case'
           }, {
@@ -1254,6 +1255,11 @@ module.exports = function (Outbreak) {
         }
       }, filter || {}))
       .then(function (relationships) {
+        // initialize map of case IDs to map of contacts IDs to true value (doing this in order to prevent an indexOf search in an array of contact IDs)
+        // this is a helper map to not loop multiple times through the relationships
+        // eg: {"caseId": {"contactId": numberOfRelationships}}
+        let caseIDsMap = {};
+
         // loop through the relationships to count
         relationships.forEach(function (relationship) {
           // get caseId and contactId from relationship; the relationship only has 2 elements
@@ -1278,11 +1284,36 @@ module.exports = function (Outbreak) {
           }
         });
 
-        // filter the caseIDsContactsCounter to get the caseIDs with less than numberContactsLessThan contacts
-        let resultCases = Object.keys(caseIDsMap).filter(caseId => Object.keys(caseIDsMap[caseId]).length < numberContactsLessThan);
+        // get all the found cases with relationships since we will need to get the other cases
+        let allCases = Object.keys(caseIDsMap);
+
+        // filter the caseIDsContactsCounter to get the caseIDs with less than noLessContacts contacts
+        result.caseIDs = allCases.filter(caseId => Object.keys(caseIDsMap[caseId]).length < noLessContacts);
+        result.count = result.caseIDs.length;
+
+        // get cases without relationships
+        return app.models.case.find({
+          where: {
+            outbreakId: outbreakId,
+            id: {
+              nin: allCases
+            }
+          },
+          fields: {
+            id: true
+          }
+        });
+      })
+      .then(function (cases) {
+        // parse the cases; need only the IDs
+        let caseIds = cases.map(item => item.id);
+
+        // add the found cases into the result
+        result.caseIDs = result.caseIDs.concat(caseIds);
+        result.count += caseIds.length;
 
         // send response
-        callback(null, resultCases.length, resultCases);
+        callback(null, result);
       })
       .catch(callback);
   };

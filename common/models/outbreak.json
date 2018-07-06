@@ -1873,21 +1873,26 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'numberContactsLessThan' number on the first level in 'where'"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'noLessContacts' number on the first level in 'where'"
         }
       ],
       "returns": [
         {
-          "arg": "count",
-          "type": "number",
-          "description": "Number of cases with less than X contacts",
-          "required": true
-        },
-        {
-          "arg": "caseIDs",
-          "type": ["string"],
-          "description": "Array with IDs of cases with less than X contacts",
-          "required": true
+          "arg": "counters",
+          "type": {
+            "count": {
+              "type": "number",
+              "description": "Number of cases with less than X contacts",
+              "required": true
+            },
+            "caseIDs": {
+              "type": ["string"],
+              "description": "Array with IDs of cases with less than X contacts",
+              "required": true
+            }
+          },
+          "required": true,
+          "root": true
         }
       ],
       "description": "Count the number of cases with less than X contacts; Also return the case IDs",
