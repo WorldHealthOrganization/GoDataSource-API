@@ -1363,12 +1363,24 @@ module.exports = function (Outbreak) {
             'persons.1.type': {
               inq: ['case']
             }
+          },
+          // we're only interested in the cases that have dateOfOnset set
+          include: {
+            relation: 'people',
+            scope: {
+              where: {
+                dateOfOnset: {
+                  neq: null
+                }
+              },
+              filterParent: true
+            }
           }
         }, filter || {}))
       .then(function (relationships) {
         // go trough all relations
         relationships.forEach(function (relation) {
-          // we're only interested in the cases that have dateOfOnset set
+          // we're only interested in the cases that have dateOfOnset set (this should be already done by the query, but double-check)
           if (relation.people[0].dateOfOnset && relation.people[1].dateOfOnset) {
             const case1Date = new Date(relation.people[0].dateOfOnset);
             const case2Date = new Date(relation.people[1].dateOfOnset);
