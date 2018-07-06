@@ -182,7 +182,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.createCaseRelationship = function (caseId, data, callback) {
-    helpers.createPersonRelationship(this.id, caseId, 'case', data, callback);
+    // make sure there contact is valid, before trying to create any relations
+    app.models.case
+      .findById(caseId)
+      .then((caseModel) => {
+        if (!caseModel) {
+          return callback(app.utils.apiError.getError('VALIDATION_ERROR', {
+            model: app.models.case.modelName,
+            details: `Case with id: ${caseId} not found`
+          }));
+        }
+        helpers.createPersonRelationship(this.id, caseId, 'case', data, callback);
+      })
+      .catch(callback);
   };
 
   /**
@@ -192,7 +204,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.createContactRelationship = function (contactId, data, callback) {
-    helpers.createPersonRelationship(this.id, contactId, 'contact', data, callback);
+    // make sure there contact is valid, before trying to create any relations
+    app.models.contact
+      .findById(contactId)
+      .then((contact) => {
+        if (!contact) {
+          return callback(app.utils.apiError.getError('VALIDATION_ERROR', {
+            model: app.models.contact.modelName,
+            details: `Contact with id: ${contactId} not found`
+          }));
+        }
+        helpers.createPersonRelationship(this.id, contactId, 'contact', data, callback);
+      })
+      .catch(callback);
   };
 
   /**
