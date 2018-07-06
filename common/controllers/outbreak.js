@@ -1648,6 +1648,18 @@ module.exports = function (Outbreak) {
         // calculate average number of contacts per case
         result.averageNoContactsPerCase = result.contactsCount / result.casesCount;
 
+        // calculate mean; currently is the same as average
+        // TODO: Find out how mean is calculated
+        result.meanNoContactsPerCase = result.averageNoContactsPerCase;
+
+        // calculate median
+        // get an array with sorted contact numbers
+        let contactCountList = result.cases.map(item => item.contactsCount).sort((a, b) => a - b);
+        let contactCountListLength = contactCountList.length;
+        result.medianNoContactsPerCase = contactCountListLength % 2 === 0 ?
+          (contactCountList[contactCountListLength / 2 - 1] + contactCountList[contactCountListLength / 2]) / 2 :
+          contactCountList[Math.ceil(contactCountListLength / 2)];
+
         // send response
         callback(null, result);
       })
