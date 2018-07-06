@@ -1799,8 +1799,10 @@
             "contactsSeen": "number",
             "teams": [
               {
-                "id": "teamId/null",
-                "contactsSeen": "number"
+                "type": {
+                  "id": "string",
+                  "contactsSeen": "number"
+                }
               }
             ]
           },
@@ -1830,8 +1832,10 @@
             "contactsLostToFollowup": "number",
             "teams": [
               {
-                "id": "teamId/null",
-                "contactsLostToFollowup": "number"
+                "type": {
+                  "id": "string",
+                  "contactsLostToFollowup": "number"
+                }
               }
             ]
           },
@@ -1915,8 +1919,13 @@
             "newContacts": "number",
             "events": [
               {
-                "id": "eventId",
-                "newContacts": "number"
+                "type": {
+                  "id": "string",
+                  "newContacts": "number",
+                  "contactIDs": [
+                    "string"
+                  ]
+                }
               }
             ]
           },
