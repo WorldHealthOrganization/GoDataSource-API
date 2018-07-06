@@ -147,7 +147,6 @@
   "methods": {
     "resetPassWithSecurityQuestion": {
       "accepts": [
-
         {
           "arg": "options",
           "type": {
