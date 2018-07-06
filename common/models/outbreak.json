@@ -679,6 +679,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "filteredCountCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "filteredCountCases"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "countIndependentTransmissionChains"
@@ -1577,6 +1589,28 @@
       "http": {
         "verb": "get",
         "path": "/contacts/new-by-exposure-type/count"
+      }
+    },
+    "prototype.filteredCountCases": {
+      "accepts":[
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of cases that pass the filter",
+          "required": true
+        }
+      ],
+      "description": "Counts the cases that pass a filter (which now can accept relations)",
+      "http": {
+        "verb": "get",
+        "path": "/cases/filtered-count"
       }
     },
     "prototype.restoreContactFollowUp": {
