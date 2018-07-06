@@ -954,7 +954,7 @@ module.exports = function (Outbreak) {
     const self = this;
     // count transmission chains
     app.models.relationship
-      .countTransmissionChains(this.id, this.followUpPeriod, filter, function (error, noOfChains) {
+      .countTransmissionChains(this.id, this.periodOfFollowup, filter, function (error, noOfChains) {
         if (error) {
           return callback(error);
         }
@@ -1006,7 +1006,7 @@ module.exports = function (Outbreak) {
     const self = this;
     // get transmission chains
     app.models.relationship
-      .getTransmissionChains(this.id, this.followUpPeriod, filter, function (error, transmissionChains) {
+      .getTransmissionChains(this.id, this.periodOfFollowup, filter, function (error, transmissionChains) {
         if (error) {
           return callback(error);
         }
