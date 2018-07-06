@@ -1351,10 +1351,20 @@ module.exports = function (Outbreak) {
     const longPeriodsBetweenCaseOnset = this.longPeriodsBetweenCaseOnset;
     // keep a list of relations that match the criteria
     const relationshipsWithLongPeriodsBetweenDatesOfOnset = [];
-
     // get known transmission chains
     app.models.relationship
-      .filterKnownTransmissionChains(this.id, filter)
+      .filterKnownTransmissionChains(this.id, app.utils.remote
+        // were only interested in cases
+        .mergeFilters({
+          where: {
+            'persons.0.type': {
+              inq: ['case']
+            },
+            'persons.1.type': {
+              inq: ['case']
+            }
+          }
+        }, filter || {}))
       .then(function (relationships) {
         // go trough all relations
         relationships.forEach(function (relation) {
