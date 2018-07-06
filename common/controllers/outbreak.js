@@ -1341,7 +1341,7 @@ module.exports = function (Outbreak) {
 
     // initialize results
     let results = {
-      newContacts: 0,
+      newContactsCount: 0,
       events: {}
     };
 
@@ -1384,7 +1384,7 @@ module.exports = function (Outbreak) {
           if (!eventsMap[eventId]) {
             eventsMap[eventId] = {
               id: eventId,
-              newContacts: 0,
+              newContactsCount: 0,
               contactIDs: []
             };
 
@@ -1397,7 +1397,7 @@ module.exports = function (Outbreak) {
             // get contactId flag in order to not count it twice for the event
             eventContactsMap[eventId][contactId] = true;
             // increase counter
-            eventsMap[eventId].newContacts++;
+            eventsMap[eventId].newContactsCount++;
             // add contactId
             eventsMap[eventId].contactIDs.push(contactId);
           }
@@ -1406,7 +1406,7 @@ module.exports = function (Outbreak) {
             // get contactId flag in order to not count it twice in total
             contactsMap[contactId] = true;
             // increase total counter
-            results.newContacts++;
+            results.newContactsCount++;
           }
         });
 
@@ -1431,7 +1431,7 @@ module.exports = function (Outbreak) {
         let parsedEvents = events.map(event => {
           return {
             id: event.id,
-            newContacts: 0,
+            newContactsCount: 0,
             contactIDs: []
           }
         });
@@ -1537,4 +1537,120 @@ module.exports = function (Outbreak) {
     });
   };
 
+
+  /**
+   * Count the contacts for each case; Also calculate average/mean/median
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countCasesContacts = function (filter, callback) {
+    // initialize results
+    let result = {
+      casesCount: 0,
+      contactsCount: 0,
+      cases: {}
+    };
+
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // get all relationships between cases and contacts
+    app.models.relationship.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId,
+          and: [
+            {'persons.type': 'contact'},
+            {'persons.type': 'case'}
+          ]
+        }
+      }, filter || {})
+    )
+      .then(function (relationships) {
+        // initialize cases map and contacts map
+        let casesMap = {};
+        let contactsMap = {};
+        // helper property to keep the contacts already counted
+        let caseContactsMap = {};
+
+        // loop through the relationships and populate the casesMap;
+        // Note: This loop will only add the cases that have relationships. Will need to do another query to get the cases without relationships
+        relationships.forEach(function (relationship) {
+          // get case index from persons
+          let caseIndex = relationship.persons.findIndex(elem => elem.type === 'case');
+          // get caseId, contactId
+          // there are only 2 persons so the indexes are 0 or 1
+          let caseId = relationship.persons[caseIndex].id;
+          let contactId = relationship.persons[caseIndex ? 0 : 1].id;
+
+          // create entry for the case in the casesMap if not already created
+          if (!casesMap[caseId]) {
+            casesMap[caseId] = {
+              id: caseId,
+              contactsCount: 0,
+              contactIDs: []
+            };
+
+            // also create entry for the caseContactsMap
+            caseContactsMap[caseId] = {};
+          }
+
+          // count the contact only if not already counted
+          if (!caseContactsMap[caseId][contactId]) {
+            // get contactId flag in order to not count it twice for the case
+            caseContactsMap[caseId][contactId] = true;
+            // increase counter
+            casesMap[caseId].contactsCount++;
+            // add contactId
+            casesMap[caseId].contactIDs.push(contactId);
+          }
+
+          if (!contactsMap[contactId]) {
+            // get contactId flag in order to not count it twice in total
+            contactsMap[contactId] = true;
+            // increase total counter
+            result.contactsCount++;
+          }
+        });
+
+        // update result.cases; sending array with cases information
+        result.cases = _.values(casesMap);
+
+        // get cases without relationships
+        return app.models.case.find({
+          where: {
+            outbreakId: outbreakId,
+            id: {
+              nin: Object.keys(caseContactsMap)
+            }
+          },
+          fields: {
+            id: true
+          }
+        });
+      })
+      .then(function (cases) {
+        // parse the cases to create entries for the result
+        let parsedCases = cases.map(item => {
+          return {
+            id: item.id,
+            contactsCount: 0,
+            contactIDs: []
+          }
+        });
+
+        // add the parsed cases in the result
+        result.cases = result.cases.concat(parsedCases);
+
+        // add case counter in the results
+        result.casesCount = result.cases.length;
+
+        // calculate average number of contacts per case
+        result.averageNoContactsPerCase = result.contactsCount / result.casesCount;
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
+  };
 };
