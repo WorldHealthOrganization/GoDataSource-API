@@ -48,10 +48,10 @@ module.exports = function (Outbreak) {
    * Allows count requests with advanced filters (like the ones we can use on GET requests)
    * to be made on outbreak/{id}/cases.
    */
-  Outbreak.prototype.filteredCountCases = function(filter, callback) {
+  Outbreak.prototype.filteredCountCases = function (filter, callback) {
     this.__get__cases(filter, function (err, res) {
       if (err) {
-       return callback(err);
+        return callback(err);
       }
       callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
     })
@@ -1142,7 +1142,7 @@ module.exports = function (Outbreak) {
         callback(null, result);
       })
       .catch(callback);
-  }
+  };
 
   /**
    * Count the cases with less than X contacts
@@ -1322,19 +1322,58 @@ module.exports = function (Outbreak) {
           }
         });
       })
-      .then(function(events) {
+      .then(function (events) {
         // parse the events to create entries for the result
-        let parsedEvents = events.map(event => { return {
-          id: event.id,
-          newContacts: 0,
-          contactIDs: []
-        }});
+        let parsedEvents = events.map(event => {
+          return {
+            id: event.id,
+            newContacts: 0,
+            contactIDs: []
+          }
+        });
 
         // add the parsed events in the result
         results.events = results.events.concat(parsedEvents);
 
         // send response
         callback(null, results);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Get a list of relationships that links cases with long periods between the dates of onset
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.longPeriodsBetweenDatesOfOnsetInTransmissionChains = function (filter, callback) {
+    // get longPeriodsBetweenCaseOnset
+    const longPeriodsBetweenCaseOnset = this.longPeriodsBetweenCaseOnset;
+    // keep a list of relations that match the criteria
+    const relationshipsWithLongPeriodsBetweenDatesOfOnset = [];
+
+    // get known transmission chains
+    app.models.relationship
+      .filterKnownTransmissionChains(this.id, filter)
+      .then(function (relationships) {
+        // go trough all relations
+        relationships.forEach(function (relation) {
+          // we're only interested in the cases that have dateOfOnset set
+          if (relation.people[0].dateOfOnset && relation.people[1].dateOfOnset) {
+            const case1Date = new Date(relation.people[0].dateOfOnset);
+            const case2Date = new Date(relation.people[1].dateOfOnset);
+            // get time difference in days
+            const timeDifferenceInDays = Math.ceil(Math.abs(case1Date.getTime() - case2Date.getTime()) / (1000 * 3600 * 24));
+            // if the time difference is bigger then the threshold
+            if (timeDifferenceInDays > longPeriodsBetweenCaseOnset) {
+              // add time difference information
+              relation.differenceBetweenDatesOfOnset = timeDifferenceInDays;
+              // and save the relation
+              relationshipsWithLongPeriodsBetweenDatesOfOnset.push(relation);
+            }
+          }
+        });
+        callback(null, relationshipsWithLongPeriodsBetweenDatesOfOnset);
       })
       .catch(callback);
   };
