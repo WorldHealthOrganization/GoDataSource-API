@@ -20,11 +20,12 @@ module.exports = function (Relationship) {
   /**
    * Build or count transmission chains for an outbreak
    * @param outbreakId
+   * @param followUpPeriod
    * @param filter
    * @param countOnly
    * @param callback
    */
-  Relationship.buildOrCountTransmissionChains = function (outbreakId, filter, countOnly, callback) {
+  Relationship.buildOrCountTransmissionChains = function (outbreakId, followUpPeriod, filter, countOnly, callback) {
     // build a filter: get all relations between non-discarded cases and contacts + events from current outbreak
     filter = app.utils.remote
       .mergeFilters({
@@ -62,10 +63,10 @@ module.exports = function (Relationship) {
         relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
         if (countOnly) {
           // count transmission chain
-          transmissionChain.count(relationships, callback);
+          transmissionChain.count(relationships, followUpPeriod, callback);
         } else {
           // build transmission chain
-          transmissionChain.build(relationships, callback);
+          transmissionChain.build(relationships, followUpPeriod, callback);
         }
 
       })
@@ -75,21 +76,23 @@ module.exports = function (Relationship) {
   /**
    * Build transmission chains for an outbreak
    * @param outbreakId
+   * @param followUpPeriod
    * @param filter
    * @param callback
    */
-  Relationship.getTransmissionChains = function (outbreakId, filter, callback) {
-    Relationship.buildOrCountTransmissionChains(outbreakId, filter, false, callback);
+  Relationship.getTransmissionChains = function (outbreakId, followUpPeriod, filter, callback) {
+    Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, filter, false, callback);
   };
 
   /**
    * Count transmission chains for an outbreak
    * @param outbreakId
+   * @param followUpPeriod
    * @param filter
    * @param callback
    */
-  Relationship.countTransmissionChains = function (outbreakId, filter, callback) {
-    Relationship.buildOrCountTransmissionChains(outbreakId, filter, true, callback);
+  Relationship.countTransmissionChains = function (outbreakId, followUpPeriod, filter, callback) {
+    Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, filter, true, callback);
   };
 
   /**
