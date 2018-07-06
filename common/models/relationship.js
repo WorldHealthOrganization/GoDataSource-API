@@ -99,7 +99,7 @@ module.exports = function (Relationship) {
    * Filter known transmission chains
    * @param outbreakId
    * @param filter
-   * @return {*|PromiseLike<T>|Promise<T>}
+   * @return {*|PromiseLike<T>|Promise<T>} Promise that resolves a list of relationships
    */
   Relationship.filterKnownTransmissionChains = function (outbreakId, filter) {
     // transmission chains are formed by case-case relations of non-discarded cases
@@ -107,8 +107,12 @@ module.exports = function (Relationship) {
       .mergeFilters({
         where: {
           outbreakId: outbreakId,
-          'persons.0.type': 'case',
-          'persons.1.type': 'case'
+          'persons.0.type': {
+            inq: ['case', 'event']
+          },
+          'persons.1.type': {
+            inq: ['case', 'event']
+          }
         },
         include: {
           relation: 'people',

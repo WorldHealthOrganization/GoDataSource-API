@@ -1033,8 +1033,8 @@ module.exports = function (Outbreak) {
           })
           .then(function (isolatedNodes) {
             // add all the isolated nodes to the complete list of nodes
-            isolatedNodes.forEach(function (isolatedCase) {
-              transmissionChains.nodes[isolatedCase.id] = isolatedCase;
+            isolatedNodes.forEach(function (isolatedNode) {
+              transmissionChains.nodes[isolatedNode.id] = isolatedNode;
             });
             callback(null, transmissionChains);
           })
