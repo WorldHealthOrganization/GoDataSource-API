@@ -965,33 +965,50 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countIndependentTransmissionChains = function (filter, callback) {
-    // build a filter
-    filter = app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: this.id
-        }
-      }, filter || {});
-
-    // get follow-up period (is needed by transmission chain builder to decide if a chain is active)
-    let followUpPeriod = this.periodOfFollowup;
-
-    // search relations
+    const self = this;
+    // count transmission chains
     app.models.relationship
-      .find(filter)
-      .then(function (relationships) {
-        // add 'filterParent' capability
-        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
-        // count transmission chains
-        app.models.relationship
-          .countTransmissionChains(relationships, followUpPeriod, function (error, noOfChains) {
-            if (error) {
-              throw error;
+      .countTransmissionChains(this.id, this.periodOfFollowup, filter, function (error, noOfChains) {
+        if (error) {
+          return callback(error);
+        }
+        // get node IDs
+        const nodeIds = Object.keys(noOfChains.nodes);
+        // count isolated nodes
+        const isolatedNodesNo = Object.keys(noOfChains.isolatedNodes).reduce(function (accumulator, currentValue) {
+          if (noOfChains.isolatedNodes[currentValue]) {
+            accumulator++;
+          }
+          return accumulator;
+        }, 0);
+        // find other isolated nodes (nodes that were never in a relationship)
+        app.models.person
+          .count({
+            outbreakId: self.id,
+            or: [
+              {
+                type: 'case',
+                classification: {
+                  inq: app.models.case.nonDiscardedCaseClassifications
+                }
+              },
+              {
+                type: 'event'
+              }
+            ],
+            id: {
+              nin: nodeIds
             }
-            callback(null, noOfChains)
-          });
-      })
-      .catch(callback);
+          })
+          .then(function (isolatedNodesCount) {
+            // total list of isolated nodes is composed by the nodes that were never in a relationship + the ones that
+            // come from relationships that were invalidated as part of the chain
+            noOfChains.isolatedNodes = isolatedNodesCount + isolatedNodesNo;
+            delete noOfChains.nodes;
+            callback(null, noOfChains);
+          })
+          .catch(callback)
+      });
   };
 
   /**
@@ -1000,56 +1017,43 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getIndependentTransmissionChains = function (filter, callback) {
-    filter = filter || {};
-    // start with a basic filter
-    let _filter = {
-      where: {
-        outbreakId: this.id
-      }
-    };
-    // get include filter
-    let includeFilter = _.get(filter, 'include', []);
-    // normalize filters
-    if (!Array.isArray(includeFilter)) {
-      includeFilter = [includeFilter];
-    }
-    // check of the filter has people relation included (is needed for transmission chains)
-    let hasPeopleRelation = false;
-    includeFilter.forEach(function (singleInclude) {
-      if (
-        (typeof singleInclude === 'string' && singleInclude === 'people') ||
-        (typeof singleInclude === 'object' && singleInclude.relation === 'people')) {
-        hasPeopleRelation = true;
-      }
-    });
-    // if the relation was not included
-    if (!hasPeopleRelation) {
-      // include it
-      includeFilter.push('people');
-    }
-    // update filter
-    _.set(filter, 'include', includeFilter);
-    // merge filters
-    filter = app.utils.remote.mergeFilters(_filter, filter);
-
-    // get follow-up period (is needed by transmission chain builder to decide if a chain is active)
-    let followUpPeriod = this.periodOfFollowup;
-
+    const self = this;
+    // get transmission chains
     app.models.relationship
-      .find(filter)
-      .then(function (relationships) {
-        // add 'filterParent' capability
-        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
-        // build transmission chains
-        app.models.relationship
-          .getTransmissionChains(relationships, followUpPeriod, function (error, transmissionChains) {
-            if (error) {
-              return callback(error);
+      .getTransmissionChains(this.id, this.periodOfFollowup, filter, function (error, transmissionChains) {
+        if (error) {
+          return callback(error);
+        }
+        // get isolated nodes as well (nodes that were never part of a relationship)
+        app.models.person
+          .find({
+            where: {
+              outbreakId: self.id,
+              or: [
+                {
+                  type: 'case',
+                  classification: {
+                    inq: app.models.case.nonDiscardedCaseClassifications
+                  }
+                },
+                {
+                  type: 'event'
+                }
+              ],
+              id: {
+                nin: Object.keys(transmissionChains.nodes)
+              }
             }
-            callback(null, transmissionChains)
-          });
-      })
-      .catch(callback);
+          })
+          .then(function (isolatedNodes) {
+            // add all the isolated nodes to the complete list of nodes
+            isolatedNodes.forEach(function (isolatedNode) {
+              transmissionChains.nodes[isolatedNode.id] = isolatedNode;
+            });
+            callback(null, transmissionChains);
+          })
+          .catch(callback);
+      });
   };
 
   /**
@@ -1088,6 +1092,57 @@ module.exports = function (Outbreak) {
       resultProperty: 'contactsLostToFollowup'
     }, filter, callback);
   };
+
+  /**
+   * Count new cases in known transmission chains
+   * @param filter Besides the default filter properties this request also accepts 'noDaysDaysInChains': number on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countNewCasesInKnownTransmissionChains = function (filter, callback) {
+    // default number of day used to determine new cases
+    let noDaysDaysInChains = this.noDaysDaysInChains;
+    // check if a different number was sent in the filter
+    if (filter && filter.where && filter.where.noDaysDaysInChains) {
+      noDaysDaysInChains = filter.where.noDaysDaysInChains;
+      delete filter.where.noDaysDaysInChains;
+    }
+    // start building a result
+    const result = {
+      newCases: 0,
+      total: 0
+    };
+
+    // use a cases index to make sure we don't count a case multiple times
+    const casesIndex = {};
+    // calculate date used to compare contact date of onset with
+    const newCasesFromDate = new Date();
+    newCasesFromDate.setDate(newCasesFromDate.getDate() - noDaysDaysInChains);
+
+    // get known transmission chains (case-case relationships)
+    app.models.relationship
+      .filterKnownTransmissionChains(this.id, filter)
+      .then(function (relationships) {
+        // go trough all relations
+        relationships.forEach(function (relation) {
+          // go trough all the people
+          if (Array.isArray(relation.people)) {
+            relation.people.forEach(function (person) {
+              // count each case only once
+              if (!casesIndex[person.id]) {
+                casesIndex[person.id] = true;
+                result.total++;
+                // check if the case is new (date of symptoms is later than the threshold date)
+                if ((new Date(person.dateOfOnset)) >= newCasesFromDate) {
+                  result.newCases++;
+                }
+              }
+            })
+          }
+        });
+        callback(null, result);
+      })
+      .catch(callback);
+  }
 
   /**
    * Count the cases with less than X contacts

@@ -1,6 +1,7 @@
 'use strict';
 
 const transmissionChain = require('../../components/workerRunner').transmissionChain;
+const app = require('../../server/server');
 
 module.exports = function (Relationship) {
   // set flag to not get controller
@@ -17,22 +18,124 @@ module.exports = function (Relationship) {
   };
 
   /**
-   * Build transmission chains from a list of relationships
-   * @param relationships {[relationship]}
+   * Build or count transmission chains for an outbreak
+   * @param outbreakId
    * @param followUpPeriod
+   * @param filter
+   * @param countOnly
    * @param callback
    */
-  Relationship.getTransmissionChains = function (relationships, followUpPeriod, callback) {
-    transmissionChain.build(relationships, followUpPeriod, callback);
+  Relationship.buildOrCountTransmissionChains = function (outbreakId, followUpPeriod, filter, countOnly, callback) {
+    // build a filter: get all relations between non-discarded cases and contacts + events from current outbreak
+    filter = app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId
+        },
+        include: {
+          relation: 'people',
+          scope: {
+            where: {
+              or: [
+                {
+                  type: 'case',
+                  classification: {
+                    inq: app.models.case.nonDiscardedCaseClassifications
+                  }
+                },
+                {
+                  type: {
+                    inq: ['contact', 'event']
+                  }
+                }
+              ]
+            },
+            filterParent: true
+          }
+        }
+      }, filter || {});
+
+    // search relations
+    app.models.relationship
+      .find(filter)
+      .then(function (relationships) {
+        // add 'filterParent' capability
+        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
+        if (countOnly) {
+          // count transmission chain
+          transmissionChain.count(relationships, followUpPeriod, callback);
+        } else {
+          // build transmission chain
+          transmissionChain.build(relationships, followUpPeriod, callback);
+        }
+
+      })
+      .catch(callback);
   };
 
   /**
-   * Count transmission chains from a list of relationships
-   * @param relationships {[relationship]}
+   * Build transmission chains for an outbreak
+   * @param outbreakId
    * @param followUpPeriod
+   * @param filter
    * @param callback
    */
-  Relationship.countTransmissionChains = function (relationships, followUpPeriod, callback) {
-    transmissionChain.count(relationships, followUpPeriod, callback);
+  Relationship.getTransmissionChains = function (outbreakId, followUpPeriod, filter, callback) {
+    Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, filter, false, callback);
   };
+
+  /**
+   * Count transmission chains for an outbreak
+   * @param outbreakId
+   * @param followUpPeriod
+   * @param filter
+   * @param callback
+   */
+  Relationship.countTransmissionChains = function (outbreakId, followUpPeriod, filter, callback) {
+    Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, filter, true, callback);
+  };
+
+  /**
+   * Filter known transmission chains
+   * @param outbreakId
+   * @param filter
+   * @return {*|PromiseLike<T>|Promise<T>} Promise that resolves a list of relationships
+   */
+  Relationship.filterKnownTransmissionChains = function (outbreakId, filter) {
+    // transmission chains are formed by case-case relations of non-discarded cases
+    let _filter = app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId,
+          'persons.0.type': {
+            inq: ['case', 'event']
+          },
+          'persons.1.type': {
+            inq: ['case', 'event']
+          }
+        },
+        include: {
+          relation: 'people',
+          scope: {
+            where: {
+              classification: {
+                inq: app.models.case.nonDiscardedCaseClassifications
+              }
+            },
+            filterParent: true
+          }
+        }
+      }, filter || {});
+
+    // find relationships
+    return Relationship
+      .find(_filter)
+      .then(function (relationships) {
+        return app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, _filter)
+        // some relations may be invalid after applying scope filtering, remove invalid ones
+          .filter(function (relationship) {
+            return relationship.people.length === 2;
+          });
+      });
+  }
 };

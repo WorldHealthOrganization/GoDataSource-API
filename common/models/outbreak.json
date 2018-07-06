@@ -733,6 +733,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countNewCasesInKnownTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "countCasesWithLessThanXContacts"
@@ -1705,7 +1711,8 @@
               }
             ],
             "length": "number",
-            "activeChains": "number"
+            "activeChains": "number",
+            "isolatedNodes": "number"
           },
           "description": "Number of transmission chains and the length of each chain",
           "required": true,
@@ -1859,6 +1866,32 @@
       "http": {
         "verb": "get",
         "path": "/relationships/cases-with-less-than-x-contacts/count"
+      }
+    },
+    "prototype.countNewCasesInKnownTransmissionChains": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'noDaysDaysInChains' number on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": {
+            "newCases": "number",
+            "total": "number"
+          },
+          "description": "Retrieve number of new cases in known transmission chains",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the number of new cases vs total number of cases in known transmission chains",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/new-cases-in-transmission-chains/count"
       }
     }
   }
