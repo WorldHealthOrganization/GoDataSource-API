@@ -724,6 +724,12 @@
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "countNewCasesInKnownTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCasesWithLessThanXContacts"
     }
   ],
   "methods": {
@@ -1665,11 +1671,13 @@
             "chains": [
               {
                 "type": {
-                  "length": "number"
+                  "length": "number",
+                  "active": "boolean"
                 }
               }
             ],
             "length": "number",
+            "activeChains": "number",
             "isolatedNodes": "number"
           },
           "description": "Number of transmission chains and the length of each chain",
@@ -1711,19 +1719,16 @@
             },
             "transmissionChains": {
               "type": {
-                "chains": {
-                  "type": [
-                    {
-                      "type": [
-                        {
-                          "type": [
-                            "string"
-                          ]
-                        }
-                      ]
+                "chains": [
+                  {
+                    "type": {
+                      "chain": [
+                        "string"
+                      ],
+                      "active": "boolean"
                     }
-                  ]
-                },
+                  }
+                ],
                 "length": "number"
               }
             }
@@ -1799,6 +1804,34 @@
       "http": {
         "verb": "get",
         "path": "/follow-ups/contacts-lost-to-follow-up/count"
+      }
+    },
+    "prototype.countCasesWithLessThanXContacts": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'numberContactsLessThan' number on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of cases with less than X contacts",
+          "required": true
+        },
+        {
+          "arg": "caseIDs",
+          "type": ["string"],
+          "description": "Array with IDs of cases with less than X contacts",
+          "required": true
+        }
+      ],
+      "description": "Count the number of cases with less than X contacts; Also return the case IDs",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/cases-with-less-than-x-contacts/count"
       }
     },
     "prototype.countNewCasesInKnownTransmissionChains": {

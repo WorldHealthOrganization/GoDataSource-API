@@ -1129,4 +1129,74 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   }
+
+  /**
+   * Count the cases with less than X contacts
+   * Note: Besides the count the response also contains a list with the counted cases IDs
+   * @param filter Besides the default filter properties this request also accepts 'numberContactsLessThan': number on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countCasesWithLessThanXContacts = function (filter, callback) {
+    // initialize numberContactsLessThan filter
+    let numberContactsLessThan;
+    // check if the numberContactsLessThan filter was sent; accepting it only on the first level
+    numberContactsLessThan = _.get(filter, 'where.numberContactsLessThan');
+    if (typeof numberContactsLessThan !== "undefined") {
+      // numberContactsLessThan was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.numberContactsLessThan;
+    } else {
+      // get the outbreak noLessContacts as the default numberContactsLessThan value
+      numberContactsLessThan = this.noLessContacts;
+    }
+
+    // initialize map of case IDs to map of contacts IDs to true value (doing this in order to prevent an indexOf search in an array of contact IDs)
+    // this is a helper map to not loop multiple times through the relationships
+    // eg: {"caseId": {"contactId": numberOfRelationships}}
+    let caseIDsMap = {};
+
+    // in order to count the cases with less than X contacts get the relationships and count unique contacts per case
+    app.models.relationship.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: this.id,
+          and: [{
+            'persons.type': 'case'
+          }, {
+            'persons.type': 'contact'
+          }]
+        }
+      }, filter || {}))
+      .then(function (relationships) {
+        // loop through the relationships to count
+        relationships.forEach(function (relationship) {
+          // get caseId and contactId from relationship; the relationship only has 2 elements
+          // getting caseId index as it can be 0 or 1 so the contactId will be the other index
+          let caseIdIndex = relationship.persons.findIndex(elem => elem.type === 'case');
+          let caseId = relationship.persons[caseIdIndex].id;
+          let contactId = relationship.persons[caseIdIndex ? 0 : 1].id;
+
+          // if there is already an entry in caseIDsMap[caseId] map for the contactId they is nothing to do; a relation with the same persons was already parsed
+          if (caseIDsMap[caseId] && caseIDsMap[caseId][contactId]) {
+            // nothing to do
+          } else {
+            // initialize caseId entry in the caseIDsMap if there is no entry yet
+            if (!caseIDsMap[caseId]) {
+              caseIDsMap[caseId] = {};
+            }
+
+            // add the contactId entry in the caseIDsMap[caseId] map if not already added
+            if (!caseIDsMap[caseId][contactId]) {
+              caseIDsMap[caseId][contactId] = true;
+            }
+          }
+        });
+
+        // filter the caseIDsContactsCounter to get the caseIDs with less than numberContactsLessThan contacts
+        let resultCases = Object.keys(caseIDsMap).filter(caseId => Object.keys(caseIDsMap[caseId]).length < numberContactsLessThan);
+
+        // send response
+        callback(null, resultCases.length, resultCases);
+      })
+      .catch(callback);
+  };
 };
