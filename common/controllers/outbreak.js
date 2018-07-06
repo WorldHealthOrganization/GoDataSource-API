@@ -1272,6 +1272,7 @@ module.exports = function (Outbreak) {
           // get event index from persons
           let eventIndex = relationship.persons.findIndex(elem => elem.type === 'event');
           // get eventId, contactId
+          // there are only 2 persons so the indexes are 0 or 1
           let eventId = relationship.persons[eventIndex].id;
           let contactId = relationship.persons[eventIndex ? 0 : 1].id;
 
