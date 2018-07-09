@@ -766,6 +766,12 @@
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "countNewChainsFromRegisteredContactsWhoBecameCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countCasesContacts"
     }
   ],
   "methods": {
@@ -1873,21 +1879,42 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'numberContactsLessThan' number on the first level in 'where'"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'noLessContacts' number on the first level in 'where'"
         }
       ],
       "returns": [
         {
-          "arg": "count",
-          "type": "number",
-          "description": "Number of cases with less than X contacts",
-          "required": true
-        },
-        {
-          "arg": "caseIDs",
-          "type": ["string"],
-          "description": "Array with IDs of cases with less than X contacts",
-          "required": true
+          "arg": "counters",
+          "type": {
+            "casesCount": {
+              "type": "number",
+              "description": "Number of cases with less than X contacts",
+              "required": true
+            },
+            "caseIDs": {
+              "type": ["string"],
+              "description": "Array with IDs of cases with less than X contacts",
+              "required": true
+            },
+            "cases": [
+              {
+                "type": {
+                  "id": "string",
+                  "contactsCount": {
+                    "type": "number",
+                    "description": "Number of contacts for case",
+                    "required": true
+                  },
+                  "contactIDs": [
+                    "string"
+                  ]
+                },
+                "description": "Array with information for the cases with less than X contacts"
+              }
+            ]
+          },
+          "required": true,
+          "root": true
         }
       ],
       "description": "Count the number of cases with less than X contacts; Also return the case IDs",
@@ -1934,12 +1961,12 @@
         {
           "arg": "counters",
           "type": {
-            "newContacts": "number",
+            "newContactsCount": "number",
             "events": [
               {
                 "type": {
                   "id": "string",
-                  "newContacts": "number",
+                  "newContactsCount": "number",
                   "contactIDs": [
                     "string"
                   ]
@@ -2067,6 +2094,70 @@
       "http": {
         "verb": "get",
         "path": "/relationships/new-transmission-chains-from-registered-contacts-who-became-cases/filtered-count"
+      }
+    },
+    "prototype.countCasesContacts": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "casesCount": {
+              "type": "number",
+              "description": "Total number of cases",
+              "required": true
+            },
+            "contactsCount": {
+              "type": "number",
+              "description": "Total number of contacts related to cases; Note there might be other contacts related to events.",
+              "required": true
+            },
+            "averageNoContactsPerCase": {
+              "type": "number",
+              "description": "Average Number of contacts per case",
+              "required": true
+            },
+            "meanNoContactsPerCase": {
+              "type": "number",
+              "description": "Mean Number of contacts per case",
+              "required": true
+            },
+            "medianNoContactsPerCase": {
+              "type": "number",
+              "description": "Median Number of contacts per case",
+              "required": true
+            },
+            "cases": [
+              {
+                "type": {
+                  "id": "string",
+                  "contactsCount": {
+                    "type": "number",
+                    "description": "Number of contacts for case",
+                    "required": true
+                  },
+                  "contactIDs": [
+                    "string"
+                  ]
+                }
+              }
+            ]
+          },
+          "description": "Object containing counters for contacts per case",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the number of contacts for each case; Additionally calculate average/mean/median",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/contacts-per-case/count"
       }
     }
   }
