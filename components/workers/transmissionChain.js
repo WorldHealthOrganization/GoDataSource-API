@@ -280,7 +280,7 @@ const worker = {
         isolatedNodes: isolatedNodes,
         chains: chainsLengths,
         length: _chains.length,
-        activeChains: activeChainsLength
+        activeChainsCount: activeChainsLength
       };
     } else {
       // return info about nodes, edges and the actual chains

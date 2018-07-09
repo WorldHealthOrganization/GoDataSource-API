@@ -1075,7 +1075,8 @@ module.exports = function (Outbreak) {
           .then(function (isolatedNodesCount) {
             // total list of isolated nodes is composed by the nodes that were never in a relationship + the ones that
             // come from relationships that were invalidated as part of the chain
-            noOfChains.isolatedNodes = isolatedNodesCount + isolatedNodesNo;
+            noOfChains.isolatedNodesCount = isolatedNodesCount + isolatedNodesNo;
+            delete noOfChains.isolatedNodes;
             delete noOfChains.nodes;
             callback(null, noOfChains);
           })
@@ -1426,7 +1427,7 @@ module.exports = function (Outbreak) {
     // get known transmission chains
     app.models.relationship
       .filterKnownTransmissionChains(this.id, app.utils.remote
-        // were only interested in cases
+      // were only interested in cases
         .mergeFilters({
           where: {
             'persons.0.type': {
@@ -1471,4 +1472,38 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Build new transmission chains from registered contacts who became cases
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.buildNewChainsFromRegisteredContactsWhoBecameCases = function (filter, callback) {
+    Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases(this, filter, false, callback);
+  };
+
+  /**
+   * Count new transmission chains from registered contacts who became cases
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countNewChainsFromRegisteredContactsWhoBecameCases = function (filter, callback) {
+    Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases(this, filter, true, function (error, result) {
+      if (error) {
+        return callback(error);
+      }
+      // there is no need for the nodes, it's just a count
+      delete result.nodes;
+      // count isolated nodes
+      result.isolatedNodesCount = Object.keys(result.isolatedNodes).reduce(function (accumulator, currentValue) {
+        if (result.isolatedNodes[currentValue]) {
+          accumulator++;
+        }
+        return accumulator;
+      }, 0);
+      delete result.isolatedNodes;
+      callback(null, result);
+    });
+  };
+
 };

@@ -32,6 +32,10 @@ const _ = require('lodash');
  * @return {*}
  */
 function deepSearchByRelationPropertyOnModel(model, filter) {
+  // if the model does not exist, stop here
+  if (!model) {
+    return model;
+  }
   // always work with JSON to be able to traverse relation data
   if (typeof model.toJSON === 'function') {
     model = model.toJSON();

@@ -754,6 +754,18 @@
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "longPeriodsBetweenDatesOfOnsetInTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "buildNewChainsFromRegisteredContactsWhoBecameCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countNewChainsFromRegisteredContactsWhoBecameCases"
     }
   ],
   "methods": {
@@ -1723,8 +1735,8 @@
               }
             ],
             "length": "number",
-            "activeChains": "number",
-            "isolatedNodes": "number"
+            "activeChainsCount": "number",
+            "isolatedNodesCount": "number"
           },
           "description": "Number of transmission chains and the length of each chain",
           "required": true,
@@ -1967,6 +1979,94 @@
       "http": {
         "verb": "get",
         "path": "/relationships/long-periods-between-dates-of-onset-in-transmission-chains"
+      }
+    },
+    "prototype.buildNewChainsFromRegisteredContactsWhoBecameCases": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "chains",
+          "type": {
+            "nodes": {
+              "type": {
+                "<personId>": {
+                  "type": "person"
+                }
+              }
+            },
+            "edges": {
+              "type": {
+                "<relationshipId>": {
+                  "type": "relationship"
+                }
+              }
+            },
+            "transmissionChains": {
+              "type": {
+                "chains": [
+                  {
+                    "type": {
+                      "chain": [
+                        "string"
+                      ],
+                      "active": "boolean"
+                    }
+                  }
+                ],
+                "length": "number"
+              }
+            }
+          },
+          "description": "New transmission chains",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Build new transmission chains from registered contacts who became cases",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/new-transmission-chains-from-registered-contacts-who-became-cases"
+      }
+    },
+    "prototype.countNewChainsFromRegisteredContactsWhoBecameCases": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "chains",
+          "type": {
+            "chains": [
+              {
+                "type": {
+                  "length": "number",
+                  "active": "boolean"
+                }
+              }
+            ],
+            "length": "number",
+            "activeChainsCount": "number",
+            "isolatedNodesCount": "number"
+          },
+          "description": "Number of transmission chains and the length of each chain",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Count new transmission chains from registered contacts who became cases",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/new-transmission-chains-from-registered-contacts-who-became-cases/filtered-count"
       }
     }
   }
