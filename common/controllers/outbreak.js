@@ -1565,26 +1565,23 @@ module.exports = function (Outbreak) {
           if (relationship.people[0].dateOfOnset && relationship.people[1].dateOfOnset) {
             // find source person index (in persons)
             const _sourceIndex = relationship.persons.findIndex(person => person.source);
-            // only continue if found (source/target are new relationship properties)
-            if (_sourceIndex !== -1) {
-              // find source person index
-              const sourceIndex = relationship.people.findIndex(person => person.id === relationship.persons[_sourceIndex].id);
-              // find source person
-              const sourcePerson = relationship.people[sourceIndex];
-              // get target person (the other person from people list)
-              const targetPerson = relationship.people[sourceIndex ? 0 : 1];
-              // if target person's date of onset is earlier than the source's person
-              if ((new Date(targetPerson.dateOfOnset)) < (new Date(sourcePerson.dateOfOnset))) {
-                //store info about both people and their relationship
-                const result = {
-                  primaryCase: sourcePerson,
-                  secondaryCase: targetPerson,
-                  relationship: Object.assign({}, relationship)
-                };
-                // remove extra info
-                delete result.relationship.people;
-                results.push(result);
-              }
+            // find source person index
+            const sourceIndex = relationship.people.findIndex(person => person.id === relationship.persons[_sourceIndex].id);
+            // find source person
+            const sourcePerson = relationship.people[sourceIndex];
+            // get target person (the other person from people list)
+            const targetPerson = relationship.people[sourceIndex ? 0 : 1];
+            // if target person's date of onset is earlier than the source's person
+            if ((new Date(targetPerson.dateOfOnset)) < (new Date(sourcePerson.dateOfOnset))) {
+              //store info about both people and their relationship
+              const result = {
+                primaryCase: sourcePerson,
+                secondaryCase: targetPerson,
+                relationship: Object.assign({}, relationship)
+              };
+              // remove extra info
+              delete result.relationship.people;
+              results.push(result);
             }
           }
         });
