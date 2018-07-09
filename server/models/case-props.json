@@ -1,0 +1,11 @@
+{
+  "name": "caseProps",
+  "base": "case",
+  "hidden": [
+    "id"
+  ],
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
