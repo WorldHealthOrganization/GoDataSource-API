@@ -1544,9 +1544,9 @@ module.exports = function (Outbreak) {
       .mergeFilters({
         where: {
           outbreakId: outbreakId,
-          // get follow-ups that are not in the past
+          // get follow-ups that are scheduled later than today 00:00 hours
           date: {
-            gte: new Date()
+            gte: (new Date()).setHours(0,0,0,0)
           }
         }
       }, filter || {}))
