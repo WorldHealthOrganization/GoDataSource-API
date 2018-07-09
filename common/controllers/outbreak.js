@@ -1003,7 +1003,8 @@ module.exports = function (Outbreak) {
           .then(function (isolatedNodesCount) {
             // total list of isolated nodes is composed by the nodes that were never in a relationship + the ones that
             // come from relationships that were invalidated as part of the chain
-            noOfChains.isolatedNodes = isolatedNodesCount + isolatedNodesNo;
+            noOfChains.isolatedNodesCount = isolatedNodesCount + isolatedNodesNo;
+            delete noOfChains.isolatedNodes;
             delete noOfChains.nodes;
             callback(null, noOfChains);
           })
@@ -1422,12 +1423,13 @@ module.exports = function (Outbreak) {
       // there is no need for the nodes, it's just a count
       delete result.nodes;
       // count isolated nodes
-      result.isolatedNodes = Object.keys(result.isolatedNodes).reduce(function (accumulator, currentValue) {
+      result.isolatedNodesCount = Object.keys(result.isolatedNodes).reduce(function (accumulator, currentValue) {
         if (result.isolatedNodes[currentValue]) {
           accumulator++;
         }
         return accumulator;
       }, 0);
+      delete result.isolatedNodes;
       callback(null, result);
     });
   };

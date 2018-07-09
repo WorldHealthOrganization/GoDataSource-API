@@ -1735,8 +1735,8 @@
               }
             ],
             "length": "number",
-            "activeChains": "number",
-            "isolatedNodes": "number"
+            "activeChainsCount": "number",
+            "isolatedNodesCount": "number"
           },
           "description": "Number of transmission chains and the length of each chain",
           "required": true,
@@ -2055,8 +2055,8 @@
               }
             ],
             "length": "number",
-            "activeChains": "number",
-            "isolatedNodes": "number"
+            "activeChainsCount": "number",
+            "isolatedNodesCount": "number"
           },
           "description": "Number of transmission chains and the length of each chain",
           "required": true,
