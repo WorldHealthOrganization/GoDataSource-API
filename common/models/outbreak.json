@@ -1332,7 +1332,15 @@
         {
           "arg": "nk",
           "type": "string",
-          "description": "Foreign key for contacts"
+          "description": "Foreign key for contact"
+        },
+        {
+          "arg": "body",
+          "type": "caseProps",
+          "http": {
+            "source": "body"
+          },
+          "description": "Case specific properties"
         }
       ],
       "returns": [

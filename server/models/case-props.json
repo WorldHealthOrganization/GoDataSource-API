@@ -1,0 +1,58 @@
+{
+  "name": "caseProps",
+  "base": "Model",
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "dateOfInfection": {
+      "type": "date"
+    },
+    "dateOfOnset": {
+      "type": "date"
+    },
+    "isDateOfOnsetApproximate": {
+      "type": "boolean"
+    },
+    "dateBecomeCase": {
+      "type": "date"
+    },
+    "dateOfOutcome": {
+      "type": "date"
+    },
+    "isolationDates": [
+      "date"
+    ],
+    "hospitalizationDates": [
+      "date"
+    ],
+    "incubationDates": [
+      "date"
+    ],
+    "deceased": {
+      "type": "boolean",
+      "default": false
+    },
+    "dateDeceased": {
+      "type": "date"
+    },
+    "classification": {
+      "type": "string",
+      "required": true
+    },
+    "riskLevel": {
+      "type": "string"
+    },
+    "riskReason": {
+      "type": "string"
+    },
+    "transferRefused": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

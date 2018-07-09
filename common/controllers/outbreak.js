@@ -420,11 +420,18 @@ module.exports = function (Outbreak) {
   /**
    * Convert a contact to a case
    * @param contactId
+   * @param params Case specific params
    * @param callback
    */
-  Outbreak.prototype.convertContactToCase = function (contactId, callback) {
+  Outbreak.prototype.convertContactToCase = function (contactId, params, callback) {
     let updateRelations = [];
     let convertedCase;
+
+    // parse case specific params, if not available fallback on default values
+    params = params || {};
+    params.type = 'case';
+    params.dateBecomeCase = params.dateBecomeCase || new Date();
+    params.classification = params.classification || 'suspect';
 
     // override default scope to allow switching the type
     const defaultScope = app.models.contact.defaultScope;
@@ -442,10 +449,7 @@ module.exports = function (Outbreak) {
         if (!contact) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: contactId});
         }
-        return contact.updateAttributes({
-          type: "case",
-          dateBecomeCase: new Date()
-        });
+        return contact.updateAttributes(params);
       })
       .then(function (_case) {
         convertedCase = _case;
