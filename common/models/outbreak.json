@@ -766,6 +766,12 @@
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "countNewChainsFromRegisteredContactsWhoBecameCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "findSecondaryCasesWithDateOfOnsetBeforePrimaryCase"
     }
   ],
   "methods": {
@@ -2067,6 +2073,35 @@
       "http": {
         "verb": "get",
         "path": "/relationships/new-transmission-chains-from-registered-contacts-who-became-cases/filtered-count"
+      }
+    },
+    "prototype.findSecondaryCasesWithDateOfOnsetBeforePrimaryCase": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "results",
+          "type": [{
+            "type": {
+              "primaryCase": "case",
+              "secondaryCase": "case",
+              "relationship": "relationship"
+            }
+          }],
+          "description": "List of secondary cases that have date of onset before the date of onset of primary cases",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get a list of secondary cases that have date of onset before the date of onset of primary cases",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/secondary-cases-with-date-of-onset-before-primary-case"
       }
     }
   }

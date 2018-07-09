@@ -98,7 +98,8 @@ module.exports = function (Outbreak) {
       if (data.persons.length) {
         data.persons.push({
           id: personId,
-          type: type
+          type: type,
+          source: true,
         });
       }
 
@@ -131,7 +132,8 @@ module.exports = function (Outbreak) {
                     id: person.id
                   }));
                 }
-
+                // this person is a target
+                data.persons[index].target = true;
                 // set its type
                 data.persons[index].type = foundPerson.type;
               })
