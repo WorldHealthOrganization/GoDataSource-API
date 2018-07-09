@@ -778,6 +778,12 @@
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "findSecondaryCasesWithDateOfOnsetBeforePrimaryCase"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countFollowUpContacts"
     }
   ],
   "methods": {
@@ -1642,7 +1648,7 @@
       }
     },
     "prototype.filteredCountCases": {
-      "accepts":[
+      "accepts": [
         {
           "arg": "filter",
           "type": "object",
@@ -1906,7 +1912,9 @@
               "required": true
             },
             "caseIDs": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "description": "Array with IDs of cases with less than X contacts",
               "required": true
             },
@@ -2010,7 +2018,9 @@
       "returns": [
         {
           "arg": "relationships",
-          "type": ["relationship"],
+          "type": [
+            "relationship"
+          ],
           "description": "List of relationships that links cases with long periods between the dates of onset (includes people relation and the time difference in differenceBetweenDatesOfOnset param)",
           "root": true,
           "required": true
@@ -2201,6 +2211,43 @@
       "http": {
         "verb": "get",
         "path": "/relationships/secondary-cases-with-date-of-onset-before-primary-case"
+      }
+    },
+    "prototype.countFollowUpContacts": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "contactsCount": {
+              "type": "number",
+              "description": "Number of contacts on follow-up list",
+              "required": true
+            },
+            "followUpsCount": {
+              "type": "number",
+              "description": "Total number of follow-ups.",
+              "required": true
+            },
+            "contactIDs": [
+              "string"
+            ]
+          },
+          "description": "Object containing counters for contacts on follow-up list",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the number of contacts for each case; Additionally calculate average/mean/median",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/contacts/count"
       }
     }
   }
