@@ -1220,69 +1220,45 @@ module.exports = function (Outbreak) {
   /**
    * Count the cases with less than X contacts
    * Note: Besides the count the response also contains a list with the counted cases IDs
-   * @param filter Besides the default filter properties this request also accepts 'numberContactsLessThan': number on the first level in 'where'
+   * @param filter Besides the default filter properties this request also accepts 'noLessContacts': number on the first level in 'where'
    * @param callback
    */
   Outbreak.prototype.countCasesWithLessThanXContacts = function (filter, callback) {
-    // initialize numberContactsLessThan filter
-    let numberContactsLessThan;
-    // check if the numberContactsLessThan filter was sent; accepting it only on the first level
-    numberContactsLessThan = _.get(filter, 'where.numberContactsLessThan');
-    if (typeof numberContactsLessThan !== "undefined") {
-      // numberContactsLessThan was sent; remove it from the filter as it shouldn't reach DB
-      delete filter.where.numberContactsLessThan;
+    // initialize noLessContacts filter
+    let noLessContacts;
+    // check if the noLessContacts filter was sent; accepting it only on the first level
+    noLessContacts = _.get(filter, 'where.noLessContacts');
+    if (typeof noLessContacts !== "undefined") {
+      // noLessContacts was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.noLessContacts;
     } else {
-      // get the outbreak noLessContacts as the default numberContactsLessThan value
-      numberContactsLessThan = this.noLessContacts;
+      // get the outbreak noLessContacts as the default noLessContacts value
+      noLessContacts = this.noLessContacts;
     }
 
-    // initialize map of case IDs to map of contacts IDs to true value (doing this in order to prevent an indexOf search in an array of contact IDs)
-    // this is a helper map to not loop multiple times through the relationships
-    // eg: {"caseId": {"contactId": numberOfRelationships}}
-    let caseIDsMap = {};
+    // get outbreakId
+    let outbreakId = this.id;
 
-    // in order to count the cases with less than X contacts get the relationships and count unique contacts per case
-    app.models.relationship.find(app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: this.id,
-          and: [{
-            'persons.type': 'case'
-          }, {
-            'persons.type': 'contact'
-          }]
-        }
-      }, filter || {}))
-      .then(function (relationships) {
-        // loop through the relationships to count
-        relationships.forEach(function (relationship) {
-          // get caseId and contactId from relationship; the relationship only has 2 elements
-          // getting caseId index as it can be 0 or 1 so the contactId will be the other index
-          let caseIdIndex = relationship.persons.findIndex(elem => elem.type === 'case');
-          let caseId = relationship.persons[caseIdIndex].id;
-          let contactId = relationship.persons[caseIdIndex ? 0 : 1].id;
+    // get cases with contacts
+    app.models.relationship
+      .getCasesWithContacts(outbreakId, filter)
+      .then(function (casesWithContacts) {
+        // initialize result
+        let result = {
+          cases: Object.values(casesWithContacts.cases)
+        };
 
-          // if there is already an entry in caseIDsMap[caseId] map for the contactId they is nothing to do; a relation with the same persons was already parsed
-          if (caseIDsMap[caseId] && caseIDsMap[caseId][contactId]) {
-            // nothing to do
-          } else {
-            // initialize caseId entry in the caseIDsMap if there is no entry yet
-            if (!caseIDsMap[caseId]) {
-              caseIDsMap[caseId] = {};
-            }
+        // get all the found cases IDs
+        let allCasesIDs = Object.keys(casesWithContacts.cases);
+        let allCasesInfo = Object.values(casesWithContacts.cases);
 
-            // add the contactId entry in the caseIDsMap[caseId] map if not already added
-            if (!caseIDsMap[caseId][contactId]) {
-              caseIDsMap[caseId][contactId] = true;
-            }
-          }
-        });
-
-        // filter the caseIDsContactsCounter to get the caseIDs with less than numberContactsLessThan contacts
-        let resultCases = Object.keys(caseIDsMap).filter(caseId => Object.keys(caseIDsMap[caseId]).length < numberContactsLessThan);
+        // get the caseIDs with less than noLessContacts contacts
+        result.caseIDs = allCasesIDs.filter(caseId => casesWithContacts.cases[caseId].contactsCount < noLessContacts);
+        result.cases = allCasesInfo.filter(item => result.caseIDs.indexOf(item.id) !== -1);
+        result.casesCount = result.caseIDs.length;
 
         // send response
-        callback(null, resultCases.length, resultCases);
+        callback(null, result);
       })
       .catch(callback);
   };
@@ -1310,7 +1286,7 @@ module.exports = function (Outbreak) {
 
     // initialize results
     let results = {
-      newContacts: 0,
+      newContactsCount: 0,
       events: {}
     };
 
@@ -1353,7 +1329,7 @@ module.exports = function (Outbreak) {
           if (!eventsMap[eventId]) {
             eventsMap[eventId] = {
               id: eventId,
-              newContacts: 0,
+              newContactsCount: 0,
               contactIDs: []
             };
 
@@ -1366,7 +1342,7 @@ module.exports = function (Outbreak) {
             // get contactId flag in order to not count it twice for the event
             eventContactsMap[eventId][contactId] = true;
             // increase counter
-            eventsMap[eventId].newContacts++;
+            eventsMap[eventId].newContactsCount++;
             // add contactId
             eventsMap[eventId].contactIDs.push(contactId);
           }
@@ -1375,7 +1351,7 @@ module.exports = function (Outbreak) {
             // get contactId flag in order to not count it twice in total
             contactsMap[contactId] = true;
             // increase total counter
-            results.newContacts++;
+            results.newContactsCount++;
           }
         });
 
@@ -1400,7 +1376,7 @@ module.exports = function (Outbreak) {
         let parsedEvents = events.map(event => {
           return {
             id: event.id,
-            newContacts: 0,
+            newContactsCount: 0,
             contactIDs: []
           }
         });
@@ -1506,6 +1482,49 @@ module.exports = function (Outbreak) {
     });
   };
 
+
+  /**
+   * Count the contacts for each case; Also calculate average/mean/median
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countCasesContacts = function (filter, callback) {
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // get cases with contacts
+    app.models.relationship
+      .getCasesWithContacts(outbreakId, filter)
+      .then(function (casesWithContacts) {
+        // initialize result
+        let result = {
+          casesCount: casesWithContacts.casesCount,
+          contactsCount: casesWithContacts.contactsCount,
+          cases: Object.values(casesWithContacts.cases)
+        };
+
+        // calculate average/mean/median
+        // get an array with sorted contact numbers; sort is needed for median
+        let contactCountList = result.cases.map(item => item.contactsCount).sort((a, b) => a - b);
+        let contactCountListLength = contactCountList.length;
+
+        // calculate average number of contacts per case; sum the number of contacts per case and split to number of cases
+        result.averageNoContactsPerCase = contactCountList.reduce((totalNo, noContactsPerCase) => totalNo + noContactsPerCase, 0) / contactCountListLength;
+
+        // calculate mean; currently is the same as average
+        // TODO: Find out how mean is calculated
+        result.meanNoContactsPerCase = result.averageNoContactsPerCase;
+
+        // calculate median; it's either the middle element of the array in case the length is uneven or the average of the two middle elements for even length
+        result.medianNoContactsPerCase = contactCountListLength % 2 === 0 ?
+          (contactCountList[contactCountListLength / 2 - 1] + contactCountList[contactCountListLength / 2]) / 2 :
+          contactCountList[Math.floor(contactCountListLength / 2)];
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
+  };
   /**
    * Get a list of secondary cases that have date of onset before the date of onset of primary cases
    * @param filter
@@ -1573,5 +1592,4 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
-
 };
