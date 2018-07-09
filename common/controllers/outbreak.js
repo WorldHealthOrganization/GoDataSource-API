@@ -1546,7 +1546,7 @@ module.exports = function (Outbreak) {
           outbreakId: outbreakId,
           // get follow-ups that are scheduled later than today 00:00 hours
           date: {
-            gte: (new Date()).setHours(0,0,0,0)
+            gte: (new Date()).setHours(0, 0, 0, 0)
           }
         }
       }, filter || {}))
@@ -1555,8 +1555,8 @@ module.exports = function (Outbreak) {
         let contactsMap = {};
 
         // loop through the followups to get unique contacts
-        followUps.forEach(function(followUp) {
-          if(!contactsMap[followUp.personId]) {
+        followUps.forEach(function (followUp) {
+          if (!contactsMap[followUp.personId]) {
             contactsMap[followUp.personId] = true;
           }
         });
