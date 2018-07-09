@@ -748,6 +748,12 @@
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "countEventNewContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "longPeriodsBetweenDatesOfOnsetInTransmissionChains"
     }
   ],
   "methods": {
@@ -1938,6 +1944,29 @@
       "http": {
         "verb": "get",
         "path": "/relationships/events-new-contacts/count"
+      }
+    },
+    "prototype.longPeriodsBetweenDatesOfOnsetInTransmissionChains": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationships",
+          "type": ["relationship"],
+          "description": "List of relationships that links cases with long periods between the dates of onset (includes people relation and the time difference in differenceBetweenDatesOfOnset param)",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get a list of relationships that links cases with long periods between the dates of onset",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/long-periods-between-dates-of-onset-in-transmission-chains"
       }
     }
   }
