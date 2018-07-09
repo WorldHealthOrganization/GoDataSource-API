@@ -1354,7 +1354,7 @@ module.exports = function (Outbreak) {
     // get known transmission chains
     app.models.relationship
       .filterKnownTransmissionChains(this.id, app.utils.remote
-        // were only interested in cases
+      // were only interested in cases
         .mergeFilters({
           where: {
             'persons.0.type': {
@@ -1399,4 +1399,23 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Build new transmission chains from registered contacts who became cases
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.buildNewChainsFromRegisteredContactsWhoBecameCases = function (filter, callback) {
+    Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases(this, filter, false, callback);
+  };
+
+  /**
+   * Count new transmission chains from registered contacts who became cases
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countNewChainsFromRegisteredContactsWhoBecameCases = function (filter, callback) {
+    Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases(this, filter, true, callback);
+  };
+
 };

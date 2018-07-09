@@ -137,5 +137,30 @@ module.exports = function (Relationship) {
             return relationship.people.length === 2;
           });
       });
+  };
+
+  /**
+   * Forward transmission chain builder/counter
+   * @type {{build: build, count: count}}
+   */
+  Relationship.transmissionChain = {
+    /**
+     * Build transmission chains
+     * @param relationships
+     * @param followUpPeriod
+     * @param callback
+     */
+    build: function (relationships, followUpPeriod, callback) {
+      transmissionChain.build(relationships, followUpPeriod, callback);
+    },
+    /**
+     * Count transmission chains
+     * @param relationships
+     * @param followUpPeriod
+     * @param callback
+     */
+    count: function (relationships, followUpPeriod, callback) {
+      transmissionChain.build(relationships, followUpPeriod, callback);
+    }
   }
 };

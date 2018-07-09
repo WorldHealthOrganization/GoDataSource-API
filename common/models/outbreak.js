@@ -616,4 +616,59 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Build/Count new transmission chains from registered contacts who became cases
+   * @param outbreak
+   * @param filter
+   * @param countOnly
+   * @param callback
+   */
+  Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases = function (outbreak, filter, countOnly, callback) {
+    // build a filter for finding cases who came from registered contacts and their relationships that appeared happened after they became cases
+    const _filter = {
+      where: {
+        outbreakId: outbreak.id,
+        dateBecomeCase: {
+          neq: null
+        }
+      },
+      fields: ['id', 'dateBecomeCase'],
+      include: [
+        {
+          relation: 'relationships',
+          fields: ['id', 'contactDate'],
+          filterParent: true
+        }
+      ]
+    };
+    // find the cases
+    app.models.case
+      .find(_filter)
+      .then(function (cases) {
+        // remove those without relations
+        cases = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(cases, _filter);
+        // keep a list of relationIds
+        const relationshipIds = [];
+        // go through all the cases
+        cases.forEach(function (caseRecord) {
+          if (Array.isArray(caseRecord.relationships)) {
+            // go trough their relationships
+            caseRecord.relationships.forEach(function (relationship) {
+              // store only the relationships that are newer than their conversion date
+              if ((new Date(relationship.contactDate)) > (new Date(caseRecord.dateBecomeCase))) {
+                relationshipIds.push(relationship.id);
+              }
+            });
+          }
+        });
+        // build/count transmission chains starting from the found relationIds
+        app.models.relationship.buildOrCountTransmissionChains(outbreakId, outbreak.periodOfFollowup, app.utils.remote.mergeFilters({
+          where: {
+            if: relationshipIds
+          }
+        }, filter || {}), countOnly, callback);
+      })
+      .catch(callback);
+  };
 };
