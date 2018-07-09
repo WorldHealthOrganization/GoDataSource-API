@@ -431,7 +431,7 @@ module.exports = function (Outbreak) {
     params = params || {};
     params.type = 'case';
     params.dateBecomeCase = params.dateBecomeCase || new Date();
-    params.classification = params.classification || 'suspect';
+    params.classification = params.classification || 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT';
 
     // override default scope to allow switching the type
     const defaultScope = app.models.contact.defaultScope;
