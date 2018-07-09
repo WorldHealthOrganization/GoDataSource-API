@@ -876,7 +876,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.generateUniqueId = function (callback) {
-    callback(null, uuid.v4())
+    return callback(null, {
+      uuid: uuid.v4()
+    });
   };
 
   /**

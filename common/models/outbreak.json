@@ -1478,17 +1478,15 @@
       }
     },
     "generateUniqueId": {
-      "accepts": [
-        {
-          "arg": "nk",
-          "type": "string",
-          "description": "Foreign key for cases"
-        }
-      ],
+      "accepts": [],
       "returns": [
         {
           "arg": "uniqueId",
-          "type": "string",
+          "type": {
+            "uuid": {
+              "type": "string"
+            }
+          },
           "description": "Unique ID",
           "root": true,
           "required": true
