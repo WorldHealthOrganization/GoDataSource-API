@@ -196,7 +196,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.createCaseRelationship = function (caseId, data, callback) {
-    helpers.createPersonRelationship(this.id, caseId, 'case', data, callback);
+    // make sure case is valid, before trying to create any relations
+    app.models.case
+      .findById(caseId)
+      .then((caseModel) => {
+        if (!caseModel) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.case.modelName,
+            id: caseId
+          }));
+        }
+        helpers.createPersonRelationship(this.id, caseId, 'case', data, callback);
+      })
+      .catch(callback);
   };
 
   /**
@@ -206,7 +218,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.createContactRelationship = function (contactId, data, callback) {
-    helpers.createPersonRelationship(this.id, contactId, 'contact', data, callback);
+    // make sure contact is valid, before trying to create any relations
+    app.models.contact
+      .findById(contactId)
+      .then((contact) => {
+        if (!contact) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.contact.modelName,
+            id: contactId
+          }));
+        }
+        helpers.createPersonRelationship(this.id, contactId, 'contact', data, callback);
+      })
+      .catch(callback);
   };
 
   /**
@@ -216,7 +240,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.createEventRelationship = function (eventId, data, callback) {
-    helpers.createPersonRelationship(this.id, eventId, 'event', data, callback);
+    // make sure event is valid, before trying to create any relations
+    app.models.event
+      .findById(eventId)
+      .then((event) => {
+        if (!event) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.event.modelName,
+            id: eventId
+          }));
+        }
+        helpers.createPersonRelationship(this.id, eventId, 'event', data, callback);
+      })
+      .catch(callback);
   };
 
   /**
@@ -322,7 +358,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countCaseRelationships = function (caseId, where, callback) {
-    helpers.countPersonRelationships(caseId, where, callback);
+    // make sure case is valid
+    app.models.case
+      .findById(caseId)
+      .then((caseModel) => {
+        if (!caseModel) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.case.modelName,
+            id: caseId
+          }));
+        }
+        helpers.countPersonRelationships(caseId, where, callback);
+      })
+      .catch(callback);
   };
 
   /**
@@ -332,7 +380,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactRelationships = function (contactId, where, callback) {
-    helpers.countPersonRelationships(contactId, where, callback);
+    // make sure contact is valid
+    app.models.contact
+      .findById(contactId)
+      .then((contact) => {
+        if (!contact) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.contact.modelName,
+            id: contactId
+          }));
+        }
+        helpers.countPersonRelationships(contactId, where, callback);
+      })
+      .catch(callback);
   };
 
   /**
@@ -342,7 +402,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countEventRelationships = function (eventId, where, callback) {
-    helpers.countPersonRelationships(eventId, where, callback);
+    // make sure event is valid
+    app.models.event
+      .findById(eventId)
+      .then((event) => {
+        if (!event) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.event.modelName,
+            id: eventId
+          }));
+        }
+        helpers.countPersonRelationships(eventId, where, callback);
+      })
+      .catch(callback);
   };
 
   /**
