@@ -1529,6 +1529,53 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Count the contacts on follow-up list
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countFollowUpContacts = function (filter, callback) {
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // get cases with contacts
+    app.models.followUp.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId,
+          // get follow-ups that are not in the past
+          date: {
+            gte: new Date()
+          }
+        }
+      }, filter || {}))
+      .then(function (followUps) {
+        // initialize contacts map; helper to not count contacts twice
+        let contactsMap = {};
+
+        // loop through the followups to get unique contacts
+        followUps.forEach(function(followUp) {
+          if(!contactsMap[followUp.personId]) {
+            contactsMap[followUp.personId] = true;
+          }
+        });
+
+        // get contacts IDs
+        let contactIDs = Object.keys(contactsMap);
+
+        // create result
+        let result = {
+          contactsCount: contactIDs.length,
+          followUpsCount: followUps.length,
+          contactIDs: contactIDs
+        };
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
+  };
   /**
    * Get a list of secondary cases that have date of onset before the date of onset of primary cases
    * @param filter
