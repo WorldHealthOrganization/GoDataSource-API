@@ -1239,78 +1239,23 @@ module.exports = function (Outbreak) {
     // get outbreakId
     let outbreakId = this.id;
 
-    // initialize result
-    let result = {};
+    // get cases with contacts
+    app.models.relationship
+      .getCasesWithContacts(outbreakId, filter)
+      .then(function (casesWithContacts) {
+        // initialize result
+        let result = {
+          cases: Object.values(casesWithContacts.cases)
+        };
 
-    // in order to count the cases with less than X contacts get the relationships and count unique contacts per case
-    app.models.relationship.find(app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: outbreakId,
-          and: [{
-            'persons.type': 'case'
-          }, {
-            'persons.type': 'contact'
-          }]
-        }
-      }, filter || {}))
-      .then(function (relationships) {
-        // initialize map of case IDs to map of contacts IDs to true value (doing this in order to prevent an indexOf search in an array of contact IDs)
-        // this is a helper map to not loop multiple times through the relationships
-        // eg: {"caseId": {"contactId": numberOfRelationships}}
-        let caseIDsMap = {};
+        // get all the found cases IDs
+        let allCasesIDs = Object.keys(casesWithContacts.cases);
+        let allCasesInfo = Object.values(casesWithContacts.cases);
 
-        // loop through the relationships to count
-        relationships.forEach(function (relationship) {
-          // get caseId and contactId from relationship; the relationship only has 2 elements
-          // getting caseId index as it can be 0 or 1 so the contactId will be the other index
-          let caseIdIndex = relationship.persons.findIndex(elem => elem.type === 'case');
-          let caseId = relationship.persons[caseIdIndex].id;
-          let contactId = relationship.persons[caseIdIndex ? 0 : 1].id;
-
-          // if there is already an entry in caseIDsMap[caseId] map for the contactId they is nothing to do; a relation with the same persons was already parsed
-          if (caseIDsMap[caseId] && caseIDsMap[caseId][contactId]) {
-            // nothing to do
-          } else {
-            // initialize caseId entry in the caseIDsMap if there is no entry yet
-            if (!caseIDsMap[caseId]) {
-              caseIDsMap[caseId] = {};
-            }
-
-            // add the contactId entry in the caseIDsMap[caseId] map if not already added
-            if (!caseIDsMap[caseId][contactId]) {
-              caseIDsMap[caseId][contactId] = true;
-            }
-          }
-        });
-
-        // get all the found cases with relationships since we will need to get the other cases
-        let allCases = Object.keys(caseIDsMap);
-
-        // filter the caseIDsContactsCounter to get the caseIDs with less than noLessContacts contacts
-        result.caseIDs = allCases.filter(caseId => Object.keys(caseIDsMap[caseId]).length < noLessContacts);
-        result.count = result.caseIDs.length;
-
-        // get cases without relationships
-        return app.models.case.find({
-          where: {
-            outbreakId: outbreakId,
-            id: {
-              nin: allCases
-            }
-          },
-          fields: {
-            id: true
-          }
-        });
-      })
-      .then(function (cases) {
-        // parse the cases; need only the IDs
-        let caseIds = cases.map(item => item.id);
-
-        // add the found cases into the result
-        result.caseIDs = result.caseIDs.concat(caseIds);
-        result.count += caseIds.length;
+        // get the caseIDs with less than noLessContacts contacts
+        result.caseIDs = allCasesIDs.filter(caseId => casesWithContacts.cases[caseId].contactsCount < noLessContacts);
+        result.cases = allCasesInfo.filter(item => result.caseIDs.indexOf(item.id) !== -1);
+        result.casesCount = result.caseIDs.length;
 
         // send response
         callback(null, result);
@@ -1544,106 +1489,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countCasesContacts = function (filter, callback) {
-    // initialize results
-    let result = {
-      casesCount: 0,
-      contactsCount: 0,
-      cases: {}
-    };
-
     // get outbreakId
     let outbreakId = this.id;
 
-    // get all relationships between cases and contacts
-    app.models.relationship.find(app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: outbreakId,
-          and: [
-            {'persons.type': 'contact'},
-            {'persons.type': 'case'}
-          ]
-        }
-      }, filter || {})
-    )
-      .then(function (relationships) {
-        // initialize cases map and contacts map
-        let casesMap = {};
-        let contactsMap = {};
-        // helper property to keep the contacts already counted
-        let caseContactsMap = {};
-
-        // loop through the relationships and populate the casesMap;
-        // Note: This loop will only add the cases that have relationships. Will need to do another query to get the cases without relationships
-        relationships.forEach(function (relationship) {
-          // get case index from persons
-          let caseIndex = relationship.persons.findIndex(elem => elem.type === 'case');
-          // get caseId, contactId
-          // there are only 2 persons so the indexes are 0 or 1
-          let caseId = relationship.persons[caseIndex].id;
-          let contactId = relationship.persons[caseIndex ? 0 : 1].id;
-
-          // create entry for the case in the casesMap if not already created
-          if (!casesMap[caseId]) {
-            casesMap[caseId] = {
-              id: caseId,
-              contactsCount: 0,
-              contactIDs: []
-            };
-
-            // also create entry for the caseContactsMap
-            caseContactsMap[caseId] = {};
-          }
-
-          // count the contact only if not already counted
-          if (!caseContactsMap[caseId][contactId]) {
-            // get contactId flag in order to not count it twice for the case
-            caseContactsMap[caseId][contactId] = true;
-            // increase counter
-            casesMap[caseId].contactsCount++;
-            // add contactId
-            casesMap[caseId].contactIDs.push(contactId);
-          }
-
-          if (!contactsMap[contactId]) {
-            // get contactId flag in order to not count it twice in total
-            contactsMap[contactId] = true;
-            // increase total counter
-            result.contactsCount++;
-          }
-        });
-
-        // update result.cases; sending array with cases information
-        result.cases = _.values(casesMap);
-
-        // get cases without relationships
-        return app.models.case.find({
-          where: {
-            outbreakId: outbreakId,
-            id: {
-              nin: Object.keys(caseContactsMap)
-            }
-          },
-          fields: {
-            id: true
-          }
-        });
-      })
-      .then(function (cases) {
-        // parse the cases to create entries for the result
-        let parsedCases = cases.map(item => {
-          return {
-            id: item.id,
-            contactsCount: 0,
-            contactIDs: []
-          }
-        });
-
-        // add the parsed cases in the result
-        result.cases = result.cases.concat(parsedCases);
-
-        // add case counter in the results
-        result.casesCount = result.cases.length;
+    // get cases with contacts
+    app.models.relationship
+      .getCasesWithContacts(outbreakId, filter)
+      .then(function (casesWithContacts) {
+        // initialize result
+        let result = {
+          casesCount: casesWithContacts.casesCount,
+          contactsCount: casesWithContacts.contactsCount,
+          cases: Object.values(casesWithContacts.cases)
+        };
 
         // calculate average/mean/median
         // get an array with sorted contact numbers; sort is needed for median

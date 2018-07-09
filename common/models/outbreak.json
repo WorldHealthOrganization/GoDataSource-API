@@ -1886,7 +1886,7 @@
         {
           "arg": "counters",
           "type": {
-            "count": {
+            "casesCount": {
               "type": "number",
               "description": "Number of cases with less than X contacts",
               "required": true
@@ -1895,7 +1895,23 @@
               "type": ["string"],
               "description": "Array with IDs of cases with less than X contacts",
               "required": true
-            }
+            },
+            "cases": [
+              {
+                "type": {
+                  "id": "string",
+                  "contactsCount": {
+                    "type": "number",
+                    "description": "Number of contacts for case",
+                    "required": true
+                  },
+                  "contactIDs": [
+                    "string"
+                  ]
+                },
+                "description": "Array with information for the cases with less than X contacts"
+              }
+            ]
           },
           "required": true,
           "root": true
