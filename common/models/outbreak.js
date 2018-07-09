@@ -627,21 +627,24 @@ module.exports = function (Outbreak) {
   Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases = function (outbreak, filter, countOnly, callback) {
     // build a filter for finding cases who came from registered contacts and their relationships that appeared happened after they became cases
     const _filter = {
-      where: {
-        outbreakId: outbreak.id,
-        dateBecomeCase: {
-          neq: null
-        }
-      },
-      fields: ['id', 'dateBecomeCase'],
-      include: [
-        {
-          relation: 'relationships',
-          fields: ['id', 'contactDate'],
-          filterParent: true
-        }
-      ]
-    };
+        where: {
+          outbreakId: outbreak.id,
+          dateBecomeCase: {
+            neq: null
+          }
+        },
+        fields: ['id', 'relationships', 'dateBecomeCase'],
+        include: [
+          {
+            relation: 'relationships',
+            fields: ['id', 'contactDate'],
+            scope: {
+              filterParent: true
+            }
+          }
+        ]
+      }
+    ;
     // find the cases
     app.models.case
       .find(_filter)
@@ -663,9 +666,11 @@ module.exports = function (Outbreak) {
           }
         });
         // build/count transmission chains starting from the found relationIds
-        app.models.relationship.buildOrCountTransmissionChains(outbreakId, outbreak.periodOfFollowup, app.utils.remote.mergeFilters({
+        app.models.relationship.buildOrCountTransmissionChains(outbreak.id, outbreak.periodOfFollowup, app.utils.remote.mergeFilters({
           where: {
-            if: relationshipIds
+            id: {
+              inq: relationshipIds
+            }
           }
         }, filter || {}), countOnly, callback);
       })

@@ -1415,7 +1415,21 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countNewChainsFromRegisteredContactsWhoBecameCases = function (filter, callback) {
-    Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases(this, filter, true, callback);
+    Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases(this, filter, true, function (error, result) {
+      if (error) {
+        return callback(error);
+      }
+      // there is no need for the nodes, it's just a count
+      delete result.nodes;
+      // count isolated nodes
+      result.isolatedNodes = Object.keys(result.isolatedNodes).reduce(function (accumulator, currentValue) {
+        if (result.isolatedNodes[currentValue]) {
+          accumulator++;
+        }
+        return accumulator;
+      }, 0);
+      callback(null, result);
+    });
   };
 
 };
