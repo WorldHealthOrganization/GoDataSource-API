@@ -2099,7 +2099,7 @@
             },
             "contactsCount": {
               "type": "number",
-              "description": "Total number of contacts",
+              "description": "Total number of contacts related to cases; Note there might be other contacts related to events.",
               "required": true
             },
             "averageNoContactsPerCase": {
