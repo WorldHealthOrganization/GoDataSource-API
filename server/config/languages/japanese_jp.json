@@ -42,6 +42,10 @@
     "LNG_ROLE_AVAILABLE_PERMISSIONS_READ_FOLLOW_UP_DESCRIPTION": "日本のThis permission allows reading contact follow-up information.",
     "LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_FOLLOW_UP": "日本のWrite Follow-up",
     "LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_FOLLOW_UP_DESCRIPTION": "日本のThis permission allows creating/modifying/removing follow-up information.",
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_HELP": "日本のWrite Help Item",
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_HELP_DESCRIPTION": "日本のThis permission allows creating/modifying/removing help item information.",
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP": "日本のApprove Help Items",
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP_DESCRIPTION": "日本のThis permission allows the approval of help items.",
 
     "LNG_CASE_FIELD_LABEL_ADDRESS_NAME": "日本のName",
     "LNG_CASE_FIELD_LABEL_ADDRESS_COUNTRY": "日本のCountry",

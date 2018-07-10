@@ -118,6 +118,16 @@ module.exports = function (Role) {
       id: 'write_followup',
       label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_FOLLOW_UP',
       description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_FOLLOW_UP_DESCRIPTION'
+    },
+    {
+      id: 'write_help',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_HELP',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_HELP_DESCRIPTION'
+    },
+    {
+      id: 'approve_help',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP_DESCRIPTION'
     }
   ];
 

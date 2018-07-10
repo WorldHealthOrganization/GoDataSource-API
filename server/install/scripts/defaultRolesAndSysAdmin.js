@@ -22,14 +22,18 @@ const rolesMap = {
       'read_user_account',
       'write_user_account',
       'read_role',
-      'write_role'
+      'write_role',
+      'write_help',
+      'approve_help'
     ]
   },
   'GO.Data Administrator': {
     description: 'This role has access to configuration of the Go.Data for specific outbreak.',
     permissionIds: [
       'read_outbreak',
-      'write_outbreak'
+      'write_outbreak',
+      'write_help',
+      'approve_help'
     ]
   },
   'Epidemiologist': {
