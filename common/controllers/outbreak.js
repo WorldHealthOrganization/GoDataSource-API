@@ -2,7 +2,6 @@
 
 const moment = require('moment');
 const app = require('../../server/server');
-const uuid = require('uuid');
 const _ = require('lodash');
 const rr = require('rr');
 const templateParser = require('./../../components/templateParser');
@@ -873,14 +872,6 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.generateVisualId = function (callback) {
     Outbreak.helpers.getAvailableVisualId(this, callback);
-  };
-
-  /**
-   * Generate a globally unique id
-   * @param callback
-   */
-  Outbreak.generateUniqueId = function (callback) {
-    callback(null, uuid.v4())
   };
 
   /**
