@@ -1809,4 +1809,40 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Handle visual identifier (uniqueness and generation)
+   */
+  Outbreak.beforeRemote('prototype.__create__events', function (context, modelInstance, next) {
+    // if the visual id was not passed
+    if (context.args.data.visualId === undefined) {
+      // set it automatically
+      Outbreak.helpers.getAvailableVisualId(context.instance, function (error, visualId) {
+        context.args.data.visualId = visualId;
+        return next(error);
+      });
+    } else {
+      // make sure the visual id is unique in the given outbreak, otherwise stop with error
+      Outbreak.helpers
+        .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
+        .then(next)
+        .catch(next);
+    }
+  });
+
+  /**
+   * Validate visual identifier (optional)
+   */
+  Outbreak.beforeRemote('prototype.__updateById__events', function (context, modelInstance, next) {
+    // if visual id was sent in request, check for uniqueness
+    if (context.args.data.visualId !== undefined) {
+      // make sure the visual id is unique in the given outbreak, otherwise stop with error
+      Outbreak.helpers
+        .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
+        .then(next)
+        .catch(next);
+    } else {
+      return next();
+    }
+  });
 };
