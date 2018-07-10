@@ -799,7 +799,19 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countNewCasesInThePreviousXDaysDetectedAmongKnownContacts"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactsNotSeenInXDays"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
       "permission": "ALLOW",
       "property": "countContactsNotSeenInXDays"
     }
