@@ -790,6 +790,12 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "countFollowUpContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countNewCasesInThePreviousXDaysDetectedAmongKnownContacts"
     }
   ],
   "methods": {
@@ -2226,6 +2232,43 @@
       "http": {
         "verb": "get",
         "path": "/follow-ups/contacts/count"
+      }
+    },
+    "prototype.countNewCasesInThePreviousXDaysDetectedAmongKnownContacts": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'noDaysAmongContacts' number on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "newCasesCount": {
+              "type": "number",
+              "description": "Number of new cases in the previous X days",
+              "required": true
+            },
+            "newCasesAmongKnownContactsCount": {
+              "type": "number",
+              "description": "Number of new cases in the previous X days detected among known contacts",
+              "required": true
+            },
+            "newCasesAmongKnownContactsIDs": [
+              "string"
+            ]
+          },
+          "description": "Object containing counters for new cases in the previous X days",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the number of new cases in the previous X days",
+      "http": {
+        "verb": "get",
+        "path": "/cases/new-among-known-contacts/count"
       }
     }
   }
