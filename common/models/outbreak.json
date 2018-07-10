@@ -583,12 +583,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
-      "property": "generateUniqueId"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "getCaseQRResourceLink"
@@ -1475,27 +1469,6 @@
       "http": {
         "verb": "post",
         "path": "/generate-visual-id"
-      }
-    },
-    "generateUniqueId": {
-      "accepts": [],
-      "returns": [
-        {
-          "arg": "uniqueId",
-          "type": {
-            "uuid": {
-              "type": "string"
-            }
-          },
-          "description": "Unique ID",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Generates a globally unique ID (UUID).",
-      "http": {
-        "verb": "post",
-        "path": "/generate-unique-id"
       }
     },
     "prototype.getCaseQRResourceLink": {
