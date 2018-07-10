@@ -1723,15 +1723,9 @@ module.exports = function (Outbreak) {
         where: {
           outbreakId: outbreakId,
           // get follow-ups that were scheduled in the past noDaysNotSeen days
-          and: [{
-            date: {
-              gte: xDaysAgo
-            }
-          }, {
-            date: {
-              lte: now
-            }
-          }]
+          date: {
+            between: [xDaysAgo, now]
+          }
         },
         // order by date as we need to check the follow-ups from the oldest to the most new
         order: 'date ASC'
