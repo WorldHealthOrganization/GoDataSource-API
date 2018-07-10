@@ -1504,7 +1504,8 @@ module.exports = function (Outbreak) {
         let contactCountListLength = contactCountList.length;
 
         // calculate mean number of contacts per case; sum the number of contacts per case and split to number of cases
-        result.meanNoContactsPerCase = contactCountList.reduce((totalNo, noContactsPerCase) => totalNo + noContactsPerCase, 0) / contactCountListLength;
+        // Note: the value is rounded to 1 decimal
+        result.meanNoContactsPerCase = parseFloat((contactCountList.reduce((totalNo, noContactsPerCase) => totalNo + noContactsPerCase, 0) / contactCountListLength).toFixed(1));
 
         // calculate median; it's either the middle element of the array in case the length is uneven or the average of the two middle elements for even length
         result.medianNoContactsPerCase = contactCountListLength % 2 === 0 ?
