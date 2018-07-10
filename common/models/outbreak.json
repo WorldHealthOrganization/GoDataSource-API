@@ -769,6 +769,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countCasesContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCasesContacts"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "findSecondaryCasesWithDateOfOnsetBeforePrimaryCase"
@@ -2113,11 +2125,6 @@
               "description": "Total number of contacts related to cases; Note there might be other contacts related to events.",
               "required": true
             },
-            "averageNoContactsPerCase": {
-              "type": "number",
-              "description": "Average Number of contacts per case",
-              "required": true
-            },
             "meanNoContactsPerCase": {
               "type": "number",
               "description": "Mean Number of contacts per case",
@@ -2149,7 +2156,7 @@
           "required": true
         }
       ],
-      "description": "Count the number of contacts for each case; Additionally calculate average/mean/median",
+      "description": "Count the number of contacts for each case; Additionally calculate mean/median",
       "http": {
         "verb": "get",
         "path": "/relationships/contacts-per-case/count"
