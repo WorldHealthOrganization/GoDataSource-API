@@ -16,6 +16,8 @@ module.exports = function (User) {
   app.utils.remote.disableStandardRelationRemoteMethods(User, 'accessTokens');
   // disable access to role
   app.utils.remote.disableStandardRelationRemoteMethods(User, 'role');
+  // disable access to active outbreak
+  app.utils.remote.disableStandardRelationRemoteMethods(User, 'activeOutbreak');
   // disable email verification, confirm endpoints
   app.utils.remote.disableRemoteMethods(User, ['prototype.verify', 'confirm']);
 

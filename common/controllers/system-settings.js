@@ -1,6 +1,7 @@
 'use strict';
 
 const app = require('../../server/server');
+const uuid = require('uuid');
 
 module.exports = function (SystemSettings) {
 
@@ -53,5 +54,15 @@ module.exports = function (SystemSettings) {
         }
       })
       .catch(cb);
+  };
+
+  /**
+   * Generate a globally unique id
+   * @param callback
+   */
+  SystemSettings.generateUniqueId = function (callback) {
+    return callback(null, {
+      uuid: uuid.v4()
+    });
   };
 };

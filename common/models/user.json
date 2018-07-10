@@ -127,6 +127,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_user_account",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_user_account",
       "permission": "ALLOW",
       "property": "patchAttributes"
@@ -141,10 +147,25 @@
   "methods": {
     "resetPassWithSecurityQuestion": {
       "accepts": [
-
         {
-          "arg": "data",
-          "type": "object",
+          "arg": "options",
+          "type": {
+            "questions": [
+              {
+                "type": {
+                  "question": {
+                    "type": "string"
+                  },
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            ],
+            "email": {
+              "type": "string"
+            }
+          },
           "http": {
             "source": "body"
           },
@@ -153,8 +174,12 @@
       ],
       "returns": [
         {
-          "arg": "data",
-          "type": "object",
+          "arg": "response",
+          "type": {
+            "token": {
+              "type": "string"
+            }
+          },
           "root": true,
           "required": true
         }

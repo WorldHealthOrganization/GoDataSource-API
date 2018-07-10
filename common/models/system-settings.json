@@ -48,6 +48,12 @@
       "principalId": "write_sys_config",
       "permission": "ALLOW",
       "property": "updateSystemSettings"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "generateUniqueId"
     }
   ],
   "methods": {
@@ -98,6 +104,27 @@
       "http": {
         "verb": "put",
         "path": "/"
+      }
+    },
+    "generateUniqueId": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "uniqueId",
+          "type": {
+            "uuid": {
+              "type": "string"
+            }
+          },
+          "description": "Unique ID",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Generates a globally unique ID (UUID).",
+      "http": {
+        "verb": "post",
+        "path": "/generate-unique-id"
       }
     }
   }

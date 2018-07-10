@@ -1,14 +1,22 @@
 'use strict';
 
 const worker = {
-  buildOrCount: function (relationships, countOnly) {
+  buildOrCount: function (relationships, followUpPeriod, countOnly) {
+    // define the start date of active chains (today - (the follow-up period + 1))
+    let activeChainStartDate = new Date();
+    activeChainStartDate.setDate(activeChainStartDate.getDate() - (followUpPeriod + 1));
     // keep a list o chains
     let transmissionChains = [];
     // keep a map of people to chains
     let personIdToChainMap = [];
+    // keep information about active transmission chains
+    let activeTransmissionChains = {};
+
     // keep information about nodes and edges
     let nodes = {};
     let edges = {};
+    // keep a list of isolated nodes
+    let isolatedNodes = {};
 
     /**
      * Merge two chains
@@ -19,6 +27,12 @@ const worker = {
       let sourceLength = transmissionChains[sourceIndex].length;
       let targetLength = transmissionChains[targetIndex].length;
       let index = 0;
+
+      // if either of the chains were active
+      if (activeTransmissionChains[targetIndex] || activeTransmissionChains[sourceIndex]) {
+        // mark resulting chain as active
+        activeTransmissionChains[targetIndex] = true;
+      }
 
       // while there are source items to process
       while (index < sourceLength) {
@@ -35,6 +49,8 @@ const worker = {
       }
       // remove the source
       transmissionChains[sourceIndex] = null;
+      // remove source from active transmission chains list
+      activeTransmissionChains[sourceIndex] = null;
     }
 
     let relationsLength = relationships.length;
@@ -44,31 +60,102 @@ const worker = {
     while (relationsIndex < relationsLength) {
       let relationship = relationships[relationsIndex];
 
+      // check if the relation is active
+      let isRelationActive = ((new Date(relationship.contactDate)) > activeChainStartDate);
+
       // build a list of (two) person ids
       let personIds = [relationship.persons[0].id, relationship.persons[1].id];
       // check if we actually have a valid relation (should always be the case)
       if (personIds.length === 2) {
+        // define shortcuts
+        let relationshipPerson1;
+        let relationshipPerson2;
+
+        // if people information is available
+        if (relationship.people && relationship.people.length) {
+
+          // build defined shortcuts
+          relationshipPerson1 = relationship.people[0];
+          relationshipPerson2 = relationship.people[1];
+
+          // add edge only when there is information about both people
+          // there can be only one person in the relationship because some filtering was applied
+          if (relationshipPerson1 && relationshipPerson2) {
+            // add information about edges
+            edges[relationship.id] = relationship;
+
+            // get information about first person
+            if (!nodes[relationshipPerson1.id]) {
+              nodes[relationshipPerson1.id] = relationshipPerson1;
+            }
+            // get information about second person
+            if (!nodes[relationshipPerson2.id]) {
+              nodes[relationshipPerson2.id] = relationshipPerson2;
+            }
+
+            // if none of the people are contacts, mark both nodes as not being isolated
+            if (relationshipPerson1.type !== 'contact' && relationshipPerson2.type !== 'contact') {
+              if (isolatedNodes[relationshipPerson1.id] === undefined || isolatedNodes[relationshipPerson1.id]) {
+                isolatedNodes[relationshipPerson1.id] = false;
+              }
+              if (isolatedNodes[relationshipPerson2.id] === undefined || isolatedNodes[relationshipPerson2.id]) {
+                isolatedNodes[relationshipPerson2.id] = false;
+              }
+
+            } else {
+              // only person 1 is not a contact, mark the node as isolated (if it was not previously marked otherwise)
+              if (relationshipPerson1.type !== 'contact' && isolatedNodes[relationshipPerson1.id] === undefined) {
+                isolatedNodes[relationshipPerson1.id] = true;
+              }
+              // only person 2 is not a contact, mark rhe node as isolated (if it was not previously marked otherwise)
+              if (relationshipPerson2.type !== 'contact' && isolatedNodes[relationshipPerson2.id] === undefined) {
+                isolatedNodes[relationshipPerson2.id] = true;
+              }
+            }
+
+          } else {
+            // if the relationship does not contain information about both people, skip contacts (they cannot exist unlinked from a chain)
+            // get information about first person (if it exists and it's not a contact)
+            if (relationshipPerson1 && relationshipPerson1.type !== 'contact' && !nodes[relationshipPerson1.id]) {
+              nodes[relationshipPerson1.id] = relationshipPerson1;
+              // this seems like an isolated node, mark it as isolated, if no other info was available
+              if (isolatedNodes[relationshipPerson1.id] === undefined) {
+                isolatedNodes[relationshipPerson1.id] = true;
+              }
+            }
+            // get information about second person (if it exists and it's not a contact)
+            if (relationshipPerson2 && relationshipPerson2.type !== 'contact' && !nodes[relationshipPerson2.id]) {
+              nodes[relationshipPerson2.id] = relationshipPerson2;
+              // this seems like an isolated node, mark it as isolated, if no other info was available
+              if (isolatedNodes[relationshipPerson2.id] === undefined) {
+                isolatedNodes[relationshipPerson2.id] = true;
+              }
+            }
+
+            // skip adding nodes to the chain when the relation is incomplete
+            relationsIndex++;
+            continue;
+          }
+
+          // remove extra info
+          relationship.people = undefined;
+        } else {
+          // relationship does not contain people information (is invalid)
+          relationsIndex++;
+          continue;
+        }
+
+        // transmission chains are build only by case/event-case/event relationships
+        if (relationshipPerson1.type === 'contact' || relationshipPerson2.type === 'contact') {
+          relationsIndex++;
+          continue;
+        }
+
         // define some shortcuts
         const person1 = personIds[0],
           person2 = personIds[1],
           indexPerson1 = personIdToChainMap[person1],
           indexPerson2 = personIdToChainMap[person2];
-
-        // if it's more than a count and information is available
-        if (!countOnly && relationship.people && relationship.people[0] && relationship.people[1]) {
-          // get information about first person
-          if (!nodes[relationship.people[0].id]) {
-            nodes[relationship.people[0].id] = relationship.people[0];
-          }
-          // get information about second person
-          if (!nodes[relationship.people[1].id]) {
-            nodes[relationship.people[1].id] = relationship.people[1];
-          }
-          // remove extra info
-          relationship.people = undefined;
-          // add information about edges
-          edges[relationship.id] = relationship;
-        }
 
         // treat each scenario separately
         switch (true) {
@@ -82,6 +169,11 @@ const worker = {
                 transmissionChains[indexPerson1].push([person1, person2]);
                 // set their map
                 personIdToChainMap[person1] = personIdToChainMap[person2] = indexPerson1;
+                // if the relation is active
+                if (isRelationActive) {
+                  // mark resulting chain as active
+                  activeTransmissionChains[indexPerson1] = true;
+                }
                 // merge the smaller chain into the bigger one
                 mergeChains(indexPerson1, indexPerson2);
               } else {
@@ -89,6 +181,11 @@ const worker = {
                 transmissionChains[indexPerson2].push([person1, person2]);
                 // set their map
                 personIdToChainMap[person1] = personIdToChainMap[person2] = indexPerson2;
+                // if the relation is active
+                if (isRelationActive) {
+                  // mark resulting chain as active
+                  activeTransmissionChains[indexPerson2] = true;
+                }
                 // merge the smaller chain into the bigger one
                 mergeChains(indexPerson2, indexPerson1);
               }
@@ -100,6 +197,11 @@ const worker = {
             transmissionChains[indexPerson1].push([person1, person2]);
             // set their map
             personIdToChainMap[person1] = personIdToChainMap[person2] = indexPerson1;
+            // if the relation is active
+            if (isRelationActive) {
+              // mark resulting chain as active
+              activeTransmissionChains[indexPerson1] = true;
+            }
             break;
           // only person2 was already present
           case indexPerson2 !== undefined:
@@ -107,6 +209,11 @@ const worker = {
             transmissionChains[indexPerson2].push([person1, person2]);
             // set their map
             personIdToChainMap[person1] = personIdToChainMap[person2] = indexPerson2;
+            // if the relation is active
+            if (isRelationActive) {
+              // mark resulting chain as active
+              activeTransmissionChains[indexPerson2] = true;
+            }
             break;
           // first appearance of both people
           default:
@@ -114,6 +221,11 @@ const worker = {
             let length = transmissionChains.push([[person1, person2]]);
             // set their map
             personIdToChainMap[person1] = personIdToChainMap[person2] = length - 1;
+            // if the relation is active
+            if (isRelationActive) {
+              // mark resulting chain as active
+              activeTransmissionChains[length - 1] = true;
+            }
             break;
         }
       }
@@ -127,6 +239,7 @@ const worker = {
     };
     // store lengths for each chain
     let chainsLengths = [];
+    let activeChainsLength = 0;
 
     // filter out invalid data (chain == null) from the chains list
     let resultIndex = 0;
@@ -138,10 +251,17 @@ const worker = {
       let transmissionChain = transmissionChains[chainIndex];
       // if the chain is valid
       if (transmissionChain !== null) {
+        // check if the chain is active
+        let isChainActive = !!activeTransmissionChains[chainIndex];
+        // if the chain is active
+        if (isChainActive) {
+          // update the number of active chains
+          activeChainsLength++;
+        }
         // add it to the list of chains
-        _chains.chains[resultIndex] = transmissionChain;
+        _chains.chains[resultIndex] = {chain: transmissionChain, active: isChainActive};
         // store length for each chain
-        chainsLengths[resultIndex] = {length: transmissionChain.length};
+        chainsLengths[resultIndex] = {length: transmissionChain.length, active: isChainActive};
         resultIndex++;
       }
       chainIndex++;
@@ -155,8 +275,12 @@ const worker = {
     // only need counters
     if (countOnly) {
       result = {
+        // also add nodes and isolated nodes info
+        nodes: nodes,
+        isolatedNodes: isolatedNodes,
         chains: chainsLengths,
-        length: _chains.length
+        length: _chains.length,
+        activeChainsCount: activeChainsLength
       };
     } else {
       // return info about nodes, edges and the actual chains
@@ -169,11 +293,11 @@ const worker = {
     // send back result
     return result;
   },
-  build: function (relationships) {
-    return this.buildOrCount(relationships);
+  build: function (relationships, followUpPeriod) {
+    return this.buildOrCount(relationships, followUpPeriod);
   },
-  count: function (relationships) {
-    return this.buildOrCount(relationships, true);
+  count: function (relationships, followUpPeriod) {
+    return this.buildOrCount(relationships, followUpPeriod, true);
   }
 };
 

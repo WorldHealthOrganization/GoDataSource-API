@@ -8,7 +8,14 @@
   "mongodb": {
     "collection": "person"
   },
+  "hidden": [
+    "outbreakId"
+  ],
   "properties": {
+    "outbreakId": {
+      "type": "string",
+      "readOnly": true
+    },
     "visualId": {
       "type": "string",
       "unique": true
@@ -64,6 +71,9 @@
     },
     "documents_index": {
       "documents": 1
+    },
+    "outbreakId_index": {
+      "outbreakId": 1
     }
   },
   "validations": [],

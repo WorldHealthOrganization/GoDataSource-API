@@ -15,7 +15,8 @@
     },
     "active": {
       "type": "boolean",
-      "required": true
+      "required": true,
+      "default": true
     },
     "populationDensity": {
       "type": "number"
@@ -41,7 +42,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_sys_config",
+      "principalId": "$authenticated",
       "permissions": "ALLOW",
       "property": "find"
     },

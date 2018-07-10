@@ -2,7 +2,6 @@
 
 const moment = require('moment');
 const app = require('../../server/server');
-const uuid = require('uuid');
 const _ = require('lodash');
 const rr = require('rr');
 const templateParser = require('./../../components/templateParser');
@@ -40,8 +39,22 @@ module.exports = function (Outbreak) {
 
   // attach search by relation property behavior on get contacts
   app.utils.remote.searchByRelationProperty.attachOnRemotes(Outbreak, [
-    'prototype.__get__contacts'
+    'prototype.__get__contacts',
+    'prototype.__get__cases'
   ]);
+
+  /**
+   * Allows count requests with advanced filters (like the ones we can use on GET requests)
+   * to be made on outbreak/{id}/cases.
+   */
+  Outbreak.prototype.filteredCountCases = function (filter, callback) {
+    this.__get__cases(filter, function (err, res) {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
+    })
+  };
 
   /**
    * Do not allow deletion of a active Outbreak
@@ -179,30 +192,69 @@ module.exports = function (Outbreak) {
    * Create relation for a case
    * @param caseId
    * @param data
+   * @param options
    * @param callback
    */
   Outbreak.prototype.createCaseRelationship = function (caseId, data, options, callback) {
-    helpers.createPersonRelationship(this.id, caseId, 'case', data, options, callback);
+    // make sure case is valid, before trying to create any relations
+    app.models.case
+      .findById(caseId)
+      .then((caseModel) => {
+        if (!caseModel) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.case.modelName,
+            id: caseId
+          }));
+        }
+        helpers.createPersonRelationship(this.id, caseId, 'case', data, options, callback);
+      })
+      .catch(callback);
   };
 
   /**
    * Create relation for a contact
    * @param contactId
    * @param data
+   * @param options
    * @param callback
    */
   Outbreak.prototype.createContactRelationship = function (contactId, data, options, callback) {
-    helpers.createPersonRelationship(this.id, contactId, 'contact', data, options, callback);
+    // make sure contact is valid, before trying to create any relations
+    app.models.contact
+      .findById(contactId)
+      .then((contact) => {
+        if (!contact) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.contact.modelName,
+            id: contactId
+          }));
+        }
+        helpers.createPersonRelationship(this.id, contactId, 'contact', data, options, callback);
+      })
+      .catch(callback);
   };
 
   /**
    * Create relation for a event
    * @param eventId
    * @param data
+   * @param options
    * @param callback
    */
   Outbreak.prototype.createEventRelationship = function (eventId, data, options, callback) {
-    helpers.createPersonRelationship(this.id, eventId, 'event', data, options, callback);
+    // make sure event is valid, before trying to create any relations
+    app.models.event
+      .findById(eventId)
+      .then((event) => {
+        if (!event) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.event.modelName,
+            id: eventId
+          }));
+        }
+        helpers.createPersonRelationship(this.id, eventId, 'event', data, options, callback);
+      })
+      .catch(callback);
   };
 
   /**
@@ -243,6 +295,7 @@ module.exports = function (Outbreak) {
    * @param caseId
    * @param relationshipId
    * @param data
+   * @param options
    * @param callback
    */
   Outbreak.prototype.updateCaseRelationship = function (caseId, relationshipId, data, options, callback) {
@@ -254,6 +307,7 @@ module.exports = function (Outbreak) {
    * @param contactId
    * @param relationshipId
    * @param data
+   * @param options
    * @param callback
    */
   Outbreak.prototype.updateContactRelationship = function (contactId, relationshipId, data, options, callback) {
@@ -265,6 +319,7 @@ module.exports = function (Outbreak) {
    * @param eventId
    * @param relationshipId
    * @param data
+   * @param options
    * @param callback
    */
   Outbreak.prototype.updateEventRelationship = function (eventId, relationshipId, data, options, callback) {
@@ -275,6 +330,7 @@ module.exports = function (Outbreak) {
    * Delete a relation for a case
    * @param caseId
    * @param relationshipId
+   * @param options
    * @param callback
    */
   Outbreak.prototype.deleteCaseRelationship = function (caseId, relationshipId, options, callback) {
@@ -285,6 +341,7 @@ module.exports = function (Outbreak) {
    * Delete a relation for a contact
    * @param contactId
    * @param relationshipId
+   * @param options
    * @param callback
    */
   Outbreak.prototype.deleteContactRelationship = function (contactId, relationshipId, options, callback) {
@@ -295,6 +352,7 @@ module.exports = function (Outbreak) {
    * Delete a relation for a event
    * @param eventId
    * @param relationshipId
+   * @param options
    * @param callback
    */
   Outbreak.prototype.deleteEventRelationship = function (eventId, relationshipId, options, callback) {
@@ -308,7 +366,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countCaseRelationships = function (caseId, where, callback) {
-    helpers.countPersonRelationships(caseId, where, callback);
+    // make sure case is valid
+    app.models.case
+      .findById(caseId)
+      .then((caseModel) => {
+        if (!caseModel) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.case.modelName,
+            id: caseId
+          }));
+        }
+        helpers.countPersonRelationships(caseId, where, callback);
+      })
+      .catch(callback);
   };
 
   /**
@@ -318,7 +388,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactRelationships = function (contactId, where, callback) {
-    helpers.countPersonRelationships(contactId, where, callback);
+    // make sure contact is valid
+    app.models.contact
+      .findById(contactId)
+      .then((contact) => {
+        if (!contact) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.contact.modelName,
+            id: contactId
+          }));
+        }
+        helpers.countPersonRelationships(contactId, where, callback);
+      })
+      .catch(callback);
   };
 
   /**
@@ -328,17 +410,37 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countEventRelationships = function (eventId, where, callback) {
-    helpers.countPersonRelationships(eventId, where, callback);
+    // make sure event is valid
+    app.models.event
+      .findById(eventId)
+      .then((event) => {
+        if (!event) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.event.modelName,
+            id: eventId
+          }));
+        }
+        helpers.countPersonRelationships(eventId, where, callback);
+      })
+      .catch(callback);
   };
 
   /**
    * Convert a contact to a case
    * @param contactId
+   * @param params Case specific params
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.convertContactToCase = function (contactId, options, callback) {
+  Outbreak.prototype.convertContactToCase = function (contactId, params, options, callback) {
     let updateRelations = [];
     let convertedCase;
+
+    // parse case specific params, if not available fallback on default values
+    params = params || {};
+    params.type = 'case';
+    params.dateBecomeCase = params.dateBecomeCase || new Date();
+    params.classification = params.classification || 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT';
 
     // override default scope to allow switching the type
     const defaultScope = app.models.contact.defaultScope;
@@ -356,10 +458,7 @@ module.exports = function (Outbreak) {
         if (!contact) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: contactId});
         }
-        return contact.updateAttributes({
-          type: "case",
-          dateBecomeCase: new Date()
-        }, options);
+        return contact.updateAttributes(params, options);
       })
       .then(function (_case) {
         convertedCase = _case;
@@ -400,6 +499,7 @@ module.exports = function (Outbreak) {
   /**
    * Convert a case to a contact
    * @param caseId
+   * @param options
    * @param callback
    */
   Outbreak.prototype.convertCaseToContact = function (caseId, options, callback) {
@@ -504,6 +604,7 @@ module.exports = function (Outbreak) {
   /**
    * Restore a deleted case
    * @param caseId
+   * @param options
    * @param callback
    */
   Outbreak.prototype.restoreCase = function (caseId, options, callback) {
@@ -541,6 +642,7 @@ module.exports = function (Outbreak) {
    * Restore a deleted follow up
    * @param contactId
    * @param followUpId
+   * @param options
    * @param callback
    */
   Outbreak.prototype.restoreContactFollowUp = function (contactId, followUpId, options, callback) {
@@ -786,14 +888,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Generate a globally unique id
-   * @param callback
-   */
-  Outbreak.generateUniqueId = function (callback) {
-    callback(null, uuid.v4())
-  };
-
-  /**
    * Get a resource link embedded in a QR Code Image (png) for a case
    * @param caseId
    * @param callback
@@ -951,30 +1045,51 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countIndependentTransmissionChains = function (filter, callback) {
-    // build a filter
-    filter = app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: this.id
-        }
-      }, filter || {});
-
-    // search relations
+    const self = this;
+    // count transmission chains
     app.models.relationship
-      .find(filter)
-      .then(function (relationships) {
-        // add 'filterParent' capability
-        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
-        // count transmission chains
-        app.models.relationship
-          .countTransmissionChains(relationships, function (error, noOfChains) {
-            if (error) {
-              throw error;
+      .countTransmissionChains(this.id, this.periodOfFollowup, filter, function (error, noOfChains) {
+        if (error) {
+          return callback(error);
+        }
+        // get node IDs
+        const nodeIds = Object.keys(noOfChains.nodes);
+        // count isolated nodes
+        const isolatedNodesNo = Object.keys(noOfChains.isolatedNodes).reduce(function (accumulator, currentValue) {
+          if (noOfChains.isolatedNodes[currentValue]) {
+            accumulator++;
+          }
+          return accumulator;
+        }, 0);
+        // find other isolated nodes (nodes that were never in a relationship)
+        app.models.person
+          .count({
+            outbreakId: self.id,
+            or: [
+              {
+                type: 'case',
+                classification: {
+                  inq: app.models.case.nonDiscardedCaseClassifications
+                }
+              },
+              {
+                type: 'event'
+              }
+            ],
+            id: {
+              nin: nodeIds
             }
-            callback(null, noOfChains)
-          });
-      })
-      .catch(callback);
+          })
+          .then(function (isolatedNodesCount) {
+            // total list of isolated nodes is composed by the nodes that were never in a relationship + the ones that
+            // come from relationships that were invalidated as part of the chain
+            noOfChains.isolatedNodesCount = isolatedNodesCount + isolatedNodesNo;
+            delete noOfChains.isolatedNodes;
+            delete noOfChains.nodes;
+            callback(null, noOfChains);
+          })
+          .catch(callback)
+      });
   };
 
   /**
@@ -983,53 +1098,43 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getIndependentTransmissionChains = function (filter, callback) {
-    filter = filter || {};
-    // start with a basic filter
-    let _filter = {
-      where: {
-        outbreakId: this.id
-      }
-    };
-    // get include filter
-    let includeFilter = _.get(filter, 'include', []);
-    // normalize filters
-    if (!Array.isArray(includeFilter)) {
-      includeFilter = [includeFilter];
-    }
-    // check of the filter has people relation included (is needed for transmission chains)
-    let hasPeopleRelation = false;
-    includeFilter.forEach(function (singleInclude) {
-      if (
-        (typeof singleInclude === 'string' && singleInclude === 'people') ||
-        (typeof singleInclude === 'object' && singleInclude.relation === 'people')) {
-        hasPeopleRelation = true;
-      }
-    });
-    // if the relation was not included
-    if (!hasPeopleRelation) {
-      // include it
-      includeFilter.push('people');
-    }
-    // update filter
-    _.set(filter, 'include', includeFilter);
-    // merge filters
-    filter = app.utils.remote.mergeFilters(_filter, filter);
-
+    const self = this;
+    // get transmission chains
     app.models.relationship
-      .find(filter)
-      .then(function (relationships) {
-        // add 'filterParent' capability
-        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
-        // build transmission chains
-        app.models.relationship
-          .getTransmissionChains(relationships, function (error, transmissionChains) {
-            if (error) {
-              return callback(error);
+      .getTransmissionChains(this.id, this.periodOfFollowup, filter, function (error, transmissionChains) {
+        if (error) {
+          return callback(error);
+        }
+        // get isolated nodes as well (nodes that were never part of a relationship)
+        app.models.person
+          .find({
+            where: {
+              outbreakId: self.id,
+              or: [
+                {
+                  type: 'case',
+                  classification: {
+                    inq: app.models.case.nonDiscardedCaseClassifications
+                  }
+                },
+                {
+                  type: 'event'
+                }
+              ],
+              id: {
+                nin: Object.keys(transmissionChains.nodes)
+              }
             }
-            callback(null, transmissionChains)
-          });
-      })
-      .catch(callback);
+          })
+          .then(function (isolatedNodes) {
+            // add all the isolated nodes to the complete list of nodes
+            isolatedNodes.forEach(function (isolatedNode) {
+              transmissionChains.nodes[isolatedNode.id] = isolatedNode;
+            });
+            callback(null, transmissionChains);
+          })
+          .catch(callback);
+      });
   };
 
   /**
@@ -1067,5 +1172,604 @@ module.exports = function (Outbreak) {
       followUpFlag: 'lostToFollowUp',
       resultProperty: 'contactsLostToFollowup'
     }, filter, callback);
+  };
+
+  /**
+   * Count new cases in known transmission chains
+   * @param filter Besides the default filter properties this request also accepts 'noDaysDaysInChains': number on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countNewCasesInKnownTransmissionChains = function (filter, callback) {
+    // default number of day used to determine new cases
+    let noDaysDaysInChains = this.noDaysDaysInChains;
+    // check if a different number was sent in the filter
+    if (filter && filter.where && filter.where.noDaysDaysInChains) {
+      noDaysDaysInChains = filter.where.noDaysDaysInChains;
+      delete filter.where.noDaysDaysInChains;
+    }
+    // start building a result
+    const result = {
+      newCases: 0,
+      total: 0
+    };
+
+    // use a cases index to make sure we don't count a case multiple times
+    const casesIndex = {};
+    // calculate date used to compare contact date of onset with
+    const newCasesFromDate = new Date();
+    newCasesFromDate.setDate(newCasesFromDate.getDate() - noDaysDaysInChains);
+
+    // get known transmission chains (case-case relationships)
+    app.models.relationship
+      .filterKnownTransmissionChains(this.id, filter)
+      .then(function (relationships) {
+        // go trough all relations
+        relationships.forEach(function (relation) {
+          // go trough all the people
+          if (Array.isArray(relation.people)) {
+            relation.people.forEach(function (person) {
+              // count each case only once
+              if (!casesIndex[person.id]) {
+                casesIndex[person.id] = true;
+                result.total++;
+                // check if the case is new (date of symptoms is later than the threshold date)
+                if ((new Date(person.dateOfOnset)) >= newCasesFromDate) {
+                  result.newCases++;
+                }
+              }
+            })
+          }
+        });
+        callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count the cases with less than X contacts
+   * Note: Besides the count the response also contains a list with the counted cases IDs
+   * @param filter Besides the default filter properties this request also accepts 'noLessContacts': number on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countCasesWithLessThanXContacts = function (filter, callback) {
+    // initialize noLessContacts filter
+    let noLessContacts;
+    // check if the noLessContacts filter was sent; accepting it only on the first level
+    noLessContacts = _.get(filter, 'where.noLessContacts');
+    if (typeof noLessContacts !== "undefined") {
+      // noLessContacts was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.noLessContacts;
+    } else {
+      // get the outbreak noLessContacts as the default noLessContacts value
+      noLessContacts = this.noLessContacts;
+    }
+
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // get cases with contacts
+    app.models.relationship
+      .getCasesWithContacts(outbreakId, filter)
+      .then(function (casesWithContacts) {
+        // initialize result
+        let result = {
+          cases: Object.values(casesWithContacts.cases)
+        };
+
+        // get all the found cases IDs
+        let allCasesIDs = Object.keys(casesWithContacts.cases);
+        let allCasesInfo = Object.values(casesWithContacts.cases);
+
+        // get the caseIDs with less than noLessContacts contacts
+        result.caseIDs = allCasesIDs.filter(caseId => casesWithContacts.cases[caseId].contactsCount < noLessContacts);
+        result.cases = allCasesInfo.filter(item => result.caseIDs.indexOf(item.id) !== -1);
+        result.casesCount = result.caseIDs.length;
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count the new contacts for each event
+   * @param filter Besides the default filter properties this request also accepts 'noDaysNewContacts': number on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countEventNewContacts = function (filter, callback) {
+    // initialize noDaysNewContacts filter
+    let noDaysNewContacts;
+    // check if the noDaysNewContacts filter was sent; accepting it only on the first level
+    noDaysNewContacts = _.get(filter, 'where.noDaysNewContacts');
+    if (typeof noDaysNewContacts !== "undefined") {
+      // noDaysNewContacts was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.noDaysNewContacts;
+    } else {
+      // get the outbreak noDaysNewContacts as the default noDaysNewContacts value
+      noDaysNewContacts = this.noDaysNewContacts;
+    }
+
+    // get now date
+    let now = new Date();
+
+    // initialize results
+    let results = {
+      newContactsCount: 0,
+      events: {}
+    };
+
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // get all relationships between events and contacts which were created sooner than 'noDaysNewContacts' ago
+    app.models.relationship.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId,
+          and: [
+            {'persons.type': 'contact'},
+            {'persons.type': 'event'}
+          ],
+          contactDate: {
+            gte: now.setDate(now.getDate() - noDaysNewContacts)
+          }
+        }
+      }, filter || {})
+    )
+      .then(function (relationships) {
+        // initialize events map and contacts map
+        let eventsMap = {};
+        let contactsMap = {};
+        // helper property to keep the contacts already counted
+        let eventContactsMap = {};
+
+        // loop through the relationships and populate the eventsMap;
+        // Note: This loop will only add the events that have relationships. Will need to do another query to get the events without relationships
+        relationships.forEach(function (relationship) {
+          // get event index from persons
+          let eventIndex = relationship.persons.findIndex(elem => elem.type === 'event');
+          // get eventId, contactId
+          // there are only 2 persons so the indexes are 0 or 1
+          let eventId = relationship.persons[eventIndex].id;
+          let contactId = relationship.persons[eventIndex ? 0 : 1].id;
+
+          // create entry for the event in the eventsMap if not already created
+          if (!eventsMap[eventId]) {
+            eventsMap[eventId] = {
+              id: eventId,
+              newContactsCount: 0,
+              contactIDs: []
+            };
+
+            // also create entry for the eventContactsMap
+            eventContactsMap[eventId] = {};
+          }
+
+          // count the contact only if not already counted
+          if (!eventContactsMap[eventId][contactId]) {
+            // get contactId flag in order to not count it twice for the event
+            eventContactsMap[eventId][contactId] = true;
+            // increase counter
+            eventsMap[eventId].newContactsCount++;
+            // add contactId
+            eventsMap[eventId].contactIDs.push(contactId);
+          }
+
+          if (!contactsMap[contactId]) {
+            // get contactId flag in order to not count it twice in total
+            contactsMap[contactId] = true;
+            // increase total counter
+            results.newContactsCount++;
+          }
+        });
+
+        // update results.events; sending array with events information
+        results.events = _.values(eventsMap);
+
+        // get events without relationships
+        return app.models.event.find({
+          where: {
+            outbreakId: outbreakId,
+            id: {
+              nin: Object.keys(eventContactsMap)
+            }
+          },
+          fields: {
+            id: true
+          }
+        });
+      })
+      .then(function (events) {
+        // parse the events to create entries for the result
+        let parsedEvents = events.map(event => {
+          return {
+            id: event.id,
+            newContactsCount: 0,
+            contactIDs: []
+          }
+        });
+
+        // add the parsed events in the result
+        results.events = results.events.concat(parsedEvents);
+
+        // send response
+        callback(null, results);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Get a list of relationships that links cases with long periods between the dates of onset
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.longPeriodsBetweenDatesOfOnsetInTransmissionChains = function (filter, callback) {
+    // get longPeriodsBetweenCaseOnset
+    const longPeriodsBetweenCaseOnset = this.longPeriodsBetweenCaseOnset;
+    // keep a list of relations that match the criteria
+    const relationshipsWithLongPeriodsBetweenDatesOfOnset = [];
+    // get known transmission chains
+    app.models.relationship
+      .filterKnownTransmissionChains(this.id, app.utils.remote
+      // were only interested in cases
+        .mergeFilters({
+          where: {
+            'persons.0.type': {
+              inq: ['case']
+            },
+            'persons.1.type': {
+              inq: ['case']
+            }
+          },
+          // we're only interested in the cases that have dateOfOnset set
+          include: {
+            relation: 'people',
+            scope: {
+              where: {
+                dateOfOnset: {
+                  neq: null
+                }
+              },
+              filterParent: true
+            }
+          }
+        }, filter || {}))
+      .then(function (relationships) {
+        // go trough all relations
+        relationships.forEach(function (relation) {
+          // we're only interested in the cases that have dateOfOnset set (this should be already done by the query, but double-check)
+          if (relation.people[0].dateOfOnset && relation.people[1].dateOfOnset) {
+            const case1Date = new Date(relation.people[0].dateOfOnset);
+            const case2Date = new Date(relation.people[1].dateOfOnset);
+            // get time difference in days
+            const timeDifferenceInDays = Math.ceil(Math.abs(case1Date.getTime() - case2Date.getTime()) / (1000 * 3600 * 24));
+            // if the time difference is bigger then the threshold
+            if (timeDifferenceInDays > longPeriodsBetweenCaseOnset) {
+              // add time difference information
+              relation.differenceBetweenDatesOfOnset = timeDifferenceInDays;
+              // and save the relation
+              relationshipsWithLongPeriodsBetweenDatesOfOnset.push(relation);
+            }
+          }
+        });
+        callback(null, relationshipsWithLongPeriodsBetweenDatesOfOnset);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Build new transmission chains from registered contacts who became cases
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.buildNewChainsFromRegisteredContactsWhoBecameCases = function (filter, callback) {
+    Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases(this, filter, false, callback);
+  };
+
+  /**
+   * Count new transmission chains from registered contacts who became cases
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countNewChainsFromRegisteredContactsWhoBecameCases = function (filter, callback) {
+    Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases(this, filter, true, function (error, result) {
+      if (error) {
+        return callback(error);
+      }
+      // there is no need for the nodes, it's just a count
+      delete result.nodes;
+      // count isolated nodes
+      result.isolatedNodesCount = Object.keys(result.isolatedNodes).reduce(function (accumulator, currentValue) {
+        if (result.isolatedNodes[currentValue]) {
+          accumulator++;
+        }
+        return accumulator;
+      }, 0);
+      delete result.isolatedNodes;
+      callback(null, result);
+    });
+  };
+
+
+  /**
+   * Count the contacts for each case; Also calculate mean/median
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countCasesContacts = function (filter, callback) {
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // get cases with contacts
+    app.models.relationship
+      .getCasesWithContacts(outbreakId, filter)
+      .then(function (casesWithContacts) {
+        // initialize result
+        let result = {
+          casesCount: casesWithContacts.casesCount,
+          contactsCount: casesWithContacts.contactsCount,
+          cases: Object.values(casesWithContacts.cases)
+        };
+
+        // calculate average/mean/median
+        // get an array with sorted contact numbers; sort is needed for median
+        let contactCountList = result.cases.map(item => item.contactsCount).sort((a, b) => a - b);
+        let contactCountListLength = contactCountList.length;
+
+        // calculate mean number of contacts per case; sum the number of contacts per case and split to number of cases
+        // Note: the value is rounded to 1 decimal
+        result.meanNoContactsPerCase = parseFloat((contactCountList.reduce((totalNo, noContactsPerCase) => totalNo + noContactsPerCase, 0) / contactCountListLength).toFixed(1));
+
+        // calculate median; it's either the middle element of the array in case the length is uneven or the average of the two middle elements for even length
+        result.medianNoContactsPerCase = contactCountListLength % 2 === 0 ?
+          (contactCountList[contactCountListLength / 2 - 1] + contactCountList[contactCountListLength / 2]) / 2 :
+          contactCountList[Math.floor(contactCountListLength / 2)];
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count the contacts on follow-up list
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countFollowUpContacts = function (filter, callback) {
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // get follow-ups
+    app.models.followUp.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId,
+          // get follow-ups that are scheduled later than today 00:00 hours
+          date: {
+            gte: (new Date()).setHours(0, 0, 0, 0)
+          }
+        }
+      }, filter || {}))
+      .then(function (followUps) {
+        // initialize contacts map; helper to not count contacts twice
+        let contactsMap = {};
+
+        // loop through the followups to get unique contacts
+        followUps.forEach(function (followUp) {
+          if (!contactsMap[followUp.personId]) {
+            contactsMap[followUp.personId] = true;
+          }
+        });
+
+        // get contacts IDs
+        let contactIDs = Object.keys(contactsMap);
+
+        // create result
+        let result = {
+          contactsCount: contactIDs.length,
+          followUpsCount: followUps.length,
+          contactIDs: contactIDs
+        };
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Get a list of secondary cases that have date of onset before the date of onset of primary cases
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findSecondaryCasesWithDateOfOnsetBeforePrimaryCase = function (filter, callback) {
+    const results = [];
+    // get known transmission chains
+    app.models.relationship
+      .filterKnownTransmissionChains(this.id, app.utils.remote
+      // were only interested in cases
+        .mergeFilters({
+          where: {
+            'persons.0.type': {
+              inq: ['case']
+            },
+            'persons.1.type': {
+              inq: ['case']
+            }
+          },
+          // we're only interested in the cases that have dateOfOnset set
+          include: {
+            relation: 'people',
+            scope: {
+              where: {
+                dateOfOnset: {
+                  neq: null
+                }
+              },
+              filterParent: true
+            }
+          }
+        }, filter || {}))
+      .then(function (relationships) {
+        // go trough all relations
+        relationships.forEach(function (relationship) {
+          // we're only interested in the cases that have dateOfOnset set (this should be already done by the query, but double-check)
+          if (relationship.people[0].dateOfOnset && relationship.people[1].dateOfOnset) {
+            // find source person index (in persons)
+            const _sourceIndex = relationship.persons.findIndex(person => person.source);
+            // find source person index
+            const sourceIndex = relationship.people.findIndex(person => person.id === relationship.persons[_sourceIndex].id);
+            // find source person
+            const sourcePerson = relationship.people[sourceIndex];
+            // get target person (the other person from people list)
+            const targetPerson = relationship.people[sourceIndex ? 0 : 1];
+            // if target person's date of onset is earlier than the source's person
+            if ((new Date(targetPerson.dateOfOnset)) < (new Date(sourcePerson.dateOfOnset))) {
+              //store info about both people and their relationship
+              const result = {
+                primaryCase: sourcePerson,
+                secondaryCase: targetPerson,
+                relationship: Object.assign({}, relationship)
+              };
+              // remove extra info
+              delete result.relationship.people;
+              results.push(result);
+            }
+          }
+        });
+        callback(null, results);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count the new cases in the previous X days detected among known contacts
+   * @param filter Besides the default filter properties this request also accepts 'noDaysAmongContacts': number on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countNewCasesInThePreviousXDaysDetectedAmongKnownContacts = function (filter, callback) {
+    // initialize noDaysAmongContacts filter
+    let noDaysAmongContacts;
+    // check if the noDaysAmongContacts filter was sent; accepting it only on the first level
+    noDaysAmongContacts = _.get(filter, 'where.noDaysAmongContacts');
+    if (typeof noDaysAmongContacts !== "undefined") {
+      // noDaysAmongContacts was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.noDaysAmongContacts;
+    } else {
+      // get the outbreak noDaysAmongContacts as the default noDaysNewContacts value
+      noDaysAmongContacts = this.noDaysAmongContacts;
+    }
+
+    // get now date
+    let now = new Date();
+
+    // get from noDaysAmongContacts ago
+    let xDaysAgo = new Date((new Date()).setHours(0, 0, 0, 0)).setDate(now.getDate() - noDaysAmongContacts);
+
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // get all cases that were created sooner or have 'dateBecomeCase' sooner than 'noDaysAmongContacts' ago
+    app.models.case.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId,
+          or: [{
+            createdAt: {
+              gte: xDaysAgo
+            }
+          }, {
+            dateBecomeCase: {
+              gte: xDaysAgo
+            }
+          }]
+        }
+      }, filter || {})
+    )
+      .then(function (cases) {
+        // initialize result
+        let result = {
+          newCasesCount: cases.length,
+          newCasesAmongKnownContactsCount: 0,
+          newCasesAmongKnownContactsIDs: []
+        };
+
+        // get the newCasesAmongKnownContactsIDs
+        result.newCasesAmongKnownContactsIDs = cases.filter(item => new Date(item.dateBecomeCase) >= xDaysAgo).map(item => item.id);
+        result.newCasesAmongKnownContactsCount = result.newCasesAmongKnownContactsIDs.length;
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count the contacts not seen in the past X days
+   * @param filter Besides the default filter properties this request also accepts 'noDaysNotSeen': number on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countContactsNotSeenInXDays = function (filter, callback) {
+    // initialize noDaysNotSeen filter
+    let noDaysNotSeen;
+    // check if the noDaysNotSeen filter was sent; accepting it only on the first level
+    noDaysNotSeen = _.get(filter, 'where.noDaysNotSeen');
+    if (typeof noDaysNotSeen !== "undefined") {
+      // noDaysNotSeen was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.noDaysNotSeen;
+    } else {
+      // get the outbreak noDaysNotSeen as the default noDaysNotSeen value
+      noDaysNotSeen = this.noDaysNotSeen;
+    }
+
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // get current date
+    let now = new Date();
+    // get date from noDaysNotSeen days ago
+    let xDaysAgo = new Date((new Date()).setHours(0, 0, 0, 0)).setDate(now.getDate() - noDaysNotSeen);
+
+    // get follow-ups
+    app.models.followUp.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId,
+          // get follow-ups that were scheduled in the past noDaysNotSeen days
+          date: {
+            between: [xDaysAgo, now]
+          }
+        },
+        // order by date as we need to check the follow-ups from the oldest to the most new
+        order: 'date ASC'
+      }, filter || {}))
+      .then(function (followUps) {
+        // initialize contacts map; helper to not count contacts twice and keep the seen value;
+        // once a contact is seen the newer follow-ups for the same contact don't matter
+        let contactsMap = {};
+
+        // loop through the followups to get unique contacts
+        followUps.forEach(function (followUp) {
+          // check if there is an entry for the personId or if it is false; In this case, override with current seen flag
+          if (!contactsMap[followUp.personId]) {
+            // set value in the contacts map as the performed flag
+            contactsMap[followUp.personId] = followUp.performed;
+          }
+        });
+
+        // get the contacts not seen from the contacts map
+        let notSeenContactsIDs = Object.keys(contactsMap).filter(contactId => !contactsMap[contactId]);
+
+        // create result
+        let result = {
+          contactsCount: notSeenContactsIDs.length,
+          contactIDs: notSeenContactsIDs
+        };
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
   };
 };

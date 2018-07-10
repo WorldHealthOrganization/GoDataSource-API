@@ -30,6 +30,11 @@ module.exports = function (app) {
       // log incoming request
       req.logger.debug(`Received Request: ${req.method} ${req.originalUrl} Headers: ${JSON.stringify(req.headers)} Body: ${JSON.stringify(req.body)}`);
 
+      // set the Transaction-Id header in the response
+      res.setHeader('Transaction-Id', req.transactionId);
+      // expose the Transaction-Id header to the client
+      res.setHeader('Access-Control-Expose-Headers', 'Transaction-Id');
+
       // intercept responses, some use send
       const _send = res.send;
       res.send = function (data) {
