@@ -123,18 +123,68 @@ module.exports = function (Outbreak) {
         return next(error);
       });
     } else {
-      next();
+      // make sure the visual id is unique in the given outbreak, otherwise stop with error
+      Outbreak.helpers
+        .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
+        .then(next)
+        .catch(next);
+    }
+  });
+
+  /**
+   * Handle visual identifier (uniqueness and generation)
+   */
+  Outbreak.beforeRemote('prototype.__create__contacts', function (context, modelInstance, next) {
+    // if the visual id was not passed
+    if (context.args.data.visualId === undefined) {
+      // set it automatically
+      Outbreak.helpers.getAvailableVisualId(context.instance, function (error, visualId) {
+        context.args.data.visualId = visualId;
+        return next(error);
+      });
+    } else {
+      // make sure the visual id is unique in the given outbreak, otherwise stop with error
+      Outbreak.helpers
+        .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
+        .then(next)
+        .catch(next);
     }
   });
 
   /**
    * Parsing the properties that are of type '["date"]' as Loopback doesn't save them correctly
+   * Validate visual identifier (optional)
    */
   Outbreak.beforeRemote('prototype.__updateById__cases', function (context, modelInstance, next) {
     // parse array of dates properties
     helpers.parseArrayOfDates(context.args.data);
 
-    next();
+    // if visual id was sent in request, check for uniqueness
+    if (context.args.data.visualId !== undefined) {
+      // make sure the visual id is unique in the given outbreak, otherwise stop with error
+      Outbreak.helpers
+        .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
+        .then(next)
+        .catch(next);
+    } else {
+      return next();
+    }
+  });
+
+  /**
+   * Make sure visual identifier is unique, if its sent in request
+   */
+  Outbreak.beforeRemote('prototype.__updateById__contacts', function (context, modelInstance, next) {
+    // if visual id was sent in request, check for uniqueness
+    if (context.args.data.visualId !== undefined) {
+      // make sure the visual id is unique in the given outbreak, otherwise stop with error
+      Outbreak.helpers
+        .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
+        .then(next)
+        .catch(next);
+    } else {
+      return next();
+    }
   });
 
   /**

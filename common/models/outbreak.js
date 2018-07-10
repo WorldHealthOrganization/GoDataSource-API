@@ -678,4 +678,32 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Validates whether a given visual identifier is unique per given outbreak
+   * If not, then a DUPLICATE_VISUAL_ID error is built and returned
+   * @param outbreakId Outbreaks identifier
+   * @param visualId Visual identifier (string)
+   * @returns Promise { false (if unique), error }
+   */
+  Outbreak.helpers.validateVisualIdUniqueness = function (outbreakId, visualId) {
+    return app.models.person
+      .findOne({
+        where: {
+          outbreakId: outbreakId,
+          visualId: visualId
+        },
+        deleted: true
+      })
+      .then((instance) => {
+        if (!instance) {
+          // is unique, returning undefined, to be consistent with callback usage
+          return;
+        }
+        // not unique, return crafted error
+        return app.utils.apiError.getError('DUPLICATE_VISUAL_ID', {
+          id: visualId
+        });
+      });
+  };
 };
