@@ -1640,4 +1640,66 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Count the new cases in the previous X days detected among known contacts
+   * @param filter Besides the default filter properties this request also accepts 'noDaysAmongContacts': number on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countNewCasesInThePreviousXDaysDetectedAmongKnownContacts = function (filter, callback) {
+    // initialize noDaysAmongContacts filter
+    let noDaysAmongContacts;
+    // check if the noDaysAmongContacts filter was sent; accepting it only on the first level
+    noDaysAmongContacts = _.get(filter, 'where.noDaysAmongContacts');
+    if (typeof noDaysAmongContacts !== "undefined") {
+      // noDaysAmongContacts was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.noDaysAmongContacts;
+    } else {
+      // get the outbreak noDaysAmongContacts as the default noDaysNewContacts value
+      noDaysAmongContacts = this.noDaysAmongContacts;
+    }
+
+    // get now date
+    let now = new Date();
+
+    // get from noDaysAmongContacts ago
+    let xDaysAgo = new Date((new Date()).setHours(0, 0, 0, 0)).setDate(now.getDate() - noDaysAmongContacts);
+
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // get all cases that were created sooner or have 'dateBecomeCase' sooner than 'noDaysAmongContacts' ago
+    app.models.case.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId,
+          or: [{
+            createdAt: {
+              gte: xDaysAgo
+            }
+          }, {
+            dateBecomeCase: {
+              gte: xDaysAgo
+            }
+          }]
+        }
+      }, filter || {})
+    )
+      .then(function (cases) {
+        // initialize result
+        let result = {
+          newCasesCount: cases.length,
+          newCasesAmongKnownContactsCount: 0,
+          newCasesAmongKnownContactsIDs: []
+        };
+
+        // get the newCasesAmongKnownContactsIDs
+        result.newCasesAmongKnownContactsIDs = cases.filter(item => new Date(item.dateBecomeCase) >= xDaysAgo).map(item => item.id);
+        result.newCasesAmongKnownContactsCount = result.newCasesAmongKnownContactsIDs.length;
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
+  };
 };
