@@ -1479,7 +1479,7 @@ module.exports = function (Outbreak) {
 
 
   /**
-   * Count the contacts for each case; Also calculate average/mean/median
+   * Count the contacts for each case; Also calculate mean/median
    * @param filter
    * @param callback
    */
@@ -1503,12 +1503,8 @@ module.exports = function (Outbreak) {
         let contactCountList = result.cases.map(item => item.contactsCount).sort((a, b) => a - b);
         let contactCountListLength = contactCountList.length;
 
-        // calculate average number of contacts per case; sum the number of contacts per case and split to number of cases
-        result.averageNoContactsPerCase = contactCountList.reduce((totalNo, noContactsPerCase) => totalNo + noContactsPerCase, 0) / contactCountListLength;
-
-        // calculate mean; currently is the same as average
-        // TODO: Find out how mean is calculated
-        result.meanNoContactsPerCase = result.averageNoContactsPerCase;
+        // calculate mean number of contacts per case; sum the number of contacts per case and split to number of cases
+        result.meanNoContactsPerCase = contactCountList.reduce((totalNo, noContactsPerCase) => totalNo + noContactsPerCase, 0) / contactCountListLength;
 
         // calculate median; it's either the middle element of the array in case the length is uneven or the average of the two middle elements for even length
         result.medianNoContactsPerCase = contactCountListLength % 2 === 0 ?
