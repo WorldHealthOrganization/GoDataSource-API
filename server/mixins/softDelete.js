@@ -293,7 +293,7 @@ module.exports = function (Model) {
 
   const _findOne = Model.findOne;
   /**
-   * Overwrite find to search for non-(soft)deleted records
+   * Overwrite find one method, to search for non-(soft)deleted records
    * @param filter
    * @param args
    * @returns {*}
