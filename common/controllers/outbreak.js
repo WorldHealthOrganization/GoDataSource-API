@@ -1526,7 +1526,7 @@ module.exports = function (Outbreak) {
     // get outbreakId
     let outbreakId = this.id;
 
-    // get cases with contacts
+    // get follow-ups
     app.models.followUp.find(app.utils.remote
       .mergeFilters({
         where: {
@@ -1563,6 +1563,7 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
   /**
    * Get a list of secondary cases that have date of onset before the date of onset of primary cases
    * @param filter
@@ -1683,6 +1684,74 @@ module.exports = function (Outbreak) {
         // get the newCasesAmongKnownContactsIDs
         result.newCasesAmongKnownContactsIDs = cases.filter(item => new Date(item.dateBecomeCase) >= xDaysAgo).map(item => item.id);
         result.newCasesAmongKnownContactsCount = result.newCasesAmongKnownContactsIDs.length;
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count the contacts not seen in the past X days
+   * @param filter Besides the default filter properties this request also accepts 'noDaysNotSeen': number on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countContactsNotSeenInXDays = function (filter, callback) {
+    // initialize noDaysNotSeen filter
+    let noDaysNotSeen;
+    // check if the noDaysNotSeen filter was sent; accepting it only on the first level
+    noDaysNotSeen = _.get(filter, 'where.noDaysNotSeen');
+    if (typeof noDaysNotSeen !== "undefined") {
+      // noDaysNotSeen was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.noDaysNotSeen;
+    } else {
+      // get the outbreak noDaysNotSeen as the default noDaysNotSeen value
+      noDaysNotSeen = this.noDaysNotSeen;
+    }
+
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // get current date
+    let now = new Date();
+    // get date from noDaysNotSeen days ago
+    let xDaysAgo = new Date((new Date()).setHours(0, 0, 0, 0)).setDate(now.getDate() - noDaysNotSeen);
+
+    // get follow-ups
+    app.models.followUp.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId,
+          // get follow-ups that were scheduled in the past noDaysNotSeen days
+          date: {
+            between: [xDaysAgo, now]
+          }
+        },
+        // order by date as we need to check the follow-ups from the oldest to the most new
+        order: 'date ASC'
+      }, filter || {}))
+      .then(function (followUps) {
+        // initialize contacts map; helper to not count contacts twice and keep the seen value;
+        // once a contact is seen the newer follow-ups for the same contact don't matter
+        let contactsMap = {};
+
+        // loop through the followups to get unique contacts
+        followUps.forEach(function (followUp) {
+          // check if there is an entry for the personId or if it is false; In this case, override with current seen flag
+          if (!contactsMap[followUp.personId]) {
+            // set value in the contacts map as the performed flag
+            contactsMap[followUp.personId] = followUp.performed;
+          }
+        });
+
+        // get the contacts not seen from the contacts map
+        let notSeenContactsIDs = Object.keys(contactsMap).filter(contactId => !contactsMap[contactId]);
+
+        // create result
+        let result = {
+          contactsCount: notSeenContactsIDs.length,
+          contactIDs: notSeenContactsIDs
+        };
 
         // send response
         callback(null, result);

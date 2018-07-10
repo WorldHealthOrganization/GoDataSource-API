@@ -796,6 +796,24 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "countNewCasesInThePreviousXDaysDetectedAmongKnownContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countNewCasesInThePreviousXDaysDetectedAmongKnownContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactsNotSeenInXDays"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countContactsNotSeenInXDays"
     }
   ],
   "methods": {
@@ -2228,7 +2246,7 @@
           "required": true
         }
       ],
-      "description": "Count the number of contacts for each case; Additionally calculate average/mean/median",
+      "description": "Count the number of contacts on follow-up list",
       "http": {
         "verb": "get",
         "path": "/follow-ups/contacts/count"
@@ -2269,6 +2287,38 @@
       "http": {
         "verb": "get",
         "path": "/cases/new-among-known-contacts/count"
+      }
+    },
+    "prototype.countContactsNotSeenInXDays": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'noDaysNotSeen' number on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "contactsCount": {
+              "type": "number",
+              "description": "Number of contacts not seen in the past X days",
+              "required": true
+            },
+            "contactIDs": [
+              "string"
+            ]
+          },
+          "description": "Object containing counters for contacts not seen in the past X days",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the number of contacts not seen in the past X days",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/contacts-not-seen/count"
       }
     }
   }
