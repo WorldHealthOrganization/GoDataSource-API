@@ -5,6 +5,7 @@
     "LNG_AUDIT_LOG_ACTIONS_CREATED": "日本のNew Record",
     "LNG_AUDIT_LOG_ACTIONS_MODIFIED": "日本のRecord Modified",
     "LNG_AUDIT_LOG_ACTIONS_REMOVED": "日本のRecord Removed",
+    "LNG_AUDIT_LOG_ACTIONS_RESTORED": "日本のRecord Restored",
 
     "LNG_ROLE_AVAILABLE_PERMISSIONS_READ_SYS_CONFIG": "日本のRead System Configuration",
     "LNG_ROLE_AVAILABLE_PERMISSIONS_READ_SYS_CONFIG_DESCRIPTION": "日本のThis permission allows reading system configuration settings.",
