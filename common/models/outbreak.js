@@ -157,6 +157,7 @@ module.exports = function (Outbreak) {
    * @param personId
    * @param type
    * @param data
+   * @param options
    * @param callback
    */
   Outbreak.helpers.createPersonRelationship = function (outbreakId, personId, type, data, options, callback) {
@@ -214,6 +215,7 @@ module.exports = function (Outbreak) {
    * @param relationshipId
    * @param type
    * @param data
+   * @param options
    * @param callback
    */
   Outbreak.helpers.updatePersonRelationship = function (personId, relationshipId, type, data, options, callback) {
@@ -252,6 +254,7 @@ module.exports = function (Outbreak) {
    * Delete a relation for a person
    * @param personId
    * @param relationshipId
+   * @param options
    * @param callback
    */
   Outbreak.helpers.deletePersonRelationship = function (personId, relationshipId, options, callback) {

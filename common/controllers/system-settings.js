@@ -36,6 +36,7 @@ module.exports = function (SystemSettings) {
   /**
    * Modify System Settings
    * @param data
+   * @param options
    * @param cb
    */
   SystemSettings.updateSystemSettings = function (data, options, cb) {

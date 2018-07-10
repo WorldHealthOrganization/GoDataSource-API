@@ -56,6 +56,7 @@ module.exports = function (Icon) {
    * @param req
    * @param name
    * @param icon
+   * @param options
    * @param callback
    */
   Icon.upload = function (req, name, icon, options, callback) {
