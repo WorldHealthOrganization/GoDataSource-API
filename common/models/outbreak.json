@@ -667,6 +667,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countNewContactsByExposure"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_outbreak",
       "permission": "ALLOW",
       "property": "generateFollowups"
@@ -1636,12 +1642,36 @@
       }
     },
     "prototype.countNewContactsByExposure": {
-      "accepts": [],
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'noDaysNewContacts' number on the first level in 'where'"
+        }
+      ],
       "returns": [
         {
           "arg": "counters",
           "type": {
-            "{exposureTypeId}": "number"
+            "newContactsCount": "number",
+            "exposureType": {
+              "type": {
+                "id": {
+                  "type": "string",
+                  "description": "Exposure type ID"
+                },
+                "count": {
+                  "type": "number",
+                  "description": "Contacts number for exposure type"
+                },
+                "contactIDs": {
+                  "type": [
+                    "string"
+                  ],
+                  "description": "Contact IDs container"
+                }
+              }
+            }
           },
           "description": "Object containing new contacts counters for each found exposure type",
           "root": true,
@@ -2197,13 +2227,15 @@
       "returns": [
         {
           "arg": "results",
-          "type": [{
-            "type": {
-              "primaryCase": "case",
-              "secondaryCase": "case",
-              "relationship": "relationship"
+          "type": [
+            {
+              "type": {
+                "primaryCase": "case",
+                "secondaryCase": "case",
+                "relationship": "relationship"
+              }
             }
-          }],
+          ],
           "description": "List of secondary cases that have date of onset before the date of onset of primary cases",
           "root": true,
           "required": true
