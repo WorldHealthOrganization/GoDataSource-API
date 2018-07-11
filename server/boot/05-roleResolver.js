@@ -201,4 +201,39 @@ module.exports = function (app) {
       hasPermission(permission, context, _callback);
     });
   });
+
+  // register the special role resolver for client application permission
+  // it should not be used for general purpose
+  if (Role.hasOwnProperty('clientApplicationPermission')) {
+    Role.registerResolver(Role.clientApplicationPermission, function (permission, context, done) {
+      // cache client credentials from request context
+      let clientCredentials = context.remotingContext.req.body.credentials;
+
+      // flag that indicates whether the client is ok
+      // initially is assumed that is not
+      let hasAccess = false;
+
+      // check the client credentials against any set in system settings
+      app.models.systemSettings
+        .findOne()
+        .then((systemSettings) => {
+          // try to find a match by client identifier
+          let clientIndex = systemSettings.clientApplications.findIndex((client) => client.credentials.clientId === clientCredentials.clientId);
+
+          // if no client was found with the given id, or the client is inactive, stop with error
+          if (clientIndex !== -1) {
+            if (systemSettings.clientApplications[clientIndex].active) {
+              // check password hashes
+              hasAccess = systemSettings.clientApplications[clientIndex].clientSecret === clientCredentials.clientSecret;
+            }
+          }
+
+          if (hasAccess) {
+            return done(null, hasAccess);
+          }
+
+          return done(app.utils.apiError.getError('ACCESS_DENIED', { accessErrors: 'Client credentials are wrong' }, 403));
+        });
+    });
+  }
 };

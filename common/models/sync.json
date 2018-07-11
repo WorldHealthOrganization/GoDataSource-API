@@ -1,6 +1,7 @@
 {
   "name": "sync",
-  "base": "extendedPersistedModel",
+  "base": "Model",
+  "plural": "sync",
   "idInjection": true,
   "options": {
     "validateUpsert": true
@@ -20,11 +21,11 @@
     "getDatabaseSnapshot": {
       "accepts": [
         {
-          "arg": "credentials",
-          "type": "clientCredentials",
-          "description": "Client credentials",
+          "arg": "req",
+          "type": "object",
+          "description": "Client credentials authorization header",
           "http": {
-            "source": "body"
+            "source": "req"
           },
           "root": true,
           "required": true
