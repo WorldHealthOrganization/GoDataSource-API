@@ -80,6 +80,12 @@ const defaultReferenceData = {
     'Over 21 Times',
     'Unknown'
   ],
+  'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION': [
+    'Very Short (seconds)',
+    'Short (minutes)',
+    'Medium (hours)',
+    'Long (days)'
+  ],
   'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL': [
     '1 - Low',
     '2 - Medium',
