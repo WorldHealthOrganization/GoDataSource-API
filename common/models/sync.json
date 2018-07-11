@@ -1,0 +1,49 @@
+{
+  "name": "sync",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "getDatabaseSnapshot"
+    }
+  ],
+  "methods": {
+    "getDatabaseSnapshot": {
+      "accepts": [
+        {
+          "arg": "credentials",
+          "type": "clientCredentials",
+          "description": "Client credentials",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "snapshot",
+          "type": "string",
+          "description": "Database snapshot",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Retrieve a compressed snapshot of the database.",
+      "http": {
+        "verb": "get",
+        "path": "/database-snapshot"
+      }
+    }
+  }
+}
