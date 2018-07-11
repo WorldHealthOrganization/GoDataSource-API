@@ -17,8 +17,7 @@
       "readOnly": true
     },
     "visualId": {
-      "type": "string",
-      "unique": true
+      "type": "string"
     },
     "firstName": {
       "type": "string",

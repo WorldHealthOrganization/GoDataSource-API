@@ -94,5 +94,9 @@
   "DEACTIVATE_PARENT_MODEL": {
     "defaultStatusCode": 400,
     "messagePattern": "This `<%= model %>` still has sub models that are active. Please make sure to deactivate all child models before deactivating a parent model."
+  },
+  "DUPLICATE_VISUAL_ID": {
+    "defaultStatusCode": 409,
+    "messagePattern": "The visual identifier `<%= id %>` is not unique."
   }
 }

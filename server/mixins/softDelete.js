@@ -291,6 +291,23 @@ module.exports = function (Model) {
     return _find.call(Model, filter, ...args);
   };
 
+  const _findOne = Model.findOne;
+  /**
+   * Overwrite find one method, to search for non-(soft)deleted records
+   * @param filter
+   * @param args
+   * @returns {*}
+   */
+  Model.findOne = function findOneDeleted(filter = {}, ...args) {
+    if (!filter.where) {
+      filter.where = {};
+    }
+    if (!filter.deleted) {
+      filter.where = {and: [filter.where, filterNonDeleted]};
+    }
+    return _findOne.call(Model, filter, ...args);
+  };
+
 
   const _count = Model.count;
   /**
