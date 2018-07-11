@@ -35,7 +35,9 @@ module.exports = function (Model) {
     // options is optional
     if (typeof options === 'function' && callback === undefined) {
       callback = options;
-      options = {};
+      options = {
+        options: {}
+      };
     }
     // make context available for others
     const self = this;

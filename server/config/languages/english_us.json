@@ -5,6 +5,7 @@
     "LNG_AUDIT_LOG_ACTIONS_CREATED": "New Record",
     "LNG_AUDIT_LOG_ACTIONS_MODIFIED": "Record Modified",
     "LNG_AUDIT_LOG_ACTIONS_REMOVED": "Record Removed",
+    "LNG_AUDIT_LOG_ACTIONS_RESTORED": "Record Restored",
 
     "LNG_ROLE_AVAILABLE_PERMISSIONS_READ_SYS_CONFIG": "Read System Configuration",
     "LNG_ROLE_AVAILABLE_PERMISSIONS_READ_SYS_CONFIG_DESCRIPTION": "This permission allows reading system configuration settings.",

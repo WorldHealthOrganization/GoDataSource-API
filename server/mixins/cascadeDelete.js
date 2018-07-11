@@ -4,14 +4,69 @@ const app = require('../server');
 const async = require('async');
 // define a list of available operations
 const availableOperationsMap = {
-  'delete': require('../../components/workerRunner').bulkModelOperation.deleteOneByOne,
-  'restore': require('../../components/workerRunner').bulkModelOperation.restoreOneByOne
+  /**
+   * Perform a mass delete, but delete each record individually
+   * @param modelName
+   * @param where
+   * @param callback
+   */
+  'delete': function deleteOneByOne(modelName, where, callback) {
+    // find the models that need to be deleted
+    app.models[modelName]
+      .find({where: where})
+      .then(function (instancesToDelete) {
+        // create a list of delete operations
+        let deleteOperations = [];
+        // for each instance, schedule a delete
+        instancesToDelete.forEach(function (instance) {
+          deleteOperations.push(function (callback) {
+            instance.destroy(callback);
+          });
+        });
+        // delete them (in series) and send back the number of deleted records
+        // use series (instead of parallel) because we may have deep cascade (relations that cascade other relations)
+        async.series(deleteOperations, function (error) {
+          callback(error, instancesToDelete.length)
+        });
+      })
+      .catch(callback);
+  },
+
+  /**
+   * Perform a mass restore, but restore each record individually
+   * @param modelName
+   * @param where
+   * @param callback
+   */
+  'restore': function restoreOneByOne(modelName, where, callback) {
+    app.models[modelName]
+      .find({
+        where: where,
+        deleted: true
+      })
+      .then(function (instancesToRestore) {
+        // create a list of restore operations
+        let restoreOperations = [];
+        // for each instance, schedule a restore
+        instancesToRestore.forEach(function (instance) {
+          restoreOperations.push(function (callback) {
+            instance.undoDelete(callback);
+          });
+        });
+        // restore them (in series) and send back the number of restored records
+        // use series (instead of parallel) because we may have deep cascade (relations that cascade other relations)
+        async.series(restoreOperations, function (error) {
+          callback(error, instancesToRestore.length)
+        });
+      })
+      .catch(callback);
+  }
 };
 
 module.exports = function (Model, options) {
 
   // by default await for all (cascaded) delete operations to be completed before moving along
-  if (options.awaitCompletion === undefined){
+  if (options.awaitCompletion === undefined) {
     options.awaitCompletion = true;
   }
 
@@ -96,7 +151,7 @@ module.exports = function (Model, options) {
 
     // after deleting a model instance
     Model.observe('after delete', function (context, next) {
-     runOperation('delete', context, next);
+      runOperation('delete', context, next);
     });
 
     // after restoring a model instance
