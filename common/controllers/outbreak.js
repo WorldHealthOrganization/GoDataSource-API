@@ -161,10 +161,23 @@ module.exports = function (Outbreak) {
 
     // if visual id was sent in request, check for uniqueness
     if (context.args.data.visualId !== undefined) {
-      // make sure the visual id is unique in the given outbreak, otherwise stop with error
-      Outbreak.helpers
-        .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
-        .then(next)
+      // retrieve the instance that will be updated
+      // if visual id's are the same, no need to check for uniqueness
+      app.models.case
+        .findOne({
+          where: {
+            id: context.args.fk
+          }
+        })
+        .then((caseModel) => {
+          if (caseModel.visualId === context.args.data.visualId) {
+            return next();
+          }
+          // make sure the visual id is unique in the given outbreak, otherwise stop with error
+          return Outbreak.helpers
+            .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
+            .then(next);
+        })
         .catch(next);
     } else {
       return next();
@@ -177,10 +190,23 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.__updateById__contacts', function (context, modelInstance, next) {
     // if visual id was sent in request, check for uniqueness
     if (context.args.data.visualId !== undefined) {
-      // make sure the visual id is unique in the given outbreak, otherwise stop with error
-      Outbreak.helpers
-        .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
-        .then(next)
+      // retrieve the instance that will be updated
+      // if visual id's are the same, no need to check for uniqueness
+      app.models.contact
+        .findOne({
+          where: {
+            id: context.args.fk
+          }
+        })
+        .then((contact) => {
+          if (contact.visualId === context.args.data.visualId) {
+            return next();
+          }
+          // make sure the visual id is unique in the given outbreak, otherwise stop with error
+          return Outbreak.helpers
+            .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
+            .then(next);
+        })
         .catch(next);
     } else {
       return next();
@@ -1836,10 +1862,23 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.__updateById__events', function (context, modelInstance, next) {
     // if visual id was sent in request, check for uniqueness
     if (context.args.data.visualId !== undefined) {
-      // make sure the visual id is unique in the given outbreak, otherwise stop with error
-      Outbreak.helpers
-        .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
-        .then(next)
+      // retrieve the instance that will be updated
+      // if visual id's are the same, skip validation
+      app.models.event
+        .findOne({
+          where: {
+            id: context.args.fk
+          }
+        })
+        .then((event) => {
+          if (event.visualId === context.args.data.visualId) {
+            return next();
+          }
+          // make sure the visual id is unique in the given outbreak, otherwise stop with error
+          return Outbreak.helpers
+            .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
+            .then(next);
+        })
         .catch(next);
     } else {
       return next();
