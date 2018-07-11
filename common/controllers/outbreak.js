@@ -975,26 +975,42 @@ module.exports = function (Outbreak) {
 
   /**
    * Count the new contacts and groups them by exposure type
+   * @param filter Besides the default filter properties this request also accepts 'noDaysNewContacts': number on the first level in 'where'
    * @param callback
    */
-  Outbreak.prototype.countNewContactsByExposure = function (callback) {
-    // get outbreak
-    let outbreak = this;
-    // initialize noDaysNewContacts
-    let noDaysNewContacts = outbreak.noDaysNewContacts;
-    // initialize result
-    let result = {};
+  Outbreak.prototype.countNewContactsByExposure = function (filter, callback) {
+    // initialize noDaysNewContacts filter
+    let noDaysNewContacts;
+    // check if the noDaysNewContacts filter was sent; accepting it only on the first level
+    noDaysNewContacts = _.get(filter, 'where.noDaysNewContacts');
+    if (typeof noDaysNewContacts !== "undefined") {
+      // noDaysNewContacts was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.noDaysNewContacts;
+    } else {
+      // get the outbreak noDaysNewContacts as the default noDaysNewContacts value
+      noDaysNewContacts = this.noDaysNewContacts;
+    }
+
+    // get outbreak ID
+    let outbreakId = this.id;
+
+    // initialize exposureType map
+    let exposureTypeMap = {};
 
     // get exposureTypes from reference data
-    helpers.getSystemAndOwnReferenceData(outbreak.id, {
+    helpers.getSystemAndOwnReferenceData(outbreakId, {
       where: {
         categoryId: 'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE'
       }
     })
       .then(function (exposureTypes) {
-        // loop through exposure types and initialize the counters in the result
+        // loop through exposure types and initialize the exposureTypeMap entry
         exposureTypes.forEach(function (exposureType) {
-          result[exposureType.value] = 0;
+          exposureTypeMap[exposureType.value] = {
+            id: exposureType.value,
+            count: 0,
+            contactIDs: []
+          };
         });
 
         // get now date
@@ -1004,6 +1020,7 @@ module.exports = function (Outbreak) {
         return app.models.contact.find({
           include: ['relationships'],
           where: {
+            outbreakId: outbreakId,
             createdAt: {
               gte: now.setDate(now.getDate() - noDaysNewContacts)
             }
@@ -1014,11 +1031,23 @@ module.exports = function (Outbreak) {
         // loop through the contacts and check relationships exposure types to increase the counters in the result
         contacts.forEach(function (contact) {
           contact.relationships.forEach(function (relationship) {
-            // increasing counter for all the contact relationships
             // Note: The result counters total will not equal number of contacts as contacts may have multiple relationships
-            result[relationship.exposureTypeId]++;
+            // counting only if contact wasn't already added for the exposure type
+            // also checking if set exposureTypeId is known; if not known, relations is skipped
+            if (exposureTypeMap[relationship.exposureTypeId] && exposureTypeMap[relationship.exposureTypeId].contactIDs.indexOf(contact.id) === -1) {
+              // increasing counter for exposure type
+              exposureTypeMap[relationship.exposureTypeId].count++;
+              // kepp contact ID
+              exposureTypeMap[relationship.exposureTypeId].contactIDs.push(contact.id);
+            }
           });
         });
+
+        // initialize result
+        let result = {
+          newContactsCount: contacts.length,
+          exposureType: Object.values(exposureTypeMap)
+        };
 
         // send response
         callback(null, result);
