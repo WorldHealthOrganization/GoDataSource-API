@@ -111,7 +111,7 @@ const defaultReferenceData = {
     'Recovered',
     'Deceased'
   ],
-  'LNG_REFERENCE_DATA_QUESTION_ANSWER_TYPE': [
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE': [
     'Free Text',
     'Numeric',
     'Date/Time',
@@ -119,10 +119,10 @@ const defaultReferenceData = {
     'Multiple Answers',
     'File Upload'
   ],
-  'LNG_REFERENCE_DATA_MISCELLANEOUS_CUSTOMIZABLE_UI_ELEMENT': [
+  'LNG_REFERENCE_DATA_CATEGORY_MISCELLANEOUS_CUSTOMIZABLE_UI_ELEMENT': [
     'Hospitalized Case'
   ],
-  'LNG_REFERENCE_DATA_PERSON_TYPE': [
+  'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE': [
     'Case',
     'Contact',
     'Event'
