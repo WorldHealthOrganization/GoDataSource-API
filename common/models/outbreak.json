@@ -870,6 +870,11 @@
           },
           "root": true,
           "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -942,6 +947,11 @@
           },
           "root": true,
           "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -970,6 +980,11 @@
           "arg": "fk",
           "type": "string",
           "description": "Foreign key for relationships."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -1060,6 +1075,11 @@
           },
           "root": true,
           "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -1132,6 +1152,11 @@
           },
           "root": true,
           "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -1160,6 +1185,11 @@
           "arg": "fk",
           "type": "string",
           "description": "Foreign key for relationships."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -1250,6 +1280,11 @@
           },
           "root": true,
           "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -1322,6 +1357,11 @@
           },
           "root": true,
           "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -1350,6 +1390,11 @@
           "arg": "fk",
           "type": "string",
           "description": "Foreign key for relationships."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -1407,6 +1452,11 @@
             "source": "body"
           },
           "description": "Case specific properties"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -1430,6 +1480,11 @@
           "arg": "nk",
           "type": "string",
           "description": "Foreign key for cases"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -1472,6 +1527,11 @@
           "arg": "nk",
           "type": "string",
           "description": "Foreign key for cases"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -1717,6 +1777,11 @@
           "arg": "fk",
           "type": "string",
           "description": "Foreign key for followUps"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [

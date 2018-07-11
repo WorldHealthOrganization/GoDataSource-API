@@ -58,7 +58,7 @@ module.exports = function (Model) {
         callback(true);
       };
       // restore the instance
-      self.updateAttributes({[deletedFlag]: false, [deletedAt]: null}, function (error, result) {
+      self.updateAttributes({[deletedFlag]: false, [deletedAt]: null}, options, function (error, result) {
         // if error occurred, stop
         if (error) {
           return callback(error);

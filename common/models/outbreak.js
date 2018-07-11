@@ -157,9 +157,10 @@ module.exports = function (Outbreak) {
    * @param personId
    * @param type
    * @param data
+   * @param options
    * @param callback
    */
-  Outbreak.helpers.createPersonRelationship = function (outbreakId, personId, type, data, callback) {
+  Outbreak.helpers.createPersonRelationship = function (outbreakId, personId, type, data, options, callback) {
     Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error, persons) {
       if (error) {
         return callback(error);
@@ -167,7 +168,7 @@ module.exports = function (Outbreak) {
       data.persons = persons;
       app.models.relationship.removeReadOnlyProperties(data);
       app.models.relationship
-        .create(Object.assign(data, {outbreakId: outbreakId}))
+        .create(Object.assign(data, {outbreakId: outbreakId}), options)
         .then(function (createdRelation) {
           callback(null, createdRelation);
         })
@@ -214,9 +215,10 @@ module.exports = function (Outbreak) {
    * @param relationshipId
    * @param type
    * @param data
+   * @param options
    * @param callback
    */
-  Outbreak.helpers.updatePersonRelationship = function (personId, relationshipId, type, data, callback) {
+  Outbreak.helpers.updatePersonRelationship = function (personId, relationshipId, type, data, options, callback) {
     Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error, persons) {
       if (error) {
         return callback(error);
@@ -239,7 +241,7 @@ module.exports = function (Outbreak) {
             });
           }
           app.models.relationship.removeReadOnlyProperties(data);
-          return relationship.updateAttributes(data);
+          return relationship.updateAttributes(data, options);
         })
         .then(function (relationship) {
           callback(null, relationship);
@@ -252,9 +254,10 @@ module.exports = function (Outbreak) {
    * Delete a relation for a person
    * @param personId
    * @param relationshipId
+   * @param options
    * @param callback
    */
-  Outbreak.helpers.deletePersonRelationship = function (personId, relationshipId, callback) {
+  Outbreak.helpers.deletePersonRelationship = function (personId, relationshipId, options, callback) {
     app.models.relationship
       .findOne({
         where: {
@@ -266,7 +269,7 @@ module.exports = function (Outbreak) {
         if (!relationship) {
           return {count: 0};
         }
-        return relationship.destroy();
+        return relationship.destroy(options);
       })
       .then(function (relationship) {
         callback(null, relationship);

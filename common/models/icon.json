@@ -76,6 +76,11 @@
         {
           "arg": "icon",
           "type": "file"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [

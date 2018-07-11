@@ -192,9 +192,10 @@ module.exports = function (Outbreak) {
    * Create relation for a case
    * @param caseId
    * @param data
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.createCaseRelationship = function (caseId, data, callback) {
+  Outbreak.prototype.createCaseRelationship = function (caseId, data, options, callback) {
     // make sure case is valid, before trying to create any relations
     app.models.case
       .findById(caseId)
@@ -205,7 +206,7 @@ module.exports = function (Outbreak) {
             id: caseId
           }));
         }
-        helpers.createPersonRelationship(this.id, caseId, 'case', data, callback);
+        helpers.createPersonRelationship(this.id, caseId, 'case', data, options, callback);
       })
       .catch(callback);
   };
@@ -214,9 +215,10 @@ module.exports = function (Outbreak) {
    * Create relation for a contact
    * @param contactId
    * @param data
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.createContactRelationship = function (contactId, data, callback) {
+  Outbreak.prototype.createContactRelationship = function (contactId, data, options, callback) {
     // make sure contact is valid, before trying to create any relations
     app.models.contact
       .findById(contactId)
@@ -227,7 +229,7 @@ module.exports = function (Outbreak) {
             id: contactId
           }));
         }
-        helpers.createPersonRelationship(this.id, contactId, 'contact', data, callback);
+        helpers.createPersonRelationship(this.id, contactId, 'contact', data, options, callback);
       })
       .catch(callback);
   };
@@ -236,9 +238,10 @@ module.exports = function (Outbreak) {
    * Create relation for a event
    * @param eventId
    * @param data
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.createEventRelationship = function (eventId, data, callback) {
+  Outbreak.prototype.createEventRelationship = function (eventId, data, options, callback) {
     // make sure event is valid, before trying to create any relations
     app.models.event
       .findById(eventId)
@@ -249,7 +252,7 @@ module.exports = function (Outbreak) {
             id: eventId
           }));
         }
-        helpers.createPersonRelationship(this.id, eventId, 'event', data, callback);
+        helpers.createPersonRelationship(this.id, eventId, 'event', data, options, callback);
       })
       .catch(callback);
   };
@@ -292,10 +295,11 @@ module.exports = function (Outbreak) {
    * @param caseId
    * @param relationshipId
    * @param data
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.updateCaseRelationship = function (caseId, relationshipId, data, callback) {
-    helpers.updatePersonRelationship(caseId, relationshipId, 'case', data, callback);
+  Outbreak.prototype.updateCaseRelationship = function (caseId, relationshipId, data, options, callback) {
+    helpers.updatePersonRelationship(caseId, relationshipId, 'case', data, options, callback);
   };
 
   /**
@@ -303,10 +307,11 @@ module.exports = function (Outbreak) {
    * @param contactId
    * @param relationshipId
    * @param data
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.updateContactRelationship = function (contactId, relationshipId, data, callback) {
-    helpers.updatePersonRelationship(contactId, relationshipId, 'contact', data, callback);
+  Outbreak.prototype.updateContactRelationship = function (contactId, relationshipId, data, options, callback) {
+    helpers.updatePersonRelationship(contactId, relationshipId, 'contact', data, options, callback);
   };
 
   /**
@@ -314,40 +319,44 @@ module.exports = function (Outbreak) {
    * @param eventId
    * @param relationshipId
    * @param data
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.updateEventRelationship = function (eventId, relationshipId, data, callback) {
-    helpers.updatePersonRelationship(eventId, relationshipId, 'event', data, callback);
+  Outbreak.prototype.updateEventRelationship = function (eventId, relationshipId, data, options, callback) {
+    helpers.updatePersonRelationship(eventId, relationshipId, 'event', data, options, callback);
   };
 
   /**
    * Delete a relation for a case
    * @param caseId
    * @param relationshipId
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.deleteCaseRelationship = function (caseId, relationshipId, callback) {
-    helpers.deletePersonRelationship(caseId, relationshipId, callback);
+  Outbreak.prototype.deleteCaseRelationship = function (caseId, relationshipId, options, callback) {
+    helpers.deletePersonRelationship(caseId, relationshipId, options, callback);
   };
 
   /**
    * Delete a relation for a contact
    * @param contactId
    * @param relationshipId
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.deleteContactRelationship = function (contactId, relationshipId, callback) {
-    helpers.deletePersonRelationship(contactId, relationshipId, callback);
+  Outbreak.prototype.deleteContactRelationship = function (contactId, relationshipId, options, callback) {
+    helpers.deletePersonRelationship(contactId, relationshipId, options, callback);
   };
 
   /**
    * Delete a relation for a event
    * @param eventId
    * @param relationshipId
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.deleteEventRelationship = function (eventId, relationshipId, callback) {
-    helpers.deletePersonRelationship(eventId, relationshipId, callback);
+  Outbreak.prototype.deleteEventRelationship = function (eventId, relationshipId, options, callback) {
+    helpers.deletePersonRelationship(eventId, relationshipId, options, callback);
   };
 
   /**
@@ -420,9 +429,10 @@ module.exports = function (Outbreak) {
    * Convert a contact to a case
    * @param contactId
    * @param params Case specific params
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.convertContactToCase = function (contactId, params, callback) {
+  Outbreak.prototype.convertContactToCase = function (contactId, params, options, callback) {
     let updateRelations = [];
     let convertedCase;
 
@@ -448,7 +458,7 @@ module.exports = function (Outbreak) {
         if (!contact) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: contactId});
         }
-        return contact.updateAttributes(params);
+        return contact.updateAttributes(params, options);
       })
       .then(function (_case) {
         convertedCase = _case;
@@ -472,7 +482,7 @@ module.exports = function (Outbreak) {
             }
             persons.push(person);
           });
-          updateRelations.push(relation.updateAttributes({persons: persons}));
+          updateRelations.push(relation.updateAttributes({persons: persons}, options));
         });
         return Promise.all(updateRelations);
       })
@@ -489,9 +499,10 @@ module.exports = function (Outbreak) {
   /**
    * Convert a case to a contact
    * @param caseId
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.convertCaseToContact = function (caseId, callback) {
+  Outbreak.prototype.convertCaseToContact = function (caseId, options, callback) {
     let updateRelations = [];
     let convertedContact;
     let caseInstance;
@@ -544,7 +555,7 @@ module.exports = function (Outbreak) {
         }
 
         // the case has relations with other cases; proceed with the conversion
-        return caseInstance.updateAttribute('type', 'contact');
+        return caseInstance.updateAttribute('type', 'contact', options);
       })
       .then(function (contact) {
         convertedContact = contact;
@@ -568,7 +579,7 @@ module.exports = function (Outbreak) {
             }
             persons.push(person);
           });
-          updateRelations.push(relation.updateAttributes({persons: persons}));
+          updateRelations.push(relation.updateAttributes({persons: persons}, options));
         });
         return Promise.all(updateRelations);
       })
@@ -593,9 +604,10 @@ module.exports = function (Outbreak) {
   /**
    * Restore a deleted case
    * @param caseId
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.restoreCase = function (caseId, callback) {
+  Outbreak.prototype.restoreCase = function (caseId, options, callback) {
     app.models.case
       .findOne({
         deleted: true,
@@ -610,7 +622,7 @@ module.exports = function (Outbreak) {
         }
 
         // undo case delete
-        instance.undoDelete(callback);
+        instance.undoDelete(options, callback);
       })
       .catch(callback);
   };
@@ -630,9 +642,10 @@ module.exports = function (Outbreak) {
    * Restore a deleted follow up
    * @param contactId
    * @param followUpId
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.restoreContactFollowUp = function (contactId, followUpId, callback) {
+  Outbreak.prototype.restoreContactFollowUp = function (contactId, followUpId, options, callback) {
     app.models.followUp
       .findOne({
         deleted: true,
@@ -646,7 +659,7 @@ module.exports = function (Outbreak) {
         if (!instance) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.followUp.modelName, id: followUpId});
         }
-        instance.undoDelete(callback);
+        instance.undoDelete(options, callback);
       })
       .catch(callback);
   };
