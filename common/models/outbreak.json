@@ -820,6 +820,24 @@
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "countContactsNotSeenInXDays"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactsWithSuccessfulFollowups"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_team",
+      "permission": "ALLOW",
+      "property": "countContactsWithSuccessfulFollowups"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countContactsWithSuccessfulFollowups"
     }
   ],
   "methods": {
@@ -2416,6 +2434,60 @@
       "http": {
         "verb": "get",
         "path": "/follow-ups/contacts-not-seen/count"
+      }
+    },
+    "prototype.countContactsWithSuccessfulFollowups": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "totalContactsWithFollowupsCount": "number",
+            "contactsWithSuccessfulFollowupsCount": "number",
+            "teams": {
+              "type": [
+                {
+                  "type": {
+                    "id": "string",
+                    "totalContactsWithFollowupsCount": "number",
+                    "contactsWithSuccessfulFollowupsCount": "number",
+                    "followedUpContactsIDs": [
+                      "string"
+                    ],
+                    "missedContactsIDs": [
+                      "string"
+                    ]
+                  }
+                }
+              ]
+            },
+            "contacts": {
+              "type": [
+                {
+                  "type": {
+                    "id": "string",
+                    "totalFollowupsCount": "number",
+                    "successfulFollowupsCount": "number"
+                  }
+                }
+              ]
+            }
+          },
+          "description": "Object containing counters for contacts with follow-ups and contacts with successful follow-ups",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of followups and successful followups",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/contacts-with-successful-follow-ups/count"
       }
     }
   }
