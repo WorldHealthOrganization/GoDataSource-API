@@ -2110,10 +2110,10 @@ module.exports = function (Outbreak) {
     // check if the filter includes date; if not, set the filter to get all the follow-ups from today by default
     if (!filter || !filter.where || JSON.stringify(filter.where).indexOf('date') === -1) {
       // to get the entire day today, filter between today 00:00 and tomorrow 00:00
-      let today = new Date();
-      today.setHours(0, 0, 0, 0);
+      let today = genericHelpers.getUTCDate().toString();
       let tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow = genericHelpers.getUTCDate(tomorrow).toString();
 
       defaultFilter.where.date = {
         between: [today, tomorrow]
@@ -2124,130 +2124,68 @@ module.exports = function (Outbreak) {
     app.models.followUp.find(app.utils.remote
       .mergeFilters(defaultFilter, filter || {}))
       .then(function (followups) {
-        // initialize teams map and contacts map as the request needs to count contacts
+        // initialize teams map
         let teamsMap = {};
-        let contactsMap = {};
-        // initialize helper contacts to team map
-        let contactsTeamMap = {};
+        // initialize helper team to date to contacts map
+        let teamDateContactsMap = {};
 
         followups.forEach(function (followup) {
           // get contactId
           let contactId = followup.personId;
           // get teamId; there might be no team id, set null
           let teamId = followup.teamId || null;
+          // get date; format it to UTC 00:00:00
+          let date = genericHelpers.getUTCDate(followup.date).toString();
 
-          // check if a followup for the same contact was already parsed
-          if (contactsTeamMap[contactId]) {
-            // check if there was another followup for the same team
-            // if so check for the performed flag;
-            // if the previous followup was performed there is no need to update any team contacts counter;
-            // total and successful counters were already updated
-            if (contactsTeamMap[contactId].teams[teamId]) {
-              // new follow-up for the contact from the same team is performed; update flag and increase succcessful counter
-              if (!contactsTeamMap[contactId].teams[teamId].performed && followup.performed === true) {
-                // update performed flag
-                contactsTeamMap[contactId].teams[teamId].performed = true;
-                // increase successful counter for team
-                teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
-                // update followedUpContactsIDs/missedContactsIDs lists
-                teamsMap[teamId].followedUpContactsIDs.push(contactId);
-                teamsMap[teamId].missedContactsIDs.splice(teamsMap[teamId].missedContactsIDs.indexOf(contactId), 1);
-              }
-            } else {
-              // new teamId
-              // cache followup performed information for contact in team
-              contactsTeamMap[contactId].teams[teamId] = {
-                performed: followup.performed
-              };
-
-              // initialize team entry if doesn't already exist
-              if (!teamsMap[teamId]) {
-                teamsMap[teamId] = {
-                  id: teamId,
-                  totalContactsWithFollowupsCount: 0,
-                  contactsWithSuccessfulFollowupsCount: 0,
-                  followedUpContactsIDs: [],
-                  missedContactsIDs: []
-                };
-              }
-
-              // increase team counters
-              teamsMap[teamId].totalContactsWithFollowupsCount++;
-              if (followup.performed) {
-                teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
-                // keep contactId in the followedUpContactsIDs list
-                teamsMap[teamId].followedUpContactsIDs.push(contactId);
-              } else {
-                // keep contactId in the missedContactsIDs list
-                teamsMap[teamId].missedContactsIDs.push(contactId);
-              }
-            }
-          } else {
-            // first followup for the contact; add it in the contactsMap
-            contactsMap[contactId] = {
-              id: contactId,
+          // initialize team entry if not already initialized
+          if (!teamsMap[teamId]) {
+            teamsMap[teamId] = {
+              id: teamId,
               totalFollowupsCount: 0,
-              successfulFollowupsCount: 0
+              successfulFollowupsCount: 0,
+              dates: []
             };
 
-            // cache followup performed information for contact in team and overall
-            contactsTeamMap[contactId] = {
-              teams: {
-                [teamId]: {
-                  performed: followup.performed
-                }
-              },
-              performed: followup.performed,
-            };
-
-            // increase overall counters
-            result.totalContactsWithFollowupsCount++;
-
-            // initialize team entry if doesn't already exist
-            if (!teamsMap[teamId]) {
-              teamsMap[teamId] = {
-                id: teamId,
-                totalContactsWithFollowupsCount: 0,
-                contactsWithSuccessfulFollowupsCount: 0,
-                followedUpContactsIDs: [],
-                missedContactsIDs: []
-              };
-            }
-
-            // increase team counters
-            teamsMap[teamId].totalContactsWithFollowupsCount++;
-            if (followup.performed) {
-              teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
-              // keep contactId in the followedUpContactsIDs list
-              teamsMap[teamId].followedUpContactsIDs.push(contactId);
-              // increase total successful total counter
-              result.contactsWithSuccessfulFollowupsCount++;
-            } else {
-              // keep contactId in the missedContactsIDs list
-              teamsMap[teamId].missedContactsIDs.push(contactId);
-            }
+            teamDateContactsMap[teamId] = {};
           }
 
-          // update total follow-ups counter for contact
-          contactsMap[contactId].totalFollowupsCount++;
-          if (followup.performed) {
-            // update counter for contact successful follow-ups
-            contactsMap[contactId].successfulFollowupsCount++;
-            // update overall performed flag
-            contactsTeamMap[contactId].performed = true;
+          // initialize variable that will keep the index of the date entry in the team.dates array
+          let dateIndexInTeam;
 
-            // check if contact didn't have a succesful followup and the current one was performed
-            // as specified above for teams this is the only case where updates are needed
-            if (!contactsTeamMap[contactId].performed) {
-              // increase total successful total counter
-              result.contactsWithSuccessfulFollowupsCount++;
-            }
+          // initialize date entry for the team if not already initialized
+          if ((dateIndexInTeam = teamsMap[teamId].dates.findIndex(dateEntry => dateEntry.date === date)) === -1) {
+            // push the entry in the array and keep the index
+            dateIndexInTeam = teamsMap[teamId].dates.push({
+              date: date,
+              totalFollowupsCount: 0,
+              successfulFollowupsCount: 0,
+              contactIDs: []
+            }) - 1;
+
+            teamDateContactsMap[teamId][date] = {};
+          }
+
+          // increase counters
+          teamsMap[teamId].dates[dateIndexInTeam].totalFollowupsCount++;
+          teamsMap[teamId].totalFollowupsCount++;
+
+          if (followup.performed) {
+            teamsMap[teamId].dates[dateIndexInTeam].successfulFollowupsCount++;
+            teamsMap[teamId].successfulFollowupsCount++;
+            result.successfulFollowupsCount++;
+          }
+
+          // add contactId to the team/date container if not already added
+          if (!teamDateContactsMap[teamId][date][contactId]) {
+            // keep flag to not add contact twice for team
+            teamDateContactsMap[teamId][date][contactId] = true;
+            teamsMap[teamId].dates[dateIndexInTeam].contactIDs.push(contactId);
           }
         });
 
         // update results; sending array with teams and contacts information
         result.teams = Object.values(teamsMap);
-        result.contacts = Object.values(contactsMap);
+        result.totalFollowupsCount = followups.length;
 
         // send response
         callback(null, result);
