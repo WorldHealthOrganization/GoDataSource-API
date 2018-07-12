@@ -353,6 +353,10 @@
       "LNG_SECURITY_QUESTION_8": "日本の What is the middle name of your oldest child?",
       "LNG_SECURITY_QUESTION_9": "日本の In what town or city was your first full time job?",
       "LNG_SECURITY_QUESTION_10": "日本の In what town or city did you meet your spouse/partner?"
+    },
+    "translationsFileHeaders": {
+      "LNG_TRANSLATION_FILE_LANGUAGE_TOKEN_HEADER": "日本の Language Token",
+      "LNG_TRANSLATION_FILE_TRANSLATION_HEADER": "日本の Translation"
     }
   }
 }

@@ -107,14 +107,55 @@ module.exports = function (Language) {
     });
   };
 
-
+  /**
+   * Export language file
+   * @param callback
+   */
   Language.prototype.exportLanguageFile = function (callback) {
+    // make context available
     const self = this;
-    Icon.readFromDisk(this.path)
-      .then(function (imageBuffer) {
-        const extension = path.extname(self.path).replace('.', '');
-        callback(null, imageBuffer, `image/${extension}`, `attachment;filename=${self.name}.${extension}`);
+    // get language tokens for this language
+    app.models.languageToken
+      .find({
+        where: {
+          languageId: this.id
+        },
+        order: 'token ASC'
       })
-      .catch(callback);
+      .then(function (languageTokens) {
+        // heep a list of tokens
+        const tokens = [];
+        // define default translation file headers
+        const translationFileHeaders = {
+          token: 'Language Token',
+          translation: 'Translation'
+        };
+
+        // try and find translation file headers in the correct language
+        languageTokens.forEach(function (languageToken) {
+          if (languageToken.token === 'LNG_TRANSLATION_FILE_LANGUAGE_TOKEN_HEADER') {
+            translationFileHeaders.token = languageToken.translation;
+          }
+          if (languageToken.token === 'LNG_TRANSLATION_FILE_TRANSLATION_HEADER') {
+            translationFileHeaders.translation = languageToken.translation;
+          }
+        });
+        // build the list of "rows" for the workbook
+        languageTokens.forEach(function (languageToken) {
+          tokens.push({
+            [translationFileHeaders.token]: languageToken.token,
+            [translationFileHeaders.translation]: languageToken.translation
+          });
+        });
+        // build the worksheet based on the build JSON
+        const sheet = xlsx.utils.json_to_sheet(tokens);
+        // create a new workbook
+        const workbook = xlsx.utils.book_new();
+        // add the worksheet to workbook
+        xlsx.utils.book_append_sheet(workbook, sheet);
+        // send the file for downloading
+        callback(null, xlsx.write(workbook, {type: 'buffer'}), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', `attachment;filename=${app.utils.helpers.getAsciiString(self.name)}.xls`);
+      })
+      .catch(callback)
   }
 };

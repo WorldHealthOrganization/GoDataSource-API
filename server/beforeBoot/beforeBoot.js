@@ -10,6 +10,7 @@ const aesCrypto = require('../../components/aesCrypto');
 const anonymizeDatasetFields = require('../../components/anonymizeDatasetFields');
 const maskField = require('../../components/maskField');
 const qrCode = require('../../components/qrCode');
+const helpers = require('../../components/helpers');
 
 function init(app, callback) {
   app.utils = {
@@ -24,7 +25,8 @@ function init(app, callback) {
     aesCrypto: aesCrypto,
     anonymizeDatasetFields: anonymizeDatasetFields,
     maskField: maskField,
-    qrCode: qrCode
+    qrCode: qrCode,
+    helpers: helpers
   };
   callback();
 }

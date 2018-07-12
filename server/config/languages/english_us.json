@@ -353,6 +353,10 @@
       "LNG_SECURITY_QUESTION_8": "What is the middle name of your oldest child?",
       "LNG_SECURITY_QUESTION_9": "In what town or city was your first full time job?",
       "LNG_SECURITY_QUESTION_10": "In what town or city did you meet your spouse/partner?"
+    },
+    "translationsFileHeaders": {
+      "LNG_TRANSLATION_FILE_LANGUAGE_TOKEN_HEADER": "Language Token",
+      "LNG_TRANSLATION_FILE_TRANSLATION_HEADER": "Translation"
     }
   }
 }

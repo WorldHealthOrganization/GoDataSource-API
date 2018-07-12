@@ -15,6 +15,10 @@ process.on('uncaughtException', function (e) {
   }
 });
 
+process.on('warning', function(w){
+  console.error(' => Suman interactive warning => ', w.stack || w);
+});
+
 
 const beforeBoot = require('./beforeBoot/beforeBoot');
 const logger = require('../components/logger');
