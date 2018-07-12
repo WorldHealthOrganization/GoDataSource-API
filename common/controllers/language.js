@@ -1,6 +1,9 @@
 'use strict';
 
 const app = require('../../server/server');
+const formidable = require('formidable');
+const xlsx = require('xlsx');
+const fs = require('fs');
 
 module.exports = function (Language) {
 
@@ -12,4 +15,106 @@ module.exports = function (Language) {
     'prototype.__updateById__languageTokens',
     'prototype.__destroyById__languageTokens',
   ]);
+
+  /**
+   * Import language file
+   * @param req
+   * @param languageFile
+   * @param options
+   * @param callback
+   */
+  Language.prototype.importLanguageFile = function (req, languageFile, options, callback) {
+    // make context available
+    const self = this;
+    // use formidable to parse multi-part data
+    const form = new formidable.IncomingForm();
+    form.parse(req, function (error, fields, files) {
+      if (error) {
+        return callback(error);
+      }
+      // validate required properties, loopback can't validate multi-part payloads
+      let missingProperties = [];
+
+      if (!files.languageFile) {
+        missingProperties.push('icon');
+      }
+      // if there are missing required properties
+      if (missingProperties.length) {
+        // send back the error
+        return callback(app.utils.apiError.getError('MISSING_REQUIRED_PROPERTY', {
+          model: Language.modelName,
+          properties: missingProperties.join(', ')
+        }));
+      }
+      // read language file
+      fs.readFile(files.languageFile.path, function (error, buffer) {
+        if (error) {
+          return callback(error);
+        }
+        // read XLS file
+        // we don't need to worry about other file formats, XLSX tries to read anything (does not do validations)
+        // we'll validate the tokens below
+        const parsedData = xlsx.read(buffer);
+        // extract first sheet name (we only care about first sheet)
+        let sheetName = parsedData.SheetNames.shift();
+        // keep a list of language tokens
+        const languageTokens = [];
+        // keep a marker for end of file
+        let eof = false;
+        // start from row 2, first row contains headings
+        let index = 2;
+        // keep parsing until we reach end of file
+        while (!eof) {
+          // keep reading from the file until there are no translations left
+          if (!parsedData.Sheets[sheetName][`A${index}`]) {
+            eof = true;
+          } else {
+            // get token
+            let token = parsedData.Sheets[sheetName][`A${index}`].v;
+            // check if token is valid (starts with LNG_)
+            if (/^LNG_/.test(token)) {
+              // translation may be missing, use a default
+              let translation = ' ';
+              // if the translation exists, use it
+              if (parsedData.Sheets[sheetName][`B${index}`]) {
+                translation = parsedData.Sheets[sheetName][`B${index}`].v
+              }
+              // save raw data
+              languageTokens.push({
+                token: token,
+                translation: translation,
+              });
+            }
+          }
+          // move to next row
+          index++;
+        }
+        // do a simple file validation (check if we found valid tokens)
+        if (!languageTokens.length) {
+          // error if no valid tokens found
+          return callback(app.utils.apiError.getError('INVALID_TRANSLATIONS_FILE', {
+            fileName: files.languageFile.name,
+            details: 'No valid language tokens were found in the file.'
+          }));
+        }
+        // start updating translations
+        self.updateLanguageTranslations(languageTokens, options)
+          .then(function (languageTokens) {
+            callback(null, languageTokens);
+          })
+          .catch(callback);
+      });
+    });
+  };
+
+
+  Language.prototype.exportLanguageFile = function (callback) {
+    const self = this;
+    Icon.readFromDisk(this.path)
+      .then(function (imageBuffer) {
+        const extension = path.extname(self.path).replace('.', '');
+        callback(null, imageBuffer, `image/${extension}`, `attachment;filename=${self.name}.${extension}`);
+      })
+      .catch(callback);
+  }
 };

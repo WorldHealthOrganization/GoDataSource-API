@@ -28,5 +28,68 @@
     }
   },
   "acls": [],
-  "methods": {}
+  "methods": {
+    "prototype.importLanguageFile": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "languageFile",
+          "type": "file"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "languageTokens",
+          "type": ["languageToken"],
+          "root": true
+        }
+      ],
+      "description": "Import a translation file for a language",
+      "http": {
+        "verb": "post",
+        "path": "/language-tokens/import"
+      }
+    },
+    "prototype.exportLanguageFile": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Download a translation file for a language.",
+      "http": {
+        "verb": "get",
+        "path": "/language-tokens/export"
+      }
+    }
+  }
 }
