@@ -129,6 +129,30 @@ module.exports = function (ReferenceData) {
     'outbreak': ['caseClassification', 'vaccinationStatus', 'nutritionalStatus', 'pregnancyInformation']
   };
 
+  // keep a map of reference data available categories mapped by category id (for easy reference in relations)
+  ReferenceData.availableCategoriesMap = {};
+  ReferenceData.availableCategories.forEach(function (category) {
+    ReferenceData.availableCategoriesMap[category.id] = category;
+  });
+
+  // define a list of custom (non-loopback-supported) relations
+  ReferenceData.customRelations = {
+    category: {
+      type: 'function',
+      fn: function (instance) {
+        return new Promise(function (resolve) {
+          let category = null;
+          // if the item has a categoryId defined
+          if (instance.categoryId) {
+            // get the category
+            category = ReferenceData.availableCategoriesMap[instance.categoryId];
+          }
+          resolve(category);
+        });
+      }
+    }
+  };
+
   /**
    * Check if model is editable & model usage before deleting the model
    */
