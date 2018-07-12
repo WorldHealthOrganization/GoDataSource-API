@@ -2192,4 +2192,231 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Merge multiple cases and contacts
+   * @param data List of records ids, to be merged
+   */
+  Outbreak.prototype.mergeCasesAndContacts = function (data) {
+    data = data || {};
+    data.ids = data.ids || [];
+
+    /**
+     * Helper function used to retrieve relations for a given case
+     * @param personId
+     */
+    let _findRelations = function (personId) {
+      return app.models.relationship.find({
+        where: {
+          'persons.id': personId
+        }
+      });
+    };
+
+    // retrieve all the case/contacts that should be merged, ordered by their last update date
+    return Promise.all([
+      app.models.case
+        .find(
+          {
+            where: {
+              id: {
+                inq: data.ids
+              }
+            },
+            include: ['labResults'],
+            order: 'updatedAt DESC'
+          }
+        ),
+      app.models.contact
+        .find(
+          {
+            where: {
+              id: {
+                inq: data.ids
+              }
+            },
+            include: ['followUps'],
+            order: 'updatedAt DESC'
+          }
+        )
+    ])
+    // retrieve all relationships belonging to the case/contacts
+      .then((listOfCaseAndContacts) => Promise
+        .all(listOfCaseAndContacts.map((item) => Promise
+          .all(item.map((model) => _findRelations(model.id)
+            .then((relations) => {
+              model.relationships = relations;
+              return model;
+            }))))
+        )
+      )
+      .then((items) => {
+        // clone the items original array, needed to filter relation from spliced items as well
+        let originalList = [].concat(...items.slice(0));
+
+        // create reference for case/contact lists
+        let cases = items[0];
+        let contacts = items[1];
+
+        // pick the most updated case and contact
+        // those will be the base models used in merging
+        let baseCase = cases.splice(0, 1)[0];
+        let baseContact = contacts.splice(0, 1)[0];
+
+        // if a case is found, then it will be the resulted model of the merging
+        // the contact most updated one is used mainly to merge contact's specific properties
+        // that eventually will be merged into case result model
+        let isCase = !!baseCase;
+        let resultModel = baseCase ? baseCase : baseContact;
+
+        // store reference to the properties that belong to the result model
+        let resultModelProps = resultModel.__data;
+
+        // start merging basic properties
+        // go levels below to the most last updatedAt one, if any property is missing
+        // we start with case because it has priority
+        // in case, a base case was not found we consider it being a contact to contact merge
+        // hence ignoring case merge feature whatsoever
+        if (!isCase) {
+          resultModel = helpers.mergePersonModels(baseContact, contacts, 'contact');
+        } else {
+          resultModel = helpers.mergePersonModels(resultModel, cases, 'case');
+
+          // make sure we're not doing anything related to contact merging, if no contact id was given
+          if (baseContact) {
+            baseContact = helpers.mergePersonModels(baseContact, contacts, 'contact');
+
+            // store ref to base contact props
+            let baseContactProps = baseContact.__data;
+
+            // attach predefined contact props on the case model
+            ['riskLevel', 'riskReason'].forEach((prop) => {
+              resultModelProps[prop] = baseContactProps[prop];
+            });
+
+            // also after simple properties merge is done, addresses/documents of the resulted contact should be merged on the base case
+            resultModelProps.addresses = resultModelProps.addresses.concat(baseContactProps.addresses);
+            resultModelProps.documents = resultModelProps.documents.concat(
+              baseContactProps.documents.filter((doc) => resultModelProps.documents.findIndex((resultItem) => {
+                return resultItem.type === doc.type && resultItem.number === doc.number;
+              }) === -1)
+            );
+          }
+        }
+
+        // strip model related props from documents/addresses entries
+        resultModelProps.addresses = resultModelProps.addresses.map((entry) => entry.__data);
+        resultModelProps.documents = resultModelProps.documents.map((entry) => entry.__data);
+
+        // make sure, that if the case is the base model, we're collecting followups/relations from base contact as well
+        if (isCase) {
+          contacts.push(baseContact);
+        }
+
+        // get all the ids for case/contact, needed to verify that there are no relations between 2 cases that should be merged
+        // also make a list of ids and based on their type, used when updating database records
+        let caseIds = cases.map((item) => item.id);
+        let contactIds = contacts.map((item) => item.id);
+
+        // take follow ups from all the contacts and change their contact id to point to result model
+        let followUps = [];
+        contacts.forEach((contact) => {
+          if (contact.followUps().length) {
+            contact.followUps().forEach((followUp) => {
+              followUps.push({
+                id: followUp.id,
+                personId: resultModel.id
+              });
+            });
+          }
+        });
+
+        // prepare lab results
+        let labResults = [];
+        cases.forEach((caseItem) => {
+          if (caseItem.labResults().length) {
+            caseItem.labResults().forEach((labResult) => {
+              labResults.push({
+                id: labResult.id,
+                personId: resultModel.id
+              });
+            });
+          }
+        });
+
+        // prepare relations
+        let relations = [];
+
+        // build a list of all ids, used to filter any relationship between them
+        let ids = originalList.map((item) => item.id);
+
+        // filter relations from case/contacts
+        // item points to either case or contact list
+        originalList.forEach((entry) => {
+          entry.relationships.forEach((relation) => {
+            let firstMember = ids.indexOf(relation.persons[0].id);
+            let secondMember = ids.indexOf(relation.persons[1].id);
+
+            // if there is a relation between 2 merge candidates skip it
+            if (firstMember !== -1 && secondMember !== -1) {
+              return;
+            }
+
+            // otherwise try check which of the candidates is a from the merging list and replace it with base's id
+            firstMember = firstMember === -1 ? relation.persons[0].id : resultModel.id;
+            secondMember = secondMember === -1 ? relation.persons[1].id : resultModel.id;
+
+            relations.push({
+              id: relation.id,
+              persons: [
+                {
+                  id: firstMember,
+                  type: firstMember === resultModel.id ? resultModel.type : relation.persons[0].type
+                },
+                {
+                  id: secondMember,
+                  type: firstMember === resultModel.id ? resultModel.type : relation.persons[1].type
+                }
+              ]
+            });
+          });
+        });
+
+        // type of model that updates the record
+        let updateBaseRecord = resultModel.type === 'case' ? app.models.case : app.models.contact;
+
+        // make changes into database
+        return Promise
+          .all([
+            // soft delete merged contacts/cases
+            app.models.case.destroyAll({ id: { inq: caseIds } }),
+            app.models.contact.destroyAll({ id: { inq: contactIds } }),
+            // update base record
+            updateBaseRecord.upsertWithWhere({ id: resultModel.id }, resultModelProps),
+            // update lab results
+            Promise.all(labResults.map((labResult) => app.models.labResult.upsertWithWhere(
+              {
+                id: labResult.id
+              },
+              labResult))
+            ),
+            // update relations
+            Promise.all(relations.map((relation) => app.models.relationship.upsertWithWhere(
+              {
+                id: relation.id
+              },
+              relation))
+            ),
+            // update follow ups
+            Promise.all(followUps.map((followUp) => app.models.followUp.upsertWithWhere(
+              {
+                id: followUp.id
+              },
+              followUp))
+            )
+          ])
+          // return the base model
+          .then((result) => result[2]);
+      });
+  };
 };
