@@ -206,8 +206,33 @@ module.exports = function (app) {
   // it should not be used for general purpose
   if (Role.hasOwnProperty('clientApplicationPermission')) {
     Role.registerResolver(Role.clientApplicationPermission, function (permission, context, done) {
-      // cache client credentials from request context
-      let clientCredentials = context.remotingContext.req.body.credentials;
+      let buildError = app.utils.apiError.getError;
+      let reqHeaders = context.remotingContext.req.headers;
+
+      // retrieve authorization header and decode client credentials
+      let clientId, clientSecret;
+      if (reqHeaders.authorization) {
+        let parts = reqHeaders.authorization.split(' ');
+        if (parts.length === 2) {
+          let [scheme, credentials] = parts;
+
+          // check if authorization header contains the required format
+          if (/^Basic$/i.test(scheme)) {
+            let decodedCredentialsStr = Buffer.from(credentials, 'base64').toString();
+
+            // check if credentials have the correct format
+            [clientId, clientSecret] = decodedCredentialsStr.split(':');
+
+            if (!clientId || !clientSecret) {
+              return done(buildError('ACCESS_DENIED', { accessErrors: 'Invalid credentials' }, 403));
+            }
+          }
+        } else {
+          return done(buildError('ACCESS_DENIED', { accessErrors: 'Format is Authorization: Basic [token]' }, 403));
+        }
+      } else {
+        return done(buildError('ACCESS_DENIED', { accessErrors: 'No Authorization header found' }, 403));
+      }
 
       // flag that indicates whether the client is ok
       // initially is assumed that is not
@@ -217,14 +242,20 @@ module.exports = function (app) {
       app.models.systemSettings
         .findOne()
         .then((systemSettings) => {
+          let clients = systemSettings.clientApplications;
+
           // try to find a match by client identifier
-          let clientIndex = systemSettings.clientApplications.findIndex((client) => client.credentials.clientId === clientCredentials.clientId);
+          let clientIndex = clients.findIndex((client) => {
+            return client.credentials && client.credentials.clientId === clientId;
+          });
 
           // if no client was found with the given id, or the client is inactive, stop with error
           if (clientIndex !== -1) {
-            if (systemSettings.clientApplications[clientIndex].active) {
-              // check password hashes
-              hasAccess = systemSettings.clientApplications[clientIndex].clientSecret === clientCredentials.clientSecret;
+            if (clients[clientIndex].active) {
+              // check password
+              hasAccess = clients[clientIndex].credentials.clientSecret === clientSecret;
+            } else {
+              return done(buildError('ACCESS_DENIED', { accessErrors: 'Client is not active' }, 403));
             }
           }
 
@@ -232,7 +263,7 @@ module.exports = function (app) {
             return done(null, hasAccess);
           }
 
-          return done(app.utils.apiError.getError('ACCESS_DENIED', { accessErrors: 'Client credentials are wrong' }, 403));
+          return done(buildError('ACCESS_DENIED', { accessErrors: 'Client credentials are wrong' }, 403));
         });
     });
   }

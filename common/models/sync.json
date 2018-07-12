@@ -6,6 +6,9 @@
   "options": {
     "validateUpsert": true
   },
+  "mixins": {
+    "AttachController": true
+  },
   "properties": {},
   "validations": [],
   "relations": {},
@@ -21,14 +24,9 @@
     "getDatabaseSnapshot": {
       "accepts": [
         {
-          "arg": "req",
+          "arg": "filter",
           "type": "object",
-          "description": "Client credentials authorization header",
-          "http": {
-            "source": "req"
-          },
-          "root": true,
-          "required": true
+          "description": "Date filter"
         }
       ],
       "returns": [

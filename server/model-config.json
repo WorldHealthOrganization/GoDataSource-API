@@ -225,7 +225,7 @@
     "public": false
   },
   "sync": {
-    "dataSource": null,
+    "dataSource": "memory",
     "public": true
   }
 }
