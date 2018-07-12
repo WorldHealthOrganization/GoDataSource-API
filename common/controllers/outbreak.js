@@ -2082,4 +2082,114 @@ module.exports = function (Outbreak) {
       return next();
     }
   });
+
+  /**
+   * Count the followups per team per day
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countFollowUpsPerTeamPerDay = function (filter, callback) {
+    // initialize result
+    let result = {
+      totalFollowupsCount: 0,
+      successfulFollowupsCount: 0,
+      teams: []
+    };
+
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // initialize default filter
+    let defaultFilter = {
+      where: {
+        outbreakId: outbreakId
+      },
+      order: 'date ASC'
+    };
+
+    // check if the filter includes date; if not, set the filter to get all the follow-ups from today by default
+    if (!filter || !filter.where || JSON.stringify(filter.where).indexOf('date') === -1) {
+      // to get the entire day today, filter between today 00:00 and tomorrow 00:00
+      let today = genericHelpers.getUTCDate().toString();
+      let tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow = genericHelpers.getUTCDate(tomorrow).toString();
+
+      defaultFilter.where.date = {
+        between: [today, tomorrow]
+      }
+    }
+
+    // get all the followups for the filtered period
+    app.models.followUp.find(app.utils.remote
+      .mergeFilters(defaultFilter, filter || {}))
+      .then(function (followups) {
+        // initialize teams map
+        let teamsMap = {};
+        // initialize helper team to date to contacts map
+        let teamDateContactsMap = {};
+
+        followups.forEach(function (followup) {
+          // get contactId
+          let contactId = followup.personId;
+          // get teamId; there might be no team id, set null
+          let teamId = followup.teamId || null;
+          // get date; format it to UTC 00:00:00
+          let date = genericHelpers.getUTCDate(followup.date).toString();
+
+          // initialize team entry if not already initialized
+          if (!teamsMap[teamId]) {
+            teamsMap[teamId] = {
+              id: teamId,
+              totalFollowupsCount: 0,
+              successfulFollowupsCount: 0,
+              dates: []
+            };
+
+            teamDateContactsMap[teamId] = {};
+          }
+
+          // initialize variable that will keep the index of the date entry in the team.dates array
+          let dateIndexInTeam;
+
+          // initialize date entry for the team if not already initialized
+          if ((dateIndexInTeam = teamsMap[teamId].dates.findIndex(dateEntry => dateEntry.date === date)) === -1) {
+            // push the entry in the array and keep the index
+            dateIndexInTeam = teamsMap[teamId].dates.push({
+              date: date,
+              totalFollowupsCount: 0,
+              successfulFollowupsCount: 0,
+              contactIDs: []
+            }) - 1;
+
+            teamDateContactsMap[teamId][date] = {};
+          }
+
+          // increase counters
+          teamsMap[teamId].dates[dateIndexInTeam].totalFollowupsCount++;
+          teamsMap[teamId].totalFollowupsCount++;
+
+          if (followup.performed) {
+            teamsMap[teamId].dates[dateIndexInTeam].successfulFollowupsCount++;
+            teamsMap[teamId].successfulFollowupsCount++;
+            result.successfulFollowupsCount++;
+          }
+
+          // add contactId to the team/date container if not already added
+          if (!teamDateContactsMap[teamId][date][contactId]) {
+            // keep flag to not add contact twice for team
+            teamDateContactsMap[teamId][date][contactId] = true;
+            teamsMap[teamId].dates[dateIndexInTeam].contactIDs.push(contactId);
+          }
+        });
+
+        // update results; sending array with teams and contacts information
+        result.teams = Object.values(teamsMap);
+        result.totalFollowupsCount = followups.length;
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
+  };
 };
