@@ -29,49 +29,29 @@ languageList.forEach(function (language) {
           return app.models.language
             .create({
               id: language.id,
-              name: language.name
+              name: language.name,
+              readOnly: language.readOnly
             });
         }
         return foundLanguage;
       })
       .then(function (createdLanguage) {
-        // keep a list of languages tokens to be created (for async lib)
-        const createLanguageTokens = [];
-        Object.keys(language.tokens).forEach(function (token) {
-          // create/update token for language
-          createLanguageTokens.push(function (callback) {
-            // try to find the token
-            app.models.languageToken
-              .findOne({
-                where: {
-                  token: token,
-                  languageId: createdLanguage.id
-                }
-              })
-              .then(function (foundToken) {
-                if (foundToken) {
-                  // if found, update translation
-                  return foundToken.updateAttributes({
-                    translation: language.tokens[token]
-                  });
-                } else {
-                  // if not found, create it
-                  return app.models.languageToken
-                    .create({
-                      token: token,
-                      languageId: createdLanguage.id,
-                      translation: language.tokens[token]
-                    });
-                }
-              })
-              .then(function () {
-                callback();
-              })
-              .catch(callback);
+        const languageTokens = [];
+        // go through all language sections
+        Object.keys(language.sections).forEach(function (section) {
+          // go through all language tokens of each section
+          Object.keys(language.sections[section]).forEach(function (token) {
+            languageTokens.push({
+              token: token,
+              translation: language.sections[section][token]
+            });
           });
         });
         // move to the next language after all tokens for current language have been created
-        async.parallelLimit(createLanguageTokens, 10, callback);
+        return createdLanguage.updateLanguageTranslations(languageTokens)
+          .then(function (languageTokens) {
+            callback(null, languageTokens);
+          });
       })
       .catch(callback);
   });

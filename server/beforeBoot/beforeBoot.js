@@ -10,6 +10,8 @@ const aesCrypto = require('../../components/aesCrypto');
 const anonymizeDatasetFields = require('../../components/anonymizeDatasetFields');
 const maskField = require('../../components/maskField');
 const qrCode = require('../../components/qrCode');
+const helpers = require('../../components/helpers');
+const remoteHelpers = require('../../components/remoteHelpers');
 
 function init(app, callback) {
   app.utils = {
@@ -18,13 +20,15 @@ function init(app, callback) {
       searchByRelationProperty: searchByRelationProperty,
       disableStandardRelationRemoteMethods: disableStandardRelationRemoteMethods,
       disableCommonExtraRoutes: disableCommonExtraRoutes,
-      mergeFilters: mergeFilters
+      mergeFilters: mergeFilters,
+      helpers: remoteHelpers
     },
     apiError: apiError,
     aesCrypto: aesCrypto,
     anonymizeDatasetFields: anonymizeDatasetFields,
     maskField: maskField,
-    qrCode: qrCode
+    qrCode: qrCode,
+    helpers: helpers
   };
   callback();
 }

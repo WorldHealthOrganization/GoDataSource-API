@@ -98,5 +98,9 @@
   "DUPLICATE_VISUAL_ID": {
     "defaultStatusCode": 409,
     "messagePattern": "The visual identifier `<%= id %>` is not unique."
+  },
+  "INVALID_TRANSLATIONS_FILE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "The provided language file `<%= fileName %>` is invalid: <%= details %>"
   }
 }

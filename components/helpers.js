@@ -12,6 +12,16 @@ const getUTCDate = function (date) {
   return date ? moment(date).utc().startOf('day') : moment.utc().startOf('day');
 };
 
+/**
+ * Remove non-ASCII chars from a string
+ * @param string
+ * @return {*}
+ */
+const getAsciiString = function(string) {
+  return string.replace(/[^\x00-\x7F]/g, '');
+};
+
 module.exports = {
-  getUTCDate: getUTCDate
+  getUTCDate: getUTCDate,
+  getAsciiString: getAsciiString
 };
