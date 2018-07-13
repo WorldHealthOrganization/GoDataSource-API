@@ -15,6 +15,7 @@ process.on('uncaughtException', function (e) {
   }
 });
 
+
 const beforeBoot = require('./beforeBoot/beforeBoot');
 const logger = require('../components/logger');
 
