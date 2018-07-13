@@ -2263,10 +2263,12 @@ module.exports = function (Outbreak) {
         outbreakId: outbreakId,
         or: [{
           createdAt: {
+            // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
             between: periodInterval.slice()
           }
         }, {
           dateBecomeCase: {
+            // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
             between: periodInterval.slice()
           }
         }]
@@ -2343,7 +2345,10 @@ module.exports = function (Outbreak) {
 
           // increase counters
           periodMap[casePeriodIdentifier].totalCasesCount++;
-          periodMap[casePeriodIdentifier].classificationCounters[item.classification] = periodMap[casePeriodIdentifier].classificationCounters[item.classification] || 0;
+          // initialize counter for classification if it's not already initialize
+          if (!periodMap[casePeriodIdentifier].classificationCounters[item.classification]) {
+            periodMap[casePeriodIdentifier].classificationCounters[item.classification] = 0;
+          }
           periodMap[casePeriodIdentifier].classificationCounters[item.classification]++;
           periodMap[casePeriodIdentifier].caseIDs.push(item.id);
         });

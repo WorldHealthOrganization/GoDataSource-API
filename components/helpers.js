@@ -4,10 +4,10 @@
 const moment = require('moment');
 
 /**
- * Convert a Date object into moment UTC date; reset day to the given day and reset time to start of the day
- * If no date is given, the current datetime is returned
- * @param date
- * @param dayOfWeek If not sent the date will not be changed
+ * Convert a Date object into moment UTC date and reset time to start of the day
+ * Additionally if dayOfWeek is sent the function will return the date for the date's corresponding day of the week
+ * @param date If no date is given, the current datetime is returned
+ * @param dayOfWeek If not sent the day of the week will not be changed
  */
 const getUTCDate = function (date, dayOfWeek) {
   let momentDate = date ? moment(date).utc().startOf('day') : moment.utc().startOf('day');
@@ -15,9 +15,9 @@ const getUTCDate = function (date, dayOfWeek) {
 };
 
 /**
- * Convert a Date object into moment UTC date; reset day to the given day and reset time to end of the day
- * If no date is given, the current datetime is returned
- * @param date
+ * Convert a Date object into moment UTC date and reset time to end of the day
+ * Additionally if dayOfWeek is sent the function will return the date for the date's corresponding day of the week
+ * @param date If no date is given, the current datetime is returned
  * @param dayOfWeek If not sent the date will not be changed
  */
 const getUTCDateEndOfDay = function (date, dayOfWeek) {
