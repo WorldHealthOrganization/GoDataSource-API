@@ -234,7 +234,7 @@ module.exports = function (Model) {
         }
       });
       app.models.auditLog
-        .create(logData);
+        .create(logData, context.options);
       // call the callback without waiting for the audit log changes to be persisted
       callback();
     });

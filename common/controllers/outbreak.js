@@ -745,7 +745,7 @@ module.exports = function (Outbreak) {
    * @param data Contains number of days used to perform the generation
    * @param callback
    */
-  Outbreak.prototype.generateFollowups = function (data, callback) {
+  Outbreak.prototype.generateFollowups = function (data, options, callback) {
     // if no followup period was sent in request, assume its just for one day
     data = data || {};
     data.followUpPeriod = data.followUpPeriod || 1;
@@ -886,7 +886,7 @@ module.exports = function (Outbreak) {
                               // so no randomness is required
                               teamId: eligibleTeams[0],
                               isGenerated: true
-                            })
+                            }, options)
                             .then((createdFollowUp) => {
                               generateResponse[genResponseIndex].followUps.push(createdFollowUp);
                             })
@@ -912,7 +912,7 @@ module.exports = function (Outbreak) {
                               // split the follow ups work equally across teams
                               teamId: rr(eligibleTeams),
                               isGenerated: true
-                            })
+                            }, options)
                             .then((createdFollowUp) => {
                               generateResponse[genResponseIndex].followUps.push(createdFollowUp);
                             })

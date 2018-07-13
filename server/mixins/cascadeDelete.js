@@ -10,7 +10,7 @@ const availableOperationsMap = {
    * @param where
    * @param callback
    */
-  'delete': function deleteOneByOne(modelName, where, callback) {
+  'delete': function deleteOneByOne(modelName, where, options, callback) {
     // find the models that need to be deleted
     app.models[modelName]
       .find({where: where})
@@ -20,7 +20,7 @@ const availableOperationsMap = {
         // for each instance, schedule a delete
         instancesToDelete.forEach(function (instance) {
           deleteOperations.push(function (callback) {
-            instance.destroy(callback);
+            instance.destroy(options, callback);
           });
         });
         // delete them (in series) and send back the number of deleted records
@@ -38,7 +38,7 @@ const availableOperationsMap = {
    * @param where
    * @param callback
    */
-  'restore': function restoreOneByOne(modelName, where, callback) {
+  'restore': function restoreOneByOne(modelName, where, options, callback) {
     app.models[modelName]
       .find({
         where: where,
@@ -50,7 +50,7 @@ const availableOperationsMap = {
         // for each instance, schedule a restore
         instancesToRestore.forEach(function (instance) {
           restoreOperations.push(function (callback) {
-            instance.undoDelete(callback);
+            instance.undoDelete(options, callback);
           });
         });
         // restore them (in series) and send back the number of restored records
@@ -106,7 +106,7 @@ module.exports = function (Model, options) {
               operations.push(function (callback) {
                 availableOperationsMap[operation](relationDefinition.model, {
                   [relationDefinition.foreignKey]: instanceId
-                }, function (error, count) {
+                }, context.options, function (error, count) {
                   if (error) {
                     // log error
                     app.logger.error(`Cascade ${operation} failed for ${Model.modelName}. Relation ${relationName} ${operation} failed to be cascaded: ${JSON.stringify(error)}`);
