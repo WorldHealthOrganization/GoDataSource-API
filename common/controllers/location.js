@@ -1,7 +1,5 @@
 'use strict';
 
-const app = require('../../server/server');
-
 module.exports = function (Location) {
 
   /**
@@ -37,11 +35,25 @@ module.exports = function (Location) {
   /**
    * Do not allow the deletion of a location if it still has sub-locations
    */
-  Location.beforeRemote("deleteById", function(context, modelInstance, next) {
+  Location.beforeRemote("deleteById", function (context, modelInstance, next) {
     Location.checkIfCanDelete(context.args.id)
       .then(() => {
         next();
       })
       .catch(next);
-  })
+  });
+
+  /**
+   * Export hierarchical locations list
+   * @param callback
+   */
+  Location.exportHierarchicalList = function (callback) {
+    Location
+      .find({
+        order: 'parentLocationId ASC, id ASC'
+      })
+      .then(function (locations) {
+        callback(null, JSON.stringify(Location.buildHierarchicalLocationsList(locations), null, 2), 'application/json', 'attachment;filename=locations.json');
+      }).catch(callback);
+  }
 };
