@@ -82,5 +82,38 @@ module.exports = function (Language) {
         language.isEditable(callback);
       })
       .catch(callback);
-  }
+  };
+
+  /**
+   * Check if a language is editable
+   * @param language language instance | language id
+   * @param next
+   */
+  Language.checkIfEditable = function (language, next) {
+    // assume language id is sent
+    let languageId = language;
+    // define check language function
+    let checkIfLanguageIsEditable = Language.isEditable.bind(null, languageId);
+    // if language is an instance
+    if (typeof language === "object") {
+      // get language id
+      languageId = language.id;
+      // update check function
+      checkIfLanguageIsEditable = language.isEditable.bind(language);
+    }
+    // check if the language is editable
+    checkIfLanguageIsEditable(function (error, editable) {
+      if (error) {
+        return next(error);
+      }
+      // if the language is not editable, stop with error
+      if (!editable) {
+        return next(app.utils.apiError.getError('MODEL_NOT_EDITABLE', {
+          model: Language.modelName,
+          id: languageId
+        }));
+      }
+      next();
+    });
+  };
 };

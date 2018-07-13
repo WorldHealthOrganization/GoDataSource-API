@@ -88,19 +88,19 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "$everyone",
+      "principalId": "read_sys_config",
       "permission": "ALLOW",
-      "property": "exportLanguageFile"
+      "property": "exportLanguageTokensFile"
     },
     {
       "principalType": "ROLE",
       "principalId": "write_sys_config",
       "permission": "ALLOW",
-      "property": "importLanguageFile"
+      "property": "importLanguageTokensFile"
     }
   ],
   "methods": {
-    "prototype.importLanguageFile": {
+    "prototype.importLanguageTokensFile": {
       "accepts": [
         {
           "arg": "req",
@@ -132,7 +132,7 @@
         "path": "/language-tokens/import"
       }
     },
-    "prototype.exportLanguageFile": {
+    "prototype.exportLanguageTokensFile": {
       "accepts": [],
       "returns": [
         {

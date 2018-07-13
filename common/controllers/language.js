@@ -16,44 +16,11 @@ module.exports = function (Language) {
     'prototype.__destroyById__languageTokens',
   ]);
 
-  /**
-   * Check if a language is editable
-   * @param language language instance | language id
-   * @param next
-   */
-  Language.checkIfEditable = function (language, next) {
-    // assume language id is sent
-    let languageId = language;
-    // define check language function
-    let checkIfLanguageIsEditable = Language.isEditable.bind(null, languageId);
-    // if language is an instance
-    if (typeof language === "object") {
-      // get language id
-      languageId = language.id;
-      // update check function
-      checkIfLanguageIsEditable = language.isEditable.bind(language);
-    }
-    // check if the language is editable
-    checkIfLanguageIsEditable(function (error, editable) {
-      if (error) {
-        return next(error);
-      }
-      // if the language is not editable, stop with error
-      if (!editable) {
-        return next(app.utils.apiError.getError('MODEL_NOT_EDITABLE', {
-          model: Language.modelName,
-          id: languageId
-        }));
-      }
-      next();
-    });
-  };
-
   Language.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
     Language.checkIfEditable(context.instance, next);
   });
 
-  Language.beforeRemote('prototype.importLanguageFile', function (context, modelInstance, next) {
+  Language.beforeRemote('prototype.importLanguageTokensFile', function (context, modelInstance, next) {
     Language.checkIfEditable(context.instance, next);
   });
 
@@ -62,13 +29,13 @@ module.exports = function (Language) {
   });
 
   /**
-   * Import language file
+   * Import file containing language tokens
    * @param req
    * @param languageFile
    * @param options
    * @param callback
    */
-  Language.prototype.importLanguageFile = function (req, languageFile, options, callback) {
+  Language.prototype.importLanguageTokensFile = function (req, languageFile, options, callback) {
     // make context available
     const self = this;
     // use formidable to parse multi-part data
@@ -81,7 +48,7 @@ module.exports = function (Language) {
       let missingProperties = [];
 
       if (!files.languageFile) {
-        missingProperties.push('icon');
+        missingProperties.push('languageFile');
       }
       // if there are missing required properties
       if (missingProperties.length) {
@@ -153,10 +120,10 @@ module.exports = function (Language) {
   };
 
   /**
-   * Export language file
+   * Export a file containing language tokens
    * @param callback
    */
-  Language.prototype.exportLanguageFile = function (callback) {
+  Language.prototype.exportLanguageTokensFile = function (callback) {
     // make context available
     const self = this;
     // get language tokens for this language
@@ -168,7 +135,7 @@ module.exports = function (Language) {
         order: 'token ASC'
       })
       .then(function (languageTokens) {
-        // heep a list of tokens
+        // keep a list of tokens
         const tokens = [];
         // define default translation file headers
         const translationFileHeaders = {
