@@ -61,4 +61,26 @@ module.exports = function (Language) {
       });
     });
   };
+
+  /**
+   * Is language editable
+   * @param callback
+   */
+  Language.prototype.isEditable = function (callback) {
+    callback(null, !this.readOnly);
+  };
+
+  /**
+   * Check if a language is editable
+   * @param languageId
+   * @param callback
+   */
+  Language.isEditable = function (languageId, callback) {
+    Language
+      .findById(languageId)
+      .then(function (language) {
+        language.isEditable(callback);
+      })
+      .catch(callback);
+  }
 };

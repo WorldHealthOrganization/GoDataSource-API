@@ -1,6 +1,7 @@
 {
   "id": "english_us",
   "name": "English",
+  "readOnly": true,
   "sections": {
     "auditLog": {
       "LNG_AUDIT_LOG_ACTIONS_CREATED": "New Record",

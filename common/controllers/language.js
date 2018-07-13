@@ -17,6 +17,51 @@ module.exports = function (Language) {
   ]);
 
   /**
+   * Check if a language is editable
+   * @param language language instance | language id
+   * @param next
+   */
+  Language.checkIfEditable = function (language, next) {
+    // assume language id is sent
+    let languageId = language;
+    // define check language function
+    let checkIfLanguageIsEditable = Language.isEditable.bind(null, languageId);
+    // if language is an instance
+    if (typeof language === "object") {
+      // get language id
+      languageId = language.id;
+      // update check function
+      checkIfLanguageIsEditable = language.isEditable.bind(language);
+    }
+    // check if the language is editable
+    checkIfLanguageIsEditable(function (error, editable) {
+      if (error) {
+        return next(error);
+      }
+      // if the language is not editable, stop with error
+      if (!editable) {
+        return next(app.utils.apiError.getError('MODEL_NOT_EDITABLE', {
+          model: Language.modelName,
+          id: languageId
+        }));
+      }
+      next();
+    });
+  };
+
+  Language.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
+    Language.checkIfEditable(context.instance, next);
+  });
+
+  Language.beforeRemote('prototype.importLanguageFile', function (context, modelInstance, next) {
+    Language.checkIfEditable(context.instance, next);
+  });
+
+  Language.beforeRemote('deleteById', function (context, modelInstance, next) {
+    Language.checkIfEditable(context.args.id, next);
+  });
+
+  /**
    * Import language file
    * @param req
    * @param languageFile
@@ -154,7 +199,8 @@ module.exports = function (Language) {
         // add the worksheet to workbook
         xlsx.utils.book_append_sheet(workbook, sheet);
         // send the file for downloading
-        callback(null, xlsx.write(workbook, {type: 'buffer'}), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', `attachment;filename=${app.utils.helpers.getAsciiString(self.name)}.xls`);
+        app.utils.remote.helpers
+          .offerFileToDownload(xlsx.write(workbook, {type: 'buffer'}), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', `${self.name}.xlsx`, callback);
       })
       .catch(callback)
   }

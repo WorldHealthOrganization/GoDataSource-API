@@ -29,7 +29,8 @@ languageList.forEach(function (language) {
           return app.models.language
             .create({
               id: language.id,
-              name: language.name
+              name: language.name,
+              readOnly: language.readOnly
             });
         }
         return foundLanguage;

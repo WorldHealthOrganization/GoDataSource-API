@@ -106,7 +106,8 @@ module.exports = function (Icon) {
     Icon.readFromDisk(this.path)
       .then(function (imageBuffer) {
         const extension = path.extname(self.path).replace('.', '');
-        callback(null, imageBuffer, `image/${extension}`, `attachment;filename=${app.utils.helpers.getAsciiString(self.name)}.${extension}`);
+        app.utils.remote.helpers
+          .offerFileToDownload(imageBuffer, `image/${extension}`, `${self.name}.${extension}`, callback);
       })
       .catch(callback);
   }
