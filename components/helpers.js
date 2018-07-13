@@ -10,7 +10,7 @@ const moment = require('moment');
  * @param dayOfWeek If not sent the day of the week will not be changed
  */
 const getUTCDate = function (date, dayOfWeek) {
-  let momentDate = date ? moment(date).utc().startOf('day') : moment.utc().startOf('day');
+  let momentDate = date ? moment.utc(date).startOf('day') : moment.utc().startOf('day');
   return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
 };
 
@@ -21,7 +21,7 @@ const getUTCDate = function (date, dayOfWeek) {
  * @param dayOfWeek If not sent the date will not be changed
  */
 const getUTCDateEndOfDay = function (date, dayOfWeek) {
-  let momentDate = date ? moment(date).utc().endOf('day') : moment.utc().endOf('day');
+  let momentDate = date ? moment.utc(date).endOf('day') : moment.utc().endOf('day');
   return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
 };
 
