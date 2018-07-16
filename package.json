@@ -11,7 +11,8 @@
     "posttest": "npm run lint && nsp check",
     "init-database": "node ./server/install/install.js init-database",
     "migrate-database": "node ./server/install/install.js migrate-database",
-    "reset-admin-password": "node ./server/install/install.js reset-admin-password"
+    "reset-admin-password": "node ./server/install/install.js reset-admin-password",
+    "install-script": "node ./server/install/install.js install-script"
   },
   "dependencies": {
     "async": "^2.6.0",

@@ -50,6 +50,13 @@ module.exports = function (Location) {
   Location.exportHierarchicalList = function (callback) {
     Location
       .find({
+        fields: {
+          createdAt: false,
+          createdBy: false,
+          updatedAt: false,
+          updatedBy: false,
+          deleted: false
+        },
         order: 'parentLocationId ASC, id ASC'
       })
       .then(function (locations) {

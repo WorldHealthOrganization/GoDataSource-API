@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const _ = require('lodash');
+const async = require('async');
 
 module.exports = function (Location) {
 
@@ -337,5 +338,39 @@ module.exports = function (Location) {
     hierarchicalLocationsList = hierarchicalLocationsList.filter(item => item && item.location);
     // return built list
     return hierarchicalLocationsList;
-  }
+  };
+
+  /**
+   * Create locations from a hierarchical locations list
+   * @param parentLocationId
+   * @param locationsList
+   * @param callback
+   */
+  Location.createLocationsFromHierarchicalLocationsList = function (parentLocationId, locationsList, callback) {
+    // build a list of create operations
+    const createLocationOperations = [];
+    locationsList.forEach(function (location) {
+        // build current location
+        let _location = Object.assign({parentLocationId: parentLocationId}, location.location);
+        // add create location operation
+        createLocationOperations.push(function (cb) {
+          Location
+            .create(_location)
+            .then(function (createdLocation) {
+              // when done, if there are other sub-locations
+              if (location.children && location.children.length) {
+                // create them recursively
+                Location.createLocationsFromHierarchicalLocationsList(createdLocation.id, location.children, cb);
+              } else {
+                // otherwise just stop
+                cb();
+              }
+            })
+            .catch(cb)
+        });
+      }
+    );
+    // run create operations
+    async.series(createLocationOperations, callback);
+  };
 };
