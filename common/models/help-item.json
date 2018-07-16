@@ -27,6 +27,9 @@
     "categoryId": {
       "type": "string",
       "required": true
+    },
+    "comment": {
+      "type": "string"
     }
   },
   "validations": [],
