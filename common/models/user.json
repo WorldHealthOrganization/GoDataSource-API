@@ -147,10 +147,25 @@
   "methods": {
     "resetPassWithSecurityQuestion": {
       "accepts": [
-
         {
-          "arg": "data",
-          "type": "object",
+          "arg": "options",
+          "type": {
+            "questions": [
+              {
+                "type": {
+                  "question": {
+                    "type": "string"
+                  },
+                  "answer": {
+                    "type": "string"
+                  }
+                }
+              }
+            ],
+            "email": {
+              "type": "string"
+            }
+          },
           "http": {
             "source": "body"
           },
@@ -159,8 +174,12 @@
       ],
       "returns": [
         {
-          "arg": "data",
-          "type": "object",
+          "arg": "response",
+          "type": {
+            "token": {
+              "type": "string"
+            }
+          },
           "root": true,
           "required": true
         }

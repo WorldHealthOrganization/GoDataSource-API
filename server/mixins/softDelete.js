@@ -35,18 +35,21 @@ module.exports = function (Model) {
     // options is optional
     if (typeof options === 'function' && callback === undefined) {
       callback = options;
-      options = {};
+      options = {
+        options: {}
+      };
     }
     // make context available for others
     const self = this;
     // build a before/after hook context
-    let context = Object.assign({}, options, {
+    let context = {
       model: Model,
       instance: self,
       where: {
         id: self.id
-      }
-    });
+      },
+      options: options
+    };
     // notify listeners that a restore operation begins
     Model.notifyObserversOf('before restore', context, function (error) {
       // if error occurred, stop
@@ -58,7 +61,7 @@ module.exports = function (Model) {
         callback(true);
       };
       // restore the instance
-      self.updateAttributes({[deletedFlag]: false, [deletedAt]: null}, function (error, result) {
+      self.updateAttributes({[deletedFlag]: false, [deletedAt]: null}, options, function (error, result) {
         // if error occurred, stop
         if (error) {
           return callback(error);
@@ -289,6 +292,23 @@ module.exports = function (Model) {
       filter.where = {and: [filter.where, filterNonDeleted]};
     }
     return _find.call(Model, filter, ...args);
+  };
+
+  const _findOne = Model.findOne;
+  /**
+   * Overwrite find one method, to search for non-(soft)deleted records
+   * @param filter
+   * @param args
+   * @returns {*}
+   */
+  Model.findOne = function findOneDeleted(filter = {}, ...args) {
+    if (!filter.where) {
+      filter.where = {};
+    }
+    if (!filter.deleted) {
+      filter.where = {and: [filter.where, filterNonDeleted]};
+    }
+    return _findOne.call(Model, filter, ...args);
   };
 
 

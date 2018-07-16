@@ -45,7 +45,7 @@ function convertMaskToSearchRegExp(mask) {
   if (!maskIsValid(mask)) {
     return false;
   }
-  mask = escapeRegExp(mask);
+  mask = `^${escapeRegExp(mask)}$`;
   let maskPlaceholders = getMaskPlaceholders(mask);
   maskPlaceholders.forEach(function (placeholder) {
     // assume the digits are required

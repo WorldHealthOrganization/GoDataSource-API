@@ -1,6 +1,7 @@
 'use strict';
 
 const app = require('../../server/server');
+const uuid = require('uuid');
 
 module.exports = function (SystemSettings) {
 
@@ -35,14 +36,15 @@ module.exports = function (SystemSettings) {
   /**
    * Modify System Settings
    * @param data
+   * @param options
    * @param cb
    */
-  SystemSettings.updateSystemSettings = function (data, cb) {
+  SystemSettings.updateSystemSettings = function (data, options, cb) {
     // There is only one entry in the system settings collection; get it and update it
     SystemSettings.findOne()
       .then(function (instance) {
         if (instance) {
-          return instance.updateAttributes(data)
+          return instance.updateAttributes(data, options)
             .then(function (instance) {
               cb(null, instance);
             });
@@ -53,5 +55,15 @@ module.exports = function (SystemSettings) {
         }
       })
       .catch(cb);
+  };
+
+  /**
+   * Generate a globally unique id
+   * @param callback
+   */
+  SystemSettings.generateUniqueId = function (callback) {
+    return callback(null, {
+      uuid: uuid.v4()
+    });
   };
 };

@@ -50,7 +50,18 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "contact": {
+      "type": "belongsTo",
+      "model": "contact",
+      "foreignKey": "personId"
+    },
+    "team": {
+      "type": "belongsTo",
+      "model": "team",
+      "foreignKey": "teamId"
+    }
+  },
   "acls": [],
   "methods": {}
 }

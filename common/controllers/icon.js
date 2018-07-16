@@ -56,9 +56,10 @@ module.exports = function (Icon) {
    * @param req
    * @param name
    * @param icon
+   * @param options
    * @param callback
    */
-  Icon.upload = function (req, name, icon, callback) {
+  Icon.upload = function (req, name, icon, options, callback) {
     const form = new formidable.IncomingForm();
     form.parse(req, function (error, fields, files) {
       if (error) {
@@ -87,7 +88,7 @@ module.exports = function (Icon) {
           return Icon.create({
             name: fields.name,
             path: savePath
-          });
+          }, options);
         })
         .then(function (image) {
           callback(null, image);
@@ -105,7 +106,8 @@ module.exports = function (Icon) {
     Icon.readFromDisk(this.path)
       .then(function (imageBuffer) {
         const extension = path.extname(self.path).replace('.', '');
-        callback(null, imageBuffer, `image/${extension}`, `attachment;filename=${self.name}.${extension}`);
+        app.utils.remote.helpers
+          .offerFileToDownload(imageBuffer, `image/${extension}`, `${self.name}.${extension}`, callback);
       })
       .catch(callback);
   }

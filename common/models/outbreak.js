@@ -10,6 +10,8 @@ module.exports = function (Outbreak) {
 
   // initialize model helpers
   Outbreak.helpers = {};
+  // set a higher limit for event listeners to avoid warnings (we have quite a few listeners)
+  Outbreak.setMaxListeners(40);
 
   /**
    * Checks whether the given follow up model is generated
@@ -98,7 +100,8 @@ module.exports = function (Outbreak) {
       if (data.persons.length) {
         data.persons.push({
           id: personId,
-          type: type
+          type: type,
+          source: true
         });
       }
 
@@ -131,7 +134,8 @@ module.exports = function (Outbreak) {
                     id: person.id
                   }));
                 }
-
+                // this person is a target
+                data.persons[index].target = true;
                 // set its type
                 data.persons[index].type = foundPerson.type;
               })
@@ -155,9 +159,10 @@ module.exports = function (Outbreak) {
    * @param personId
    * @param type
    * @param data
+   * @param options
    * @param callback
    */
-  Outbreak.helpers.createPersonRelationship = function (outbreakId, personId, type, data, callback) {
+  Outbreak.helpers.createPersonRelationship = function (outbreakId, personId, type, data, options, callback) {
     Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error, persons) {
       if (error) {
         return callback(error);
@@ -165,7 +170,7 @@ module.exports = function (Outbreak) {
       data.persons = persons;
       app.models.relationship.removeReadOnlyProperties(data);
       app.models.relationship
-        .create(Object.assign(data, {outbreakId: outbreakId}))
+        .create(Object.assign(data, {outbreakId: outbreakId}), options)
         .then(function (createdRelation) {
           callback(null, createdRelation);
         })
@@ -212,9 +217,10 @@ module.exports = function (Outbreak) {
    * @param relationshipId
    * @param type
    * @param data
+   * @param options
    * @param callback
    */
-  Outbreak.helpers.updatePersonRelationship = function (personId, relationshipId, type, data, callback) {
+  Outbreak.helpers.updatePersonRelationship = function (personId, relationshipId, type, data, options, callback) {
     Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error, persons) {
       if (error) {
         return callback(error);
@@ -237,7 +243,7 @@ module.exports = function (Outbreak) {
             });
           }
           app.models.relationship.removeReadOnlyProperties(data);
-          return relationship.updateAttributes(data);
+          return relationship.updateAttributes(data, options);
         })
         .then(function (relationship) {
           callback(null, relationship);
@@ -250,9 +256,10 @@ module.exports = function (Outbreak) {
    * Delete a relation for a person
    * @param personId
    * @param relationshipId
+   * @param options
    * @param callback
    */
-  Outbreak.helpers.deletePersonRelationship = function (personId, relationshipId, callback) {
+  Outbreak.helpers.deletePersonRelationship = function (personId, relationshipId, options, callback) {
     app.models.relationship
       .findOne({
         where: {
@@ -264,7 +271,7 @@ module.exports = function (Outbreak) {
         if (!relationship) {
           return {count: 0};
         }
-        return relationship.destroy();
+        return relationship.destroy(options);
       })
       .then(function (relationship) {
         callback(null, relationship);
@@ -615,5 +622,190 @@ module.exports = function (Outbreak) {
         callback(null, results);
       })
       .catch(callback);
+  };
+
+  /**
+   * Build/Count new transmission chains from registered contacts who became cases
+   * @param outbreak
+   * @param filter
+   * @param countOnly
+   * @param callback
+   */
+  Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases = function (outbreak, filter, countOnly, callback) {
+    // build a filter for finding cases who came from registered contacts and their relationships that appeared happened after they became cases
+    const _filter = {
+        where: {
+          outbreakId: outbreak.id,
+          dateBecomeCase: {
+            neq: null
+          }
+        },
+        fields: ['id', 'relationships', 'dateBecomeCase'],
+        include: [
+          {
+            relation: 'relationships',
+            fields: ['id', 'contactDate'],
+            scope: {
+              filterParent: true
+            }
+          }
+        ]
+      }
+    ;
+    // find the cases
+    app.models.case
+      .find(_filter)
+      .then(function (cases) {
+        // remove those without relations
+        cases = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(cases, _filter);
+        // keep a list of relationIds
+        const relationshipIds = [];
+        // go through all the cases
+        cases.forEach(function (caseRecord) {
+          if (Array.isArray(caseRecord.relationships)) {
+            // go trough their relationships
+            caseRecord.relationships.forEach(function (relationship) {
+              // store only the relationships that are newer than their conversion date
+              if ((new Date(relationship.contactDate)) > (new Date(caseRecord.dateBecomeCase))) {
+                relationshipIds.push(relationship.id);
+              }
+            });
+          }
+        });
+        // build/count transmission chains starting from the found relationIds
+        app.models.relationship.buildOrCountTransmissionChains(outbreak.id, outbreak.periodOfFollowup, app.utils.remote.mergeFilters({
+          where: {
+            id: {
+              inq: relationshipIds
+            }
+          }
+        }, filter || {}), countOnly, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Validates whether a given visual identifier is unique per given outbreak
+   * If not, then a DUPLICATE_VISUAL_ID error is built and returned
+   * @param outbreakId Outbreaks identifier
+   * @param visualId Visual identifier (string)
+   * @returns Promise { false (if unique), error }
+   */
+  Outbreak.helpers.validateVisualIdUniqueness = function (outbreakId, visualId) {
+    return app.models.person
+      .findOne({
+        where: {
+          outbreakId: outbreakId,
+          visualId: visualId
+        },
+        deleted: true
+      })
+      .then((instance) => {
+        if (!instance) {
+          // is unique, returning undefined, to be consistent with callback usage
+          return;
+        }
+        // not unique, return crafted error
+        return app.utils.apiError.getError('DUPLICATE_VISUAL_ID', {
+          id: visualId
+        });
+      });
+  };
+
+  /**
+   * Merge 2 or more 'person' models of the same type
+   * @base base model to be merged upon
+   * @people list of 'person' models to be merged into 'base'
+   * @type person type: case/contact supported
+   */
+  Outbreak.helpers.mergePersonModels = function (base, people, type) {
+    // declare list of properties specific for case/contacts
+    const contactProps = [
+      'riskLevel',
+      'riskReason'
+    ];
+    const caseProps = [
+      'dateOfInfection',
+      'dateOfOnset',
+      'isDateOfOnsetApproximate',
+      'dateBecomeCase',
+      'dateOfOutcome',
+      'deceased',
+      'dateDeceased',
+      'classification',
+      'riskLevel',
+      'riskReason',
+      'transferRefused'
+    ];
+    // the following case props are array and should be treated differently
+    const caseArrayProps = [
+      'isolationDates',
+      'hospitalizationDates',
+      'incubationDates',
+    ];
+
+    // decide which type of properties map to use, based on given type
+    let propsMap = type === 'case' ? caseProps : contactProps;
+
+    // get reference to properties of the base model
+    let baseProps = base.__data;
+
+    // list of properties that should be looked upon, levels below
+    let missingProps = [];
+
+    // iterate over case predefined props map
+    for (let propName in propsMap) {
+      // make sure the property is belonging to the model
+      // note: undefined, null are taken into consideration as well
+      // doing abstract equality, to check for both undefined/null values
+      if (!baseProps.hasOwnProperty(propName) || baseProps[propName] == null) {
+        missingProps.push(propName);
+      }
+    }
+
+    // start working the properties that were missing in the base case
+    missingProps.forEach((prop) => {
+      for (let i = 1; i < people.length; i++) {
+        let props = people[i].__data;
+        if (props.hasOwnProperty(prop) && props[prop] !== null) {
+          baseProps[prop] = props[prop];
+          break;
+        }
+      }
+    });
+
+    // merge all case array props
+    if (type === 'case') {
+      caseArrayProps.forEach((arrayProp) => {
+        baseProps[arrayProp] = baseProps[arrayProp] || [];
+        baseProps[arrayProp] = baseProps[arrayProp].concat(...
+          people
+            .filter((item) => item[arrayProp])
+            .map((item) => item[arrayProp])
+        );
+      });
+    }
+
+    // merge all address
+    baseProps.addresses = baseProps.addresses || [];
+    baseProps.addresses = baseProps.addresses.concat(
+      ...people
+        .filter((item) => item.addresses)
+        .map((item) => item.addresses)
+    );
+
+    // merge all documents, accept only unique type,number combination
+    baseProps.documents = baseProps.documents || [];
+    baseProps.documents = baseProps.documents.concat(
+      ...people
+        .filter((item) => item.documents)
+        .map((item) => {
+          return item.documents.filter((doc) => baseProps.documents.findIndex((resultItem) => {
+            return resultItem.type === doc.type && resultItem.number === doc.number;
+          }) === -1);
+        })
+    );
+
+    return base;
   };
 };

@@ -137,7 +137,7 @@ module.exports = function (Model) {
           }
         });
         app.models.auditLog
-          .create(logData);
+          .create(logData, context.options);
         // call the callback without waiting for the audit log changes to be persisted
         callback();
       } else {
@@ -152,7 +152,8 @@ module.exports = function (Model) {
             changedData: context.options.changedFields
           };
           app.models.auditLog
-            .create(logData);
+            .create(logData, context.options);
+
         }
         // call the callback without waiting for the audit log changes to be persisted
         callback();
@@ -199,12 +200,43 @@ module.exports = function (Model) {
           }
         });
         app.models.auditLog
-          .create(logData);
+          .create(logData, context.options);
         // call the callback without waiting for the audit log changes to be persisted
         callback();
       } else {
         callback();
       }
+    });
+
+    /**
+     * Log restored instances after the model is restored
+     */
+    Model.observe('after restore', function (context, callback) {
+      const user = getUserContextInformation(context);
+      let logData = {
+        action: app.models.auditLog.actions.restored,
+        modelName: Model.modelName,
+        userId: user.id,
+        userRole: user.role,
+        userIPAddress: user.iPAddress,
+        changedData: []
+      };
+      let instance = context.instance;
+      if (instance.toJSON) {
+        instance = instance.toJSON();
+      }
+      Object.keys(instance).forEach(function (field) {
+        if (isMonitoredField(field) && instance[field] !== undefined) {
+          logData.changedData.push({
+            field: field,
+            newValue: instance[field]
+          });
+        }
+      });
+      app.models.auditLog
+        .create(logData, context.options);
+      // call the callback without waiting for the audit log changes to be persisted
+      callback();
     });
   }
 };
