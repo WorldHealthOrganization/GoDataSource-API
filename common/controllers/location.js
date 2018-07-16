@@ -66,5 +66,19 @@ module.exports = function (Location) {
         app.utils.remote.helpers
           .offerFileToDownload(JSON.stringify(Location.buildHierarchicalLocationsList(locations), null, 2), 'application/json', `locations.json`, callback);
       }).catch(callback);
-  }
+  };
+
+  /**
+   * Get hierarchical locations list
+   * @param callback
+   */
+  Location.getHierarchicalList = function (callback) {
+    Location
+      .find({
+        order: 'parentLocationId ASC, id ASC'
+      })
+      .then(function (locations) {
+        callback(null, Location.buildHierarchicalLocationsList(locations));
+      }).catch(callback);
+  };
 };

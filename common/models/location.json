@@ -81,6 +81,12 @@
       "principalId": "read_sys_config",
       "permission": "ALLOW",
       "property": "exportHierarchicalList"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getHierarchicalList"
     }
   ],
   "methods": {
@@ -112,6 +118,34 @@
       "http": {
         "verb": "get",
         "path": "/export"
+      }
+    },
+    "getHierarchicalList": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "locations",
+          "type": [{
+            "type": {
+              "location": "location",
+              "children": [
+                {
+                  "type": {
+                    "location": "location",
+                    "children": []
+                  }
+                }
+              ]
+            }
+          }],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get hierarchical list of locations.",
+      "http": {
+        "verb": "get",
+        "path": "/hierarchical"
       }
     }
   }
