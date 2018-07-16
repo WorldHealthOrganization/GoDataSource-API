@@ -1,0 +1,23 @@
+{
+  "name": "importableFileWithMap",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "fileId": "string",
+    "map": {
+      "type": {
+        "<fileProperty>": "string"
+      }
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

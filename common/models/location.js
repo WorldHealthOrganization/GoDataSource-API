@@ -359,32 +359,17 @@ module.exports = function (Location) {
    * @param callback
    */
   Location.createLocationsFromHierarchicalLocationsList = function (parentLocationId, locationsList, options, callback) {
-    /**
-     * Flatten results list. Merge results into result
-     * @param result
-     * @param results
-     * @return {*}
-     */
-    function mergeResults(result, results) {
-      // go through all results
-      results.forEach(function (createdLocation) {
-        // if the result is a list of results
-        if (Array.isArray(createdLocation)) {
-          // merge them recursively
-          mergeResults(result, createdLocation);
-        } else {
-          // add the result to the final list of results
-          result.push(createdLocation);
-        }
-      });
-      return result;
-    }
-
     // options is a optional params
     if (typeof options === 'function') {
       callback = options;
       options = {};
     }
+
+    // gather all results under one accumulator
+    if (!options.resultAccumulator) {
+      options.resultAccumulator = [];
+    }
+
     // build a list of create operations
     const createLocationOperations = [];
     locationsList.forEach(function (location) {
@@ -395,6 +380,8 @@ module.exports = function (Location) {
           Location
             .create(_location, options)
             .then(function (createdLocation) {
+              // store result
+              options.resultAccumulator.push(createdLocation);
               // when done, if there are other sub-locations
               if (location.children && location.children.length) {
                 // create them recursively
@@ -409,11 +396,11 @@ module.exports = function (Location) {
       }
     );
     // run create operations
-    async.series(createLocationOperations, function (error, results) {
+    async.series(createLocationOperations, function (error) {
       if (error) {
         return callback(error);
       }
-      callback(null, mergeResults([], results));
+      callback(null, options.resultAccumulator);
     });
   };
 

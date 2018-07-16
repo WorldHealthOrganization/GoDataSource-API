@@ -205,19 +205,11 @@
         {
           "arg": "body",
           "type": "object",
-          "model": {
-            "type": {
-              "fileId": "string",
-              "map": {
-                "type": {
-                  "<fileProperty>": "string"
-                }
-              }
-            }
-          },
+          "model": "importableFileWithMap",
           "http": {
             "source": "body"
-          }
+          },
+          "root": true
         },
         {
           "arg": "options",

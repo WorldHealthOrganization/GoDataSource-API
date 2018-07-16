@@ -203,5 +203,9 @@
   "importableFile": {
     "dataSource": "memory",
     "public": true
+  },
+  "importableFileWithMap": {
+    "dataSource": null,
+    "public": true
   }
 }

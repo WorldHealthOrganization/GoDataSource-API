@@ -123,21 +123,32 @@ module.exports = function (Location) {
     });
   };
 
+  /**
+   * Import an importable file using file ID and a map to remap parameters
+   * @param body
+   * @param options
+   * @param callback
+   */
   Location.importImportableFileUsingMap = function (body, options, callback) {
+    // get importable file
     app.models.importableFile
       .getTemporaryFileById(body.fileId, function (error, file) {
+        // handle errors
         if (error) {
           return callback(error);
         }
         try {
-          let _list = JSON.parse(file);
-          _list = app.utils.helpers.remapProperties(_list, body.map);
-          let _hl = Location.buildHierarchicalLocationsList(_list, true);
+          // parse file content
+          const rawLocationsList = JSON.parse(file);
+          // remap properties
+          const locationsList = app.utils.helpers.remapProperties(rawLocationsList, body.map);
+          // build hierarchical list
+          const hierarchicalList = Location.buildHierarchicalLocationsList(locationsList, true);
           // import locations
-          Location.importHierarchicalListFromJsonFile(_hl, options, callback);
+          Location.importHierarchicalListFromJsonFile(hierarchicalList, options, callback);
         } catch (error) {
           callback(error);
         }
-      })
-  }
+      });
+  };
 };
