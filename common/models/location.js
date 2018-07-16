@@ -73,11 +73,12 @@ module.exports = function (Location) {
     Location
       .find({
         where: {
-          or: [{
-            id: {
-              in: notRetrievedParentLocationsIds
-            }
-          },
+          or: [
+            {
+              id: {
+                in: notRetrievedParentLocationsIds
+              }
+            },
             {
               parentLocationId: {
                 in: parentLocationsIds
@@ -220,27 +221,6 @@ module.exports = function (Location) {
       })
   };
 
-  /**
-   * Update indices for children locations (under new parentLocationPath)
-   * @param location
-   * @param locationIndex
-   * @param parentLocationPath
-   */
-  function updateChildrenLocationIndex(location, locationIndex, parentLocationPath) {
-    // go trough all children
-    location.children.forEach(function (child, index) {
-      // move the child under the new parent path
-      let updatedIndex = `${parentLocationPath}.children.${index}`;
-      // update index
-      locationIndex[child.location.id] = updatedIndex;
-      // if there are grand-children
-      if (child.children.length) {
-        // process them
-        updateChildrenLocationIndex(child, locationIndex, updatedIndex);
-      }
-    });
-  }
-
 
   /**
    * Build hierarchical list of locations
@@ -248,6 +228,28 @@ module.exports = function (Location) {
    * @return {*[]}
    */
   Location.buildHierarchicalLocationsList = function (locationsList) {
+
+    /**
+     * Update indices for children locations (under new parentLocationPath)
+     * @param location
+     * @param locationIndex
+     * @param parentLocationPath
+     */
+    function updateChildrenLocationIndex(location, locationIndex, parentLocationPath) {
+      // go trough all children
+      location.children.forEach(function (child, index) {
+        // move the child under the new parent path
+        let updatedIndex = `${parentLocationPath}.children.${index}`;
+        // update index
+        locationIndex[child.location.id] = updatedIndex;
+        // if there are grand-children
+        if (child.children.length) {
+          // process them
+          updateChildrenLocationIndex(child, locationIndex, updatedIndex);
+        }
+      });
+    }
+
     // store a hierarchical list of locations
     let hierarchicalLocationsList = [];
     // index position for each element for easy referencing
@@ -266,7 +268,7 @@ module.exports = function (Location) {
       let length;
       // keep a flag for just processed locations
       let justProcessed = false;
-      // it the location was found in unprocessed locations
+      // if the location was found in unprocessed locations
       if (unprocessedLocations[location.id]) {
         // update location information (process it)
         _.set(hierarchicalLocationsList, `${locationIndex[location.id]}.location`, location);

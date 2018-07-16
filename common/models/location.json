@@ -78,7 +78,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_sys_config",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "exportHierarchicalList"
     },
@@ -117,7 +117,7 @@
       "description": "Export hierarchical list of locations.",
       "http": {
         "verb": "get",
-        "path": "/export"
+        "path": "/hierarchical/export"
       }
     },
     "getHierarchicalList": {
