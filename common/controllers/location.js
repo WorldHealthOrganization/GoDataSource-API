@@ -1,5 +1,7 @@
 'use strict';
 
+const app = require('../../server/server');
+
 module.exports = function (Location) {
 
   /**
@@ -50,6 +52,7 @@ module.exports = function (Location) {
   Location.exportHierarchicalList = function (callback) {
     Location
       .find({
+        // blacklist some fields in the export
         fields: {
           createdAt: false,
           createdBy: false,
@@ -60,7 +63,8 @@ module.exports = function (Location) {
         order: 'parentLocationId ASC, id ASC'
       })
       .then(function (locations) {
-        callback(null, JSON.stringify(Location.buildHierarchicalLocationsList(locations), null, 2), 'application/json', 'attachment;filename=locations.json');
+        app.utils.remote.helpers
+          .offerFileToDownload(JSON.stringify(Location.buildHierarchicalLocationsList(locations), null, 2), 'application/json', `locations.json`, callback);
       }).catch(callback);
   }
 };
