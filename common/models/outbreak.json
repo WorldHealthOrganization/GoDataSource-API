@@ -673,7 +673,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_outbreak",
+      "principalId": "write_followup",
       "permission": "ALLOW",
       "property": "generateFollowups"
     },

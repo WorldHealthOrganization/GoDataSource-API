@@ -20,6 +20,9 @@
     "order": {
       "type": "number",
       "required": true
+    },
+    "description": {
+      "type": "string"
     }
   },
   "validations": [],
@@ -30,6 +33,117 @@
       "foreignKey": "categoryId"
     }
   },
-  "acls": [],
-  "methods": {}
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_help",
+      "permission": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_help",
+      "permission": "ALLOW",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_help",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "__get__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "__findById__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_help",
+      "permission": "ALLOW",
+      "property": "__create__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_help",
+      "permission": "ALLOW",
+      "property": "__updateById__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_help",
+      "permission": "ALLOW",
+      "property": "__destroyById__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "__count__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "approve_help",
+      "permission": "ALLOW",
+      "property": "approveHelpItem"
+    }
+  ],
+  "methods": {
+    "prototype.approveHelpItem": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for help items"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": {
+        "arg": "helpItem",
+        "type": "helpItem",
+        "description": "Help Item resulted from approval",
+        "required": true,
+        "root": true
+      },
+      "description": "Approves a help item",
+      "http": {
+        "verb": "post",
+        "path": "/help-items/:fk/approve"
+      }
+    }
+  }
 }
