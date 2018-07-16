@@ -1,0 +1,92 @@
+{
+  "name": "importableFile",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "mixins": {
+    "AttachController": true
+  },
+  "properties": {
+    "file": {
+      "type": "file",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "upload"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getJsonById"
+    }
+  ],
+  "methods": {
+    "upload": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "file",
+          "type": "file"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "arg": "headers",
+          "type": ["string"],
+          "required": true
+        }
+      ],
+      "description": "Upload a file and get file headers",
+      "http": {
+        "verb": "post",
+        "path": "/"
+      }
+    },
+    "getJsonById": {
+      "accepts": [
+        {
+          "arg": "id",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "json",
+          "type": "any",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Retrieve JSON version of an uploaded file",
+      "http": {
+        "verb": "get",
+        "path": "/:id/json"
+      }
+    }
+  }
+}
