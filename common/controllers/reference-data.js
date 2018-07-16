@@ -42,7 +42,7 @@ module.exports = function (ReferenceData) {
           });
           context.args.data = data;
         }
-      } else {
+      } else if (error) {
         // unhandled error
         return next(error);
       }
