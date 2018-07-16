@@ -20,6 +20,9 @@
     "order": {
       "type": "number",
       "required": true
+    },
+    "description": {
+      "type": "string"
     }
   },
   "validations": [],
@@ -95,12 +98,6 @@
       "principalId": "write_help",
       "permission": "ALLOW",
       "property": "__updateById__helpItems"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_help",
-      "permission": "ALLOW",
-      "property": "__delete__helpItems"
     },
     {
       "principalType": "ROLE",

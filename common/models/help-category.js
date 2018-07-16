@@ -17,7 +17,14 @@ module.exports = function (HelpCategory) {
    * @param next
    */
   HelpCategory.beforeCreateHook = function (modelName, titleField, context, modelInstance, next) {
-    let identifier = "LNG_" + `${_.snakeCase(modelName).toUpperCase()}_`;
+    let identifier = '';
+
+    //Build the identifier for either a Help Category or a Help Item.
+    if(context.instance) {
+      identifier = context.instance.name + `_${_.snakeCase(modelName).toUpperCase()}_`;
+    } else {
+      identifier = "LNG_" + `${_.snakeCase(modelName).toUpperCase()}_`;
+    }
     identifier += `${_.snakeCase(context.args.data[titleField]).toUpperCase()}`;
 
     context.req._original = {
@@ -25,6 +32,11 @@ module.exports = function (HelpCategory) {
     };
     context.args.data.id = identifier;
     context.args.data[titleField] = identifier;
+
+    if(modelName === 'helpCategory') {
+      context.req._original.description = context.args.data.description;
+      context.args.data.description = identifier + '_DESCRIPTION';
+    }
 
     if(modelName === 'helpItem') {
       context.req._original.content = context.args.data.content;
@@ -56,13 +68,22 @@ module.exports = function (HelpCategory) {
                 translation: context.req._original[titleField]
               }, context.args.options)
             );
+            if(modelName === 'helpCategory') {
+              tokenPromises.push(app.models.languageToken
+                .create({
+                  token: modelInstance.description,
+                  languageId: language.id,
+                  translation: context.req._original.description ? context.req._original.description : ' '
+                }, context.args.options)
+              );
+            }
             if(modelName === 'helpItem') {
               tokenPromises.push(app.models.languageToken
                 .create({
                   token: modelInstance.content,
                   languageId: language.id,
                   translation: context.req._original.content
-                }))
+                }, context.args.options))
             }
           });
         })
@@ -86,13 +107,18 @@ module.exports = function (HelpCategory) {
    * @param next
    */
   HelpCategory.beforeUpdateHook = function (modelName, titleField, context, modelInstance, next) {
-    if (context.args.data && (context.args.data[titleField] || context.args.data.content)) {
+    if (context.args.data && (context.args.data[titleField] || context.args.data.description || context.args.data.content)) {
       let originalValues = {};
       let data = context.args.data;
 
       if(data[titleField]) {
         originalValues[titleField] = data[titleField];
         delete data[titleField];
+      }
+
+      if(data.description) {
+        originalValues.description = data.description;
+        delete data.description;
       }
 
       if (modelName === 'helpItem' && data.content) {
@@ -121,6 +147,10 @@ module.exports = function (HelpCategory) {
 
       let updateFields = [titleField];
 
+      if (modelName === "helpCategory" && context.req._original.description) {
+        updateFields.push('description');
+      }
+
       if (modelName === 'helpItem' && context.req._original.content) {
         updateFields.push('content');
       }
@@ -131,14 +161,13 @@ module.exports = function (HelpCategory) {
             app.models.languageToken
               .findOne({
                 where: {
-                  token: updateField === 'content' ? languageToken + '_DESCRIPTION' : languageToken,
+                  token: ['content', 'description'].indexOf(updateField) !== -1 ? languageToken + '_DESCRIPTION' : languageToken,
                   languageId: languageId
                 }
               })
               .then((languageToken) => {
-                  return languageToken.updateAttribute('translation', context.req._original[updateField]);
-                }
-              )
+                return languageToken.updateAttribute('translation', context.req._original[updateField], context.args.options);
+              })
           )
         }
       });

@@ -1,9 +1,13 @@
 'use strict';
 
 const app = require('../../server/server');
-const _ = require('lodash');
 
 module.exports = function (HelpCategory) {
+
+  // disable bulk delete for related models
+  app.utils.remote.disableRemoteMethods(HelpCategory, [
+    'prototype.__delete__helpItems'
+  ]);
 
   /**
    * Approve a help item
