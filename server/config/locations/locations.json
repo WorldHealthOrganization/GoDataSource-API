@@ -1,2211 +1,3655 @@
 [
   {
-    "name": "Algeria",
+    "location": {
+      "name": "Algeria"
+    },
     "children": [
       {
-        "name": "Algiers"
+        "location": {
+          "name": "Algiers"
+        }
       },
       {
-        "name": "Annaba"
+        "location": {
+          "name": "Annaba"
+        }
       },
       {
-        "name": "Azazga"
+        "location": {
+          "name": "Azazga"
+        }
       },
       {
-        "name": "Batna City"
+        "location": {
+          "name": "Batna City"
+        }
       },
       {
-        "name": "Blida"
+        "location": {
+          "name": "Blida"
+        }
       },
       {
-        "name": "Bordj"
+        "location": {
+          "name": "Bordj"
+        }
       },
       {
-        "name": "Bordj Bou Arreridj"
+        "location": {
+          "name": "Bordj Bou Arreridj"
+        }
       },
       {
-        "name": "Bougara"
+        "location": {
+          "name": "Bougara"
+        }
       },
       {
-        "name": "Cheraga"
+        "location": {
+          "name": "Cheraga"
+        }
       },
       {
-        "name": "Chlef"
+        "location": {
+          "name": "Chlef"
+        }
       },
       {
-        "name": "Constantine"
+        "location": {
+          "name": "Constantine"
+        }
       },
       {
-        "name": "Djelfa"
+        "location": {
+          "name": "Djelfa"
+        }
       },
       {
-        "name": "Draria"
+        "location": {
+          "name": "Draria"
+        }
       },
       {
-        "name": "El Tarf"
+        "location": {
+          "name": "El Tarf"
+        }
       },
       {
-        "name": "Hussein Dey"
+        "location": {
+          "name": "Hussein Dey"
+        }
       },
       {
-        "name": "Illizi"
+        "location": {
+          "name": "Illizi"
+        }
       },
       {
-        "name": "Jijel"
+        "location": {
+          "name": "Jijel"
+        }
       },
       {
-        "name": "Kouba"
+        "location": {
+          "name": "Kouba"
+        }
       },
       {
-        "name": "Laghouat"
+        "location": {
+          "name": "Laghouat"
+        }
       },
       {
-        "name": "Oran"
+        "location": {
+          "name": "Oran"
+        }
       },
       {
-        "name": "Ouargla"
+        "location": {
+          "name": "Ouargla"
+        }
       },
       {
-        "name": "Oued Smar"
+        "location": {
+          "name": "Oued Smar"
+        }
       },
       {
-        "name": "Relizane"
+        "location": {
+          "name": "Relizane"
+        }
       },
       {
-        "name": "Rouiba"
+        "location": {
+          "name": "Rouiba"
+        }
       },
       {
-        "name": "Saida"
+        "location": {
+          "name": "Saida"
+        }
       },
       {
-        "name": "Souk Ahras"
+        "location": {
+          "name": "Souk Ahras"
+        }
       },
       {
-        "name": "Tamanghasset"
+        "location": {
+          "name": "Tamanghasset"
+        }
       },
       {
-        "name": "Tiaret"
+        "location": {
+          "name": "Tiaret"
+        }
       },
       {
-        "name": "Tissemsilt"
+        "location": {
+          "name": "Tissemsilt"
+        }
       },
       {
-        "name": "Tizi"
+        "location": {
+          "name": "Tizi"
+        }
       },
       {
-        "name": "Tizi Ouzou"
+        "location": {
+          "name": "Tizi Ouzou"
+        }
       },
       {
-        "name": "Tlemcen"
+        "location": {
+          "name": "Tlemcen"
+        }
       }
     ]
   },
   {
-    "name": "Angola",
+    "location": {
+      "name": "Angola"
+    },
     "children": [
       {
-        "name": "Ambriz"
+        "location": {
+          "name": "Ambriz"
+        }
       },
       {
-        "name": "Benguela"
+        "location": {
+          "name": "Benguela"
+        }
       },
       {
-        "name": "Cabinda"
+        "location": {
+          "name": "Cabinda"
+        }
       },
       {
-        "name": "Cacole"
+        "location": {
+          "name": "Cacole"
+        }
       },
       {
-        "name": "Camabatela"
+        "location": {
+          "name": "Camabatela"
+        }
       },
       {
-        "name": "Cazeta"
+        "location": {
+          "name": "Cazeta"
+        }
       },
       {
-        "name": "Huambo"
+        "location": {
+          "name": "Huambo"
+        }
       },
       {
-        "name": "Kuito"
+        "location": {
+          "name": "Kuito"
+        }
       },
       {
-        "name": "Lobito"
+        "location": {
+          "name": "Lobito"
+        }
       },
       {
-        "name": "Luanda"
+        "location": {
+          "name": "Luanda"
+        }
       },
       {
-        "name": "Lubango"
+        "location": {
+          "name": "Lubango"
+        }
       },
       {
-        "name": "Lucapa"
+        "location": {
+          "name": "Lucapa"
+        }
       },
       {
-        "name": "Lumeje"
+        "location": {
+          "name": "Lumeje"
+        }
       },
       {
-        "name": "Malanje"
+        "location": {
+          "name": "Malanje"
+        }
       },
       {
-        "name": "Menongue"
+        "location": {
+          "name": "Menongue"
+        }
       },
       {
-        "name": "Muxaluando"
+        "location": {
+          "name": "Muxaluando"
+        }
       },
       {
-        "name": "Namibe"
+        "location": {
+          "name": "Namibe"
+        }
       },
       {
-        "name": "Ondjiva"
+        "location": {
+          "name": "Ondjiva"
+        }
       },
       {
-        "name": "Piri"
+        "location": {
+          "name": "Piri"
+        }
       },
       {
-        "name": "Saurimo"
+        "location": {
+          "name": "Saurimo"
+        }
       },
       {
-        "name": "Talatona"
+        "location": {
+          "name": "Talatona"
+        }
       }
     ]
   },
   {
-    "name": "Botswana",
+    "location": {
+      "name": "Botswana"
+    },
     "children": [
       {
-        "name": "Francistown"
+        "location": {
+          "name": "Francistown"
+        }
       },
       {
-        "name": "Gaborone"
+        "location": {
+          "name": "Gaborone"
+        }
       },
       {
-        "name": "Orapa"
+        "location": {
+          "name": "Orapa"
+        }
       },
       {
-        "name": "Serowe"
+        "location": {
+          "name": "Serowe"
+        }
       },
       {
-        "name": "Village"
+        "location": {
+          "name": "Village"
+        }
       }
     ]
   },
   {
-    "name": "Cameroon",
+    "location": {
+      "name": "Cameroon"
+    },
     "children": [
       {
-        "name": "Bafia"
+        "location": {
+          "name": "Bafia"
+        }
       },
       {
-        "name": "Bafoussam"
+        "location": {
+          "name": "Bafoussam"
+        }
       },
       {
-        "name": "Bamenda"
+        "location": {
+          "name": "Bamenda"
+        }
       },
       {
-        "name": "Buea"
+        "location": {
+          "name": "Buea"
+        }
       },
       {
-        "name": "Douala"
+        "location": {
+          "name": "Douala"
+        }
       },
       {
-        "name": "Kribi"
+        "location": {
+          "name": "Kribi"
+        }
       },
       {
-        "name": "Kumba"
+        "location": {
+          "name": "Kumba"
+        }
       },
       {
-        "name": "Ringo"
+        "location": {
+          "name": "Ringo"
+        }
       },
       {
-        "name": "Tibati"
+        "location": {
+          "name": "Tibati"
+        }
       }
     ]
   },
   {
-    "name": "Congo",
+    "location": {
+      "name": "Congo"
+    },
     "children": [
       {
-        "name": "Banana"
+        "location": {
+          "name": "Banana"
+        }
       },
       {
-        "name": "Goma"
+        "location": {
+          "name": "Goma"
+        }
       },
       {
-        "name": "Kinshasa"
+        "location": {
+          "name": "Kinshasa"
+        }
       },
       {
-        "name": "Likasi"
+        "location": {
+          "name": "Likasi"
+        }
       },
       {
-        "name": "Lubumbashi"
+        "location": {
+          "name": "Lubumbashi"
+        }
       }
     ]
   },
   {
-    "name": "Egypt",
+    "location": {
+      "name": "Egypt"
+    },
     "children": [
       {
-        "name": "Abu Hammad"
+        "location": {
+          "name": "Abu Hammad"
+        }
       },
       {
-        "name": "Al Mahallah al Kubra"
+        "location": {
+          "name": "Al Mahallah al Kubra"
+        }
       },
       {
-        "name": "Al Mansurah"
+        "location": {
+          "name": "Al Mansurah"
+        }
       },
       {
-        "name": "Al Marj"
+        "location": {
+          "name": "Al Marj"
+        }
       },
       {
-        "name": "Alexandria"
+        "location": {
+          "name": "Alexandria"
+        }
       },
       {
-        "name": "Almazah"
+        "location": {
+          "name": "Almazah"
+        }
       },
       {
-        "name": "Ar Rawdah"
+        "location": {
+          "name": "Ar Rawdah"
+        }
       },
       {
-        "name": "Assiut"
+        "location": {
+          "name": "Assiut"
+        }
       },
       {
-        "name": "Az Zamalik"
+        "location": {
+          "name": "Az Zamalik"
+        }
       },
       {
-        "name": "Badr"
+        "location": {
+          "name": "Badr"
+        }
       },
       {
-        "name": "Banha"
+        "location": {
+          "name": "Banha"
+        }
       },
       {
-        "name": "Bani Suwayf"
+        "location": {
+          "name": "Bani Suwayf"
+        }
       },
       {
-        "name": "Cairo"
+        "location": {
+          "name": "Cairo"
+        }
       },
       {
-        "name": "Damietta"
+        "location": {
+          "name": "Damietta"
+        }
       },
       {
-        "name": "Faraskur"
+        "location": {
+          "name": "Faraskur"
+        }
       },
       {
-        "name": "Flaminj"
+        "location": {
+          "name": "Flaminj"
+        }
       },
       {
-        "name": "Giza"
+        "location": {
+          "name": "Giza"
+        }
       },
       {
-        "name": "Heliopolis"
+        "location": {
+          "name": "Heliopolis"
+        }
       },
       {
-        "name": "Helwan"
+        "location": {
+          "name": "Helwan"
+        }
       },
       {
-        "name": "Hurghada"
+        "location": {
+          "name": "Hurghada"
+        }
       },
       {
-        "name": "Ismailia"
+        "location": {
+          "name": "Ismailia"
+        }
       },
       {
-        "name": "Kafr ash Shaykh"
+        "location": {
+          "name": "Kafr ash Shaykh"
+        }
       },
       {
-        "name": "Luxor"
+        "location": {
+          "name": "Luxor"
+        }
       },
       {
-        "name": "Madinat an Nasr"
+        "location": {
+          "name": "Madinat an Nasr"
+        }
       },
       {
-        "name": "Madinat as Sadis min Uktubar"
+        "location": {
+          "name": "Madinat as Sadis min Uktubar"
+        }
       },
       {
-        "name": "Minya"
+        "location": {
+          "name": "Minya"
+        }
       },
       {
-        "name": "Nasr"
+        "location": {
+          "name": "Nasr"
+        }
       },
       {
-        "name": "New Cairo"
+        "location": {
+          "name": "New Cairo"
+        }
       },
       {
-        "name": "Port Said"
+        "location": {
+          "name": "Port Said"
+        }
       },
       {
-        "name": "Rafah"
+        "location": {
+          "name": "Rafah"
+        }
       },
       {
-        "name": "Ramsis"
+        "location": {
+          "name": "Ramsis"
+        }
       },
       {
-        "name": "Sadat"
+        "location": {
+          "name": "Sadat"
+        }
       },
       {
-        "name": "Shirbin"
+        "location": {
+          "name": "Shirbin"
+        }
       },
       {
-        "name": "Shubra"
+        "location": {
+          "name": "Shubra"
+        }
       },
       {
-        "name": "Sohag"
+        "location": {
+          "name": "Sohag"
+        }
       },
       {
-        "name": "Suez"
+        "location": {
+          "name": "Suez"
+        }
       },
       {
-        "name": "Tanta"
+        "location": {
+          "name": "Tanta"
+        }
       },
       {
-        "name": "Toukh"
+        "location": {
+          "name": "Toukh"
+        }
       },
       {
-        "name": "Zagazig"
+        "location": {
+          "name": "Zagazig"
+        }
       }
     ]
   },
   {
-    "name": "Gabon",
+    "location": {
+      "name": "Gabon"
+    },
     "children": [
       {
-        "name": "Gamba"
+        "location": {
+          "name": "Gamba"
+        }
       },
       {
-        "name": "Libreville"
+        "location": {
+          "name": "Libreville"
+        }
       },
       {
-        "name": "Mamagnia"
+        "location": {
+          "name": "Mamagnia"
+        }
       },
       {
-        "name": "Moanda"
+        "location": {
+          "name": "Moanda"
+        }
       },
       {
-        "name": "Port-Gentil"
+        "location": {
+          "name": "Port-Gentil"
+        }
       }
     ]
   },
   {
-    "name": "Georgia",
+    "location": {
+      "name": "Georgia"
+    },
     "children": [
       {
-        "name": "Gogolesubani"
+        "location": {
+          "name": "Gogolesubani"
+        }
       },
       {
-        "name": "Kutaisi"
+        "location": {
+          "name": "Kutaisi"
+        }
       },
       {
-        "name": "Lentekhi"
+        "location": {
+          "name": "Lentekhi"
+        }
       },
       {
-        "name": "Qazbegi"
+        "location": {
+          "name": "Qazbegi"
+        }
       },
       {
-        "name": "Samtredia"
+        "location": {
+          "name": "Samtredia"
+        }
       },
       {
-        "name": "Sukhumi"
+        "location": {
+          "name": "Sukhumi"
+        }
       },
       {
-        "name": "Tbilisi"
+        "location": {
+          "name": "Tbilisi"
+        }
       },
       {
-        "name": "Zemo-Avchala"
+        "location": {
+          "name": "Zemo-Avchala"
+        }
       },
       {
-        "name": "Zugdidi"
+        "location": {
+          "name": "Zugdidi"
+        }
       }
     ]
   },
   {
-    "name": "Ghana",
+    "location": {
+      "name": "Ghana"
+    },
     "children": [
       {
-        "name": "Accra"
+        "location": {
+          "name": "Accra"
+        }
       },
       {
-        "name": "Bawku"
+        "location": {
+          "name": "Bawku"
+        }
       },
       {
-        "name": "Berekum"
+        "location": {
+          "name": "Berekum"
+        }
       },
       {
-        "name": "Bolgatanga"
+        "location": {
+          "name": "Bolgatanga"
+        }
       },
       {
-        "name": "Cape Coast"
+        "location": {
+          "name": "Cape Coast"
+        }
       },
       {
-        "name": "Home"
+        "location": {
+          "name": "Home"
+        }
       },
       {
-        "name": "Koforidua"
+        "location": {
+          "name": "Koforidua"
+        }
       },
       {
-        "name": "Kumasi"
+        "location": {
+          "name": "Kumasi"
+        }
       },
       {
-        "name": "Legon"
+        "location": {
+          "name": "Legon"
+        }
       },
       {
-        "name": "Mampong"
+        "location": {
+          "name": "Mampong"
+        }
       },
       {
-        "name": "Navrongo"
+        "location": {
+          "name": "Navrongo"
+        }
       },
       {
-        "name": "Sunyani"
+        "location": {
+          "name": "Sunyani"
+        }
       },
       {
-        "name": "Takoradi"
+        "location": {
+          "name": "Takoradi"
+        }
       },
       {
-        "name": "Tema"
+        "location": {
+          "name": "Tema"
+        }
       },
       {
-        "name": "Wa"
+        "location": {
+          "name": "Wa"
+        }
       },
       {
-        "name": "Winneba"
+        "location": {
+          "name": "Winneba"
+        }
       }
     ]
   },
   {
-    "name": "Guinea",
+    "location": {
+      "name": "Guinea"
+    },
     "children": [
       {
-        "name": "Conakry"
+        "location": {
+          "name": "Conakry"
+        }
       },
       {
-        "name": "Dabola"
+        "location": {
+          "name": "Dabola"
+        }
       },
       {
-        "name": "Kalia"
+        "location": {
+          "name": "Kalia"
+        }
       },
       {
-        "name": "Kankan"
+        "location": {
+          "name": "Kankan"
+        }
       },
       {
-        "name": "Lola"
+        "location": {
+          "name": "Lola"
+        }
       },
       {
-        "name": "Mamou"
+        "location": {
+          "name": "Mamou"
+        }
       },
       {
-        "name": "Port Kamsar"
+        "location": {
+          "name": "Port Kamsar"
+        }
       },
       {
-        "name": "Sangaredi"
+        "location": {
+          "name": "Sangaredi"
+        }
       }
     ]
   },
   {
-    "name": "Kenya",
+    "location": {
+      "name": "Kenya"
+    },
     "children": [
       {
-        "name": "Bondo"
+        "location": {
+          "name": "Bondo"
+        }
       },
       {
-        "name": "Chuka"
+        "location": {
+          "name": "Chuka"
+        }
       },
       {
-        "name": "Eldoret"
+        "location": {
+          "name": "Eldoret"
+        }
       },
       {
-        "name": "Kabete"
+        "location": {
+          "name": "Kabete"
+        }
       },
       {
-        "name": "Kaiboi"
+        "location": {
+          "name": "Kaiboi"
+        }
       },
       {
-        "name": "Karatina"
+        "location": {
+          "name": "Karatina"
+        }
       },
       {
-        "name": "Kiambu"
+        "location": {
+          "name": "Kiambu"
+        }
       },
       {
-        "name": "Kikuyu"
+        "location": {
+          "name": "Kikuyu"
+        }
       },
       {
-        "name": "Kisii"
+        "location": {
+          "name": "Kisii"
+        }
       },
       {
-        "name": "Kisumu"
+        "location": {
+          "name": "Kisumu"
+        }
       },
       {
-        "name": "Kitale"
+        "location": {
+          "name": "Kitale"
+        }
       },
       {
-        "name": "Kitui"
+        "location": {
+          "name": "Kitui"
+        }
       },
       {
-        "name": "Machakos"
+        "location": {
+          "name": "Machakos"
+        }
       },
       {
-        "name": "Maseno"
+        "location": {
+          "name": "Maseno"
+        }
       },
       {
-        "name": "Mbita"
+        "location": {
+          "name": "Mbita"
+        }
       },
       {
-        "name": "Mombasa"
+        "location": {
+          "name": "Mombasa"
+        }
       },
       {
-        "name": "Nairobi"
+        "location": {
+          "name": "Nairobi"
+        }
       },
       {
-        "name": "Nakuru"
+        "location": {
+          "name": "Nakuru"
+        }
       },
       {
-        "name": "Sawa Sawa"
+        "location": {
+          "name": "Sawa Sawa"
+        }
       },
       {
-        "name": "Siaya"
+        "location": {
+          "name": "Siaya"
+        }
       },
       {
-        "name": "Thika"
+        "location": {
+          "name": "Thika"
+        }
       },
       {
-        "name": "Turbo"
+        "location": {
+          "name": "Turbo"
+        }
       },
       {
-        "name": "Wote"
+        "location": {
+          "name": "Wote"
+        }
       }
     ]
   },
   {
-    "name": "Libya",
+    "location": {
+      "name": "Libya"
+    },
     "children": [
       {
-        "name": "Benghazi"
+        "location": {
+          "name": "Benghazi"
+        }
       },
       {
-        "name": "Misratah"
+        "location": {
+          "name": "Misratah"
+        }
       },
       {
-        "name": "Sabha"
+        "location": {
+          "name": "Sabha"
+        }
       },
       {
-        "name": "Tripoli"
+        "location": {
+          "name": "Tripoli"
+        }
       },
       {
-        "name": "Zliten"
+        "location": {
+          "name": "Zliten"
+        }
       }
     ]
   },
   {
-    "name": "Madagascar",
+    "location": {
+      "name": "Madagascar"
+    },
     "children": [
       {
-        "name": "Ambanja"
+        "location": {
+          "name": "Ambanja"
+        }
       },
       {
-        "name": "Antananarivo"
+        "location": {
+          "name": "Antananarivo"
+        }
       },
       {
-        "name": "Antsirabe"
+        "location": {
+          "name": "Antsirabe"
+        }
       },
       {
-        "name": "Antsiranana"
+        "location": {
+          "name": "Antsiranana"
+        }
       },
       {
-        "name": "Fianarantsoa"
+        "location": {
+          "name": "Fianarantsoa"
+        }
       },
       {
-        "name": "Toamasina"
+        "location": {
+          "name": "Toamasina"
+        }
       },
       {
-        "name": "Toliara"
+        "location": {
+          "name": "Toliara"
+        }
       }
     ]
   },
   {
-    "name": "Morocco",
+    "location": {
+      "name": "Morocco"
+    },
     "children": [
       {
-        "name": "Afourer"
+        "location": {
+          "name": "Afourer"
+        }
       },
       {
-        "name": "Agadir"
+        "location": {
+          "name": "Agadir"
+        }
       },
       {
-        "name": "Ait Melloul"
+        "location": {
+          "name": "Ait Melloul"
+        }
       },
       {
-        "name": "Al Hoceima"
+        "location": {
+          "name": "Al Hoceima"
+        }
       },
       {
-        "name": "Assa"
+        "location": {
+          "name": "Assa"
+        }
       },
       {
-        "name": "Benguerir"
+        "location": {
+          "name": "Benguerir"
+        }
       },
       {
-        "name": "Beni Mellal"
+        "location": {
+          "name": "Beni Mellal"
+        }
       },
       {
-        "name": "Berrechid"
+        "location": {
+          "name": "Berrechid"
+        }
       },
       {
-        "name": "Casablanca"
+        "location": {
+          "name": "Casablanca"
+        }
       },
       {
-        "name": "Deroua"
+        "location": {
+          "name": "Deroua"
+        }
       },
       {
-        "name": "El Gara"
+        "location": {
+          "name": "El Gara"
+        }
       },
       {
-        "name": "El Hajeb"
+        "location": {
+          "name": "El Hajeb"
+        }
       },
       {
-        "name": "El Jadida"
+        "location": {
+          "name": "El Jadida"
+        }
       },
       {
-        "name": "Erfoud"
+        "location": {
+          "name": "Erfoud"
+        }
       },
       {
-        "name": "Fes"
+        "location": {
+          "name": "Fes"
+        }
       },
       {
-        "name": "Fkih Ben Salah"
+        "location": {
+          "name": "Fkih Ben Salah"
+        }
       },
       {
-        "name": "Kenitra"
+        "location": {
+          "name": "Kenitra"
+        }
       },
       {
-        "name": "Khemisset"
+        "location": {
+          "name": "Khemisset"
+        }
       },
       {
-        "name": "Khouribga"
+        "location": {
+          "name": "Khouribga"
+        }
       },
       {
-        "name": "Ksar el Kebir"
+        "location": {
+          "name": "Ksar el Kebir"
+        }
       },
       {
-        "name": "Larache"
+        "location": {
+          "name": "Larache"
+        }
       },
       {
-        "name": "Mansour"
+        "location": {
+          "name": "Mansour"
+        }
       },
       {
-        "name": "Marrakesh"
+        "location": {
+          "name": "Marrakesh"
+        }
       },
       {
-        "name": "Mehediyah"
+        "location": {
+          "name": "Mehediyah"
+        }
       },
       {
-        "name": "Meknes"
+        "location": {
+          "name": "Meknes"
+        }
       },
       {
-        "name": "Mohammedia"
+        "location": {
+          "name": "Mohammedia"
+        }
       },
       {
-        "name": "Nador"
+        "location": {
+          "name": "Nador"
+        }
       },
       {
-        "name": "Ouazzane"
+        "location": {
+          "name": "Ouazzane"
+        }
       },
       {
-        "name": "Oued Zem"
+        "location": {
+          "name": "Oued Zem"
+        }
       },
       {
-        "name": "Oujda"
+        "location": {
+          "name": "Oujda"
+        }
       },
       {
-        "name": "Oulad Teima"
+        "location": {
+          "name": "Oulad Teima"
+        }
       },
       {
-        "name": "Rabat"
+        "location": {
+          "name": "Rabat"
+        }
       },
       {
-        "name": "Safi"
+        "location": {
+          "name": "Safi"
+        }
       },
       {
-        "name": "Sefrou"
+        "location": {
+          "name": "Sefrou"
+        }
       },
       {
-        "name": "Settat"
+        "location": {
+          "name": "Settat"
+        }
       },
       {
-        "name": "Sidi Bennour"
+        "location": {
+          "name": "Sidi Bennour"
+        }
       },
       {
-        "name": "Sidi Slimane"
+        "location": {
+          "name": "Sidi Slimane"
+        }
       },
       {
-        "name": "Skhirat"
+        "location": {
+          "name": "Skhirat"
+        }
       },
       {
-        "name": "Tahala"
+        "location": {
+          "name": "Tahala"
+        }
       },
       {
-        "name": "Tan-Tan"
+        "location": {
+          "name": "Tan-Tan"
+        }
       },
       {
-        "name": "Tangier"
+        "location": {
+          "name": "Tangier"
+        }
       },
       {
-        "name": "Tarfaya"
+        "location": {
+          "name": "Tarfaya"
+        }
       },
       {
-        "name": "Taza"
+        "location": {
+          "name": "Taza"
+        }
       },
       {
-        "name": "Temara"
+        "location": {
+          "name": "Temara"
+        }
       },
       {
-        "name": "Tiflet"
+        "location": {
+          "name": "Tiflet"
+        }
       },
       {
-        "name": "Tiznit"
+        "location": {
+          "name": "Tiznit"
+        }
       },
       {
-        "name": "Touissite"
+        "location": {
+          "name": "Touissite"
+        }
       }
     ]
   },
   {
-    "name": "Mozambique",
+    "location": {
+      "name": "Mozambique"
+    },
     "children": [
       {
-        "name": "Beira"
+        "location": {
+          "name": "Beira"
+        }
       },
       {
-        "name": "Maputo"
+        "location": {
+          "name": "Maputo"
+        }
       },
       {
-        "name": "Matola"
+        "location": {
+          "name": "Matola"
+        }
       },
       {
-        "name": "Mozambique"
+        "location": {
+          "name": "Mozambique"
+        }
       },
       {
-        "name": "Nampula"
+        "location": {
+          "name": "Nampula"
+        }
       },
       {
-        "name": "Pemba"
+        "location": {
+          "name": "Pemba"
+        }
       },
       {
-        "name": "Quelimane"
+        "location": {
+          "name": "Quelimane"
+        }
       },
       {
-        "name": "Tete"
+        "location": {
+          "name": "Tete"
+        }
       }
     ]
   },
   {
-    "name": "Nigeria",
+    "location": {
+      "name": "Nigeria"
+    },
     "children": [
       {
-        "name": "Aba"
+        "location": {
+          "name": "Aba"
+        }
       },
       {
-        "name": "Abakaliki"
+        "location": {
+          "name": "Abakaliki"
+        }
       },
       {
-        "name": "Abeokuta"
+        "location": {
+          "name": "Abeokuta"
+        }
       },
       {
-        "name": "Abraka"
+        "location": {
+          "name": "Abraka"
+        }
       },
       {
-        "name": "Abraka"
+        "location": {
+          "name": "Abraka"
+        }
       },
       {
-        "name": "Abuja"
+        "location": {
+          "name": "Abuja"
+        }
       },
       {
-        "name": "Ado-Ekiti"
+        "location": {
+          "name": "Ado-Ekiti"
+        }
       },
       {
-        "name": "Adodo"
+        "location": {
+          "name": "Adodo"
+        }
       },
       {
-        "name": "Aganga"
+        "location": {
+          "name": "Aganga"
+        }
       },
       {
-        "name": "Agege"
+        "location": {
+          "name": "Agege"
+        }
       },
       {
-        "name": "Agidingbi"
+        "location": {
+          "name": "Agidingbi"
+        }
       },
       {
-        "name": "Ajegunle"
+        "location": {
+          "name": "Ajegunle"
+        }
       },
       {
-        "name": "Ajuwon"
+        "location": {
+          "name": "Ajuwon"
+        }
       },
       {
-        "name": "Akure"
+        "location": {
+          "name": "Akure"
+        }
       },
       {
-        "name": "Alimosho"
+        "location": {
+          "name": "Alimosho"
+        }
       },
       {
-        "name": "Anambra"
+        "location": {
+          "name": "Anambra"
+        }
       },
       {
-        "name": "Apapa"
+        "location": {
+          "name": "Apapa"
+        }
       },
       {
-        "name": "Ayobo"
+        "location": {
+          "name": "Ayobo"
+        }
       },
       {
-        "name": "Benin City"
+        "location": {
+          "name": "Benin City"
+        }
       },
       {
-        "name": "Birnin Kebbi"
+        "location": {
+          "name": "Birnin Kebbi"
+        }
       },
       {
-        "name": "Bonny"
+        "location": {
+          "name": "Bonny"
+        }
       },
       {
-        "name": "Burutu"
+        "location": {
+          "name": "Burutu"
+        }
       },
       {
-        "name": "Bwari"
+        "location": {
+          "name": "Bwari"
+        }
       },
       {
-        "name": "Calabar"
+        "location": {
+          "name": "Calabar"
+        }
       },
       {
-        "name": "Chafe"
+        "location": {
+          "name": "Chafe"
+        }
       },
       {
-        "name": "Damaturu"
+        "location": {
+          "name": "Damaturu"
+        }
       },
       {
-        "name": "Egbeda"
+        "location": {
+          "name": "Egbeda"
+        }
       },
       {
-        "name": "Ekpoma"
+        "location": {
+          "name": "Ekpoma"
+        }
       },
       {
-        "name": "Enugu"
+        "location": {
+          "name": "Enugu"
+        }
       },
       {
-        "name": "Forum"
+        "location": {
+          "name": "Forum"
+        }
       },
       {
-        "name": "Funtua"
+        "location": {
+          "name": "Funtua"
+        }
       },
       {
-        "name": "Ibadan"
+        "location": {
+          "name": "Ibadan"
+        }
       },
       {
-        "name": "Ido"
+        "location": {
+          "name": "Ido"
+        }
       },
       {
-        "name": "Ifako"
+        "location": {
+          "name": "Ifako"
+        }
       },
       {
-        "name": "Igando"
+        "location": {
+          "name": "Igando"
+        }
       },
       {
-        "name": "Igueben"
+        "location": {
+          "name": "Igueben"
+        }
       },
       {
-        "name": "Ikeja"
+        "location": {
+          "name": "Ikeja"
+        }
       },
       {
-        "name": "Ikorodu"
+        "location": {
+          "name": "Ikorodu"
+        }
       },
       {
-        "name": "Ikotun"
+        "location": {
+          "name": "Ikotun"
+        }
       },
       {
-        "name": "Ile-Ife"
+        "location": {
+          "name": "Ile-Ife"
+        }
       },
       {
-        "name": "Ilesa"
+        "location": {
+          "name": "Ilesa"
+        }
       },
       {
-        "name": "Ilorin"
+        "location": {
+          "name": "Ilorin"
+        }
       },
       {
-        "name": "Ipaja"
+        "location": {
+          "name": "Ipaja"
+        }
       },
       {
-        "name": "Iseri-Oke"
+        "location": {
+          "name": "Iseri-Oke"
+        }
       },
       {
-        "name": "Isolo"
+        "location": {
+          "name": "Isolo"
+        }
       },
       {
-        "name": "Jalingo"
+        "location": {
+          "name": "Jalingo"
+        }
       },
       {
-        "name": "Jos"
+        "location": {
+          "name": "Jos"
+        }
       },
       {
-        "name": "Kaduna"
+        "location": {
+          "name": "Kaduna"
+        }
       },
       {
-        "name": "Kano"
+        "location": {
+          "name": "Kano"
+        }
       },
       {
-        "name": "Kebbi"
+        "location": {
+          "name": "Kebbi"
+        }
       },
       {
-        "name": "Lagos"
+        "location": {
+          "name": "Lagos"
+        }
       },
       {
-        "name": "Lekki"
+        "location": {
+          "name": "Lekki"
+        }
       },
       {
-        "name": "Lokoja"
+        "location": {
+          "name": "Lokoja"
+        }
       },
       {
-        "name": "Magodo"
+        "location": {
+          "name": "Magodo"
+        }
       },
       {
-        "name": "Makurdi"
+        "location": {
+          "name": "Makurdi"
+        }
       },
       {
-        "name": "Maryland"
+        "location": {
+          "name": "Maryland"
+        }
       },
       {
-        "name": "Minna"
+        "location": {
+          "name": "Minna"
+        }
       },
       {
-        "name": "Mogho"
+        "location": {
+          "name": "Mogho"
+        }
       },
       {
-        "name": "Mowe"
+        "location": {
+          "name": "Mowe"
+        }
       },
       {
-        "name": "Mushin"
+        "location": {
+          "name": "Mushin"
+        }
       },
       {
-        "name": "Nsukka"
+        "location": {
+          "name": "Nsukka"
+        }
       },
       {
-        "name": "Obafemi"
+        "location": {
+          "name": "Obafemi"
+        }
       },
       {
-        "name": "Obudu"
+        "location": {
+          "name": "Obudu"
+        }
       },
       {
-        "name": "Odau"
+        "location": {
+          "name": "Odau"
+        }
       },
       {
-        "name": "Ojo"
+        "location": {
+          "name": "Ojo"
+        }
       },
       {
-        "name": "Ojota"
+        "location": {
+          "name": "Ojota"
+        }
       },
       {
-        "name": "Ondo"
+        "location": {
+          "name": "Ondo"
+        }
       },
       {
-        "name": "Onigbongbo"
+        "location": {
+          "name": "Onigbongbo"
+        }
       },
       {
-        "name": "Orile Oshodi"
+        "location": {
+          "name": "Orile Oshodi"
+        }
       },
       {
-        "name": "Oshodi"
+        "location": {
+          "name": "Oshodi"
+        }
       },
       {
-        "name": "Osogbo"
+        "location": {
+          "name": "Osogbo"
+        }
       },
       {
-        "name": "Ota"
+        "location": {
+          "name": "Ota"
+        }
       },
       {
-        "name": "Owerri"
+        "location": {
+          "name": "Owerri"
+        }
       },
       {
-        "name": "Oworonsoki"
+        "location": {
+          "name": "Oworonsoki"
+        }
       },
       {
-        "name": "Port Harcourt"
+        "location": {
+          "name": "Port Harcourt"
+        }
       },
       {
-        "name": "Shomolu"
+        "location": {
+          "name": "Shomolu"
+        }
       },
       {
-        "name": "Suleja"
+        "location": {
+          "name": "Suleja"
+        }
       },
       {
-        "name": "Suru-Lere"
+        "location": {
+          "name": "Suru-Lere"
+        }
       },
       {
-        "name": "Tara"
+        "location": {
+          "name": "Tara"
+        }
       },
       {
-        "name": "Ughelli"
+        "location": {
+          "name": "Ughelli"
+        }
       },
       {
-        "name": "Ungwan Madaki"
+        "location": {
+          "name": "Ungwan Madaki"
+        }
       },
       {
-        "name": "Uyo"
+        "location": {
+          "name": "Uyo"
+        }
       },
       {
-        "name": "Warri"
+        "location": {
+          "name": "Warri"
+        }
       },
       {
-        "name": "Warri"
+        "location": {
+          "name": "Warri"
+        }
       },
       {
-        "name": "Yaba"
+        "location": {
+          "name": "Yaba"
+        }
       },
       {
-        "name": "Yola"
+        "location": {
+          "name": "Yola"
+        }
       },
       {
-        "name": "Zaria"
+        "location": {
+          "name": "Zaria"
+        }
       }
     ]
   },
   {
-    "name": "Senegal",
+    "location": {
+      "name": "Senegal"
+    },
     "children": [
       {
-        "name": "Boussinki"
+        "location": {
+          "name": "Boussinki"
+        }
       },
       {
-        "name": "Camberene"
+        "location": {
+          "name": "Camberene"
+        }
       },
       {
-        "name": "Dakar"
+        "location": {
+          "name": "Dakar"
+        }
       },
       {
-        "name": "Dodji"
+        "location": {
+          "name": "Dodji"
+        }
       },
       {
-        "name": "Guediawaye"
+        "location": {
+          "name": "Guediawaye"
+        }
       },
       {
-        "name": "Kaolack"
+        "location": {
+          "name": "Kaolack"
+        }
       },
       {
-        "name": "Kedougou"
+        "location": {
+          "name": "Kedougou"
+        }
       },
       {
-        "name": "Louga"
+        "location": {
+          "name": "Louga"
+        }
       },
       {
-        "name": "Madina Kokoun"
+        "location": {
+          "name": "Madina Kokoun"
+        }
       },
       {
-        "name": "Saint-Louis"
+        "location": {
+          "name": "Saint-Louis"
+        }
       },
       {
-        "name": "Sama"
+        "location": {
+          "name": "Sama"
+        }
       },
       {
-        "name": "Tanaf"
+        "location": {
+          "name": "Tanaf"
+        }
       }
     ]
   },
   {
-    "name": "South Africa",
+    "location": {
+      "name": "South Africa"
+    },
     "children": [
       {
-        "name": "Alberton"
+        "location": {
+          "name": "Alberton"
+        }
       },
       {
-        "name": "Alice"
+        "location": {
+          "name": "Alice"
+        }
       },
       {
-        "name": "Alrode"
+        "location": {
+          "name": "Alrode"
+        }
       },
       {
-        "name": "Amanzimtoti"
+        "location": {
+          "name": "Amanzimtoti"
+        }
       },
       {
-        "name": "Ashton"
+        "location": {
+          "name": "Ashton"
+        }
       },
       {
-        "name": "Atlantis"
+        "location": {
+          "name": "Atlantis"
+        }
       },
       {
-        "name": "Balfour"
+        "location": {
+          "name": "Balfour"
+        }
       },
       {
-        "name": "Bathurst"
+        "location": {
+          "name": "Bathurst"
+        }
       },
       {
-        "name": "Beaufort West"
+        "location": {
+          "name": "Beaufort West"
+        }
       },
       {
-        "name": "Bedfordview"
+        "location": {
+          "name": "Bedfordview"
+        }
       },
       {
-        "name": "Belhar"
+        "location": {
+          "name": "Belhar"
+        }
       },
       {
-        "name": "Bellville"
+        "location": {
+          "name": "Bellville"
+        }
       },
       {
-        "name": "Benoni"
+        "location": {
+          "name": "Benoni"
+        }
       },
       {
-        "name": "Bergvliet"
+        "location": {
+          "name": "Bergvliet"
+        }
       },
       {
-        "name": "Bethal"
+        "location": {
+          "name": "Bethal"
+        }
       },
       {
-        "name": "Bethlehem"
+        "location": {
+          "name": "Bethlehem"
+        }
       },
       {
-        "name": "Bloemfontein"
+        "location": {
+          "name": "Bloemfontein"
+        }
       },
       {
-        "name": "Boksburg"
+        "location": {
+          "name": "Boksburg"
+        }
       },
       {
-        "name": "Bothasig"
+        "location": {
+          "name": "Bothasig"
+        }
       },
       {
-        "name": "Botshabelo"
+        "location": {
+          "name": "Botshabelo"
+        }
       },
       {
-        "name": "Braamfontein"
+        "location": {
+          "name": "Braamfontein"
+        }
       },
       {
-        "name": "Brackenfell"
+        "location": {
+          "name": "Brackenfell"
+        }
       },
       {
-        "name": "Brakpan"
+        "location": {
+          "name": "Brakpan"
+        }
       },
       {
-        "name": "Bredasdorp"
+        "location": {
+          "name": "Bredasdorp"
+        }
       },
       {
-        "name": "Brits"
+        "location": {
+          "name": "Brits"
+        }
       },
       {
-        "name": "Bronkhorstspruit"
+        "location": {
+          "name": "Bronkhorstspruit"
+        }
       },
       {
-        "name": "Brooklyn"
+        "location": {
+          "name": "Brooklyn"
+        }
       },
       {
-        "name": "Bryanston"
+        "location": {
+          "name": "Bryanston"
+        }
       },
       {
-        "name": "Buffalo"
+        "location": {
+          "name": "Buffalo"
+        }
       },
       {
-        "name": "Butterworth"
+        "location": {
+          "name": "Butterworth"
+        }
       },
       {
-        "name": "Cape Town"
+        "location": {
+          "name": "Cape Town"
+        }
       },
       {
-        "name": "Capital Park"
+        "location": {
+          "name": "Capital Park"
+        }
       },
       {
-        "name": "Carletonville"
+        "location": {
+          "name": "Carletonville"
+        }
       },
       {
-        "name": "Carolina"
+        "location": {
+          "name": "Carolina"
+        }
       },
       {
-        "name": "Centurion"
+        "location": {
+          "name": "Centurion"
+        }
       },
       {
-        "name": "City of Cape Town"
+        "location": {
+          "name": "City of Cape Town"
+        }
       },
       {
-        "name": "Clanwilliam"
+        "location": {
+          "name": "Clanwilliam"
+        }
       },
       {
-        "name": "Claremont"
+        "location": {
+          "name": "Claremont"
+        }
       },
       {
-        "name": "Coega"
+        "location": {
+          "name": "Coega"
+        }
       },
       {
-        "name": "Coligny"
+        "location": {
+          "name": "Coligny"
+        }
       },
       {
-        "name": "Constantia"
+        "location": {
+          "name": "Constantia"
+        }
       },
       {
-        "name": "Craighall"
+        "location": {
+          "name": "Craighall"
+        }
       },
       {
-        "name": "Cullinan"
+        "location": {
+          "name": "Cullinan"
+        }
       },
       {
-        "name": "De Aar"
+        "location": {
+          "name": "De Aar"
+        }
       },
       {
-        "name": "Delmas"
+        "location": {
+          "name": "Delmas"
+        }
       },
       {
-        "name": "Deneysville"
+        "location": {
+          "name": "Deneysville"
+        }
       },
       {
-        "name": "Despatch"
+        "location": {
+          "name": "Despatch"
+        }
       },
       {
-        "name": "Doornfontein"
+        "location": {
+          "name": "Doornfontein"
+        }
       },
       {
-        "name": "Dube Location"
+        "location": {
+          "name": "Dube Location"
+        }
       },
       {
-        "name": "Duiwelskloof"
+        "location": {
+          "name": "Duiwelskloof"
+        }
       },
       {
-        "name": "Dullstroom"
+        "location": {
+          "name": "Dullstroom"
+        }
       },
       {
-        "name": "Dundee"
+        "location": {
+          "name": "Dundee"
+        }
       },
       {
-        "name": "Durban"
+        "location": {
+          "name": "Durban"
+        }
       },
       {
-        "name": "Durbanville"
+        "location": {
+          "name": "Durbanville"
+        }
       },
       {
-        "name": "East London"
+        "location": {
+          "name": "East London"
+        }
       },
       {
-        "name": "Edenburg"
+        "location": {
+          "name": "Edenburg"
+        }
       },
       {
-        "name": "Edenvale"
+        "location": {
+          "name": "Edenvale"
+        }
       },
       {
-        "name": "Eersterivier"
+        "location": {
+          "name": "Eersterivier"
+        }
       },
       {
-        "name": "Elandsfontein"
+        "location": {
+          "name": "Elandsfontein"
+        }
       },
       {
-        "name": "Elarduspark"
+        "location": {
+          "name": "Elarduspark"
+        }
       },
       {
-        "name": "Eloff"
+        "location": {
+          "name": "Eloff"
+        }
       },
       {
-        "name": "Elsburg"
+        "location": {
+          "name": "Elsburg"
+        }
       },
       {
-        "name": "Elsenburg"
+        "location": {
+          "name": "Elsenburg"
+        }
       },
       {
-        "name": "Emerald Hill"
+        "location": {
+          "name": "Emerald Hill"
+        }
       },
       {
-        "name": "Emnambithi-Ladysmith"
+        "location": {
+          "name": "Emnambithi-Ladysmith"
+        }
       },
       {
-        "name": "Empangeni"
+        "location": {
+          "name": "Empangeni"
+        }
       },
       {
-        "name": "Erasmia"
+        "location": {
+          "name": "Erasmia"
+        }
       },
       {
-        "name": "Ermelo"
+        "location": {
+          "name": "Ermelo"
+        }
       },
       {
-        "name": "Eshowe"
+        "location": {
+          "name": "Eshowe"
+        }
       },
       {
-        "name": "Evander"
+        "location": {
+          "name": "Evander"
+        }
       },
       {
-        "name": "Faure"
+        "location": {
+          "name": "Faure"
+        }
       },
       {
-        "name": "Florida Glen"
+        "location": {
+          "name": "Florida Glen"
+        }
       },
       {
-        "name": "Fochville"
+        "location": {
+          "name": "Fochville"
+        }
       },
       {
-        "name": "Fordsburg"
+        "location": {
+          "name": "Fordsburg"
+        }
       },
       {
-        "name": "Fort Cox"
+        "location": {
+          "name": "Fort Cox"
+        }
       },
       {
-        "name": "Franschhoek"
+        "location": {
+          "name": "Franschhoek"
+        }
       },
       {
-        "name": "Gansbaai"
+        "location": {
+          "name": "Gansbaai"
+        }
       },
       {
-        "name": "Ganspan"
+        "location": {
+          "name": "Ganspan"
+        }
       },
       {
-        "name": "George"
+        "location": {
+          "name": "George"
+        }
       },
       {
-        "name": "Germiston"
+        "location": {
+          "name": "Germiston"
+        }
       },
       {
-        "name": "Gezina"
+        "location": {
+          "name": "Gezina"
+        }
       },
       {
-        "name": "Gillitts"
+        "location": {
+          "name": "Gillitts"
+        }
       },
       {
-        "name": "Gingindlovu"
+        "location": {
+          "name": "Gingindlovu"
+        }
       },
       {
-        "name": "Glen Austin"
+        "location": {
+          "name": "Glen Austin"
+        }
       },
       {
-        "name": "Goodwood"
+        "location": {
+          "name": "Goodwood"
+        }
       },
       {
-        "name": "Graaff Reinet"
+        "location": {
+          "name": "Graaff Reinet"
+        }
       },
       {
-        "name": "Grabouw"
+        "location": {
+          "name": "Grabouw"
+        }
       },
       {
-        "name": "Grahamstown"
+        "location": {
+          "name": "Grahamstown"
+        }
       },
       {
-        "name": "Greytown"
+        "location": {
+          "name": "Greytown"
+        }
       },
       {
-        "name": "Groblersdal"
+        "location": {
+          "name": "Groblersdal"
+        }
       },
       {
-        "name": "Haenertsburg"
+        "location": {
+          "name": "Haenertsburg"
+        }
       },
       {
-        "name": "Harrismith"
+        "location": {
+          "name": "Harrismith"
+        }
       },
       {
-        "name": "Hartbeespoort"
+        "location": {
+          "name": "Hartbeespoort"
+        }
       },
       {
-        "name": "Hartenbos"
+        "location": {
+          "name": "Hartenbos"
+        }
       },
       {
-        "name": "Hartswater"
+        "location": {
+          "name": "Hartswater"
+        }
       },
       {
-        "name": "Hatfield"
+        "location": {
+          "name": "Hatfield"
+        }
       },
       {
-        "name": "Hawston"
+        "location": {
+          "name": "Hawston"
+        }
       },
       {
-        "name": "Hazyview"
+        "location": {
+          "name": "Hazyview"
+        }
       },
       {
-        "name": "Heidelberg"
+        "location": {
+          "name": "Heidelberg"
+        }
       },
       {
-        "name": "Hekpoort"
+        "location": {
+          "name": "Hekpoort"
+        }
       },
       {
-        "name": "Henley on Klip"
+        "location": {
+          "name": "Henley on Klip"
+        }
       },
       {
-        "name": "Hennenman"
+        "location": {
+          "name": "Hennenman"
+        }
       },
       {
-        "name": "Hermanus"
+        "location": {
+          "name": "Hermanus"
+        }
       },
       {
-        "name": "Hillcrest"
+        "location": {
+          "name": "Hillcrest"
+        }
       },
       {
-        "name": "Hilton"
+        "location": {
+          "name": "Hilton"
+        }
       },
       {
-        "name": "Himeville"
+        "location": {
+          "name": "Himeville"
+        }
       },
       {
-        "name": "Hluhluwe"
+        "location": {
+          "name": "Hluhluwe"
+        }
       },
       {
-        "name": "Hoedspruit"
+        "location": {
+          "name": "Hoedspruit"
+        }
       },
       {
-        "name": "Hogsback"
+        "location": {
+          "name": "Hogsback"
+        }
       },
       {
-        "name": "Houghton Estate"
+        "location": {
+          "name": "Houghton Estate"
+        }
       },
       {
-        "name": "Hout Bay"
+        "location": {
+          "name": "Hout Bay"
+        }
       },
       {
-        "name": "Howick"
+        "location": {
+          "name": "Howick"
+        }
       },
       {
-        "name": "Humansdorp"
+        "location": {
+          "name": "Humansdorp"
+        }
       },
       {
-        "name": "Hyde Park"
+        "location": {
+          "name": "Hyde Park"
+        }
       },
       {
-        "name": "Irene"
+        "location": {
+          "name": "Irene"
+        }
       },
       {
-        "name": "Isando"
+        "location": {
+          "name": "Isando"
+        }
       },
       {
-        "name": "Ixopo"
+        "location": {
+          "name": "Ixopo"
+        }
       },
       {
-        "name": "Johannesburg"
+        "location": {
+          "name": "Johannesburg"
+        }
       },
       {
-        "name": "Kalkbaai"
+        "location": {
+          "name": "Kalkbaai"
+        }
       },
       {
-        "name": "Katlehong"
+        "location": {
+          "name": "Katlehong"
+        }
       },
       {
-        "name": "Kempton Park"
+        "location": {
+          "name": "Kempton Park"
+        }
       },
       {
-        "name": "Kimberley"
+        "location": {
+          "name": "Kimberley"
+        }
       },
       {
-        "name": "Kingsborough"
+        "location": {
+          "name": "Kingsborough"
+        }
       },
       {
-        "name": "Kingsley"
+        "location": {
+          "name": "Kingsley"
+        }
       },
       {
-        "name": "Kingsmead"
+        "location": {
+          "name": "Kingsmead"
+        }
       },
       {
-        "name": "Kinross"
+        "location": {
+          "name": "Kinross"
+        }
       },
       {
-        "name": "Kleinmond"
+        "location": {
+          "name": "Kleinmond"
+        }
       },
       {
-        "name": "Klerksdorp"
+        "location": {
+          "name": "Klerksdorp"
+        }
       },
       {
-        "name": "Kloof"
+        "location": {
+          "name": "Kloof"
+        }
       },
       {
-        "name": "Knysna"
+        "location": {
+          "name": "Knysna"
+        }
       },
       {
-        "name": "Kokstad"
+        "location": {
+          "name": "Kokstad"
+        }
       },
       {
-        "name": "Kraaifontein"
+        "location": {
+          "name": "Kraaifontein"
+        }
       },
       {
-        "name": "Kranskop"
+        "location": {
+          "name": "Kranskop"
+        }
       },
       {
-        "name": "Kriel"
+        "location": {
+          "name": "Kriel"
+        }
       },
       {
-        "name": "Kroonstad"
+        "location": {
+          "name": "Kroonstad"
+        }
       },
       {
-        "name": "Krugersdorp"
+        "location": {
+          "name": "Krugersdorp"
+        }
       },
       {
-        "name": "Kuils River"
+        "location": {
+          "name": "Kuils River"
+        }
       },
       {
-        "name": "KwaDukuza"
+        "location": {
+          "name": "KwaDukuza"
+        }
       },
       {
-        "name": "La Lucia"
+        "location": {
+          "name": "La Lucia"
+        }
       },
       {
-        "name": "La Motte"
+        "location": {
+          "name": "La Motte"
+        }
       },
       {
-        "name": "Ladybrand"
+        "location": {
+          "name": "Ladybrand"
+        }
       },
       {
-        "name": "Lansdowne"
+        "location": {
+          "name": "Lansdowne"
+        }
       },
       {
-        "name": "Laudium"
+        "location": {
+          "name": "Laudium"
+        }
       },
       {
-        "name": "Lephalale"
+        "location": {
+          "name": "Lephalale"
+        }
       },
       {
-        "name": "Lichtenburg"
+        "location": {
+          "name": "Lichtenburg"
+        }
       },
       {
-        "name": "Lombardy East"
+        "location": {
+          "name": "Lombardy East"
+        }
       },
       {
-        "name": "London"
+        "location": {
+          "name": "London"
+        }
       },
       {
-        "name": "Louis Trichardt"
+        "location": {
+          "name": "Louis Trichardt"
+        }
       },
       {
-        "name": "Lutzville"
+        "location": {
+          "name": "Lutzville"
+        }
       },
       {
-        "name": "Lydenburg"
+        "location": {
+          "name": "Lydenburg"
+        }
       },
       {
-        "name": "Lyndhurst"
+        "location": {
+          "name": "Lyndhurst"
+        }
       },
       {
-        "name": "Lynnwood"
+        "location": {
+          "name": "Lynnwood"
+        }
       },
       {
-        "name": "Lyttelton"
+        "location": {
+          "name": "Lyttelton"
+        }
       },
       {
-        "name": "Machadodorp"
+        "location": {
+          "name": "Machadodorp"
+        }
       },
       {
-        "name": "Mafikeng"
+        "location": {
+          "name": "Mafikeng"
+        }
       },
       {
-        "name": "Maidstone"
+        "location": {
+          "name": "Maidstone"
+        }
       },
       {
-        "name": "Majuba"
+        "location": {
+          "name": "Majuba"
+        }
       },
       {
-        "name": "Malmesbury"
+        "location": {
+          "name": "Malmesbury"
+        }
       },
       {
-        "name": "Malvern"
+        "location": {
+          "name": "Malvern"
+        }
       },
       {
-        "name": "Maraisburg"
+        "location": {
+          "name": "Maraisburg"
+        }
       },
       {
-        "name": "Margate"
+        "location": {
+          "name": "Margate"
+        }
       },
       {
-        "name": "Marshalltown"
+        "location": {
+          "name": "Marshalltown"
+        }
       },
       {
-        "name": "Meadowridge"
+        "location": {
+          "name": "Meadowridge"
+        }
       },
       {
-        "name": "Medunsa"
+        "location": {
+          "name": "Medunsa"
+        }
       },
       {
-        "name": "Melkbosstrand"
+        "location": {
+          "name": "Melkbosstrand"
+        }
       },
       {
-        "name": "Merrivale"
+        "location": {
+          "name": "Merrivale"
+        }
       },
       {
-        "name": "Messina"
+        "location": {
+          "name": "Messina"
+        }
       },
       {
-        "name": "Meyerton"
+        "location": {
+          "name": "Meyerton"
+        }
       },
       {
-        "name": "Middelburg"
+        "location": {
+          "name": "Middelburg"
+        }
       },
       {
-        "name": "Middelburg"
+        "location": {
+          "name": "Middelburg"
+        }
       },
       {
-        "name": "Midrand"
+        "location": {
+          "name": "Midrand"
+        }
       },
       {
-        "name": "Milnerton"
+        "location": {
+          "name": "Milnerton"
+        }
       },
       {
-        "name": "Mmabatho"
+        "location": {
+          "name": "Mmabatho"
+        }
       },
       {
-        "name": "Mobeni"
+        "location": {
+          "name": "Mobeni"
+        }
       },
       {
-        "name": "Modderfontein"
+        "location": {
+          "name": "Modderfontein"
+        }
       },
       {
-        "name": "Mokopane"
+        "location": {
+          "name": "Mokopane"
+        }
       },
       {
-        "name": "Montagu"
+        "location": {
+          "name": "Montagu"
+        }
       },
       {
-        "name": "Monument Park"
+        "location": {
+          "name": "Monument Park"
+        }
       },
       {
-        "name": "Mooi River"
+        "location": {
+          "name": "Mooi River"
+        }
       },
       {
-        "name": "Mookgophong"
+        "location": {
+          "name": "Mookgophong"
+        }
       },
       {
-        "name": "Moorreesburg"
+        "location": {
+          "name": "Moorreesburg"
+        }
       },
       {
-        "name": "Morningside Manor"
+        "location": {
+          "name": "Morningside Manor"
+        }
       },
       {
-        "name": "Mossel Bay"
+        "location": {
+          "name": "Mossel Bay"
+        }
       },
       {
-        "name": "Mount Edgecombe"
+        "location": {
+          "name": "Mount Edgecombe"
+        }
       },
       {
-        "name": "Mthatha"
+        "location": {
+          "name": "Mthatha"
+        }
       },
       {
-        "name": "Muizenberg"
+        "location": {
+          "name": "Muizenberg"
+        }
       },
       {
-        "name": "Napier"
+        "location": {
+          "name": "Napier"
+        }
       },
       {
-        "name": "Nelspruit"
+        "location": {
+          "name": "Nelspruit"
+        }
       },
       {
-        "name": "New Germany"
+        "location": {
+          "name": "New Germany"
+        }
       },
       {
-        "name": "Newcastle"
+        "location": {
+          "name": "Newcastle"
+        }
       },
       {
-        "name": "Newlands"
+        "location": {
+          "name": "Newlands"
+        }
       },
       {
-        "name": "Nigel"
+        "location": {
+          "name": "Nigel"
+        }
       },
       {
-        "name": "Northcliff"
+        "location": {
+          "name": "Northcliff"
+        }
       },
       {
-        "name": "Odendaalsrus"
+        "location": {
+          "name": "Odendaalsrus"
+        }
       },
       {
-        "name": "Ogies"
+        "location": {
+          "name": "Ogies"
+        }
       },
       {
-        "name": "Olifantsfontein"
+        "location": {
+          "name": "Olifantsfontein"
+        }
       },
       {
-        "name": "Onderstepoort"
+        "location": {
+          "name": "Onderstepoort"
+        }
       },
       {
-        "name": "Onverwacht"
+        "location": {
+          "name": "Onverwacht"
+        }
       },
       {
-        "name": "Oranjeville"
+        "location": {
+          "name": "Oranjeville"
+        }
       },
       {
-        "name": "Oranjezicht"
+        "location": {
+          "name": "Oranjezicht"
+        }
       },
       {
-        "name": "Ottosdal"
+        "location": {
+          "name": "Ottosdal"
+        }
       },
       {
-        "name": "Oudtshoorn"
+        "location": {
+          "name": "Oudtshoorn"
+        }
       },
       {
-        "name": "Overport"
+        "location": {
+          "name": "Overport"
+        }
       },
       {
-        "name": "Paarl"
+        "location": {
+          "name": "Paarl"
+        }
       },
       {
-        "name": "Panorama"
+        "location": {
+          "name": "Panorama"
+        }
       },
       {
-        "name": "Parktown"
+        "location": {
+          "name": "Parktown"
+        }
       },
       {
-        "name": "Parkview"
+        "location": {
+          "name": "Parkview"
+        }
       },
       {
-        "name": "Parow"
+        "location": {
+          "name": "Parow"
+        }
       },
       {
-        "name": "Peninsula"
+        "location": {
+          "name": "Peninsula"
+        }
       },
       {
-        "name": "Phalaborwa"
+        "location": {
+          "name": "Phalaborwa"
+        }
       },
       {
-        "name": "Philadelphia"
+        "location": {
+          "name": "Philadelphia"
+        }
       },
       {
-        "name": "Philipstown"
+        "location": {
+          "name": "Philipstown"
+        }
       },
       {
-        "name": "Phoenix"
+        "location": {
+          "name": "Phoenix"
+        }
       },
       {
-        "name": "Phokeng"
+        "location": {
+          "name": "Phokeng"
+        }
       },
       {
-        "name": "Pietermaritzburg"
+        "location": {
+          "name": "Pietermaritzburg"
+        }
       },
       {
-        "name": "Pinelands"
+        "location": {
+          "name": "Pinelands"
+        }
       },
       {
-        "name": "Pinetown"
+        "location": {
+          "name": "Pinetown"
+        }
       },
       {
-        "name": "Plettenberg Bay"
+        "location": {
+          "name": "Plettenberg Bay"
+        }
       },
       {
-        "name": "Plumstead"
+        "location": {
+          "name": "Plumstead"
+        }
       },
       {
-        "name": "Polokwane"
+        "location": {
+          "name": "Polokwane"
+        }
       },
       {
-        "name": "Pongola"
+        "location": {
+          "name": "Pongola"
+        }
       },
       {
-        "name": "Port Alfred"
+        "location": {
+          "name": "Port Alfred"
+        }
       },
       {
-        "name": "Port Elizabeth"
+        "location": {
+          "name": "Port Elizabeth"
+        }
       },
       {
-        "name": "Port Shepstone"
+        "location": {
+          "name": "Port Shepstone"
+        }
       },
       {
-        "name": "Potchefstroom"
+        "location": {
+          "name": "Potchefstroom"
+        }
       },
       {
-        "name": "Pretoria"
+        "location": {
+          "name": "Pretoria"
+        }
       },
       {
-        "name": "Prieska"
+        "location": {
+          "name": "Prieska"
+        }
       },
       {
-        "name": "Primrose"
+        "location": {
+          "name": "Primrose"
+        }
       },
       {
-        "name": "Pringle Bay"
+        "location": {
+          "name": "Pringle Bay"
+        }
       },
       {
-        "name": "Queensburgh"
+        "location": {
+          "name": "Queensburgh"
+        }
       },
       {
-        "name": "Queenstown"
+        "location": {
+          "name": "Queenstown"
+        }
       },
       {
-        "name": "Queenswood"
+        "location": {
+          "name": "Queenswood"
+        }
       },
       {
-        "name": "Randburg"
+        "location": {
+          "name": "Randburg"
+        }
       },
       {
-        "name": "Randfontein"
+        "location": {
+          "name": "Randfontein"
+        }
       },
       {
-        "name": "Rawsonville"
+        "location": {
+          "name": "Rawsonville"
+        }
       },
       {
-        "name": "Rhodes"
+        "location": {
+          "name": "Rhodes"
+        }
       },
       {
-        "name": "Richards Bay"
+        "location": {
+          "name": "Richards Bay"
+        }
       },
       {
-        "name": "Richmond"
+        "location": {
+          "name": "Richmond"
+        }
       },
       {
-        "name": "Riebeek-Kasteel"
+        "location": {
+          "name": "Riebeek-Kasteel"
+        }
       },
       {
-        "name": "Rivonia"
+        "location": {
+          "name": "Rivonia"
+        }
       },
       {
-        "name": "Roggebaai"
+        "location": {
+          "name": "Roggebaai"
+        }
       },
       {
-        "name": "Roodepoort"
+        "location": {
+          "name": "Roodepoort"
+        }
       },
       {
-        "name": "Rooigrond"
+        "location": {
+          "name": "Rooigrond"
+        }
       },
       {
-        "name": "Rooihuiskraal"
+        "location": {
+          "name": "Rooihuiskraal"
+        }
       },
       {
-        "name": "Rosebank"
+        "location": {
+          "name": "Rosebank"
+        }
       },
       {
-        "name": "Rosettenville"
+        "location": {
+          "name": "Rosettenville"
+        }
       },
       {
-        "name": "Rosslyn"
+        "location": {
+          "name": "Rosslyn"
+        }
       },
       {
-        "name": "Rustenburg"
+        "location": {
+          "name": "Rustenburg"
+        }
       },
       {
-        "name": "Sabie"
+        "location": {
+          "name": "Sabie"
+        }
       },
       {
-        "name": "Saint Helena Bay"
+        "location": {
+          "name": "Saint Helena Bay"
+        }
       },
       {
-        "name": "Saint James"
+        "location": {
+          "name": "Saint James"
+        }
       },
       {
-        "name": "Saldanha"
+        "location": {
+          "name": "Saldanha"
+        }
       },
       {
-        "name": "Salt Rock"
+        "location": {
+          "name": "Salt Rock"
+        }
       },
       {
-        "name": "Sandown"
+        "location": {
+          "name": "Sandown"
+        }
       },
       {
-        "name": "Sandton"
+        "location": {
+          "name": "Sandton"
+        }
       },
       {
-        "name": "Sasolburg"
+        "location": {
+          "name": "Sasolburg"
+        }
       },
       {
-        "name": "Schweizer-Reneke"
+        "location": {
+          "name": "Schweizer-Reneke"
+        }
       },
       {
-        "name": "Scottburgh"
+        "location": {
+          "name": "Scottburgh"
+        }
       },
       {
-        "name": "Sebokeng"
+        "location": {
+          "name": "Sebokeng"
+        }
       },
       {
-        "name": "Secunda"
+        "location": {
+          "name": "Secunda"
+        }
       },
       {
-        "name": "Sedgefield"
+        "location": {
+          "name": "Sedgefield"
+        }
       },
       {
-        "name": "Senekal"
+        "location": {
+          "name": "Senekal"
+        }
       },
       {
-        "name": "Shelly Beach"
+        "location": {
+          "name": "Shelly Beach"
+        }
       },
       {
-        "name": "Silverton"
+        "location": {
+          "name": "Silverton"
+        }
       },
       {
-        "name": "Sinoville"
+        "location": {
+          "name": "Sinoville"
+        }
       },
       {
-        "name": "Somerset West"
+        "location": {
+          "name": "Somerset West"
+        }
       },
       {
-        "name": "Soshanguve"
+        "location": {
+          "name": "Soshanguve"
+        }
       },
       {
-        "name": "Soweto"
+        "location": {
+          "name": "Soweto"
+        }
       },
       {
-        "name": "Springs"
+        "location": {
+          "name": "Springs"
+        }
       },
       {
-        "name": "Standerton"
+        "location": {
+          "name": "Standerton"
+        }
       },
       {
-        "name": "Stanford"
+        "location": {
+          "name": "Stanford"
+        }
       },
       {
-        "name": "Stellenbosch"
+        "location": {
+          "name": "Stellenbosch"
+        }
       },
       {
-        "name": "Stilfontein"
+        "location": {
+          "name": "Stilfontein"
+        }
       },
       {
-        "name": "Strand"
+        "location": {
+          "name": "Strand"
+        }
       },
       {
-        "name": "Sun Valley"
+        "location": {
+          "name": "Sun Valley"
+        }
       },
       {
-        "name": "Swartkops"
+        "location": {
+          "name": "Swartkops"
+        }
       },
       {
-        "name": "Temba"
+        "location": {
+          "name": "Temba"
+        }
       },
       {
-        "name": "Tembisa"
+        "location": {
+          "name": "Tembisa"
+        }
       },
       {
-        "name": "Thabazimbi"
+        "location": {
+          "name": "Thabazimbi"
+        }
       },
       {
-        "name": "The Rest"
+        "location": {
+          "name": "The Rest"
+        }
       },
       {
-        "name": "Thohoyandou"
+        "location": {
+          "name": "Thohoyandou"
+        }
       },
       {
-        "name": "Three Anchor Bay"
+        "location": {
+          "name": "Three Anchor Bay"
+        }
       },
       {
-        "name": "Three Rivers"
+        "location": {
+          "name": "Three Rivers"
+        }
       },
       {
-        "name": "Tokai"
+        "location": {
+          "name": "Tokai"
+        }
       },
       {
-        "name": "Tongaat"
+        "location": {
+          "name": "Tongaat"
+        }
       },
       {
-        "name": "Tzaneen"
+        "location": {
+          "name": "Tzaneen"
+        }
       },
       {
-        "name": "Uitenhage"
+        "location": {
+          "name": "Uitenhage"
+        }
       },
       {
-        "name": "Umbogintwini"
+        "location": {
+          "name": "Umbogintwini"
+        }
       },
       {
-        "name": "Umdloti"
+        "location": {
+          "name": "Umdloti"
+        }
       },
       {
-        "name": "Umhlanga"
+        "location": {
+          "name": "Umhlanga"
+        }
       },
       {
-        "name": "Umkomaas"
+        "location": {
+          "name": "Umkomaas"
+        }
       },
       {
-        "name": "Umtentweni"
+        "location": {
+          "name": "Umtentweni"
+        }
       },
       {
-        "name": "Upington"
+        "location": {
+          "name": "Upington"
+        }
       },
       {
-        "name": "Vaalbank"
+        "location": {
+          "name": "Vaalbank"
+        }
       },
       {
-        "name": "Vaalpark"
+        "location": {
+          "name": "Vaalpark"
+        }
       },
       {
-        "name": "Vanderbijlpark"
+        "location": {
+          "name": "Vanderbijlpark"
+        }
       },
       {
-        "name": "Vereeniging"
+        "location": {
+          "name": "Vereeniging"
+        }
       },
       {
-        "name": "Verulam"
+        "location": {
+          "name": "Verulam"
+        }
       },
       {
-        "name": "Villiersdorp"
+        "location": {
+          "name": "Villiersdorp"
+        }
       },
       {
-        "name": "Virginia"
+        "location": {
+          "name": "Virginia"
+        }
       },
       {
-        "name": "Vosloorus"
+        "location": {
+          "name": "Vosloorus"
+        }
       },
       {
-        "name": "Vrededorp"
+        "location": {
+          "name": "Vrededorp"
+        }
       },
       {
-        "name": "Vredenburg"
+        "location": {
+          "name": "Vredenburg"
+        }
       },
       {
-        "name": "Vryheid"
+        "location": {
+          "name": "Vryheid"
+        }
       },
       {
-        "name": "Walkerville"
+        "location": {
+          "name": "Walkerville"
+        }
       },
       {
-        "name": "Walmer Heights"
+        "location": {
+          "name": "Walmer Heights"
+        }
       },
       {
-        "name": "Warner Beach"
+        "location": {
+          "name": "Warner Beach"
+        }
       },
       {
-        "name": "Wartburg"
+        "location": {
+          "name": "Wartburg"
+        }
       },
       {
-        "name": "Waverley"
+        "location": {
+          "name": "Waverley"
+        }
       },
       {
-        "name": "Waverley"
+        "location": {
+          "name": "Waverley"
+        }
       },
       {
-        "name": "Welgelegen"
+        "location": {
+          "name": "Welgelegen"
+        }
       },
       {
-        "name": "Welgemoed"
+        "location": {
+          "name": "Welgemoed"
+        }
       },
       {
-        "name": "Welkom"
+        "location": {
+          "name": "Welkom"
+        }
       },
       {
-        "name": "Welkom"
+        "location": {
+          "name": "Welkom"
+        }
       },
       {
-        "name": "Wellington"
+        "location": {
+          "name": "Wellington"
+        }
       },
       {
-        "name": "Weltevreden"
+        "location": {
+          "name": "Weltevreden"
+        }
       },
       {
-        "name": "Weltevreedenpark"
+        "location": {
+          "name": "Weltevreedenpark"
+        }
       },
       {
-        "name": "Westonaria"
+        "location": {
+          "name": "Westonaria"
+        }
       },
       {
-        "name": "Westville"
+        "location": {
+          "name": "Westville"
+        }
       },
       {
-        "name": "White River"
+        "location": {
+          "name": "White River"
+        }
       },
       {
-        "name": "Wilderness"
+        "location": {
+          "name": "Wilderness"
+        }
       },
       {
-        "name": "Winterton"
+        "location": {
+          "name": "Winterton"
+        }
       },
       {
-        "name": "Witbank"
+        "location": {
+          "name": "Witbank"
+        }
       },
       {
-        "name": "Witpoortjie"
+        "location": {
+          "name": "Witpoortjie"
+        }
       },
       {
-        "name": "Wonderboom"
+        "location": {
+          "name": "Wonderboom"
+        }
       },
       {
-        "name": "Worcester"
+        "location": {
+          "name": "Worcester"
+        }
       },
       {
-        "name": "Wynberg"
+        "location": {
+          "name": "Wynberg"
+        }
       },
       {
-        "name": "Zeerust"
+        "location": {
+          "name": "Zeerust"
+        }
       }
     ]
   },
   {
-    "name": "Sudan",
+    "location": {
+      "name": "Sudan"
+    },
     "children": [
       {
-        "name": "Kassala"
+        "location": {
+          "name": "Kassala"
+        }
       },
       {
-        "name": "Khartoum"
+        "location": {
+          "name": "Khartoum"
+        }
       },
       {
-        "name": "Nyala"
+        "location": {
+          "name": "Nyala"
+        }
       },
       {
-        "name": "Shendi"
+        "location": {
+          "name": "Shendi"
+        }
       },
       {
-        "name": "Thabit"
+        "location": {
+          "name": "Thabit"
+        }
       },
       {
-        "name": "Umm Durman"
+        "location": {
+          "name": "Umm Durman"
+        }
       }
     ]
   },
   {
-    "name": "Tanzania",
+    "location": {
+      "name": "Tanzania"
+    },
     "children": [
       {
-        "name": "Arusha"
+        "location": {
+          "name": "Arusha"
+        }
       },
       {
-        "name": "Bukoba"
+        "location": {
+          "name": "Bukoba"
+        }
       },
       {
-        "name": "Dar es Salaam"
+        "location": {
+          "name": "Dar es Salaam"
+        }
       },
       {
-        "name": "Dodoma"
+        "location": {
+          "name": "Dodoma"
+        }
       },
       {
-        "name": "Morogoro"
+        "location": {
+          "name": "Morogoro"
+        }
       },
       {
-        "name": "Mwanza"
+        "location": {
+          "name": "Mwanza"
+        }
       },
       {
-        "name": "Njombe"
+        "location": {
+          "name": "Njombe"
+        }
       },
       {
-        "name": "Raha"
+        "location": {
+          "name": "Raha"
+        }
       },
       {
-        "name": "Tanga"
+        "location": {
+          "name": "Tanga"
+        }
       },
       {
-        "name": "Zanzibar"
+        "location": {
+          "name": "Zanzibar"
+        }
       }
     ]
   },
   {
-    "name": "Zambia",
+    "location": {
+      "name": "Zambia"
+    },
     "children": [
       {
-        "name": "Kalomo"
+        "location": {
+          "name": "Kalomo"
+        }
       },
       {
-        "name": "Kitwe"
+        "location": {
+          "name": "Kitwe"
+        }
       },
       {
-        "name": "Livingstone"
+        "location": {
+          "name": "Livingstone"
+        }
       },
       {
-        "name": "Lusaka"
+        "location": {
+          "name": "Lusaka"
+        }
       },
       {
-        "name": "Macha"
+        "location": {
+          "name": "Macha"
+        }
       },
       {
-        "name": "Mumbwa"
+        "location": {
+          "name": "Mumbwa"
+        }
       },
       {
-        "name": "Ndola"
+        "location": {
+          "name": "Ndola"
+        }
       },
       {
-        "name": "Siavonga"
+        "location": {
+          "name": "Siavonga"
+        }
       },
       {
-        "name": "Solwezi"
+        "location": {
+          "name": "Solwezi"
+        }
       }
     ]
   },
   {
-    "name": "Zimbabwe",
+    "location": {
+      "name": "Zimbabwe"
+    },
     "children": [
       {
-        "name": "Bulawayo"
+        "location": {
+          "name": "Bulawayo"
+        }
       },
       {
-        "name": "Chinhoyi"
+        "location": {
+          "name": "Chinhoyi"
+        }
       },
       {
-        "name": "Greendale"
+        "location": {
+          "name": "Greendale"
+        }
       },
       {
-        "name": "Gwanda"
+        "location": {
+          "name": "Gwanda"
+        }
       },
       {
-        "name": "Harare"
+        "location": {
+          "name": "Harare"
+        }
       },
       {
-        "name": "Kwekwe"
+        "location": {
+          "name": "Kwekwe"
+        }
       },
       {
-        "name": "Mufakose"
+        "location": {
+          "name": "Mufakose"
+        }
       },
       {
-        "name": "Mutare"
+        "location": {
+          "name": "Mutare"
+        }
       },
       {
-        "name": "Victoria Falls"
+        "location": {
+          "name": "Victoria Falls"
+        }
       }
     ]
   }

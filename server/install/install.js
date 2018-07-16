@@ -4,7 +4,7 @@ const async = require('async');
 const _ = require('lodash');
 const args = process.argv;
 // keep a list of supported install arguments
-const supportedArguments = ['init-database', 'migrate-database', 'reset-admin-password'];
+const supportedArguments = ['init-database', 'migrate-database', 'reset-admin-password', 'install-script'];
 // keep a list of functions that will be run
 const runFunctions = [];
 // define a list of supported routines
@@ -35,6 +35,19 @@ const routines = {
     console.log('Resetting Administrative Password...');
     [
       require('./scripts/resetAdministrativePassword')
+    ].forEach(function (installScript) {
+      runFunctions.push(installScript);
+    });
+  },
+  installScript: function () {
+    let script = /script=(.+)(?:\s+|$)/.exec(args.toString());
+    if (!script) {
+      return console.error('No valid script name passed. Use -- script=<scriptName> to specify a script');
+    }
+    script = script.pop();
+    console.log(`Running install script ${script}`);
+    [
+      require(`./scripts/${script}`)
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });

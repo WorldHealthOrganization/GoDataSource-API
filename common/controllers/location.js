@@ -37,11 +37,48 @@ module.exports = function (Location) {
   /**
    * Do not allow the deletion of a location if it still has sub-locations
    */
-  Location.beforeRemote("deleteById", function(context, modelInstance, next) {
+  Location.beforeRemote("deleteById", function (context, modelInstance, next) {
     Location.checkIfCanDelete(context.args.id)
       .then(() => {
         next();
       })
       .catch(next);
-  })
+  });
+
+  /**
+   * Export hierarchical locations list
+   * @param callback
+   */
+  Location.exportHierarchicalList = function (callback) {
+    Location
+      .find({
+        // blacklist some fields in the export
+        fields: {
+          createdAt: false,
+          createdBy: false,
+          updatedAt: false,
+          updatedBy: false,
+          deleted: false
+        },
+        order: 'parentLocationId ASC, id ASC'
+      })
+      .then(function (locations) {
+        app.utils.remote.helpers
+          .offerFileToDownload(JSON.stringify(Location.buildHierarchicalLocationsList(locations), null, 2), 'application/json', `locations.json`, callback);
+      }).catch(callback);
+  };
+
+  /**
+   * Get hierarchical locations list
+   * @param callback
+   */
+  Location.getHierarchicalList = function (callback) {
+    Location
+      .find({
+        order: 'parentLocationId ASC, id ASC'
+      })
+      .then(function (locations) {
+        callback(null, Location.buildHierarchicalLocationsList(locations));
+      }).catch(callback);
+  };
 };
