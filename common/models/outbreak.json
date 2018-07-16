@@ -2609,7 +2609,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'periodType': enum [daily, weekly, monthly], 'periodInterval':['date', 'date'] on the first level in 'where'"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'periodType': enum [day, week, month], 'periodInterval':['date', 'date'] on the first level in 'where'"
         }
       ],
       "returns": [

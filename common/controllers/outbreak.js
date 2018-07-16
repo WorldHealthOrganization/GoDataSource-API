@@ -2195,16 +2195,16 @@ module.exports = function (Outbreak) {
 
   /**
    * Count the cases per period per classification
-   * @param filter Besides the default filter properties this request also accepts 'periodType': enum [daily, weekly, monthly], 'periodInterval':['date', 'date'] on the first level in 'where'
+   * @param filter Besides the default filter properties this request also accepts 'periodType': enum [day, week, month], 'periodInterval':['date', 'date'] on the first level in 'where'
    * @param callback
    */
   Outbreak.prototype.countCasesPerPeriod = function (filter, callback) {
-    // initialize periodType filter; default is daily; accepting daily/weekly/monthly
+    // initialize periodType filter; default is day; accepting day/week/month
     let periodType;
     let periodTypes = {
-      daily: 'daily',
-      weekly: 'weekly',
-      monthly: 'monthly'
+      day: 'day',
+      week: 'week',
+      month: 'month'
     };
 
     // check if the periodType filter was sent; accepting it only on the first level
@@ -2217,7 +2217,7 @@ module.exports = function (Outbreak) {
     // check if the received periodType is accepted
     if (Object.values(periodTypes).indexOf(periodType) === -1) {
       // set default periodType
-      periodType = periodTypes.daily;
+      periodType = periodTypes.day;
     }
 
     // initialize periodInterval; keeping it as moment instances we need to use them further in the code
@@ -2233,19 +2233,19 @@ module.exports = function (Outbreak) {
     } else {
       // set default periodInterval depending on periodType
       switch (periodType) {
-        case periodTypes.daily:
+        case periodTypes.day:
           // get interval for today
           let today = genericHelpers.getUTCDate();
           let todayEndOfDay = genericHelpers.getUTCDateEndOfDay();
           periodInterval = [today, todayEndOfDay];
           break;
-        case periodTypes.weekly:
+        case periodTypes.week:
           // get interval for this week
           let mondayStartOfDay = genericHelpers.getUTCDate(null, 1);
           let sundayEndOfDay = genericHelpers.getUTCDateEndOfDay(null, 7);
           periodInterval = [mondayStartOfDay, sundayEndOfDay];
           break;
-        case periodTypes.monthly:
+        case periodTypes.month:
           // get interval for this month
           let firstDayOfMonth = genericHelpers.getUTCDate().startOf('month');
           let lastDayOfMonth = genericHelpers.getUTCDateEndOfDay().endOf('month');
@@ -2276,6 +2276,8 @@ module.exports = function (Outbreak) {
       order: 'createdAt ASC'
     };
 
+    let periodMap = genericHelpers.getChunksForInterval(periodInterval, periodType);
+
     // initialize result
     let result = {
       totalCasesCount: 0,
@@ -2295,13 +2297,13 @@ module.exports = function (Outbreak) {
           // get period in which the case needs to be included
           let casePeriodInterval;
           switch (periodType) {
-            case periodTypes.daily:
+            case periodTypes.day:
               // get interval for today
               let today = genericHelpers.getUTCDate(caseDate).toString();
               let todayEndOfDay = genericHelpers.getUTCDateEndOfDay(caseDate).toString();
               casePeriodInterval = [today, todayEndOfDay];
               break;
-            case periodTypes.weekly:
+            case periodTypes.week:
               // get interval for this week
               let mondayStartOfDay = genericHelpers.getUTCDate(caseDate, 1);
               let sundayEndOfDay = genericHelpers.getUTCDateEndOfDay(caseDate, 7);
@@ -2314,7 +2316,7 @@ module.exports = function (Outbreak) {
 
               casePeriodInterval = [mondayStartOfDay, sundayEndOfDay];
               break;
-            case periodTypes.monthly:
+            case periodTypes.month:
               // get interval for this month
               let firstDayOfMonth = genericHelpers.getUTCDate(caseDate).startOf('month');
               let lastDayOfMonth = genericHelpers.getUTCDateEndOfDay(caseDate).endOf('month');

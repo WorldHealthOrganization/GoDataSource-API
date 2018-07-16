@@ -2,6 +2,7 @@
 
 // dependencies
 const moment = require('moment');
+const chunkDateRange = require('chunk-date-range');
 
 /**
  * Convert a Date object into moment UTC date and reset time to start of the day
@@ -34,8 +35,29 @@ const getAsciiString = function(string) {
   return string.replace(/[^\x00-\x7F]/g, '');
 };
 
+/**
+ * Split a date interval into chunks of specified length
+ * @param interval Array containing the margin dates of the interval
+ * @param chunk String Length of each resulted chunk; Can be a daily/weekly/monthly
+ * @returns {{}} Map of chunks
+ */
+const getChunksForInterval = function (interval, chunk) {
+  // initialize map for chunkDateRange chunk values
+  let chunkMap = {
+    day: 'day',
+    week: 'week',
+    month: 'month'
+  };
+  // set default chunk to 1 day
+  chunk = chunk ? chunkMap[chunk] : chunkMap.day;
+
+  let result = chunkDateRange(interval[0], interval[1], chunk);
+  return result;
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   getUTCDateEndOfDay: getUTCDateEndOfDay,
-  getAsciiString: getAsciiString
+  getAsciiString: getAsciiString,
+  getChunksForInterval: getChunksForInterval
 };
