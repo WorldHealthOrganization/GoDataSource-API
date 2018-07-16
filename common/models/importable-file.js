@@ -178,7 +178,7 @@ module.exports = function (ImportableFile) {
         return callback(error);
       }
       // store file on dist
-      ImportableFile.temporaryStoreFileOnDisk(result.obj, function (error, fileId) {
+      ImportableFile.temporaryStoreFileOnDisk(JSON.stringify(result.obj), function (error, fileId) {
         // send back file id and headers
         callback(error, {
           id: fileId,
