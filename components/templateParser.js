@@ -90,7 +90,7 @@ function saveLanguageTokens(context, next) {
             if (token) {
               return token.updateAttributes({
                 translation: originalValues[qindex].text
-              });
+              }, context.args.options);
             } else {
               context.req.logger.debug(`Language token "${questions[qindex].text}" doesn't exist in DB. Should have been in the DB. Recreating it.`);
               // shouldn't get here
@@ -99,7 +99,7 @@ function saveLanguageTokens(context, next) {
                   token: questions[qindex].text,
                   translation: originalValues[qindex].text,
                   languageId: languageId
-                }));
+                }, context.args.options));
             }
           })
         );
@@ -130,7 +130,7 @@ function saveLanguageTokens(context, next) {
                 if (token) {
                   return token.updateAttributes({
                     translation: originalValues[qindex].answers[aindex].label
-                  });
+                  }, context.args.options);
                 } else {
                   context.req.logger.debug(`Language token "${answers[aindex].label}" doesn't exist in DB. Should have been in the DB. Recreating it only for the user's language.`);
                   // shouldn't get here
@@ -139,7 +139,7 @@ function saveLanguageTokens(context, next) {
                       token: answers[aindex].label,
                       translation: originalValues[qindex].answers[aindex].label,
                       languageId: languageId
-                    }));
+                    }, context.args.options));
                 }
               })
             );
@@ -192,7 +192,7 @@ function saveLanguageTokens(context, next) {
             // add languageId and create token
             token.languageId = language.id;
             tokenPromises.push(app.models.languageToken
-              .create(token));
+              .create(token, context.args.options));
           });
         });
 
@@ -276,7 +276,7 @@ function beforeHook(context, modelInstance, next) {
       // initialize container with question variable/answer value counters
       let counters = {};
 
-      // parse questions to replate text/answer label with tokens
+      // parse questions to replace text/answer label with tokens
       parseQuestions(questions, templateIdentifier, counters);
 
       // check counters

@@ -68,14 +68,14 @@ function afterCreateHook(context, modelInstance, next) {
               token: modelInstance.id,
               languageId: language.id,
               translation: context.req._original.value
-            }));
+            }, context.args.options));
           // create token for description
           tokenPromises.push(app.models.languageToken
             .create({
               token: modelInstance.description,
               languageId: language.id,
               translation: context.req._original.description
-            }));
+            }, context.args.options));
         });
       })
       .then(function () {
@@ -148,7 +148,7 @@ function afterUpdateHook(context, modelInstance, next) {
               // and update it's translation. Do not handle 'not found' case, it should be internal system error
               return languageToken.updateAttributes({
                 translation: context.req._original[prop]
-              });
+              }, context.args.options);
             })
         );
       }

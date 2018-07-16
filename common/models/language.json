@@ -17,6 +17,11 @@
       "type": "string",
       "required": true,
       "unique": true
+    },
+    "readOnly": {
+      "type": "boolean",
+      "readOnly": true,
+      "default": false
     }
   },
   "validations": [],
@@ -27,6 +32,135 @@
       "foreignKey": "languageId"
     }
   },
-  "acls": [],
-  "methods": {}
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "__get__languageTokens"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "__count__languageTokens"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "exportLanguageTokensFile"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "importLanguageTokensFile"
+    }
+  ],
+  "methods": {
+    "prototype.importLanguageTokensFile": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "languageFile",
+          "type": "file"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "languageTokens",
+          "type": ["languageToken"],
+          "root": true
+        }
+      ],
+      "description": "Import a translation file for a language",
+      "http": {
+        "verb": "post",
+        "path": "/language-tokens/import"
+      }
+    },
+    "prototype.exportLanguageTokensFile": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Download a translation file for a language.",
+      "http": {
+        "verb": "get",
+        "path": "/language-tokens/export"
+      }
+    }
+  }
 }

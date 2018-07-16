@@ -42,13 +42,14 @@ module.exports = function (Model) {
     // make context available for others
     const self = this;
     // build a before/after hook context
-    let context = Object.assign({}, options, {
+    let context = {
       model: Model,
       instance: self,
       where: {
         id: self.id
-      }
-    });
+      },
+      options: options
+    };
     // notify listeners that a restore operation begins
     Model.notifyObserversOf('before restore', context, function (error) {
       // if error occurred, stop
