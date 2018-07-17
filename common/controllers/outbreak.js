@@ -2262,10 +2262,15 @@ module.exports = function (Outbreak) {
       where: {
         outbreakId: outbreakId,
         or: [{
-          createdAt: {
-            // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
-            between: periodInterval.slice()
-          }
+          and: [{
+            createdAt: {
+              // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
+              between: periodInterval.slice()
+            },
+            dateBecomeCase: {
+              eq: null
+            }
+          }]
         }, {
           dateBecomeCase: {
             // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
@@ -2275,8 +2280,6 @@ module.exports = function (Outbreak) {
       },
       order: 'createdAt ASC'
     };
-
-    let periodMap = genericHelpers.getChunksForInterval(periodInterval, periodType);
 
     // initialize result
     let result = {
@@ -2288,8 +2291,16 @@ module.exports = function (Outbreak) {
     app.models.case.find(app.utils.remote
       .mergeFilters(defaultFilter, filter || {}))
       .then(function (cases) {
-        // initialize period map
-        let periodMap = {};
+        // get periodMap for interval
+        let periodMap = genericHelpers.getChunksForInterval(periodInterval, periodType);
+        // fill additional details for each entry in the periodMap
+        Object.keys(periodMap).forEach(function(entry) {
+          periodMap[entry] = Object.assign(periodMap[entry], {
+            totalCasesCount: 0,
+            classificationCounters: {},
+            caseIDs: []
+          });
+        });
 
         cases.forEach(function (item) {
           // get case date; it's either dateBecomeCase or createdAt
@@ -2333,17 +2344,6 @@ module.exports = function (Outbreak) {
 
           // create a period identifier
           let casePeriodIdentifier = casePeriodInterval.join(' - ');
-
-          // initialize period entry if not already initialized
-          if (!periodMap[casePeriodIdentifier]) {
-            periodMap[casePeriodIdentifier] = {
-              periodStart: casePeriodInterval[0],
-              periodEnd: casePeriodInterval[1],
-              totalCasesCount: 0,
-              classificationCounters: { },
-              caseIDs: []
-            };
-          }
 
           // increase counters
           periodMap[casePeriodIdentifier].totalCasesCount++;
@@ -2561,10 +2561,10 @@ module.exports = function (Outbreak) {
         return Promise
           .all([
             // soft delete merged contacts/cases
-            app.models.case.destroyAll({ id: { inq: caseIds } }),
-            app.models.contact.destroyAll({ id: { inq: contactIds } }),
+            app.models.case.destroyAll({id: {inq: caseIds}}),
+            app.models.contact.destroyAll({id: {inq: contactIds}}),
             // update base record
-            updateBaseRecord.upsertWithWhere({ id: resultModel.id }, resultModelProps),
+            updateBaseRecord.upsertWithWhere({id: resultModel.id}, resultModelProps),
             // update lab results
             Promise.all(labResults.map((labResult) => app.models.labResult.upsertWithWhere(
               {

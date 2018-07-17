@@ -2621,8 +2621,8 @@
               "type": [
                 {
                   "type": {
-                    "periodStart": "date",
-                    "periodEnd": "date",
+                    "start": "date",
+                    "end": "date",
                     "totalCasesCount": "number",
                     "classificationCounters": {
                       "type": {

@@ -31,7 +31,7 @@ const getUTCDateEndOfDay = function (date, dayOfWeek) {
  * @param string
  * @return {*}
  */
-const getAsciiString = function(string) {
+const getAsciiString = function (string) {
   return string.replace(/[^\x00-\x7F]/g, '');
 };
 
@@ -51,7 +51,34 @@ const getChunksForInterval = function (interval, chunk) {
   // set default chunk to 1 day
   chunk = chunk ? chunkMap[chunk] : chunkMap.day;
 
-  let result = chunkDateRange(interval[0], interval[1], chunk);
+  // get chunks
+  // Note chunkDateRange doesn't include the last day in the interval so we add a day
+  let chunks = chunkDateRange(interval[0], interval[1], chunk);
+
+  // initialize result
+  let result = {};
+
+  // parse the chunks and create map with UTC dates
+  chunks.forEach(function (chunk, index) {
+    // get the chunk margins and format to UTC
+    let start = getUTCDate(chunk.start);
+    // chunkDateRange uses for both start and end 00:00 hours;
+    // we use 23:59 hours for end so we need to get the end of day for the previous day except for the last day in the interval since we already send it at 23:59 hours
+    let end = getUTCDateEndOfDay(chunk.end);
+    if (index !== chunks.length - 1) {
+      end.add(-1, 'd')
+    }
+
+    // create period identifier
+    let identifier = start.toString() + ' - ' + end.toString();
+
+    // store period entry in the map
+    result[identifier] = {
+      start: start,
+      end: end
+    }
+  });
+
   return result;
 };
 
