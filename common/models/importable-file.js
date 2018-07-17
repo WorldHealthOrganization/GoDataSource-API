@@ -127,7 +127,9 @@ module.exports = function (ImportableFile) {
       if (range) {
         // look for headers in the range
         for (let i = 'A'.charCodeAt(0); i <= range[1].charCodeAt(0); i++) {
-          headers.push(parsedData.Sheets[sheetName][`${String.fromCharCode(i)}1`].v);
+          if (parsedData.Sheets[sheetName][`${String.fromCharCode(i)}1`]) {
+            headers.push(parsedData.Sheets[sheetName][`${String.fromCharCode(i)}1`].v);
+          }
         }
       }
       // should always be an array (sheets are lists)

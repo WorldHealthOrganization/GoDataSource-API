@@ -118,7 +118,7 @@ module.exports = function (Location) {
           return callback(error);
         }
         // import locations
-        Location.importHierarchicalListFromJsonFile(buffer, options, callback);
+        Location.importHierarchicalListFromJsonFile(buffer.toString(), options, callback);
       });
     });
   };
