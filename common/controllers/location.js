@@ -92,7 +92,7 @@ module.exports = function (Location) {
    */
   Location.importHierarchicalList = function (req, file, options, callback) {
     // loopback cannot parse multipart requests
-    app.utils.remote.helpers.parseMultipartRequest(req, [], ['file'], function (error, fields, files) {
+    app.utils.remote.helpers.parseMultipartRequest(req, [], ['file'], Location, function (error, fields, files) {
       if (error) {
         return callback(error);
       }

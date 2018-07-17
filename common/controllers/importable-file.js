@@ -12,7 +12,7 @@ module.exports = function (ImportableFile) {
    */
   ImportableFile.upload = function (req, file, callback) {
     // loopback cannot parse multipart requests
-    app.utils.remote.helpers.parseMultipartRequest(req, [], ['file'], function (error, fields, files) {
+    app.utils.remote.helpers.parseMultipartRequest(req, [], ['file'], ImportableFile, function (error, fields, files) {
       // handle errors
       if (error) {
         return callback(error);
