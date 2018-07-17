@@ -225,7 +225,7 @@ module.exports = function (Location) {
   /**
    * Build hierarchical list of locations
    * @param locationsList
-   * @param [removeIdentifiers] {boolean}
+   * @param [removeIdentifiers] {boolean} If true, id and parentLocationId are omitted from the record
    * @return {*[]}
    */
   Location.buildHierarchicalLocationsList = function (locationsList, removeIdentifiers) {
@@ -269,7 +269,7 @@ module.exports = function (Location) {
         // transform it to JSON
         location = location.toJSON();
       }
-      // clone location
+      // clone location (in order to modify it without altering the source)
       let locationToStore = Object.assign({}, location);
       // check if identifiers should be removed
       if (removeIdentifiers) {

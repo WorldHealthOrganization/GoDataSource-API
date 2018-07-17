@@ -124,15 +124,16 @@ module.exports = function (ImportableFile) {
       let range = /^[A-Za-z]+\d+:([A-Za-z])+\d+$/.exec(parsedData.Sheets[sheetName]['!ref']);
       // keep a list of headers
       let headers = [];
-      // look for headers in the range
-      for (let i = 'A'.charCodeAt(0); i <= range[1].charCodeAt(0); i++) {
-        headers.push(parsedData.Sheets[sheetName][`${String.fromCharCode(i)}1`].v);
+      if (range) {
+        // look for headers in the range
+        for (let i = 'A'.charCodeAt(0); i <= range[1].charCodeAt(0); i++) {
+          headers.push(parsedData.Sheets[sheetName][`${String.fromCharCode(i)}1`].v);
+        }
       }
       // should always be an array (sheets are lists)
       // send back the parsed object and its headers
       callback(null, {obj: jsonObj, headers: headers});
-    })
-
+    });
   }
 
   /**

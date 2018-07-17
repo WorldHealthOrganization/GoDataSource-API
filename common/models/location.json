@@ -227,7 +227,7 @@
           "required": true
         }
       ],
-      "description": "Import a hierarchical locations list coming from a flat XLS file",
+      "description": "Import a hierarchical locations list coming from a flat XLS file that was previously uploaded as an importable file",
       "http": {
         "verb": "post",
         "path": "/import-importable-file-using-map"
