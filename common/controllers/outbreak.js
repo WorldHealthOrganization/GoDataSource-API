@@ -2294,7 +2294,7 @@ module.exports = function (Outbreak) {
         // get periodMap for interval
         let periodMap = genericHelpers.getChunksForInterval(periodInterval, periodType);
         // fill additional details for each entry in the periodMap
-        Object.keys(periodMap).forEach(function(entry) {
+        Object.keys(periodMap).forEach(function (entry) {
           periodMap[entry] = Object.assign(periodMap[entry], {
             totalCasesCount: 0,
             classificationCounters: {},
@@ -2620,7 +2620,7 @@ module.exports = function (Outbreak) {
           let contactId = followup.personId;
 
           // add in the contacts map the entire follow-up if it was not perfomed
-          if(!followup.performed) {
+          if (!followup.performed) {
             contactsMap[contactId] = followup;
           } else {
             // reset the contactId entry in the map to null if the newer follow-up was performed
