@@ -66,10 +66,6 @@
           }
         },
         {
-          "arg": "name",
-          "type": "string"
-        },
-        {
           "arg": "snapshot",
           "type": "file"
         }

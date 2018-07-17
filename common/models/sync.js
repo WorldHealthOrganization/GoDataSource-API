@@ -147,10 +147,11 @@ module.exports = function (Sync) {
 
   /**
    * Extract a database snapshot archive to a temporary directory
+   * And sync with the current database
    * @param filePath
    * @param callback
    */
-  Sync.extractDatabaseArchive = function (filePath, callback) {
+  Sync.syncDatabaseWithSnapshot = function (filePath, callback) {
     // create a temporary directory to store the database files
     // it always created the folder in the system temporary directory
     let tmpDir = tmp.dirSync();
@@ -187,12 +188,12 @@ module.exports = function (Sync) {
           return async.parallel(collectionsFiles.map((fileName) => {
             return (done) => {
               // split filename into 'collection name' and 'extension'
-              let collectionName = fileName.split('.');
+              let collectionName = fileName.split('.')[0];
 
               // cache reference to Loopback's model
               let model = app.models[collectionsMap[collectionName]];
 
-              fs.readFile(`${tmpDirName}/${fileName}`, (err, data) => {
+              fs.readFile(`${tmpDirName}/${fileName}`, { encoding: 'utf8' }, (err, data) => {
                 // parse file contents to JavaScript object
                 try {
                   let collectionRecords = JSON.parse(data);

@@ -44,7 +44,7 @@ module.exports = function (Sync) {
 
     form.parse(req, function (err, fields, files) {
       if (err) {
-        return done(error);
+        return done(err);
       }
 
       // validates snapshot archive
@@ -55,13 +55,9 @@ module.exports = function (Sync) {
           properties: 'snapshot'
         }));
       }
-      // validate that the archive is a .tar.gz
-      if (files.snapshot.type !== 'application/gzip') {
-        return done(buildError('INVALID_SNAPSHOT_FILE'));
-      }
 
       // extract the archive to the temporary directory
-      Sync.extractDatabaseArchive(files.snapshot.path, done);
+      Sync.syncDatabaseWithSnapshot(files.snapshot.path, done);
     });
   };
 };
