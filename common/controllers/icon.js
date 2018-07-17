@@ -60,7 +60,7 @@ module.exports = function (Icon) {
    */
   Icon.upload = function (req, name, icon, options, callback) {
     // loopback cannot parse multipart requests
-    app.utils.remote.helpers.parseMultipartRequest(req, ['name'], ['icon'], function (error, fields, files) {
+    app.utils.remote.helpers.parseMultipartRequest(req, ['name'], ['icon'], Icon, function (error, fields, files) {
       if (error) {
         return callback(error);
       }

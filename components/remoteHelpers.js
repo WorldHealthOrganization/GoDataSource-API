@@ -2,6 +2,7 @@
 
 const helpers = require('./helpers');
 const formidable = require('formidable');
+const apiError = require('./apiError');
 
 /**
  * Offer a file to be downloaded
@@ -21,7 +22,7 @@ function offerFileToDownload(fileBuffer, mimeType, fileName, remoteCallback) {
  * @param requiredFiles
  * @param callback
  */
-function parseMultipartRequest(req, requiredFields, requiredFiles, callback) {
+function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callback) {
   // use formidable to parse multi-part data
   const form = new formidable.IncomingForm();
   form.parse(req, function (error, fields, files) {
@@ -49,8 +50,8 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, callback) {
     // if there are missing required properties
     if (missingProperties.length) {
       // send back the error
-      return callback(app.utils.apiError.getError('MISSING_REQUIRED_PROPERTY', {
-        model: ImportableFile.modelName,
+      return callback(apiError.getError('MISSING_REQUIRED_PROPERTY', {
+        model: Model.modelName,
         properties: missingProperties.join(', ')
       }));
     }
