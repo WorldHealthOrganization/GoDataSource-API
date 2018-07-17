@@ -537,6 +537,9 @@ module.exports = function (Outbreak) {
         }
       }, filter || {}))
       .then(function (followups) {
+        // filter by relation properties
+        followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
+
         // initialize map of contacts to not count same contact twice
         let contacts = {};
         // initialize map of teams

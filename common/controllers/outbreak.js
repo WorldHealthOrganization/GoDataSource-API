@@ -1713,6 +1713,8 @@ module.exports = function (Outbreak) {
         }
       }, filter || {}))
       .then(function (followUps) {
+        // filter by relation properties
+        followUps = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followUps, filter);
         // initialize contacts map; helper to not count contacts twice
         let contactsMap = {};
 
@@ -1906,6 +1908,8 @@ module.exports = function (Outbreak) {
         order: 'date ASC'
       }, filter || {}))
       .then(function (followUps) {
+        // filter by relation properties
+        followUps = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followUps, filter);
         // initialize contacts map; helper to not count contacts twice and keep the seen value;
         // once a contact is seen the newer follow-ups for the same contact don't matter
         let contactsMap = {};
