@@ -1,7 +1,6 @@
 'use strict';
 
 const app = require('../../server/server');
-const formidable = require('formidable');
 const fs = require('fs');
 
 module.exports = function (Location) {
@@ -87,30 +86,15 @@ module.exports = function (Location) {
   /**
    * Import a hierarchical list (JSON) of locations
    * @param req
-   * @param file
+   * @param file This is doc-only, loopback cannot parse multi-part payload.
    * @param options
    * @param callback
    */
   Location.importHierarchicalList = function (req, file, options, callback) {
-    // use formidable to parse multi-part data
-    const form = new formidable.IncomingForm();
-    form.parse(req, function (error, fields, files) {
+    // loopback cannot parse multipart requests
+    app.utils.remote.helpers.parseMultipartRequest(req, [], ['file'], function (error, fields, files) {
       if (error) {
         return callback(error);
-      }
-      // validate required properties, loopback can't validate multi-part payloads
-      let missingProperties = [];
-
-      if (!files.file) {
-        missingProperties.push('file');
-      }
-      // if there are missing required properties
-      if (missingProperties.length) {
-        // send back the error
-        return callback(app.utils.apiError.getError('MISSING_REQUIRED_PROPERTY', {
-          model: Location.modelName,
-          properties: missingProperties.join(', ')
-        }));
       }
       // read the file
       fs.readFile(files.file.path, function (error, buffer) {

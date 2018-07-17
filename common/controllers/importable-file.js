@@ -1,7 +1,6 @@
 'use strict';
 
 const app = require('../../server/server');
-const formidable = require('formidable');
 
 module.exports = function (ImportableFile) {
 
@@ -12,26 +11,11 @@ module.exports = function (ImportableFile) {
    * @param callback
    */
   ImportableFile.upload = function (req, file, callback) {
-    // use formidable to parse multi-part data
-    const form = new formidable.IncomingForm();
-    form.parse(req, function (error, fields, files) {
+    // loopback cannot parse multipart requests
+    app.utils.remote.helpers.parseMultipartRequest(req, [], ['file'], function (error, fields, files) {
       // handle errors
       if (error) {
         return callback(error);
-      }
-      // validate required properties, loopback can't validate multi-part payloads
-      let missingProperties = [];
-
-      if (!files.file) {
-        missingProperties.push('file');
-      }
-      // if there are missing required properties
-      if (missingProperties.length) {
-        // send back the error
-        return callback(app.utils.apiError.getError('MISSING_REQUIRED_PROPERTY', {
-          model: ImportableFile.modelName,
-          properties: missingProperties.join(', ')
-        }));
       }
       // store the file and get its headers
       ImportableFile.storeFileAndGetHeaders(files.file, callback)

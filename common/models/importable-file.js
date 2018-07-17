@@ -103,7 +103,7 @@ module.exports = function (ImportableFile) {
   }
 
   /**
-   * Get XML file as JSON and its headers
+   * Get XLS/XLSX/CSV/ODS file as JSON and its headers
    * @param file
    * @param callback
    */

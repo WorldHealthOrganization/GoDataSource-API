@@ -88,7 +88,7 @@ const getChunksForInterval = function (interval, chunk) {
  * @param fieldsMap
  * @return {Array}
  */
-const remapProperties = function (list, fieldsMap){
+const remapProperties = function (list, fieldsMap) {
   // store final result
   let results = [];
   // get a list of source fields
