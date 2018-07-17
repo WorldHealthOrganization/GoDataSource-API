@@ -17,6 +17,7 @@
   "dependencies": {
     "async": "^2.6.0",
     "bcrypt": "^2.0.1",
+    "chunk-date-range": "^0.1.0",
     "compression": "^1.0.3",
     "cors": "^2.5.2",
     "formidable": "^1.2.1",

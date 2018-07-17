@@ -862,6 +862,18 @@
       "principalId": "write_contact",
       "permission": "ALLOW",
       "property": "mergeCasesAndContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countCasesPerPeriod"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "listLatestFollowUpsForContactsIfNotPerformed"
     }
   ],
   "methods": {
@@ -2596,6 +2608,75 @@
       "http": {
         "verb": "post",
         "path": "/merge"
+      }
+    },
+    "prototype.countCasesPerPeriod": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'periodType': enum [day, week, month], 'periodInterval':['date', 'date'] on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "totalCasesCount": "number",
+            "period": {
+              "type": [
+                {
+                  "type": {
+                    "start": "date",
+                    "end": "date",
+                    "totalCasesCount": "number",
+                    "classificationCounters": {
+                      "type": {
+                        "{caseClassification}": "number"
+                      }
+                    },
+                    "caseIDs": [
+                      "string"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "description": "Object containing counters for cases per period",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of cases per period",
+      "http": {
+        "verb": "get",
+        "path": "/cases/per-period-per-classification/count"
+      }
+    },
+    "prototype.listLatestFollowUpsForContactsIfNotPerformed": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "follow-ups",
+          "type": [
+            "followUp"
+          ],
+          "description": "Array containing latest follow-ups missed by contacts. Doesn't return a missed follow-up if there is a new one for the same contact that was performed",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "List the latest follow-ups for contacts if were not performed. Doesn't return a missed follow-up if there is a new one for the same contact that was performed",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/latest-by-contacts-if-not-performed"
       }
     }
   }
