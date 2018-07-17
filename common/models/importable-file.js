@@ -49,14 +49,21 @@ module.exports = function (ImportableFile) {
         const jsonObj = JSON.parse(data);
         // this needs to be a list (in order to get its headers)
         if (!Array.isArray(jsonObj)) {
-          // TODO: api errors
-          return callback('Invalid JSON content; it should contain an array');
+          // error invalid content
+          return callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+            contentType: 'JSON',
+            details: 'it should contain an array'
+          }));
         }
         // send back the parsed object and its headers (prop names of the first item)
         callback(null, {obj: jsonObj, headers: Object.keys(jsonObj.shift())});
       }
       catch (error) {
-        callback(error);
+        // handle JSON.parse errors
+        callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+          contentType: 'JSON',
+          details: error.message
+        }));
       }
     });
   }
@@ -83,8 +90,11 @@ module.exports = function (ImportableFile) {
         const firstProp = Object.keys(jsonObj).shift();
         // this needs to be a list (in order to get its headers)
         if (!Array.isArray(jsonObj[firstProp])) {
-          //TODO: api errors
-          return callback('Invalid XML content; it should contain an array');
+          // error invalid content
+          return callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+            contentType: 'XML',
+            details: 'it should contain an array'
+          }));
         }
         // send back the parsed object and its headers (prop names of the first item)
         callback(null, {obj: jsonObj[firstProp], headers: Object.keys(jsonObj[firstProp].shift())});

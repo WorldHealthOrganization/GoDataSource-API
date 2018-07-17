@@ -420,14 +420,20 @@ module.exports = function (Location) {
       const locations = typeof fileContent === 'string' ? JSON.parse(fileContent) : fileContent;
       // this needs to be a list (in order to get its headers)
       if (!Array.isArray(locations)) {
-        //TODO: api errors
-        return callback('Invalid JSON content; it should contain an array');
+        // error invalid content
+        return callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+          contentType: 'JSON',
+          details: 'it should contain an array'
+        }));
       }
       // create locations from the hierarchical list
       Location.createLocationsFromHierarchicalLocationsList(undefined, locations, options, callback);
     } catch (error) {
       // handle JSON.parse errors
-      callback(error);
+      callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+        contentType: 'JSON',
+        details: error.message
+      }));
     }
   };
 };

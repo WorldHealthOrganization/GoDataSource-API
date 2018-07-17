@@ -147,7 +147,11 @@ module.exports = function (Location) {
           // import locations
           Location.importHierarchicalListFromJsonFile(hierarchicalList, options, callback);
         } catch (error) {
-          callback(error);
+          // handle parse error
+          callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+            contentType: 'JSON',
+            details: error.message
+          }));
         }
       });
   };

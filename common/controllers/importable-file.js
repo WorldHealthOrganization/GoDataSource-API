@@ -56,7 +56,10 @@ module.exports = function (ImportableFile) {
       }
       catch (error) {
         // handle JSON.parse errors
-        callback(error);
+        callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+          contentType: 'JSON',
+          details: error.message
+        }));
       }
     });
   };
