@@ -2591,4 +2591,49 @@ module.exports = function (Outbreak) {
           .then((result) => result[2]);
       });
   };
+
+  /**
+   * List the latest follow-ups for contacts if were not performed
+   * The request doesn't return a missed follow-up if there is a new one for the same contact that was performed
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.listLatestFollowUpsForContactsIfNotPerformed = function (filter, callback) {
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // get all the followups for the filtered period
+    app.models.followUp.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId
+        },
+        // order by date as we need to check the follow-ups from the oldest to the most new
+        order: 'date ASC'
+      }, filter || {}))
+      .then(function (followups) {
+        // initialize contacts map as the request needs to return the latest follow-up for the contact if not performed
+        let contactsMap = {};
+
+        followups.forEach(function (followup) {
+          // get contactId
+          let contactId = followup.personId;
+
+          // add in the contacts map the entire follow-up if it was not perfomed
+          if(!followup.performed) {
+            contactsMap[contactId] = followup;
+          } else {
+            // reset the contactId entry in the map to null if the newer follow-up was performed
+            contactsMap[contactId] = null;
+          }
+        });
+
+        // get the follow-ups from the contact map
+        let result = Object.values(contactsMap).filter(followUp => followUp);
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
+  };
 };
