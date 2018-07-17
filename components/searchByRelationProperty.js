@@ -32,13 +32,13 @@ const _ = require('lodash');
  * @return {*}
  */
 function deepSearchByRelationPropertyOnModel(model, filter) {
-  // if the model does not exist, stop here
-  if (!model) {
-    return model;
-  }
   // always work with JSON to be able to traverse relation data
   if (typeof model.toJSON === 'function') {
     model = model.toJSON();
+  }
+  // if the model does not exist or no filter, stop here
+  if (!model || !filter) {
+    return model;
   }
   // get standard include filter
   let include = _.get(filter, 'include', []);
@@ -55,7 +55,7 @@ function deepSearchByRelationPropertyOnModel(model, filter) {
   const includedRelNames = [];
   // go through all relations
   include = include.filter(function (relation) {
-    // get relation na,e
+    // get relation name
     let relationName;
     if (typeof relation === 'string') {
       relationName = relation;

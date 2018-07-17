@@ -12,6 +12,7 @@ const maskField = require('../../components/maskField');
 const qrCode = require('../../components/qrCode');
 const helpers = require('../../components/helpers');
 const remoteHelpers = require('../../components/remoteHelpers');
+const pdfDoc = require('../../components/pdfDoc');
 
 function init(app, callback) {
   app.utils = {
@@ -28,7 +29,8 @@ function init(app, callback) {
     anonymizeDatasetFields: anonymizeDatasetFields,
     maskField: maskField,
     qrCode: qrCode,
-    helpers: helpers
+    helpers: helpers,
+    pdfDoc: pdfDoc
   };
   callback();
 }

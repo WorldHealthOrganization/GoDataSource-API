@@ -862,6 +862,12 @@
       "principalId": "write_contact",
       "permission": "ALLOW",
       "property": "mergeCasesAndContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "exportFilteredCases"
     }
   ],
   "methods": {
@@ -1806,6 +1812,47 @@
       "http": {
         "verb": "get",
         "path": "/cases/filtered-count"
+      }
+    },
+    "prototype.exportFilteredCases": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export filtered list of cases",
+      "http": {
+        "verb": "get",
+        "path": "/cases/export"
       }
     },
     "prototype.restoreContactFollowUp": {

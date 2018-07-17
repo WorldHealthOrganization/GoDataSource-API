@@ -57,6 +57,62 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Export filtered cases to PDF
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportFilteredCases = function (filter, options, callback) {
+    // use get cases functionality
+    this.__get__cases(filter, function (error, result) {
+      if (error) {
+        return callback(error);
+      }
+      // add support for filter parent
+      const results = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, filter);
+      const contextUser = options.remotingContext.req.authData.user;
+      // load user language dictionary
+      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+        // handle errors
+        if (error) {
+          return callback(error);
+        }
+        // define a list of table headers
+        const headers = [];
+        // headers come from case models
+        Object.keys(app.models.case.fieldLabelsMap).forEach(function (propertyName) {
+          // show the field only if the user has it configured or it does not have any configuration set
+          if (
+            !contextUser.settings ||
+            !contextUser.settings.caseFields ||
+            contextUser.settings.caseFields.indexOf(propertyName) !== -1
+          ) {
+            headers.push({
+              id: propertyName,
+              // use correct label translation for user language
+              header: app.models.language.getFieldTranslationFromDictionary(app.models.case.fieldLabelsMap[propertyName], contextUser.languageId, dictionary)
+            });
+          }
+        });
+        // go through the results
+        results.forEach(function (result) {
+          // for the fields that use reference data
+          app.models.case.referenceDataFields.forEach(function (field) {
+            if (result[field]) {
+              // get translation of the reference data
+              result[field] = app.models.language.getFieldTranslationFromDictionary(result[field], contextUser.languageId, dictionary);
+            }
+          });
+        });
+        // create PDF doc with the results
+        app.utils.pdfDoc.createPDFList(headers, results, function (error, pdfDoc) {
+          app.utils.remote.helpers.offerFileToDownload(pdfDoc, 'application/pdf', 'Case Line List.pdf', callback);
+        });
+      });
+    })
+  };
+
+  /**
    * Do not allow deletion of a active Outbreak
    */
   Outbreak.beforeRemote('deleteById', function (context, modelInstance, next) {
@@ -2389,10 +2445,10 @@ module.exports = function (Outbreak) {
         return Promise
           .all([
             // soft delete merged contacts/cases
-            app.models.case.destroyAll({ id: { inq: caseIds } }),
-            app.models.contact.destroyAll({ id: { inq: contactIds } }),
+            app.models.case.destroyAll({id: {inq: caseIds}}),
+            app.models.contact.destroyAll({id: {inq: contactIds}}),
             // update base record
-            updateBaseRecord.upsertWithWhere({ id: resultModel.id }, resultModelProps),
+            updateBaseRecord.upsertWithWhere({id: resultModel.id}, resultModelProps),
             // update lab results
             Promise.all(labResults.map((labResult) => app.models.labResult.upsertWithWhere(
               {
