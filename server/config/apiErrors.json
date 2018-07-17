@@ -102,5 +102,13 @@
   "INVALID_TRANSLATIONS_FILE": {
     "defaultStatusCode": 422,
     "messagePattern": "The provided language file `<%= fileName %>` is invalid: <%= details %>"
+  },
+  "UNSUPPORTED_FILE_TYPE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "The provided file `<%= fileName %>` is invalid: <%= details%>"
+  },
+  "INVALID_CONTENT_OF_TYPE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Invalid <%= contentType %> content: <%= details%>"
   }
 }

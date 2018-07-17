@@ -11,7 +11,9 @@
       "required": true
     },
     "synonyms": {
-      "type": ["string"]
+      "type": [
+        "string"
+      ]
     },
     "active": {
       "type": "boolean",
@@ -87,6 +89,18 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "getHierarchicalList"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "importHierarchicalList"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "importImportableFileUsingMap"
     }
   ],
   "methods": {
@@ -125,19 +139,21 @@
       "returns": [
         {
           "arg": "locations",
-          "type": [{
-            "type": {
-              "location": "location",
-              "children": [
-                {
-                  "type": {
-                    "location": "location",
-                    "children": []
+          "type": [
+            {
+              "type": {
+                "location": "location",
+                "children": [
+                  {
+                    "type": {
+                      "location": "location",
+                      "children": []
+                    }
                   }
-                }
-              ]
+                ]
+              }
             }
-          }],
+          ],
           "root": true,
           "required": true
         }
@@ -146,6 +162,75 @@
       "http": {
         "verb": "get",
         "path": "/hierarchical"
+      }
+    },
+    "importHierarchicalList": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "file",
+          "type": "file",
+          "description": "JSON file containing hierarchical locations list"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "locations",
+          "type": [
+            "location"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a hierarchical locations list (JSON)",
+      "http": {
+        "verb": "post",
+        "path": "/import"
+      }
+    },
+    "importImportableFileUsingMap": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "locations",
+          "type": [
+            "location"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a hierarchical locations list coming from a flat XLS file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/import-importable-file-using-map"
       }
     }
   }

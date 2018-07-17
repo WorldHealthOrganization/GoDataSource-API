@@ -1,7 +1,6 @@
 'use strict';
 
 const app = require('../../server/server');
-const formidable = require('formidable');
 const xlsx = require('xlsx');
 const fs = require('fs');
 
@@ -38,25 +37,10 @@ module.exports = function (Language) {
   Language.prototype.importLanguageTokensFile = function (req, languageFile, options, callback) {
     // make context available
     const self = this;
-    // use formidable to parse multi-part data
-    const form = new formidable.IncomingForm();
-    form.parse(req, function (error, fields, files) {
+    // loopback cannot parse multipart requests
+    app.utils.remote.helpers.parseMultipartRequest(req, [], ['languageFile'], function (error, fields, files) {
       if (error) {
         return callback(error);
-      }
-      // validate required properties, loopback can't validate multi-part payloads
-      let missingProperties = [];
-
-      if (!files.languageFile) {
-        missingProperties.push('languageFile');
-      }
-      // if there are missing required properties
-      if (missingProperties.length) {
-        // send back the error
-        return callback(app.utils.apiError.getError('MISSING_REQUIRED_PROPERTY', {
-          model: Language.modelName,
-          properties: missingProperties.join(', ')
-        }));
       }
       // read language file
       fs.readFile(files.languageFile.path, function (error, buffer) {
