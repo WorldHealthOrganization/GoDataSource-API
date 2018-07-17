@@ -18,6 +18,12 @@
       "principalId": "$client_application",
       "permissions": "ALLOW",
       "property": "getDatabaseSnapshot"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "importDatabaseSnapshot"
     }
   ],
   "methods": {
@@ -31,17 +37,48 @@
       ],
       "returns": [
         {
-          "arg": "snapshot",
-          "type": "string",
-          "description": "Database snapshot",
+          "arg": "body",
+          "type": "file",
           "root": true,
           "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
         }
       ],
       "description": "Retrieve a compressed snapshot of the database.",
       "http": {
         "verb": "get",
         "path": "/database-snapshot"
+      }
+    },
+    "importDatabaseSnapshot": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "name",
+          "type": "string"
+        },
+        {
+          "arg": "snapshot",
+          "type": "file"
+        }
+      ],
+      "returns": [],
+      "description": "Synchronize the database based on a given snapshot archive",
+      "http": {
+        "verb": "post",
+        "path": "/import-database-snapshot"
       }
     }
   }

@@ -35,6 +35,7 @@
     "serve-favicon": "^2.0.1",
     "strong-error-handler": "^2.0.0",
     "svg2png": "^4.1.1",
+    "tar": "^4.4.4",
     "tmp": "0.0.33",
     "uuid": "^3.2.1",
     "voilab-pdf-table": "^0.4.0",

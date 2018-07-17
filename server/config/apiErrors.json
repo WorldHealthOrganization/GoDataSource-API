@@ -122,5 +122,9 @@
   "IMPORT_PARTIAL_SUCCESS": {
     "defaultStatusCode": 422,
     "messagePattern": "Import Partial Success. Some `<%= model %>` instances failed to be imported. Successfully imported: <%= success %> \nFailed to be imported: <%= failed %>"
+  },
+  "INVALID_SNAPSHOT_FILE": {
+    "defaultStatusCode": 400,
+    "messagePattern": "The provided database snapshot archive is invalid."
   }
 }
