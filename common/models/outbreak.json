@@ -862,6 +862,12 @@
       "principalId": "write_contact",
       "permission": "ALLOW",
       "property": "mergeCasesAndContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countCasesPerPeriod"
     }
   ],
   "methods": {
@@ -2596,6 +2602,50 @@
       "http": {
         "verb": "post",
         "path": "/merge"
+      }
+    },
+    "prototype.countCasesPerPeriod": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'periodType': enum [day, week, month], 'periodInterval':['date', 'date'] on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "totalCasesCount": "number",
+            "period": {
+              "type": [
+                {
+                  "type": {
+                    "start": "date",
+                    "end": "date",
+                    "totalCasesCount": "number",
+                    "classificationCounters": {
+                      "type": {
+                        "{caseClassification}": "number"
+                      }
+                    },
+                    "caseIDs": [
+                      "string"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "description": "Object containing counters for cases per period",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of cases per period",
+      "http": {
+        "verb": "get",
+        "path": "/cases/per-period-per-classification/count"
       }
     }
   }

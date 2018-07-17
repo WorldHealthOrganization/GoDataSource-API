@@ -2194,6 +2194,178 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Count the cases per period per classification
+   * @param filter Besides the default filter properties this request also accepts 'periodType': enum [day, week, month], 'periodInterval':['date', 'date'] on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countCasesPerPeriod = function (filter, callback) {
+    // initialize periodType filter; default is day; accepting day/week/month
+    let periodType;
+    let periodTypes = {
+      day: 'day',
+      week: 'week',
+      month: 'month'
+    };
+
+    // check if the periodType filter was sent; accepting it only on the first level
+    periodType = _.get(filter, 'where.periodType');
+    if (typeof periodType !== "undefined") {
+      // periodType was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.periodType;
+    }
+
+    // check if the received periodType is accepted
+    if (Object.values(periodTypes).indexOf(periodType) === -1) {
+      // set default periodType
+      periodType = periodTypes.day;
+    }
+
+    // initialize periodInterval; keeping it as moment instances we need to use them further in the code
+    let periodInterval;
+    // check if the periodInterval filter was sent; accepting it only on the first level
+    periodInterval = _.get(filter, 'where.periodInterval');
+    if (typeof periodInterval !== "undefined") {
+      // periodInterval was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.periodInterval;
+      // normalize periodInterval dates
+      periodInterval[0] = genericHelpers.getUTCDate(periodInterval[0]);
+      periodInterval[1] = genericHelpers.getUTCDateEndOfDay(periodInterval[1]);
+    } else {
+      // set default periodInterval depending on periodType
+      switch (periodType) {
+        case periodTypes.day:
+          // get interval for today
+          let today = genericHelpers.getUTCDate();
+          let todayEndOfDay = genericHelpers.getUTCDateEndOfDay();
+          periodInterval = [today, todayEndOfDay];
+          break;
+        case periodTypes.week:
+          // get interval for this week
+          let mondayStartOfDay = genericHelpers.getUTCDate(null, 1);
+          let sundayEndOfDay = genericHelpers.getUTCDateEndOfDay(null, 7);
+          periodInterval = [mondayStartOfDay, sundayEndOfDay];
+          break;
+        case periodTypes.month:
+          // get interval for this month
+          let firstDayOfMonth = genericHelpers.getUTCDate().startOf('month');
+          let lastDayOfMonth = genericHelpers.getUTCDateEndOfDay().endOf('month');
+          periodInterval = [firstDayOfMonth, lastDayOfMonth];
+          break;
+      }
+    }
+
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // initialize default filter
+    let defaultFilter = {
+      where: {
+        outbreakId: outbreakId,
+        or: [{
+          and: [{
+            createdAt: {
+              // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
+              between: periodInterval.slice()
+            },
+            dateBecomeCase: {
+              eq: null
+            }
+          }]
+        }, {
+          dateBecomeCase: {
+            // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
+            between: periodInterval.slice()
+          }
+        }]
+      },
+      order: 'createdAt ASC'
+    };
+
+    // initialize result
+    let result = {
+      totalCasesCount: 0,
+      period: []
+    };
+
+    // get all the cases for the filtered period
+    app.models.case.find(app.utils.remote
+      .mergeFilters(defaultFilter, filter || {}))
+      .then(function (cases) {
+        // get periodMap for interval
+        let periodMap = genericHelpers.getChunksForInterval(periodInterval, periodType);
+        // fill additional details for each entry in the periodMap
+        Object.keys(periodMap).forEach(function(entry) {
+          periodMap[entry] = Object.assign(periodMap[entry], {
+            totalCasesCount: 0,
+            classificationCounters: {},
+            caseIDs: []
+          });
+        });
+
+        cases.forEach(function (item) {
+          // get case date; it's either dateBecomeCase or createdAt
+          let caseDate = item.dateBecomeCase || item.createdAt;
+          // get period in which the case needs to be included
+          let casePeriodInterval;
+          switch (periodType) {
+            case periodTypes.day:
+              // get interval for today
+              let today = genericHelpers.getUTCDate(caseDate).toString();
+              let todayEndOfDay = genericHelpers.getUTCDateEndOfDay(caseDate).toString();
+              casePeriodInterval = [today, todayEndOfDay];
+              break;
+            case periodTypes.week:
+              // get interval for this week
+              let mondayStartOfDay = genericHelpers.getUTCDate(caseDate, 1);
+              let sundayEndOfDay = genericHelpers.getUTCDateEndOfDay(caseDate, 7);
+
+              // we should use monday only if it is later than the first date of the periodInterval; else use the first date of the period interval
+              mondayStartOfDay = (mondayStartOfDay.isAfter(periodInterval[0]) ? mondayStartOfDay : periodInterval[0]).toString();
+
+              // we should use sunday only if it is earlier than the last date of the periodInterval; else use the last date of the period interval
+              sundayEndOfDay = (sundayEndOfDay.isBefore(periodInterval[1]) ? sundayEndOfDay : periodInterval[1]).toString();
+
+              casePeriodInterval = [mondayStartOfDay, sundayEndOfDay];
+              break;
+            case periodTypes.month:
+              // get interval for this month
+              let firstDayOfMonth = genericHelpers.getUTCDate(caseDate).startOf('month');
+              let lastDayOfMonth = genericHelpers.getUTCDateEndOfDay(caseDate).endOf('month');
+
+              // we should use first day of month only if it is later than the first date of the periodInterval; else use the first date of the period interval
+              firstDayOfMonth = (firstDayOfMonth.isAfter(periodInterval[0]) ? firstDayOfMonth : periodInterval[0]).toString();
+
+              // we should use last day of month only if it is earlier than the last date of the periodInterval; else use the last date of the period interval
+              lastDayOfMonth = (lastDayOfMonth.isBefore(periodInterval[1]) ? lastDayOfMonth : periodInterval[1]).toString();
+
+              casePeriodInterval = [firstDayOfMonth, lastDayOfMonth];
+              break;
+          }
+
+          // create a period identifier
+          let casePeriodIdentifier = casePeriodInterval.join(' - ');
+
+          // increase counters
+          periodMap[casePeriodIdentifier].totalCasesCount++;
+          // initialize counter for classification if it's not already initialize
+          if (!periodMap[casePeriodIdentifier].classificationCounters[item.classification]) {
+            periodMap[casePeriodIdentifier].classificationCounters[item.classification] = 0;
+          }
+          periodMap[casePeriodIdentifier].classificationCounters[item.classification]++;
+          periodMap[casePeriodIdentifier].caseIDs.push(item.id);
+        });
+
+        // update results; sending array with period entries
+        result.period = Object.values(periodMap);
+        result.totalCasesCount = cases.length;
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
    * Merge multiple cases and contacts
    * @param data List of records ids, to be merged
    */
@@ -2389,10 +2561,10 @@ module.exports = function (Outbreak) {
         return Promise
           .all([
             // soft delete merged contacts/cases
-            app.models.case.destroyAll({ id: { inq: caseIds } }),
-            app.models.contact.destroyAll({ id: { inq: contactIds } }),
+            app.models.case.destroyAll({id: {inq: caseIds}}),
+            app.models.contact.destroyAll({id: {inq: contactIds}}),
             // update base record
-            updateBaseRecord.upsertWithWhere({ id: resultModel.id }, resultModelProps),
+            updateBaseRecord.upsertWithWhere({id: resultModel.id}, resultModelProps),
             // update lab results
             Promise.all(labResults.map((labResult) => app.models.labResult.upsertWithWhere(
               {

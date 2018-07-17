@@ -2,14 +2,28 @@
 
 // dependencies
 const moment = require('moment');
+const chunkDateRange = require('chunk-date-range');
 
 /**
  * Convert a Date object into moment UTC date and reset time to start of the day
- * If no date is given, the current datetime is returned
- * @param date
+ * Additionally if dayOfWeek is sent the function will return the date for the date's corresponding day of the week
+ * @param date If no date is given, the current datetime is returned
+ * @param dayOfWeek If not sent the day of the week will not be changed
  */
-const getUTCDate = function (date) {
-  return date ? moment(date).utc().startOf('day') : moment.utc().startOf('day');
+const getUTCDate = function (date, dayOfWeek) {
+  let momentDate = date ? moment.utc(date).startOf('day') : moment.utc().startOf('day');
+  return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
+};
+
+/**
+ * Convert a Date object into moment UTC date and reset time to end of the day
+ * Additionally if dayOfWeek is sent the function will return the date for the date's corresponding day of the week
+ * @param date If no date is given, the current datetime is returned
+ * @param dayOfWeek If not sent the date will not be changed
+ */
+const getUTCDateEndOfDay = function (date, dayOfWeek) {
+  let momentDate = date ? moment.utc(date).endOf('day') : moment.utc().endOf('day');
+  return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
 };
 
 /**
@@ -17,11 +31,60 @@ const getUTCDate = function (date) {
  * @param string
  * @return {*}
  */
-const getAsciiString = function(string) {
+const getAsciiString = function (string) {
   return string.replace(/[^\x00-\x7F]/g, '');
+};
+
+/**
+ * Split a date interval into chunks of specified length
+ * @param interval Array containing the margin dates of the interval
+ * @param chunk String Length of each resulted chunk; Can be a daily/weekly/monthly
+ * @returns {{}} Map of chunks
+ */
+const getChunksForInterval = function (interval, chunk) {
+  // initialize map for chunkDateRange chunk values
+  let chunkMap = {
+    day: 'day',
+    week: 'week',
+    month: 'month'
+  };
+  // set default chunk to 1 day
+  chunk = chunk ? chunkMap[chunk] : chunkMap.day;
+
+  // get chunks
+  // Note chunkDateRange doesn't include the last day in the interval so we add a day
+  let chunks = chunkDateRange(interval[0], interval[1], chunk);
+
+  // initialize result
+  let result = {};
+
+  // parse the chunks and create map with UTC dates
+  chunks.forEach(function (chunk, index) {
+    // get the chunk margins and format to UTC
+    let start = getUTCDate(chunk.start);
+    // chunkDateRange uses for both start and end 00:00 hours;
+    // we use 23:59 hours for end so we need to get the end of day for the previous day except for the last day in the interval since we already send it at 23:59 hours
+    let end = getUTCDateEndOfDay(chunk.end);
+    if (index !== chunks.length - 1) {
+      end.add(-1, 'd')
+    }
+
+    // create period identifier
+    let identifier = start.toString() + ' - ' + end.toString();
+
+    // store period entry in the map
+    result[identifier] = {
+      start: start,
+      end: end
+    }
+  });
+
+  return result;
 };
 
 module.exports = {
   getUTCDate: getUTCDate,
-  getAsciiString: getAsciiString
+  getUTCDateEndOfDay: getUTCDateEndOfDay,
+  getAsciiString: getAsciiString,
+  getChunksForInterval: getChunksForInterval
 };
