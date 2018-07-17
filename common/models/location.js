@@ -225,9 +225,14 @@ module.exports = function (Location) {
   /**
    * Build hierarchical list of locations
    * @param locationsList
+   * @param [removeIdentifiers] {boolean} If true, id and parentLocationId are omitted from the record
    * @return {*[]}
    */
-  Location.buildHierarchicalLocationsList = function (locationsList) {
+  Location.buildHierarchicalLocationsList = function (locationsList, removeIdentifiers) {
+    // by default keep identifiers
+    if (removeIdentifiers === undefined) {
+      removeIdentifiers = false;
+    }
 
     /**
      * Update indices for children locations (under new parentLocationPath)
@@ -264,6 +269,13 @@ module.exports = function (Location) {
         // transform it to JSON
         location = location.toJSON();
       }
+      // clone location (in order to modify it without altering the source)
+      let locationToStore = Object.assign({}, location);
+      // check if identifiers should be removed
+      if (removeIdentifiers) {
+        delete locationToStore.id;
+        delete locationToStore.parentLocationId;
+      }
       // define length (it will be used later)
       let length;
       // keep a flag for just processed locations
@@ -271,7 +283,7 @@ module.exports = function (Location) {
       // if the location was found in unprocessed locations
       if (unprocessedLocations[location.id]) {
         // update location information (process it)
-        _.set(hierarchicalLocationsList, `${locationIndex[location.id]}.location`, location);
+        _.set(hierarchicalLocationsList, `${locationIndex[location.id]}.location`, locationToStore);
         // delete it from the unprocessed list
         delete unprocessedLocations[location.id];
         // and mark it as just processed
@@ -284,7 +296,7 @@ module.exports = function (Location) {
         if (!justProcessed) {
           // add it to the list on the top level
           length = hierarchicalLocationsList.push({
-            location: location,
+            location: locationToStore,
             children: []
           });
           // store its index
@@ -297,7 +309,7 @@ module.exports = function (Location) {
           const parentLocation = _.get(hierarchicalLocationsList, locationIndex[location.parentLocationId]);
           // build current location
           let currentLocation = {
-            location: location,
+            location: locationToStore,
             children: []
           };
           // if it was just processed
@@ -324,7 +336,7 @@ module.exports = function (Location) {
             location: null,
             children: [
               {
-                location: location,
+                location: locationToStore,
                 children: []
               }
             ]
@@ -346,9 +358,21 @@ module.exports = function (Location) {
    * Create locations from a hierarchical locations list
    * @param parentLocationId
    * @param locationsList
+   * @param [options]
    * @param callback
    */
-  Location.createLocationsFromHierarchicalLocationsList = function (parentLocationId, locationsList, callback) {
+  Location.createLocationsFromHierarchicalLocationsList = function (parentLocationId, locationsList, options, callback) {
+    // options is a optional params
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+
+    // gather all results under one accumulator
+    if (!options.resultAccumulator) {
+      options.resultAccumulator = [];
+    }
+
     // build a list of create operations
     const createLocationOperations = [];
     locationsList.forEach(function (location) {
@@ -357,15 +381,17 @@ module.exports = function (Location) {
         // add create location operation
         createLocationOperations.push(function (cb) {
           Location
-            .create(_location)
+            .create(_location, options)
             .then(function (createdLocation) {
+              // store result
+              options.resultAccumulator.push(createdLocation);
               // when done, if there are other sub-locations
               if (location.children && location.children.length) {
                 // create them recursively
-                Location.createLocationsFromHierarchicalLocationsList(createdLocation.id, location.children, cb);
+                Location.createLocationsFromHierarchicalLocationsList(createdLocation.id, location.children, options, cb);
               } else {
                 // otherwise just stop
-                cb();
+                cb(null, createdLocation);
               }
             })
             .catch(cb)
@@ -373,6 +399,41 @@ module.exports = function (Location) {
       }
     );
     // run create operations
-    async.series(createLocationOperations, callback);
+    async.series(createLocationOperations, function (error) {
+      if (error) {
+        return callback(error);
+      }
+      callback(null, options.resultAccumulator);
+    });
+  };
+
+  /**
+   * Import hierarchical locations list from JSON file
+   * @param fileContent
+   * @param options
+   * @param callback
+   * @return {*}
+   */
+  Location.importHierarchicalListFromJsonFile = function (fileContent, options, callback) {
+    // try and parse JSON file content
+    try {
+      const locations = typeof fileContent === 'string' ? JSON.parse(fileContent) : fileContent;
+      // this needs to be a list (in order to get its headers)
+      if (!Array.isArray(locations)) {
+        // error invalid content
+        return callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+          contentType: 'JSON',
+          details: 'it should contain an array'
+        }));
+      }
+      // create locations from the hierarchical list
+      Location.createLocationsFromHierarchicalLocationsList(undefined, locations, options, callback);
+    } catch (error) {
+      // handle JSON.parse errors
+      callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+        contentType: 'JSON',
+        details: error.message
+      }));
+    }
   };
 };

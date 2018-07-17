@@ -1,6 +1,5 @@
 'use strict';
 
-const formidable = require('formidable');
 const app = require('../../server/server');
 const path = require('path');
 
@@ -60,26 +59,10 @@ module.exports = function (Icon) {
    * @param callback
    */
   Icon.upload = function (req, name, icon, options, callback) {
-    const form = new formidable.IncomingForm();
-    form.parse(req, function (error, fields, files) {
+    // loopback cannot parse multipart requests
+    app.utils.remote.helpers.parseMultipartRequest(req, ['name'], ['icon'], Icon, function (error, fields, files) {
       if (error) {
         return callback(error);
-      }
-      // validate required properties, loopback can't validate multi-part payloads
-      let missingProperties = [];
-      if (!fields.name) {
-        missingProperties.push('name');
-      }
-      if (!files.icon) {
-        missingProperties.push('icon');
-      }
-      // if there are missing required properties
-      if (missingProperties.length) {
-        // send back the error
-        return callback(app.utils.apiError.getError('MISSING_REQUIRED_PROPERTY', {
-          model: Icon.modelName,
-          properties: missingProperties.join(', ')
-        }));
       }
       // save resource on disk
       Icon.saveOnDisk(files.icon.path)

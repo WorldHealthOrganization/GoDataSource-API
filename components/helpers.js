@@ -97,9 +97,36 @@ const getChunksForInterval = function (interval, chunk) {
   return result;
 };
 
+/**
+ * Remap a list of items using a map
+ * @param list
+ * @param fieldsMap
+ * @return {Array}
+ */
+const remapProperties = function (list, fieldsMap) {
+  // store final result
+  let results = [];
+  // get a list of source fields
+  let fields = Object.keys(fieldsMap);
+  // go through the list of items
+  list.forEach(function (item) {
+    // build each individual item
+    let result = {};
+    // go trough the list of fields
+    fields.forEach(function (field) {
+      // remap property
+      result[fieldsMap[field]] = item[field];
+    });
+    // add processed item to the final list
+    results.push(result);
+  });
+  return results;
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamToBuffer,
+  remapProperties: remapProperties,
   getUTCDateEndOfDay: getUTCDateEndOfDay,
   getAsciiString: getAsciiString,
   getChunksForInterval: getChunksForInterval

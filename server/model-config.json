@@ -199,5 +199,13 @@
   "caseProps": {
     "dataSource": null,
     "public": false
+  },
+  "importableFile": {
+    "dataSource": "memory",
+    "public": true
+  },
+  "importableFileWithMap": {
+    "dataSource": null,
+    "public": true
   }
 }
