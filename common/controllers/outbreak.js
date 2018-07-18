@@ -59,15 +59,42 @@ module.exports = function (Outbreak) {
   /**
    * Export filtered cases to PDF
    * @param filter
+   * @param exportType
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredCases = function (filter, options, callback) {
+  Outbreak.prototype.exportFilteredCases = function (filter, exportType, options, callback) {
     // use get cases functionality
     this.__get__cases(filter, function (error, result) {
       if (error) {
         return callback(error);
       }
+
+      // by default export CSV
+      if (!exportType) {
+        exportType = 'csv';
+      } else {
+        // be more permissive, always convert to lowercase
+        exportType = exportType.toLowerCase();
+      }
+
+      // validate export type, only allow csv and pdf
+      if (['csv', 'pdf'].indexOf(exportType) === -1) {
+        return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {errorMessages: `Invalid Export Type: ${exportType}. Supported options: pdf, csv`}));
+      }
+
+      let fileBuilder;
+      let mimeType;
+
+      // set file builder and mime type according to exported type
+      if (exportType === 'csv') {
+        fileBuilder = app.utils.spreadSheetFile.createCsvFile;
+        mimeType = 'text/csv';
+      } else {
+        fileBuilder = app.utils.pdfDoc.createPDFList;
+        mimeType = 'application/pdf';
+      }
+
       // add support for filter parent
       const results = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, filter);
       const contextUser = options.remotingContext.req.authData.user;
@@ -104,9 +131,10 @@ module.exports = function (Outbreak) {
             }
           });
         });
-        // create PDF doc with the results
-        app.utils.pdfDoc.createPDFList(headers, results, function (error, pdfDoc) {
-          app.utils.remote.helpers.offerFileToDownload(pdfDoc, 'application/pdf', 'Case Line List.pdf', callback);
+        // create file with the results
+        fileBuilder(headers, results, function (error, file) {
+          // and offer it for download
+          app.utils.remote.helpers.offerFileToDownload(file, mimeType, `Case Line List.${exportType}`, callback);
         });
       });
     })
