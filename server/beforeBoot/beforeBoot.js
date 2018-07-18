@@ -13,6 +13,7 @@ const qrCode = require('../../components/qrCode');
 const helpers = require('../../components/helpers');
 const remoteHelpers = require('../../components/remoteHelpers');
 const pdfDoc = require('../../components/pdfDoc');
+const spreadSheetFile = require('../../components/spreadSheetFile');
 
 function init(app, callback) {
   app.utils = {
@@ -30,7 +31,8 @@ function init(app, callback) {
     maskField: maskField,
     qrCode: qrCode,
     helpers: helpers,
-    pdfDoc: pdfDoc
+    pdfDoc: pdfDoc,
+    spreadSheetFile: spreadSheetFile
   };
   callback();
 }
