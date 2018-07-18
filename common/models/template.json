@@ -25,7 +25,7 @@
       "type": "number",
       "description": "Number of days used to calculate the proportion of new cases detected among known contacts"
     },
-    "noDaysDaysInChains": {
+    "noDaysInChains": {
       "type": "number",
       "description": "Number of days used to calculate the proportion of new cases in known transmission chains"
     },

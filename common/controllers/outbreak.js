@@ -799,6 +799,7 @@ module.exports = function (Outbreak) {
   /**
    * Generate list of follow ups
    * @param data Contains number of days used to perform the generation
+   * @param options
    * @param callback
    */
   Outbreak.prototype.generateFollowups = function (data, options, callback) {
@@ -1337,16 +1338,16 @@ module.exports = function (Outbreak) {
 
   /**
    * Count new cases in known transmission chains
-   * @param filter Besides the default filter properties this request also accepts 'noDaysDaysInChains': number on the first level in 'where'
+   * @param filter Besides the default filter properties this request also accepts 'noDaysInChains': number on the first level in 'where'
    * @param callback
    */
   Outbreak.prototype.countNewCasesInKnownTransmissionChains = function (filter, callback) {
     // default number of day used to determine new cases
-    let noDaysDaysInChains = this.noDaysDaysInChains;
+    let noDaysInChains = this.noDaysInChains;
     // check if a different number was sent in the filter
-    if (filter && filter.where && filter.where.noDaysDaysInChains) {
-      noDaysDaysInChains = filter.where.noDaysDaysInChains;
-      delete filter.where.noDaysDaysInChains;
+    if (filter && filter.where && filter.where.noDaysInChains) {
+      noDaysInChains = filter.where.noDaysInChains;
+      delete filter.where.noDaysInChains;
     }
     // start building a result
     const result = {
@@ -1358,7 +1359,7 @@ module.exports = function (Outbreak) {
     const casesIndex = {};
     // calculate date used to compare contact date of onset with
     const newCasesFromDate = new Date();
-    newCasesFromDate.setDate(newCasesFromDate.getDate() - noDaysDaysInChains);
+    newCasesFromDate.setDate(newCasesFromDate.getDate() - noDaysInChains);
 
     // get known transmission chains (case-case relationships)
     app.models.relationship
