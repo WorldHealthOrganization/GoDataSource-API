@@ -54,6 +54,12 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "generateUniqueId"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "createPdfFromSvg"
     }
   ],
   "methods": {
@@ -125,6 +131,48 @@
       "http": {
         "verb": "post",
         "path": "/generate-unique-id"
+      }
+    },
+    "createPdfFromSvg": {
+      "accepts": [
+        {
+          "arg": "svg",
+          "type": "string",
+          "required": true,
+          "description": "SVG content"
+        },
+        {
+          "arg": "splitFactor",
+          "type": "number",
+          "description": "Split the image into a square matrix with a side of splitFactor (1 no split, 2 => 2x2 grid, 3 => 3x3 grid)"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Create a PDF file containing PNG images coming from SVG files",
+      "http": {
+        "verb": "post",
+        "path": "/svg-to-pdf"
       }
     }
   }

@@ -19,6 +19,38 @@ const defaultDocumentConfiguration = {
 };
 
 /**
+ * Add page number
+ * @param document
+ */
+function addPageNumber(document) {
+  // init page number
+  if (document.pageNumber === undefined) {
+    document.pageNumber = 0;
+  }
+  // start from page 1
+  document.pageNumber++;
+  // get initial bottom margin
+  const bottomMargin = document.page.margins.bottom;
+  // set bottom margin to 0, so we can write on the margins
+  document.page.margins.bottom = 0;
+  // add page number to bottom-right corner
+  document.text(
+    document.pageNumber,
+    document.page.width - 100,
+    document.page.height - 35,
+    {
+      width: 100,
+      align: 'center',
+      lineBreak: false,
+    });
+  // Reset text writer position
+  document.text('', 50, 50);
+  // reset page bottom margin
+  document.page.margins.bottom = bottomMargin;
+}
+
+
+/**
  * Create a (standard) PDF document
  * @param options
  * @return {PDFDocument}
@@ -33,6 +65,7 @@ function createPdfDoc(options) {
     this.image(`${__dirname}/../resources/images/logo-black.png`, 50, 15, {height: 25});
     this.lineWidth(options.lineWidth);
     this.fontSize(options.fontSize);
+    addPageNumber(document);
   });
   // add first page
   document.addPage(options);
@@ -108,10 +141,10 @@ function createPDFList(headers, data, callback) {
   helpers.streamToBuffer(document, callback);
   // finalize document
   document.end();
-};
+}
 
 /**
- * Create a PDF file containg PNG images coming from SVG files
+ * Create a PDF file containing PNG images coming from SVG files
  * @param svgData
  * @param splitFactor Split the image into a square matrix with a side of splitFactor (1 no split, 2 => 2x2 grid, 3 => 3x3 grid)
  * @param callback

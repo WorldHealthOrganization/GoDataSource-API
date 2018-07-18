@@ -106,6 +106,9 @@ module.exports = function (Outbreak) {
         });
         // create PDF doc with the results
         app.utils.pdfDoc.createPDFList(headers, results, function (error, pdfDoc) {
+          if (error) {
+            return callback(error);
+          }
           app.utils.remote.helpers.offerFileToDownload(pdfDoc, 'application/pdf', 'Case Line List.pdf', callback);
         });
       });
