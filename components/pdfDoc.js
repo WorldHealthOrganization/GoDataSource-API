@@ -74,20 +74,20 @@ function createPDFList(headers, data, callback) {
   });
 
   // compute width
-  let reservedWith = 0;
+  let reservedWidth = 0;
   let noHeadersWithReservedWidth = 0;
   // find headers which need specific width
   headers.forEach(function (header) {
     if (header.width) {
       // mark width as reserved
-      reservedWith += header.width;
+      reservedWidth += header.width;
       // count the number of headers with reserved width
       noHeadersWithReservedWidth++;
     }
   });
 
   // for rows without reserved width, split remaining document width (doc width - margins - reserved width) between remaining headers
-  const defaultRowWidth = (defaultDocumentConfiguration.widthForPageSize - 2 * defaultDocumentConfiguration.margin - reservedWith) / (headers.length - noHeadersWithReservedWidth);
+  const defaultRowWidth = (defaultDocumentConfiguration.widthForPageSize - 2 * defaultDocumentConfiguration.margin - reservedWidth) / (headers.length - noHeadersWithReservedWidth);
 
   // add all headers
   headers.forEach(function (header) {
