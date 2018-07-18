@@ -184,13 +184,15 @@ module.exports = function (Sync) {
           // read each file's contents and sync with database
           return async.parallel(collectionsFiles.map((fileName) => {
             return (done) => {
+              let filePath = `${tmpDirName}/${fileName}`;
+
               // split filename into 'collection name' and 'extension'
               let collectionName = fileName.split('.')[0];
 
               // cache reference to Loopback's model
               let model = app.models[collectionsMap[collectionName]];
 
-              fs.readFile(`${tmpDirName}/${fileName}`, { encoding: 'utf8' }, (err, data) => {
+              fs.readFile(filePath, { encoding: 'utf8' }, (err, data) => {
                 // parse file contents to JavaScript object
                 try {
                   let collectionRecords = JSON.parse(data);
@@ -201,16 +203,29 @@ module.exports = function (Sync) {
                         // check if a record with the given id exists
                         // if not, create it, otherwise check updatedAt timestamp
                         // if it's different, then update the record using data from the snapshot
-                        model.findById(collectionRecord._id, (err, record) => {
+                        model.findOne(
+                          {
+                            where: {
+                              id: collectionRecord._id
+                            },
+                            deleted: true
+                          },
+                          (err, record) => {
                             if (err) {
                               return done(err);
                             }
 
                             if (!record) {
-                              return model.save(collectionRecord, done);
+                              return model.create(collectionRecord, null, (err, record) => {
+                                let a = 1;
+                              });
                             }
 
                             if (record && record.updatedAt !== collectionRecord.updatedAt) {
+                              // make sure that if the record is soft deleted, it stays that way
+                              if (record.deleted) {
+                                collectionRecord.deleted = true;
+                              }
                               return record.updateAttributes(collectionRecord, done);
                             }
 
@@ -221,7 +236,9 @@ module.exports = function (Sync) {
                     (err) => callback(err)
                   );
                 } catch (parseError) {
-                  return done(parseError);
+                  app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
+
+                  return done(app.utils.apiError.getError('INVALID_SNAPSHOT_FILE'));
                 }
               });
             };
