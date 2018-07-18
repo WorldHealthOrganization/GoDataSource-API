@@ -17,12 +17,14 @@ module.exports = function (Sync) {
 
     Sync.exportDatabase(
       filter,
+      // excluding the following properties specially for mobile
       [
         'systemSettings',
         'template',
         'icon',
         'helpCategory'
       ],
+      // no collection specific options
       [],
       (err, fileName) => {
         if (err) {
