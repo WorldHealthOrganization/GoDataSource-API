@@ -216,9 +216,7 @@ module.exports = function (Sync) {
                             }
 
                             if (!record) {
-                              return model.create(collectionRecord, null, (err, record) => {
-                                let a = 1;
-                              });
+                              return model.create(collectionRecord, null, done);
                             }
 
                             if (record && record.updatedAt !== collectionRecord.updatedAt) {
