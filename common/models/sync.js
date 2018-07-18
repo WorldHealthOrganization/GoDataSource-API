@@ -154,7 +154,7 @@ module.exports = function (Sync) {
   Sync.syncDatabaseWithSnapshot = function (filePath, callback) {
     // create a temporary directory to store the database files
     // it always created the folder in the system temporary directory
-    let tmpDir = tmp.dirSync();
+    let tmpDir = tmp.dirSync({ unsafeCleanup: true });
     let tmpDirName = tmpDir.name;
 
     // extract the compressed database snapshot into the newly created temporary directory
@@ -182,8 +182,8 @@ module.exports = function (Sync) {
           });
 
           // read each file's contents and sync with database
-          return async.parallel(collectionsFiles.map((fileName) => {
-            return (done) => {
+          return async.parallel(
+            collectionsFiles.map((fileName) => (doneCollection) => {
               let filePath = `${tmpDirName}/${fileName}`;
 
               // split filename into 'collection name' and 'extension'
@@ -192,14 +192,22 @@ module.exports = function (Sync) {
               // cache reference to Loopback's model
               let model = app.models[collectionsMap[collectionName]];
 
-              fs.readFile(filePath, { encoding: 'utf8' }, (err, data) => {
-                // parse file contents to JavaScript object
-                try {
-                  let collectionRecords = JSON.parse(data);
+              return fs.readFile(
+                filePath,
+                {
+                  encoding: 'utf8'
+                },
+                (err, data) => {
+                  if (err) {
+                    return doneCollection(err);
+                  }
 
-                  return async.parallel(
-                    collectionRecords.map((collectionRecord) => {
-                      return (done) => {
+                  // parse file contents to JavaScript object
+                  try {
+                    let collectionRecords = JSON.parse(data);
+
+                    return async.parallel(
+                      collectionRecords.map((collectionRecord) => (doneRecord) => {
                         // check if a record with the given id exists
                         // if not, create it, otherwise check updatedAt timestamp
                         // if it's different, then update the record using data from the snapshot
@@ -212,11 +220,11 @@ module.exports = function (Sync) {
                           },
                           (err, record) => {
                             if (err) {
-                              return done(err);
+                              return doneRecord(err);
                             }
 
                             if (!record) {
-                              return model.create(collectionRecord, null, done);
+                              return model.create(collectionRecord, null, doneRecord);
                             }
 
                             if (record && record.updatedAt !== collectionRecord.updatedAt) {
@@ -224,29 +232,34 @@ module.exports = function (Sync) {
                               if (record.deleted) {
                                 collectionRecord.deleted = true;
                               }
-                              return record.updateAttributes(collectionRecord, done);
+                              return record.updateAttributes(collectionRecord, doneRecord);
                             }
 
-                            return done();
+                            return doneRecord();
                           });
-                      };
-                    }),
-                    (err) => callback(err)
-                  );
-                } catch (parseError) {
-                  app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
+                        }),
+                        (err) => doneCollection(err)
+                    )
+                  } catch (parseError) {
+                    app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
+                    return done(app.utils.apiError.getError('INVALID_SNAPSHOT_FILE'));
+                  }
+                });
+            }),
+            (err) => {
+              // remove temporary directory
+              tmpDir.removeCallback();
 
-                  return done(app.utils.apiError.getError('INVALID_SNAPSHOT_FILE'));
-                }
-              });
-            };
-          }),
-          (err) => {
-            if (err){
-              return callback(err);
+              // remove temporary uploaded file
+              fs.unlink(filePath);
+
+              if (err) {
+                return callback(err);
+              }
+
+              return callback();
             }
-            return callback();
-          });
+          );
         });
       }
     );
