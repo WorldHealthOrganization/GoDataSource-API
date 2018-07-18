@@ -1466,22 +1466,35 @@ module.exports = function (Outbreak) {
     // get outbreakId
     let outbreakId = this.id;
 
-    // get all relationships between events and contacts which were created sooner than 'noDaysNewContacts' ago
-    app.models.relationship.find(app.utils.remote
+    // create filter as we need to use it also after the relationships are found
+    let _filter = app.utils.remote
       .mergeFilters({
         where: {
           outbreakId: outbreakId,
           and: [
             {'persons.type': 'contact'},
             {'persons.type': 'event'}
-          ],
-          contactDate: {
-            gte: now.setDate(now.getDate() - noDaysNewContacts)
+          ]
+        },
+        include: [{
+          relation: 'people',
+          scope: {
+            where: {
+              type: 'contact',
+              createdAt: {
+                gte: now.setDate(now.getDate() - noDaysNewContacts)
+              }
+            },
+            filterParent: true
           }
-        }
-      }, filter || {})
-    )
+        }]
+      }, filter || {});
+
+    // get all relationships between events and contacts, where the contacts were created sooner than 'noDaysNewContacts' ago
+    app.models.relationship.find(_filter)
       .then(function (relationships) {
+        // filter by relation properties
+        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, _filter);
         // initialize events map and contacts map
         let eventsMap = {};
         let contactsMap = {};
