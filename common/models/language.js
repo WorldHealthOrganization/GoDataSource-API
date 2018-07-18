@@ -116,4 +116,49 @@ module.exports = function (Language) {
       next();
     });
   };
+
+  /**
+   * Get language dictionary for the specified language (also include english as a fallback language)
+   * @param languageId
+   * @param callback
+   */
+  Language.getLanguageDictionary = function (languageId, callback) {
+    app.models.languageToken
+      .find({
+        where: {
+          or: [
+            {languageId: languageId},
+            {languageId: 'english_us'}
+          ]
+        },
+        fields: ['token', 'translation', 'languageId']
+      })
+      .then(function (languageTokens) {
+        // build a language map for easy referencing language tokens
+        const tokensMap = {};
+        languageTokens.forEach(function (languageToken) {
+          tokensMap[`${languageToken.token}-${languageToken.languageId}`] = languageToken.translation;
+        });
+        callback(null, tokensMap);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Get translation for a language token from a language dictionary
+   * @param field
+   * @param languageId
+   * @param dictionary
+   * @return {string}
+   */
+  Language.getFieldTranslationFromDictionary = function (field, languageId, dictionary) {
+    // first look for the translation in the specified language
+    if (dictionary[`${field}-${languageId}`]) {
+      field = dictionary[`${field}-${languageId}`];
+    // then look for the translation in the english language
+    } else if (dictionary[`${field}-english_us`]) {
+      field = dictionary[`${field}-english_us`];
+    }
+    return field;
+  }
 };

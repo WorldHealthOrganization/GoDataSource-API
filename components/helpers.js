@@ -36,6 +36,21 @@ const getAsciiString = function (string) {
 };
 
 /**
+ * Convert a read to a buffer
+ * @param stream
+ * @param callback
+ */
+function streamToBuffer(stream, callback) {
+  const chunks = [];
+  stream.on('data', function (chunk) {
+    chunks.push(chunk);
+  });
+  stream.on('end', function () {
+    callback(null, Buffer.concat(chunks));
+  });
+}
+
+/**
  * Split a date interval into chunks of specified length
  * @param interval Array containing the margin dates of the interval
  * @param chunk String Length of each resulted chunk; Can be a daily/weekly/monthly
@@ -110,6 +125,7 @@ const remapProperties = function (list, fieldsMap) {
 
 module.exports = {
   getUTCDate: getUTCDate,
+  streamToBuffer: streamToBuffer,
   remapProperties: remapProperties,
   getUTCDateEndOfDay: getUTCDateEndOfDay,
   getAsciiString: getAsciiString,

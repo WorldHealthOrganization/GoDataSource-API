@@ -15,6 +15,10 @@ process.on('uncaughtException', function (e) {
   }
 });
 
+// also catch unhandled rejections
+process.on('unhandledRejection', function (r) {
+  throw r;
+});
 
 const beforeBoot = require('./beforeBoot/beforeBoot');
 const logger = require('../components/logger');
