@@ -143,7 +143,7 @@ module.exports = function (Language) {
             [translationFileHeaders.translation]: languageToken.translation
           });
         });
-        // build the worksheet based on the build JSON
+        // build the worksheet based on the built JSON
         const sheet = xlsx.utils.json_to_sheet(tokens);
         // create a new workbook
         const workbook = xlsx.utils.book_new();

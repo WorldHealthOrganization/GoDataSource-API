@@ -1834,6 +1834,12 @@
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
         },
         {
+          "arg": "type",
+          "type": "string",
+          "enum": ["pdf", "csv"],
+          "description": "Export type; can be: pdf or csv. Default: csv"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
