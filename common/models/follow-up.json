@@ -27,11 +27,6 @@
       "type": "geopoint"
     },
     "questionnaireAnswers": {
-      "type": [
-        "object"
-      ]
-    },
-    "additionalData": {
       "type": "object"
     },
     "index": {
