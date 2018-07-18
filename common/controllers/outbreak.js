@@ -1162,17 +1162,21 @@ module.exports = function (Outbreak) {
         let now = new Date();
 
         // get the new contacts in the outbreak
-        return app.models.contact.find({
-          include: ['relationships'],
-          where: {
-            outbreakId: outbreakId,
-            createdAt: {
-              gte: now.setDate(now.getDate() - noDaysNewContacts)
+        return app.models.contact.find(app.utils.remote
+          .mergeFilters({
+            include: ['relationships'],
+            where: {
+              outbreakId: outbreakId,
+              createdAt: {
+                gte: now.setDate(now.getDate() - noDaysNewContacts)
+              }
             }
-          }
-        });
+          }, filter || {})
+        );
       })
       .then(function (contacts) {
+        // filter by relation properties
+        contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
         // loop through the contacts and check relationships exposure types to increase the counters in the result
         contacts.forEach(function (contact) {
           contact.relationships.forEach(function (relationship) {
@@ -2075,12 +2079,12 @@ module.exports = function (Outbreak) {
           if (followup.performed) {
             // update counter for contact successful follow-ups
             contactsMap[contactId].successfulFollowupsCount++;
-            // update overall performed flag
-            contactsTeamMap[contactId].performed = true;
 
             // check if contact didn't have a succesful followup and the current one was performed
             // as specified above for teams this is the only case where updates are needed
             if (!contactsTeamMap[contactId].performed) {
+              // update overall performed flag
+              contactsTeamMap[contactId].performed = true;
               // increase total successful total counter
               result.contactsWithSuccessfulFollowupsCount++;
             }
@@ -2187,6 +2191,8 @@ module.exports = function (Outbreak) {
     app.models.followUp.find(app.utils.remote
       .mergeFilters(defaultFilter, filter || {}))
       .then(function (followups) {
+        // filter by relation properties
+        followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
         // initialize teams map
         let teamsMap = {};
         // initialize helper team to date to contacts map
