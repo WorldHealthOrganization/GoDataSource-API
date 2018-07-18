@@ -157,10 +157,7 @@ module.exports = function (Sync) {
     let tmpDir = tmp.dirSync();
     let tmpDirName = tmpDir.name;
 
-    // cache reference to mongodb connection
-    let connection = app.dataSources.mongoDb.connector;
-
-    // create a tar extract stream
+    // extract the compressed database snapshot into the newly created temporary directory
     tar.x(
       {
         cwd: tmpDirName,
@@ -171,8 +168,8 @@ module.exports = function (Sync) {
           return callback(err);
         }
 
-        // retrieve all the extracted files
-        return fs.readdir(tmpDirName, function (err, filenames) {
+        // read all files in the temp dir
+        return fs.readdir(tmpDirName, (err, filenames) => {
           if (err) {
             return callback(err);
           }
@@ -181,7 +178,7 @@ module.exports = function (Sync) {
           let collectionsFiles = filenames.filter((filename) => {
             // split filename into 'collection name' and 'extension'
             filename = filename.split('.');
-            return collectionsMap.hasOwnProperty(filename[0]);
+            return filename[0] && collectionsMap.hasOwnProperty(filename[0]);
           });
 
           // read each file's contents and sync with database
@@ -214,7 +211,7 @@ module.exports = function (Sync) {
                             }
 
                             if (record && record.updatedAt !== collectionRecord.updatedAt) {
-                              return model.updateAttributes(collectionRecord, done);
+                              return record.updateAttributes(collectionRecord, done);
                             }
 
                             return done();
@@ -228,7 +225,13 @@ module.exports = function (Sync) {
                 }
               });
             };
-          }));
+          }),
+          (err) => {
+            if (err){
+              return callback(err);
+            }
+            return callback();
+          });
         });
       }
     );
