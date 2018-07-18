@@ -66,6 +66,9 @@
     "transferRefused": {
       "type": "boolean",
       "default": false
+    },
+    "questionnaireAnswers": {
+      "type": "object"
     }
   },
   "validations": [],

@@ -56,7 +56,7 @@
       "enum": ["inProgress", "completed"],
       "required": true
     },
-    "additionalData": {
+    "questionnaireAnswers": {
       "type": "object"
     }
   },
