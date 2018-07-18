@@ -148,24 +148,8 @@
     "resetPassWithSecurityQuestion": {
       "accepts": [
         {
-          "arg": "options",
-          "type": {
-            "questions": [
-              {
-                "type": {
-                  "question": {
-                    "type": "string"
-                  },
-                  "answer": {
-                    "type": "string"
-                  }
-                }
-              }
-            ],
-            "email": {
-              "type": "string"
-            }
-          },
+          "arg": "data",
+          "type": "securityQuestionsTemplate",
           "http": {
             "source": "body"
           },
