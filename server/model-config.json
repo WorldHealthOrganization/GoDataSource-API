@@ -207,5 +207,13 @@
   "importableFileWithMap": {
     "dataSource": null,
     "public": true
+  },
+  "securityQuestionsTemplate": {
+    "dataSource": null,
+    "public": false
+  },
+  "securityQuestionTemplate": {
+    "dataSource": null,
+    "public": false
   }
 }
