@@ -1963,6 +1963,9 @@ module.exports = function (Outbreak) {
         }
       }, filter || {}))
       .then(function (followups) {
+        // filter by relation properties
+        followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
+
         // initialize teams map and contacts map as the request needs to count contacts
         let teamsMap = {};
         let contactsMap = {};

@@ -618,8 +618,8 @@ module.exports = function (Outbreak) {
           }
         });
 
-        // update results.teams; sending array with teams information
-        results.teams = _.values(teams);
+        // update results.teams; sending array with teams information only for the teams that have contacts
+        results.teams = _.values(teams).filter(teamEntry => teamEntry[resultProperty]);
 
         // send response
         callback(null, results);
