@@ -5,7 +5,6 @@ const tmp = require('tmp');
 const async = require('async');
 const app = require('../../server/server');
 const fs = require('fs');
-const moment = require('moment');
 
 module.exports = function (Sync) {
   Sync.hasController = true;
@@ -60,8 +59,7 @@ module.exports = function (Sync) {
       // doing this because createdAt and updatedAt are equal when a record is created
       customFilter = {
         updatedAt: {
-          // date conversion will be removed when 'WGD-349' is merged
-          $gte: moment(filter.where.fromDate).toDate()
+          $gte: filter.where.fromDate
         }
       };
     }
