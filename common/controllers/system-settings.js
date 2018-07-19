@@ -66,4 +66,19 @@ module.exports = function (SystemSettings) {
       uuid: uuid.v4()
     });
   };
+
+  /**
+   * Create a PDF file containing PNG images coming from SVG files
+   * @param svg
+   * @param splitFactor Split the image into a square matrix with a side of splitFactor (1 no split, 2 => 2x2 grid, 3 => 3x3 grid)
+   * @param callback
+   */
+  SystemSettings.createPdfFromSvg = function (svg, splitFactor, callback) {
+    app.utils.pdfDoc.createSVGDoc(svg, splitFactor, function (error, pdfDoc) {
+      if (error) {
+        return callback(error);
+      }
+      app.utils.remote.helpers.offerFileToDownload(pdfDoc, 'application/pdf', `${uuid.v4()}.pdf`, callback);
+    });
+  }
 };

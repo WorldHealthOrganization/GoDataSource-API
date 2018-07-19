@@ -2,7 +2,9 @@
 
 const PdfKit = require('pdfkit');
 const PdfTable = require('voilab-pdf-table');
+const svg2png = require('svg2png');
 const helpers = require('./helpers');
+const Jimp = require('jimp');
 
 // define a default document configuration
 const defaultDocumentConfiguration = {
@@ -17,21 +19,56 @@ const defaultDocumentConfiguration = {
 };
 
 /**
+ * Add page number
+ * @param document
+ */
+function addPageNumber(document) {
+  // init page number
+  if (document.pageNumber === undefined) {
+    document.pageNumber = 0;
+  }
+  // start from page 1
+  document.pageNumber++;
+  // get initial bottom margin
+  const bottomMargin = document.page.margins.bottom;
+  // set bottom margin to 0, so we can write on the margins
+  document.page.margins.bottom = 0;
+  // add page number to bottom-right corner
+  document.text(
+    document.pageNumber,
+    document.page.width - 100,
+    document.page.height - 35,
+    {
+      width: 100,
+      align: 'center',
+      lineBreak: false,
+    });
+  // Reset text writer position
+  document.text('', 50, 50);
+  // reset page bottom margin
+  document.page.margins.bottom = bottomMargin;
+}
+
+
+/**
  * Create a (standard) PDF document
  * @param options
  * @return {PDFDocument}
  */
 function createPdfDoc(options) {
+  // merge options
+  options = Object.assign({}, defaultDocumentConfiguration, options);
   // create a PDF document
-  const document = new PdfKit(Object.assign({}, defaultDocumentConfiguration, options));
+  const document = new PdfKit(options);
   // set logo on all pages and default line width
   document.on('pageAdded', function () {
     this.image(`${__dirname}/../resources/images/logo-black.png`, 50, 15, {height: 25});
-    this.lineWidth(defaultDocumentConfiguration.lineWidth);
-    this.fontSize(defaultDocumentConfiguration.fontSize);
+    this.lineWidth(options.lineWidth);
+    this.fontSize(options.fontSize);
+    addPageNumber(document);
   });
   // add first page
-  document.addPage(defaultDocumentConfiguration);
+  document.addPage(options);
   return document;
 }
 
@@ -106,6 +143,106 @@ function createPDFList(headers, data, callback) {
   document.end();
 }
 
+/**
+ * Create a PDF file containing PNG images coming from SVG files
+ * @param svgData
+ * @param splitFactor Split the image into a square matrix with a side of splitFactor (1 no split, 2 => 2x2 grid, 3 => 3x3 grid)
+ * @param callback
+ */
+function createSVGDoc(svgData, splitFactor, callback) {
+  // create a PDF doc
+  const document = createPdfDoc({size: 'A3'});
+
+  // image size is A3 page - margins
+  const imageSize = {
+    width: 1090,
+    height: 740
+  };
+
+  // render the image at 120% resolution of the page (make the image sharper)
+  const renderImageSize = {
+    width: imageSize.width * 1.2,
+    height: imageSize.height * 1.2
+  };
+
+  // default splitFactor is 1
+  if (!splitFactor || splitFactor < 1) {
+    splitFactor = 1;
+  } else {
+    // splitFactor is always integer
+    splitFactor = parseInt(splitFactor);
+  }
+
+  // when done, send back document buffer
+  helpers.streamToBuffer(document, callback);
+  // render a PNG from a SVG at a resolution of a rendered image, multiplied by the split factor
+  svg2png(svgData, {width: renderImageSize.width * splitFactor, height: renderImageSize.height * splitFactor})
+    .then(function (buffer) {
+      // check if we need to split the image
+      if (splitFactor > 1) {
+        // load the image into Jimp
+        Jimp.read(buffer)
+          .then(function (image) {
+            // store image parts
+            let images = [];
+            // build a matrix of images, each cropped to its own position in the matrix
+            for (let row = 0; row < splitFactor; row++) {
+              for (let column = 0; column < splitFactor; column++) {
+                images.push(image.clone().crop(column * renderImageSize.width, row * renderImageSize.height, renderImageSize.width, renderImageSize.height));
+              }
+            }
+            // keep a flag for first image (first page is auto-added, we don't want to add it twice)
+            let firstImage = true;
+
+            /**
+             * Add images to PDF doc
+             * @param done
+             */
+            function writeImageToPage(done) {
+              // get first image from the queue
+              const image = images.shift();
+              // if the image is a valid one
+              if (image) {
+                // if this is the first image added, do not add a new page
+                if (!firstImage) {
+                  document.addPage();
+                }
+                firstImage = false;
+                // get image buffer
+                image.getBuffer(Jimp.MIME_PNG, function (error, buffer) {
+                  if (error) {
+                    return done(error);
+                  }
+                  // store it in the document (fit to document size - margins)
+                  document.image(buffer, 50, 50, {fit: [imageSize.width, imageSize.height]});
+                  // move to the next page
+                  writeImageToPage(done);
+                });
+              } else {
+                // no more images to add, move along
+                done();
+              }
+            }
+            // write images to pdf
+            writeImageToPage(function (error) {
+              if (error) {
+                return callback(error);
+              }
+              // finalize document
+              document.end();
+            });
+          })
+      } else {
+        // fit the image to page (page dimensions - margins)
+        document.image(buffer, 50, 50, {fit: [imageSize.width, imageSize.height]});
+        // finalize document
+        document.end();
+      }
+    })
+    .catch(callback);
+}
+
 module.exports = {
-  createPDFList: createPDFList
+  createPDFList: createPDFList,
+  createSVGDoc: createSVGDoc
 };

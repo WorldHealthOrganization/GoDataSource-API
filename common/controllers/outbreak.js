@@ -133,6 +133,9 @@ module.exports = function (Outbreak) {
         });
         // create file with the results
         fileBuilder(headers, results, function (error, file) {
+          if (error) {
+            return callback(error);
+          }
           // and offer it for download
           app.utils.remote.helpers.offerFileToDownload(file, mimeType, `Case Line List.${exportType}`, callback);
         });
