@@ -225,7 +225,7 @@ module.exports = function (Sync) {
                               return model.create(collectionRecord, null, doneRecord);
                             }
 
-                            if (record && record.updatedAt !== collectionRecord.updatedAt) {
+                            if (record && record.updatedAt.getTime() !== new Date(collectionRecord.updatedAt).getTime()) {
                               // make sure that if the record is soft deleted, it stays that way
                               if (record.deleted) {
                                 collectionRecord.deleted = true;
