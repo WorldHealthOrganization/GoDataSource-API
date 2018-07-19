@@ -1194,17 +1194,21 @@ module.exports = function (Outbreak) {
         let now = new Date();
 
         // get the new contacts in the outbreak
-        return app.models.contact.find({
-          include: ['relationships'],
-          where: {
-            outbreakId: outbreakId,
-            createdAt: {
-              gte: now.setDate(now.getDate() - noDaysNewContacts)
+        return app.models.contact.find(app.utils.remote
+          .mergeFilters({
+            include: ['relationships'],
+            where: {
+              outbreakId: outbreakId,
+              createdAt: {
+                gte: now.setDate(now.getDate() - noDaysNewContacts)
+              }
             }
-          }
-        });
+          }, filter || {})
+        );
       })
       .then(function (contacts) {
+        // filter by relation properties
+        contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
         // loop through the contacts and check relationships exposure types to increase the counters in the result
         contacts.forEach(function (contact) {
           contact.relationships.forEach(function (relationship) {
@@ -1494,22 +1498,35 @@ module.exports = function (Outbreak) {
     // get outbreakId
     let outbreakId = this.id;
 
-    // get all relationships between events and contacts which were created sooner than 'noDaysNewContacts' ago
-    app.models.relationship.find(app.utils.remote
+    // create filter as we need to use it also after the relationships are found
+    let _filter = app.utils.remote
       .mergeFilters({
         where: {
           outbreakId: outbreakId,
           and: [
             {'persons.type': 'contact'},
             {'persons.type': 'event'}
-          ],
-          contactDate: {
-            gte: now.setDate(now.getDate() - noDaysNewContacts)
+          ]
+        },
+        include: [{
+          relation: 'people',
+          scope: {
+            where: {
+              type: 'contact',
+              createdAt: {
+                gte: now.setDate(now.getDate() - noDaysNewContacts)
+              }
+            },
+            filterParent: true
           }
-        }
-      }, filter || {})
-    )
+        }]
+      }, filter || {});
+
+    // get all relationships between events and contacts, where the contacts were created sooner than 'noDaysNewContacts' ago
+    app.models.relationship.find(_filter)
       .then(function (relationships) {
+        // filter by relation properties
+        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, _filter);
         // initialize events map and contacts map
         let eventsMap = {};
         let contactsMap = {};
@@ -1745,6 +1762,8 @@ module.exports = function (Outbreak) {
         }
       }, filter || {}))
       .then(function (followUps) {
+        // filter by relation properties
+        followUps = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followUps, filter);
         // initialize contacts map; helper to not count contacts twice
         let contactsMap = {};
 
@@ -1938,6 +1957,8 @@ module.exports = function (Outbreak) {
         order: 'date ASC'
       }, filter || {}))
       .then(function (followUps) {
+        // filter by relation properties
+        followUps = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followUps, filter);
         // initialize contacts map; helper to not count contacts twice and keep the seen value;
         // once a contact is seen the newer follow-ups for the same contact don't matter
         let contactsMap = {};
@@ -1991,6 +2012,9 @@ module.exports = function (Outbreak) {
         }
       }, filter || {}))
       .then(function (followups) {
+        // filter by relation properties
+        followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
+
         // initialize teams map and contacts map as the request needs to count contacts
         let teamsMap = {};
         let contactsMap = {};
@@ -2100,12 +2124,12 @@ module.exports = function (Outbreak) {
           if (followup.performed) {
             // update counter for contact successful follow-ups
             contactsMap[contactId].successfulFollowupsCount++;
-            // update overall performed flag
-            contactsTeamMap[contactId].performed = true;
 
             // check if contact didn't have a succesful followup and the current one was performed
             // as specified above for teams this is the only case where updates are needed
             if (!contactsTeamMap[contactId].performed) {
+              // update overall performed flag
+              contactsTeamMap[contactId].performed = true;
               // increase total successful total counter
               result.contactsWithSuccessfulFollowupsCount++;
             }
@@ -2212,6 +2236,8 @@ module.exports = function (Outbreak) {
     app.models.followUp.find(app.utils.remote
       .mergeFilters(defaultFilter, filter || {}))
       .then(function (followups) {
+        // filter by relation properties
+        followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
         // initialize teams map
         let teamsMap = {};
         // initialize helper team to date to contacts map

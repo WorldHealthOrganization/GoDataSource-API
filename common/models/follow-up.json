@@ -33,7 +33,7 @@
       "type": "number"
     },
     "teamId": {
-      "type": "number"
+      "type": "string"
     },
     "isGenerated": {
       "description": "Hidden flag that indicates whether the follow up is generated or not",

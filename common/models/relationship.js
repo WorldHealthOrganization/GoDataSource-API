@@ -192,6 +192,8 @@ module.exports = function (Relationship) {
       }, filter || {})
     )
       .then(function (relationships) {
+        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
+
         // initialize contacts map and caseContactsMap
         // helper properties to keep the contacts already counted
         let contactsMap = {};

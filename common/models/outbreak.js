@@ -537,6 +537,9 @@ module.exports = function (Outbreak) {
         }
       }, filter || {}))
       .then(function (followups) {
+        // filter by relation properties
+        followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
+
         // initialize map of contacts to not count same contact twice
         let contacts = {};
         // initialize map of teams
@@ -615,8 +618,8 @@ module.exports = function (Outbreak) {
           }
         });
 
-        // update results.teams; sending array with teams information
-        results.teams = _.values(teams);
+        // update results.teams; sending array with teams information only for the teams that have contacts
+        results.teams = _.values(teams).filter(teamEntry => teamEntry[resultProperty]);
 
         // send response
         callback(null, results);
