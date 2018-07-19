@@ -241,9 +241,6 @@ module.exports = function (Outbreak) {
    * Validate visual identifier (optional)
    */
   Outbreak.beforeRemote('prototype.__updateById__cases', function (context, modelInstance, next) {
-    // parse array of dates properties
-    helpers.parseArrayOfDates(context.args.data);
-
     // if visual id was sent in request, check for uniqueness
     if (context.args.data.visualId !== undefined) {
       // retrieve the instance that will be updated
