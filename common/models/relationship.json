@@ -24,7 +24,7 @@
       "required": true
     },
     "certaintyLevelId": {
-      "type": "number",
+      "type": "string",
       "required": true
     },
     "exposureTypeId": {
