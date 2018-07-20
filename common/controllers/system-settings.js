@@ -2,7 +2,7 @@
 
 const app = require('../../server/server');
 const uuid = require('uuid');
-const genericHelpers = require('../../components/helpers');
+const moment = require('moment');
 
 module.exports = function (SystemSettings) {
 
@@ -91,7 +91,7 @@ module.exports = function (SystemSettings) {
     return callback(
       null,
       {
-        date: genericHelpers.getUTCDate()
+        date: moment.utc()
       }
     );
   };
