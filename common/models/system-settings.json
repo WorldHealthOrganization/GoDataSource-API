@@ -60,6 +60,12 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "createPdfFromSvg"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getServerUTCDate"
     }
   ],
   "methods": {
@@ -173,6 +179,27 @@
       "http": {
         "verb": "post",
         "path": "/svg-to-pdf"
+      }
+    },
+    "getServerUTCDate": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "date",
+          "type": {
+            "date": {
+              "type": "string"
+            }
+          },
+          "description": "Current server UTC date",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Generates server current UTC date.",
+      "http": {
+        "verb": "get",
+        "path": "/utc-date"
       }
     }
   }
