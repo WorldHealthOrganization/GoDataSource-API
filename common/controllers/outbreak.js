@@ -829,6 +829,31 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.generateFollowups = function (data, options, callback) {
+    // sanity checks
+    let isValid = true;
+    let invalidValues = {};
+    if (this.periodOfFollowup <= 0) {
+      invalidValues.periodOfFollowup = this.periodOfFollowup;
+    }
+    if (this.frequencyOfFollowUp <= 0) {
+      invalidValues.frequencyOfFollowUp = this.frequencyOfFollowUp;
+    }
+    if (this.frequencyOfFollowUpPerDay <= 0) {
+      invalidValues.frequencyOfFollowUpPerDay = this.frequencyOfFollowUpPerDay;
+    }
+
+    // stop follow up generation, if sanity checks failed
+    if (!isValid) {
+      return callback(
+        app.utils.apiError.getError(
+          'INVALID_GENERATE_FOLLOWUP_PARAMS',
+          {
+            params: invalidValues
+          }
+        )
+      )
+    }
+
     // if no followup period was sent in request, assume its just for one day
     data = data || {};
     data.followUpPeriod = data.followUpPeriod || 1;
