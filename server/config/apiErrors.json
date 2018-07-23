@@ -110,5 +110,9 @@
   "INVALID_CONTENT_OF_TYPE": {
     "defaultStatusCode": 422,
     "messagePattern": "Invalid <%= contentType %> content: <%= details%>"
+  },
+  "INVALID_GENERATE_FOLLOWUP_PARAMS": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid follow up generation parameters. Details: `<%= details %>`"
   }
 }
