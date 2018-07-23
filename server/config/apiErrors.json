@@ -113,6 +113,6 @@
   },
   "INVALID_GENERATE_FOLLOWUP_PARAMS": {
     "defaultStatusCode": 400,
-    "messagePattern": "Invalid follow up generation parameters `<%= params %>`"
+    "messagePattern": "Invalid follow up generation parameters. Details: `<%= details %>`"
   }
 }
