@@ -178,8 +178,7 @@ function afterUpdateHook(context, modelInstance, next) {
                           token: `${languageTokenID}_DESCRIPTION`,
                           languageId: language.id,
                           translation: context.req._original.description
-                        }, context.args.options)
-                        .then((res) => res);
+                        }, context.args.options);
                     }));
                   })
               }
