@@ -29,6 +29,14 @@
     "lastName": {
       "type": "string"
     },
+    "name": {
+      "type": "string",
+      "description": "Event name; Defining it here as Loopback fails on querying with regexp on properties that are not defined in the model; Needed for querying person directly"
+    },
+    "description": {
+      "type": "string",
+      "description": "Event description; Defining it here as Loopback fails on querying with regexp on properties that are not defined in the model; Needed for querying person directly"
+    },
     "dob": {
       "type": "date"
     },
