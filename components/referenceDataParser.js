@@ -39,7 +39,10 @@ function beforeCreateHook(context, modelInstance, next) {
     // update record data with the language tokens
     context.args.data.id = identifier;
     context.args.data.value = identifier;
-    context.args.data.description = `${identifier}_DESCRIPTION`;
+    // update description only if value was sent to not set a language token for an non-existent value
+    if (context.args.data.description) {
+      context.args.data.description = `${identifier}_DESCRIPTION`;
+    }
   }
   next();
 }
@@ -70,7 +73,7 @@ function afterCreateHook(context, modelInstance, next) {
               translation: context.req._original.value
             }, context.args.options));
           // create token for description if present
-          if(context.req._original.description) {
+          if (context.req._original.description) {
             tokenPromises.push(app.models.languageToken
               .create({
                 token: modelInstance.description,
@@ -105,11 +108,21 @@ function beforeUpdateHook(context, modelInstance, next) {
     let data = context.args.data;
     // initialize original values storage
     let originalValues = {};
-    // store original request values and remove them from the body as they shouldn't be changed. Translations will be changed
+    // store original request values
     ['value', 'description'].forEach(function (prop) {
       if (data[prop]) {
         originalValues[prop] = data[prop];
+        // remove request values from the body as they shouldn't be changed. Translations will be changed
         delete data[prop];
+
+        // for description set the language token again to the same value as we cannot do a simple check if the token already exists;
+        // it might not since it's not required; in that case we need to create the token and set it
+        if (prop === 'description') {
+          // get language token; depending on model it is either the ID (for system reference data) or the FK (for outbreak reference data)
+          let languageTokenID = context.method.sharedClass.name === 'outbreak' ? context.args.fk : context.instance.id;
+          // set description
+          data.description = `${languageTokenID}_DESCRIPTION`;
+        }
       }
     });
 
@@ -130,7 +143,7 @@ function afterUpdateHook(context, modelInstance, next) {
     // get logged user languageId
     let languageId = context.req.authData.user.languageId;
     // get language token; depending on model it is either the ID (for system reference data) or the FK (for outbreak reference data)
-    let languageToken = context.method.sharedClass.name === 'outbreak' ? context.args.fk : context.instance.id;
+    let languageTokenID = context.method.sharedClass.name === 'outbreak' ? context.args.fk : context.instance.id;
     // initialize array of promises to be executed for updating language tokens
     let updateActions = [];
 
@@ -142,15 +155,34 @@ function afterUpdateHook(context, modelInstance, next) {
           app.models.languageToken
             .findOne({
               where: {
-                token: languageToken + (prop === 'value' ? '' : '_DESCRIPTION'),
+                token: languageTokenID + (prop === 'value' ? '' : '_DESCRIPTION'),
                 languageId: languageId
               }
             })
             .then(function (languageToken) {
-              // and update it's translation. Do not handle 'not found' case, it should be internal system error
-              return languageToken.updateAttributes({
-                translation: context.req._original[prop]
-              }, context.args.options);
+              // and update it's translation if found. Do not handle 'not found' case for value, it should be internal system error
+              // the token might not exist for description as we don't create description tokens when the description was not sent so we need to create the token in that case
+              if (prop === 'value' || (prop === 'description' && languageToken)) {
+                return languageToken.updateAttributes({
+                  translation: context.req._original[prop]
+                }, context.args.options);
+              } else {
+                // get installed languages and create description tokens for each one
+                return app.models.language
+                  .find()
+                  .then(function (languages) {
+                    // loop through all the languages and create new token promises for each language for each new token
+                    return Promise.all(languages.map((language) => {
+                      return app.models.languageToken
+                        .create({
+                          token: `${languageTokenID}_DESCRIPTION`,
+                          languageId: language.id,
+                          translation: context.req._original.description
+                        }, context.args.options)
+                        .then((res) => res);
+                    }));
+                  })
+              }
             })
         );
       }
