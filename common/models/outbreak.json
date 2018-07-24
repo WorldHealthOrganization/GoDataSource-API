@@ -159,6 +159,11 @@
       "type": "hasMany",
       "model": "followUp",
       "foreignKey": "outbreakId"
+    },
+    "people": {
+      "type": "hasMany",
+      "model": "person",
+      "foreignKey": "outbreakId"
     }
   },
   "acls": [
@@ -880,6 +885,18 @@
       "principalId": "read_followup",
       "permission": "ALLOW",
       "property": "listLatestFollowUpsForContactsIfNotPerformed"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "__get__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "__count__people"
     }
   ],
   "methods": {
