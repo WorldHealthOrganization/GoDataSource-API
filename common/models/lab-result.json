@@ -18,43 +18,38 @@
       "required": true
     },
     "dateSampleDelivered": {
-      "type": "date",
-      "required": true
+      "type": "date"
     },
     "dateTesting": {
-      "type": "date",
-      "required": true
+      "type": "date"
     },
     "dateOfResult": {
       "type": "date"
     },
     "labName": {
-      "type": "string",
-      "required": true
+      "type": "string"
+    },
+    "sampleIdentifier": {
+      "type": "string"
     },
     "sampleType": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "testType": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "result": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "quantitativeResult": {
       "type": "string"
     },
     "notes": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "status": {
       "type": "string",
-      "enum": ["inProgress", "completed"],
-      "required": true
+      "enum": ["inProgress", "completed"]
     },
     "questionnaireAnswers": {
       "type": "object"
