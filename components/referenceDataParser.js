@@ -180,7 +180,7 @@ function afterUpdateHook(context, modelInstance, next) {
                           translation: context.req._original.description
                         }, context.args.options);
                     }));
-                  })
+                  });
               }
             })
         );
