@@ -69,13 +69,15 @@ function afterCreateHook(context, modelInstance, next) {
               languageId: language.id,
               translation: context.req._original.value
             }, context.args.options));
-          // create token for description
-          tokenPromises.push(app.models.languageToken
-            .create({
-              token: modelInstance.description,
-              languageId: language.id,
-              translation: context.req._original.description
-            }, context.args.options));
+          // create token for description if present
+          if(context.req._original.description) {
+            tokenPromises.push(app.models.languageToken
+              .create({
+                token: modelInstance.description,
+                languageId: language.id,
+                translation: context.req._original.description
+              }, context.args.options));
+          }
         });
       })
       .then(function () {
