@@ -1,5 +1,8 @@
 'use strict';
 
+const app = require('../../server/server');
+const moment = require('moment');
+
 module.exports = function (Followup) {
   // set flag to not get controller
   Followup.hasController = false;
@@ -13,71 +16,39 @@ module.exports = function (Followup) {
       return next();
     }
 
-    // retrieve all the follow ups for the given contact, ordered by their date creation
-    // to figure out the index of the follow up that should be created
-    Followup.getDataSource().connector.collection(Followup.modelName)
-      .aggregate([
-        {
-          $project: {
-            _id: 1,
-            personId: 1,
-            day: {
-              $dayOfMonth: '$createdAt'
-            },
-            month: {
-              $month: '$createdAt'
-            },
-            year: {
-              $year: '$createdAt'
-            }
-          }
-        },
-        {
-          $project: {
-            _id: 1,
-            personId: 1,
-            createdAt: {
-              $concat: [{
-                $substr: ['$year', 0, 4]
-              },
-                "-", {
-                  $substr: ['$month', 0, 2]
-                },
-                "-", {
-                  $substr: ['$day', 0, 2]
-                }
-              ]
-            }
-          }
-        },
-        {
-          $match: {
-            // contact's id
-            personId: ctx.instance.personId
-          }
-        },
-        {
-          $group: {
-            _id: {
-              createdAt: '$createdAt',
-              contactId: '$personId'
-            }
-          }
-        },
-        {
-          $group: {
-            _id: '$_id.createdAt'
-          }
+    //Find the oldest existing followUp of the contact
+    app.models.followUp.findOne({
+      where: {
+        personId: ctx.instance.personId
+      },
+      order: "date ASC"
+    })
+    .then((followUp) => {
+      //If it is in the past, use it as a starting point for the index calculation
+      if(followUp && daysSince(followUp.date, Date.now()) >= 0) {
+        ctx.instance.index = daysSince(followUp.date, ctx.instance.date) + 1;
+      } else {
+        //If no followUp exists in the past, initiate a new index
+        //If the followUp is part of a followUp generate action, use now() to calculate the index
+        if(ctx.instance.isGenerated) {
+          ctx.instance.index = daysSince(Date.now(), ctx.instance.date) + 1;
+        } else {
+          //If this is the first follow up and it is added separately (create followUp) set the index to 1.
+          ctx.instance.index = 1;
         }
-      ], (err, results) => {
-        if (err) {
-          return next(err);
-        }
+      }
 
-        // results is a list of all follow up that were created prior to this date, distinct per created at date
-        ctx.instance.index = ++results.length;
-
-        return next();
-      });
+      return next();
+    })
+    .catch((next));
   });
+
+  /**
+   *
+   * @param startDate
+   * @param endDate
+   */
+  const daysSince = function (startDate, endDate){
+    return (moment(endDate).startOf('day')).diff(moment(startDate).startOf('day'), 'days');
+  }
 };
