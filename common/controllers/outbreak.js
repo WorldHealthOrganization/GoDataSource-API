@@ -22,6 +22,7 @@ module.exports = function (Outbreak) {
     'prototype.__delete__contacts',
     'prototype.__delete__contacts__followUps',
     'prototype.__delete__contacts__relationships',
+    'prototype.__delete__events',
     'prototype.__create__clusters__relationships',
     'prototype.__delete__clusters__relationships',
     'prototype.__findById__clusters__relationships',
