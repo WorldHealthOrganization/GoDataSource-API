@@ -3272,7 +3272,7 @@ module.exports = function (Outbreak) {
           'case',
           {
               outbreakId: outbreakId,
-              ['caseId']: caseId
+              caseId: caseId
           }
         )
       );
