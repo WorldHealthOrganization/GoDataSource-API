@@ -3227,4 +3227,57 @@ module.exports = function (Outbreak) {
         }
       });
   };
+
+  /**
+   * Build and return a pdf containing case investigation, contact and lab results template from outbreak
+   * @param caseId
+   * @param request
+   * @param callback
+   */
+  Outbreak.prototype.exportCaseInvestigation = function (caseId, request, callback) {
+    let template = this.caseInvestigationTemplate;
+    let outbreakId = this.id;
+
+    // sanity check
+    // if case investigation template is empty, stop
+    if (!template.length) {
+      return callback(app.utils.apiError.getError('CASE_INVESTIGATION_TEMPLATE_EMPTY'));
+    }
+
+    // authenticated user's language, used to know in which language to translate
+    let targetLang = request.remotingContext.req.authData.userInstance.languageId;
+
+    // load user language dictionary
+    app.models.language.getLanguageDictionary(targetLang, function (error, dictionary) {
+      // handle errors
+      if (error) {
+        return callback(error);
+      }
+
+      // translate template questions
+      let questions = Outbreak.helpers.parseTemplateQuestions(template, targetLang, dictionary);
+
+      // generate pdf document containing the template params
+      let doc = app.utils.pdfDoc.createQuestionsPdfDoc(
+        questions,
+        {
+          outbreakId: outbreakId,
+          caseId: caseId
+        }
+      );
+
+      // end the document stream
+      // to convert it into a buffer
+      doc.end();
+
+      // convert pdf stream to buffer and send it as response
+      genericHelpers.streamToBuffer(doc, (err, buffer) => {
+        if (err) {
+          callback(err);
+        } else {
+          app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', `case_investigation.pdf`, callback);
+        }
+      });
+    });
+  };
 };

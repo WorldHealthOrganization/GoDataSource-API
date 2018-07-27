@@ -5,6 +5,7 @@ const PdfTable = require('voilab-pdf-table');
 const svg2png = require('svg2png');
 const helpers = require('./helpers');
 const Jimp = require('jimp');
+const qrCode = require('./qrCode');
 
 // define a default document configuration
 const defaultDocumentConfiguration = {
@@ -242,7 +243,77 @@ function createSVGDoc(svgData, splitFactor, callback) {
     .catch(callback);
 }
 
+/**
+ * Create a pdf including standard document logo and title and a QR code containing link to the given resource
+ * PDF will include a list of questions
+ * This should be used mainly for generating pdf for case investigation, lab results, contact follow up templates
+ * @param title
+ * @param questions
+ * @param resourceIds
+ */
+const createQuestionsPdfDoc = function (title, questions, resourceIds) {
+  // create a standard PDF document
+  let doc = createPdfDoc();
+
+  doc.on('pageAdded', function () {
+    // change font size for questions, when a second page is added automatically
+    this.fontSize(15);
+    this.moveDown(3);
+  });
+
+  // generate QR code using outbreak and case ids
+  let qrCodeImg = qrCode.createResourceLink(
+    'case',
+    {
+      outbreakId: resourceIds.outbreakId,
+      ['caseId']: resourceIds.caseId
+    }
+  );
+
+  // add qr code on right top of the first page
+  doc.image(qrCodeImg, 720, 15, { width: 100, height: 100 });
+
+  // set document title
+  if (title) {
+    doc
+      .fontSize(25)
+      .text(title, { align: 'center' });
+  }
+
+  // change font size for questions
+  doc.fontSize(15);
+
+  // recursively insert each question and their answers into the document
+  (function addQuestions(questions, isNested) {
+    questions.forEach((item) => {
+      doc.moveDown(2).text(`${item.order}. ${item.question}`, isNested ? 60 : 20);
+
+      // answers type are written differently into the doc
+      switch (item.answerType) {
+        case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT':
+          doc.moveDown().text('Answer:', isNested ? 80 : 40).moveDown();
+          break;
+        default:
+          // NOTE: only first nested level is handled for additional questions
+          item.answers.forEach((answer) => {
+            doc.moveDown().text(answer.label, isNested ? 105 : 65, doc.y + 3);
+            doc.moveUp().rect(isNested ? 80 : 40, doc.y, 15, 15).stroke().moveDown();
+
+            // handle additional questions
+            if (answer.additionalQuestions.length) {
+              addQuestions(answer.additionalQuestions, true);
+            }
+          });
+          break;
+      }
+    });
+  })(questions);
+
+  return doc;
+};
+
 module.exports = {
   createPDFList: createPDFList,
-  createSVGDoc: createSVGDoc
+  createSVGDoc: createSVGDoc,
+  createQuestionsPdfDoc: createQuestionsPdfDoc
 };

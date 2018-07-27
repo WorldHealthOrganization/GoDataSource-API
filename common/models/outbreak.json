@@ -945,6 +945,12 @@
       "principalId": "write_case",
       "permission": "ALLOW",
       "property": "importImportableLabResultsFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "exportCaseInvestigation"
     }
   ],
   "methods": {
@@ -3013,6 +3019,47 @@
       "http": {
         "verb": "post",
         "path": "/cases/lab-results/import-importable-file-using-map"
+      }
+    },
+    "prototype.exportCaseInvestigation": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export pdf containing case investigation, lab results and contact templates",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/export-case-investigation"
       }
     }
   }
