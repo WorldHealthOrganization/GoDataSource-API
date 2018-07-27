@@ -249,9 +249,9 @@ function createSVGDoc(svgData, splitFactor, callback) {
  * This should be used mainly for generating pdf for case investigation, lab results, contact follow up templates
  * @param title
  * @param questions
- * @param resourceIds
+ * @param qrCodeImage
  */
-const createQuestionsPdfDoc = function (title, questions, resourceIds) {
+const createQuestionsPdfDoc = function (title, questions, qrCodeImage) {
   // create a standard PDF document
   let doc = createPdfDoc();
 
@@ -261,17 +261,8 @@ const createQuestionsPdfDoc = function (title, questions, resourceIds) {
     this.moveDown(3);
   });
 
-  // generate QR code using outbreak and case ids
-  let qrCodeImg = qrCode.createResourceLink(
-    'case',
-    {
-      outbreakId: resourceIds.outbreakId,
-      ['caseId']: resourceIds.caseId
-    }
-  );
-
   // add qr code on right top of the first page
-  doc.image(qrCodeImg, 720, 15, { width: 100, height: 100 });
+  doc.image(qrCodeImage, 720, 15, { width: 100, height: 100 });
 
   // set document title
   if (title) {

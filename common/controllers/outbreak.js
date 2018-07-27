@@ -3229,12 +3229,12 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Build and return a pdf containing case investigation, contact and lab results template from outbreak
+   * Build and return a pdf containing case investigation template questions
    * @param caseId
    * @param request
    * @param callback
    */
-  Outbreak.prototype.exportCaseInvestigation = function (caseId, request, callback) {
+  Outbreak.prototype.exportCaseInvestigationTemplate = function (caseId, request, callback) {
     let template = this.caseInvestigationTemplate;
     let outbreakId = this.id;
 
@@ -3254,16 +3254,27 @@ module.exports = function (Outbreak) {
         return callback(error);
       }
 
+      // translate template title
+      let templateTitle = app.models.language.getFieldTranslationFromDictionary(
+        'LNG_PAGE_CREATE_OUTBREAK_TAB_CASE_INVESTIGATION',
+        targetLang,
+        dictionary
+      );
+
       // translate template questions
       let questions = Outbreak.helpers.parseTemplateQuestions(template, targetLang, dictionary);
 
       // generate pdf document containing the template params
       let doc = app.utils.pdfDoc.createQuestionsPdfDoc(
+        templateTitle,
         questions,
-        {
-          outbreakId: outbreakId,
-          caseId: caseId
-        }
+        app.utils.qrCode.createResourceLink(
+          'case',
+          {
+              outbreakId: outbreakId,
+              ['caseId']: caseId
+          }
+        )
       );
 
       // end the document stream
@@ -3276,6 +3287,134 @@ module.exports = function (Outbreak) {
           callback(err);
         } else {
           app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', `case_investigation.pdf`, callback);
+        }
+      });
+    });
+  };
+
+  /**
+   * Build and return a pdf containing lab results template questions
+   * @param caseId
+   * @param request
+   * @param callback
+   */
+  Outbreak.prototype.exportLabResultsTemplate = function (caseId, request, callback) {
+    let template = this.labResultsTemplate;
+    let outbreakId = this.id;
+
+    // sanity check
+    // if case investigation template is empty, stop
+    if (!template.length) {
+      return callback(app.utils.apiError.getError('CASE_INVESTIGATION_TEMPLATE_EMPTY'));
+    }
+
+    // authenticated user's language, used to know in which language to translate
+    let targetLang = request.remotingContext.req.authData.userInstance.languageId;
+
+    // load user language dictionary
+    app.models.language.getLanguageDictionary(targetLang, function (error, dictionary) {
+      // handle errors
+      if (error) {
+        return callback(error);
+      }
+
+      // translate template title
+      let templateTitle = app.models.language.getFieldTranslationFromDictionary(
+        'LNG_PAGE_CREATE_OUTBREAK_TAB_LAB_RESULTS',
+        targetLang,
+        dictionary
+      );
+
+      // translate template questions
+      let questions = Outbreak.helpers.parseTemplateQuestions(template, targetLang, dictionary);
+
+      // generate pdf document containing the template params
+      let doc = app.utils.pdfDoc.createQuestionsPdfDoc(
+        templateTitle,
+        questions,
+        app.utils.qrCode.createResourceLink(
+          'case',
+          {
+            outbreakId: outbreakId,
+            caseId: caseId
+          }
+        )
+      );
+
+      // end the document stream
+      // to convert it into a buffer
+      doc.end();
+
+      // convert pdf stream to buffer and send it as response
+      genericHelpers.streamToBuffer(doc, (err, buffer) => {
+        if (err) {
+          callback(err);
+        } else {
+          app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', `lab_results.pdf`, callback);
+        }
+      });
+    });
+  };
+
+  /**
+   * Build and return a pdf containing contact follow up template questions
+   * @param contactId
+   * @param request
+   * @param callback
+   */
+  Outbreak.prototype.exportContactFollowUpTemplate = function (contactId, request, callback) {
+    let template = this.contactFollowUpTemplate;
+    let outbreakId = this.id;
+
+    // sanity check
+    // if case investigation template is empty, stop
+    if (!template.length) {
+      return callback(app.utils.apiError.getError('CASE_INVESTIGATION_TEMPLATE_EMPTY'));
+    }
+
+    // authenticated user's language, used to know in which language to translate
+    let targetLang = request.remotingContext.req.authData.userInstance.languageId;
+
+    // load user language dictionary
+    app.models.language.getLanguageDictionary(targetLang, function (error, dictionary) {
+      // handle errors
+      if (error) {
+        return callback(error);
+      }
+
+      // translate template title
+      let templateTitle = app.models.language.getFieldTranslationFromDictionary(
+        'LNG_PAGE_CREATE_OUTBREAK_TAB_CONTACT_FOLLOWUP',
+        targetLang,
+        dictionary
+      );
+
+      // translate template questions
+      let questions = Outbreak.helpers.parseTemplateQuestions(template, targetLang, dictionary);
+
+      // generate pdf document containing the template params
+      let doc = app.utils.pdfDoc.createQuestionsPdfDoc(
+        templateTitle,
+        questions,
+        app.utils.qrCode.createResourceLink(
+          'contact',
+          {
+            outbreakId: outbreakId,
+            contactId: contactId
+          }
+        )
+      );
+
+      // end the document stream
+      // to convert it into a buffer
+      doc.end();
+
+      // convert pdf stream to buffer and send it as response
+      genericHelpers.streamToBuffer(doc, (err, buffer) => {
+        if (err) {
+          callback(err);
+        } else {
+          app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', `lab_results.pdf`, callback);
         }
       });
     });

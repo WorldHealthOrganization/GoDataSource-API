@@ -950,7 +950,19 @@
       "principalType": "ROLE",
       "principalId": "read_outbreak",
       "permission": "ALLOW",
-      "property": "exportCaseInvestigation"
+      "property": "exportCaseInvestigationTemplate"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "exportLabResultsTemplate"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "exportContactFollowUpTemplate"
     }
   ],
   "methods": {
@@ -3022,6 +3034,7 @@
       }
     },
     "prototype.exportCaseInvestigation": {
+    "prototype.exportCaseInvestigationTemplate": {
       "accepts": [
         {
           "arg": "nk",
@@ -3056,10 +3069,92 @@
           }
         }
       ],
-      "description": "Export pdf containing case investigation, lab results and contact templates",
+      "description": "Export pdf containing case investigation template",
       "http": {
         "verb": "get",
-        "path": "/cases/:nk/export-case-investigation"
+        "path": "/cases/:nk/export-investigation-template"
+      }
+    },
+    "prototype.exportLabResultsTemplate": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export pdf containing lab results template",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/lab-results/export-template"
+      }
+    },
+    "prototype.exportContactFollowUpTemplate": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export pdf containing follow ups template",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/follow-ups/export-template"
       }
     }
   }
