@@ -1225,7 +1225,7 @@ module.exports = function (Outbreak) {
             include: ['relationships'],
             where: {
               outbreakId: outbreakId,
-              createdAt: {
+              dateOfReporting: {
                 gte: now.setDate(now.getDate() - noDaysNewContacts)
               }
             }
@@ -1435,8 +1435,8 @@ module.exports = function (Outbreak) {
               if (!casesIndex[person.id]) {
                 casesIndex[person.id] = true;
                 result.total++;
-                // check if the case is new (date of symptoms is later than the threshold date)
-                if ((new Date(person.dateOfOnset)) >= newCasesFromDate) {
+                // check if the case is new (date of reporting is later than the threshold date)
+                if ((new Date(person.dateOfReporting)) >= newCasesFromDate) {
                   result.newCases++;
                 }
               }
@@ -1539,7 +1539,7 @@ module.exports = function (Outbreak) {
           scope: {
             where: {
               type: 'contact',
-              createdAt: {
+              dateOfReporting: {
                 gte: now.setDate(now.getDate() - noDaysNewContacts)
               }
             },
@@ -1908,13 +1908,13 @@ module.exports = function (Outbreak) {
     // get outbreakId
     let outbreakId = this.id;
 
-    // get all cases that were created sooner or have 'dateBecomeCase' sooner than 'noDaysAmongContacts' ago
+    // get all cases that were reported sooner or have 'dateBecomeCase' sooner than 'noDaysAmongContacts' ago
     app.models.case.find(app.utils.remote
       .mergeFilters({
         where: {
           outbreakId: outbreakId,
           or: [{
-            createdAt: {
+            dateOfReporting: {
               gte: xDaysAgo
             }
           }, {
@@ -2403,7 +2403,7 @@ module.exports = function (Outbreak) {
         outbreakId: outbreakId,
         or: [{
           and: [{
-            createdAt: {
+            dateOfReporting: {
               // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
               between: periodInterval.slice()
             },
@@ -2418,7 +2418,7 @@ module.exports = function (Outbreak) {
           }
         }]
       },
-      order: 'createdAt ASC'
+      order: 'dateOfReporting ASC'
     };
 
     // initialize result
@@ -2443,8 +2443,8 @@ module.exports = function (Outbreak) {
         });
 
         cases.forEach(function (item) {
-          // get case date; it's either dateBecomeCase or createdAt
-          let caseDate = item.dateBecomeCase || item.createdAt;
+          // get case date; it's either dateBecomeCase or dateOfReporting
+          let caseDate = item.dateBecomeCase || item.dateOfReporting;
           // get period in which the case needs to be included
           let casePeriodInterval;
           switch (periodType) {
