@@ -3235,47 +3235,41 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportCaseInvestigationTemplate = function (caseId, request, callback) {
+    let caseModel = app.models.case;
+    let pdfUtils = app.utils.pdfDoc;
     let template = this.caseInvestigationTemplate;
     let outbreakId = this.id;
 
-    // sanity check
-    // if case investigation template is empty, stop
-    if (!template.length) {
-      return callback(app.utils.apiError.getError('CASE_INVESTIGATION_TEMPLATE_EMPTY'));
-    }
-
     // authenticated user's language, used to know in which language to translate
-    let targetLang = request.remotingContext.req.authData.userInstance.languageId;
+    let languageId = request.remotingContext.req.authData.userInstance.languageId;
 
     // load user language dictionary
-    app.models.language.getLanguageDictionary(targetLang, function (error, dictionary) {
+    app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
       // handle errors
       if (error) {
         return callback(error);
       }
 
-      // translate template title
-      let templateTitle = app.models.language.getFieldTranslationFromDictionary(
-        'LNG_PAGE_CREATE_OUTBREAK_TAB_CASE_INVESTIGATION',
-        targetLang,
-        dictionary
-      );
+      // translate case fields
+      let caseFields = helpers.translateFieldLabels(caseModel.fieldLabelsMap, 'case', languageId, dictionary);
 
       // translate template questions
-      let questions = Outbreak.helpers.parseTemplateQuestions(template, targetLang, dictionary);
+      let questions = Outbreak.helpers.parseTemplateQuestions(template, languageId, dictionary);
 
-      // generate pdf document containing the template params
-      let doc = app.utils.pdfDoc.createQuestionsPdfDoc(
-        templateTitle,
-        questions,
-        app.utils.qrCode.createResourceLink(
-          'case',
-          {
-              outbreakId: outbreakId,
-              caseId: caseId
-          }
-        )
-      );
+      // generate pdf document
+      let doc = pdfUtils.createPdfDoc({
+        fontSize: 15,
+        margin: {
+          top: 100
+        }
+      });
+
+      // add case profile fields (empty)
+      pdfUtils.createPersonProfile(doc, caseFields, true);
+
+      // add case investigation questionnaire into the pdf in a separate page
+      doc.addPage();
+      pdfUtils.createQuestionnaire(doc, questions);
 
       // end the document stream
       // to convert it into a buffer

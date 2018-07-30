@@ -244,36 +244,12 @@ function createSVGDoc(svgData, splitFactor, callback) {
 }
 
 /**
- * Create a pdf including standard document logo and title and a QR code containing link to the given resource
- * PDF will include a list of questions
- * This should be used mainly for generating pdf for case investigation, lab results, contact follow up templates
- * @param title
+ * Add questions pages in a existing pdf
+ * Questions are added in separate pages
+ * @param doc
  * @param questions
- * @param qrCodeImage
  */
-const createQuestionsPdfDoc = function (title, questions, qrCodeImage) {
-  // create a standard PDF document
-  let doc = createPdfDoc();
-
-  doc.on('pageAdded', function () {
-    // change font size for questions, when a second page is added automatically
-    this.fontSize(15);
-    this.moveDown(3);
-  });
-
-  // add qr code on right top of the first page
-  doc.image(qrCodeImage, 720, 15, { width: 100, height: 100 });
-
-  // set document title
-  if (title) {
-    doc
-      .fontSize(25)
-      .text(title, { align: 'center' });
-  }
-
-  // change font size for questions
-  doc.fontSize(15);
-
+const createQuestionnaire = function (doc, questions) {
   // recursively insert each question and their answers into the document
   (function addQuestions(questions, isNested) {
     questions.forEach((item) => {
@@ -282,7 +258,7 @@ const createQuestionsPdfDoc = function (title, questions, qrCodeImage) {
       // answers type are written differently into the doc
       switch (item.answerType) {
         case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT':
-          doc.moveDown().text('Answer:', isNested ? 80 : 40).moveDown();
+          doc.moveDown().text('Answer:', isNested ? 80 : 40);
           break;
         default:
           // NOTE: only first nested level is handled for additional questions
@@ -303,8 +279,25 @@ const createQuestionsPdfDoc = function (title, questions, qrCodeImage) {
   return doc;
 };
 
+/**
+ * Display a person specific fields
+ * @param doc
+ * @param person
+ * @param empty Do not display actual values, only field names
+ */
+const createPersonProfile = function (doc, person, empty) {
+  // display each field on a row
+  Object.keys(person).forEach((fieldName) => {
+    doc.text(`${fieldName}:${empty ? '' : person[fieldName]}`);
+  });
+
+  return doc;
+};
+
 module.exports = {
   createPDFList: createPDFList,
   createSVGDoc: createSVGDoc,
-  createQuestionsPdfDoc: createQuestionsPdfDoc
+  createPdfDoc: createPdfDoc,
+  createPersonProfile: createPersonProfile,
+  createQuestionnaire: createQuestionnaire
 };

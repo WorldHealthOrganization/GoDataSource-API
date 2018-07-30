@@ -852,4 +852,20 @@ module.exports = function (Outbreak) {
       });
     })(questions);
   };
+
+  /**
+   * Translate all marked field labels of a model
+   * @param modelName
+   * @param model
+   * @param languageId
+   * @param dictionary
+   */
+  Outbreak.helpers.translateFieldLabels = function (model, modelName, languageId, dictionary) {
+    return _.mapKeys(model, (value, key) => {
+      if (app.models[modelName].fieldLabelsMap[key]) {
+        return app.models.language.getFieldTranslationFromDictionary(app.models[modelName].fieldLabelsMap[key], languageId, dictionary);
+      }
+      return key;
+    });
+  };
 };
