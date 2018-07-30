@@ -2756,4 +2756,133 @@ module.exports = function (Outbreak) {
     }
     return next();
   });
+
+  Outbreak.prototype.caseDossier = function(cases, anonymousFields, options, callback) {
+    this.__get__cases({
+      where: {
+        id: {
+          inq: cases
+        }
+      },
+      include: [
+        {
+          relation: "relationships",
+          scope: {
+            include: {
+              relation: "people"
+            }
+          }
+        },
+        {
+          relation: "labResults"
+        }
+      ]
+    }, function(error, results) {
+      if (error) {
+        return callback(error);
+      }
+
+      let sanitizedCases = [];
+      const relationshipDateFields = ['contactDate'];
+      const labResultDateFields = ['dateSampleTaken', 'dateSampleDelivered', 'dateTesting', 'dateOfResult'];
+      const personFieldsAddedToRelationship = ['firstName', 'middleName', 'lastName'];
+
+      const contextUser = options.remotingContext.req.authData.user;
+
+      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+        // handle errors
+        if (error) {
+          return callback(error);
+        }
+        //translate all the reference data fields
+        results.forEach((person, caseIndex) => {
+          sanitizedCases[caseIndex] = {};
+          Outbreak.helpers.translateReferenceDataFields(person, app.models.case.modelName, contextUser, dictionary);
+
+          //Anonymize the requested fields
+          person.__data = _.mapValues(person.__data, (value, key) => {
+            if(anonymousFields.indexOf(key) !== -1) {
+              return '***'
+            } else {
+              return value;
+            }
+          });
+
+          person.relationships.forEach((relationship, relationshipIndex) => {
+            sanitizedCases[caseIndex].relationships = [];
+            let relationshipMember = _.find(relationship.people, (member) => {
+              return member.id !== person.id
+            });
+
+            let personType = relationshipMember.type;
+
+            relationshipMember.__data = _.pick(relationshipMember.__data, personFieldsAddedToRelationship);
+
+            relationshipMember.__data = Outbreak.helpers.translateFieldLabels(relationshipMember, app.models[personType].modelName, contextUser.languageId, dictionary);
+
+            Outbreak.helpers.translateReferenceDataFields(relationship, app.models.relationship.modelName, contextUser, dictionary);
+
+            // Remove all fields that are of no interest
+            relationship.__data = _.pick(relationship.__data, Object.keys(app.models.relationship.fieldLabelsMap));
+
+            relationship.__data = _.mapValues(relationship.__data, (value, key) => {
+              if(relationshipDateFields.indexOf(key) !== -1) {
+                return moment(value).format('YYYY-MM-DD');
+              } else {
+                return value;
+              }
+            });
+
+            delete relationship.__data.persons;
+
+            // Translate all remaining keys
+            relationship.__data = Outbreak.helpers.translateFieldLabels(relationship, app.models.relationship.modelName, contextUser.languageId, dictionary);
+
+            sanitizedCases[caseIndex].relationships[relationshipIndex] = _.assign(relationshipMember.__data, relationship.__data);
+          });
+
+          person.__data.labResults.forEach((labResult, labIndex) => {
+            sanitizedCases[caseIndex].labResults = []
+            Outbreak.helpers.translateReferenceDataFields(labResult, app.models.labResult.modelName, contextUser.languageId, dictionary);
+
+            labResult.__data = _.pick(labResult, Object.keys(app.models.labResult.fieldLabelsMap));
+
+            labResult.__data = _.mapValues(labResult.__data, (value, key) => {
+              if(labResultDateFields.indexOf(key) !== -1) {
+                return moment(value).format('YYYY-MM-DD');
+              } else {
+                return value;
+              }
+            });
+
+            labResult.__data = Outbreak.helpers.translateFieldLabels(labResult, app.models.labResult.modelName, contextUser.languageId, dictionary);
+
+            sanitizedCases[caseIndex].labResults[labIndex] = labResult.__data;
+          });
+
+          // Remove all fields that are of no interest
+          person.__data =  _.pick(person.__data, app.models.case.printFieldsinOrder);
+
+          // Translate all remaining keys
+          person.__data  = Outbreak.helpers.translateFieldLabels(person, app.models.case.modelName, contextUser.languageId, dictionary);
+
+          sanitizedCases[caseIndex].data = person.__data;
+        });
+
+        let fileBuilder;
+        let mimeType;
+
+        fileBuilder = app.utils.pdfDoc.createCaseDossier;
+        mimeType = 'application/pdf';
+
+        fileBuilder(sanitizedCases, function(error, file) {
+          if (error) {
+            return callback(error);
+          }
+          // and offer it for download
+          app.utils.remote.helpers.offerFileToDownload(file, mimeType, `Case Dossier.pdf`, callback);
+        })
+      });
+    })
+  }
 };

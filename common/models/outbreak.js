@@ -791,4 +791,45 @@ module.exports = function (Outbreak) {
 
     return base;
   };
+
+  /**
+   * Translate all marked referenceData fields of a model
+   * @param modelName
+   * @param model
+   * @param contextUser
+   * @param dictionary
+   */
+  Outbreak.helpers.translateReferenceDataFields = function (model, modelName, contextUser, dictionary) {
+    app.models[modelName].referenceDataFields.forEach((field) => {
+      if(field.indexOf('[].') === -1) {
+        if (_.get(model, field)) {
+          _.set(model, field, app.models.language.getFieldTranslationFromDictionary(_.get(model, field), contextUser.languageId, dictionary));
+        }
+      } else {
+        // separate the string into the name of the array type property and the name the field that needs to be translated
+        let parsedField = field.split('[].');
+        // translate the field from each element of the array type property
+        _.get(model, parsedField[0]).forEach((child) => {
+          _.set(child, parsedField[1], app.models.language.getFieldTranslationFromDictionary(_.get(child, parsedField[1]), contextUser.languageId, dictionary))
+        })
+      }
+    });
+  };
+
+  /**
+   * Translate all marked field labels of a model
+   * @param modelName
+   * @param model
+   * @param contextUser
+   * @param dictionary
+   */
+  Outbreak.helpers.translateFieldLabels = function (model, modelName, contextUser, dictionary) {
+    return _.mapKeys(model.__data, (value, key) => {
+      if(app.models[modelName].fieldLabelsMap[key]) {
+        return app.models.language.getFieldTranslationFromDictionary(app.models[modelName].fieldLabelsMap[key], contextUser.languageId, dictionary);
+      } else {
+        return key;
+      }
+    })
+  };
 };

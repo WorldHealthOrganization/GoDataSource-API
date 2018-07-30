@@ -29,14 +29,49 @@ module.exports = function (Case) {
     'riskLevel': 'LNG_CASE_FIELD_LABEL_RISK_LEVEL',
     'riskReason': 'LNG_CASE_FIELD_LABEL_RISK_REASON',
     'dateOfOutcome': 'LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME',
-    'deceased': 'LNG_CASE_FIELD_LABEL_DECEASED'
+    'deceased': 'LNG_CASE_FIELD_LABEL_DECEASED',
+    'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
+    'type': 'LNG_CASE_FIELD_LABEL_TYPE',
+    'isolationDates': 'LNG_CASE_FIELD_LABEL_ISOLATION_DATES',
+    'hospitalizationDates': 'LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES',
+    'incubationDates': 'LNG_CASE_FIELD_LABEL_INCUBATION_DATES',
+    'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
+    'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES'
   };
 
   // keep a list of fields that use values from reference data
   Case.referenceDataFields = [
+    'gender',
     'classification',
     'riskLevel',
     'occupation',
-    'documents.type'
+    'documents[].type'
   ];
+
+  Case.printFieldsinOrder = [
+    'firstName',
+    'middleName',
+    'lastName',
+    'gender',
+    'dob',
+    'age',
+    'occupation',
+    'phoneNumber',
+    'addresses',
+    'documents',
+    'type',
+    'classification',
+    'riskLevel',
+    'riskReason',
+    'dateBecomeCase',
+    'dateDeceased',
+    'dateOfInfection',
+    'dateOfOnset',
+    'dateOfOutcome',
+    'hospitalizationDates',
+    'incubationDates',
+    'isolationDates',
+    'transferRefused',
+    'deceased'
+  ]
 };

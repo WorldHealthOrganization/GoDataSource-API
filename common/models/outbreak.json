@@ -880,6 +880,30 @@
       "principalId": "read_followup",
       "permission": "ALLOW",
       "property": "listLatestFollowUpsForContactsIfNotPerformed"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "contactDossier"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "caseDossier"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "contactDossier"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "caseDossier"
     }
   ],
   "methods": {
@@ -2730,6 +2754,93 @@
       "http": {
         "verb": "get",
         "path": "/follow-ups/latest-by-contacts-if-not-performed"
+      }
+    },
+    "prototype.contactDossier": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export dossier for one or more contacts",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/dossier"
+      }
+    },
+    "prototype.caseDossier": {
+      "accepts": [
+        {
+          "arg": "cases",
+          "type": ["string"],
+          "description": "Array of cases for which the dossiers will be generated"
+        },
+        {
+          "arg": "data",
+          "type": ["string"],
+          "description": "Array of fields to be anonymized"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export dossier for one or more cases",
+      "http": {
+        "verb": "post",
+        "path": "/cases/dossier"
       }
     }
   }

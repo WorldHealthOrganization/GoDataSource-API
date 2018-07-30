@@ -5,6 +5,7 @@ const PdfTable = require('voilab-pdf-table');
 const svg2png = require('svg2png');
 const helpers = require('./helpers');
 const Jimp = require('jimp');
+const _ = require('lodash');
 
 // define a default document configuration
 const defaultDocumentConfiguration = {
@@ -242,7 +243,50 @@ function createSVGDoc(svgData, splitFactor, callback) {
     .catch(callback);
 }
 
+function createCaseDossier(people, callback) {
+  const document = createPdfDoc();
+  let pdfTable = new PdfTable(document);
+
+  people.forEach((person) => {
+    Object.keys(person.data).forEach((key) => {
+      document.text(key + ': ' + person.data[key]);
+    });
+
+    document.moveDown(3);
+
+    Object.keys(person.relationships[0]).forEach((key) => {
+      pdfTable.addColumn({
+        id: key,
+        header: key,
+        width: 50
+      })
+    })
+
+    pdfTable.addBody(person.relationships);
+
+    document.x = 50;
+    document.moveDown(3);
+
+    pdfTable = new PdfTable(document);
+
+    Object.keys(person.labResults[0]).forEach((key) => {
+      pdfTable.addColumn({
+        id: key,
+        header: key,
+        width: 50
+      })
+    })
+
+    pdfTable.addBody(person.labResults);
+  });
+
+  helpers.streamToBuffer(document, callback);
+  // finalize document
+  document.end();
+}
+
 module.exports = {
   createPDFList: createPDFList,
-  createSVGDoc: createSVGDoc
+  createSVGDoc: createSVGDoc,
+  createCaseDossier: createCaseDossier
 };
