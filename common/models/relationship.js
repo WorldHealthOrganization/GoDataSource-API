@@ -242,18 +242,37 @@ module.exports = function (Relationship) {
           }
         });
 
-        // get cases without relationships
-        return app.models.case.find({
-          where: {
-            outbreakId: outbreakId,
-            id: {
-              nin: Object.keys(result.cases)
+        // Note: in order to get the full results we need to also get the cases that don't have contacts
+        // however if the filter included a scope filter for the "people" relation, the cases were filtered so no need to get cases that don't have relationships
+        // checking if a filter was sent for cases
+        // initialize casesFiltered flag
+        let casesFiltered = false;
+        if (filter && filter.include) {
+          // normalize filter.include
+          let includeFilter = Array.isArray(filter.include) ? filter.include : [filter.include];
+          // checking for an include item that has relation = people and has a scope
+          casesFiltered = includeFilter.findIndex(function (relation) {
+            return typeof relation === 'object' && relation.relation === 'people' && relation.scope;
+          }) !== -1;
+        }
+
+        if (!casesFiltered) {
+          // get cases without relationships
+          return app.models.case.find({
+            where: {
+              outbreakId: outbreakId,
+              id: {
+                nin: Object.keys(result.cases)
+              }
+            },
+            fields: {
+              id: true
             }
-          },
-          fields: {
-            id: true
-          }
-        });
+          });
+        } else {
+          // no need to query for other cases; sending empty array to not affect result
+          return [];
+        }
       })
       .then(function (cases) {
         // loop through the found cases and add them to the result
