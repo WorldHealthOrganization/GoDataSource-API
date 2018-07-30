@@ -33,6 +33,13 @@
     },
     "riskReason": {
       "type": "string"
+    },
+    "deceased": {
+      "type": "boolean",
+      "default": false
+    },
+    "dateDeceased": {
+      "type": "date"
     }
   },
   "excludeBaseProperties": [
