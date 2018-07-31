@@ -33,5 +33,5 @@ module.exports = function (LabResult) {
   LabResult.extendedForm = {
     template: 'labResultsTemplate',
     containerProperty: 'questionnaireAnswers'
-  }
+  };
 };

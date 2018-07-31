@@ -244,27 +244,50 @@ function createSVGDoc(svgData, splitFactor, callback) {
 }
 
 /**
+ * Helper function used to add a text (title in most cases) with a given font size
+ * @param doc
+ * @param title
+ * @param fontSize
+ */
+const addTitle = function (doc, title, fontSize) {
+  let oldFontSize = doc._fontSize;
+  doc.fontSize(fontSize || 20);
+  doc.text(title);
+  doc.fontSize(oldFontSize).moveDown(0.5);
+};
+
+/**
  * Add questions pages in a existing pdf
  * Questions are added in separate pages
+ * Optionally a title can be added
+ * @param title
  * @param doc
  * @param questions
  */
-const createQuestionnaire = function (doc, questions) {
+const createQuestionnaire = function (doc, questions, title) {
+  // cache initial document margin
+  const initialXMargin = doc.x;
+
+  // add questionnaire page title
+  if (title) {
+    addTitle(doc, title);
+  }
+
   // recursively insert each question and their answers into the document
   (function addQuestions(questions, isNested) {
     questions.forEach((item) => {
-      doc.moveDown(2).text(`${item.order}. ${item.question}`, isNested ? 60 : 20);
+      doc.moveDown(1).text(`${item.order}. ${item.question}`, isNested ? initialXMargin + 40 : initialXMargin);
 
       // answers type are written differently into the doc
       switch (item.answerType) {
         case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT':
-          doc.moveDown().text('Answer:', isNested ? 80 : 40);
+          doc.moveDown().text(`Answer: ${'_'.repeat(25)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
           break;
         default:
           // NOTE: only first nested level is handled for additional questions
           item.answers.forEach((answer) => {
-            doc.moveDown().text(answer.label, isNested ? 105 : 65, doc.y + 3);
-            doc.moveUp().rect(isNested ? 80 : 40, doc.y, 15, 15).stroke().moveDown();
+            doc.moveDown().text(answer.label, isNested ? initialXMargin + 85 : initialXMargin + 45, doc.y + 5);
+            doc.moveUp().rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y, 15, 15).stroke().moveDown();
 
             // handle additional questions
             if (answer.additionalQuestions.length) {
@@ -281,14 +304,44 @@ const createQuestionnaire = function (doc, questions) {
 
 /**
  * Display a person specific fields
+ * Do not display actual values, only field names
+ * DisplayValues flag is also supported, if true it will display the actual field values
+ * This flag is needed to create empty profile pages
+ * Optionally a title can be added
  * @param doc
  * @param person
- * @param empty Do not display actual values, only field names
+ * @param displayValues
+ * @param title
  */
-const createPersonProfile = function (doc, person, empty) {
+const createPersonProfile = function (doc, person, displayValues, title) {
+  // add page title
+  if (title) {
+    addTitle(doc, title);
+  }
+
   // display each field on a row
   Object.keys(person).forEach((fieldName) => {
-    doc.text(`${fieldName}:${empty ? '' : person[fieldName]}`);
+    if (Array.isArray(person[fieldName])) {
+      doc.text(fieldName);
+      let pdfTable = new PdfTable(doc);
+
+      // if no records should be displayed, create 3 empty rows
+      // take header values from first entry in the array (there is always a template as first element in the array)
+      if (!displayValues) {
+        Object.keys(person[fieldName][0]).forEach((key) => {
+            pdfTable.addColumn({
+              id: key,
+              header: key,
+              width: 50
+            });
+        });
+      }
+
+      pdfTable.addBody(person[fieldName]);
+
+      return;
+    }
+    doc.text(`${fieldName}: ${displayValues ? person[fieldName] : '_'.repeat(25)}`).moveDown();
   });
 
   return doc;

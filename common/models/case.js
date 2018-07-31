@@ -30,13 +30,13 @@ module.exports = function (Case) {
     'riskReason': 'LNG_CASE_FIELD_LABEL_RISK_REASON',
     'dateOfOutcome': 'LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME',
     'deceased': 'LNG_CASE_FIELD_LABEL_DECEASED',
-    'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
     'type': 'LNG_CASE_FIELD_LABEL_TYPE',
     'isolationDates': 'LNG_CASE_FIELD_LABEL_ISOLATION_DATES',
     'hospitalizationDates': 'LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES',
     'incubationDates': 'LNG_CASE_FIELD_LABEL_INCUBATION_DATES',
     'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
-    'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES'
+    'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
+    'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
   };
 
   Case.referenceDataFieldsToCategoryMap = {

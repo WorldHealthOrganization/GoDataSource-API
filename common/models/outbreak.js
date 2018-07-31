@@ -853,6 +853,12 @@ module.exports = function (Outbreak) {
     })(questions);
   };
 
+  // person specific array fields
+  const arrayFields = {
+    addresses: 'address',
+    documents: 'document'
+  };
+
   /**
    * Translate all marked field labels of a model
    * @param modelName
@@ -863,6 +869,11 @@ module.exports = function (Outbreak) {
   Outbreak.helpers.translateFieldLabels = function (model, modelName, languageId, dictionary) {
     return _.mapKeys(model, (value, key) => {
       if (app.models[modelName].fieldLabelsMap[key]) {
+        if (Array.isArray(value) && value.length && typeof(value[0]) === 'object' && arrayFields[key]) {
+          value.forEach((element, index) => {
+            model[key][index] = Outbreak.helpers.translateFieldLabels(element, arrayFields[key], languageId, dictionary);
+          });
+        }
         return app.models.language.getFieldTranslationFromDictionary(app.models[modelName].fieldLabelsMap[key], languageId, dictionary);
       }
       return key;
