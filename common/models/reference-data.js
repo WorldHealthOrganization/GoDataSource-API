@@ -127,12 +127,29 @@ module.exports = function (ReferenceData) {
   /**
    * Keep a list of places where reference data might be used so we can safely delete a record
    * @type {{case: string[], contact: string[], outbreak: string[]}}
+   * TODO: remove static usage and move everything to model
    */
   ReferenceData.possibleRecordUsage = {
     'case': ['document.type'],
     'contact': ['document.type'],
     'outbreak': ['caseClassification', 'vaccinationStatus', 'nutritionalStatus', 'pregnancyInformation']
   };
+
+  // after the application started (all models finished loading)
+  app.on('started', function () {
+    // go through all models
+    app.models().forEach(function (Model) {
+      // get their list of reference data fields
+      if (Array.isArray(Model.referenceDataFields)) {
+        // build possible record usage list
+        ReferenceData.possibleRecordUsage[Model.modelName] = [];
+        Model.referenceDataFields.forEach(function (referenceDataField) {
+          // some fields contain array markers ([]) needed by some business logic, remove those here
+          ReferenceData.possibleRecordUsage[Model.modelName].push(referenceDataField.replace(/\[]/g,''));
+        });
+      }
+    });
+  });
 
   // keep a map of reference data available categories mapped by category id (for easy reference in relations)
   ReferenceData.availableCategoriesMap = {};
