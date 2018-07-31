@@ -46,7 +46,11 @@ module.exports = function (Outbreak) {
   // attach search by relation property behavior on get contacts
   app.utils.remote.searchByRelationProperty.attachOnRemotes(Outbreak, [
     'prototype.__get__contacts',
-    'prototype.__get__cases'
+    'prototype.__get__cases',
+    'prototype.__get__events',
+    'prototype.findCaseRelationships',
+    'prototype.findContactRelationships',
+    'prototype.findEventRelationships'
   ]);
 
   /**
