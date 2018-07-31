@@ -8,6 +8,11 @@ const moment = require('moment');
 
 module.exports = function (Outbreak) {
 
+  const arrayFields = {
+    addresses: 'address',
+    'documents': 'document'
+  };
+
   // initialize model helpers
   Outbreak.helpers = {};
   // set a higher limit for event listeners to avoid warnings (we have quite a few listeners)
@@ -824,8 +829,13 @@ module.exports = function (Outbreak) {
    * @param dictionary
    */
   Outbreak.helpers.translateFieldLabels = function (model, modelName, contextUser, dictionary) {
-    return _.mapKeys(model.__data, (value, key) => {
+    return _.mapKeys(model, (value, key) => {
       if(app.models[modelName].fieldLabelsMap[key]) {
+        if(Array.isArray(value) && value.length && typeof(value[0]) === 'object' && arrayFields[key]) {
+          value.forEach((element, index) => {
+            model[key][index] = Outbreak.helpers.translateFieldLabels(element, arrayFields[key], contextUser, dictionary);
+          })
+        }
         return app.models.language.getFieldTranslationFromDictionary(app.models[modelName].fieldLabelsMap[key], contextUser.languageId, dictionary);
       } else {
         return key;
