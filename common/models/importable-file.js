@@ -205,7 +205,8 @@ module.exports = function (ImportableFile) {
         // send back file id and headers
         callback(error, {
           id: fileId,
-          headers: result.headers
+          headers: result.headers,
+          jsonObj: result.obj
         });
       });
     });

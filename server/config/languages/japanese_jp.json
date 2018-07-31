@@ -222,6 +222,14 @@
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_INCONCLUSIVE": "日本の Inconclusive",
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_INCONCLUSIVE_DESCRIPTION": "日本の description_placeholder"
     },
+    "referenceDataCategoryLabTestResultStatus": {
+      "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS": "日本の Lab Test Result Status",
+      "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_DESCRIPTION": "日本の description_placeholder",
+      "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_IN_PROGRESS": "日本の In Progress",
+      "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_IN_PROGRESS_DESCRIPTION": "日本の description_placeholder",
+      "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_COMPLETED": "日本の Completed",
+      "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_COMPLETED_DESCRIPTION": "日本の description_placeholder"
+    },
     "referenceDataCategoryDocumentType": {
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE": "日本の Document Type",
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_DESCRIPTION": "日本の description_placeholder",

@@ -2787,4 +2787,24 @@ module.exports = function (Outbreak) {
     }
     return next();
   });
+
+  /**
+   * Upload an importable file
+   * @param req
+   * @param file
+   * @param modelName
+   * @param callback
+   */
+  Outbreak.prototype.importableFileUpload = function (req, file, modelName, callback) {
+    app.controllers.importableFile.upload(req, file, modelName, this.id, callback);
+  };
+
+  /**
+   * Get an importable file (contents) using file id
+   * @param id
+   * @param callback
+   */
+  Outbreak.prototype.getImportableFileJsonById = function (id, callback) {
+    app.controllers.importableFile.getJsonById(id, callback);
+  };
 };

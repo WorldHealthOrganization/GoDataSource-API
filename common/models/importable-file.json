@@ -46,17 +46,37 @@
         {
           "arg": "file",
           "type": "file"
+        },
+        {
+          "arg": "model",
+          "type": "string"
         }
       ],
       "returns": [
         {
-          "arg": "id",
-          "type": "string",
-          "required": true
-        },
-        {
-          "arg": "headers",
-          "type": ["string"],
+          "arg": "result",
+          "type": {
+            "id": "string",
+            "headers": [
+              "string"
+            ],
+            "suggestedFieldMapping": {
+              "type": {
+                "<fileProperty>": "string"
+              }
+            },
+            "availableReferenceDataPropertyValues": {
+              "type": {
+                "<modelProperty>": ["string"]
+              }
+            },
+            "distinctColumnValues": {
+              "type": {
+                "<fileProperty>": ["string"]
+              }
+            }
+          },
+          "root": true,
           "required": true
         }
       ],
@@ -77,7 +97,7 @@
       "returns": [
         {
           "arg": "json",
-          "type": "any",
+          "type": ["any"],
           "required": true,
           "root": true
         }

@@ -897,6 +897,18 @@
       "principalId": "read_outbreak",
       "permission": "ALLOW",
       "property": "__count__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "importableFileUpload"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getImportableFileJsonById"
     }
   ],
   "methods": {
@@ -2747,6 +2759,81 @@
       "http": {
         "verb": "get",
         "path": "/follow-ups/latest-by-contacts-if-not-performed"
+      }
+    },
+    "prototype.importableFileUpload": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "file",
+          "type": "file"
+        },
+        {
+          "arg": "model",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": {
+            "id": "string",
+            "headers": [
+              "string"
+            ],
+            "suggestedFieldMapping": {
+              "type": {
+                "<fileProperty>": "string"
+              }
+            },
+            "availableReferenceDataPropertyValues": {
+              "type": {
+                "<modelProperty>": ["string"]
+              }
+            },
+            "distinctColumnValues": {
+              "type": {
+                "<fileProperty>": ["string"]
+              }
+            }
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Upload a file and get file headers",
+      "http": {
+        "verb": "post",
+        "path": "/importable-files"
+      }
+    },
+    "prototype.getImportableFileJsonById": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Importable file ID",
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "json",
+          "type": ["any"],
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Retrieve JSON version of an uploaded file",
+      "http": {
+        "verb": "get",
+        "path": "/importable-files/:id/json"
       }
     }
   }

@@ -11,7 +11,8 @@
   "properties": {
     "personId": {
       "type": "string",
-      "readOnly": true
+      "readOnly": true,
+      "safeForImport": true
     },
     "dateSampleTaken": {
       "type": "date",
@@ -49,7 +50,10 @@
     },
     "status": {
       "type": "string",
-      "enum": ["inProgress", "completed"]
+      "enum": [
+        "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_IN_PROGRESS",
+        "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_COMPLETED"
+      ]
     },
     "questionnaireAnswers": {
       "type": "object"
