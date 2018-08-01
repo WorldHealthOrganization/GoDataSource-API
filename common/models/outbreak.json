@@ -888,15 +888,39 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_outbreak",
+      "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__get__people"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_outbreak",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "__get__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__count__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "__count__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "listInconsistenciesInKeyDates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "listInconsistenciesInKeyDates"
     },
     {
       "principalType": "ROLE",
@@ -1871,7 +1895,10 @@
         {
           "arg": "type",
           "type": "string",
-          "enum": ["pdf", "csv"],
+          "enum": [
+            "pdf",
+            "csv"
+          ],
           "description": "Export type; can be: pdf or csv. Default: csv"
         },
         {
@@ -2765,6 +2792,31 @@
       "http": {
         "verb": "get",
         "path": "/follow-ups/latest-by-contacts-if-not-performed"
+      }
+    },
+    "prototype.listInconsistenciesInKeyDates": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "people",
+          "type": [
+            "person"
+          ],
+          "description": "Array containing contacts/cases where inconsistencies were found between dates. Besides the contact/case properties each entry will also contain an 'inconsistencies' property (array of inconsistencies)",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "List of contacts/cases where inconsistencies were found between dates. Besides the contact/case properties each entry will also contain an 'inconsistencies' property (array of inconsistencies)",
+      "http": {
+        "verb": "get",
+        "path": "/people/inconsistencies-in-key-dates"
       }
     },
     "prototype.importableFileUpload": {
