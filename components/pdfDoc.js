@@ -369,23 +369,37 @@ const createPersonProfile = function (doc, person, displayValues, title) {
     doc.moveDown();
   }
 
+  // we display lists on separate pages
+  let arrayProps = [];
+
   // display each field on a row
   Object.keys(person).forEach((fieldName) => {
-    if (Array.isArray(person[fieldName])) {
-      // fetch table headers from first entry in the array, if no entry is set, do not display the table
-      if (person[fieldName][0]) {
-        let headers = Object.keys(person[fieldName][0]).map((key) => {
-          return {
-            id: key,
-            header: key
-          };
-        });
-        // create the table
-        createTable(doc, headers, person[fieldName]);
-      }
+    // if property is array and has at least one element, display it on next page
+    if (Array.isArray(person[fieldName]) && person[fieldName][0]) {
+      arrayProps.push({ name: fieldName, list: person[fieldName] });
     } else {
       doc.text(`${fieldName}: ${displayValues ? person[fieldName] : '_'.repeat(25)}`).moveDown();
     }
+  });
+
+  doc.addPage();
+
+  // display array properties one by one
+  arrayProps.forEach((arrayProp) => {
+    doc.text(arrayProp.name);
+
+    let headers = Object.keys(arrayProp.list[0]).map((key) => {
+      return {
+        id: key,
+        header: key
+      };
+    });
+
+    // create the table
+    createTable(doc, headers, arrayProp.list);
+
+    doc.x = 50;
+    doc.moveDown();
   });
 
   return doc;

@@ -3265,7 +3265,8 @@ module.exports = function (Outbreak) {
       // generate pdf document
       let doc = pdfUtils.createPdfDoc({
         fontSize: 11,
-        layout: 'portrait'
+        layout: 'portrait',
+        margin: 20
       });
 
       // add a top margin of 2 lines for each page
