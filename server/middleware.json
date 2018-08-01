@@ -47,6 +47,7 @@
   "final:after": {
     "./middleware/passwordResetError": {},
     "./middleware/authenticationError": {},
+    "./middleware/mongoDBError": {},
     "strong-error-handler": {
       "params": {
         "log": true

@@ -29,6 +29,10 @@
     "defaultStatusCode": 404,
     "messagePattern": "Unknown `<%= model %>` id `<%= id %>` in context of `<%= contextModel %>` id `<%= contextId %>`"
   },
+  "MODEL_CONFLICT": {
+    "defaultStatusCode": 409,
+    "messagePattern": "Model with id `<%= id %>` already exists"
+  },
   "INTERNAL_ERROR": {
     "defaultStatusCode": 500,
     "messagePattern": "Internal error: `<%= error %>`"
