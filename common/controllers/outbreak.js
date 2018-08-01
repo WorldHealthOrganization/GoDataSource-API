@@ -3080,4 +3080,34 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Restore a deleted reference data
+   * @param caseId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.restoreReferenceData = function (referenceDataId, options, callback) {
+    app.models.referenceData
+      .findOne({
+        deleted: true,
+        where: {
+          id: referenceDataId,
+          outbreakId: this.id,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.referenceData.modelName,
+            id: referenceDataId
+          });
+        }
+
+        // undo reference data delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
+  };
 };

@@ -125,6 +125,12 @@
       "principalId": "write_reference_data",
       "permission": "ALLOW",
       "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_reference_data",
+      "permission": "ALLOW",
+      "property": "restore"
     }
   ],
   "methods": {
@@ -200,6 +206,36 @@
           "path": "/usage/count"
         }
       ]
+    },
+    "restore": {
+      "accepts": [
+        {
+          "arg": "id",
+          "type": "string",
+          "description": "Reference data ID"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "referenceData",
+          "type": [
+            "referenceData"
+          ],
+          "description": "Reference Data",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted Reference Data.",
+      "http": {
+        "verb": "post",
+        "path": "/:id/restore"
+      }
     }
   }
 }
