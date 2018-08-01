@@ -2945,7 +2945,8 @@ module.exports = function (Outbreak) {
           let dateOfOutcome = person.dateOfOutcome ? moment(person.dateOfOutcome) : null;
 
           // for contacts only get the ones where dateDeceased < date of birth; this check also applies for cases
-          if (dob && dateDeceased && ['contact', 'case'].indexOf(person.type) !== -1 && dob.isAfter(dateDeceased)) {
+          // no need to check for person type as the query was done only for contacts/cases
+          if (dob && dateDeceased && dob.isAfter(dateDeceased)) {
             inconsistencies.push(['dob', 'dateDeceased']);
           }
 
