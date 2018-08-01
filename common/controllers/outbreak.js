@@ -7,6 +7,7 @@ const rr = require('rr');
 const templateParser = require('./../../components/templateParser');
 const referenceDataParser = require('./../../components/referenceDataParser');
 const genericHelpers = require('../../components/helpers');
+const async = require('async');
 
 module.exports = function (Outbreak) {
 
@@ -2806,5 +2807,100 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.getImportableFileJsonById = function (id, callback) {
     app.controllers.importableFile.getJsonById(id, callback);
+  };
+
+  /**
+   * Import an importable lab results file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.importImportableLabResultsFileUsingMap = function (body, options, callback) {
+    const self = this;
+    // get importable file
+    app.models.importableFile
+      .getTemporaryFileById(body.fileId, function (error, file) {
+        // handle errors
+        if (error) {
+          return callback(error);
+        }
+        try {
+          // parse file content
+          const rawlabResultsList = JSON.parse(file);
+          // remap properties & values
+          const labResultsList = app.utils.helpers.remapProperties(rawlabResultsList, body.map, body.valuesMap);
+          // build a list of create lab results operations
+          const createLabResults = [];
+          // define a container for error results
+          const createErrors = [];
+          // define a toString function to be used by error handler
+          createErrors.toString = function () {
+            return JSON.stringify(this);
+          };
+          // go through all entries
+          labResultsList.forEach(function (labResult, index) {
+            createLabResults.push(function (callback) {
+              // first check if the case id (person id) is valid
+              app.models.case
+                .findOne({
+                  where: {
+                    id: labResult.personId,
+                    outbreakId: self.id
+                  }
+                })
+                .then(function (caseInstance) {
+                  // if the person was not found, don't create the case, stop with error
+                  if (!caseInstance) {
+                    throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+                      model: app.models.case.modelName,
+                      id: labResult.personId
+                    });
+                  }
+                  // create the lab result
+                  return app.models.labResult
+                    .create(labResult, options)
+                    .then(function (result) {
+                      callback(null, result);
+                    });
+                })
+                .catch(function (error) {
+                  // on error, store the error, but don't stop, continue with other items
+                  createErrors.push(`Failed to import lab result ${index + 1}. Error: ${JSON.stringify(error)}`);
+                  callback(null, null);
+                });
+            });
+          });
+          // start importing lab results
+          async.parallelLimit(createLabResults, 10, function (error, results) {
+            // handle errors (should not be any)
+            if (error) {
+              return callback(error);
+            }
+            // if import errors were found
+            if (createErrors.length) {
+              // remove results that failed to be added
+              results = results.filter(result => result !== null);
+              // define a toString function to be used by error handler
+              results.toString = function () {
+                return JSON.stringify(this);
+              };
+              // return error with partial success
+              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+                model: app.models.labResult.modelName,
+                failed: createErrors,
+                success: results
+              }));
+            }
+            // send the result
+            callback(null, results);
+          });
+        } catch (error) {
+          // handle parse error
+          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
+            contentType: 'JSON',
+            details: error.message
+          }));
+        }
+      });
   };
 };

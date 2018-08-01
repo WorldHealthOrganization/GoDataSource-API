@@ -114,5 +114,9 @@
   "INVALID_GENERATE_FOLLOWUP_PARAMS": {
     "defaultStatusCode": 400,
     "messagePattern": "Invalid follow up generation parameters. Details: `<%= details %>`"
+  },
+  "IMPORT_PARTIAL_SUCCESS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Import Partial Success. Some `<%= model %>` instances failed to be imported. Successfully imported: <%= success %> \nFailed to be imported: <%= failed %>"
   }
 }

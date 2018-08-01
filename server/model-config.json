@@ -219,5 +219,9 @@
   "dateRange": {
     "dataSource": null,
     "public": false
+  },
+  "importableFileWithFieldAndReferenceDataMap": {
+    "dataSource": null,
+    "public": true
   }
 }

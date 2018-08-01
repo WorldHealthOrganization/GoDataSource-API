@@ -98,12 +98,13 @@ const getChunksForInterval = function (interval, chunk) {
 };
 
 /**
- * Remap a list of items using a map
+ * Remap a list of items using a map. optionally remap their values using a values map
  * @param list
  * @param fieldsMap
+ * @param [valuesMap]
  * @return {Array}
  */
-const remapProperties = function (list, fieldsMap) {
+const remapProperties = function (list, fieldsMap, valuesMap) {
   // store final result
   let results = [];
   // get a list of source fields
@@ -116,6 +117,11 @@ const remapProperties = function (list, fieldsMap) {
     fields.forEach(function (field) {
       // remap property
       result[fieldsMap[field]] = item[field];
+      // if a values map was provided
+      if (valuesMap[field] && valuesMap[field][item[field]] !== undefined) {
+        // remap the values
+        result[fieldsMap[field]] = valuesMap[field][item[field]];
+      }
     });
     // add processed item to the final list
     results.push(result);

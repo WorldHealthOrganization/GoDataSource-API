@@ -909,6 +909,12 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "getImportableFileJsonById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "importImportableLabResultsFileUsingMap"
     }
   ],
   "methods": {
@@ -2834,6 +2840,39 @@
       "http": {
         "verb": "get",
         "path": "/importable-files/:id/json"
+      }
+    },
+    "prototype.importImportableLabResultsFileUsingMap": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithFieldAndReferenceDataMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "labResults",
+          "type": [
+            "labResult"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a list of lab results from a file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/cases/lab-results/import-importable-file-using-map"
       }
     }
   }
