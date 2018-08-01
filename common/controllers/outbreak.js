@@ -2791,4 +2791,293 @@ module.exports = function (Outbreak) {
     }
     return next();
   });
+
+  /**
+   * List of contacts/cases where inconsistencies were found between dates.
+   * Besides the contact/case properties each entry will also contain an 'inconsistencies' property (array of inconsistencies)
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.listInconsistenciesInKeyDates = function (filter, callback) {
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // get all the followups for the filtered period
+    app.models.person.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId,
+          // getting only the cases and contacts as there are no inconsistencies to check for events
+          or: [{
+            // for contacts only get the ones where dateDeceased < date of birth; this check also applies for cases
+            $where: 'this.dateDeceased < this.dob',
+            type: {
+              in: ['contact', 'case']
+            }
+          }, {
+            // for case: compare against dob
+            type: 'case',
+            // first check for is dob exists to not make the other checks
+            dob: {
+              neq: null
+            },
+            or: [{
+              // dateOfInfection < date of birth
+              $where: 'this.dateOfInfection < this.dob',
+            }, {
+              // dateOfOnset < date of birth
+              $where: 'this.dateOfOnset < this.dob',
+            }, {
+              // dateBecomeCase < date of birth
+              $where: 'this.dateBecomeCase < this.dob',
+            }, {
+              // dateOfOutcome < date of birth
+              $where: 'this.dateOfOutcome < this.dob',
+            }]
+          }, {
+            // for case: compare against dateDeceased
+            type: 'case',
+            // first check for is dob exists to not make the other checks
+            dateDeceased: {
+              neq: null
+            },
+            or: [{
+              // dateOfInfection > dateDeceased
+              $where: 'this.dateOfInfection > this.dateDeceased',
+            }, {
+              // dateOfOnset > dateDeceased
+              $where: 'this.dateOfOnset > this.dateDeceased',
+            }, {
+              // dateBecomeCase > dateDeceased
+              $where: 'this.dateBecomeCase > this.dateDeceased',
+            }, {
+              // dateOfOutcome > dateDeceased
+              $where: 'this.dateOfOutcome > this.dateDeceased',
+            }]
+          }, {
+            // for case: compare dateOfInfection, dateOfOnset, dateBecomeCase, dateOfOutcome
+            type: 'case',
+            or: [{
+              // dateOfInfection > dateOfOnset
+              $where: 'this.dateOfInfection > this.dateOfOnset',
+            }, {
+              // dateOfInfection > dateBecomeCase
+              $where: 'this.dateOfInfection > this.dateBecomeCase',
+            }, {
+              // dateOfInfection > dateOfOutcome
+              $where: 'this.dateOfInfection > this.dateOfOutcome',
+            }, {
+              // dateOfOnset > dateBecomeCase
+              $where: 'this.dateOfOnset > this.dateBecomeCase',
+            }, {
+              // dateOfOnset > dateOfOutcome
+              $where: 'this.dateOfOnset > this.dateOfOutcome',
+            }, {
+              // dateBecomeCase > dateOfOutcome
+              $where: 'this.dateBecomeCase > this.dateOfOutcome',
+            }]
+          }, {
+            // for case: compare isolationDates, hospitalizationDates, incubationDates startDate/endDate for each item in them and against the date of birth and dateDeceased
+            type: 'case',
+            $where: `function () {
+              // initialize check result
+              var inconsistencyInKeyDates = false;
+              // get date of birth and dateDeceased
+              var dob = this.dob;
+              var dateDeceased = this.dateDeceased;
+
+              // loop through the isolationDates, hospitalizationDates, incubationDates and make comparisons
+              var datesContainers = ['isolationDates', 'hospitalizationDates', 'incubationDates'];
+              for (var i = 0; i < datesContainers.length; i++) {
+                // check if the datesContainer exists on the model
+                var datesContainer = datesContainers[i];
+                if (this[datesContainer] && this[datesContainer].length) {
+                  // loop through the dates; comparison stops at first successful check
+                  for (var j = 0; j < this[datesContainer].length; j++) {
+                    var dateEntry = this[datesContainer][j];
+
+                    // compare startDate with endDate
+                    inconsistencyInKeyDates = dateEntry.startDate > dateEntry.endDate ? true : false;
+
+                    // check for dob; both startDate and endDate must be after dob
+                    if (!inconsistencyInKeyDates && dob) {
+                      inconsistencyInKeyDates = dateEntry.startDate < dob ? true : false;
+                      inconsistencyInKeyDates = inconsistencyInKeyDates || (dateEntry.endDate < dob ? true : false);
+                    }
+
+                    // check for dateDeceased; both startDate and endDate must be before dob
+                    if (!inconsistencyInKeyDates && dateDeceased) {
+                      inconsistencyInKeyDates = dateEntry.startDate > dateDeceased ? true : false;
+                      inconsistencyInKeyDates = inconsistencyInKeyDates || (dateEntry.endDate > dateDeceased ? true : false);
+                    }
+
+                    // stop checks if an inconsistency was found
+                    if (inconsistencyInKeyDates) {
+                      break;
+                    }
+                  }
+                }
+
+                // stop checks if an inconsistency was found
+                if (inconsistencyInKeyDates) {
+                  break;
+                }
+              }
+              
+              return inconsistencyInKeyDates;
+            }`
+          }]
+        }
+      }, filter || {}))
+      .then(function (people) {
+        // loop through the people to add the inconsistencies array
+        people.forEach(function (person, index) {
+          // initialize inconsistencies
+          let inconsistencies = [];
+
+          // get dob and dateDeceased since they are used in the majority of comparisons
+          let dob = person.dob ? moment(person.dob) : null;
+          let dateDeceased = person.dateDeceased ? moment(person.dateDeceased) : null;
+          // also get the other dates
+          let dateOfInfection = person.dateOfInfection ? moment(person.dateOfInfection) : null;
+          let dateOfOnset = person.dateOfOnset ? moment(person.dateOfOnset) : null;
+          let dateBecomeCase = person.dateBecomeCase ? moment(person.dateBecomeCase) : null;
+          let dateOfOutcome = person.dateOfOutcome ? moment(person.dateOfOutcome) : null;
+
+          // for contacts only get the ones where dateDeceased < date of birth; this check also applies for cases
+          // no need to check for person type as the query was done only for contacts/cases
+          if (dob && dateDeceased && dob.isAfter(dateDeceased)) {
+            inconsistencies.push(['dob', 'dateDeceased']);
+          }
+
+          // for case:
+          if (person.type === 'case') {
+            // compare against dob
+            if (dob) {
+              // dateOfInfection < date of birth
+              if (dateOfInfection && dob.isAfter(dateOfInfection)) {
+                inconsistencies.push(['dob', 'dateOfInfection']);
+              }
+
+              // dateOfOnset < date of birth
+              if (dateOfOnset && dob.isAfter(dateOfOnset)) {
+                inconsistencies.push(['dob', 'dateOfOnset']);
+              }
+
+              // dateBecomeCase < date of birth
+              if (dateBecomeCase && dob.isAfter(dateBecomeCase)) {
+                inconsistencies.push(['dob', 'dateBecomeCase']);
+              }
+
+              // dateOfOutcome < date of birth
+              if (dateOfOutcome && dob.isAfter(dateOfOutcome)) {
+                inconsistencies.push(['dob', 'dateOfOutcome']);
+              }
+            }
+
+            // compare against dateDeceased
+            if (dateDeceased) {
+              // dateOfInfection > dateDeceased
+              if (dateOfInfection && dateOfInfection.isAfter(dateDeceased)) {
+                inconsistencies.push(['dateDeceased', 'dateOfInfection']);
+              }
+
+              // dateOfOnset > dateDeceased
+              if (dateOfOnset && dateOfOnset.isAfter(dateDeceased)) {
+                inconsistencies.push(['dateDeceased', 'dateOfOnset']);
+              }
+
+              // dateBecomeCase > dateDeceased
+              if (dateBecomeCase && dateBecomeCase.isAfter(dateDeceased)) {
+                inconsistencies.push(['dateDeceased', 'dateBecomeCase']);
+              }
+
+              // dateOfOutcome > dateDeceased
+              if (dateOfOutcome && dateOfOutcome.isAfter(dateDeceased)) {
+                inconsistencies.push(['dateDeceased', 'dateOfOutcome']);
+              }
+            }
+
+            // compare dateOfInfection, dateOfOnset, dateBecomeCase, dateOfOutcome
+            // dateOfInfection > dateOfOnset
+            if (dateOfInfection && dateOfOnset && dateOfInfection.isAfter(dateOfOnset)) {
+              inconsistencies.push(['dateOfInfection', 'dateOfOnset']);
+            }
+
+            // dateOfInfection > dateBecomeCase
+            if (dateOfInfection && dateBecomeCase && dateOfInfection.isAfter(dateBecomeCase)) {
+              inconsistencies.push(['dateOfInfection', 'dateBecomeCase']);
+            }
+
+            // dateOfInfection > dateOfOutcome
+            if (dateOfInfection && dateOfOutcome && dateOfInfection.isAfter(dateOfOutcome)) {
+              inconsistencies.push(['dateOfInfection', 'dateOfOutcome']);
+            }
+
+            // dateOfOnset > dateBecomeCase
+            if (dateOfOnset && dateBecomeCase && dateOfOnset.isAfter(dateBecomeCase)) {
+              inconsistencies.push(['dateOfOnset', 'dateBecomeCase']);
+            }
+
+            // dateOfOnset > dateOfOutcome
+            if (dateOfOnset && dateOfOutcome && dateOfOnset.isAfter(dateOfOutcome)) {
+              inconsistencies.push(['dateOfOnset', 'dateOfOutcome']);
+            }
+
+            // dateBecomeCase > dateOfOutcome
+            if (dateBecomeCase && dateOfOutcome && dateBecomeCase.isAfter(dateOfOutcome)) {
+              inconsistencies.push(['dateBecomeCase', 'dateOfOutcome']);
+            }
+
+            // compare isolationDates, hospitalizationDates, incubationDates startDate/endDate for each item in them and against the date of birth and dateDeceased
+            // loop through the isolationDates, hospitalizationDates, incubationDates and make comparisons
+            var datesContainers = ['isolationDates', 'hospitalizationDates', 'incubationDates'];
+            datesContainers.forEach(function (datesContainer) {
+              if (person[datesContainer] && person[datesContainer].length) {
+                // loop through the datesto find inconsistencies
+                person[datesContainer].forEach(function (dateEntry, dateEntryIndex) {
+                  // get startDate and endDate
+                  let startDate = moment(dateEntry.startDate);
+                  let endDate = moment(dateEntry.endDate);
+
+                  // compare startDate with endDate
+                  if (startDate.isAfter(endDate)) {
+                    inconsistencies.push([`${datesContainer}.${dateEntryIndex}.startDate`, `${datesContainer}.${dateEntryIndex}.endDate`]);
+                  }
+
+                  // check for dob; both startDate and endDate must be after dob
+                  if (dob) {
+                    if (dob.isAfter(startDate)) {
+                      inconsistencies.push(['dob', `${datesContainer}.${dateEntryIndex}.startDate`]);
+                    }
+
+                    if (dob.isAfter(endDate)) {
+                      inconsistencies.push(['dob', `${datesContainer}.${dateEntryIndex}.endDate`]);
+                    }
+                  }
+
+                  // check for dateDeceased; both startDate and endDate must be before dob
+                  if (dateDeceased) {
+                    if (startDate.isAfter(dateDeceased)) {
+                      inconsistencies.push(['dateDeceased', `${datesContainer}.${dateEntryIndex}.startDate`]);
+                    }
+
+                    if (endDate.isAfter(dateDeceased)) {
+                      inconsistencies.push(['dateDeceased', `${datesContainer}.${dateEntryIndex}.endDate`]);
+                    }
+                  }
+                });
+              }
+            });
+          }
+
+          // add inconsistencies in the person entry
+          people[index].inconsistencies = inconsistencies;
+        });
+
+        // send response
+        callback(null, people);
+      })
+      .catch(callback);
+  };
 };
