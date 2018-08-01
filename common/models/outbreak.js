@@ -8,6 +8,12 @@ const moment = require('moment');
 
 module.exports = function (Outbreak) {
 
+  Outbreak.referenceDataFieldsToCategoryMap = {
+    disease: 'LNG_REFERENCE_DATA_CATEGORY_DISEASE'
+  };
+
+  Outbreak.referenceDataFields = Object.keys(Outbreak.referenceDataFieldsToCategoryMap);
+
   // initialize model helpers
   Outbreak.helpers = {};
   // set a higher limit for event listeners to avoid warnings (we have quite a few listeners)

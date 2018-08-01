@@ -32,11 +32,14 @@ module.exports = function (Case) {
     'deceased': 'LNG_CASE_FIELD_LABEL_DECEASED'
   };
 
-  // keep a list of fields that use values from reference data
-  Case.referenceDataFields = [
-    'classification',
-    'riskLevel',
-    'occupation',
-    'documents.type'
-  ];
+  Case.referenceDataFieldsToCategoryMap = {
+    classification: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION',
+    riskLevel: 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL',
+    gender: 'LNG_REFERENCE_DATA_CATEGORY_GENDER',
+    occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
+    outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
+    'documents.type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE'
+  };
+
+  Case.referenceDataFields = Object.keys(Case.referenceDataFieldsToCategoryMap);
 };
