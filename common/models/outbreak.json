@@ -924,6 +924,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "restoreReferenceData"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "importableFileUpload"
@@ -2817,6 +2823,36 @@
       "http": {
         "verb": "get",
         "path": "/people/inconsistencies-in-key-dates"
+      }
+    },
+    "prototype.restoreReferenceData": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for reference data"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "referenceData",
+          "type": [
+            "referenceData"
+          ],
+          "description": "Reference Data",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted Reference Data.",
+      "http": {
+        "verb": "post",
+        "path": "/reference-data/:nk/restore"
       }
     },
     "prototype.importableFileUpload": {
