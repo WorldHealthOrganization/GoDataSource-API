@@ -3264,7 +3264,7 @@ module.exports = function (Outbreak) {
 
       // generate pdf document
       let doc = pdfUtils.createPdfDoc({
-        fontSize: 12,
+        fontSize: 11,
         layout: 'portrait'
       });
 
@@ -3275,8 +3275,6 @@ module.exports = function (Outbreak) {
 
       // set margin top for first page here, to not change the entire createPdfDoc functionality
       doc.moveDown(2);
-
-      // get the list properties from case field order
 
       // add case profile fields (empty)
       pdfUtils.createPersonProfile(doc, caseFields, false, 'Case Information');

@@ -303,6 +303,55 @@ const createQuestionnaire = function (doc, questions, title) {
 };
 
 /**
+ * Create a standard pdf table
+ * @param doc
+ * @param headers
+ * @param data
+ */
+const createTable = function (doc, headers, data) {
+  doc.x = 50;
+  doc.moveDown();
+
+  let pdfTable = new PdfTable(doc);
+
+  // set default values for columns
+  pdfTable.setColumnsDefaults({
+    headerBorder: 'B',
+    align: 'left',
+    headerPadding: [2],
+    padding: [2]
+  });
+
+  // compute width
+  let reservedWidth = 0;
+  let noHeadersWithReservedWidth = 0;
+  // find headers which need specific width
+  headers.forEach(function (header) {
+    if (header.width) {
+      // mark width as reserved
+      reservedWidth += header.width;
+      // count the number of headers with reserved width
+      noHeadersWithReservedWidth++;
+    }
+  });
+
+  // for rows without reserved width, split remaining document width (doc width - margins - reserved width) between remaining headers
+  const defaultRowWidth = (defaultDocumentConfiguration.widthForPageSize - 2 * defaultDocumentConfiguration.margin - reservedWidth) / (headers.length - noHeadersWithReservedWidth);
+
+  // add all headers
+  headers.forEach(function (header) {
+    pdfTable.addColumn({
+      id: header.id,
+      header: header.header,
+      width: header.width || defaultRowWidth
+    })
+  });
+
+  // add table data
+  pdfTable.addBody(data);
+};
+
+/**
  * Display a person specific fields
  * Do not display actual values, only field names
  * DisplayValues flag is also supported, if true it will display the actual field values
@@ -317,31 +366,26 @@ const createPersonProfile = function (doc, person, displayValues, title) {
   // add page title
   if (title) {
     addTitle(doc, title);
+    doc.moveDown();
   }
 
   // display each field on a row
   Object.keys(person).forEach((fieldName) => {
     if (Array.isArray(person[fieldName])) {
-      doc.text(fieldName);
-      let pdfTable = new PdfTable(doc);
-
-      // if no records should be displayed, create 3 empty rows
-      // take header values from first entry in the array (there is always a template as first element in the array)
-      if (!displayValues) {
-        Object.keys(person[fieldName][0]).forEach((key) => {
-            pdfTable.addColumn({
-              id: key,
-              header: key,
-              width: 50
-            });
+      // fetch table headers from first entry in the array, if no entry is set, do not display the table
+      if (person[fieldName][0]) {
+        let headers = Object.keys(person[fieldName][0]).map((key) => {
+          return {
+            id: key,
+            header: key
+          };
         });
+        // create the table
+        createTable(doc, headers, person[fieldName]);
       }
-
-      pdfTable.addBody(person[fieldName]);
-
-      return;
+    } else {
+      doc.text(`${fieldName}: ${displayValues ? person[fieldName] : '_'.repeat(25)}`).moveDown();
     }
-    doc.text(`${fieldName}: ${displayValues ? person[fieldName] : '_'.repeat(25)}`).moveDown();
   });
 
   return doc;
