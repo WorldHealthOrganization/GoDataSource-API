@@ -1383,7 +1383,7 @@ module.exports = function (Outbreak) {
     helpers.countContactsByFollowUpFlag({
       outbreakId: this.id,
       followUpFlag: 'performed',
-      resultProperty: 'contactsSeen'
+      resultProperty: 'contactsSeenCount'
     }, filter, callback);
   };
 
@@ -1397,7 +1397,7 @@ module.exports = function (Outbreak) {
     helpers.countContactsByFollowUpFlag({
       outbreakId: this.id,
       followUpFlag: 'lostToFollowUp',
-      resultProperty: 'contactsLostToFollowup'
+      resultProperty: 'contactsLostToFollowupCount'
     }, filter, callback);
   };
 

@@ -2104,12 +2104,26 @@
         {
           "arg": "counters",
           "type": {
-            "contactsSeen": "number",
+            "contactsSeenCount": "number",
+            "contactIDs": {
+              "type": [
+                "string"
+              ],
+              "description": "Array with IDs of contacts that are seen",
+              "required": true
+            },
             "teams": [
               {
                 "type": {
                   "id": "string",
-                  "contactsSeen": "number"
+                  "contactsSeenCount": "number",
+                  "contactIDs": {
+                    "type": [
+                      "string"
+                    ],
+                    "description": "Array with IDs of contacts that are seen",
+                    "required": true
+                  }
                 }
               }
             ]
@@ -2137,12 +2151,26 @@
         {
           "arg": "counters",
           "type": {
-            "contactsLostToFollowup": "number",
+            "contactsLostToFollowupCount": "number",
+            "contactIDs": {
+              "type": [
+                "string"
+              ],
+              "description": "Array with IDs of contacts that are lost to follow-up",
+              "required": true
+            },
             "teams": [
               {
                 "type": {
                   "id": "string",
-                  "contactsLostToFollowup": "number"
+                  "contactsLostToFollowupCount": "number",
+                  "contactIDs": {
+                    "type": [
+                      "string"
+                    ],
+                    "description": "Array with IDs of contacts that are lost to follow-up",
+                    "required": true
+                  }
                 }
               }
             ]
