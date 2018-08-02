@@ -83,7 +83,10 @@ module.exports = function (Location) {
               parentLocationId: {
                 in: parentLocationsIds
               }
-            }]
+            }],
+          id: {
+            nin: allLocationsIds
+          }
         }
       })
       .then(function (locations) {
@@ -136,7 +139,7 @@ module.exports = function (Location) {
         startLocationsIdsToRetrieve.push(locationId);
       }
       // start location is already retrieved; retrieve parent if not already in the list
-      else if(allLocations.findIndex(location => location.id === allLocations[index].parentLocationId) === -1) {
+      else if (allLocations.findIndex(location => location.id === allLocations[index].parentLocationId) === -1) {
         parentLocationsIds.push(allLocations[index].parentLocationId);
       }
     });

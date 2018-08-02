@@ -101,23 +101,23 @@ module.exports = function (Location) {
           let locationsIDs = locations.map(location => location.id);
 
           // get parent locations
-          Location.getParentLocationsWithDetails(locationsIDs, locations, function (error, foundLocations) {
-            if(error) {
+          Location.getParentLocationsWithDetails(locationsIDs, locations, function (error, locationsWithParents) {
+            if (error) {
               throw error;
             }
 
             // check for includeChildren flag
             if (includeChildren) {
               // get sub locations
-              Location.getSubLocationsWithDetails(locationsIDs, locations, function (error, foundLocations) {
-                if(error) {
+              Location.getSubLocationsWithDetails(locationsIDs, locationsWithParents, function (error, foundLocations) {
+                if (error) {
                   throw error;
                 }
 
                 callback(null, Location.buildHierarchicalLocationsList(foundLocations));
               });
             } else {
-              callback(null, Location.buildHierarchicalLocationsList(foundLocations));
+              callback(null, Location.buildHierarchicalLocationsList(locationsWithParents));
             }
           });
         } else {
