@@ -286,8 +286,8 @@ const createQuestionnaire = function (doc, questions, title) {
         default:
           // NOTE: only first nested level is handled for additional questions
           item.answers.forEach((answer) => {
-            doc.moveDown().text(answer.label, isNested ? initialXMargin + 85 : initialXMargin + 45, doc.y + 5);
-            doc.moveUp().rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y, 15, 15).stroke().moveDown();
+            doc.moveDown().text(answer.label, isNested ? initialXMargin + 85 : initialXMargin + 45, doc.y + 8);
+            doc.moveUp().rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y, 13, 13).stroke().moveDown();
 
             // handle additional questions
             if (answer.additionalQuestions.length) {
@@ -300,55 +300,6 @@ const createQuestionnaire = function (doc, questions, title) {
   })(questions);
 
   return doc;
-};
-
-/**
- * Create a standard pdf table
- * @param doc
- * @param headers
- * @param data
- */
-const createTable = function (doc, headers, data) {
-  doc.x = 50;
-  doc.moveDown();
-
-  let pdfTable = new PdfTable(doc);
-
-  // set default values for columns
-  pdfTable.setColumnsDefaults({
-    headerBorder: 'B',
-    align: 'left',
-    headerPadding: [2],
-    padding: [2]
-  });
-
-  // compute width
-  let reservedWidth = 0;
-  let noHeadersWithReservedWidth = 0;
-  // find headers which need specific width
-  headers.forEach(function (header) {
-    if (header.width) {
-      // mark width as reserved
-      reservedWidth += header.width;
-      // count the number of headers with reserved width
-      noHeadersWithReservedWidth++;
-    }
-  });
-
-  // for rows without reserved width, split remaining document width (doc width - margins - reserved width) between remaining headers
-  const defaultRowWidth = (defaultDocumentConfiguration.widthForPageSize - 2 * defaultDocumentConfiguration.margin - reservedWidth) / (headers.length - noHeadersWithReservedWidth);
-
-  // add all headers
-  headers.forEach(function (header) {
-    pdfTable.addColumn({
-      id: header.id,
-      header: header.header,
-      width: header.width || defaultRowWidth
-    })
-  });
-
-  // add table data
-  pdfTable.addBody(data);
 };
 
 /**
@@ -369,37 +320,49 @@ const createPersonProfile = function (doc, person, displayValues, title) {
     doc.moveDown();
   }
 
-  // we display lists on separate pages
-  let arrayProps = [];
+  // cache initial document margin
+  const initialXMargin = doc.x;
 
   // display each field on a row
   Object.keys(person).forEach((fieldName) => {
     // if property is array and has at least one element, display it on next page
     if (Array.isArray(person[fieldName]) && person[fieldName][0]) {
-      arrayProps.push({ name: fieldName, list: person[fieldName] });
+      // top property
+      doc.text(fieldName, initialXMargin).moveDown();
+
+      // if this should be an empty form, display 2 entries of it
+      if (!displayValues) {
+        // there will always be an element in the array, containing field definitions
+        let fields = Object.keys(person[fieldName][0]);
+
+        [fields, fields].forEach((fields, index, arr) => {
+          fields.forEach((field) => {
+            doc.text(`${field}: ${'_'.repeat(25)}`, initialXMargin + 20).moveDown();
+          });
+
+          // separate each group of fields
+          // if this is the last item do not move 2 lines
+          if (index !== arr.length - 1) {
+            doc.moveDown(2);
+          }
+        });
+      } else {
+        // display nested props
+        person[fieldName].forEach((item, index, arr) => {
+          Object.keys(item).forEach((prop) => {
+            doc.text(`${prop}: ${item[prop]}`, initialXMargin + 20).moveDown();
+          });
+
+          // space after each item in the list
+          // if this is the last item do not move 2 lines
+          if (index !== arr.length - 1) {
+            doc.moveDown(2);
+          }
+        });
+      }
     } else {
       doc.text(`${fieldName}: ${displayValues ? person[fieldName] : '_'.repeat(25)}`).moveDown();
     }
-  });
-
-  doc.addPage();
-
-  // display array properties one by one
-  arrayProps.forEach((arrayProp) => {
-    doc.text(arrayProp.name);
-
-    let headers = Object.keys(arrayProp.list[0]).map((key) => {
-      return {
-        id: key,
-        header: key
-      };
-    });
-
-    // create the table
-    createTable(doc, headers, arrayProp.list);
-
-    doc.x = 50;
-    doc.moveDown();
   });
 
   return doc;
