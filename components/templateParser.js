@@ -323,27 +323,43 @@ function afterHook(context, modelInstance, next) {
   saveLanguageTokens(context, next);
 }
 
+/**
+ * Extract a list of variables and their answers (if any) from a template
+ * @param template
+ * @return {Array}
+ */
 function extractVariablesAndAnswerOptions(template) {
+  // store a list of variables
   let variables = [];
+  // template should be an array of questions
   if (Array.isArray(template)) {
+    // go through all the questions
     template.forEach(function (question) {
+      // start building the variable
       const variable = {
         name: question.variable,
         text: question.text,
         answerType: question.answerType
       };
+      // if the question has predefined answers
       if (Array.isArray(question.answers)) {
+        // store a list of variables
         variable.answers = [];
+        // go through the list of answers
         question.answers.forEach(function (answer) {
+          // store them
           variable.answers.push({
             label: answer.label,
             value: answer.value
           });
+          // if there are additional questions inside an answer
           if (Array.isArray(answer.additionalQuestions)) {
+            // parse them recursively
             variables = variables.concat(extractVariablesAndAnswerOptions(answer.additionalQuestions));
           }
         });
       }
+      // store variable in the list of variables
       variables.push(variable);
     });
   }
