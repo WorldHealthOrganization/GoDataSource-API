@@ -34,9 +34,9 @@ module.exports = function (Case) {
     'isolationDates': 'LNG_CASE_FIELD_LABEL_ISOLATION_DATES',
     'hospitalizationDates': 'LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES',
     'incubationDates': 'LNG_CASE_FIELD_LABEL_INCUBATION_DATES',
+    'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
     'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
-    'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
   };
 
   Case.referenceDataFieldsToCategoryMap = {

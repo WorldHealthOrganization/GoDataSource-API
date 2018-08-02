@@ -286,8 +286,8 @@ const createQuestionnaire = function (doc, questions, title) {
         default:
           // NOTE: only first nested level is handled for additional questions
           item.answers.forEach((answer) => {
-            doc.moveDown().text(answer.label, isNested ? initialXMargin + 85 : initialXMargin + 45, doc.y + 8);
-            doc.moveUp().rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y, 13, 13).stroke().moveDown();
+            doc.moveDown().text(answer.label, isNested ? initialXMargin + 85 : initialXMargin + 45);
+            doc.moveUp().rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y, 15, 15).stroke().moveDown();
 
             // handle additional questions
             if (answer.additionalQuestions.length) {
@@ -312,8 +312,11 @@ const createQuestionnaire = function (doc, questions, title) {
  * @param person
  * @param displayValues
  * @param title
+ * @param numberOfEmptyEntries
  */
-const createPersonProfile = function (doc, person, displayValues, title) {
+const createPersonProfile = function (doc, person, displayValues, title, numberOfEmptyEntries) {
+  numberOfEmptyEntries = numberOfEmptyEntries || 2;
+
   // add page title
   if (title) {
     addTitle(doc, title);
@@ -335,7 +338,12 @@ const createPersonProfile = function (doc, person, displayValues, title) {
         // there will always be an element in the array, containing field definitions
         let fields = Object.keys(person[fieldName][0]);
 
-        [fields, fields].forEach((fields, index, arr) => {
+        // list of empty entries to add
+        let emptyEntries = new Array(numberOfEmptyEntries);
+        emptyEntries.fill(fields);
+
+        // number of empty entries to set
+        emptyEntries.forEach((fields, index, arr) => {
           fields.forEach((field) => {
             doc.text(`${field}: ${'_'.repeat(25)}`, initialXMargin + 20).moveDown();
           });
@@ -361,7 +369,7 @@ const createPersonProfile = function (doc, person, displayValues, title) {
         });
       }
     } else {
-      doc.text(`${fieldName}: ${displayValues ? person[fieldName] : '_'.repeat(25)}`).moveDown();
+      doc.text(`${fieldName}: ${displayValues ? person[fieldName] : '_'.repeat(25)}`, initialXMargin).moveDown();
     }
   });
 
