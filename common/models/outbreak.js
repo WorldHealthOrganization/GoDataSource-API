@@ -731,7 +731,9 @@ module.exports = function (Outbreak) {
       'classification',
       'riskLevel',
       'riskReason',
-      'transferRefused'
+      'transferRefused',
+      'dateOfReporting',
+      'isDateOfReportingApproximate'
     ];
     // the following case props are array and should be treated differently
     const caseArrayProps = [
