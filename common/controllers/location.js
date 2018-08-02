@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const fs = require('fs');
+const _ = require('lodash');
 
 module.exports = function (Location) {
 
@@ -71,15 +72,57 @@ module.exports = function (Location) {
 
   /**
    * Get hierarchical locations list
+   * @param filter Besides the default filter properties this request also accepts 'includeChildren' boolean on the first level in 'where'; this flag is taken into consideration only if other filters are applied
    * @param callback
    */
-  Location.getHierarchicalList = function (callback) {
+  Location.getHierarchicalList = function (filter, callback) {
+    // initialize includeChildren filter
+    let includeChildren;
+    // check if the includeChildren filter was sent; accepting it only on the first level
+    includeChildren = _.get(filter, 'where.includeChildren');
+    if (typeof includeChildren !== "undefined") {
+      // includeChildren was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.includeChildren;
+    } else {
+      // default value is true
+      includeChildren = true;
+    }
+
     Location
-      .find({
-        order: 'parentLocationId ASC, id ASC'
-      })
+      .find(app.utils.remote
+        .mergeFilters({
+          order: 'parentLocationId ASC, id ASC'
+        }, filter || {}))
       .then(function (locations) {
-        callback(null, Location.buildHierarchicalLocationsList(locations));
+        // check for sent filters; if filters were sent we need to return hierarchical list for the found locations
+        // this means that we need to also retrieve parent locations and in case where includeChildren is true also retrieve children recursively
+        if (filter && filter.where && Object.keys(filter.where).length) {
+          // get locations IDs
+          let locationsIDs = locations.map(location => location.id);
+
+          // get parent locations
+          Location.getParentLocationsWithDetails(locationsIDs, locations, function (error, foundLocations) {
+            if(error) {
+              throw error;
+            }
+
+            // check for includeChildren flag
+            if (includeChildren) {
+              // get sub locations
+              Location.getSubLocationsWithDetails(locationsIDs, locations, function (error, foundLocations) {
+                if(error) {
+                  throw error;
+                }
+
+                callback(null, Location.buildHierarchicalLocationsList(foundLocations));
+              });
+            } else {
+              callback(null, Location.buildHierarchicalLocationsList(foundLocations));
+            }
+          });
+        } else {
+          callback(null, Location.buildHierarchicalLocationsList(locations));
+        }
       }).catch(callback);
   };
 

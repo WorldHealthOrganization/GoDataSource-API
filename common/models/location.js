@@ -115,6 +115,73 @@ module.exports = function (Location) {
   };
 
   /**
+   * Get parent locations for a list of locations. Result is an array of location models
+   * Result also includes the models with IDs in locationsIds
+   * @param locationsIds Array of location Ids for which to get the parent locations recursively
+   * @param allLocations Array on which to add the result; Must be an array of location models
+   * @param callback
+   */
+  Location.getParentLocationsWithDetails = function (locationsIds, allLocations, callback) {
+    // initialize array of IDs for locations that need to be retrieved
+    let locationsToRetrieve = [];
+
+    // retrieve the start locations if the locationIds are not found in the allLocations array
+    // also retrieve the parent locations for the locationsIds that are found in allLocations array
+    let startLocationsIdsToRetrieve = [];
+    let parentLocationsIds = [];
+    locationsIds.forEach(function (locationId) {
+      let index = allLocations.findIndex(location => location.id === locationId);
+      if (index === -1) {
+        // start location was not found in allLocations array; retrieve it
+        startLocationsIdsToRetrieve.push(locationId);
+      }
+      // start location is already retrieved; retrieve parent if not already in the list
+      else if(allLocations.findIndex(location => location.id === allLocations[index].parentLocationId) === -1) {
+        parentLocationsIds.push(allLocations[index].parentLocationId);
+      }
+    });
+
+    // we need to retrieve both the start locations as well as their parents
+    locationsToRetrieve = locationsToRetrieve.concat(startLocationsIdsToRetrieve, parentLocationsIds);
+
+    // find not already retrieved locations
+    Location
+      .find({
+        where: {
+          id: {
+            in: locationsToRetrieve
+          }
+        }
+      })
+      .then(function (locations) {
+        // if locations found
+        if (locations.length) {
+          // initialize array of location IDs for which the parent still needs to be found
+          // will be composed of all retrieved locations IDs except the ones for which the parent is already retrieved
+          let locationsIdsToRetrieveParent = [];
+
+          locations.forEach(function (location) {
+            // get parentLocationId
+            let parentLocationId = location.parentLocationId;
+
+            // check if the parent location already exists in allLocations; if so do not retrieve it again.
+            if (allLocations.findIndex(location => location.id === parentLocationId) === -1) {
+              locationsIdsToRetrieveParent.push(location.id);
+            }
+          });
+          // consolidate them in the locations list
+          allLocations = allLocations.concat(locations);
+          // go higher into the hierarchy
+          Location.getParentLocationsWithDetails(locationsIdsToRetrieveParent, allLocations, callback);
+        } else {
+          // no more locations found, stop here
+          callback(null, allLocations);
+        }
+      })
+      .catch(callback);
+  };
+
+  /**
    * Check that the model's identifiers (name and synonyms) are unique/contain unique elements,
    * in the context (between models with the same parentLocationId).
    */
@@ -331,20 +398,35 @@ module.exports = function (Location) {
         } else {
           // not a top level location and we cannot locate its parent, mark it as unprocessed entity
           unprocessedLocations[location.parentLocationId] = true;
+
+          // initialize location entry
+          let currentLocation = {
+            location: locationToStore,
+            children: []
+          };
+
+          // when the entry is just processed need to get it as its index will change
+          if (justProcessed) {
+            currentLocation = JSON.parse(JSON.stringify(_.get(hierarchicalLocationsList, `${locationIndex[location.id]}`)));
+            // remove it from current index
+            _.set(hierarchicalLocationsList, locationIndex[location.id], null);
+          }
+
           // add it to the hierarchical list, as a child of an unprocessed parent
           length = hierarchicalLocationsList.push({
             location: null,
             children: [
-              {
-                location: locationToStore,
-                children: []
-              }
+              currentLocation
             ]
           });
+
           // set unprocessed parent location index
           locationIndex[location.parentLocationId] = length - 1;
-          // set unprocessed location index
           locationIndex[location.id] = `${length - 1}.children.0`;
+          // if the location was just processed after updating its index also update its children indexes
+          if (justProcessed) {
+            updateChildrenLocationIndex(currentLocation, locationIndex, locationIndex[location.id]);
+          }
         }
       }
     });
