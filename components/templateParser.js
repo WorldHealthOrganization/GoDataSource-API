@@ -323,7 +323,35 @@ function afterHook(context, modelInstance, next) {
   saveLanguageTokens(context, next);
 }
 
+function extractVariablesAndAnswerOptions(template) {
+  let variables = [];
+  if (Array.isArray(template)) {
+    template.forEach(function (question) {
+      const variable = {
+        name: question.variable,
+        text: question.text,
+        answerType: question.answerType
+      };
+      if (Array.isArray(question.answers)) {
+        variable.answers = [];
+        question.answers.forEach(function (answer) {
+          variable.answers.push({
+            label: answer.label,
+            value: answer.value
+          });
+          if (Array.isArray(answer.additionalQuestions)) {
+            variables = variables.concat(extractVariablesAndAnswerOptions(answer.additionalQuestions));
+          }
+        });
+      }
+      variables.push(variable);
+    });
+  }
+  return variables;
+}
+
 module.exports = {
   beforeHook: beforeHook,
-  afterHook: afterHook
+  afterHook: afterHook,
+  extractVariablesAndAnswerOptions: extractVariablesAndAnswerOptions
 };

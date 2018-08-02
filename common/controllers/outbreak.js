@@ -108,7 +108,7 @@ module.exports = function (Outbreak) {
 
       // add support for filter parent
       const results = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, filter);
-      const contextUser = options.remotingContext.req.authData.user;
+      const contextUser = app.utils.remote.getUserFromOptions(options);
       // load user language dictionary
       app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
         // handle errors
@@ -128,7 +128,7 @@ module.exports = function (Outbreak) {
             headers.push({
               id: propertyName,
               // use correct label translation for user language
-              header: app.models.language.getFieldTranslationFromDictionary(app.models.case.fieldLabelsMap[propertyName], contextUser.languageId, dictionary)
+              header: dictionary.getTranslation(app.models.case.fieldLabelsMap[propertyName])
             });
           }
         });
@@ -3117,10 +3117,11 @@ module.exports = function (Outbreak) {
    * @param req
    * @param file
    * @param modelName
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.importableFileUpload = function (req, file, modelName, callback) {
-    app.controllers.importableFile.upload(req, file, modelName, this.id, callback);
+  Outbreak.prototype.importableFileUpload = function (req, file, modelName, options, callback) {
+    app.controllers.importableFile.upload(req, file, modelName, options, this.id, callback);
   };
 
   /**

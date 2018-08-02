@@ -23,7 +23,19 @@ function init(app, callback) {
       disableStandardRelationRemoteMethods: disableStandardRelationRemoteMethods,
       disableCommonExtraRoutes: disableCommonExtraRoutes,
       mergeFilters: mergeFilters,
-      helpers: remoteHelpers
+      helpers: remoteHelpers,
+      /**
+       * Get user from options (context)
+       * @param options
+       * @return {*}
+       */
+      getUserFromOptions: function (options) {
+        let user;
+        if (options && options.remotingContext && options.remotingContext.req && options.remotingContext.req.authData) {
+          user = options.remotingContext.req.authData.user;
+        }
+        return user;
+      }
     },
     apiError: apiError,
     aesCrypto: aesCrypto,

@@ -50,6 +50,11 @@
         {
           "arg": "model",
           "type": "string"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [

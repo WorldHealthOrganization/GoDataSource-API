@@ -139,26 +139,30 @@ module.exports = function (Language) {
         languageTokens.forEach(function (languageToken) {
           tokensMap[`${languageToken.token}-${languageToken.languageId}`] = languageToken.translation;
         });
+        /**
+         * Get translation for a language token
+         * @param field
+         * @return {*}
+         */
+        tokensMap.getTranslation = function (field) {
+          // first look for the translation in the specified language
+          if (this[`${field}-${languageId}`]) {
+            field = this[`${field}-${languageId}`];
+            // then look for the translation in the english language
+          } else if (this[`${field}-english_us`]) {
+            field = this[`${field}-english_us`];
+          }
+          return field;
+        };
         callback(null, tokensMap);
       })
       .catch(callback);
   };
 
   /**
-   * Get translation for a language token from a language dictionary
-   * @param field
-   * @param languageId
-   * @param dictionary
-   * @return {string}
+   * @deprecated Use dictionary.getTranslation instead
    */
   Language.getFieldTranslationFromDictionary = function (field, languageId, dictionary) {
-    // first look for the translation in the specified language
-    if (dictionary[`${field}-${languageId}`]) {
-      field = dictionary[`${field}-${languageId}`];
-    // then look for the translation in the english language
-    } else if (dictionary[`${field}-english_us`]) {
-      field = dictionary[`${field}-english_us`];
-    }
-    return field;
+    return dictionary.getTranslation(field);
   }
 };
