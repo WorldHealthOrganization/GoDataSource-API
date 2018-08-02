@@ -506,6 +506,7 @@ module.exports = function (Outbreak) {
     // initialize result
     let results = {
       [resultProperty]: 0,
+      contactIDs: [],
       teams: []
     };
 
@@ -544,6 +545,8 @@ module.exports = function (Outbreak) {
                 contacts[contactId].teams[teamId][followUpFlag] = true;
                 // increase counter for team
                 teams[teamId][resultProperty]++;
+                // add contact ID in list of IDs
+                teams[teamId].contactIDs.push(followup.personId);
               }
             } else {
               // new teamId
@@ -555,11 +558,16 @@ module.exports = function (Outbreak) {
               // initialize team entry if doesn't already exist
               teams[teamId] = teams[teamId] || {
                 id: teamId,
+                contactIDs: [],
                 [resultProperty]: 0
               };
 
               // increase counter for the team
-              followup[followUpFlag] && teams[teamId][resultProperty]++;
+              if (followup[followUpFlag]) {
+                teams[teamId][resultProperty]++;
+                // add contact ID in list of IDs
+                teams[teamId].contactIDs.push(followup.personId);
+              }
             }
 
             // check if the previous flag value was  false and the current one is true
@@ -570,6 +578,8 @@ module.exports = function (Outbreak) {
               contacts[contactId][followUpFlag] = true;
               // increase successful total counter
               results[resultProperty]++;
+              // add contact ID in list of IDs
+              results.contactIDs.push(followup.personId);
             }
           } else {
             // first followup for the contact
@@ -586,14 +596,17 @@ module.exports = function (Outbreak) {
             // initialize team entry if doesn't already exist
             teams[teamId] = teams[teamId] || {
               id: teamId,
+              contactIDs: [],
               [resultProperty]: 0
             };
 
-            // increase counters if the follow-up flag is true
+            // increase counters if the follow-up flag is true; add contact ID in list of IDs
             // eg: if the contact was lost to follow-up
             if (followup[followUpFlag]) {
               results[resultProperty]++;
+              results.contactIDs.push(followup.personId);
               teams[teamId][resultProperty]++;
+              teams[teamId].contactIDs.push(followup.personId);
             }
           }
         });
