@@ -126,5 +126,9 @@
   "INVALID_SNAPSHOT_FILE": {
     "defaultStatusCode": 400,
     "messagePattern": "The provided database snapshot is invalid."
+  },
+  "DELETE_CONTACT_LAST_RELATIONSHIP": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Cannot delete a contact's last relationship with a case or event. The contact with ID <%= contactIDs %> doesn't have an additional relationship with a case or event."
   }
 }
