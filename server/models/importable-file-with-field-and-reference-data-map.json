@@ -12,12 +12,12 @@
     "fileId": "string",
     "map": {
       "type": {
-        "<fileProperty>": "string"
+        "<fileHeader>": "string"
       }
     },
     "valuesMap":{
       "type":{
-        "<fileProperty>": {
+        "<fileHeader>": {
           "type": {
             "<fileValue>": "string"
           }

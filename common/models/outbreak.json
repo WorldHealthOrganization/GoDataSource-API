@@ -2911,22 +2911,33 @@
           "arg": "result",
           "type": {
             "id": "string",
-            "headers": [
+            "fileHeaders": [
               "string"
             ],
             "suggestedFieldMapping": {
               "type": {
-                "<fileProperty>": "string"
+                "<fileHeader>": "string"
               }
             },
-            "availableReferenceDataPropertyValues": {
+            "modelProperties": {
               "type": {
-                "<modelProperty>": ["string"]
+                "<modelProperty>": [
+                  "string"
+                ]
               }
             },
-            "distinctColumnValues": {
+            "modelPropertyValues": {
               "type": {
-                "<fileProperty>": ["string"]
+                "<modelProperty>": [
+                  "string"
+                ]
+              }
+            },
+            "distinctFileColumnValues": {
+              "type": {
+                "<fileHeader>": [
+                  "string"
+                ]
               }
             }
           },
@@ -2952,7 +2963,9 @@
       "returns": [
         {
           "arg": "json",
-          "type": ["any"],
+          "type": [
+            "any"
+          ],
           "required": true,
           "root": true
         }

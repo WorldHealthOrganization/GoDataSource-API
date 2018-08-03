@@ -12,7 +12,7 @@
     "fileId": "string",
     "map": {
       "type": {
-        "<fileProperty>": "string"
+        "<fileHeader>": "string"
       }
     }
   },

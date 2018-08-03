@@ -67,7 +67,7 @@
             ],
             "suggestedFieldMapping": {
               "type": {
-                "<fileProperty>": "string"
+                "<fileHeader>": "string"
               }
             },
             "modelProperties": {
@@ -82,7 +82,7 @@
             },
             "distinctFileColumnValues": {
               "type": {
-                "<fileProperty>": ["string"]
+                "<fileHeader>": ["string"]
               }
             }
           },

@@ -99,7 +99,7 @@ const getChunksForInterval = function (interval, chunk) {
 };
 
 /**
- * Remap a list of items using a map. optionally remap their values using a values map
+ * Remap a list of items using a map. Optionally remap their values using a values map
  * @param list
  * @param fieldsMap
  * @param [valuesMap]

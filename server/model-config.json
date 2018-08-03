@@ -206,7 +206,7 @@
   },
   "importableFileWithMap": {
     "dataSource": null,
-    "public": true
+    "public": false
   },
   "securityQuestionsTemplate": {
     "dataSource": null,
@@ -222,6 +222,6 @@
   },
   "importableFileWithFieldAndReferenceDataMap": {
     "dataSource": null,
-    "public": true
+    "public": false
   }
 }
