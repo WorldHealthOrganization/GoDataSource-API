@@ -5,7 +5,6 @@ const PdfTable = require('voilab-pdf-table');
 const svg2png = require('svg2png');
 const helpers = require('./helpers');
 const Jimp = require('jimp');
-const qrCode = require('./qrCode');
 
 // define a default document configuration
 const defaultDocumentConfiguration = {
@@ -54,7 +53,6 @@ function addPageNumber(document) {
 /**
  * Create a (standard) PDF document
  * @param options
- * @return {PDFDocument}
  */
 function createPdfDoc(options) {
   // merge options

@@ -3256,11 +3256,14 @@ module.exports = function (Outbreak) {
 
       let caseFields = helpers.translateFieldLabels(caseModel, 'case', languageId, dictionary);
       let contactFields = helpers.translateFieldLabels(models.contact.fieldLabelsMap, 'contact', languageId, dictionary);
-      let labResultsFields = helpers.translateFieldLabels(models.labResult.fieldLabelsMap, 'labResult', languageId, dictionary);
 
-      // remove not needed properties from relationship fields map
+      // remove not needed properties from lab result/relationship field maps
       let relationFieldsMap = Object.assign({}, models.relationship.fieldLabelsMap);
+      let labResultFieldsMap = Object.assign({}, models.labResult.fieldLabelsMap);
+      delete labResultFieldsMap.personId;
       delete relationFieldsMap.persons;
+
+      let labResultsFields = helpers.translateFieldLabels(labResultFieldsMap, 'labResult', languageId, dictionary);
       let relationFields = helpers.translateFieldLabels(relationFieldsMap, 'relationship', languageId, dictionary);
 
       // translate template questions

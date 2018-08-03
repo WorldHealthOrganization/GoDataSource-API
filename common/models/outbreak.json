@@ -3021,7 +3021,6 @@
         "path": "/cases/lab-results/import-importable-file-using-map"
       }
     },
-    "prototype.exportCaseInvestigation": {
     "prototype.exportCaseInvestigationTemplate": {
       "accepts": [
         {
