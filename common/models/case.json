@@ -40,6 +40,9 @@
     "dateBecomeCase": {
       "type": "date"
     },
+    "outcomeId": {
+      "type": "string"
+    },
     "dateOfOutcome": {
       "type": "date"
     },

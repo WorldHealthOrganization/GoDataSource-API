@@ -3,6 +3,7 @@
 // dependencies
 const moment = require('moment');
 const chunkDateRange = require('chunk-date-range');
+const _ = require('lodash');
 
 /**
  * Convert a Date object into moment UTC date and reset time to start of the day
@@ -98,12 +99,13 @@ const getChunksForInterval = function (interval, chunk) {
 };
 
 /**
- * Remap a list of items using a map
+ * Remap a list of items using a map. Optionally remap their values using a values map
  * @param list
  * @param fieldsMap
+ * @param [valuesMap]
  * @return {Array}
  */
-const remapProperties = function (list, fieldsMap) {
+const remapProperties = function (list, fieldsMap, valuesMap) {
   // store final result
   let results = [];
   // get a list of source fields
@@ -115,7 +117,12 @@ const remapProperties = function (list, fieldsMap) {
     // go trough the list of fields
     fields.forEach(function (field) {
       // remap property
-      result[fieldsMap[field]] = item[field];
+      _.set(result, fieldsMap[field], item[field]);
+      // if a values map was provided
+      if (valuesMap[field] && valuesMap[field][item[field]] !== undefined) {
+        // remap the values
+      _.set(result, fieldsMap[field], valuesMap[field][item[field]]);
+      }
     });
     // add processed item to the final list
     results.push(result);

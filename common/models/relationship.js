@@ -7,6 +7,16 @@ module.exports = function (Relationship) {
   // set flag to not get controller
   Relationship.hasController = false;
 
+  Relationship.referenceDataFieldsToCategoryMap = {
+    certaintyLevelId: 'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL',
+    exposureTypeId: 'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE',
+    exposureFrequencyId: 'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY',
+    exposureDurationId: 'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION',
+    socialRelationshipTypeId: 'LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION'
+  };
+
+  Relationship.referenceDataFields = Object.keys(Relationship.referenceDataFieldsToCategoryMap);
+
   // define a list of custom (non-loopback-supported) relations
   Relationship.customRelations = {
     people: {

@@ -6,18 +6,27 @@ const readReadOnlyProperties = {};
 /**
  * Add support for 'readOnly' keyword in the list of properties.
  * Removes properties marked as readonly form request data for create and prototype.updateAttributes
+ * Also stores a list of properties that is safe for import (marked as non-readonly or safeForImport)
  * @param Model
  */
 module.exports = function (Model) {
 
   if (!readReadOnlyProperties[Model.modelName]) {
     readReadOnlyProperties[Model.modelName] = [];
+    Model._importableProperties = [];
   }
 
   // cache model read-only properties
   Model.forEachProperty(function (propertyName) {
     if (Model.definition.properties[propertyName].readOnly) {
       readReadOnlyProperties[Model.modelName].push(propertyName);
+      // property may be readOnly in the API but safe to import from a file
+      if (Model.definition.properties[propertyName].safeForImport) {
+        Model._importableProperties.push(propertyName);
+      }
+    } else {
+      // non-readOnly properties are importable
+      Model._importableProperties.push(propertyName);
     }
   });
 

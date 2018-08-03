@@ -1,5 +1,5 @@
 {
-  "name": "importableFileWithMap",
+  "name": "importableFileWithFieldAndReferenceDataMap",
   "base": "Model",
   "idInjection": true,
   "options": {
@@ -15,6 +15,18 @@
         "<fileHeader>": {
           "type": "string",
           "description": "Model property"
+        }
+      }
+    },
+    "valuesMap":{
+      "type":{
+        "<fileHeader>": {
+          "type": {
+            "<fileValue>": {
+              "type": "string",
+              "description": "Model property value"
+            }
+          }
         }
       }
     }

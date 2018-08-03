@@ -53,6 +53,11 @@ module.exports = function (ReferenceData) {
       "description": "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_DESCRIPTION"
     },
     {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS",
+      "name": "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS",
+      "description": "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_DESCRIPTION"
+    },
+    {
       "id": "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE",
       "name": "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE",
       "description": "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_DESCRIPTION"
@@ -121,13 +126,20 @@ module.exports = function (ReferenceData) {
 
   /**
    * Keep a list of places where reference data might be used so we can safely delete a record
-   * @type {{case: string[], contact: string[], outbreak: string[]}}
    */
-  ReferenceData.possibleRecordUsage = {
-    'case': ['document.type'],
-    'contact': ['document.type'],
-    'outbreak': ['caseClassification', 'vaccinationStatus', 'nutritionalStatus', 'pregnancyInformation']
-  };
+  ReferenceData.possibleRecordUsage = {};
+
+  // after the application started (all models finished loading)
+  app.on('started', function () {
+    // go through all models
+    app.models().forEach(function (Model) {
+      // get their list of reference data fields
+      if (Array.isArray(Model.referenceDataFields)) {
+        // build possible record usage list
+        ReferenceData.possibleRecordUsage[Model.modelName] = Model.referenceDataFields;
+      }
+    });
+  });
 
   // keep a map of reference data available categories mapped by category id (for easy reference in relations)
   ReferenceData.availableCategoriesMap = {};

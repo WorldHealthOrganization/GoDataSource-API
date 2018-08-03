@@ -206,7 +206,7 @@
   },
   "importableFileWithMap": {
     "dataSource": null,
-    "public": true
+    "public": false
   },
   "securityQuestionsTemplate": {
     "dataSource": null,
@@ -217,6 +217,10 @@
     "public": false
   },
   "dateRange": {
+    "dataSource": null,
+    "public": false
+  },
+  "importableFileWithFieldAndReferenceDataMap": {
     "dataSource": null,
     "public": false
   }

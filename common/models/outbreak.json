@@ -927,6 +927,24 @@
       "principalId": "write_outbreak",
       "permission": "ALLOW",
       "property": "restoreReferenceData"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "importableFileUpload"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getImportableFileJsonById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "importImportableLabResultsFileUsingMap"
     }
   ],
   "methods": {
@@ -2863,6 +2881,138 @@
       "http": {
         "verb": "post",
         "path": "/reference-data/:nk/restore"
+      }
+    },
+    "prototype.importableFileUpload": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "file",
+          "type": "file"
+        },
+        {
+          "arg": "model",
+          "type": "string"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": {
+            "id": "string",
+            "fileHeaders": [
+              "string"
+            ],
+            "suggestedFieldMapping": {
+              "type": {
+                "<fileHeader>": {
+                  "type": "string",
+                  "description": "Model property"
+                }
+              }
+            },
+            "modelProperties": {
+              "type": {
+                "<modelProperty>": [{
+                  "type": "string",
+                  "description": "Model property label"
+                }]
+              }
+            },
+            "modelPropertyValues": {
+              "type": {
+                "<modelProperty>": [{
+                  "type": "string",
+                  "description": "Available values for a model property"
+                }]
+              }
+            },
+            "distinctFileColumnValues": {
+              "type": {
+                "<fileHeader>": [{
+                  "type": "string",
+                  "description": "Distinct values for column"
+                }]
+              }
+            }
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Upload a file and get file headers",
+      "http": {
+        "verb": "post",
+        "path": "/importable-files"
+      }
+    },
+    "prototype.getImportableFileJsonById": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Importable file ID",
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "json",
+          "type": [
+            "any"
+          ],
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Retrieve JSON version of an uploaded file",
+      "http": {
+        "verb": "get",
+        "path": "/importable-files/:id/json"
+      }
+    },
+    "prototype.importImportableLabResultsFileUsingMap": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithFieldAndReferenceDataMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "labResults",
+          "type": [
+            "labResult"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a list of lab results from a file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/cases/lab-results/import-importable-file-using-map"
       }
     }
   }

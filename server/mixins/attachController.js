@@ -18,6 +18,11 @@ module.exports = function (Model) {
     try {
       // execute controller
       require(`${__dirname}/../../common/controllers/${controllerName}`)(Model);
+      // also save it as a controller, to be semantically correct when calling controller functions
+      if (!app.controllers) {
+        app.controllers = [];
+      }
+      app.controllers[modelName] = Model;
     }
     catch (e) {
       app.logger.log('error', `Controller "${controllerName}" cannot be loaded`, e);
