@@ -42,7 +42,7 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, header
           id: outbreakId
         });
       }
-      // extract variables from extended from template
+      // extract variables from template
       const variables = templateParser.extractVariablesAndAnswerOptions(outbreak[app.models[modelName].extendedForm.template]);
 
       // if variables are present
