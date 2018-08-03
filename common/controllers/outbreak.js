@@ -3235,9 +3235,9 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.exportCaseInvestigationTemplate = function (request, callback) {
     const models = app.models;
+    const translateToken = models.language.getFieldTranslationFromDictionary;
     const pdfUtils = app.utils.pdfDoc;
     let template = this.caseInvestigationTemplate;
-    let outbreakId = this.id;
 
     // authenticated user's language, used to know in which language to translate
     let languageId = request.remotingContext.req.authData.userInstance.languageId;
@@ -3257,7 +3257,11 @@ module.exports = function (Outbreak) {
       let caseFields = helpers.translateFieldLabels(caseModel, 'case', languageId, dictionary);
       let contactFields = helpers.translateFieldLabels(models.contact.fieldLabelsMap, 'contact', languageId, dictionary);
       let labResultsFields = helpers.translateFieldLabels(models.labResult.fieldLabelsMap, 'labResult', languageId, dictionary);
-      let relationFields = helpers.translateFieldLabels(models.relationship.fieldLabelsMap, 'relationship', languageId, dictionary);
+
+      // remove not needed properties from relationship fields map
+      let relationFieldsMap = Object.assign({}, models.relationship.fieldLabelsMap);
+      delete relationFieldsMap.persons;
+      let relationFields = helpers.translateFieldLabels(relationFieldsMap, 'relationship', languageId, dictionary);
 
       // translate template questions
       let questions = Outbreak.helpers.parseTemplateQuestions(template, languageId, dictionary);
@@ -3265,8 +3269,7 @@ module.exports = function (Outbreak) {
       // generate pdf document
       let doc = pdfUtils.createPdfDoc({
         fontSize: 11,
-        layout: 'portrait',
-        margin: 20
+        layout: 'portrait'
       });
 
       // add a top margin of 2 lines for each page
@@ -3278,22 +3281,22 @@ module.exports = function (Outbreak) {
       doc.moveDown(2);
 
       // add case profile fields (empty)
-      pdfUtils.createPersonProfile(doc, caseFields, false, 'Case Information');
+      pdfUtils.createPersonProfile(doc, caseFields, false, translateToken('LNG_PAGE_TITLE_CASE_DETAILS', languageId, dictionary));
 
       // add case investigation questionnaire into the pdf in a separate page
       doc.addPage();
-      pdfUtils.createQuestionnaire(doc, questions, 'Case Investigation');
+      pdfUtils.createQuestionnaire(doc, questions, translateToken('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE', languageId, dictionary));
 
       // add lab results information into a separate page
       doc.addPage();
-      pdfUtils.createPersonProfile(doc, labResultsFields, false, 'Lab Results Information');
+      pdfUtils.createPersonProfile(doc, labResultsFields, false, translateToken('LNG_PAGE_TITLE_LAB_RESULTS_DETAILS', languageId, dictionary));
       doc.addPage();
-      pdfUtils.createQuestionnaire(doc, questions, 'Lab Results Questions');
+      pdfUtils.createQuestionnaire(doc, questions, translateToken('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE', languageId, dictionary));
 
       // add contact relation template
       doc.addPage();
-      pdfUtils.createPersonProfile(doc, contactFields, false, 'Contact Information');
-      pdfUtils.createPersonProfile(doc, relationFields, false, 'Contact relation');
+      pdfUtils.createPersonProfile(doc, contactFields, false, translateToken('LNG_PAGE_TITLE_CONTACT_DETAILS', languageId, dictionary));
+      pdfUtils.createPersonProfile(doc, relationFields, false, translateToken('LNG_PAGE_TITLE_CONTACT_RELATIONSHIP', languageId, dictionary));
 
       // end the document stream
       // to convert it into a buffer

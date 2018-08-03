@@ -287,7 +287,7 @@ const createQuestionnaire = function (doc, questions, title) {
           // NOTE: only first nested level is handled for additional questions
           item.answers.forEach((answer) => {
             doc.moveDown().text(answer.label, isNested ? initialXMargin + 85 : initialXMargin + 45);
-            doc.moveUp().rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y, 15, 15).stroke().moveDown();
+            doc.moveUp().rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3, 15, 15).stroke().moveDown();
 
             // handle additional questions
             if (answer.additionalQuestions.length) {

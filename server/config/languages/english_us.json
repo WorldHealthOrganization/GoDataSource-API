@@ -51,6 +51,54 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP": "Approve Help Items",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP_DESCRIPTION": "This permission allows the approval of help items."
     },
+    "fieldLabels": {
+      "LNG_CASE_FIELD_LABEL_ADDRESSES": "Addresses",
+      "LNG_CASE_FIELD_LABEL_ADDRESS_NAME": "Name",
+      "LNG_CASE_FIELD_LABEL_ADDRESS_COUNTRY": "Country",
+      "LNG_CASE_FIELD_LABEL_ADDRESS_CITY": "CITY",
+      "LNG_CASE_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1": "Address Line 1",
+      "LNG_CASE_FIELD_LABEL_ADDRESS_ADDRESS_LINE_2": "Address Line 2",
+      "LNG_CASE_FIELD_LABEL_ADDRESS_POSTAL_CODE": "Postal Code",
+      "LNG_CASE_FIELD_LABEL_ADDRESS_LOCATION_ID": "Location ID",
+      "LNG_CASE_FIELD_LABEL_ADDRESS_GEO_LOCATION_LAT": "Geo-Location Latitude",
+      "LNG_CASE_FIELD_LABEL_ADDRESS_GEO_LOCATION_LNG": "Geo-Location Longitude",
+      "LNG_CASE_FIELD_LABEL_ADDRESS_GEO_LOCATION": "Geo-Location",
+      "LNG_CASE_FIELD_LABEL_ADDRESS_DATE": "Date",
+      "LNG_CASE_FIELD_LABEL_AGE": "Age",
+      "LNG_CASE_FIELD_LABEL_CLASSIFICATION": "Classification",
+      "LNG_CASE_FIELD_LABEL_CREATED_AT": "Created At",
+      "LNG_CASE_FIELD_LABEL_CREATED_BY": "Created By",
+      "LNG_CASE_FIELD_LABEL_DATE_BECOME_CASE": "Date of Becoming case",
+      "LNG_CASE_FIELD_LABEL_DATE_DECEASED": "Date of Decease",
+      "LNG_CASE_FIELD_LABEL_DATE_OF_INFECTION": "Date of Infection",
+      "LNG_CASE_FIELD_LABEL_DATE_OF_ONSET": "Date of Onset",
+      "LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME": "Date of Outcome",
+      "LNG_CASE_FIELD_LABEL_DECEASED": "Deceased",
+      "LNG_CASE_FIELD_LABEL_DELETED": "Deleted",
+      "LNG_CASE_FIELD_LABEL_DELETED_AT": "Deleted At",
+      "LNG_CASE_FIELD_LABEL_DOB": "Date of Birth",
+      "LNG_CASE_FIELD_LABEL_DOCUMENTS": "Documents",
+      "LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE": "Document Type",
+      "LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER": "Document Number",
+      "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "Fill Geo-Location Latitude",
+      "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "Fill Geo-Location Longitude",
+      "LNG_CASE_FIELD_LABEL_FIRST_NAME": "First Name",
+      "LNG_CASE_FIELD_LABEL_GENDER": "Gender",
+      "LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES": "Hospitalization Dates",
+      "LNG_CASE_FIELD_LABEL_ID": "ID",
+      "LNG_CASE_FIELD_LABEL_INCUBATION_DATES": "Incubation Dates",
+      "LNG_CASE_FIELD_LABEL_ISOLATION_DATES": "Isolation Dates",
+      "LNG_CASE_FIELD_LABEL_LAST_NAME": "Last Name",
+      "LNG_CASE_FIELD_LABEL_MIDDLE_NAME": "Middle Name",
+      "LNG_CASE_FIELD_LABEL_OCCUPATION": "Ocupation",
+      "LNG_CASE_FIELD_LABEL_OUTBREAK_ID": "Outbreak ID",
+      "LNG_CASE_FIELD_LABEL_PHONE_NUMBER": "Phone Number",
+      "LNG_CASE_FIELD_LABEL_RISK_LEVEL": "Risk Level",
+      "LNG_CASE_FIELD_LABEL_RISK_REASON": "Risk Reason",
+      "LNG_CASE_FIELD_LABEL_TYPE": "Type",
+      "LNG_CASE_FIELD_LABEL_UPDATED_AT": "Updated At",
+      "LNG_CASE_FIELD_LABEL_UPDATED_BY": "Updated By"
+    },
     "referenceDataCategoryQuestionAnswerType": {
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE": "Answer type",
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DESCRIPTION": "description_placeholder",
@@ -587,7 +635,8 @@
       "LNG_RELATIONSHIP_FIELD_LABEL_CLUSTER": "Cluster",
       "LNG_RELATIONSHIP_FIELD_LABEL_COMMENT": "Comment",
       "LNG_RELATIONSHIP_FIELD_LABEL_PERSON_FIRST_NAME": "First Name",
-      "LNG_RELATIONSHIP_FIELD_LABEL_PERSON_LAST_NAME": "Last Name"
+      "LNG_RELATIONSHIP_FIELD_LABEL_PERSON_LAST_NAME": "Last Name",
+      "LNG_RELATIONSHIP_FIELD_LABEL_SOCIAL_RELATIONSHIP_TYPE": "Social Relationship Type"
     },
     "uiFollowUpfields": {
       "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT": "Contact",
@@ -785,7 +834,8 @@
       "LNG_PAGE_CREATE_OUTBREAK_TAB_LAB_RESULTS": "Lab Results",
       "LNG_PAGE_CREATE_OUTBREAK_TAB_DONE": "Done",
       "LNG_PAGE_CREATE_OUTBREAK_ACTION_CREATE_OUTBREAK_SUCCESS_MESSAGE": "Outbreak created",
-      "LNG_PAGE_CREATE_OUTBREAK_END_DATE_START_DATE_ERROR": "End date needs to be greater than start date"
+      "LNG_PAGE_CREATE_OUTBREAK_END_DATE_START_DATE_ERROR": "End date needs to be greater than start date",
+      "LNG_PAGE_CREATE_OUTBREAK_TAB_CASE_INFORMATION": "Case Information"
     },
     "uiModifyOutbreakPage": {
       "LNG_PAGE_MODIFY_OUTBREAK_LINK_MODIFY": "Modify Outbreak",
@@ -806,6 +856,14 @@
     },
     "uiTransmissionChainsListPage": {
       "LNG_PAGE_LIST_TRANSMISSION_CHAINS_TITLE": "Chains of Transmission"
+    },
+    "pdfExport": {
+      "LNG_PAGE_TITLE_CASE_DETAILS": "Case Details",
+      "LNG_PAGE_TITLE_CASE_QUESTIONNAIRE": "Case Questionnaire",
+      "LNG_PAGE_TITLE_LAB_RESULTS_DETAILS": "Lab Results Details",
+      "LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE": "Lab Results Questionnaire",
+      "LNG_PAGE_TITLE_CONTACT_DETAILS": "Contact Details",
+      "LNG_PAGE_TITLE_CONTACT_RELATIONSHIP": "Contact Relationship"
     }
   }
 }

@@ -28,7 +28,6 @@ module.exports = function (Relationship) {
   };
 
   Relationship.fieldLabelsMap = {
-    'relationships': 'LNG_RELATIONSHIP_FIELD_LABEL',
     'persons': 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS',
     'contactDate': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE',
     'contactDateEstimated': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE_ESTIMATED',
