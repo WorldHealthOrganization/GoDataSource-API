@@ -12,14 +12,20 @@
     "fileId": "string",
     "map": {
       "type": {
-        "<fileHeader>": "string"
+        "<fileHeader>": {
+          "type": "string",
+          "description": "Model property"
+        }
       }
     },
     "valuesMap":{
       "type":{
         "<fileHeader>": {
           "type": {
-            "<fileValue>": "string"
+            "<fileValue>": {
+              "type": "string",
+              "description": "Model property value"
+            }
           }
         }
       }

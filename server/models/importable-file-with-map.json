@@ -12,7 +12,10 @@
     "fileId": "string",
     "map": {
       "type": {
-        "<fileHeader>": "string"
+        "<fileHeader>": {
+          "type": "string",
+          "description": "Model property"
+        }
       }
     }
   },

@@ -2916,28 +2916,34 @@
             ],
             "suggestedFieldMapping": {
               "type": {
-                "<fileHeader>": "string"
+                "<fileHeader>": {
+                  "type": "string",
+                  "description": "Model property"
+                }
               }
             },
             "modelProperties": {
               "type": {
-                "<modelProperty>": [
-                  "string"
-                ]
+                "<modelProperty>": [{
+                  "type": "string",
+                  "description": "Model property label"
+                }]
               }
             },
             "modelPropertyValues": {
               "type": {
-                "<modelProperty>": [
-                  "string"
-                ]
+                "<modelProperty>": [{
+                  "type": "string",
+                  "description": "Available values for a model property"
+                }]
               }
             },
             "distinctFileColumnValues": {
               "type": {
-                "<fileHeader>": [
-                  "string"
-                ]
+                "<fileHeader>": [{
+                  "type": "string",
+                  "description": "Distinct values for column"
+                }]
               }
             }
           },

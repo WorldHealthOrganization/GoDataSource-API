@@ -20,9 +20,10 @@ function stripSpecialCharsToLowerCase(string) {
  * @param modelName
  * @param headers
  * @param normalizedHeaders
+ * @param languageDictionary
  * @return {Promise.<T>}
  */
-function getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, headers, normalizedHeaders) {
+function getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, headers, normalizedHeaders, languageDictionary) {
   // start building a result
   const result = {
     suggestedFieldMapping: {},
@@ -50,7 +51,7 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, header
         // normalize them
         const normalizedVariables = variables.map(function (variable) {
           result.modelProperties[app.models[modelName].extendedForm.containerProperty][variable.name] = variable.text;
-          return stripSpecialCharsToLowerCase(variable.name);
+          return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(variable.text));
         });
         // try to find mapping suggestions
         normalizedHeaders.forEach(function (normalizedHeader, index) {
@@ -194,13 +195,20 @@ module.exports = function (ImportableFile) {
         // if a valid model was provided, and file headers were found
         if (modelName && app.models[modelName] && result.fileHeaders.length) {
 
+          // define language dictionary, it will be updated (conditionally) later
+          let languageDictionary = {};
+
           // normalize file headers
           const normalizedHeaders = result.fileHeaders.map(function (header) {
             return stripSpecialCharsToLowerCase(header);
           });
 
-          // if the model has importable properties, get their headers and try to suggest some mappings
-          if (app.models[modelName]._importableProperties && app.models[modelName]._importableProperties.length) {
+          // if the model has importable properties or the model uses extended form, load up language dictionary
+          // it will be used for mapping suggestions
+          if (
+            app.models[modelName]._importableProperties && app.models[modelName]._importableProperties.length ||
+            outbreakId !== undefined && app.models[modelName].extendedForm && app.models[modelName].extendedForm.template
+          ) {
             steps.push(function (callback) {
               // get user information from request options
               const contextUser = app.utils.remote.getUserFromOptions(options);
@@ -211,21 +219,29 @@ module.exports = function (ImportableFile) {
                   if (error) {
                     return callback(error);
                   }
-                  // normalize model headers (property labels)
-                  const normalizedModelProperties = app.models[modelName]._importableProperties.map(function (property) {
-                    result.modelProperties[property] = app.models[modelName].fieldLabelsMap[property];
-                    return stripSpecialCharsToLowerCase(dictionary.getTranslation(result.modelProperties[property]));
-                  });
-
-                  // try to find mapping suggestions between file headers and model headers (property labels)
-                  normalizedHeaders.forEach(function (normalizedHeader, index) {
-                    let propIndex = normalizedModelProperties.indexOf(normalizedHeader);
-                    if (propIndex !== -1) {
-                      result.suggestedFieldMapping[result.fileHeaders[index]] = app.models[modelName]._importableProperties[propIndex];
-                    }
-                  });
-                  callback(null, result);
+                  languageDictionary = dictionary;
+                  callback(null, dictionary);
                 });
+            });
+          }
+
+          // if the model has importable properties, get their headers and try to suggest some mappings
+          if (app.models[modelName]._importableProperties && app.models[modelName]._importableProperties.length) {
+            steps.push(function (callback) {
+              // normalize model headers (property labels)
+              const normalizedModelProperties = app.models[modelName]._importableProperties.map(function (property) {
+                result.modelProperties[property] = app.models[modelName].fieldLabelsMap[property];
+                return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(result.modelProperties[property]));
+              });
+
+              // try to find mapping suggestions between file headers and model headers (property labels)
+              normalizedHeaders.forEach(function (normalizedHeader, index) {
+                let propIndex = normalizedModelProperties.indexOf(normalizedHeader);
+                if (propIndex !== -1) {
+                  result.suggestedFieldMapping[result.fileHeaders[index]] = app.models[modelName]._importableProperties[propIndex];
+                }
+              });
+              callback(null, result);
             });
           }
 
@@ -253,7 +269,7 @@ module.exports = function (ImportableFile) {
             }
             // get mapping suggestions for extended form
             steps.push(function (callback) {
-              getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, result.fileHeaders, normalizedHeaders)
+              getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, result.fileHeaders, normalizedHeaders, languageDictionary)
                 .then(function (_result) {
                   // update result
                   result = Object.assign(
