@@ -26,6 +26,9 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, header
   // start building a result
   const result = {
     suggestedFieldMapping: {},
+    modelProperties: {
+      [app.models[modelName].extendedForm.containerProperty]: {}
+    },
     modelPropertyValues: {}
   };
   // get outbreak
@@ -45,8 +48,9 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, header
       // if variables are present
       if (variables.length) {
         // normalize them
-        const normalizedVariables = variables.map(function (element) {
-          return stripSpecialCharsToLowerCase(element.name);
+        const normalizedVariables = variables.map(function (variable) {
+          result.modelProperties[app.models[modelName].extendedForm.containerProperty][variable.name] = variable.text;
+          return stripSpecialCharsToLowerCase(variable.name);
         });
         // try to find mapping suggestions
         normalizedHeaders.forEach(function (normalizedHeader, index) {
@@ -174,6 +178,7 @@ module.exports = function (ImportableFile) {
         result = {
           id: result.id,
           fileHeaders: result.headers,
+          modelProperties: {},
           suggestedFieldMapping: {},
           modelPropertyValues: {},
           distinctFileColumnValues: {}
@@ -190,8 +195,8 @@ module.exports = function (ImportableFile) {
         if (modelName && app.models[modelName] && result.fileHeaders.length) {
 
           // normalize file headers
-          const normalizedHeaders = result.fileHeaders.map(function (element) {
-            return stripSpecialCharsToLowerCase(element);
+          const normalizedHeaders = result.fileHeaders.map(function (header) {
+            return stripSpecialCharsToLowerCase(header);
           });
 
           // if the model has importable properties, get their headers and try to suggest some mappings
@@ -207,8 +212,9 @@ module.exports = function (ImportableFile) {
                     return callback(error);
                   }
                   // normalize model headers (property labels)
-                  const normalizedModelProperties = app.models[modelName]._importableProperties.map(function (element) {
-                    return stripSpecialCharsToLowerCase(dictionary.getTranslation(app.models[modelName].fieldLabelsMap[element]));
+                  const normalizedModelProperties = app.models[modelName]._importableProperties.map(function (property) {
+                    result.modelProperties[property] = app.models[modelName].fieldLabelsMap[property];
+                    return stripSpecialCharsToLowerCase(dictionary.getTranslation(result.modelProperties[property]));
                   });
 
                   // try to find mapping suggestions between file headers and model headers (property labels)
@@ -253,6 +259,7 @@ module.exports = function (ImportableFile) {
                   result = Object.assign(
                     {}, result,
                     {suggestedFieldMapping: Object.assign(result.suggestedFieldMapping, _result.suggestedFieldMapping)},
+                    {modelProperties: Object.assign(result.modelProperties, _result.modelProperties)},
                     {modelPropertyValues: Object.assign(result.modelPropertyValues, _result.modelPropertyValues)}
                   );
                   callback(null, _result);

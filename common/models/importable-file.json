@@ -62,7 +62,7 @@
           "arg": "result",
           "type": {
             "id": "string",
-            "headers": [
+            "fileHeaders": [
               "string"
             ],
             "suggestedFieldMapping": {
@@ -70,12 +70,17 @@
                 "<fileProperty>": "string"
               }
             },
-            "availableReferenceDataPropertyValues": {
+            "modelProperties": {
               "type": {
                 "<modelProperty>": ["string"]
               }
             },
-            "distinctColumnValues": {
+            "modelPropertyValues": {
+              "type": {
+                "<modelProperty>": ["string"]
+              }
+            },
+            "distinctFileColumnValues": {
               "type": {
                 "<fileProperty>": ["string"]
               }
