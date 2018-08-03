@@ -287,6 +287,7 @@ const createQuestionnaire = function (doc, questions, title) {
           // NOTE: only first nested level is handled for additional questions
           item.answers.forEach((answer) => {
             doc.moveDown().text(answer.label, isNested ? initialXMargin + 85 : initialXMargin + 45);
+            // we need to reduce rectangle height to be on the same height as the text
             doc.moveUp().rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3, 15, 15).stroke().moveDown();
 
             // handle additional questions
