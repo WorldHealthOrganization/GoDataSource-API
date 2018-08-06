@@ -960,6 +960,12 @@
       "principalId": "write_contact",
       "permission": "ALLOW",
       "property": "importImportableOutbreaksFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactsPerLocation"
     }
   ],
   "methods": {
@@ -3164,6 +3170,67 @@
       "http": {
         "verb": "post",
         "path": "/import-importable-file-using-map"
+      }
+    },
+    "prototype.countContactsPerLocation": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); ; Note: this request also accepts 'date': 'date', 'locationId': 'locationId' on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "totalRegisteredContactsCount": {
+              "type": "number",
+              "description": "Total number of registered contacts for the outbreak"
+            },
+            "releasedContactsCount": {
+              "type": "number",
+              "description": "Number of released contacts for the outbreak"
+            },
+            "contactsUnderFollowUpCount": {
+              "type": "number",
+              "description": "Number of contacts for the outbreak that are still under follow-up"
+            },
+            "contactsSeenOnDateCount": {
+              "type": "number",
+              "description": "Number of contacts for the outbreak that were seen at their last follow-up"
+            },
+            "lastContactDateOfRelease": {
+              "type": "date",
+              "description": "Expected release of last contact in the outbreak (latest follow-up date for a contact)"
+            },
+            "locations": {
+              "type": [
+                {
+                  "type": {
+                    "id": "string",
+                    "totalRegisteredContactsCount": "number",
+                    "releasedContactsCount": "number",
+                    "contactsUnderFollowUpCount": "number",
+                    "contactsSeenOnDateCount": "number",
+                    "lastContactDateOfRelease": "date",
+                    "contactIDs": [
+                      "string"
+                    ]
+                  }
+                }
+              ],
+              "description": "Object containing counters for contacts per location"
+            }
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of contacts per location; Include counters for contacts under follow-up, contacts seen on date, contacts released as well as date for expected release of last contact",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/per-location/count"
       }
     }
   }
