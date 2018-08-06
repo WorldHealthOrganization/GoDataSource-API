@@ -477,6 +477,7 @@
       "LNG_CASE_FIELD_LABEL_AGE": "Age",
       "LNG_CASE_FIELD_LABEL_FIRST_NAME": "First Name",
       "LNG_CASE_FIELD_LABEL_DATE_OF_ONSET": "Date of Onset",
+      "LNG_CASE_FIELD_LABEL_DATE_OF_REPORTING": "Date of Reporting",
       "LNG_CASE_FIELD_LABEL_RISK_REASON": "Risk Reason",
       "LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES": "Hospitalization Dates",
       "LNG_CASE_FIELD_LABEL_ID": "ID",

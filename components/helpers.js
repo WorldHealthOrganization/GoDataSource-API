@@ -116,10 +116,12 @@ const remapProperties = function (list, fieldsMap, valuesMap) {
     let result = {};
     // go trough the list of fields
     fields.forEach(function (field) {
+      // if no array position was specified, use position 0
+      fieldsMap[field] = fieldsMap[field].replace(/\[]/g,'[0]');
       // remap property
       _.set(result, fieldsMap[field], item[field]);
       // if a values map was provided
-      if (valuesMap[field] && valuesMap[field][item[field]] !== undefined) {
+      if (valuesMap && valuesMap[field] && valuesMap[field][item[field]] !== undefined) {
         // remap the values
       _.set(result, fieldsMap[field], valuesMap[field][item[field]]);
       }

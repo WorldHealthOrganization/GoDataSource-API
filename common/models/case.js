@@ -27,6 +27,7 @@ module.exports = function (Case) {
     'dateDeceased': 'LNG_CASE_FIELD_LABEL_DATE_DECEASED',
     'dateOfInfection': 'LNG_CASE_FIELD_LABEL_DATE_OF_INFECTION',
     'dateOfOnset': 'LNG_CASE_FIELD_LABEL_DATE_OF_ONSET',
+    'dateOfReporting': 'LNG_CASE_FIELD_LABEL_DATE_OF_REPORTING',
     'phoneNumber': 'LNG_CASE_FIELD_LABEL_PHONE_NUMBER',
     'riskLevel': 'LNG_CASE_FIELD_LABEL_RISK_LEVEL',
     'riskReason': 'LNG_CASE_FIELD_LABEL_RISK_REASON',

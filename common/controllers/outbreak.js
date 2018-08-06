@@ -3191,7 +3191,11 @@ module.exports = function (Outbreak) {
                 })
                 .catch(function (error) {
                   // on error, store the error, but don't stop, continue with other items
-                  createErrors.push(`Failed to import lab result ${index + 1}. Error: ${JSON.stringify(error)}`);
+                  createErrors.push({
+                    message: `Failed to import lab result ${index + 1}`,
+                    error: error,
+                    recordNo: index + 1
+                  });
                   callback(null, null);
                 });
             });
@@ -3259,39 +3263,26 @@ module.exports = function (Outbreak) {
             return JSON.stringify(this);
           };
           // go through all entries
-          casesList.forEach(function (labResult, index) {
+          casesList.forEach(function (caseData, index) {
             createCases.push(function (callback) {
-              // first check if the case id (person id) is valid
-              app.models.case
-                .findOne({
-                  where: {
-                    id: labResult.personId,
-                    outbreakId: self.id
-                  }
-                })
-                .then(function (caseInstance) {
-                  // if the person was not found, don't create the case, stop with error
-                  if (!caseInstance) {
-                    throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
-                      model: app.models.case.modelName,
-                      id: labResult.personId
-                    });
-                  }
-                  // create the lab result
-                  return app.models.labResult
-                    .create(labResult, options)
-                    .then(function (result) {
-                      callback(null, result);
-                    });
+              // create the case
+              return app.models.case
+                .create(caseData, options)
+                .then(function (result) {
+                  callback(null, result);
                 })
                 .catch(function (error) {
                   // on error, store the error, but don't stop, continue with other items
-                  createErrors.push(`Failed to import lab result ${index + 1}. Error: ${JSON.stringify(error)}`);
+                  createErrors.push({
+                    message: `Failed to import case ${index + 1}`,
+                    error: error,
+                    recordNo: index + 1
+                  });
                   callback(null, null);
                 });
             });
           });
-          // start importing lab results
+          // start importing cases
           async.parallelLimit(createCases, 10, function (error, results) {
             // handle errors (should not be any)
             if (error) {
@@ -3307,7 +3298,7 @@ module.exports = function (Outbreak) {
               };
               // return error with partial success
               return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-                model: app.models.labResult.modelName,
+                model: app.models.case.modelName,
                 failed: createErrors,
                 success: results
               }));

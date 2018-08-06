@@ -114,12 +114,6 @@ function getDistinctPropertyValues(dataSet) {
  */
 function getReferenceDataAvailableValuesForModel(outbreakId, modelName) {
   const referenceDataValues = {};
-  // reverse the map
-  const categoryToReferenceDataFieldsMap = _.invert(app.models[modelName].referenceDataFieldsToCategoryMap);
-  // keep a list of available values for each reference data related property
-  Object.keys(app.models[modelName].referenceDataFieldsToCategoryMap).forEach(function (modelProperty) {
-    referenceDataValues[modelProperty] = [];
-  });
   // find (active) reference data for the referenced categories
   return app.models.outbreak.helpers
     .getSystemAndOwnReferenceData(outbreakId, {
@@ -132,29 +126,36 @@ function getReferenceDataAvailableValuesForModel(outbreakId, modelName) {
       fields: ['id', 'categoryId', 'value', 'description']
     })
     .then(function (referenceDataItems) {
-      // map available values for each property that uses reference data
+      // create a map of categories to items
+      const referenceDataItemsByCategory = {};
       referenceDataItems.forEach(function (referenceDataItem) {
-        if (referenceDataValues[categoryToReferenceDataFieldsMap[referenceDataItem.categoryId]]) {
-          const propertyComponents = categoryToReferenceDataFieldsMap[referenceDataItem.categoryId].split('.');
-          if (propertyComponents.length > 1) {
-            if (!referenceDataValues[propertyComponents[0]]) {
-              referenceDataValues[propertyComponents[0]] = {};
-            }
-            if (!referenceDataValues[propertyComponents[0]][propertyComponents[1]]) {
-              referenceDataValues[propertyComponents[0]][propertyComponents[1]] = [];
-            }
-            referenceDataValues[propertyComponents[0]][propertyComponents[1]].push({
-              id: referenceDataItem.id,
-              label: referenceDataItem.value,
-              value: referenceDataItem.value
-            });
-          } else {
-            referenceDataValues[categoryToReferenceDataFieldsMap[referenceDataItem.categoryId]].push({
-              id: referenceDataItem.id,
-              label: referenceDataItem.value,
-              value: referenceDataItem.value
-            });
+        if (!referenceDataItemsByCategory[referenceDataItem.categoryId]) {
+          referenceDataItemsByCategory[referenceDataItem.categoryId] = [];
+        }
+        referenceDataItemsByCategory[referenceDataItem.categoryId].push({
+          id: referenceDataItem.id,
+          label: referenceDataItem.value,
+          value: referenceDataItem.value
+        });
+      });
+
+      // keep a list of available values for each reference data related property
+      Object.keys(app.models[modelName].referenceDataFieldsToCategoryMap).forEach(function (modelProperty) {
+        // split the property in sub components
+        const propertyComponents = modelProperty.split('.');
+        // if there are sub components
+        if (propertyComponents.length > 1) {
+          // define parent component
+          if (!referenceDataValues[propertyComponents[0]]) {
+            referenceDataValues[propertyComponents[0]] = {};
           }
+          // store the sub component under parent component
+          if (!referenceDataValues[propertyComponents[0]][propertyComponents[1]]) {
+            referenceDataValues[propertyComponents[0]][propertyComponents[1]] = referenceDataItemsByCategory[app.models[modelName].referenceDataFieldsToCategoryMap[modelProperty]] || [];
+          }
+        } else {
+          // no sub components, store property directly
+          referenceDataValues[modelProperty] = referenceDataItemsByCategory[app.models[modelName].referenceDataFieldsToCategoryMap[modelProperty]] || [];
         }
       });
       return referenceDataValues;
@@ -259,7 +260,7 @@ module.exports = function (ImportableFile) {
                   // no sub components, store property directly
                   result.modelProperties[property] = app.models[modelName].fieldLabelsMap[property];
                 }
-                return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(result.modelProperties[property]));
+                return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(app.models[modelName].fieldLabelsMap[property]));
               });
 
               // try to find mapping suggestions between file headers and model headers (property labels)
