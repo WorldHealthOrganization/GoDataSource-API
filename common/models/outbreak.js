@@ -812,4 +812,71 @@ module.exports = function (Outbreak) {
 
     return base;
   };
+
+  /**
+   * Parse a outbreak template's questions by translating any tokens based on given dictionary reference
+   * Function works recursive by translating any additional questions of the answers
+   * @param questions
+   * @param languageId
+   * @param dictionary
+   */
+  Outbreak.helpers.parseTemplateQuestions = function (questions, languageId, dictionary) {
+    // cache translation function name, used in many places below
+    // include sanity check, fallback on initial value if no translation is found
+    let translateToken = function (text) {
+      let translatedText = app.models.language.getFieldTranslationFromDictionary(text, languageId, dictionary);
+      return translatedText ? translatedText : text;
+    };
+
+    // Translate all the questions, including additional questions of the answers
+    return (function translate(list) {
+      return list.map((question) => {
+        let questionResult = {
+          order: question.order,
+          question: translateToken(question.text),
+          answerType: question.answerType,
+          answers: question.answers
+        };
+
+        // do not try to translate answers that are free text
+        if (question.answerType !== 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT') {
+          questionResult.answers = question.answers.map((answer) => {
+            return {
+              label: translateToken(answer.label),
+              additionalQuestions: translate(answer.additionalQuestions || [])
+            };
+          });
+        }
+
+        return questionResult;
+      });
+    })(questions);
+  };
+
+  // person specific array fields
+  const arrayFields = {
+    addresses: 'address',
+    documents: 'document'
+  };
+
+  /**
+   * Translate all marked field labels of a model
+   * @param modelName
+   * @param model
+   * @param languageId
+   * @param dictionary
+   */
+  Outbreak.helpers.translateFieldLabels = function (model, modelName, languageId, dictionary) {
+    return _.mapKeys(model, (value, key) => {
+      if (app.models[modelName].fieldLabelsMap[key]) {
+        if (Array.isArray(value) && value.length && typeof(value[0]) === 'object' && arrayFields[key]) {
+          value.forEach((element, index) => {
+            model[key][index] = Outbreak.helpers.translateFieldLabels(element, arrayFields[key], languageId, dictionary);
+          });
+        }
+        return app.models.language.getFieldTranslationFromDictionary(app.models[modelName].fieldLabelsMap[key], languageId, dictionary);
+      }
+      return key;
+    });
+  };
 };

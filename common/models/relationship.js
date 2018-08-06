@@ -27,6 +27,18 @@ module.exports = function (Relationship) {
     }
   };
 
+  Relationship.fieldLabelsMap = {
+    'persons': 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS',
+    'contactDate': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE',
+    'contactDateEstimated': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE_ESTIMATED',
+    'certaintyLevelId': 'LNG_RELATIONSHIP_FIELD_LABEL_CERTAINTY_LEVEL',
+    'exposureTypeId': 'LNG_RELATIONSHIP_FIELD_LABEL_EXPOSURE_TYPE',
+    'exposureFrequencyId': 'LNG_RELATIONSHIP_FIELD_LABEL_EXPOSURE_FREQUENCY',
+    'exposureDurationId': 'LNG_RELATIONSHIP_FIELD_LABEL_EXPOSURE_DURATION',
+    'socialRelationshipTypeId': 'LNG_RELATIONSHIP_FIELD_LABEL_SOCIAL_RELATIONSHIP_TYPE',
+    'comment': 'LNG_RELATIONSHIP_FIELD_LABEL_COMMENT'
+  };
+
   /**
    * Build or count transmission chains for an outbreak
    * @param outbreakId
