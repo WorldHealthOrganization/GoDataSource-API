@@ -135,11 +135,26 @@ function getReferenceDataAvailableValuesForModel(outbreakId, modelName) {
       // map available values for each property that uses reference data
       referenceDataItems.forEach(function (referenceDataItem) {
         if (referenceDataValues[categoryToReferenceDataFieldsMap[referenceDataItem.categoryId]]) {
-          referenceDataValues[categoryToReferenceDataFieldsMap[referenceDataItem.categoryId]].push({
-            id: referenceDataItem.id,
-            label: referenceDataItem.value,
-            value: referenceDataItem.value
-          });
+          const propertyComponents = categoryToReferenceDataFieldsMap[referenceDataItem.categoryId].split('.');
+          if (propertyComponents.length > 1) {
+            if (!referenceDataValues[propertyComponents[0]]) {
+              referenceDataValues[propertyComponents[0]] = {};
+            }
+            if (!referenceDataValues[propertyComponents[0]][propertyComponents[1]]) {
+              referenceDataValues[propertyComponents[0]][propertyComponents[1]] = [];
+            }
+            referenceDataValues[propertyComponents[0]][propertyComponents[1]].push({
+              id: referenceDataItem.id,
+              label: referenceDataItem.value,
+              value: referenceDataItem.value
+            });
+          } else {
+            referenceDataValues[categoryToReferenceDataFieldsMap[referenceDataItem.categoryId]].push({
+              id: referenceDataItem.id,
+              label: referenceDataItem.value,
+              value: referenceDataItem.value
+            });
+          }
         }
       });
       return referenceDataValues;
@@ -230,7 +245,20 @@ module.exports = function (ImportableFile) {
             steps.push(function (callback) {
               // normalize model headers (property labels)
               const normalizedModelProperties = app.models[modelName]._importableProperties.map(function (property) {
-                result.modelProperties[property] = app.models[modelName].fieldLabelsMap[property];
+                // split the property in sub components
+                const propertyComponents = property.split('.');
+                // if there are sub components
+                if (propertyComponents.length > 1) {
+                  // define parent component
+                  if (!result.modelProperties[propertyComponents[0]]) {
+                    result.modelProperties[propertyComponents[0]] = {};
+                  }
+                  // store the sub component under parent component
+                  result.modelProperties[propertyComponents[0]][propertyComponents[1]] = app.models[modelName].fieldLabelsMap[property];
+                } else {
+                  // no sub components, store property directly
+                  result.modelProperties[property] = app.models[modelName].fieldLabelsMap[property];
+                }
                 return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(result.modelProperties[property]));
               });
 

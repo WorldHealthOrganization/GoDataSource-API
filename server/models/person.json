@@ -12,6 +12,13 @@
     "outbreakId"
   ],
   "properties": {
+    "id": {
+      "type": "string",
+      "id": true,
+      "defaultFn": "uuidv4",
+      "readOnly": true,
+      "unique": true
+    },
     "outbreakId": {
       "type": "string",
       "readOnly": true

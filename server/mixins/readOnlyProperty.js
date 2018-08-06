@@ -11,24 +11,78 @@ const readReadOnlyProperties = {};
  */
 module.exports = function (Model) {
 
+  /**
+   * Get Model importable properties (max 2 levels deep)
+   * @param Model
+   * @param prefix
+   * @return {Array}
+   */
+  function getImportableProperties(Model, prefix) {
+    // store a list of importable properties
+    let importableProperties = [];
+    Model.forEachProperty(function (propertyName) {
+      // non-readOnly properties are importable
+      // readOnly properties are importable only if marked as safe for import
+      if (
+        Model.definition.properties[propertyName].readOnly && Model.definition.properties[propertyName].safeForImport ||
+        !Model.definition.properties[propertyName].readOnly
+      ) {
+        // complex model type
+        if (Model.definition.properties[propertyName].type && Model.definition.properties[propertyName].type.definition) {
+          // do not parse mode than 2 levels (we don't need that level of granularity when importing flat files)
+          if (prefix) {
+            return importableProperties;
+          }
+          // get next level of importable properties and merge the results
+          importableProperties = importableProperties.concat(getImportableProperties(Model.definition.properties[propertyName].type, propertyName));
+        }
+        // array of types
+        if (Array.isArray(Model.definition.properties[propertyName].type)) {
+          // array of complex model types
+          if (Model.definition.properties[propertyName].type[0].definition) {
+            // do not parse mode than 2 levels (we don't need that level of granularity when importing flat files)
+            if (prefix) {
+              return importableProperties;
+            }
+            // get next level of importable properties and merge the results
+            importableProperties = importableProperties.concat(getImportableProperties(Model.definition.properties[propertyName].type[0], `${propertyName}[]`));
+          // array of simple types
+          } else {
+            // update property name if needed
+            if (prefix) {
+              propertyName = `${prefix}.${propertyName}`;
+            }
+            // mark property as an array
+            propertyName = `${propertyName}[]`;
+            // add it to the list of properties
+            importableProperties.push(propertyName);
+          }
+        } else {
+          // update property name if needed
+          if (prefix) {
+            propertyName = `${prefix}.${propertyName}`;
+          }
+          // add it to the list of properties
+          importableProperties.push(propertyName);
+        }
+      }
+    });
+    // return the list of importable properties
+    return importableProperties;
+  }
+
   if (!readReadOnlyProperties[Model.modelName]) {
     readReadOnlyProperties[Model.modelName] = [];
-    Model._importableProperties = [];
   }
 
   // cache model read-only properties
   Model.forEachProperty(function (propertyName) {
     if (Model.definition.properties[propertyName].readOnly) {
       readReadOnlyProperties[Model.modelName].push(propertyName);
-      // property may be readOnly in the API but safe to import from a file
-      if (Model.definition.properties[propertyName].safeForImport) {
-        Model._importableProperties.push(propertyName);
-      }
-    } else {
-      // non-readOnly properties are importable
-      Model._importableProperties.push(propertyName);
     }
   });
+
+  Model._importableProperties = getImportableProperties(Model);
 
   /**
    * Remove readonly properties from an object
