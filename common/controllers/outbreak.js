@@ -3345,18 +3345,18 @@ module.exports = function (Outbreak) {
             return JSON.stringify(this);
           };
           // go through all entries
-          contactsList.forEach(function (caseData, index) {
+          contactsList.forEach(function (contactData, index) {
             createContacts.push(function (callback) {
-              // create the case
-              return app.models.case
-                .create(caseData, options)
+              // create the contact
+              return app.models.contact
+                .create(contactData, options)
                 .then(function (result) {
                   callback(null, result);
                 })
                 .catch(function (error) {
                   // on error, store the error, but don't stop, continue with other items
                   createErrors.push({
-                    message: `Failed to import case ${index + 1}`,
+                    message: `Failed to import contact ${index + 1}`,
                     error: error,
                     recordNo: index + 1
                   });
@@ -3380,7 +3380,7 @@ module.exports = function (Outbreak) {
               };
               // return error with partial success
               return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-                model: app.models.case.modelName,
+                model: app.models.contact.modelName,
                 failed: createErrors,
                 success: results
               }));
