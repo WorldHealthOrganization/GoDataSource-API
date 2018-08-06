@@ -351,9 +351,13 @@ module.exports = function (Outbreak) {
         }
       })
       .then(function (result) {
-        // result can be object with count / array with contact ID elements to undefined elements
+        // result can be undefined / object with count / array with contact ID elements to undefined elements
         // for array of contact IDs need to throw error
-        if (typeof result.count !== 'undefined') {
+        if (typeof result === 'undefined') {
+          // delete relationship
+          return relationshipInstance.destroy(options);
+        }
+        else if (typeof result.count !== 'undefined') {
           return result;
         } else {
           // result is an array
@@ -363,7 +367,7 @@ module.exports = function (Outbreak) {
           // if result doesn't contain contact IDs the relationship will be deleted
           if (!contactIDs.length) {
             // delete relationship
-            return relationshipInstance.destroy(options)
+            return relationshipInstance.destroy(options);
           } else {
             // there are contacts with no other relationships with case/event; error
             throw app.utils.apiError.getError('DELETE_CONTACT_LAST_RELATIONSHIP', {

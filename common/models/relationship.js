@@ -331,12 +331,15 @@ module.exports = function (Relationship) {
 
   /**
    * Update follow-up dates on the contact if the relationship includes a contact
+   * Also do updates on delete relationship if required
    */
   Relationship.observe('after save', function (context, callback) {
     // get created/modified relationship
     let relationship = context.instance;
     // get contact representation in the relationship
     let contactInPersons = relationship.persons.find(person => person.type === 'contact');
+    // get flag for deleted relationship
+    let relationshipDeleted = context.options.softDeleteEvent;
 
     // check if the relationship created included a contact
     if (contactInPersons) {
@@ -347,9 +350,10 @@ module.exports = function (Relationship) {
 
       // properties that need to be updated on the contact are:
       // followUp.originalStartDate - updated only if the created relationship is the contact's first relationship
-      // followUp.startDate and followUp.endDate - updated only if the created relationship is the contact's first relationship or the created relationship has the latest contactDate
-      // get contact with latest 2 contact relationships; if only one is returned we are in the case where the just created relationship is the contact's first
-      // if there are 2 relationships returned check the latest one contactDate against the contactDate of the just created relationship
+      // followUp.startDate and followUp.endDate - updated only if the created relationship is the contact's first relationship or the created/updated/deleted relationship has the latest contactDate
+      // get contact with latest 2 contact relationships; if only one is returned we are in the case where the just created/updated relationship is the contact's first
+      // Note: on delete the relationship cannot be the last contact relationship (this is validated on delete)
+      // if there are 2 relationships returned check the latest one contactDate against the contactDate of the just created/updated/deleted relationship
       app.models.contact
         .findById(
           contactId,
@@ -358,7 +362,9 @@ module.exports = function (Relationship) {
               relation: 'relationships',
               scope: {
                 limit: 2,
-                order: 'contactDate DESC'
+                order: 'contactDate DESC',
+                // include the deleted relationships if the operation was a delete
+                deleted: !!relationshipDeleted
               }
             }
           })
@@ -369,7 +375,7 @@ module.exports = function (Relationship) {
           }
 
           // check if the contact will need to be updated
-          // check if the contact has a single relationship or the one which was just created/updated has the latest contactDate
+          // check if the contact has a single relationship or the one which was just created/updated/deleted has the latest contactDate
           if (contact.relationships.length === 1 || contact.relationships[0].id === relationship.id) {
             // contact needs to be updated; cache its info
             contactInstance = contact;
@@ -396,13 +402,18 @@ module.exports = function (Relationship) {
 
           // check contact relationships to update follow-up dates
           if (contactInstance.relationships.length === 1) {
-            // created relationship is the first relationship; update all dates
+            // created/updated relationship is the first relationship; update all dates
             propsToUpdate.originalStartDate = propsToUpdate.startDate = relationship.contactDate;
             propsToUpdate.endDate = moment(relationship.contactDate).add(outbreak.periodOfFollowup, 'days');
           }
-          // check if the first returned relationship is the newly created relationship
-          // since the relationships are ordered by contactDate DESC this means that the newly created relationship has the latest contactDate
+          // check if the first returned relationship is the created/updated/deleted relationship
+          // since the relationships are ordered by contactDate DESC this means that the created/updated/deleted relationship has the latest contactDate
           else if (contactInstance.relationships[0].id === relationship.id) {
+            // check if the operation was a delete; In this case need to use the dates from the next relationship
+            if (relationshipDeleted) {
+              relationship = contactInstance.relationships[1];
+            }
+
             // update only the startDate and endDate
             propsToUpdate.startDate = relationship.contactDate;
             propsToUpdate.endDate = moment(relationship.contactDate).add(outbreak.periodOfFollowup, 'days');
