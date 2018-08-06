@@ -1444,12 +1444,12 @@ module.exports = function (Outbreak) {
                 // check if the case is new (date of reporting is later than the threshold date)
                 if ((new Date(person.dateOfReporting)) >= newCasesFromDate) {
                   result.newCases++;
+                  result.caseIDs.push(person.id);
                 }
               }
             })
           }
         });
-        result.caseIDs = Object.keys(casesIndex);
         callback(null, result);
       })
       .catch(callback);
