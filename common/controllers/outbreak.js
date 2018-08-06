@@ -3284,22 +3284,22 @@ module.exports = function (Outbreak) {
       doc.moveDown(2);
 
       // add case profile fields (empty)
-      pdfUtils.createPersonProfile(doc, caseFields, false, translateToken('LNG_PAGE_TITLE_CASE_DETAILS', languageId, dictionary));
+      pdfUtils.createPersonProfile(doc, caseFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
 
       // add case investigation questionnaire into the pdf in a separate page
       doc.addPage();
-      pdfUtils.createQuestionnaire(doc, questions, translateToken('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE', languageId, dictionary));
+      pdfUtils.createQuestionnaire(doc, questions, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE'));
 
       // add lab results information into a separate page
       doc.addPage();
-      pdfUtils.createPersonProfile(doc, labResultsFields, false, translateToken('LNG_PAGE_TITLE_LAB_RESULTS_DETAILS', languageId, dictionary));
+      pdfUtils.createPersonProfile(doc, labResultsFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_DETAILS'));
       doc.addPage();
-      pdfUtils.createQuestionnaire(doc, questions, translateToken('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE', languageId, dictionary));
+      pdfUtils.createQuestionnaire(doc, questions, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE'));
 
       // add contact relation template
       doc.addPage();
-      pdfUtils.createPersonProfile(doc, contactFields, false, translateToken('LNG_PAGE_TITLE_CONTACT_DETAILS', languageId, dictionary));
-      pdfUtils.createPersonProfile(doc, relationFields, false, translateToken('LNG_PAGE_TITLE_CONTACT_RELATIONSHIP', languageId, dictionary));
+      pdfUtils.createPersonProfile(doc, contactFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
+      pdfUtils.createPersonProfile(doc, relationFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_RELATIONSHIP'));
 
       // end the document stream
       // to convert it into a buffer
