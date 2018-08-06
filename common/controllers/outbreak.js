@@ -1418,7 +1418,8 @@ module.exports = function (Outbreak) {
     // start building a result
     const result = {
       newCases: 0,
-      total: 0
+      total: 0,
+      caseIDs: []
     };
 
     // use a cases index to make sure we don't count a case multiple times
@@ -1448,6 +1449,7 @@ module.exports = function (Outbreak) {
             })
           }
         });
+        result.caseIDs = Object.keys(casesIndex);
         callback(null, result);
       })
       .catch(callback);
