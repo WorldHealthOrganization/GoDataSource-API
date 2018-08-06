@@ -2268,7 +2268,8 @@
           "arg": "count",
           "type": {
             "newCases": "number",
-            "total": "number"
+            "total": "number",
+            "caseIds": ["string"]
           },
           "description": "Retrieve number of new cases in known transmission chains",
           "root": true,
