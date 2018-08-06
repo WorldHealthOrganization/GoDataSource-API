@@ -558,8 +558,33 @@
       "LNG_PAGE_CREATE_ENTITY_ERROR_NO_SELECTED_ENTITIES": "There are no entities selected for relationships!"
     },
     "uiContactFields": {
+      "LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "Fill Geo-Location Latitude",
+      "LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME": "Date of Outcome",
+      "LNG_CONTACT_FIELD_LABEL_AGE": "Age",
+      "LNG_CONTACT_FIELD_LABEL_FIRST_NAME": "First Name",
+      "LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING": "Date of Reporting",
+      "LNG_CONTACT_FIELD_LABEL_RISK_REASON": "Risk Reason",
+      "LNG_CONTACT_FIELD_LABEL_ID": "ID",
+      "LNG_CONTACT_FIELD_LABEL_UPDATED_AT": "Updated At",
+      "LNG_CONTACT_FIELD_LABEL_OUTBREAK_ID": "Outbreak ID",
+      "LNG_CONTACT_FIELD_LABEL_DOB": "Date of Birth",
+      "LNG_CONTACT_FIELD_LABEL_CREATED_BY": "Created By",
+      "LNG_CONTACT_FIELD_LABEL_MIDDLE_NAME": "Middle Name",
+      "LNG_CONTACT_FIELD_LABEL_DELETED_AT": "Deleted At",
+      "LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "Fill Geo-Location Longitude",
+      "LNG_CONTACT_FIELD_LABEL_DELETED": "Deleted",
+      "LNG_CONTACT_FIELD_LABEL_UPDATED_BY": "Updated By",
+      "LNG_CONTACT_FIELD_LABEL_CREATED_AT": "Created At",
+      "LNG_CONTACT_FIELD_LABEL_TYPE": "Type",
+      "LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER": "Phone Number",
+      "LNG_CONTACT_FIELD_LABEL_GENDER": "Gender",
+      "LNG_CONTACT_FIELD_LABEL_OCCUPATION": "Occupation",
+      "LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE": "Document Type",
       "LNG_CONTACT_FIELD_LABEL_RISK_LEVEL": "Risk Level",
-      "LNG_CONTACT_FIELD_LABEL_RISK_REASON": "Reason"
+      "LNG_CONTACT_FIELD_LABEL_DECEASED": "Deceased",
+      "LNG_CONTACT_FIELD_LABEL_LAST_NAME": "Last Name",
+      "LNG_CONTACT_FIELD_LABEL_DATE_DECEASED": "Date of Decease",
+      "LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER": "Document Number"
     },
     "uiContactsListPage": {
       "LNG_PAGE_LIST_CONTACTS_TITLE": "Contacts"
