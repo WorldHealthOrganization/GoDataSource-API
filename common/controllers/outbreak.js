@@ -956,14 +956,27 @@ module.exports = function (Outbreak) {
                     let genResponseIndex = generateResponse.length - 1;
 
                     // find all the teams that are matching the contact's location ids from addresses
-                    // stop at first address that has a matching team
                     let eligibleTeams = [];
-                    for (let i = 0; i < contact.addresses.length; i++) {
+                    // normalize addresses
+                    contact.addresses = contact.addresses || [];
+
+                    // first get the contact's usual place of residence
+                    let contactResidence = contact.addresses.find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
+                    if (contactResidence) {
                       // try to find index of the address location in teams locations
-                      let filteredTeams = teams.filter((team) => team.locations.indexOf(contact.addresses[i].locationId) !== -1);
+                      let filteredTeams = teams.filter((team) => team.locations.indexOf(contactResidence.locationId) !== -1);
                       if (filteredTeams.length) {
-                        eligibleTeams = eligibleTeams.concat(filteredTeams.map((team) => team.id));
-                        break;
+                        eligibleTeams = filteredTeams.map((team) => team.id);
+                      }
+                    } else {
+                      // check all contact addresses; stop at first address that has a matching team
+                      for (let i = 0; i < contact.addresses.length; i++) {
+                        // try to find index of the address location in teams locations
+                        let filteredTeams = teams.filter((team) => team.locations.indexOf(contact.addresses[i].locationId) !== -1);
+                        if (filteredTeams.length) {
+                          eligibleTeams = eligibleTeams.concat(filteredTeams.map((team) => team.id));
+                          break;
+                        }
                       }
                     }
 
