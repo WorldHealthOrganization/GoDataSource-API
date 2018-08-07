@@ -3666,8 +3666,12 @@ module.exports = function (Outbreak) {
       _filter = app.utils.remote
         .mergeFilters({
           where: {
-            // TODO: Should check for contact's current address; currently there is no way to figure out the contact's current address
-            'addresses.locationId': locationToFilter
+            'addresses': {
+              'elemMatch': {
+                typeId: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
+                locationId: locationToFilter
+              }
+            }
           }
         }, _filter);
 
@@ -3697,8 +3701,18 @@ module.exports = function (Outbreak) {
           let contactId = contact.id;
 
           // get location
-          // TODO: Should get contact's current location; Currently if the locationId filter was sent using that locationId; else using the locationId of the first address
-          let contactLocationId = locationToFilter || _.get(contact, 'addresses.0.locationId');
+          let contactLocationId;
+          if (locationToFilter) {
+            // a filter for location was sent and the contact was found means that the contact location is the filtered location
+            contactLocationId = locationToFilter;
+          } else {
+            // get the contact's usual place of residence
+            // normalize addresses
+            contact.addresses = contact.addresses || [];
+            let contactResidence = contact.addresses.find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
+            // use usual place of residence if found else leave the contact unassigned to a location
+            contactLocationId = contactResidence && contactResidence.locationId ? contactResidence.locationId : null;
+          }
 
           // initialize location entry if not already initialized
           if (!locationMap[contactLocationId]) {

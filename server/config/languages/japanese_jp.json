@@ -106,6 +106,14 @@
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT": "日本の Event",
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT_DESCRIPTION": "日本の description_placeholder"
     },
+    "referenceDataCategoryAddressType": {
+      "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE": "日本の Address Type",
+      "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_DESCRIPTION": "日本の description_placeholder",
+      "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE": "日本の Usual Place of Residence",
+      "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE_DESCRIPTION": "日本の description_placeholder",
+      "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_OTHER": "日本の Other",
+      "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_OTHER_DESCRIPTION": "日本の description_placeholder"
+    },
     "referenceDataCategoryGender": {
       "LNG_REFERENCE_DATA_CATEGORY_GENDER": "日本の Gender",
       "LNG_REFERENCE_DATA_CATEGORY_GENDER_DESCRIPTION": "日本の description_placeholder",
