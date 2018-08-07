@@ -3550,6 +3550,14 @@ module.exports = function (Outbreak) {
 
       // translate case, lab results, contact fields
       let caseModel = Object.assign({}, models.case.fieldLabelsMap);
+
+      // remove array properties from model definition (they are handled separately)
+      Object.keys(caseModel).forEach(function (property) {
+        if (property.indexOf('[]') !== -1) {
+          delete caseModel[property];
+        }
+      });
+
       caseModel.addresses = [models.address.fieldLabelsMap];
       caseModel.documents = [models.document.fieldLabelsMap];
 
