@@ -41,7 +41,7 @@ const syncRecordFlags = {
  */
 const syncRecord = function (model, record, options, done) {
   // options is optional parameter
-  if (typeof options === "function") {
+  if (typeof options === 'function') {
     done = options;
     options = {};
   }
@@ -113,7 +113,7 @@ const syncRecord = function (model, record, options, done) {
     });
 
   // allow working with callbacks
-  if (typeof done === "function") {
+  if (typeof done === 'function') {
     syncPromise
       .then(function (result) {
         done(null, result);
