@@ -197,7 +197,7 @@ module.exports = function (Sync) {
                     )
                   } catch (parseError) {
                     app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
-                    return done(app.utils.apiError.getError('INVALID_SNAPSHOT_FILE'));
+                    return callback(app.utils.apiError.getError('INVALID_SNAPSHOT_FILE'));
                   }
                 });
             }),
