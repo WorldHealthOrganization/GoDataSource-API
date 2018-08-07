@@ -457,7 +457,11 @@
       "LNG_OUTBREAK_FIELD_LABEL_DAYS_IN_KNOWN_TRANSMISSION_CHAINS": "日本の Days in known transmission chains",
       "LNG_OUTBREAK_FIELD_LABEL_DAYS_NOT_SEEN": "日本の Days not seen",
       "LNG_OUTBREAK_FIELD_LABEL_LESS_THAN_X_CONTACTS": "日本の Less than X contacts",
-      "LNG_OUTBREAK_FIELD_LABEL_DAYS_LONG_PERIODS": "日本の Long Periods ( days )"
+      "LNG_OUTBREAK_FIELD_LABEL_DAYS_LONG_PERIODS": "日本の Long Periods ( days )",
+      "LNG_OUTBREAK_FIELD_LABEL_FIELDS_TO_DISPLAY_NODE": "日本の Display Fields in Node",
+      "LNG_OUTBREAK_FIELD_LABEL_CASE_INVESTIGATION_TEMPLATE": "日本の Case Investigation Template",
+      "LNG_OUTBREAK_FIELD_LABEL_CONTACT_FOLLOWUP_TEMPLATE": "日本の Contact Follow-up Template",
+      "LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE": "日本の Lab Results Template"
     },
     "uiEntityFields": {
       "LNG_ENTITY_FIELD_LABEL_FIRST_NAME": "日本の First Name",

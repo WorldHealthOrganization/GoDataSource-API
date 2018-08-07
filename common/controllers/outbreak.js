@@ -1316,7 +1316,7 @@ module.exports = function (Outbreak) {
             delete noOfChains.nodes;
             callback(null, noOfChains);
           })
-          .catch(callback)
+          .catch(callback);
       });
   };
 
@@ -3323,6 +3323,24 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.importImportableContactsFileUsingMap = function (body, options, callback) {
+    /**
+     * Extract only the importable fields for a model from a record data
+     * @param Model
+     * @param data
+     */
+    function extractImportableFields(Model, data) {
+      // store importable properties as part of a new object
+      const importableFields = {};
+      // go through all importable top level properties
+      Model._importableTopLevelProperties.forEach(function (importableProperty) {
+        // add the importable data (if it exists)
+        if (data[importableProperty] !== undefined) {
+          importableFields[importableProperty] = data[importableProperty];
+        }
+      });
+      return importableFields;
+    }
+
     const self = this;
     // get importable file
     app.models.importableFile
@@ -3345,13 +3363,41 @@ module.exports = function (Outbreak) {
             return JSON.stringify(this);
           };
           // go through all entries
-          contactsList.forEach(function (contactData, index) {
+          contactsList.forEach(function (recordData, index) {
             createContacts.push(function (callback) {
+              // extract relationship data
+              const relationshipData = extractImportableFields(app.models.relationship, recordData);
+              // extract contact data
+              const contactData = extractImportableFields(app.models.contact, recordData);
               // create the contact
-              return app.models.contact
+              app.models.contact
                 .create(contactData, options)
-                .then(function (result) {
-                  callback(null, result);
+                .then(function (createdContact) {
+                  // promisify next step
+                  return new Promise(function (resolve, reject) {
+                    // normalize people
+                    Outbreak.helpers.validateAndNormalizePeople(createdContact.id, 'contact', relationshipData, false, function (error, persons) {
+                      if (error) {
+                        return reject(error);
+                      }
+                      // add outbreak information
+                      relationshipData.outbreakId = self.id;
+                      // update persons with normalized persons
+                      relationshipData.person = persons;
+                      // create relationship
+                      return app.models.relationship
+                        .create(relationshipData, options)
+                        .then(function (createdRelationship) {
+                          // relationship successfully created, move to tne next one
+                          callback(null, Object.assign({}, createdContact.toJSON(), {relationships: [createdRelationship.toJSON()]}));
+                        })
+                        .catch(function (error) {
+                          // failed to create relationship, remove the contact
+                          createdContact.destroy();
+                          reject(error);
+                        });
+                    });
+                  });
                 })
                 .catch(function (error) {
                   // on error, store the error, but don't stop, continue with other items
@@ -3364,7 +3410,7 @@ module.exports = function (Outbreak) {
                 });
             });
           });
-          // start importing cases
+          // start importing contacts
           async.parallelLimit(createContacts, 10, function (error, results) {
             // handle errors (should not be any)
             if (error) {

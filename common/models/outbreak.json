@@ -80,35 +80,26 @@
         "string"
       ]
     },
-    "colorContactNode": {
-      "type": "string"
-    },
-    "colorCaseClassifications": {
-      "type": "array"
-    },
-    "iconPeopleDied": {
-      "type": "string"
-    },
-    "iconEvents": {
-      "type": "string"
-    },
     "caseInvestigationTemplate": {
       "type": [
         "templateQuestion"
       ],
-      "required": true
+      "required": true,
+      "importTopLevelOnly": true
     },
     "contactFollowUpTemplate": {
       "type": [
         "templateQuestion"
       ],
-      "required": true
+      "required": true,
+      "importTopLevelOnly": true
     },
     "labResultsTemplate": {
       "type": [
         "templateQuestion"
       ],
-      "required": true
+      "required": true,
+      "importTopLevelOnly": true
     },
     "caseIdMask": {
       "type": "string",

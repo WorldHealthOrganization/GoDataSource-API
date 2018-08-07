@@ -205,6 +205,10 @@ module.exports = function (ImportableFile) {
       }
       // store the file and get its headers
       ImportableFile.storeFileAndGetHeaders(file, function (error, result) {
+        // handle errors
+        if (error) {
+          return callback(error);
+        }
         // keep e reference to parsed content
         const dataSet = result.jsonObj;
         // define result
@@ -216,10 +220,6 @@ module.exports = function (ImportableFile) {
           modelPropertyValues: {},
           distinctFileColumnValues: {}
         };
-        // handle errors
-        if (error) {
-          return callback(error);
-        }
 
         // define language dictionary, it will be updated (conditionally) later
         let languageDictionary = {};

@@ -30,7 +30,11 @@ module.exports = function (Model) {
         // complex model type
         if (Model.definition.properties[propertyName].type && Model.definition.properties[propertyName].type.definition) {
           // do not parse mode than 2 levels (we don't need that level of granularity when importing flat files)
-          if (prefix) {
+          if (prefix || Model.definition.properties[propertyName].importTopLevelOnly) {
+            if (prefix) {
+              propertyName = `${prefix}.${propertyName}`;
+            }
+            importableProperties.push(propertyName);
             return importableProperties;
           }
           // get next level of importable properties and merge the results
@@ -41,19 +45,27 @@ module.exports = function (Model) {
           // array of complex model types
           if (Model.definition.properties[propertyName].type[0].definition) {
             // do not parse mode than 2 levels (we don't need that level of granularity when importing flat files)
-            if (prefix) {
+            if (prefix || Model.definition.properties[propertyName].importTopLevelOnly) {
+              if (prefix) {
+                propertyName = `${prefix}.${propertyName}`;
+              }
+              importableProperties.push(propertyName);
               return importableProperties;
             }
             // get next level of importable properties and merge the results
             importableProperties = importableProperties.concat(getImportableProperties(Model.definition.properties[propertyName].type[0], `${propertyName}[]`));
-          // array of simple types
+            // array of simple types
           } else {
+            // keep a copy of original property name
+            const originalPropertyName = propertyName;
             // update property name if needed
             if (prefix) {
               propertyName = `${prefix}.${propertyName}`;
             }
-            // mark property as an array
-            propertyName = `${propertyName}[]`;
+            if (!Model.definition.properties[originalPropertyName].importTopLevelOnly) {
+              // mark property as an array
+              propertyName = `${propertyName}[]`;
+            }
             // add it to the list of properties
             importableProperties.push(propertyName);
           }
@@ -82,7 +94,18 @@ module.exports = function (Model) {
     }
   });
 
+  // store a list of importable properties (this contains markers for array properties and goes 2 levels deep)
   Model._importableProperties = getImportableProperties(Model);
+
+  // store a list of importable top level properties (these are only the top level properties names, no array markers, no deep mapping)
+  Model._importableTopLevelProperties = [];
+  // build it from the list of importable properties by removing extra information
+  Model._importableProperties.forEach(function (importablePropertyMap) {
+    const property = importablePropertyMap.replace(/(?:\[]).*/, '');
+    if (!Model._importableTopLevelProperties.includes(property)) {
+      Model._importableTopLevelProperties.push(property);
+    }
+  });
 
   /**
    * Remove readonly properties from an object
