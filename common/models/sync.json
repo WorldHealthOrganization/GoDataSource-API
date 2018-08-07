@@ -1,0 +1,81 @@
+{
+  "name": "sync",
+  "base": "Model",
+  "plural": "sync",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "AttachController": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "getDatabaseSnapshot"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "importDatabaseSnapshot"
+    }
+  ],
+  "methods": {
+    "getDatabaseSnapshot": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Date filter"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Retrieve a compressed snapshot of the database.",
+      "http": {
+        "verb": "get",
+        "path": "/database-snapshot"
+      }
+    },
+    "importDatabaseSnapshot": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "snapshot",
+          "type": "file"
+        }
+      ],
+      "returns": [],
+      "description": "Synchronize the database based on a given snapshot archive",
+      "http": {
+        "verb": "post",
+        "path": "/import-database-snapshot"
+      }
+    }
+  }
+}

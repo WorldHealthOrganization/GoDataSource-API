@@ -223,5 +223,9 @@
   "importableFileWithFieldAndReferenceDataMap": {
     "dataSource": null,
     "public": false
+  },
+  "sync": {
+    "dataSource": "memory",
+    "public": true
   }
 }
