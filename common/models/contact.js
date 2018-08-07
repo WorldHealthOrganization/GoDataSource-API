@@ -15,12 +15,15 @@ module.exports = function (Contact) {
     'dob': 'LNG_CASE_FIELD_LABEL_DOB',
     'phoneNumber': 'LNG_CASE_FIELD_LABEL_PHONE_NUMBER',
     'riskLevel': 'LNG_CASE_FIELD_LABEL_RISK_LEVEL',
-    'riskReason': 'LNG_CASE_FIELD_LABEL_RISK_REASON'
+    'riskReason': 'LNG_CASE_FIELD_LABEL_RISK_REASON',
+    'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
+    'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES'
   };
 
   Contact.referenceDataFields = [
     'gender',
     'riskLevel',
-    'occupation'
+    'occupation',
+    'documents.type'
   ];
 };

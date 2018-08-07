@@ -27,7 +27,8 @@ module.exports = function (Relationship) {
     'exposureFrequencyId': 'LNG_RELATIONSHIP_FIELD_LABEL_EXPOSURE_FREQUENCY',
     'exposureDurationId': 'LNG_RELATIONSHIP_FIELD_LABEL_EXPOSURE_DURATION',
     'socialRelationshipTypeId': 'LNG_RELATIONSHIP_FIELD_LABEL_SOCIAL_RELATIONSHIP_TYPE',
-    'comment': 'LNG_RELATIONSHIP_FIELD_LABEL_COMMENT'
+    'comment': 'LNG_RELATIONSHIP_FIELD_LABEL_COMMENT',
+    'person': 'LNG_RELATIONSHIP_FIELD_LABEL_PERSON'
   };
 
   Relationship.referenceDataFields = [
@@ -35,7 +36,10 @@ module.exports = function (Relationship) {
     'exposureTypeId',
     'exposureFrequencyId',
     'exposureDurationId',
-    'socialRelationshipTypeId'
+    'socialRelationshipTypeId',
+    'person.gender',
+    'person.occupation',
+    'person.riskLevel'
   ]
 
   /**

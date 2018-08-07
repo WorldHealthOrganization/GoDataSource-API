@@ -3,6 +3,7 @@
 // dependencies
 const moment = require('moment');
 const chunkDateRange = require('chunk-date-range');
+const _ = require('lodash');
 
 /**
  * Convert a Date object into moment UTC date and reset time to start of the day
@@ -146,6 +147,41 @@ const convertPropsToDate = function (obj) {
   }
 };
 
+/**
+ * Prepare a models fields for printing. So far, this means eliminating undefined values and formatting dates
+ * @param model
+ * @param dateFieldsList
+ * @returns {Object}
+ */
+const prepareFieldsForPrint = function (model, dateFieldsList) {
+
+  // Format date fields
+  dateFieldsList.forEach((field) => {
+    if(field.indexOf('.') === -1) {
+      if (_.get(model, field)) {
+        _.set(model, field, new Date(_.get(model, field)).toISOString());
+      }
+    } else {
+      // separate the string into the name of the array type property and the name the field that needs to be translated
+      let mainKey = field.split('.')[0];
+      let subKey = field.split('.').slice(1).join('.');
+      // translate the field from each element of the array type property
+      model[mainKey].forEach((element) => {
+        prepareFieldsForPrint(element, [subKey]);
+      })
+    }
+  });
+
+  // Sanitize undefined fields
+  return _.mapValues(model, (value, key) => {
+    if (value === undefined) {
+      return ' ';
+    } else {
+      return value;
+    }
+  })
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamToBuffer,
@@ -153,5 +189,6 @@ module.exports = {
   getUTCDateEndOfDay: getUTCDateEndOfDay,
   getAsciiString: getAsciiString,
   getChunksForInterval: getChunksForInterval,
-  convertPropsToDate: convertPropsToDate
+  convertPropsToDate: convertPropsToDate,
+  prepareFieldsForPrint: prepareFieldsForPrint
 };

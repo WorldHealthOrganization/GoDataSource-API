@@ -5,4 +5,8 @@ module.exports = function(Document) {
     'type': 'LNG_DOCUMENT_FIELD_LABEL_TYPE',
     'number': 'LNG_DOCUMENT_FIELD_LABEL_NUMBER'
   };
+
+  Document.referenceDataFields = [
+    'type'
+  ]
 };

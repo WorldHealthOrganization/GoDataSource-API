@@ -243,50 +243,168 @@ function createSVGDoc(svgData, splitFactor, callback) {
     .catch(callback);
 }
 
-function createCaseDossier(people, callback) {
-  const document = createPdfDoc();
-  let pdfTable = new PdfTable(document);
+/**
+ * Helper function used to add a text (title in most cases) with a given font size
+ * @param doc
+ * @param title
+ * @param fontSize
+ */
+const addTitle = function (doc, title, fontSize) {
+  let oldFontSize = doc._fontSize;
+  doc.fontSize(fontSize || 20);
+  doc.text(title);
+  doc.fontSize(oldFontSize).moveDown(0.5);
+};
 
-  people.forEach((person) => {
-    Object.keys(person.data).forEach((key) => {
-      document.text(key + ': ' + person.data[key]);
+/**
+ * Add questions pages in a existing pdf
+ * Questions are added in separate pages
+ * Optionally a title can be added
+ * @param title
+ * @param doc
+ * @param questions
+ */
+const createQuestionnaire = function (doc, questions, title) {
+  // cache initial document margin
+  const initialXMargin = doc.x;
+
+  // add questionnaire page title
+  if (title) {
+    addTitle(doc, title);
+  }
+
+  // recursively insert each question and their answers into the document
+  (function addQuestions(questions, isNested) {
+    questions.forEach((item) => {
+      doc.moveDown(1).text(`${item.order}. ${item.question}`, isNested ? initialXMargin + 40 : initialXMargin);
+
+      // answers type are written differently into the doc
+      switch (item.answerType) {
+        case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT':
+          doc.moveDown().text(`Answer: ${'_'.repeat(25)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
+          break;
+        default:
+          // NOTE: only first nested level is handled for additional questions
+          item.answers.forEach((answer) => {
+            doc.moveDown().text(answer.label, isNested ? initialXMargin + 85 : initialXMargin + 45, doc.y + 8);
+            doc.moveUp().rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y, 13, 13).stroke().moveDown();
+
+            // handle additional questions
+            if (answer.additionalQuestions.length) {
+              addQuestions(answer.additionalQuestions, true);
+            }
+          });
+          break;
+      }
     });
+  })(questions);
 
-    document.moveDown(3);
+  return doc;
+};
 
-    Object.keys(person.relationships[0]).forEach((key) => {
-      pdfTable.addColumn({
-        id: key,
-        header: key,
-        width: 50
-      })
-    })
+/**
+ * Display a person specific fields
+ * Do not display actual values, only field names
+ * DisplayValues flag is also supported, if true it will display the actual field values
+ * This flag is needed to create empty profile pages
+ * Optionally a title can be added
+ * @param doc
+ * @param person
+ * @param displayValues
+ * @param title
+ */
+const displayModelDetails = function (doc, model, displayValues, title) {
+  // add page title
+  if (title) {
+    addTitle(doc, title);
+    doc.moveDown();
+  }
 
-    pdfTable.addBody(person.relationships);
+  // cache initial document margin
+  if (!initialXMargin) {
+    var initialXMargin = doc.x;
+  };
 
-    document.x = 50;
-    document.moveDown(3);
+  // display each field on a row
+  Object.keys(model).forEach((fieldName) => {
+    // if property is array and has at least one element, display it on next page
+    if (Array.isArray(model[fieldName]) && model[fieldName][0]) {
+      // top property
+      doc.text(fieldName, initialXMargin).moveDown();
 
-    pdfTable = new PdfTable(document);
+      // if this should be an empty form, display 2 entries of it
+      if (!displayValues) {
+        // there will always be an element in the array, containing field definitions
+        let fields = Object.keys(model[fieldName][0]);
 
-    Object.keys(person.labResults[0]).forEach((key) => {
-      pdfTable.addColumn({
-        id: key,
-        header: key,
-        width: 50
-      })
-    })
+        [fields, fields].forEach((fields, index, arr) => {
+          fields.forEach((field) => {
+            doc.text(`${field}: ${'_'.repeat(25)}`, initialXMargin + 20).moveDown();
+          });
 
-    pdfTable.addBody(person.labResults);
+          // separate each group of fields
+          // if this is the last item do not move 2 lines
+          if (index !== arr.length - 1) {
+            doc.moveDown(2);
+          }
+        });
+      } else {
+        // display nested props
+        model[fieldName].forEach((item, index, arr) => {
+          Object.keys(item).forEach((prop) => {
+            doc.text(`${prop}: ${item[prop]}`, initialXMargin + 20).moveDown();
+          });
+
+          // space after each item in the list
+          // if this is the last item do not move 2 lines
+          if (index !== arr.length - 1) {
+            doc.moveDown(2);
+          }
+        });
+      }
+    } else if (typeof(model[fieldName]) === 'object' && Object.keys(model[fieldName]).length) {
+      doc.text(fieldName, initialXMargin).moveDown();
+      doc.x += 20;
+      displayModelDetails(doc, model[fieldName], true);
+    } else {
+      doc.text(`${fieldName}: ${displayValues ? model[fieldName] : '_'.repeat(25)}`, initialXMargin).moveDown();
+    }
   });
 
-  helpers.streamToBuffer(document, callback);
-  // finalize document
-  document.end();
-}
+  return doc;
+};
+
+/**
+ * Display a case/contact's relationships
+ * @param doc
+ * @param relationships
+ * @param title
+ */
+const displayPersonRelationships = function (doc, relationships, title) {
+  relationships.forEach((relationship, index) => {
+    doc.addPage();
+    displayModelDetails(doc, relationship, true, index === 0 ? title : null)
+  });
+};
+
+/**
+ * Display a case's lab results
+ * @param doc
+ * @param labResults
+ * @param title
+ */
+const displayCaseLabResults = function (doc, labResults, title) {
+  labResults.forEach((labResult, index) => {
+    doc.addPage();
+    displayModelDetails(doc, labResult, true, index === 0 ? title : null)
+  });
+};
 
 module.exports = {
   createPDFList: createPDFList,
   createSVGDoc: createSVGDoc,
-  createCaseDossier: createCaseDossier
+  createPdfDoc: createPdfDoc,
+  displayModelDetails: displayModelDetails,
+  displayPersonRelationships: displayPersonRelationships,
+  displayCaseLabResults: displayCaseLabResults
 };

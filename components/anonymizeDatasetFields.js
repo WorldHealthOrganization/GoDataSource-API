@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 /**
  * Anonymize fields of a dataSet
  * @param dataSet Array of (object) items
@@ -12,14 +14,12 @@ function anonymize(dataSet, fields, replaceWith, callback) {
   fields = fields || [];
   // replaceWith argument is optional
   let useReplaceWith = true;
+  let dataSetIsObject = false;
   if (typeof  replaceWith === 'function') {
     callback = replaceWith;
     useReplaceWith = false;
   }
   // do some basic validation
-  if (!Array.isArray(dataSet)) {
-    return callback(new Error('dataSet must be an array of objects'));
-  }
   if (!Array.isArray(fields)) {
     return callback(new Error('fields must be an array of properties'));
   }
@@ -43,31 +43,38 @@ function anonymize(dataSet, fields, replaceWith, callback) {
   // store a (flat) list of sensitive property names
   const sensitiveProperties = Object.keys(replaceMap);
 
-  const resultSet = [];
+  let resultSet = [];
   try {
+    if (!Array.isArray(dataSet)) {
+      dataSet = [dataSet];
+      dataSetIsObject = true;
+    }
     // go through all entries
     dataSet.forEach(function (entry) {
       // do some basic validation of each entry
       if (typeof entry !== 'object' || Array.isArray(entry)) {
-        throw new Error('dataSet must be an array of objects');
+        throw new Error('dataSet must be an array of objects or an object');
       }
-      const _entry = {};
+      const _entry = _.cloneDeep(entry);
       // test & replace sensitive properties
-      Object.keys(entry).forEach(function (propertyName) {
-        if (sensitiveProperties.indexOf(propertyName) === -1) {
-          // non sensitive properties are copied
-          _entry[propertyName] = entry[propertyName];
-        } else if (replaceMap[propertyName] !== NO_REPLACE){
-          // properties that need to be replaced are replaced
-          _entry[propertyName] = replaceMap[propertyName];
+      sensitiveProperties.forEach((sensitiveProperty) => {
+        if(sensitiveProperty.indexOf('.') === -1) {
+          _.set(_entry, sensitiveProperty, replaceMap[sensitiveProperty]);
+        } else {
+          let mainKey = sensitiveProperty.split('.')[0];
+          let subKey = sensitiveProperty.split('.').splice(1).join('.');
+          anonymize(_entry[mainKey], [subKey], '***', (err, result) => {
+            _entry[mainKey] = result;
+          });
         }
-        // others are skipped
       });
       // update result set
       resultSet.push(_entry);
     });
+    if (dataSetIsObject) {
+      resultSet = resultSet[0];
+    }
     callback(null, resultSet);
-
   } catch (error) {
     return callback(error);
   }

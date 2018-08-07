@@ -45,7 +45,7 @@ module.exports = function (Case) {
     'classification',
     'riskLevel',
     'occupation',
-    'documents[].type'
+    'documents.type'
   ];
 
   Case.printFieldsinOrder = [
