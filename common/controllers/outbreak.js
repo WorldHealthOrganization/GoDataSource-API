@@ -3182,11 +3182,9 @@ module.exports = function (Outbreak) {
                       id: labResult.personId
                     });
                   }
-                  // create the lab result
-                  return app.models.labResult
-                    .create(labResult, options)
+                  return app.utils.dbSync.syncRecord(app.models.labResult, labResult, options)
                     .then(function (result) {
-                      callback(null, result);
+                      callback(null, result.record);
                     });
                 })
                 .catch(function (error) {
@@ -3266,10 +3264,9 @@ module.exports = function (Outbreak) {
           casesList.forEach(function (caseData, index) {
             createCases.push(function (callback) {
               // create the case
-              return app.models.case
-                .create(caseData, options)
+              return app.utils.dbSync.syncRecord(app.models.case, caseData, options)
                 .then(function (result) {
-                  callback(null, result);
+                  callback(null, result.record);
                 })
                 .catch(function (error) {
                   // on error, store the error, but don't stop, continue with other items
@@ -3370,13 +3367,13 @@ module.exports = function (Outbreak) {
               // extract contact data
               const contactData = extractImportableFields(app.models.contact, recordData);
               // create the contact
-              app.models.contact
-                .create(contactData, options)
-                .then(function (createdContact) {
+              return app.utils.dbSync.syncRecord(app.models.contact, contactData, options)
+                .then(function (syncResult) {
+                  const contactRecord = syncResult.record;
                   // promisify next step
                   return new Promise(function (resolve, reject) {
                     // normalize people
-                    Outbreak.helpers.validateAndNormalizePeople(createdContact.id, 'contact', relationshipData, false, function (error, persons) {
+                    Outbreak.helpers.validateAndNormalizePeople(contactRecord.id, 'contact', relationshipData, false, function (error, persons) {
                       if (error) {
                         return reject(error);
                       }
@@ -3385,15 +3382,16 @@ module.exports = function (Outbreak) {
                       // update persons with normalized persons
                       relationshipData.person = persons;
                       // create relationship
-                      return app.models.relationship
-                        .create(relationshipData, options)
+                      return app.utils.dbSync.syncRecord(app.models.relationship, relationshipData, options)
                         .then(function (createdRelationship) {
                           // relationship successfully created, move to tne next one
-                          callback(null, Object.assign({}, createdContact.toJSON(), {relationships: [createdRelationship.toJSON()]}));
+                          callback(null, Object.assign({}, contactRecord.toJSON(), {relationships: [createdRelationship.record.toJSON()]}));
                         })
                         .catch(function (error) {
-                          // failed to create relationship, remove the contact
-                          createdContact.destroy();
+                          // failed to create relationship, remove the contact if it was created during sync
+                          if (syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED) {
+                            contactRecord.destroy();
+                          }
                           reject(error);
                         });
                     });

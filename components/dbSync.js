@@ -21,6 +21,12 @@ const collectionsMap = {
   cluster: 'cluster'
 };
 
+const syncRecordFlags = {
+  UNTOUCHED: 'UNTOUCHED',
+  CREATED: 'CREATED',
+  UPDATED: 'UPDATED'
+};
+
 /**
  * Sync a record of given model type with the main MongoDb database
  * Note: Deleted records are taken into consideration
@@ -28,55 +34,98 @@ const collectionsMap = {
  * If no record is found or record is found and was created externally (no updateAt flag), create new record
  * If record has updateAt timestamp higher than the main database, update
  *
- * Also the following flags are returned based on the action made upon the record
- * 0 -> left untouched
- * 1 -> create
- * 2 -> update
  * @param model
  * @param record
- * @param done
+ * @param [options]
+ * @param [done]
  */
-const syncRecord = function (model, record, done) {
-  // check if a record with the given id exists
-  model.findOne(
-    {
-      where: {
-        id: record.id
-      },
-      deleted: true
-    },
-    (err, dbRecord) => {
-      if (err) {
-        return done(err);
-      }
+const syncRecord = function (model, record, options, done) {
+  // options is optional parameter
+  if (typeof options === "function") {
+    done = options;
+    options = {};
+  }
 
+  let findRecord;
+  // check if a record with the given id exists if record.id exists
+  if (record.id !== undefined) {
+    findRecord = model
+      .findOne({
+        where: {
+          id: record.id
+        },
+        deleted: true
+      })
+  } else {
+    // record id not present, don't search for a record
+    findRecord = Promise.resolve();
+  }
+
+  const syncPromise = findRecord
+    .then(function (dbRecord) {
+      // record not found, create it
       if (!dbRecord) {
-        return model.create(record, null, () => done(null, 1));
+        return model
+          .create(record, options)
+          .then(function (dbRecord) {
+            return {
+              record: dbRecord,
+              flag: syncRecordFlags.CREATED
+            };
+          });
       }
 
-      if (dbRecord) {
-        // if record was created from third parties, it might not have updated/created timestamps
-        // in this case, just create a new record with new id
-        if (!dbRecord.updatedAt) {
-          delete record.id;
-          return model.create(record, null, () => done(null, 1));
-        }
-
-        // if updated timestamp is greater than the one in the main database, update
-        // also make sure that if the record is soft deleted, it stays that way
-        if (dbRecord.updatedAt.getTime() < new Date(record.updatedAt).getTime()) {
-          if (dbRecord.deleted) {
-            record.deleted = true;
-          }
-          return dbRecord.updateAttributes(record, () => done(null, 2));
-        }
+      // if record was created from third parties, it might not have updated/created timestamps
+      // in this case, just create a new record with new id
+      if (!dbRecord.updatedAt) {
+        delete record.id;
+        return model
+          .create(record, options)
+          .then(function (dbRecord) {
+            return {
+              record: dbRecord,
+              flag: syncRecordFlags.CREATED
+            };
+          });
       }
 
-      return done(null, 0);
+      // if updated timestamp is greater than the one in the main database, update
+      // also make sure that if the record is soft deleted, it stays that way
+      if (dbRecord.updatedAt.getTime() < new Date(record.updatedAt).getTime()) {
+        if (dbRecord.deleted) {
+          record.deleted = true;
+        }
+        return dbRecord
+          .updateAttributes(record, options)
+          .then(function (dbRecord) {
+            return {
+              record: dbRecord,
+              flag: syncRecordFlags.UPDATED
+            };
+          });
+      }
+
+      // if nothing happened, report that
+      return {
+        record: dbRecord,
+        flag: syncRecordFlags.UNTOUCHED
+      };
     });
+
+  // allow working with callbacks
+  if (typeof done === "function") {
+    syncPromise
+      .then(function (result) {
+        done(null, result);
+      })
+      .catch(done);
+  } else {
+    return syncPromise;
+  }
 };
 
 module.exports = {
   collectionsMap: collectionsMap,
-  syncRecord: syncRecord
+  syncRecord: syncRecord,
+  syncRecordFlags: syncRecordFlags
 };
