@@ -5,30 +5,10 @@ const tmp = require('tmp');
 const async = require('async');
 const app = require('../../server/server');
 const fs = require('fs');
+const dbSync = require('../../components/dbSync');
 
 module.exports = function (Sync) {
   Sync.hasController = true;
-
-  // map of collections and their given corresponding collection name in database
-  let collectionsMap = {
-    systemSettings: 'systemSettings',
-    template: 'template',
-    icon: 'icon',
-    helpCategory: 'helpCategory',
-    language: 'language',
-    languageToken: 'languageToken',
-    outbreak: 'outbreak',
-    person: 'person',
-    labResult: 'labResult',
-    followUp: 'followUp',
-    referenceData: 'referenceData',
-    relationship: 'relationship',
-    location: 'location',
-    team: 'team',
-    user: 'user',
-    role: 'role',
-    cluster: 'cluster'
-  };
 
   /**
    * Helper function used to export the database's collections
@@ -65,7 +45,7 @@ module.exports = function (Sync) {
     }
 
     // create a copy of the collections map and exclude the ones from the list of excludes (if any)
-    let collections = Object.assign({}, collectionsMap);
+    let collections = Object.assign({}, dbSync.collectionsMap);
     Object.keys(collections).forEach((collectionName) => {
       if (excludes.indexOf(collectionName) !== -1) {
         delete collections[collectionName];
@@ -176,7 +156,7 @@ module.exports = function (Sync) {
           let collectionsFiles = filenames.filter((filename) => {
             // split filename into 'collection name' and 'extension'
             filename = filename.split('.');
-            return filename[0] && collectionsMap.hasOwnProperty(filename[0]);
+            return filename[0] && dbSync.collectionsMap.hasOwnProperty(filename[0]);
           });
 
           // read each file's contents and sync with database
@@ -188,7 +168,7 @@ module.exports = function (Sync) {
               let collectionName = fileName.split('.')[0];
 
               // cache reference to Loopback's model
-              let model = app.models[collectionsMap[collectionName]];
+              let model = app.models[dbSync.collectionsMap[collectionName]];
 
               return fs.readFile(
                 filePath,
@@ -206,37 +186,14 @@ module.exports = function (Sync) {
 
                     return async.parallel(
                       collectionRecords.map((collectionRecord) => (doneRecord) => {
-                        // check if a record with the given id exists
-                        // if not, create it, otherwise check updatedAt timestamp
-                        // if it's different, then update the record using data from the snapshot
-                        model.findOne(
-                          {
-                            where: {
-                              id: collectionRecord._id
-                            },
-                            deleted: true
-                          },
-                          (err, record) => {
-                            if (err) {
-                              return doneRecord(err);
-                            }
+                        // convert mongodb id notation to Loopback notation
+                        // to be consistent with external function calls
+                        collectionRecord.id = collectionRecord._id;
 
-                            if (!record) {
-                              return model.create(collectionRecord, null, doneRecord);
-                            }
-
-                            if (record && record.updatedAt.getTime() !== new Date(collectionRecord.updatedAt).getTime()) {
-                              // make sure that if the record is soft deleted, it stays that way
-                              if (record.deleted) {
-                                collectionRecord.deleted = true;
-                              }
-                              return record.updateAttributes(collectionRecord, doneRecord);
-                            }
-
-                            return doneRecord();
-                          });
-                        }),
-                        (err) => doneCollection(err)
+                        // sync the record with the main database
+                        dbSync.syncRecord(model, collectionRecord, (err) => doneRecord(err));
+                      }),
+                      (err) => doneCollection(err)
                     )
                   } catch (parseError) {
                     app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
