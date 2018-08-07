@@ -450,8 +450,8 @@
       "LNG_OUTBREAK_FIELD_LABEL_ACTIVE": "Active?",
       "LNG_OUTBREAK_FIELD_LABEL_DESCRIPTION": "Description",
       "LNG_OUTBREAK_FIELD_LABEL_DURATION_FOLLOWUP_DAYS": "Duration for the follow-up ( days )",
-      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY": "Follow-up frecquency",
-      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY_PER_DAY": "Follow-up frecquency per day",
+      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY": "Follow-up frequency",
+      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY_PER_DAY": "Follow-up frequency per day",
       "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK": "Case Id Mask",
       "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK_TOOLTIP": "Example of mask: RX-0000. It will generate Ids in the range: RX-0001 and RX-9999",
       "LNG_OUTBREAK_FIELD_LABEL_DAYS_AMONG_KNOWN_CONTACTS": "Days among known contacts",
@@ -474,7 +474,20 @@
       "LNG_ENTITY_FIELD_LABEL_PLACE": "Place",
       "LNG_ENTITY_FIELD_LABEL_ADDRESS": "Address"
     },
+    "addressFields": {
+      "LNG_CASE_FIELD_LABEL_ADDRESSES": "Addresses",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_NAME": "Name",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY": "Country",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY": "CITY",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1": "Address Line 1",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_2": "Address Line 2",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE": "Postal Code",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID": "Location ID",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION": "Geo-Location",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE": "Date"
+    },
     "uiCaseFields": {
+      "LNG_CASE_FIELD_LABEL_ADDRESSES": "Addresses",
       "LNG_CASE_FIELD_LABEL_DATE_OF_INFECTION": "Date of Infection",
       "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "Fill Geo-Location Latitude",
       "LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME": "Date of Outcome",
@@ -501,7 +514,7 @@
       "LNG_CASE_FIELD_LABEL_PHONE_NUMBER": "Phone Number",
       "LNG_CASE_FIELD_LABEL_GENDER": "Gender",
       "LNG_CASE_FIELD_LABEL_CLASSIFICATION": "Classification",
-      "LNG_CASE_FIELD_LABEL_OCCUPATION": "Ocupation",
+      "LNG_CASE_FIELD_LABEL_OCCUPATION": "Occupation",
       "LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE": "Document Type",
       "LNG_CASE_FIELD_LABEL_RISK_LEVEL": "Risk Level",
       "LNG_CASE_FIELD_LABEL_ISOLATION_DATES": "Isolation Dates",
@@ -617,7 +630,8 @@
       "LNG_RELATIONSHIP_FIELD_LABEL_CLUSTER": "Cluster",
       "LNG_RELATIONSHIP_FIELD_LABEL_COMMENT": "Comment",
       "LNG_RELATIONSHIP_FIELD_LABEL_PERSON_FIRST_NAME": "First Name",
-      "LNG_RELATIONSHIP_FIELD_LABEL_PERSON_LAST_NAME": "Last Name"
+      "LNG_RELATIONSHIP_FIELD_LABEL_PERSON_LAST_NAME": "Last Name",
+      "LNG_RELATIONSHIP_FIELD_LABEL_SOCIAL_RELATIONSHIP_TYPE": "Social Relationship Type"
     },
     "uiFollowUpfields": {
       "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT": "Contact",
@@ -815,7 +829,8 @@
       "LNG_PAGE_CREATE_OUTBREAK_TAB_LAB_RESULTS": "Lab Results",
       "LNG_PAGE_CREATE_OUTBREAK_TAB_DONE": "Done",
       "LNG_PAGE_CREATE_OUTBREAK_ACTION_CREATE_OUTBREAK_SUCCESS_MESSAGE": "Outbreak created",
-      "LNG_PAGE_CREATE_OUTBREAK_END_DATE_START_DATE_ERROR": "End date needs to be greater than start date"
+      "LNG_PAGE_CREATE_OUTBREAK_END_DATE_START_DATE_ERROR": "End date needs to be greater than start date",
+      "LNG_PAGE_CREATE_OUTBREAK_TAB_CASE_INFORMATION": "Case Information"
     },
     "uiModifyOutbreakPage": {
       "LNG_PAGE_MODIFY_OUTBREAK_LINK_MODIFY": "Modify Outbreak",
@@ -836,6 +851,14 @@
     },
     "uiTransmissionChainsListPage": {
       "LNG_PAGE_LIST_TRANSMISSION_CHAINS_TITLE": "Chains of Transmission"
+    },
+    "pdfExport": {
+      "LNG_PAGE_TITLE_CASE_DETAILS": "Case Details",
+      "LNG_PAGE_TITLE_CASE_QUESTIONNAIRE": "Case Questionnaire",
+      "LNG_PAGE_TITLE_LAB_RESULTS_DETAILS": "Lab Results Details",
+      "LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE": "Lab Results Questionnaire",
+      "LNG_PAGE_TITLE_CONTACT_DETAILS": "Contact Details",
+      "LNG_PAGE_TITLE_CONTACT_RELATIONSHIP": "Contact Relationship"
     }
   }
 }

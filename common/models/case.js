@@ -32,7 +32,14 @@ module.exports = function (Case) {
     'riskLevel': 'LNG_CASE_FIELD_LABEL_RISK_LEVEL',
     'riskReason': 'LNG_CASE_FIELD_LABEL_RISK_REASON',
     'dateOfOutcome': 'LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME',
-    'deceased': 'LNG_CASE_FIELD_LABEL_DECEASED'
+    'deceased': 'LNG_CASE_FIELD_LABEL_DECEASED',
+    'type': 'LNG_CASE_FIELD_LABEL_TYPE',
+    'isolationDates': 'LNG_CASE_FIELD_LABEL_ISOLATION_DATES',
+    'hospitalizationDates': 'LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES',
+    'incubationDates': 'LNG_CASE_FIELD_LABEL_INCUBATION_DATES',
+    'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
+    'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
+    'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
   };
 
   Case.referenceDataFieldsToCategoryMap = {
@@ -50,4 +57,31 @@ module.exports = function (Case) {
     template: 'caseInvestigationTemplate',
     containerProperty: 'questionnaireAnswers'
   };
+
+  Case.printFieldsinOrder = [
+    'firstName',
+    'middleName',
+    'lastName',
+    'gender',
+    'dob',
+    'age',
+    'occupation',
+    'phoneNumber',
+    'addresses',
+    'documents',
+    'type',
+    'classification',
+    'riskLevel',
+    'riskReason',
+    'dateBecomeCase',
+    'dateDeceased',
+    'dateOfInfection',
+    'dateOfOnset',
+    'dateOfOutcome',
+    'hospitalizationDates',
+    'incubationDates',
+    'isolationDates',
+    'transferRefused',
+    'deceased'
+  ];
 };

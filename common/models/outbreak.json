@@ -939,6 +939,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "exportCaseInvestigationTemplate"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_case",
       "permission": "ALLOW",
       "property": "importImportableCasesFileUsingMap"
@@ -3023,6 +3029,42 @@
       "http": {
         "verb": "post",
         "path": "/cases/lab-results/import-importable-file-using-map"
+      }
+    },
+    "prototype.exportCaseInvestigationTemplate": {
+      "accepts": [
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export pdf containing case investigation template",
+      "http": {
+        "verb": "get",
+        "path": "/cases/export-investigation-template"
       }
     },
     "prototype.importImportableCasesFileUsingMap": {

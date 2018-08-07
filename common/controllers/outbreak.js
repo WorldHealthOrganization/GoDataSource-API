@@ -1444,12 +1444,12 @@ module.exports = function (Outbreak) {
                 // check if the case is new (date of reporting is later than the threshold date)
                 if ((new Date(person.dateOfReporting)) >= newCasesFromDate) {
                   result.newCases++;
+                  result.caseIDs.push(person.id);
                 }
               }
             })
           }
         });
-        result.caseIDs = Object.keys(casesIndex);
         callback(null, result);
       })
       .catch(callback);
@@ -3525,5 +3525,93 @@ module.exports = function (Outbreak) {
           }));
         }
       });
+  };
+
+  /**
+   * Build and return a pdf containing case investigation template
+   * @param request
+   * @param callback
+   */
+  Outbreak.prototype.exportCaseInvestigationTemplate = function (request, callback) {
+    const models = app.models;
+    const translateToken = models.language.getFieldTranslationFromDictionary;
+    const pdfUtils = app.utils.pdfDoc;
+    let template = this.caseInvestigationTemplate;
+
+    // authenticated user's language, used to know in which language to translate
+    let languageId = request.remotingContext.req.authData.userInstance.languageId;
+
+    // load user language dictionary
+    app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
+      // handle errors
+      if (error) {
+        return callback(error);
+      }
+
+      // translate case, lab results, contact fields
+      let caseModel = Object.assign({}, models.case.fieldLabelsMap);
+      caseModel.addresses = [models.address.fieldLabelsMap];
+      caseModel.documents = [models.document.fieldLabelsMap];
+
+      let caseFields = helpers.translateFieldLabels(caseModel, 'case', languageId, dictionary);
+      let contactFields = helpers.translateFieldLabels(models.contact.fieldLabelsMap, 'contact', languageId, dictionary);
+
+      // remove not needed properties from lab result/relationship field maps
+      let relationFieldsMap = Object.assign({}, models.relationship.fieldLabelsMap);
+      let labResultFieldsMap = Object.assign({}, models.labResult.fieldLabelsMap);
+      delete labResultFieldsMap.personId;
+      delete relationFieldsMap.persons;
+
+      let labResultsFields = helpers.translateFieldLabels(labResultFieldsMap, 'labResult', languageId, dictionary);
+      let relationFields = helpers.translateFieldLabels(relationFieldsMap, 'relationship', languageId, dictionary);
+
+      // translate template questions
+      let questions = Outbreak.helpers.parseTemplateQuestions(template, languageId, dictionary);
+
+      // generate pdf document
+      let doc = pdfUtils.createPdfDoc({
+        fontSize: 11,
+        layout: 'portrait'
+      });
+
+      // add a top margin of 2 lines for each page
+      doc.on('pageAdded', () => {
+        doc.moveDown(2);
+      });
+
+      // set margin top for first page here, to not change the entire createPdfDoc functionality
+      doc.moveDown(2);
+
+      // add case profile fields (empty)
+      pdfUtils.createPersonProfile(doc, caseFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
+
+      // add case investigation questionnaire into the pdf in a separate page
+      doc.addPage();
+      pdfUtils.createQuestionnaire(doc, questions, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE'));
+
+      // add lab results information into a separate page
+      doc.addPage();
+      pdfUtils.createPersonProfile(doc, labResultsFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_DETAILS'));
+      doc.addPage();
+      pdfUtils.createQuestionnaire(doc, questions, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE'));
+
+      // add contact relation template
+      doc.addPage();
+      pdfUtils.createPersonProfile(doc, contactFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
+      pdfUtils.createPersonProfile(doc, relationFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_RELATIONSHIP'));
+
+      // end the document stream
+      // to convert it into a buffer
+      doc.end();
+
+      // convert pdf stream to buffer and send it as response
+      genericHelpers.streamToBuffer(doc, (err, buffer) => {
+        if (err) {
+          callback(err);
+        } else {
+          app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', `case_investigation.pdf`, callback);
+        }
+      });
+    });
   };
 };
