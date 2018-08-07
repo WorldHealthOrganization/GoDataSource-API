@@ -135,6 +135,9 @@ module.exports = function (Sync) {
     let tmpDir = tmp.dirSync({ unsafeCleanup: true });
     let tmpDirName = tmpDir.name;
 
+    // create a list that will contain list of collection with failed records
+    let failedIds = {};
+
     // extract the compressed database snapshot into the newly created temporary directory
     tar.x(
       {
@@ -177,12 +180,16 @@ module.exports = function (Sync) {
                 },
                 (err, data) => {
                   if (err) {
-                    return doneCollection(err);
+                    app.logger.error(`Failed to read collection file ${filePath}. ${err}`);
+                    return doneCollection();
                   }
 
                   // parse file contents to JavaScript object
                   try {
                     let collectionRecords = JSON.parse(data);
+
+                    // create failed records entry
+                    failedIds[collectionName] = [];
 
                     return async.parallel(
                       collectionRecords.map((collectionRecord) => (doneRecord) => {
@@ -191,25 +198,36 @@ module.exports = function (Sync) {
                         collectionRecord.id = collectionRecord._id;
 
                         // sync the record with the main database
-                        dbSync.syncRecord(app.logger, model, collectionRecord, (err) => doneRecord(err));
+                        dbSync.syncRecord(app.logger, model, collectionRecord, (err) => {
+                          if (err) {
+                            failedIds[collectionName].push(collectionRecord.id);
+                          }
+                          return doneRecord();
+                        });
                       }),
-                      (err) => doneCollection(err)
+                      () => {
+                        if (!failedIds[collectionName].length) {
+                          delete failedIds[collectionName];
+                        }
+
+                        return doneCollection();
+                      }
                     )
                   } catch (parseError) {
                     app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
-                    return callback(app.utils.apiError.getError('INVALID_SNAPSHOT_FILE'));
+                    return doneCollection();
                   }
                 });
             }),
-            (err) => {
+            () => {
               // remove temporary directory
               tmpDir.removeCallback();
 
               // remove temporary uploaded file
               fs.unlink(filePath);
 
-              if (err) {
-                return callback(err);
+              if (Object.keys(failedIds).length) {
+                return callback(null, { failedRecords: failedIds });
               }
 
               return callback();

@@ -70,7 +70,15 @@
           "type": "file"
         }
       ],
-      "returns": [],
+      "returns": [
+        {
+          "arg": "failedIds",
+          "description": "Failed records ids",
+          "type": "object",
+          "root": true,
+          "required": true
+        }
+      ],
       "description": "Synchronize the database based on a given snapshot archive",
       "http": {
         "verb": "post",
