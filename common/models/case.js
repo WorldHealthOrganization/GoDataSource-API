@@ -21,10 +21,13 @@ module.exports = function (Case) {
     'age': 'LNG_CASE_FIELD_LABEL_AGE',
     'dob': 'LNG_CASE_FIELD_LABEL_DOB',
     'classification': 'LNG_CASE_FIELD_LABEL_CLASSIFICATION',
+    'documents[].type': 'LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE',
+    'documents[].number': 'LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER',
     'dateBecomeCase': 'LNG_CASE_FIELD_LABEL_DATE_BECOME_CASE',
     'dateDeceased': 'LNG_CASE_FIELD_LABEL_DATE_DECEASED',
     'dateOfInfection': 'LNG_CASE_FIELD_LABEL_DATE_OF_INFECTION',
     'dateOfOnset': 'LNG_CASE_FIELD_LABEL_DATE_OF_ONSET',
+    'dateOfReporting': 'LNG_CASE_FIELD_LABEL_DATE_OF_REPORTING',
     'phoneNumber': 'LNG_CASE_FIELD_LABEL_PHONE_NUMBER',
     'riskLevel': 'LNG_CASE_FIELD_LABEL_RISK_LEVEL',
     'riskReason': 'LNG_CASE_FIELD_LABEL_RISK_REASON',
@@ -45,17 +48,15 @@ module.exports = function (Case) {
     gender: 'LNG_REFERENCE_DATA_CATEGORY_GENDER',
     occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
     outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
-    'documents.type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE'
+    'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE'
   };
 
-  // keep a list of fields that use values from reference data
-  Case.referenceDataFields = [
-    'gender',
-    'classification',
-    'riskLevel',
-    'occupation',
-    'documents[].type'
-  ];
+  Case.referenceDataFields = Object.keys(Case.referenceDataFieldsToCategoryMap);
+
+  Case.extendedForm = {
+    template: 'caseInvestigationTemplate',
+    containerProperty: 'questionnaireAnswers'
+  };
 
   Case.printFieldsinOrder = [
     'firstName',

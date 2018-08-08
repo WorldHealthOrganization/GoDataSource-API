@@ -116,12 +116,14 @@ const remapProperties = function (list, fieldsMap, valuesMap) {
     let result = {};
     // go trough the list of fields
     fields.forEach(function (field) {
+      // if no array position was specified, use position 0
+      fieldsMap[field] = fieldsMap[field].replace(/\[]/g, '[0]');
       // remap property
       _.set(result, fieldsMap[field], item[field]);
       // if a values map was provided
-      if (valuesMap[field] && valuesMap[field][item[field]] !== undefined) {
+      if (valuesMap && valuesMap[field] && valuesMap[field][item[field]] !== undefined) {
         // remap the values
-      _.set(result, fieldsMap[field], valuesMap[field][item[field]]);
+        _.set(result, fieldsMap[field], valuesMap[field][item[field]]);
       }
     });
     // add processed item to the final list
@@ -156,6 +158,24 @@ const convertPropsToDate = function (obj) {
   }
 };
 
+/**
+ * Extract only the importable fields for a model from a record data
+ * @param Model
+ * @param data
+ */
+const extractImportableFields = function (Model, data) {
+  // store importable properties as part of a new object
+  const importableFields = {};
+  // go through all importable top level properties
+  Model._importableTopLevelProperties.forEach(function (importableProperty) {
+    // add the importable data (if it exists)
+    if (data[importableProperty] !== undefined) {
+      importableFields[importableProperty] = data[importableProperty];
+    }
+  });
+  return importableFields;
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamToBuffer,
@@ -163,5 +183,6 @@ module.exports = {
   getUTCDateEndOfDay: getUTCDateEndOfDay,
   getAsciiString: getAsciiString,
   getChunksForInterval: getChunksForInterval,
-  convertPropsToDate: convertPropsToDate
+  convertPropsToDate: convertPropsToDate,
+  extractImportableFields: extractImportableFields
 };

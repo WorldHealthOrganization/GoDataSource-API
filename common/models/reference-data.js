@@ -136,7 +136,10 @@ module.exports = function (ReferenceData) {
       // get their list of reference data fields
       if (Array.isArray(Model.referenceDataFields)) {
         // build possible record usage list
-        ReferenceData.possibleRecordUsage[Model.modelName] = Model.referenceDataFields;
+        ReferenceData.possibleRecordUsage[Model.modelName] = Model.referenceDataFields.map(function (referenceDataField) {
+          // some fields contain array markers ([]) needed by some business logic, remove those here
+          return referenceDataField.replace(/\[]/g,'');
+        });
       }
     });
   });

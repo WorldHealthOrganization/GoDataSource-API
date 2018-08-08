@@ -1316,7 +1316,7 @@ module.exports = function (Outbreak) {
             delete noOfChains.nodes;
             callback(null, noOfChains);
           })
-          .catch(callback)
+          .catch(callback);
       });
   };
 
@@ -3182,16 +3182,18 @@ module.exports = function (Outbreak) {
                       id: labResult.personId
                     });
                   }
-                  // create the lab result
-                  return app.models.labResult
-                    .create(labResult, options)
+                  return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.labResult, labResult, options)
                     .then(function (result) {
-                      callback(null, result);
+                      callback(null, result.record);
                     });
                 })
                 .catch(function (error) {
                   // on error, store the error, but don't stop, continue with other items
-                  createErrors.push(`Failed to import lab result ${index + 1}. Error: ${JSON.stringify(error)}`);
+                  createErrors.push({
+                    message: `Failed to import lab result ${index + 1}`,
+                    error: error,
+                    recordNo: index + 1
+                  });
                   callback(null, null);
                 });
             });
@@ -3213,6 +3215,282 @@ module.exports = function (Outbreak) {
               // return error with partial success
               return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
                 model: app.models.labResult.modelName,
+                failed: createErrors,
+                success: results
+              }));
+            }
+            // send the result
+            callback(null, results);
+          });
+        } catch (error) {
+          // handle parse error
+          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
+            contentType: 'JSON',
+            details: error.message
+          }));
+        }
+      });
+  };
+
+  /**
+   * Import an importable cases file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.importImportableCasesFileUsingMap = function (body, options, callback) {
+    const self = this;
+    // get importable file
+    app.models.importableFile
+      .getTemporaryFileById(body.fileId, function (error, file) {
+        // handle errors
+        if (error) {
+          return callback(error);
+        }
+        try {
+          // parse file content
+          const rawCasesList = JSON.parse(file);
+          // remap properties & values
+          const casesList = app.utils.helpers.remapProperties(rawCasesList, body.map, body.valuesMap);
+          // build a list of create operations
+          const createCases = [];
+          // define a container for error results
+          const createErrors = [];
+          // define a toString function to be used by error handler
+          createErrors.toString = function () {
+            return JSON.stringify(this);
+          };
+          // go through all entries
+          casesList.forEach(function (caseData, index) {
+            createCases.push(function (callback) {
+              // create the case
+              return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.case, caseData, options)
+                .then(function (result) {
+                  callback(null, result.record);
+                })
+                .catch(function (error) {
+                  // on error, store the error, but don't stop, continue with other items
+                  createErrors.push({
+                    message: `Failed to import case ${index + 1}`,
+                    error: error,
+                    recordNo: index + 1
+                  });
+                  callback(null, null);
+                });
+            });
+          });
+          // start importing cases
+          async.parallelLimit(createCases, 10, function (error, results) {
+            // handle errors (should not be any)
+            if (error) {
+              return callback(error);
+            }
+            // if import errors were found
+            if (createErrors.length) {
+              // remove results that failed to be added
+              results = results.filter(result => result !== null);
+              // define a toString function to be used by error handler
+              results.toString = function () {
+                return JSON.stringify(this);
+              };
+              // return error with partial success
+              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+                model: app.models.case.modelName,
+                failed: createErrors,
+                success: results
+              }));
+            }
+            // send the result
+            callback(null, results);
+          });
+        } catch (error) {
+          // handle parse error
+          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
+            contentType: 'JSON',
+            details: error.message
+          }));
+        }
+      });
+  };
+
+  /**
+   * Import an importable contacts file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.importImportableContactsFileUsingMap = function (body, options, callback) {
+
+    const self = this;
+    // get importable file
+    app.models.importableFile
+      .getTemporaryFileById(body.fileId, function (error, file) {
+        // handle errors
+        if (error) {
+          return callback(error);
+        }
+        try {
+          // parse file content
+          const rawContactList = JSON.parse(file);
+          // remap properties & values
+          const contactsList = app.utils.helpers.remapProperties(rawContactList, body.map, body.valuesMap);
+          // build a list of create operations
+          const createContacts = [];
+          // define a container for error results
+          const createErrors = [];
+          // define a toString function to be used by error handler
+          createErrors.toString = function () {
+            return JSON.stringify(this);
+          };
+          // go through all entries
+          contactsList.forEach(function (recordData, index) {
+            createContacts.push(function (callback) {
+              // extract relationship data
+              const relationshipData = app.utils.helpers.extractImportableFields(app.models.relationship, recordData);
+              // extract contact data
+              const contactData = app.utils.helpers.extractImportableFields(app.models.contact, recordData);
+              // create the contact
+              return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.contact, contactData, options)
+                .then(function (syncResult) {
+                  const contactRecord = syncResult.record;
+                  // promisify next step
+                  return new Promise(function (resolve, reject) {
+                    // normalize people
+                    Outbreak.helpers.validateAndNormalizePeople(contactRecord.id, 'contact', relationshipData, false, function (error, persons) {
+                      if (error) {
+                        return reject(error);
+                      }
+                      // add outbreak information
+                      relationshipData.outbreakId = self.id;
+                      // update persons with normalized persons
+                      relationshipData.person = persons;
+                      // create relationship
+                      return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.relationship, relationshipData, options)
+                        .then(function (createdRelationship) {
+                          // relationship successfully created, move to tne next one
+                          callback(null, Object.assign({}, contactRecord.toJSON(), {relationships: [createdRelationship.record.toJSON()]}));
+                        })
+                        .catch(function (error) {
+                          // failed to create relationship, remove the contact if it was created during sync
+                          if (syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED) {
+                            contactRecord.destroy();
+                          }
+                          reject(error);
+                        });
+                    });
+                  });
+                })
+                .catch(function (error) {
+                  // on error, store the error, but don't stop, continue with other items
+                  createErrors.push({
+                    message: `Failed to import contact ${index + 1}`,
+                    error: error,
+                    recordNo: index + 1
+                  });
+                  callback(null, null);
+                });
+            });
+          });
+          // start importing contacts
+          async.parallelLimit(createContacts, 10, function (error, results) {
+            // handle errors (should not be any)
+            if (error) {
+              return callback(error);
+            }
+            // if import errors were found
+            if (createErrors.length) {
+              // remove results that failed to be added
+              results = results.filter(result => result !== null);
+              // define a toString function to be used by error handler
+              results.toString = function () {
+                return JSON.stringify(this);
+              };
+              // return error with partial success
+              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+                model: app.models.contact.modelName,
+                failed: createErrors,
+                success: results
+              }));
+            }
+            // send the result
+            callback(null, results);
+          });
+        } catch (error) {
+          // handle parse error
+          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
+            contentType: 'JSON',
+            details: error.message
+          }));
+        }
+      });
+  };
+
+
+  /**
+   * Import an importable outbreaks file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.importImportableOutbreaksFileUsingMap = function (body, options, callback) {
+    const self = this;
+    // get importable file
+    app.models.importableFile
+      .getTemporaryFileById(body.fileId, function (error, file) {
+        // handle errors
+        if (error) {
+          return callback(error);
+        }
+        try {
+          // parse file content
+          const rawOutbreakList = JSON.parse(file);
+          // remap properties & values
+          const outbreaksList = app.utils.helpers.remapProperties(rawOutbreakList, body.map, body.valuesMap);
+          // build a list of create operations
+          const createOutbreaks = [];
+          // define a container for error results
+          const createErrors = [];
+          // define a toString function to be used by error handler
+          createErrors.toString = function () {
+            return JSON.stringify(this);
+          };
+          // go through all entries
+          outbreaksList.forEach(function (outbreakData, index) {
+            createOutbreaks.push(function (callback) {
+              // create the outbreak
+              return app.models.outbreak
+                .create(outbreakData, options)
+                .then(function (result) {
+                  callback(null, result);
+                })
+                .catch(function (error) {
+                  // on error, store the error, but don't stop, continue with other items
+                  createErrors.push({
+                    message: `Failed to import outbreak ${index + 1}`,
+                    error: error,
+                    recordNo: index + 1
+                  });
+                  callback(null, null);
+                });
+            });
+          });
+          // start importing outbreaks
+          async.parallelLimit(createOutbreaks, 10, function (error, results) {
+            // handle errors (should not be any)
+            if (error) {
+              return callback(error);
+            }
+            // if import errors were found
+            if (createErrors.length) {
+              // remove results that failed to be added
+              results = results.filter(result => result !== null);
+              // define a toString function to be used by error handler
+              results.toString = function () {
+                return JSON.stringify(this);
+              };
+              // return error with partial success
+              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+                model: app.models.outbreak.modelName,
                 failed: createErrors,
                 success: results
               }));
@@ -3253,6 +3531,14 @@ module.exports = function (Outbreak) {
 
       // translate case, lab results, contact fields
       let caseModel = Object.assign({}, models.case.fieldLabelsMap);
+
+      // remove array properties from model definition (they are handled separately)
+      Object.keys(caseModel).forEach(function (property) {
+        if (property.indexOf('[]') !== -1) {
+          delete caseModel[property];
+        }
+      });
+
       caseModel.addresses = [models.address.fieldLabelsMap];
       caseModel.documents = [models.document.fieldLabelsMap];
 

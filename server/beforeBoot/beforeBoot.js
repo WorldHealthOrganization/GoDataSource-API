@@ -14,6 +14,7 @@ const helpers = require('../../components/helpers');
 const remoteHelpers = require('../../components/remoteHelpers');
 const pdfDoc = require('../../components/pdfDoc');
 const spreadSheetFile = require('../../components/spreadSheetFile');
+const dbSync = require('../../components/dbSync');
 
 function init(app, callback) {
   app.utils = {
@@ -44,7 +45,8 @@ function init(app, callback) {
     qrCode: qrCode,
     helpers: helpers,
     pdfDoc: pdfDoc,
-    spreadSheetFile: spreadSheetFile
+    spreadSheetFile: spreadSheetFile,
+    dbSync: dbSync
   };
   callback();
 }

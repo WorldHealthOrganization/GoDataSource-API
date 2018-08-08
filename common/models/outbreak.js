@@ -8,6 +8,29 @@ const moment = require('moment');
 
 module.exports = function (Outbreak) {
 
+  Outbreak.fieldLabelsMap = {
+    name: 'LNG_OUTBREAK_FIELD_LABEL_NAME',
+    description: 'LNG_OUTBREAK_FIELD_LABEL_DESCRIPTION',
+    disease: 'LNG_OUTBREAK_FIELD_LABEL_DISEASE',
+    countries: 'LNG_OUTBREAK_FIELD_LABEL_COUNTRIES',
+    startDate: 'LNG_OUTBREAK_FIELD_LABEL_START_DATE',
+    endDate: 'LNG_OUTBREAK_FIELD_LABEL_END_DATE',
+    longPeriodsBetweenCaseOnset: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_LONG_PERIODS',
+    periodOfFollowup: 'LNG_OUTBREAK_FIELD_LABEL_DURATION_FOLLOWUP_DAYS',
+    frequencyOfFollowUp: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY',
+    frequencyOfFollowUpPerDay: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY_PER_DAY',
+    noDaysAmongContacts: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_AMONG_KNOWN_CONTACTS',
+    noDaysInChains: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_IN_KNOWN_TRANSMISSION_CHAINS',
+    noDaysNotSeen: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_NOT_SEEN',
+    noLessContacts: 'LNG_OUTBREAK_FIELD_LABEL_LESS_THAN_X_CONTACTS',
+    noDaysNewContacts: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_NEW_CONTACT',
+    fieldsToDisplayNode: 'LNG_OUTBREAK_FIELD_LABEL_FIELDS_TO_DISPLAY_NODE',
+    caseInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CASE_INVESTIGATION_TEMPLATE',
+    contactFollowUpTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_FOLLOWUP_TEMPLATE',
+    labResultsTemplate: 'LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE',
+    caseIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK'
+  };
+
   Outbreak.referenceDataFieldsToCategoryMap = {
     disease: 'LNG_REFERENCE_DATA_CATEGORY_DISEASE'
   };
@@ -60,10 +83,16 @@ module.exports = function (Outbreak) {
    * @param personId
    * @param type
    * @param data
+   * @param [isCurrentPersonSource]
    * @param callback
    * @return {*}
    */
-  Outbreak.helpers.validateAndNormalizePeople = function (personId, type, data, callback) {
+  Outbreak.helpers.validateAndNormalizePeople = function (personId, type, data, isCurrentPersonSource, callback) {
+    // isCurrentPersonSource is optional and by default is true
+    if (callback === undefined) {
+      callback = isCurrentPersonSource;
+      isCurrentPersonSource = true;
+    }
     if (Array.isArray(data.persons) && data.persons.length) {
 
       let errors;
@@ -107,7 +136,7 @@ module.exports = function (Outbreak) {
         data.persons.push({
           id: personId,
           type: type,
-          source: true
+          [isCurrentPersonSource ? 'source' : 'target']: true
         });
       }
 
@@ -141,7 +170,7 @@ module.exports = function (Outbreak) {
                   }));
                 }
                 // this person is a target
-                data.persons[index].target = true;
+                data.persons[index][isCurrentPersonSource ? 'target' : 'source'] = true;
                 // set its type
                 data.persons[index].type = foundPerson.type;
               })
