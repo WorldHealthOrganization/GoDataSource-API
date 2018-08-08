@@ -3175,13 +3175,14 @@ module.exports = function (Outbreak) {
                   }
                 })
                 .then(function (caseInstance) {
-                  // if the person was not found, don't create the case, stop with error
+                  // if the person was not found, don't sync the lab result, stop with error
                   if (!caseInstance) {
                     throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
                       model: app.models.case.modelName,
                       id: labResult.personId
                     });
                   }
+                  // sync the record
                   return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.labResult, labResult, options)
                     .then(function (result) {
                       callback(null, result.record);
@@ -3263,7 +3264,7 @@ module.exports = function (Outbreak) {
           // go through all entries
           casesList.forEach(function (caseData, index) {
             createCases.push(function (callback) {
-              // create the case
+              // sync the case
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.case, caseData, options)
                 .then(function (result) {
                   callback(null, result.record);
@@ -3349,7 +3350,7 @@ module.exports = function (Outbreak) {
               const relationshipData = app.utils.helpers.extractImportableFields(app.models.relationship, recordData);
               // extract contact data
               const contactData = app.utils.helpers.extractImportableFields(app.models.contact, recordData);
-              // create the contact
+              // sync the contact
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.contact, contactData, options)
                 .then(function (syncResult) {
                   const contactRecord = syncResult.record;
@@ -3364,11 +3365,11 @@ module.exports = function (Outbreak) {
                       relationshipData.outbreakId = self.id;
                       // update persons with normalized persons
                       relationshipData.person = persons;
-                      // create relationship
+                      // sync relationship
                       return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.relationship, relationshipData, options)
-                        .then(function (createdRelationship) {
+                        .then(function (syncedRelationship) {
                           // relationship successfully created, move to tne next one
-                          callback(null, Object.assign({}, contactRecord.toJSON(), {relationships: [createdRelationship.record.toJSON()]}));
+                          callback(null, Object.assign({}, contactRecord.toJSON(), {relationships: [syncedRelationship.record.toJSON()]}));
                         })
                         .catch(function (error) {
                           // failed to create relationship, remove the contact if it was created during sync
@@ -3457,11 +3458,10 @@ module.exports = function (Outbreak) {
           // go through all entries
           outbreaksList.forEach(function (outbreakData, index) {
             createOutbreaks.push(function (callback) {
-              // create the outbreak
-              return app.models.outbreak
-                .create(outbreakData, options)
-                .then(function (result) {
-                  callback(null, result);
+              // sync the outbreak
+              return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.outbreak, outbreakData, options)
+                .then(function (syncResult) {
+                  callback(null, syncResult.record);
                 })
                 .catch(function (error) {
                   // on error, store the error, but don't stop, continue with other items
@@ -3515,7 +3515,6 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.exportCaseInvestigationTemplate = function (request, callback) {
     const models = app.models;
-    const translateToken = models.language.getFieldTranslationFromDictionary;
     const pdfUtils = app.utils.pdfDoc;
     let template = this.caseInvestigationTemplate;
 
