@@ -5,6 +5,16 @@ const templateParser = require('./../../components/templateParser');
 const _ = require('lodash');
 const async = require('async');
 
+const commonModelLabels = {
+  id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+  createdAt: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
+  createdBy: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_BY',
+  updatedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',
+  updatedBy: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
+  deleted: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
+  deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT'
+};
+
 /**
  * Remove special chars and then lowercase the string
  * @param string
@@ -267,8 +277,10 @@ module.exports = function (ImportableFile) {
               });
             }
 
+            // merge model's field to label map with the common one
+            const fieldLabelsMap = Object.assign({}, app.models[modelName].fieldLabelsMap || {}, commonModelLabels);
             // if the model has importable properties, get their headers and try to suggest some mappings
-            if (app.models[modelName]._importableProperties && app.models[modelName]._importableProperties.length && app.models[modelName].fieldLabelsMap) {
+            if (app.models[modelName]._importableProperties && app.models[modelName]._importableProperties.length) {
               steps.push(function (callback) {
                 // normalize model headers (property labels)
                 const normalizedModelProperties = app.models[modelName]._importableProperties.map(function (property) {
@@ -281,12 +293,12 @@ module.exports = function (ImportableFile) {
                       result.modelProperties[propertyComponents[0]] = {};
                     }
                     // store the sub component under parent component
-                    result.modelProperties[propertyComponents[0]][propertyComponents[1]] = app.models[modelName].fieldLabelsMap[property];
+                    result.modelProperties[propertyComponents[0]][propertyComponents[1]] = fieldLabelsMap[property];
                   } else {
                     // no sub components, store property directly
-                    result.modelProperties[property] = app.models[modelName].fieldLabelsMap[property];
+                    result.modelProperties[property] = fieldLabelsMap[property];
                   }
-                  return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(app.models[modelName].fieldLabelsMap[property]));
+                  return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(fieldLabelsMap[property]));
                 });
 
                 // try to find mapping suggestions between file headers and model headers (property labels)

@@ -326,6 +326,15 @@
       "LNG_TRANSLATION_FILE_LANGUAGE_TOKEN_HEADER": "日本の Language Token",
       "LNG_TRANSLATION_FILE_TRANSLATION_HEADER": "日本の Translation"
     },
+    "commonModelProperties": {
+      "LNG_COMMON_MODEL_FIELD_LABEL_ID": "日本の ID",
+      "LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT": "日本の Created At",
+      "LNG_COMMON_MODEL_FIELD_LABEL_CREATED_BY": "日本の Created By",
+      "LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT": "日本の Updated At",
+      "LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY": "日本の Updated By",
+      "LNG_COMMON_MODEL_FIELD_LABEL_DELETED": "日本の Deleted",
+      "LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT": "日本の Deleted At"
+    },
     "uiGenericLayout": {
       "LNG_LAYOUT_MENU_BUTTON_LABEL": "日本の MENU",
       "LNG_LAYOUT_MENU_ITEM_LOGOUT_LABEL": "日本の Log Out",

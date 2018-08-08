@@ -7,12 +7,12 @@
   },
   "mixins": {
     "EnumProperty": true,
-    "ReadOnlyProperty": true,
     "UniqueValidator": true,
     "PatternValidator": true,
     "AuthorTimeStamp": true,
     "AuditLogger": true,
     "SoftDelete": true,
+    "ReadOnlyProperty": true,
     "AttachController": true,
     "IncludeCustomRelations": true
   },
