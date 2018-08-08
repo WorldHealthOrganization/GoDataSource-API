@@ -3182,7 +3182,7 @@ module.exports = function (Outbreak) {
                       id: labResult.personId
                     });
                   }
-                  return app.utils.dbSync.syncRecord(app.models.labResult, labResult, options)
+                  return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.labResult, labResult, options)
                     .then(function (result) {
                       callback(null, result.record);
                     });
@@ -3264,7 +3264,7 @@ module.exports = function (Outbreak) {
           casesList.forEach(function (caseData, index) {
             createCases.push(function (callback) {
               // create the case
-              return app.utils.dbSync.syncRecord(app.models.case, caseData, options)
+              return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.case, caseData, options)
                 .then(function (result) {
                   callback(null, result.record);
                 })
@@ -3350,7 +3350,7 @@ module.exports = function (Outbreak) {
               // extract contact data
               const contactData = app.utils.helpers.extractImportableFields(app.models.contact, recordData);
               // create the contact
-              return app.utils.dbSync.syncRecord(app.models.contact, contactData, options)
+              return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.contact, contactData, options)
                 .then(function (syncResult) {
                   const contactRecord = syncResult.record;
                   // promisify next step
@@ -3365,7 +3365,7 @@ module.exports = function (Outbreak) {
                       // update persons with normalized persons
                       relationshipData.person = persons;
                       // create relationship
-                      return app.utils.dbSync.syncRecord(app.models.relationship, relationshipData, options)
+                      return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.relationship, relationshipData, options)
                         .then(function (createdRelationship) {
                           // relationship successfully created, move to tne next one
                           callback(null, Object.assign({}, contactRecord.toJSON(), {relationships: [createdRelationship.record.toJSON()]}));

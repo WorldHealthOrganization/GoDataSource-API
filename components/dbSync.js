@@ -34,12 +34,19 @@ const syncRecordFlags = {
  * If no record is found or record is found and was created externally (no updateAt flag), create new record
  * If record has updateAt timestamp higher than the main database, update
  *
+ * @param logger
  * @param model
  * @param record
  * @param [options]
  * @param [done]
  */
-const syncRecord = function (model, record, options, done) {
+const syncRecord = function (logger, model, record, options, done) {
+
+  // log formatted message
+  function log(level, message) {
+    logger[level](`dbSync::syncRecord ${model.modelName}: ${message}`);
+  }
+
   // options is optional parameter
   if (typeof options === 'function') {
     done = options;
@@ -49,6 +56,7 @@ const syncRecord = function (model, record, options, done) {
   let findRecord;
   // check if a record with the given id exists if record.id exists
   if (record.id !== undefined) {
+    log('debug', `Trying to find record with id ${record.id}.`);
     findRecord = model
       .findOne({
         where: {
@@ -57,6 +65,7 @@ const syncRecord = function (model, record, options, done) {
         deleted: true
       })
   } else {
+    log('debug', `Record id not present`);
     // record id not present, don't search for a record
     findRecord = Promise.resolve();
   }
@@ -65,6 +74,7 @@ const syncRecord = function (model, record, options, done) {
     .then(function (dbRecord) {
       // record not found, create it
       if (!dbRecord) {
+        log('debug', `Record not found (id: ${record.id}), creating record.`);
         return model
           .create(record, options)
           .then(function (dbRecord) {
@@ -78,6 +88,7 @@ const syncRecord = function (model, record, options, done) {
       // if record was created from third parties, it might not have updated/created timestamps
       // in this case, just create a new record with new id
       if (!dbRecord.updatedAt) {
+        log('debug', `Record found (id: ${record.id}) but data received is missing updatedAt property, probably comes from external system, creating new record.`);
         delete record.id;
         return model
           .create(record, options)
@@ -92,6 +103,7 @@ const syncRecord = function (model, record, options, done) {
       // if updated timestamp is greater than the one in the main database, update
       // also make sure that if the record is soft deleted, it stays that way
       if (dbRecord.updatedAt.getTime() < new Date(record.updatedAt).getTime()) {
+        log('debug', `Record found (id: ${record.id}), updating record`);
         if (dbRecord.deleted) {
           record.deleted = true;
         }
@@ -105,6 +117,7 @@ const syncRecord = function (model, record, options, done) {
           });
       }
 
+      log('debug', `Record found (id: ${record.id}) but data received is older than server data, record ignored.`);
       // if nothing happened, report that
       return {
         record: dbRecord,

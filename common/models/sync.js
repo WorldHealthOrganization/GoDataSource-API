@@ -191,7 +191,7 @@ module.exports = function (Sync) {
                         collectionRecord.id = collectionRecord._id;
 
                         // sync the record with the main database
-                        dbSync.syncRecord(model, collectionRecord, (err) => doneRecord(err));
+                        dbSync.syncRecord(app.logger, model, collectionRecord, (err) => doneRecord(err));
                       }),
                       (err) => doneCollection(err)
                     )
