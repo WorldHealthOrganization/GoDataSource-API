@@ -2447,7 +2447,9 @@ module.exports = function (Outbreak) {
     let result = {
       totalCasesForIntervalCount: 0,
       totalCasesClassificationCountersForInterval: {},
-      totalCasesCountersForIntervalPerLocation: {},
+      totalCasesCountersForIntervalPerLocation: {
+        locations: []
+      },
       caseIDsForInterval: [],
       period: []
     };
@@ -2489,7 +2491,9 @@ module.exports = function (Outbreak) {
       Object.assign(result, {
         totalCasesCount: 0,
         totalCasesClassificationCounters: {},
-        totalCasesCountersPerLocation: {},
+        totalCasesCountersPerLocation: {
+          locations: []
+        },
         caseIDs: []
       });
     }
@@ -2533,7 +2537,9 @@ module.exports = function (Outbreak) {
           Object.assign(periodMap[entry], {
             totalCasesCount: 0,
             classificationCounters: {},
-            countersPerLocation: {},
+            countersPerLocation: {
+              locations: []
+            },
             caseIDs: []
           });
 
@@ -2542,8 +2548,8 @@ module.exports = function (Outbreak) {
             Object.assign(periodMap[entry], {
               totalDeadCasesCount: 0,
               totalDeadConfirmedCasesCount: 0,
-              deadCaseIDs: 0,
-              deadConfirmedCaseIDs: 0
+              deadCaseIDs: [],
+              deadConfirmedCaseIDs: []
             });
           }
         });
@@ -2557,6 +2563,8 @@ module.exports = function (Outbreak) {
           let caseLocation = item.addresses.find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
           // use usual place of residence if found else leave the case unassigned to a location
           let caseLocationId = caseLocation && caseLocation.locationId ? caseLocation.locationId : null;
+          // get confirmed flag
+          let caseConfirmed = item.classification === 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_CONFIRMED';
 
           // in case includeTotals is true, there might be cases that have the date outside of the periodInterval;
           // these cases are not added in any period entry
@@ -2604,20 +2612,226 @@ module.exports = function (Outbreak) {
             // create a period identifier
             let casePeriodIdentifier = casePeriodInterval.join(' - ');
 
-            // increase counters
-            periodMap[casePeriodIdentifier].totalCasesCount++;
-            // initialize counter for classification if it's not already initialize
-            if (!periodMap[casePeriodIdentifier].classificationCounters[item.classification]) {
-              periodMap[casePeriodIdentifier].classificationCounters[item.classification] = 0;
+            // get index of the case location in the period counters per location array
+            let periodLocationIndex = periodMap[casePeriodIdentifier].countersPerLocation.locations.findIndex(location => location.id === caseLocationId);
+            // initialize location entry is not already initialized
+            if (periodLocationIndex === -1) {
+              periodLocationIndex = periodMap[casePeriodIdentifier].countersPerLocation.locations.push(
+                Object.assign({
+                    id: caseLocationId,
+                    totalCasesCount: 0,
+                    caseIDs: []
+                  },
+                  // check for includeDeaths flag to add additional properties
+                  includeDeaths ? {
+                    totalDeadCasesCount: 0,
+                    totalDeadConfirmedCasesCount: 0,
+                    deadCaseIDs: [],
+                    deadConfirmedCaseIDs: []
+                  } : {}
+                )
+              ) - 1;
             }
-            periodMap[casePeriodIdentifier].classificationCounters[item.classification]++;
-            periodMap[casePeriodIdentifier].caseIDs.push(item.id);
+
+            // get index of the case location in the entire interval counters per location array
+            let entireIntervalLocationIndex = result.totalCasesCountersForIntervalPerLocation.locations.findIndex(location => location.id === caseLocationId);
+            // initialize location entry is not already initialized
+            if (entireIntervalLocationIndex === -1) {
+              entireIntervalLocationIndex = result.totalCasesCountersForIntervalPerLocation.locations.push(
+                Object.assign({
+                    id: caseLocationId,
+                    totalCasesCount: 0,
+                    caseIDs: []
+                  },
+                  // check for includeDeaths flag to add additional properties
+                  includeDeaths ? {
+                    totalDeadCasesCount: 0,
+                    totalDeadConfirmedCasesCount: 0,
+                    deadCaseIDs: [],
+                    deadConfirmedCaseIDs: []
+                  } : {}
+                )
+              ) - 1;
+            }
+
+            // check if case is dead; will not add it to classificationCounters if so
+            if (!item.deceased) {
+              // period classification
+              // initialize counter for period classification if it's not already initialized
+              if (!periodMap[casePeriodIdentifier].classificationCounters[item.classification]) {
+                periodMap[casePeriodIdentifier].classificationCounters[item.classification] = {
+                  count: 0,
+                  caseIDs: [],
+                  locations: []
+                };
+              }
+              periodMap[casePeriodIdentifier].classificationCounters[item.classification].count++;
+              periodMap[casePeriodIdentifier].classificationCounters[item.classification].caseIDs.push(item.id);
+
+              // get index of the case location in the locations array
+              let locationIndex = periodMap[casePeriodIdentifier].classificationCounters[item.classification].locations.findIndex(location => location.id === caseLocationId);
+              // initialize location entry is not already initialized
+              if (locationIndex === -1) {
+                locationIndex = periodMap[casePeriodIdentifier].classificationCounters[item.classification].locations.push({
+                  id: caseLocationId,
+                  totalCasesCount: 0,
+                  caseIDs: []
+                }) - 1;
+              }
+
+              // increase period classification location counters
+              periodMap[casePeriodIdentifier].classificationCounters[item.classification].locations[locationIndex].totalCasesCount++;
+              periodMap[casePeriodIdentifier].classificationCounters[item.classification].locations[locationIndex].caseIDs.push(item.id);
+
+              // increase period counters outside of case classification
+              periodMap[casePeriodIdentifier].totalCasesCount++;
+              periodMap[casePeriodIdentifier].caseIDs.push(item.id);
+
+              // increase period location counters
+              periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].totalCasesCount++;
+              periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].caseIDs.push(item.id);
+
+              // entire interval classification
+              // initialize counter for entire interval classification if it's not already initialized
+              if (!result.totalCasesClassificationCountersForInterval[item.classification]) {
+                result.totalCasesClassificationCountersForInterval[item.classification] = {
+                  count: 0,
+                  caseIDs: [],
+                  locations: []
+                };
+              }
+              result.totalCasesClassificationCountersForInterval[item.classification].count++;
+              result.totalCasesClassificationCountersForInterval[item.classification].caseIDs.push(item.id);
+
+              // get index of the case location in the entire interval classification locations array
+              let entireIntervalClassificationLocationIndex = result.totalCasesClassificationCountersForInterval[item.classification].locations.findIndex(location => location.id === caseLocationId);
+              // initialize location entry is not already initialized
+              if (entireIntervalClassificationLocationIndex === -1) {
+                entireIntervalClassificationLocationIndex = result.totalCasesClassificationCountersForInterval[item.classification].locations.push({
+                  id: caseLocationId,
+                  totalCasesCount: 0,
+                  caseIDs: []
+                }) - 1;
+              }
+
+              // increase entire interval classification classification location counters
+              result.totalCasesClassificationCountersForInterval[item.classification].locations[entireIntervalClassificationLocationIndex].totalCasesCount++;
+              result.totalCasesClassificationCountersForInterval[item.classification].locations[entireIntervalClassificationLocationIndex].caseIDs.push(item.id);
+
+              // increase entire interval counters outside of case classification
+              result.totalCasesForIntervalCount++;
+              result.caseIDsForInterval.push(item.id);
+
+              // increase entire interval location counters
+              result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].totalCasesCount++;
+              result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].caseIDs.push(item.id);
+            } else {
+              // update period counters
+              if (caseConfirmed) {
+                // update confirmed dead case counters
+                periodMap[casePeriodIdentifier].totalDeadConfirmedCasesCount++;
+                periodMap[casePeriodIdentifier].deadConfirmedCaseIDs.push(item.id);
+                periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].totalDeadConfirmedCasesCount++;
+                periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].deadConfirmedCaseIDs.push(item.id);
+
+                result.totalDeadConfirmedCasesForIntervalCount++;
+                result.deadConfirmedCaseIDsForInterval.push(item.id);
+                result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].totalDeadConfirmedCasesCount++;
+                result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].deadConfirmedCaseIDs.push(item.id);
+              }
+
+              // update death counters
+              periodMap[casePeriodIdentifier].totalDeadCasesCount++;
+              periodMap[casePeriodIdentifier].deadCaseIDs.push(item.id);
+              periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].totalDeadCasesCount++;
+              periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].deadCaseIDs.push(item.id);
+
+              result.totalDeadCasesForIntervalCount++;
+              result.deadCaseIDsForInterval.push(item.id);
+              result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].totalDeadCasesCount++;
+              result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].deadCaseIDs.push(item.id);
+            }
+          }
+
+          // check for include totals to increase totals counters
+          if (includeTotals) {
+            // get index of the case location in the total counters per location array
+            let totalLocationIndex = result.totalCasesCountersPerLocation.locations.findIndex(location => location.id === caseLocationId);
+            // initialize location entry is not already initialized
+            if (totalLocationIndex === -1) {
+              totalLocationIndex = result.totalCasesCountersPerLocation.locations.push(
+                Object.assign({
+                    id: caseLocationId,
+                    totalCasesCount: 0,
+                    caseIDs: []
+                  },
+                  // check for includeDeaths flag to add additional properties
+                  includeDeaths ? {
+                    totalDeadCasesCount: 0,
+                    totalDeadConfirmedCasesCount: 0,
+                    deadCaseIDs: [],
+                    deadConfirmedCaseIDs: []
+                  } : {}
+                )
+              ) - 1;
+            }
+
+            // check if case is dead; will not add it to classificationCounters if so
+            if (!item.deceased) {
+              // initialize counter for total classification if it's not already initialized
+              if (!result.totalCasesClassificationCounters[item.classification]) {
+                result.totalCasesClassificationCounters[item.classification] = {
+                  count: 0,
+                  caseIDs: [],
+                  locations: []
+                };
+              }
+              result.totalCasesClassificationCounters[item.classification].count++;
+              result.totalCasesClassificationCounters[item.classification].caseIDs.push(item.id);
+
+              // get index of the case location in the total classification locations array
+              let totalClassificationLocationIndex = result.totalCasesClassificationCounters[item.classification].locations.findIndex(location => location.id === caseLocationId);
+              // initialize location entry is not already initialized
+              if (totalClassificationLocationIndex === -1) {
+                totalClassificationLocationIndex = result.totalCasesClassificationCounters[item.classification].locations.push({
+                  id: caseLocationId,
+                  totalCasesCount: 0,
+                  caseIDs: []
+                }) - 1;
+              }
+
+              // increase period classification location counters
+              result.totalCasesClassificationCounters[item.classification].locations[totalClassificationLocationIndex].totalCasesCount++;
+              result.totalCasesClassificationCounters[item.classification].locations[totalClassificationLocationIndex].caseIDs.push(item.id);
+
+              // increase counters outside of case classification
+              result.totalCasesCount++;
+              result.caseIDs.push(item.id);
+
+              // increase location counters
+              result.totalCasesCountersPerLocation.locations[totalLocationIndex].totalCasesCount++;
+              result.totalCasesCountersPerLocation.locations[totalLocationIndex].caseIDs.push(item.id);
+            } else {
+              // update period counters
+              if (caseConfirmed) {
+                // update confirmed dead case counters
+                result.totalDeadConfirmedCasesCount++;
+                result.deadConfirmedCaseIDs.push(item.id);
+                result.totalCasesCountersPerLocation.locations[totalLocationIndex].totalDeadConfirmedCasesCount++;
+                result.totalCasesCountersPerLocation.locations[totalLocationIndex].deadConfirmedCaseIDs.push(item.id);
+              }
+
+              // update death counters
+              result.totalDeadCasesCount++;
+              result.deadCaseIDs.push(item.id);
+              result.totalCasesCountersPerLocation.locations[totalLocationIndex].totalDeadCasesCount++;
+              result.totalCasesCountersPerLocation.locations[totalLocationIndex].deadCaseIDs.push(item.id);
+            }
           }
         });
 
         // update results; sending array with period entries
         result.period = Object.values(periodMap);
-        result.totalCasesCount = cases.length;
 
         // send response
         callback(null, result);
