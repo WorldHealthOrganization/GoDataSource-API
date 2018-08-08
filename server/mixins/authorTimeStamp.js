@@ -51,22 +51,26 @@ module.exports = function (Model) {
 
   Model.defineProperty('createdAt', {
     type: Date,
-    readOnly: true
+    readOnly: true,
+    safeForImport: true
   });
 
   Model.defineProperty('createdBy', {
     type: String,
-    readOnly: true
+    readOnly: true,
+    safeForImport: true
   });
 
   Model.defineProperty('updatedAt', {
     type: Date,
-    readOnly: true
+    readOnly: true,
+    safeForImport: true
   });
 
   Model.defineProperty('updatedBy', {
     type: String,
-    readOnly: true
+    readOnly: true,
+    safeForImport: true
   });
 
   Model.observe('before save', function (context, next) {

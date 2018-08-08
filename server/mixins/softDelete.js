@@ -18,12 +18,14 @@ module.exports = function (Model) {
     type: Boolean,
     required: true,
     default: false,
-    readOnly: true
+    readOnly: true,
+    safeForImport: true
   });
 
   Model.defineProperty(deletedAt, {
     type: Date,
-    readOnly: true
+    readOnly: true,
+    safeForImport: true
   });
 
   /**

@@ -9,8 +9,11 @@ module.exports = function (Relationship) {
   Relationship.hasController = false;
 
   Relationship.fieldLabelsMap = {
+    persons: 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS',
     'persons[].type': 'LNG_RELATIONSHIP_FIELD_LABEL_TYPE',
     'persons[].id': 'LNG_RELATIONSHIP_FIELD_LABEL_RELATED_PERSON',
+    'persons[].target': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET',
+    'persons[].source': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE',
     contactDate: 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE',
     contactDateEstimated: 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE_ESTIMATED',
     certaintyLevelId: 'LNG_RELATIONSHIP_FIELD_LABEL_CERTAINTY_LEVEL',
@@ -40,18 +43,6 @@ module.exports = function (Relationship) {
       foreignKeyContainer: 'persons',
       foreignKey: 'id'
     }
-  };
-
-  Relationship.fieldLabelsMap = {
-    'persons': 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS',
-    'contactDate': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE',
-    'contactDateEstimated': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE_ESTIMATED',
-    'certaintyLevelId': 'LNG_RELATIONSHIP_FIELD_LABEL_CERTAINTY_LEVEL',
-    'exposureTypeId': 'LNG_RELATIONSHIP_FIELD_LABEL_EXPOSURE_TYPE',
-    'exposureFrequencyId': 'LNG_RELATIONSHIP_FIELD_LABEL_EXPOSURE_FREQUENCY',
-    'exposureDurationId': 'LNG_RELATIONSHIP_FIELD_LABEL_EXPOSURE_DURATION',
-    'socialRelationshipTypeId': 'LNG_RELATIONSHIP_FIELD_LABEL_SOCIAL_RELATIONSHIP_TYPE',
-    'comment': 'LNG_RELATIONSHIP_FIELD_LABEL_COMMENT'
   };
 
   /**

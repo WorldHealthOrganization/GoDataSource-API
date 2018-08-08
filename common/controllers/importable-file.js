@@ -5,6 +5,16 @@ const templateParser = require('./../../components/templateParser');
 const _ = require('lodash');
 const async = require('async');
 
+const commonModelLabels = {
+  id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+  createdAt: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
+  createdBy: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_BY',
+  updatedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',
+  updatedBy: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
+  deleted: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
+  deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT'
+};
+
 /**
  * Remove special chars and then lowercase the string
  * @param string
@@ -209,28 +219,36 @@ module.exports = function (ImportableFile) {
         if (error) {
           return callback(error);
         }
+
         // keep e reference to parsed content
         const dataSet = result.jsonObj;
-        // define result
+        // define main result
         result = {
           id: result.id,
           fileHeaders: result.headers,
-          modelProperties: {},
-          suggestedFieldMapping: {},
-          modelPropertyValues: {},
           distinctFileColumnValues: {}
         };
-
+        // store results for multiple models
+        const results = {};
         // define language dictionary, it will be updated (conditionally) later
         let languageDictionary = {};
         // define normalized headers, they will be updated (conditionally) later
         let normalizedHeaders = {};
-
         // store a list of steps that will be executed
         const steps = [];
+        // store main model name
+        const mainModelName = modelName;
 
         // go through the list of models associated with the passed model name
         getModelNamesFor(modelName).forEach(function (modelName) {
+
+          // each model has its own results
+          results[modelName] = {
+            modelProperties: {},
+            suggestedFieldMapping: {},
+            modelPropertyValues: {}
+          };
+
           // if a valid model was provided, and file headers were found
           if (modelName && app.models[modelName] && result.fileHeaders.length) {
 
@@ -267,8 +285,10 @@ module.exports = function (ImportableFile) {
               });
             }
 
+            // merge model's field to label map with the common one
+            const fieldLabelsMap = Object.assign({}, app.models[modelName].fieldLabelsMap || {}, commonModelLabels);
             // if the model has importable properties, get their headers and try to suggest some mappings
-            if (app.models[modelName]._importableProperties && app.models[modelName]._importableProperties.length && app.models[modelName].fieldLabelsMap) {
+            if (app.models[modelName]._importableProperties && app.models[modelName]._importableProperties.length) {
               steps.push(function (callback) {
                 // normalize model headers (property labels)
                 const normalizedModelProperties = app.models[modelName]._importableProperties.map(function (property) {
@@ -277,26 +297,26 @@ module.exports = function (ImportableFile) {
                   // if there are sub components
                   if (propertyComponents.length > 1) {
                     // define parent component
-                    if (!result.modelProperties[propertyComponents[0]]) {
-                      result.modelProperties[propertyComponents[0]] = {};
+                    if (!results[modelName].modelProperties[propertyComponents[0]]) {
+                      results[modelName].modelProperties[propertyComponents[0]] = {};
                     }
                     // store the sub component under parent component
-                    result.modelProperties[propertyComponents[0]][propertyComponents[1]] = app.models[modelName].fieldLabelsMap[property];
+                    results[modelName].modelProperties[propertyComponents[0]][propertyComponents[1]] = fieldLabelsMap[property];
                   } else {
                     // no sub components, store property directly
-                    result.modelProperties[property] = app.models[modelName].fieldLabelsMap[property];
+                    results[modelName].modelProperties[property] = fieldLabelsMap[property];
                   }
-                  return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(app.models[modelName].fieldLabelsMap[property]));
+                  return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(fieldLabelsMap[property]));
                 });
 
                 // try to find mapping suggestions between file headers and model headers (property labels)
                 normalizedHeaders.forEach(function (normalizedHeader, index) {
                   let propIndex = normalizedModelProperties.indexOf(normalizedHeader);
                   if (propIndex !== -1) {
-                    result.suggestedFieldMapping[result.fileHeaders[index]] = app.models[modelName]._importableProperties[propIndex];
+                    results[modelName].suggestedFieldMapping[result.fileHeaders[index]] = app.models[modelName]._importableProperties[propIndex];
                   }
                 });
-                callback(null, result);
+                callback(null, results[modelName]);
               });
             }
 
@@ -309,8 +329,8 @@ module.exports = function (ImportableFile) {
                 getReferenceDataAvailableValuesForModel(outbreakId, modelName)
                   .then(function (referenceDataValues) {
                     // update result
-                    result = Object.assign({}, result, {modelPropertyValues: Object.assign(result.modelPropertyValues, referenceDataValues)});
-                    callback(null, result);
+                    results[modelName] = Object.assign({}, results[modelName], {modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, referenceDataValues)});
+                    callback(null, results[modelName]);
                   })
                   .catch(callback);
               });
@@ -327,13 +347,13 @@ module.exports = function (ImportableFile) {
                 getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, result.fileHeaders, normalizedHeaders, languageDictionary)
                   .then(function (_result) {
                     // update result
-                    result = Object.assign(
-                      {}, result,
-                      {suggestedFieldMapping: Object.assign(result.suggestedFieldMapping, _result.suggestedFieldMapping)},
-                      {modelProperties: Object.assign(result.modelProperties, _result.modelProperties)},
-                      {modelPropertyValues: Object.assign(result.modelPropertyValues, _result.modelPropertyValues)}
+                    results[modelName] = Object.assign(
+                      {}, results[modelName],
+                      {suggestedFieldMapping: Object.assign(results[modelName].suggestedFieldMapping, _result.suggestedFieldMapping)},
+                      {modelProperties: Object.assign(results[modelName].modelProperties, _result.modelProperties)},
+                      {modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, _result.modelPropertyValues)}
                     );
-                    callback(null, _result);
+                    callback(null, results[modelName]);
                   })
                   .catch(callback);
               });
@@ -347,6 +367,33 @@ module.exports = function (ImportableFile) {
           if (error) {
             return callback(error);
           }
+
+          // when everything is done, merge the results
+          Object.keys(results).forEach(function (modelName) {
+            // if the model in not the main one, store its results in a container with its name
+            if (modelName !== mainModelName) {
+
+              // rebuild suggestions for result
+              const suggestedFieldMapping = {};
+              // prefix all suggestions with model (container) name
+              Object.keys(results[modelName].suggestedFieldMapping).forEach(function (fileHeader) {
+                suggestedFieldMapping[fileHeader] = `${modelName}.${results[modelName].suggestedFieldMapping[fileHeader]}`;
+              });
+
+              // update result
+              result = Object.assign(
+                {},
+                result,
+                {suggestedFieldMapping: Object.assign(result.suggestedFieldMapping, suggestedFieldMapping)},
+                {modelProperties: Object.assign(result.modelProperties, {[modelName]:results[modelName].modelProperties})},
+                {modelPropertyValues: Object.assign(result.modelPropertyValues, {[modelName]:results[modelName].modelPropertyValues})}
+                );
+            } else {
+              // main model results stay on first level
+              result = Object.assign({}, result, results[modelName]);
+            }
+          });
+
           // send back the result
           callback(null, result);
         });
