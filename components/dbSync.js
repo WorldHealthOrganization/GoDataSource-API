@@ -87,7 +87,7 @@ const syncRecord = function (logger, model, record, options, done) {
 
       // if record was created from third parties, it might not have updated/created timestamps
       // in this case, just create a new record with new id
-      if (!dbRecord.updatedAt) {
+      if (!record.updatedAt) {
         log('debug', `Record found (id: ${record.id}) but data received is missing updatedAt property, probably comes from external system, creating new record.`);
         delete record.id;
         return model
