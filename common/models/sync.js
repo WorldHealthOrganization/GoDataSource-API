@@ -200,6 +200,7 @@ module.exports = function (Sync) {
                         // sync the record with the main database
                         dbSync.syncRecord(app.logger, model, collectionRecord, (err) => {
                           if (err) {
+                            app.logger.debug(`Failed syncing record (id: ${collectionRecord.id}). Error: ${err.message}`);
                             failedIds[collectionName].push(collectionRecord.id);
                           }
                           return doneRecord();
