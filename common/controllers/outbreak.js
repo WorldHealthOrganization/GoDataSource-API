@@ -3320,23 +3320,6 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.importImportableContactsFileUsingMap = function (body, options, callback) {
-    /**
-     * Extract only the importable fields for a model from a record data
-     * @param Model
-     * @param data
-     */
-    function extractImportableFields(Model, data) {
-      // store importable properties as part of a new object
-      const importableFields = {};
-      // go through all importable top level properties
-      Model._importableTopLevelProperties.forEach(function (importableProperty) {
-        // add the importable data (if it exists)
-        if (data[importableProperty] !== undefined) {
-          importableFields[importableProperty] = data[importableProperty];
-        }
-      });
-      return importableFields;
-    }
 
     const self = this;
     // get importable file
@@ -3363,9 +3346,9 @@ module.exports = function (Outbreak) {
           contactsList.forEach(function (recordData, index) {
             createContacts.push(function (callback) {
               // extract relationship data
-              const relationshipData = extractImportableFields(app.models.relationship, recordData);
+              const relationshipData = app.utils.helpers.extractImportableFields(app.models.relationship, recordData);
               // extract contact data
-              const contactData = extractImportableFields(app.models.contact, recordData);
+              const contactData = app.utils.helpers.extractImportableFields(app.models.contact, recordData);
               // create the contact
               return app.utils.dbSync.syncRecord(app.models.contact, contactData, options)
                 .then(function (syncResult) {

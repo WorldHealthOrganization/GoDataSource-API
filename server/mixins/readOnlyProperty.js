@@ -14,7 +14,7 @@ module.exports = function (Model) {
   /**
    * Get Model importable properties (max 2 levels deep)
    * @param Model
-   * @param prefix
+   * @param prefix This represents the parent property path
    * @return {Array}
    */
   function getImportableProperties(Model, prefix) {
@@ -29,7 +29,7 @@ module.exports = function (Model) {
       ) {
         // complex model type
         if (Model.definition.properties[propertyName].type && Model.definition.properties[propertyName].type.definition) {
-          // do not parse mode than 2 levels (we don't need that level of granularity when importing flat files)
+          // do not parse more than 2 levels (we don't need that level of granularity when importing flat files)
           if (prefix || Model.definition.properties[propertyName].importTopLevelOnly) {
             if (prefix) {
               propertyName = `${prefix}.${propertyName}`;
@@ -44,7 +44,7 @@ module.exports = function (Model) {
         if (Array.isArray(Model.definition.properties[propertyName].type)) {
           // array of complex model types
           if (Model.definition.properties[propertyName].type[0].definition) {
-            // do not parse mode than 2 levels (we don't need that level of granularity when importing flat files)
+            // do not parse more than 2 levels (we don't need that level of granularity when importing flat files)
             if (prefix || Model.definition.properties[propertyName].importTopLevelOnly) {
               if (prefix) {
                 propertyName = `${prefix}.${propertyName}`;

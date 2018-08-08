@@ -158,6 +158,24 @@ const convertPropsToDate = function (obj) {
   }
 };
 
+/**
+ * Extract only the importable fields for a model from a record data
+ * @param Model
+ * @param data
+ */
+function extractImportableFields(Model, data) {
+  // store importable properties as part of a new object
+  const importableFields = {};
+  // go through all importable top level properties
+  Model._importableTopLevelProperties.forEach(function (importableProperty) {
+    // add the importable data (if it exists)
+    if (data[importableProperty] !== undefined) {
+      importableFields[importableProperty] = data[importableProperty];
+    }
+  });
+  return importableFields;
+}
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamToBuffer,
@@ -165,5 +183,6 @@ module.exports = {
   getUTCDateEndOfDay: getUTCDateEndOfDay,
   getAsciiString: getAsciiString,
   getChunksForInterval: getChunksForInterval,
-  convertPropsToDate: convertPropsToDate
+  convertPropsToDate: convertPropsToDate,
+  extractImportableFields: extractImportableFields
 };
