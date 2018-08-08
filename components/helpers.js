@@ -117,13 +117,13 @@ const remapProperties = function (list, fieldsMap, valuesMap) {
     // go trough the list of fields
     fields.forEach(function (field) {
       // if no array position was specified, use position 0
-      fieldsMap[field] = fieldsMap[field].replace(/\[]/g,'[0]');
+      fieldsMap[field] = fieldsMap[field].replace(/\[]/g, '[0]');
       // remap property
       _.set(result, fieldsMap[field], item[field]);
       // if a values map was provided
       if (valuesMap && valuesMap[field] && valuesMap[field][item[field]] !== undefined) {
         // remap the values
-      _.set(result, fieldsMap[field], valuesMap[field][item[field]]);
+        _.set(result, fieldsMap[field], valuesMap[field][item[field]]);
       }
     });
     // add processed item to the final list
@@ -163,7 +163,7 @@ const convertPropsToDate = function (obj) {
  * @param Model
  * @param data
  */
-function extractImportableFields(Model, data) {
+const extractImportableFields = function (Model, data) {
   // store importable properties as part of a new object
   const importableFields = {};
   // go through all importable top level properties
@@ -174,7 +174,7 @@ function extractImportableFields(Model, data) {
     }
   });
   return importableFields;
-}
+};
 
 module.exports = {
   getUTCDate: getUTCDate,
