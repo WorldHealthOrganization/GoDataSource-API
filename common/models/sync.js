@@ -127,9 +127,10 @@ module.exports = function (Sync) {
    * Extract a database snapshot archive to a temporary directory
    * And sync with the current database
    * @param filePath
+   * @param reqOptions
    * @param callback
    */
-  Sync.syncDatabaseWithSnapshot = function (filePath, callback) {
+  Sync.syncDatabaseWithSnapshot = function (filePath, reqOptions, callback) {
     // create a temporary directory to store the database files
     // it always created the folder in the system temporary directory
     let tmpDir = tmp.dirSync({ unsafeCleanup: true });
@@ -198,7 +199,7 @@ module.exports = function (Sync) {
                         collectionRecord.id = collectionRecord._id;
 
                         // sync the record with the main database
-                        dbSync.syncRecord(app.logger, model, collectionRecord, (err) => {
+                        dbSync.syncRecord(app.logger, model, collectionRecord, reqOptions, (err) => {
                           if (err) {
                             app.logger.debug(`Failed syncing record (id: ${collectionRecord.id}). Error: ${err.message}`);
                             failedIds[collectionName].push(collectionRecord.id);
