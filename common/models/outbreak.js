@@ -289,12 +289,16 @@ module.exports = function (Outbreak) {
 
   /**
    * Delete a relation for a person
+   * Do not allow deletion of the last relationship of a contact with a case/event
    * @param personId
    * @param relationshipId
    * @param options
    * @param callback
    */
   Outbreak.helpers.deletePersonRelationship = function (personId, relationshipId, options, callback) {
+    // initialize relationship instance; will be cached
+    let relationshipInstance;
+
     app.models.relationship
       .findOne({
         where: {
@@ -306,7 +310,71 @@ module.exports = function (Outbreak) {
         if (!relationship) {
           return {count: 0};
         }
-        return relationship.destroy(options);
+
+        // cache relationship
+        relationshipInstance = relationship;
+
+        // check if the relationship includes a contact; if so the last relationship of a contact with a case/event cannot be deleted
+        let relationshipContacts = relationship.persons.filter(person => person.type === 'contact');
+        if (relationshipContacts.length) {
+          // there are contacts in the relationship; check their other relationships;
+          // creating array of promises as the relation might be contact - contact
+          let promises = [];
+          relationshipContacts.forEach(function (contactEntry) {
+            promises.push(
+              // count contact relationships with case/events except the current relationship
+              app.models.relationship
+                .count({
+                  id: {
+                    neq: relationshipId
+                  },
+                  'persons.id': contactEntry.id,
+                  'persons.type': {
+                    in: ['case', 'event']
+                  }
+                })
+                .then(function (relNo) {
+                  if (!relNo) {
+                    // no other relationships with case/event exist for the contact; return the contactId to return it in an error message
+                    return contactEntry.id;
+                  } else {
+                    return;
+                  }
+                })
+            );
+          });
+
+          // execute promises
+          return Promise.all(promises);
+        } else {
+          return;
+        }
+      })
+      .then(function (result) {
+        // result can be undefined / object with count / array with contact ID elements to undefined elements
+        // for array of contact IDs need to throw error
+        if (typeof result === 'undefined') {
+          // delete relationship
+          return relationshipInstance.destroy(options);
+        }
+        else if (typeof result.count !== 'undefined') {
+          return result;
+        } else {
+          // result is an array
+          // get contact IDs from result if they exist
+          let contactIDs = result.filter(entry => typeof entry !== 'undefined');
+
+          // if result doesn't contain contact IDs the relationship will be deleted
+          if (!contactIDs.length) {
+            // delete relationship
+            return relationshipInstance.destroy(options);
+          } else {
+            // there are contacts with no other relationships with case/event; error
+            throw app.utils.apiError.getError('DELETE_CONTACT_LAST_RELATIONSHIP', {
+              contactIDs: contactIDs.join(', ')
+            });
+          }
+        }
       })
       .then(function (relationship) {
         callback(null, relationship);

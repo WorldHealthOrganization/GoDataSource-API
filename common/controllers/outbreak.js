@@ -956,14 +956,27 @@ module.exports = function (Outbreak) {
                     let genResponseIndex = generateResponse.length - 1;
 
                     // find all the teams that are matching the contact's location ids from addresses
-                    // stop at first address that has a matching team
                     let eligibleTeams = [];
-                    for (let i = 0; i < contact.addresses.length; i++) {
+                    // normalize addresses
+                    contact.addresses = contact.addresses || [];
+
+                    // first get the contact's usual place of residence
+                    let contactResidence = contact.addresses.find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
+                    if (contactResidence) {
                       // try to find index of the address location in teams locations
-                      let filteredTeams = teams.filter((team) => team.locations.indexOf(contact.addresses[i].locationId) !== -1);
+                      let filteredTeams = teams.filter((team) => team.locations.indexOf(contactResidence.locationId) !== -1);
                       if (filteredTeams.length) {
-                        eligibleTeams = eligibleTeams.concat(filteredTeams.map((team) => team.id));
-                        break;
+                        eligibleTeams = filteredTeams.map((team) => team.id);
+                      }
+                    } else {
+                      // check all contact addresses; stop at first address that has a matching team
+                      for (let i = 0; i < contact.addresses.length; i++) {
+                        // try to find index of the address location in teams locations
+                        let filteredTeams = teams.filter((team) => team.locations.indexOf(contact.addresses[i].locationId) !== -1);
+                        if (filteredTeams.length) {
+                          eligibleTeams = eligibleTeams.concat(filteredTeams.map((team) => team.id));
+                          break;
+                        }
                       }
                     }
 
@@ -3602,5 +3615,180 @@ module.exports = function (Outbreak) {
         }
       });
     });
+  };
+
+  /**
+   * Count the total number of contacts per location; Include counters for contacts under follow-up, contacts seen on date, contacts released as well as date for expected release of last contact
+   * @param filter This request also accepts 'date': 'date', 'locationId': 'locationId' on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countContactsPerLocation = function (filter, callback) {
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // initialize filter to be sent to mongo
+    let _filter = {
+      where: {
+        outbreakId: outbreakId
+      }
+    };
+
+    // initialize dateToFilter and locationToFilter filters
+    let dateToFilter, locationToFilter;
+    // check if the dateToFilter filter was sent; accepting it only on the first level
+    dateToFilter = _.get(filter, 'where.date', null);
+    if (dateToFilter !== null) {
+      // add date to filter if it is valid; else use today
+      dateToFilter = moment(dateToFilter).isValid() ? genericHelpers.getUTCDateEndOfDay(dateToFilter) : genericHelpers.getUTCDateEndOfDay();
+
+      // date was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.date;
+    } else {
+      // use today as default filter
+      dateToFilter = genericHelpers.getUTCDateEndOfDay();
+    }
+
+    // add date to filter
+    // also in order to see if a contact was seen on the day get the latest follow-up that should have occurred
+    _filter = app.utils.remote
+      .mergeFilters({
+        where: {
+          dateOfReporting: {
+            lte: new Date(dateToFilter)
+          }
+        },
+        include: {
+          relation: 'followUps',
+          scope: {
+            where: {
+              date: {
+                // filter until date as follow-ups can be scheduled in the future
+                lte: new Date(dateToFilter)
+              }
+            },
+            order: 'date DESC',
+            limit: 1
+          }
+        }
+      }, _filter);
+
+    // check if the locationToFilter filter was sent; accepting it only on the first level
+    locationToFilter = _.get(filter, 'where.locationId', null);
+    if (locationToFilter !== null) {
+      // add location to filter
+      _filter = app.utils.remote
+        .mergeFilters({
+          where: {
+            'addresses': {
+              'elemMatch': {
+                typeId: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
+                locationId: locationToFilter
+              }
+            }
+          }
+        }, _filter);
+
+      // locationId was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.locationId;
+    }
+
+    // initialize result
+    let result = {
+      totalRegisteredContactsCount: 0,
+      releasedContactsCount: 0,
+      contactsUnderFollowUpCount: 0,
+      contactsSeenOnDateCount: 0,
+      lastContactDateOfRelease: null
+    };
+
+    // get all the contacts using sent and created filters
+    app.models.contact.find(app.utils.remote
+      .mergeFilters(_filter, filter || {}))
+      .then(function (contacts) {
+        // initialize locations map
+        let locationMap = {};
+
+        // loop through all contacts and update counters
+        contacts.forEach(function (contact) {
+          // get contactId
+          let contactId = contact.id;
+
+          // get location
+          let contactLocationId;
+          if (locationToFilter) {
+            // a filter for location was sent and the contact was found means that the contact location is the filtered location
+            contactLocationId = locationToFilter;
+          } else {
+            // get the contact's usual place of residence
+            // normalize addresses
+            contact.addresses = contact.addresses || [];
+            let contactResidence = contact.addresses.find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
+            // use usual place of residence if found else leave the contact unassigned to a location
+            contactLocationId = contactResidence && contactResidence.locationId ? contactResidence.locationId : null;
+          }
+
+          // initialize location entry if not already initialized
+          if (!locationMap[contactLocationId]) {
+            locationMap[contactLocationId] = {
+              id: contactLocationId,
+              totalRegisteredContactsCount: 0,
+              releasedContactsCount: 0,
+              contactsUnderFollowUpCount: 0,
+              contactsSeenOnDateCount: 0,
+              lastContactDateOfRelease: null,
+              contactIDs: []
+            };
+          }
+
+          // increase counters
+          locationMap[contactLocationId].totalRegisteredContactsCount++;
+
+          // check if the contact is still under follow-up
+          // get end date of contact follow-ups
+          // not having an end date should not be encountered; considering this case as still under follow-up
+          let followUpEndDate = moment(_.get(contact, 'followUp.endDate', null));
+          followUpEndDate = genericHelpers.getUTCDateEndOfDay(followUpEndDate);
+          if (!followUpEndDate.isValid() || followUpEndDate.isSameOrAfter(dateToFilter)) {
+            // update contactsUnderFollowUpCount
+            locationMap[contactLocationId].contactsUnderFollowUpCount++;
+            result.contactsUnderFollowUpCount++;
+
+            // get retrieved follow-up; is the latest that should have been performed
+            let followUp = contact.toJSON().followUps[0];
+            // check if the follow-up was performed
+            if (followUp && followUp.performed) {
+              // update contactsSeenOnDateCount
+              locationMap[contactLocationId].contactsSeenOnDateCount++;
+              result.contactsSeenOnDateCount++;
+            }
+          } else {
+            // update releasedContactsCount
+            locationMap[contactLocationId].releasedContactsCount++;
+            result.releasedContactsCount++;
+          }
+
+          // add the contact ID in the array
+          locationMap[contactLocationId].contactIDs.push(contactId);
+
+          // update lastContactDateOfRelease if not set or contact follow-up end date is after
+          if (!locationMap[contactLocationId].lastContactDateOfRelease || followUpEndDate.isAfter(locationMap[contactLocationId].lastContactDateOfRelease)) {
+            locationMap[contactLocationId].lastContactDateOfRelease = followUpEndDate;
+          }
+          // same for general result
+          if (!result.lastContactDateOfRelease || followUpEndDate.isAfter(result.lastContactDateOfRelease)) {
+            result.lastContactDateOfRelease = followUpEndDate;
+          }
+        });
+
+        // add totalRegisteredContactsCount
+        result.totalRegisteredContactsCount = contacts.length;
+
+        // get the locations
+        result.locations = Object.values(locationMap);
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
   };
 };

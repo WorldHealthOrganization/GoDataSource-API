@@ -130,9 +130,12 @@ const defaultReferenceData = {
     'Case',
     'Contact',
     'Event'
+  ],
+  'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE': [
+    'Usual Place of Residence',
+    'Other'
   ]
 };
-
 
 /**
  * Run initiation

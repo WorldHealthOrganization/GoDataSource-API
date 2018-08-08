@@ -40,6 +40,23 @@
     },
     "dateDeceased": {
       "type": "date"
+    },
+    "followUp": {
+      "description": "Object containing start/end dates for the contact's follow-up period. The dates are automatically calculated based on contact relationships dates and outbreak.periodOfFollowup",
+      "type": {
+        "originalStartDate": {
+          "description": "Date of the contact's earliest relationship (first contactDate)",
+          "type": "date"
+        },
+        "startDate": {
+          "description": "Latest contactDate of the contact's relationships",
+          "type": "date"
+        },
+        "endDate": {
+          "description": "Follow-up end date for the contact. Calculated from the startDate + outbreak.periodOfFollowup days",
+          "type": "date"
+        }
+      }
     }
   },
   "excludeBaseProperties": [
