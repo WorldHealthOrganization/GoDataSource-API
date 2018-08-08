@@ -3347,7 +3347,7 @@ module.exports = function (Outbreak) {
           contactsList.forEach(function (recordData, index) {
             createContacts.push(function (callback) {
               // extract relationship data
-              const relationshipData = app.utils.helpers.extractImportableFields(app.models.relationship, recordData);
+              const relationshipData = app.utils.helpers.extractImportableFields(app.models.relationship, recordData.relationship);
               // extract contact data
               const contactData = app.utils.helpers.extractImportableFields(app.models.contact, recordData);
               // sync the contact
