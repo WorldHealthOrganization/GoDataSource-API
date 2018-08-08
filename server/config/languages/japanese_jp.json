@@ -458,8 +458,8 @@
       "LNG_OUTBREAK_FIELD_LABEL_ACTIVE": "日本の Active?",
       "LNG_OUTBREAK_FIELD_LABEL_DESCRIPTION": "日本の Description",
       "LNG_OUTBREAK_FIELD_LABEL_DURATION_FOLLOWUP_DAYS": "日本の Duration for the follow-up ( days )",
-      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY": "日本の Follow-up frecquency",
-      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY_PER_DAY": "日本の Follow-up frecquency per day",
+      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY": "日本の Follow-up frequency",
+      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY_PER_DAY": "日本の Follow-up frequency per day",
       "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK": "日本の Case Id Mask",
       "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK_TOOLTIP": "日本の Example of mask: RX-0000. It will generate Ids in the range: RX-0001 and RX-9999",
       "LNG_OUTBREAK_FIELD_LABEL_DAYS_AMONG_KNOWN_CONTACTS": "日本の Days among known contacts",
@@ -482,16 +482,35 @@
       "LNG_ENTITY_FIELD_LABEL_PLACE": "日本の Place",
       "LNG_ENTITY_FIELD_LABEL_ADDRESS": "日本の Address"
     },
+    "addressFields": {
+      "LNG_CASE_FIELD_LABEL_ADDRESSES": "日本の Addresses",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_NAME": "日本の Name",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY": "日本の Country",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY": "日本の CITY",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1": "日本の Address Line 1",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_2": "日本の Address Line 2",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE": "日本の Postal Code",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID": "日本の Location ID",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION": "日本の Geo-Location",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE": "日本の Date"
+    },
     "uiCaseFields": {
+      "LNG_CASE_FIELD_LABEL_ADDRESSES": "日本の Addresses",
       "LNG_CASE_FIELD_LABEL_DATE_OF_INFECTION": "日本の Date of Infection",
+      "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION": "日本の Fill Geo-Location",
       "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "日本の Fill Geo-Location Latitude",
       "LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME": "日本の Date of Outcome",
+      "LNG_CASE_FIELD_LABEL_OUTCOME_ID": "日本の Outcome",
       "LNG_CASE_FIELD_LABEL_AGE": "日本の Age",
       "LNG_CASE_FIELD_LABEL_FIRST_NAME": "日本の First Name",
       "LNG_CASE_FIELD_LABEL_DATE_OF_ONSET": "日本の Date of Onset",
+      "LNG_CASE_FIELD_LABEL_DATE_OF_ONSET_APPROXIMATE": "日本の Date of Onset Approximate",
       "LNG_CASE_FIELD_LABEL_DATE_OF_REPORTING": "日本の Date of Reporting",
+      "LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE": "日本の Date of Reporting Approximate",
       "LNG_CASE_FIELD_LABEL_RISK_REASON": "日本の Risk Reason",
       "LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES": "日本の Hospitalization Dates",
+      "LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES_START_DATE": "日本の Hospitalization Start Date",
+      "LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES_END_DATE": "日本の Hospitalization End Date",
       "LNG_CASE_FIELD_LABEL_ID": "日本の ID",
       "LNG_CASE_FIELD_LABEL_UPDATED_AT": "日本の Updated At",
       "LNG_CASE_FIELD_LABEL_OUTBREAK_ID": "日本の Outbreak ID",
@@ -500,6 +519,8 @@
       "LNG_CASE_FIELD_LABEL_DATE_BECOME_CASE": "日本の Date of Becoming case",
       "LNG_CASE_FIELD_LABEL_MIDDLE_NAME": "日本の Middle Name",
       "LNG_CASE_FIELD_LABEL_INCUBATION_DATES": "日本の Incubation Dates",
+      "LNG_CASE_FIELD_LABEL_INCUBATION_DATES_START_DATE": "日本の Incubation Start Date",
+      "LNG_CASE_FIELD_LABEL_INCUBATION_DATES_END_DATE": "日本の Incubation End Date",
       "LNG_CASE_FIELD_LABEL_DELETED_AT": "日本の Deleted At",
       "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "日本の Fill Geo-Location Longitude",
       "LNG_CASE_FIELD_LABEL_DELETED": "日本の Deleted",
@@ -509,14 +530,18 @@
       "LNG_CASE_FIELD_LABEL_PHONE_NUMBER": "日本の Phone Number",
       "LNG_CASE_FIELD_LABEL_GENDER": "日本の Gender",
       "LNG_CASE_FIELD_LABEL_CLASSIFICATION": "日本の Classification",
-      "LNG_CASE_FIELD_LABEL_OCCUPATION": "日本の Ocupation",
+      "LNG_CASE_FIELD_LABEL_OCCUPATION": "日本の Occupation",
       "LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE": "日本の Document Type",
       "LNG_CASE_FIELD_LABEL_RISK_LEVEL": "日本の Risk Level",
       "LNG_CASE_FIELD_LABEL_ISOLATION_DATES": "日本の Isolation Dates",
+      "LNG_CASE_FIELD_LABEL_ISOLATION_DATES_START_DATE": "日本の Isolation Start Date",
+      "LNG_CASE_FIELD_LABEL_ISOLATION_DATES_END_DATE": "日本の Isolation End Date",
       "LNG_CASE_FIELD_LABEL_DECEASED": "日本の Deceased",
       "LNG_CASE_FIELD_LABEL_LAST_NAME": "日本の Last Name",
       "LNG_CASE_FIELD_LABEL_DATE_DECEASED": "日本の Date of Decease",
-      "LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER": "日本の Document Number"
+      "LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER": "日本の Document Number",
+      "LNG_CASE_FIELD_LABEL_VISUAL_ID": "日本の Visual ID",
+      "LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED": "日本の Transfer Refused"
     },
     "uiCasesListPage": {
       "LNG_PAGE_LIST_CASES_TITLE": "日本の Cases",
@@ -531,14 +556,19 @@
       "LNG_PAGE_MODIFY_CASE_ACTION_SEE_LAB_RESULTS": "日本の Lab results"
     },
     "uiCaseLabResultsFields": {
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_PERSON_ID": "日本の Case Id",
       "LNG_CASE_LAB_RESULT_FIELD_LABEL_ID": "日本の Sample Lab Id",
       "LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_TAKEN": "日本の Sample taken",
       "LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_DELIVERED": "日本の Sample delivered to lab",
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_TESTING": "日本の Testing Date",
       "LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_OF_RESULT": "日本の Date of the result",
       "LNG_CASE_LAB_RESULT_FIELD_LABEL_LAB_NAME": "日本の Lab name",
       "LNG_CASE_LAB_RESULT_FIELD_LABEL_SAMPLE_TYPE": "日本の Sample type",
       "LNG_CASE_LAB_RESULT_FIELD_LABEL_TEST_TYPE": "日本の Test type",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_RESULT": "日本の Result"
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_RESULT": "日本の Result",
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_QUANTITATIVE_RESULT": "日本の Quantitative Result",
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_NOTES": "日本の Notes",
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_STATUS": "日本の Status"
     },
     "uiCaseLabResultsListPage": {
       "LNG_PAGE_LIST_CASE_LAB_RESULTS_TITLE": "日本の Case lab results"
@@ -565,8 +595,36 @@
       "LNG_PAGE_CREATE_ENTITY_ERROR_NO_SELECTED_ENTITIES": "日本の There are no entities selected for relationships!"
     },
     "uiContactFields": {
+      "LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION": "日本の Fill Geo-Location",
+      "LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "日本の Fill Geo-Location Latitude",
+      "LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME": "日本の Date of Outcome",
+      "LNG_CONTACT_FIELD_LABEL_AGE": "日本の Age",
+      "LNG_CONTACT_FIELD_LABEL_FIRST_NAME": "日本の First Name",
+      "LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING": "日本の Date of Reporting",
+      "LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE": "日本の Date of Reporting Approximate",
+      "LNG_CONTACT_FIELD_LABEL_RISK_REASON": "日本の Risk Reason",
+      "LNG_CONTACT_FIELD_LABEL_ID": "日本の ID",
+      "LNG_CONTACT_FIELD_LABEL_UPDATED_AT": "日本の Updated At",
+      "LNG_CONTACT_FIELD_LABEL_OUTBREAK_ID": "日本の Outbreak ID",
+      "LNG_CONTACT_FIELD_LABEL_DOB": "日本の Date of Birth",
+      "LNG_CONTACT_FIELD_LABEL_CREATED_BY": "日本の Created By",
+      "LNG_CONTACT_FIELD_LABEL_MIDDLE_NAME": "日本の Middle Name",
+      "LNG_CONTACT_FIELD_LABEL_DELETED_AT": "日本の Deleted At",
+      "LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "日本の Fill Geo-Location Longitude",
+      "LNG_CONTACT_FIELD_LABEL_DELETED": "日本の Deleted",
+      "LNG_CONTACT_FIELD_LABEL_UPDATED_BY": "日本の Updated By",
+      "LNG_CONTACT_FIELD_LABEL_CREATED_AT": "日本の Created At",
+      "LNG_CONTACT_FIELD_LABEL_TYPE": "日本の Type",
+      "LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER": "日本の Phone Number",
+      "LNG_CONTACT_FIELD_LABEL_GENDER": "日本の Gender",
+      "LNG_CONTACT_FIELD_LABEL_OCCUPATION": "日本の Occupation",
+      "LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE": "日本の Document Type",
       "LNG_CONTACT_FIELD_LABEL_RISK_LEVEL": "日本の Risk Level",
-      "LNG_CONTACT_FIELD_LABEL_RISK_REASON": "日本の Reason"
+      "LNG_CONTACT_FIELD_LABEL_DECEASED": "日本の Deceased",
+      "LNG_CONTACT_FIELD_LABEL_LAST_NAME": "日本の Last Name",
+      "LNG_CONTACT_FIELD_LABEL_DATE_DECEASED": "日本の Date of Decease",
+      "LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER": "日本の Document Number",
+      "LNG_CONTACT_FIELD_LABEL_VISUAL_ID": "日本の Visual ID"
     },
     "uiContactsListPage": {
       "LNG_PAGE_LIST_CONTACTS_TITLE": "日本の Contacts"
@@ -595,7 +653,10 @@
       "LNG_RELATIONSHIP_FIELD_LABEL_CLUSTER": "日本の Cluster",
       "LNG_RELATIONSHIP_FIELD_LABEL_COMMENT": "日本の Comment",
       "LNG_RELATIONSHIP_FIELD_LABEL_PERSON_FIRST_NAME": "日本の First Name",
-      "LNG_RELATIONSHIP_FIELD_LABEL_PERSON_LAST_NAME": "日本の Last Name"
+      "LNG_RELATIONSHIP_FIELD_LABEL_PERSON_LAST_NAME": "日本の Last Name",
+      "LNG_RELATIONSHIP_FIELD_LABEL_SOCIAL_RELATIONSHIP_TYPE": "日本の Social Relationship Type",
+      "LNG_RELATIONSHIP_FIELD_LABEL_TARGET": "日本の Target",
+      "LNG_RELATIONSHIP_FIELD_LABEL_SOURCE": "日本の Source"
     },
     "uiFollowUpfields": {
       "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT": "日本の Contact",
@@ -793,7 +854,8 @@
       "LNG_PAGE_CREATE_OUTBREAK_TAB_LAB_RESULTS": "日本の Lab Results",
       "LNG_PAGE_CREATE_OUTBREAK_TAB_DONE": "日本の Done",
       "LNG_PAGE_CREATE_OUTBREAK_ACTION_CREATE_OUTBREAK_SUCCESS_MESSAGE": "日本の Outbreak created",
-      "LNG_PAGE_CREATE_OUTBREAK_END_DATE_START_DATE_ERROR": "日本の End date needs to be greater than start date"
+      "LNG_PAGE_CREATE_OUTBREAK_END_DATE_START_DATE_ERROR": "日本の End date needs to be greater than start date",
+      "LNG_PAGE_CREATE_OUTBREAK_TAB_CASE_INFORMATION": "日本の Case Information"
     },
     "uiModifyOutbreakPage": {
       "LNG_PAGE_MODIFY_OUTBREAK_LINK_MODIFY": "日本の Modify Outbreak",
@@ -814,6 +876,14 @@
     },
     "uiTransmissionChainsListPage": {
       "LNG_PAGE_LIST_TRANSMISSION_CHAINS_TITLE": "日本の Chains of Transmission"
+    },
+    "pdfExport": {
+      "LNG_PAGE_TITLE_CASE_DETAILS": "日本の Case Details",
+      "LNG_PAGE_TITLE_CASE_QUESTIONNAIRE": "日本の Case Questionnaire",
+      "LNG_PAGE_TITLE_LAB_RESULTS_DETAILS": "日本の Lab Results Details",
+      "LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE": "日本の Lab Results Questionnaire",
+      "LNG_PAGE_TITLE_CONTACT_DETAILS": "日本の Contact Details",
+      "LNG_PAGE_TITLE_CONTACT_RELATIONSHIP": "日本の Contact Relationship"
     }
   }
 }

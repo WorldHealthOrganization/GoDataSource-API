@@ -498,14 +498,20 @@
     "uiCaseFields": {
       "LNG_CASE_FIELD_LABEL_ADDRESSES": "Addresses",
       "LNG_CASE_FIELD_LABEL_DATE_OF_INFECTION": "Date of Infection",
+      "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION": "Fill Geo-Location",
       "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "Fill Geo-Location Latitude",
       "LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME": "Date of Outcome",
+      "LNG_CASE_FIELD_LABEL_OUTCOME_ID": "Outcome",
       "LNG_CASE_FIELD_LABEL_AGE": "Age",
       "LNG_CASE_FIELD_LABEL_FIRST_NAME": "First Name",
       "LNG_CASE_FIELD_LABEL_DATE_OF_ONSET": "Date of Onset",
+      "LNG_CASE_FIELD_LABEL_DATE_OF_ONSET_APPROXIMATE": "Date of Onset Approximate",
       "LNG_CASE_FIELD_LABEL_DATE_OF_REPORTING": "Date of Reporting",
+      "LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE": "Date of Reporting Approximate",
       "LNG_CASE_FIELD_LABEL_RISK_REASON": "Risk Reason",
       "LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES": "Hospitalization Dates",
+      "LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES_START_DATE": "Hospitalization Start Date",
+      "LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES_END_DATE": "Hospitalization End Date",
       "LNG_CASE_FIELD_LABEL_ID": "ID",
       "LNG_CASE_FIELD_LABEL_UPDATED_AT": "Updated At",
       "LNG_CASE_FIELD_LABEL_OUTBREAK_ID": "Outbreak ID",
@@ -514,6 +520,8 @@
       "LNG_CASE_FIELD_LABEL_DATE_BECOME_CASE": "Date of Becoming case",
       "LNG_CASE_FIELD_LABEL_MIDDLE_NAME": "Middle Name",
       "LNG_CASE_FIELD_LABEL_INCUBATION_DATES": "Incubation Dates",
+      "LNG_CASE_FIELD_LABEL_INCUBATION_DATES_START_DATE": "Incubation Start Date",
+      "LNG_CASE_FIELD_LABEL_INCUBATION_DATES_END_DATE": "Incubation End Date",
       "LNG_CASE_FIELD_LABEL_DELETED_AT": "Deleted At",
       "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "Fill Geo-Location Longitude",
       "LNG_CASE_FIELD_LABEL_DELETED": "Deleted",
@@ -527,10 +535,14 @@
       "LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE": "Document Type",
       "LNG_CASE_FIELD_LABEL_RISK_LEVEL": "Risk Level",
       "LNG_CASE_FIELD_LABEL_ISOLATION_DATES": "Isolation Dates",
+      "LNG_CASE_FIELD_LABEL_ISOLATION_DATES_START_DATE": "Isolation Start Date",
+      "LNG_CASE_FIELD_LABEL_ISOLATION_DATES_END_DATE": "Isolation End Date",
       "LNG_CASE_FIELD_LABEL_DECEASED": "Deceased",
       "LNG_CASE_FIELD_LABEL_LAST_NAME": "Last Name",
       "LNG_CASE_FIELD_LABEL_DATE_DECEASED": "Date of Decease",
-      "LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER": "Document Number"
+      "LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER": "Document Number",
+      "LNG_CASE_FIELD_LABEL_VISUAL_ID": "Visual ID",
+      "LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED": "Transfer Refused"
     },
     "uiCasesListPage": {
       "LNG_PAGE_LIST_CASES_TITLE": "Cases",
@@ -584,11 +596,13 @@
       "LNG_PAGE_CREATE_ENTITY_ERROR_NO_SELECTED_ENTITIES": "There are no entities selected for relationships!"
     },
     "uiContactFields": {
+      "LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION": "Fill Geo-Location",
       "LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "Fill Geo-Location Latitude",
       "LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME": "Date of Outcome",
       "LNG_CONTACT_FIELD_LABEL_AGE": "Age",
       "LNG_CONTACT_FIELD_LABEL_FIRST_NAME": "First Name",
       "LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING": "Date of Reporting",
+      "LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE": "Date of Reporting Approximate",
       "LNG_CONTACT_FIELD_LABEL_RISK_REASON": "Risk Reason",
       "LNG_CONTACT_FIELD_LABEL_ID": "ID",
       "LNG_CONTACT_FIELD_LABEL_UPDATED_AT": "Updated At",
@@ -610,7 +624,8 @@
       "LNG_CONTACT_FIELD_LABEL_DECEASED": "Deceased",
       "LNG_CONTACT_FIELD_LABEL_LAST_NAME": "Last Name",
       "LNG_CONTACT_FIELD_LABEL_DATE_DECEASED": "Date of Decease",
-      "LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER": "Document Number"
+      "LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER": "Document Number",
+      "LNG_CONTACT_FIELD_LABEL_VISUAL_ID": "Visual ID"
     },
     "uiContactsListPage": {
       "LNG_PAGE_LIST_CONTACTS_TITLE": "Contacts"
@@ -640,7 +655,9 @@
       "LNG_RELATIONSHIP_FIELD_LABEL_COMMENT": "Comment",
       "LNG_RELATIONSHIP_FIELD_LABEL_PERSON_FIRST_NAME": "First Name",
       "LNG_RELATIONSHIP_FIELD_LABEL_PERSON_LAST_NAME": "Last Name",
-      "LNG_RELATIONSHIP_FIELD_LABEL_SOCIAL_RELATIONSHIP_TYPE": "Social Relationship Type"
+      "LNG_RELATIONSHIP_FIELD_LABEL_SOCIAL_RELATIONSHIP_TYPE": "Social Relationship Type",
+      "LNG_RELATIONSHIP_FIELD_LABEL_TARGET": "Target",
+      "LNG_RELATIONSHIP_FIELD_LABEL_SOURCE": "Source"
     },
     "uiFollowUpfields": {
       "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT": "Contact",

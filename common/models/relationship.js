@@ -11,6 +11,8 @@ module.exports = function (Relationship) {
     persons: 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS',
     'persons[].type': 'LNG_RELATIONSHIP_FIELD_LABEL_TYPE',
     'persons[].id': 'LNG_RELATIONSHIP_FIELD_LABEL_RELATED_PERSON',
+    'persons[].target': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET',
+    'persons[].source': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE',
     contactDate: 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE',
     contactDateEstimated: 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE_ESTIMATED',
     certaintyLevelId: 'LNG_RELATIONSHIP_FIELD_LABEL_CERTAINTY_LEVEL',

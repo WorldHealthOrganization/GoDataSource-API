@@ -21,29 +21,16 @@ module.exports = function (Model) {
     // store a list of importable properties
     let importableProperties = [];
     Model.forEachProperty(function (propertyName) {
-      // non-readOnly properties are importable
-      // readOnly properties are importable only if marked as safe for import
-      if (
-        Model.definition.properties[propertyName].readOnly && Model.definition.properties[propertyName].safeForImport ||
-        !Model.definition.properties[propertyName].readOnly
-      ) {
-        // complex model type
-        if (Model.definition.properties[propertyName].type && Model.definition.properties[propertyName].type.definition) {
-          // do not parse more than 2 levels (we don't need that level of granularity when importing flat files)
-          if (prefix || Model.definition.properties[propertyName].importTopLevelOnly) {
-            if (prefix) {
-              propertyName = `${prefix}.${propertyName}`;
-            }
-            importableProperties.push(propertyName);
-            return importableProperties;
-          }
-          // get next level of importable properties and merge the results
-          importableProperties = importableProperties.concat(getImportableProperties(Model.definition.properties[propertyName].type, propertyName));
-        }
-        // array of types
-        if (Array.isArray(Model.definition.properties[propertyName].type)) {
-          // array of complex model types
-          if (Model.definition.properties[propertyName].type[0].definition) {
+      // don't include hidden properties
+      if (!Array.isArray(Model.definition.settings.hidden) || !Model.definition.settings.hidden.includes(propertyName)) {
+        // non-readOnly properties are importable
+        // readOnly properties are importable only if marked as safe for import
+        if (
+          Model.definition.properties[propertyName].readOnly && Model.definition.properties[propertyName].safeForImport ||
+          !Model.definition.properties[propertyName].readOnly
+        ) {
+          // complex model type
+          if (Model.definition.properties[propertyName].type && Model.definition.properties[propertyName].type.definition) {
             // do not parse more than 2 levels (we don't need that level of granularity when importing flat files)
             if (prefix || Model.definition.properties[propertyName].importTopLevelOnly) {
               if (prefix) {
@@ -53,29 +40,45 @@ module.exports = function (Model) {
               return importableProperties;
             }
             // get next level of importable properties and merge the results
-            importableProperties = importableProperties.concat(getImportableProperties(Model.definition.properties[propertyName].type[0], `${propertyName}[]`));
-            // array of simple types
+            importableProperties = importableProperties.concat(getImportableProperties(Model.definition.properties[propertyName].type, propertyName));
+          }
+          // array of types
+          if (Array.isArray(Model.definition.properties[propertyName].type)) {
+            // array of complex model types
+            if (Model.definition.properties[propertyName].type[0].definition) {
+              // do not parse more than 2 levels (we don't need that level of granularity when importing flat files)
+              if (prefix || Model.definition.properties[propertyName].importTopLevelOnly) {
+                if (prefix) {
+                  propertyName = `${prefix}.${propertyName}`;
+                }
+                importableProperties.push(propertyName);
+                return importableProperties;
+              }
+              // get next level of importable properties and merge the results
+              importableProperties = importableProperties.concat(getImportableProperties(Model.definition.properties[propertyName].type[0], `${propertyName}[]`));
+              // array of simple types
+            } else {
+              // keep a copy of original property name
+              const originalPropertyName = propertyName;
+              // update property name if needed
+              if (prefix) {
+                propertyName = `${prefix}.${propertyName}`;
+              }
+              if (!Model.definition.properties[originalPropertyName].importTopLevelOnly) {
+                // mark property as an array
+                propertyName = `${propertyName}[]`;
+              }
+              // add it to the list of properties
+              importableProperties.push(propertyName);
+            }
           } else {
-            // keep a copy of original property name
-            const originalPropertyName = propertyName;
             // update property name if needed
             if (prefix) {
               propertyName = `${prefix}.${propertyName}`;
             }
-            if (!Model.definition.properties[originalPropertyName].importTopLevelOnly) {
-              // mark property as an array
-              propertyName = `${propertyName}[]`;
-            }
             // add it to the list of properties
             importableProperties.push(propertyName);
           }
-        } else {
-          // update property name if needed
-          if (prefix) {
-            propertyName = `${prefix}.${propertyName}`;
-          }
-          // add it to the list of properties
-          importableProperties.push(propertyName);
         }
       }
     });
