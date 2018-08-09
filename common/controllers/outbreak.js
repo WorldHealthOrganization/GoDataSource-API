@@ -3470,6 +3470,8 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.importImportableLabResultsFileUsingMap = function (body, options, callback) {
     const self = this;
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
     // get importable file
     app.models.importableFile
       .getTemporaryFileById(body.fileId, function (error, file) {
@@ -3568,6 +3570,8 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.importImportableCasesFileUsingMap = function (body, options, callback) {
     const self = this;
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
     // get importable file
     app.models.importableFile
       .getTemporaryFileById(body.fileId, function (error, file) {
@@ -3591,6 +3595,8 @@ module.exports = function (Outbreak) {
           // go through all entries
           casesList.forEach(function (caseData, index) {
             createCases.push(function (callback) {
+              // set outbreak id
+              caseData.outbreakId = self.id;
               // sync the case
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.case, caseData, options)
                 .then(function (result) {
@@ -3648,8 +3654,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.importImportableContactsFileUsingMap = function (body, options, callback) {
-
     const self = this;
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
     // get importable file
     app.models.importableFile
       .getTemporaryFileById(body.fileId, function (error, file) {
@@ -3677,6 +3684,9 @@ module.exports = function (Outbreak) {
               const relationshipData = app.utils.helpers.extractImportableFields(app.models.relationship, recordData.relationship);
               // extract contact data
               const contactData = app.utils.helpers.extractImportableFields(app.models.contact, recordData);
+              // set outbreak ids
+              contactData.outbreakId = self.id;
+              relationshipData.outbreakId = self.id;
               // sync the contact
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.contact, contactData, options)
                 .then(function (syncResult) {
@@ -3688,8 +3698,6 @@ module.exports = function (Outbreak) {
                       if (error) {
                         return reject(error);
                       }
-                      // add outbreak information
-                      relationshipData.outbreakId = self.id;
                       // update persons with normalized persons
                       relationshipData.person = persons;
                       // sync relationship
@@ -3762,6 +3770,8 @@ module.exports = function (Outbreak) {
    */
   Outbreak.importImportableOutbreaksFileUsingMap = function (body, options, callback) {
     const self = this;
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
     // get importable file
     app.models.importableFile
       .getTemporaryFileById(body.fileId, function (error, file) {

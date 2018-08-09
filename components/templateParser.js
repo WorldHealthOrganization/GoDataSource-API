@@ -320,7 +320,58 @@ function beforeHook(context, modelInstance, next) {
  */
 function afterHook(context, modelInstance, next) {
   // after successfully creating/updating template, also create/update translations for it.
-  saveLanguageTokens(context, next);
+  saveLanguageTokens(context, function (error) {
+    if (error) {
+      return next(error);
+    }
+    // get JSON model
+    const jsonInstance = modelInstance.toJSON();
+    // store data to be updated
+    const updatedData = {};
+    // go trough all sub-templates and reset new flag
+    subTemplates.forEach(function (templateName) {
+      updatedData[templateName] = resetTemplateNewFlag(jsonInstance[templateName]);
+    });
+    // then update the instance with reset flags
+    modelInstance
+      .updateAttributes(updatedData, context.args.options)
+      .then(function () {
+        next();
+      })
+      .catch(next);
+  });
+}
+
+/**
+ * Reset 'new' flag for question and answers within a template
+ * @param template
+ * @return {array}
+ */
+function resetTemplateNewFlag(template) {
+  // work with a copy of the template
+  template = JSON.parse(JSON.stringify(template));
+  // template should be an array of questions
+  if (Array.isArray(template)) {
+    // go through all the questions
+    template.forEach(function (question) {
+      // reset new flag
+      question.new = false;
+      // if the question has predefined answers
+      if (Array.isArray(question.answers)) {
+        // go through all answers
+        question.answers.forEach(function (answer) {
+          // reset new flag
+          answer.new = false;
+          // if there are additional questions inside an answer
+          if (Array.isArray(answer.additionalQuestions)) {
+            // parse them recursively
+            answer.additionalQuestions = resetTemplateNewFlag(answer.additionalQuestions);
+          }
+        });
+      }
+    });
+  }
+  return template;
 }
 
 /**

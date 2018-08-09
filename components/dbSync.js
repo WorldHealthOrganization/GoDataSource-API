@@ -24,7 +24,8 @@ const collectionsMap = {
 const syncRecordFlags = {
   UNTOUCHED: 'UNTOUCHED',
   CREATED: 'CREATED',
-  UPDATED: 'UPDATED'
+  UPDATED: 'UPDATED',
+  REMOVED: 'REMOVED'
 };
 
 /**
@@ -52,6 +53,9 @@ const syncRecord = function (logger, model, record, options, done) {
     done = options;
     options = {};
   }
+
+  // mark this operation as a sync (if not specified otherwise)
+  options._sync = options._sync !== undefined ? options._sync : true;
 
   let findRecord;
   // check if a record with the given id exists if record.id exists
@@ -106,7 +110,44 @@ const syncRecord = function (logger, model, record, options, done) {
         log('debug', `Record found (id: ${record.id}), updating record`);
         if (dbRecord.deleted) {
           record.deleted = true;
+          // record was just deleted
+        } else if (
+          record.deleted !== undefined &&
+          (
+            record.deleted === true ||
+            (typeof record.deleted === 'string' && record.deleted.toLowerCase() === 'true') ||
+            record.deleted === 1
+          )
+        ) {
+          // remove deleted markers
+          delete record.deleted;
+          delete record.deletedAt;
+          // make sure the record is up to date
+          return dbRecord
+            .updateAttributes(record, options)
+            .then(function (dbRecord) {
+              // then destroy the record
+              return dbRecord
+                .destroy(record)
+                .then(function () {
+                  // get the record from the db to send it back
+                  return model
+                    .findOne({
+                      where: {
+                        id: record.id
+                      },
+                      deleted: true
+                    })
+                    .then(function (dbRecord) {
+                      return {
+                        record: dbRecord,
+                        flag: syncRecordFlags.REMOVED
+                      };
+                    });
+                });
+            });
         }
+        // record just needs to be updated
         return dbRecord
           .updateAttributes(record, options)
           .then(function (dbRecord) {
