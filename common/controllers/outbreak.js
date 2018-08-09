@@ -2355,7 +2355,11 @@ module.exports = function (Outbreak) {
 
   /**
    * Count the cases per period per classification
-   * @param filter Besides the default filter properties this request also accepts 'periodType': enum [day, week, month], 'periodInterval':['date', 'date'] on the first level in 'where'
+   * @param filter Besides the default filter properties this request also accepts
+   * 'periodType': enum [day, week, month],
+   * 'periodInterval':['date', 'date'],
+   * 'includeTotals': boolean (if false 'total' response properties are not calculated),
+   * 'includeDeaths': boolean (if false 'death' response properties are not calculated) on the first level in 'where'
    * @param callback
    */
   Outbreak.prototype.countCasesPerPeriod = function (filter, callback) {
@@ -2414,38 +2418,113 @@ module.exports = function (Outbreak) {
       }
     }
 
+    // initialize includeTotals and includeDeaths flags; default: false
+    let includeTotals, includeDeaths;
+    // check if the includeTotals filter was sent; accepting it only on the first level
+    includeTotals = _.get(filter, 'where.includeTotals');
+    if (typeof includeTotals !== "undefined") {
+      // includeTotals was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.includeTotals;
+    } else {
+      // set default
+      includeTotals = false;
+    }
+
+    // check if the includeDeaths filter was sent; accepting it only on the first level
+    includeDeaths = _.get(filter, 'where.includeDeaths');
+    if (typeof includeDeaths !== "undefined") {
+      // includeDeaths was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.includeDeaths;
+    } else {
+      // set default
+      includeDeaths = false;
+    }
+
     // get outbreakId
     let outbreakId = this.id;
 
+    // initialize result
+    let result = {
+      totalCasesForIntervalCount: 0,
+      totalCasesClassificationCountersForInterval: {},
+      totalCasesCountersForIntervalPerLocation: {
+        locations: []
+      },
+      caseIDsForInterval: [],
+      period: []
+    };
+
     // initialize default filter
+    // depending on includeTotals/includeDeaths filters we will make different queries
     let defaultFilter = {
       where: {
-        outbreakId: outbreakId,
-        or: [{
-          and: [{
-            dateOfReporting: {
-              // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
-              between: periodInterval.slice()
-            },
-            dateBecomeCase: {
-              eq: null
-            }
-          }]
-        }, {
-          dateBecomeCase: {
-            // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
-            between: periodInterval.slice()
-          }
-        }]
+        outbreakId: outbreakId
       },
       order: 'dateOfReporting ASC'
     };
 
-    // initialize result
-    let result = {
-      totalCasesCount: 0,
-      period: []
-    };
+    if (!includeTotals) {
+      // don't include totals; get only the cases reported in the periodInterval
+      defaultFilter = app.utils.remote
+        .mergeFilters({
+          where: {
+            or: [{
+              and: [{
+                dateOfReporting: {
+                  // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
+                  between: periodInterval.slice()
+                },
+                dateBecomeCase: {
+                  eq: null
+                }
+              }]
+            }, {
+              dateBecomeCase: {
+                // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
+                between: periodInterval.slice()
+              }
+            }]
+          }
+        }, defaultFilter);
+    } else {
+      // totals are included; initialize additional result properties
+      Object.assign(result, {
+        totalCasesCount: 0,
+        totalCasesClassificationCounters: {},
+        totalCasesCountersPerLocation: {
+          locations: []
+        },
+        caseIDs: []
+      });
+    }
+
+    if (!includeDeaths) {
+      // don't include deaths; get only the cases that are not dead
+      defaultFilter = app.utils.remote
+        .mergeFilters({
+          where: {
+            deceased: false
+          }
+        }, defaultFilter);
+    } else {
+      // deaths are included; initialize additional result properties (deaths for interval)
+      Object.assign(result, {
+        totalDeadCasesForIntervalCount: 0,
+        totalDeadConfirmedCasesForIntervalCount: 0,
+        deadCaseIDsForInterval: [],
+        deadConfirmedCaseIDsForInterval: []
+      });
+
+      // check for includeTotals; we might need to add additional properties in the result
+      if (includeTotals) {
+        Object.assign(result, {
+          totalDeadCasesCount: 0,
+          totalDeadConfirmedCasesCount: 0,
+          deadCaseIDs: [],
+          deadConfirmedCaseIDs: []
+        });
+      }
+    }
 
     // get all the cases for the filtered period
     app.models.case.find(app.utils.remote
@@ -2455,69 +2534,304 @@ module.exports = function (Outbreak) {
         let periodMap = genericHelpers.getChunksForInterval(periodInterval, periodType);
         // fill additional details for each entry in the periodMap
         Object.keys(periodMap).forEach(function (entry) {
-          periodMap[entry] = Object.assign(periodMap[entry], {
+          Object.assign(periodMap[entry], {
             totalCasesCount: 0,
             classificationCounters: {},
+            countersPerLocation: {
+              locations: []
+            },
             caseIDs: []
           });
+
+          // check for deaths flag in order to add additional properties to the result
+          if (includeDeaths) {
+            Object.assign(periodMap[entry], {
+              totalDeadCasesCount: 0,
+              totalDeadConfirmedCasesCount: 0,
+              deadCaseIDs: [],
+              deadConfirmedCaseIDs: []
+            });
+          }
         });
 
         cases.forEach(function (item) {
           // get case date; it's either dateBecomeCase or dateOfReporting
           let caseDate = item.dateBecomeCase || item.dateOfReporting;
-          // get period in which the case needs to be included
-          let casePeriodInterval;
-          switch (periodType) {
-            case periodTypes.day:
-              // get interval for today
-              let today = genericHelpers.getUTCDate(caseDate).toString();
-              let todayEndOfDay = genericHelpers.getUTCDateEndOfDay(caseDate).toString();
-              casePeriodInterval = [today, todayEndOfDay];
-              break;
-            case periodTypes.week:
-              // get interval for this week
-              let mondayStartOfDay = genericHelpers.getUTCDate(caseDate, 1);
-              let sundayEndOfDay = genericHelpers.getUTCDateEndOfDay(caseDate, 7);
+          // get case location
+          // normalize addresses
+          item.addresses = item.addresses || [];
+          let caseLocation = item.addresses.find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
+          // use usual place of residence if found else leave the case unassigned to a location
+          let caseLocationId = caseLocation && caseLocation.locationId ? caseLocation.locationId : null;
+          // get confirmed flag
+          let caseConfirmed = item.classification === 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_CONFIRMED';
 
-              // we should use monday only if it is later than the first date of the periodInterval; else use the first date of the period interval
-              mondayStartOfDay = (mondayStartOfDay.isAfter(periodInterval[0]) ? mondayStartOfDay : periodInterval[0]).toString();
+          // in case includeTotals is true, there might be cases that have the date outside of the periodInterval;
+          // these cases are not added in any period entry
+          // initialize flag to know if the case needs to be added in a period entry
+          let addInPeriod = !includeTotals || (periodInterval[0].isSameOrBefore(caseDate) && periodInterval[1].isSameOrAfter(caseDate));
 
-              // we should use sunday only if it is earlier than the last date of the periodInterval; else use the last date of the period interval
-              sundayEndOfDay = (sundayEndOfDay.isBefore(periodInterval[1]) ? sundayEndOfDay : periodInterval[1]).toString();
+          if (addInPeriod) {
+            // get period in which the case needs to be included
+            let casePeriodInterval;
+            switch (periodType) {
+              case periodTypes.day:
+                // get interval for today
+                let today = genericHelpers.getUTCDate(caseDate).toString();
+                let todayEndOfDay = genericHelpers.getUTCDateEndOfDay(caseDate).toString();
+                casePeriodInterval = [today, todayEndOfDay];
+                break;
+              case periodTypes.week:
+                // get interval for this week
+                let mondayStartOfDay = genericHelpers.getUTCDate(caseDate, 1);
+                let sundayEndOfDay = genericHelpers.getUTCDateEndOfDay(caseDate, 7);
 
-              casePeriodInterval = [mondayStartOfDay, sundayEndOfDay];
-              break;
-            case periodTypes.month:
-              // get interval for this month
-              let firstDayOfMonth = genericHelpers.getUTCDate(caseDate).startOf('month');
-              let lastDayOfMonth = genericHelpers.getUTCDateEndOfDay(caseDate).endOf('month');
+                // we should use monday only if it is later than the first date of the periodInterval; else use the first date of the period interval
+                mondayStartOfDay = (mondayStartOfDay.isAfter(periodInterval[0]) ? mondayStartOfDay : periodInterval[0]).toString();
 
-              // we should use first day of month only if it is later than the first date of the periodInterval; else use the first date of the period interval
-              firstDayOfMonth = (firstDayOfMonth.isAfter(periodInterval[0]) ? firstDayOfMonth : periodInterval[0]).toString();
+                // we should use sunday only if it is earlier than the last date of the periodInterval; else use the last date of the period interval
+                sundayEndOfDay = (sundayEndOfDay.isBefore(periodInterval[1]) ? sundayEndOfDay : periodInterval[1]).toString();
 
-              // we should use last day of month only if it is earlier than the last date of the periodInterval; else use the last date of the period interval
-              lastDayOfMonth = (lastDayOfMonth.isBefore(periodInterval[1]) ? lastDayOfMonth : periodInterval[1]).toString();
+                casePeriodInterval = [mondayStartOfDay, sundayEndOfDay];
+                break;
+              case periodTypes.month:
+                // get interval for this month
+                let firstDayOfMonth = genericHelpers.getUTCDate(caseDate).startOf('month');
+                let lastDayOfMonth = genericHelpers.getUTCDateEndOfDay(caseDate).endOf('month');
 
-              casePeriodInterval = [firstDayOfMonth, lastDayOfMonth];
-              break;
+                // we should use first day of month only if it is later than the first date of the periodInterval; else use the first date of the period interval
+                firstDayOfMonth = (firstDayOfMonth.isAfter(periodInterval[0]) ? firstDayOfMonth : periodInterval[0]).toString();
+
+                // we should use last day of month only if it is earlier than the last date of the periodInterval; else use the last date of the period interval
+                lastDayOfMonth = (lastDayOfMonth.isBefore(periodInterval[1]) ? lastDayOfMonth : periodInterval[1]).toString();
+
+                casePeriodInterval = [firstDayOfMonth, lastDayOfMonth];
+                break;
+            }
+
+            // create a period identifier
+            let casePeriodIdentifier = casePeriodInterval.join(' - ');
+
+            // get index of the case location in the period counters per location array
+            let periodLocationIndex = periodMap[casePeriodIdentifier].countersPerLocation.locations.findIndex(location => location.id === caseLocationId);
+            // initialize location entry is not already initialized
+            if (periodLocationIndex === -1) {
+              periodLocationIndex = periodMap[casePeriodIdentifier].countersPerLocation.locations.push(
+                Object.assign({
+                    id: caseLocationId,
+                    totalCasesCount: 0,
+                    caseIDs: []
+                  },
+                  // check for includeDeaths flag to add additional properties
+                  includeDeaths ? {
+                    totalDeadCasesCount: 0,
+                    totalDeadConfirmedCasesCount: 0,
+                    deadCaseIDs: [],
+                    deadConfirmedCaseIDs: []
+                  } : {}
+                )
+              ) - 1;
+            }
+
+            // get index of the case location in the entire interval counters per location array
+            let entireIntervalLocationIndex = result.totalCasesCountersForIntervalPerLocation.locations.findIndex(location => location.id === caseLocationId);
+            // initialize location entry is not already initialized
+            if (entireIntervalLocationIndex === -1) {
+              entireIntervalLocationIndex = result.totalCasesCountersForIntervalPerLocation.locations.push(
+                Object.assign({
+                    id: caseLocationId,
+                    totalCasesCount: 0,
+                    caseIDs: []
+                  },
+                  // check for includeDeaths flag to add additional properties
+                  includeDeaths ? {
+                    totalDeadCasesCount: 0,
+                    totalDeadConfirmedCasesCount: 0,
+                    deadCaseIDs: [],
+                    deadConfirmedCaseIDs: []
+                  } : {}
+                )
+              ) - 1;
+            }
+
+            // check if case is dead; will not add it to classificationCounters if so
+            if (!item.deceased) {
+              // period classification
+              // initialize counter for period classification if it's not already initialized
+              if (!periodMap[casePeriodIdentifier].classificationCounters[item.classification]) {
+                periodMap[casePeriodIdentifier].classificationCounters[item.classification] = {
+                  count: 0,
+                  caseIDs: [],
+                  locations: []
+                };
+              }
+              periodMap[casePeriodIdentifier].classificationCounters[item.classification].count++;
+              periodMap[casePeriodIdentifier].classificationCounters[item.classification].caseIDs.push(item.id);
+
+              // get index of the case location in the locations array
+              let locationIndex = periodMap[casePeriodIdentifier].classificationCounters[item.classification].locations.findIndex(location => location.id === caseLocationId);
+              // initialize location entry is not already initialized
+              if (locationIndex === -1) {
+                locationIndex = periodMap[casePeriodIdentifier].classificationCounters[item.classification].locations.push({
+                  id: caseLocationId,
+                  totalCasesCount: 0,
+                  caseIDs: []
+                }) - 1;
+              }
+
+              // increase period classification location counters
+              periodMap[casePeriodIdentifier].classificationCounters[item.classification].locations[locationIndex].totalCasesCount++;
+              periodMap[casePeriodIdentifier].classificationCounters[item.classification].locations[locationIndex].caseIDs.push(item.id);
+
+              // increase period counters outside of case classification
+              periodMap[casePeriodIdentifier].totalCasesCount++;
+              periodMap[casePeriodIdentifier].caseIDs.push(item.id);
+
+              // increase period location counters
+              periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].totalCasesCount++;
+              periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].caseIDs.push(item.id);
+
+              // entire interval classification
+              // initialize counter for entire interval classification if it's not already initialized
+              if (!result.totalCasesClassificationCountersForInterval[item.classification]) {
+                result.totalCasesClassificationCountersForInterval[item.classification] = {
+                  count: 0,
+                  caseIDs: [],
+                  locations: []
+                };
+              }
+              result.totalCasesClassificationCountersForInterval[item.classification].count++;
+              result.totalCasesClassificationCountersForInterval[item.classification].caseIDs.push(item.id);
+
+              // get index of the case location in the entire interval classification locations array
+              let entireIntervalClassificationLocationIndex = result.totalCasesClassificationCountersForInterval[item.classification].locations.findIndex(location => location.id === caseLocationId);
+              // initialize location entry is not already initialized
+              if (entireIntervalClassificationLocationIndex === -1) {
+                entireIntervalClassificationLocationIndex = result.totalCasesClassificationCountersForInterval[item.classification].locations.push({
+                  id: caseLocationId,
+                  totalCasesCount: 0,
+                  caseIDs: []
+                }) - 1;
+              }
+
+              // increase entire interval classification classification location counters
+              result.totalCasesClassificationCountersForInterval[item.classification].locations[entireIntervalClassificationLocationIndex].totalCasesCount++;
+              result.totalCasesClassificationCountersForInterval[item.classification].locations[entireIntervalClassificationLocationIndex].caseIDs.push(item.id);
+
+              // increase entire interval counters outside of case classification
+              result.totalCasesForIntervalCount++;
+              result.caseIDsForInterval.push(item.id);
+
+              // increase entire interval location counters
+              result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].totalCasesCount++;
+              result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].caseIDs.push(item.id);
+            } else {
+              // update period counters
+              if (caseConfirmed) {
+                // update confirmed dead case counters
+                periodMap[casePeriodIdentifier].totalDeadConfirmedCasesCount++;
+                periodMap[casePeriodIdentifier].deadConfirmedCaseIDs.push(item.id);
+                periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].totalDeadConfirmedCasesCount++;
+                periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].deadConfirmedCaseIDs.push(item.id);
+
+                result.totalDeadConfirmedCasesForIntervalCount++;
+                result.deadConfirmedCaseIDsForInterval.push(item.id);
+                result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].totalDeadConfirmedCasesCount++;
+                result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].deadConfirmedCaseIDs.push(item.id);
+              }
+
+              // update death counters
+              periodMap[casePeriodIdentifier].totalDeadCasesCount++;
+              periodMap[casePeriodIdentifier].deadCaseIDs.push(item.id);
+              periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].totalDeadCasesCount++;
+              periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].deadCaseIDs.push(item.id);
+
+              result.totalDeadCasesForIntervalCount++;
+              result.deadCaseIDsForInterval.push(item.id);
+              result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].totalDeadCasesCount++;
+              result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].deadCaseIDs.push(item.id);
+            }
           }
 
-          // create a period identifier
-          let casePeriodIdentifier = casePeriodInterval.join(' - ');
+          // check for include totals to increase totals counters
+          if (includeTotals) {
+            // get index of the case location in the total counters per location array
+            let totalLocationIndex = result.totalCasesCountersPerLocation.locations.findIndex(location => location.id === caseLocationId);
+            // initialize location entry is not already initialized
+            if (totalLocationIndex === -1) {
+              totalLocationIndex = result.totalCasesCountersPerLocation.locations.push(
+                Object.assign({
+                    id: caseLocationId,
+                    totalCasesCount: 0,
+                    caseIDs: []
+                  },
+                  // check for includeDeaths flag to add additional properties
+                  includeDeaths ? {
+                    totalDeadCasesCount: 0,
+                    totalDeadConfirmedCasesCount: 0,
+                    deadCaseIDs: [],
+                    deadConfirmedCaseIDs: []
+                  } : {}
+                )
+              ) - 1;
+            }
 
-          // increase counters
-          periodMap[casePeriodIdentifier].totalCasesCount++;
-          // initialize counter for classification if it's not already initialize
-          if (!periodMap[casePeriodIdentifier].classificationCounters[item.classification]) {
-            periodMap[casePeriodIdentifier].classificationCounters[item.classification] = 0;
+            // check if case is dead; will not add it to classificationCounters if so
+            if (!item.deceased) {
+              // initialize counter for total classification if it's not already initialized
+              if (!result.totalCasesClassificationCounters[item.classification]) {
+                result.totalCasesClassificationCounters[item.classification] = {
+                  count: 0,
+                  caseIDs: [],
+                  locations: []
+                };
+              }
+              result.totalCasesClassificationCounters[item.classification].count++;
+              result.totalCasesClassificationCounters[item.classification].caseIDs.push(item.id);
+
+              // get index of the case location in the total classification locations array
+              let totalClassificationLocationIndex = result.totalCasesClassificationCounters[item.classification].locations.findIndex(location => location.id === caseLocationId);
+              // initialize location entry is not already initialized
+              if (totalClassificationLocationIndex === -1) {
+                totalClassificationLocationIndex = result.totalCasesClassificationCounters[item.classification].locations.push({
+                  id: caseLocationId,
+                  totalCasesCount: 0,
+                  caseIDs: []
+                }) - 1;
+              }
+
+              // increase period classification location counters
+              result.totalCasesClassificationCounters[item.classification].locations[totalClassificationLocationIndex].totalCasesCount++;
+              result.totalCasesClassificationCounters[item.classification].locations[totalClassificationLocationIndex].caseIDs.push(item.id);
+
+              // increase counters outside of case classification
+              result.totalCasesCount++;
+              result.caseIDs.push(item.id);
+
+              // increase location counters
+              result.totalCasesCountersPerLocation.locations[totalLocationIndex].totalCasesCount++;
+              result.totalCasesCountersPerLocation.locations[totalLocationIndex].caseIDs.push(item.id);
+            } else {
+              // update period counters
+              if (caseConfirmed) {
+                // update confirmed dead case counters
+                result.totalDeadConfirmedCasesCount++;
+                result.deadConfirmedCaseIDs.push(item.id);
+                result.totalCasesCountersPerLocation.locations[totalLocationIndex].totalDeadConfirmedCasesCount++;
+                result.totalCasesCountersPerLocation.locations[totalLocationIndex].deadConfirmedCaseIDs.push(item.id);
+              }
+
+              // update death counters
+              result.totalDeadCasesCount++;
+              result.deadCaseIDs.push(item.id);
+              result.totalCasesCountersPerLocation.locations[totalLocationIndex].totalDeadCasesCount++;
+              result.totalCasesCountersPerLocation.locations[totalLocationIndex].deadCaseIDs.push(item.id);
+            }
           }
-          periodMap[casePeriodIdentifier].classificationCounters[item.classification]++;
-          periodMap[casePeriodIdentifier].caseIDs.push(item.id);
         });
 
         // update results; sending array with period entries
         result.period = Object.values(periodMap);
-        result.totalCasesCount = cases.length;
 
         // send response
         callback(null, result);
