@@ -384,7 +384,8 @@ module.exports = function (ImportableFile) {
               result = Object.assign(
                 {},
                 result,
-                {suggestedFieldMapping: Object.assign(result.suggestedFieldMapping, suggestedFieldMapping)},
+                // main model takes precedence on mapping
+                {suggestedFieldMapping: Object.assign(suggestedFieldMapping, result.suggestedFieldMapping)},
                 {modelProperties: Object.assign(result.modelProperties, {[modelName]:results[modelName].modelProperties})},
                 {modelPropertyValues: Object.assign(result.modelPropertyValues, {[modelName]:results[modelName].modelPropertyValues})}
                 );

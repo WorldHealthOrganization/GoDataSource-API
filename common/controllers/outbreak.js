@@ -3264,6 +3264,8 @@ module.exports = function (Outbreak) {
           // go through all entries
           casesList.forEach(function (caseData, index) {
             createCases.push(function (callback) {
+              // set outbreak id
+              caseData.outbreakId = self.id;
               // sync the case
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.case, caseData, options)
                 .then(function (result) {
@@ -3350,6 +3352,9 @@ module.exports = function (Outbreak) {
               const relationshipData = app.utils.helpers.extractImportableFields(app.models.relationship, recordData.relationship);
               // extract contact data
               const contactData = app.utils.helpers.extractImportableFields(app.models.contact, recordData);
+              // set outbreak ids
+              contactData.outbreakId = self.id;
+              relationshipData.outbreakId = self.id;
               // sync the contact
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.contact, contactData, options)
                 .then(function (syncResult) {
@@ -3361,8 +3366,6 @@ module.exports = function (Outbreak) {
                       if (error) {
                         return reject(error);
                       }
-                      // add outbreak information
-                      relationshipData.outbreakId = self.id;
                       // update persons with normalized persons
                       relationshipData.person = persons;
                       // sync relationship

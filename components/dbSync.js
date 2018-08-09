@@ -24,7 +24,8 @@ const collectionsMap = {
 const syncRecordFlags = {
   UNTOUCHED: 'UNTOUCHED',
   CREATED: 'CREATED',
-  UPDATED: 'UPDATED'
+  UPDATED: 'UPDATED',
+  REMOVED: 'REMOVED'
 };
 
 /**
@@ -106,7 +107,27 @@ const syncRecord = function (logger, model, record, options, done) {
         log('debug', `Record found (id: ${record.id}), updating record`);
         if (dbRecord.deleted) {
           record.deleted = true;
+          // record was just deleted
+        } else if (record.deleted) {
+          // remove deleted markers
+          delete record.deleted;
+          delete record.deletedAt;
+          // make sure the record is up to date
+          return dbRecord
+            .updateAttributes(record, options)
+            .then(function (dbRecord) {
+              // then destroy the record
+              return dbRecord
+                .destroy(record)
+                .then(function (dbRecord) {
+                  return {
+                    record: dbRecord,
+                    flag: syncRecordFlags.REMOVED
+                  };
+                });
+            });
         }
+        // record just needs to be updated
         return dbRecord
           .updateAttributes(record, options)
           .then(function (dbRecord) {
