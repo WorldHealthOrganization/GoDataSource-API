@@ -3143,6 +3143,8 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.importImportableLabResultsFileUsingMap = function (body, options, callback) {
     const self = this;
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
     // get importable file
     app.models.importableFile
       .getTemporaryFileById(body.fileId, function (error, file) {
@@ -3241,6 +3243,8 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.importImportableCasesFileUsingMap = function (body, options, callback) {
     const self = this;
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
     // get importable file
     app.models.importableFile
       .getTemporaryFileById(body.fileId, function (error, file) {
@@ -3323,8 +3327,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.importImportableContactsFileUsingMap = function (body, options, callback) {
-
     const self = this;
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
     // get importable file
     app.models.importableFile
       .getTemporaryFileById(body.fileId, function (error, file) {
@@ -3438,6 +3443,8 @@ module.exports = function (Outbreak) {
    */
   Outbreak.importImportableOutbreaksFileUsingMap = function (body, options, callback) {
     const self = this;
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
     // get importable file
     app.models.importableFile
       .getTemporaryFileById(body.fileId, function (error, file) {
