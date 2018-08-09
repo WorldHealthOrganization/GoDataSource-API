@@ -108,7 +108,14 @@ const syncRecord = function (logger, model, record, options, done) {
         if (dbRecord.deleted) {
           record.deleted = true;
           // record was just deleted
-        } else if (record.deleted === true || record.deleted.toLowerCase() === 'true' || record.deleted === 1) {
+        } else if (
+          record.deleted !== undefined &&
+          (
+            record.deleted === true ||
+            (typeof record.deleted === 'string' && record.deleted.toLowerCase() === 'true') ||
+            record.deleted === 1
+          )
+        ) {
           // remove deleted markers
           delete record.deleted;
           delete record.deletedAt;
