@@ -4280,4 +4280,171 @@ module.exports = function (Outbreak) {
       return Promise.resolve(results)
     }, callback);
   };
+
+  /**
+   * Export filtered contacts follow-ups to PDF
+   * PDF Information: List of contacts with follow-ups table
+   * @param filter This request also accepts 'includeContactAddress': boolean, 'includeContactPhoneNumber': boolean, 'groupResultsBy': enum ['case', 'location', 'riskLevel'] on the first level in 'where'
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportFilteredContactFollowUps = function (filter, options, callback) {
+    // initialize includeContactAddress and includeContactPhoneNumber filters
+    let includeContactAddress, includeContactPhoneNumber;
+    // check if the includeContactAddress filter was sent; accepting it only on the first level
+    includeContactAddress = _.get(filter, 'where.includeContactAddress', null);
+    if (includeContactAddress !== null) {
+      // includeContactAddress was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.includeContactAddress;
+    } else {
+      // use false as default filter
+      includeContactAddress = false;
+    }
+
+    // check if the includeContactPhoneNumber filter was sent; accepting it only on the first level
+    includeContactPhoneNumber = _.get(filter, 'where.includeContactPhoneNumber', null);
+    if (includeContactPhoneNumber !== null) {
+      // includeContactPhoneNumber was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.includeContactPhoneNumber;
+    } else {
+      // use false as default filter
+      includeContactPhoneNumber = false;
+    }
+
+    // initialize groupResultsBy filter
+    let groupResultsBy;
+    // initialize available options for group by
+    let groupByOptions = {
+      case: 'case',
+      location: 'location',
+      riskLevel: 'riskLevel'
+    };
+    groupResultsBy = _.get(filter, 'where.groupResultsBy', null);
+    if (groupResultsBy !== null) {
+      // groupResultsBy was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.groupResultsBy;
+      // check if the group value is accepted else do not group
+      groupResultsBy = Object.values(groupByOptions).indexOf(groupResultsBy) !== -1 ? groupResultsBy : null;
+    }
+
+    // include follow-ups information for each contact
+    filter = app.utils.remote
+      .mergeFilters({
+        include: [{
+          relation: 'followUps',
+          scope: {
+            filterParent: true,
+            order: 'date ASC'
+          }
+        }]
+      }, filter || {});
+
+    // if we need to group by case include also the relationships
+    if (groupResultsBy === groupByOptions.case) {
+      filter = app.utils.remote
+        .mergeFilters({
+          include: [{
+            relation: 'relationships',
+            scope: {
+              where: {
+                'persons.type': 'case'
+              },
+              order: 'contactDate DESC',
+              limit: 1,
+              // remove the contacts that don't have relationships to cases
+              filterParent: true
+            }
+          }]
+        }, filter || {});
+    }
+
+    // use get contacts functionality
+    this.__get__contacts(filter, function (error, result) {
+      if (error) {
+        return callback(error);
+      }
+
+      // add support for filter parent
+      const results = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, filter);
+
+      // check if the results need to be grouped
+      if (groupResultsBy) {
+        // initialize grouped results
+        let groupedResults = {};
+        // loop through the results and group them
+        results.forEach(function (contact) {
+          // get identifier for grouping
+          let groupIdentifier;
+          switch (groupResultsBy) {
+            case groupByOptions.case:
+              // get case entry in the contact relationship
+              let caseItem = contact.relationships[0].persons.find(person => person.type === 'case');
+              groupIdentifier = caseItem.id;
+              break;
+            case groupByOptions.location:
+              // get contact residence location
+              contact.addresses = contact.addresses || [];
+              let residenceLocation = contact.addresses.find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
+              groupIdentifier = residenceLocation ? residenceLocation.locationId : null;
+              break;
+            case groupByOptions.riskLevel:
+              groupIdentifier = contact.riskLevel;
+              break;
+          }
+
+          if (!groupedResults[groupIdentifier]) {
+            groupedResults[groupIdentifier] = [];
+          }
+
+          // add contact in group
+          groupedResults[groupIdentifier].push(contact);
+        });
+
+
+      }
+
+      const contextUser = app.utils.remote.getUserFromOptions(options);
+      // load user language dictionary
+      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+        // handle errors
+        if (error) {
+          return callback(error);
+        }
+        // initialize list of follow-up properties to be shown in table
+        let followUpProperties = ['date'];
+        // define a list of follow-up table headers
+        let followUpsHeaders = [];
+        // headers come from follow-up models;
+        followUpProperties.forEach(function (propertyName) {
+          followUpsHeaders.push({
+            id: propertyName,
+            // use correct label translation for user language
+            header: dictionary.getTranslation(app.models.case.fieldLabelsMap[propertyName])
+          });
+        });
+        // go through the results
+        results.forEach(function (result) {
+          // for the fields that use reference data
+          app.models.case.referenceDataFields.forEach(function (field) {
+            if (result[field]) {
+              // get translation of the reference data
+              result[field] = app.models.language.getFieldTranslationFromDictionary(result[field], contextUser.languageId, dictionary);
+            }
+          });
+        });
+
+        let fileBuilder = app.utils.pdfDoc.createPDFList;
+        let mimeType = 'application/pdf';
+
+        // create file with the results
+        fileBuilder(headers, results, function (error, file) {
+          if (error) {
+            return callback(error);
+          }
+          // and offer it for download
+          app.utils.remote.helpers.offerFileToDownload(file, mimeType, `Case Line List.${exportType}`, callback);
+        });
+      });
+    })
+  };
 };

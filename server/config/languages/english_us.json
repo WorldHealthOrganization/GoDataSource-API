@@ -683,7 +683,10 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS": "Address",
       "LNG_FOLLOW_UP_FIELD_LABEL_PERFORMED": "Performed",
       "LNG_FOLLOW_UP_FIELD_LABEL_LOST_TO_FOLLOW_UP": "Lost to Follow-up",
-      "LNG_FOLLOW_UP_FIELD_LABEL_DELETED": "Deleted"
+      "LNG_FOLLOW_UP_FIELD_LABEL_DELETED": "Deleted",
+      "LNG_FOLLOW_UP_FIELD_LABEL_TEAM": "Team",
+      "LNG_FOLLOW_UP_FIELD_LABEL_INDEX": "Index",
+      "LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED": "Is Generated"
     },
     "uiFollowUpsListPage": {
       "LNG_PAGE_LIST_FOLLOW_UPS_TITLE": "Upcoming Follow-ups",

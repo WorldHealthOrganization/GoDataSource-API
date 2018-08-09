@@ -114,63 +114,10 @@ function createPDFList(headers, data, callback) {
   }
 
   const document = createPdfDoc(documentConfig);
-  const pdfTable = new PdfTable(document);
 
-  // set default values for columns
-  pdfTable.setColumnsDefaults({
-    headerBorder: 'B',
-    align: 'left',
-    headerPadding: [2],
-    padding: [2],
-    fill: true
-  });
+  // create table in document
+  createTableInPDFDocument(headers, data, document, documentConfig);
 
-  // alternate background on rows
-  pdfTable.onCellBackgroundAdd(function (table, column, row, index) {
-    if (index % 2 === 0) {
-      table.pdf.fillColor('#ececec');
-    } else {
-      table.pdf.fillColor('#ffffff');
-    }
-  });
-
-  // reset fill color after setting backround as the fill color is used for all elements
-  pdfTable.onCellBackgroundAdded(function (table) {
-    table.pdf.fillColor('#000000');
-  });
-
-  // add table header on all pages
-  pdfTable.onPageAdded(function (tb) {
-    tb.addHeader();
-  });
-
-  // compute width
-  let reservedWidth = 0;
-  let noHeadersWithReservedWidth = 0;
-  // find headers which need specific width
-  headers.forEach(function (header) {
-    if (header.width) {
-      // mark width as reserved
-      reservedWidth += header.width;
-      // count the number of headers with reserved width
-      noHeadersWithReservedWidth++;
-    }
-  });
-
-  // for rows without reserved width, split remaining document width (doc width - margins - reserved width) between remaining headers
-  const defaultRowWidth = (documentConfig.widthForPageSize - 2 * defaultDocumentConfiguration.margin - reservedWidth) / (headers.length - noHeadersWithReservedWidth);
-
-  // add all headers
-  headers.forEach(function (header) {
-    pdfTable.addColumn({
-      id: header.id,
-      header: header.header,
-      width: header.width || defaultRowWidth
-    })
-  });
-
-  // add table data
-  pdfTable.addBody(data);
   // convert document stream to buffer
   streamUtils.streamToBuffer(document, callback);
   // finalize document
@@ -410,10 +357,78 @@ const createPersonProfile = function (doc, person, displayValues, title, numberO
   return doc;
 };
 
+/**
+ * Create a table in a PDF document
+ * @param headers Table headers
+ * @param data Table data
+ * @param document PDF document in which to add table
+ * @param documentConfig
+ */
+function createTableInPDFDocument(headers, data, document, documentConfig) {
+  const pdfTable = new PdfTable(document);
+
+  // set default values for columns
+  pdfTable.setColumnsDefaults({
+    headerBorder: 'B',
+    align: 'left',
+    headerPadding: [2],
+    padding: [2],
+    fill: true
+  });
+
+  // alternate background on rows
+  pdfTable.onCellBackgroundAdd(function (table, column, row, index) {
+    if (index % 2 === 0) {
+      table.pdf.fillColor('#ececec');
+    } else {
+      table.pdf.fillColor('#ffffff');
+    }
+  });
+
+  // reset fill color after setting backround as the fill color is used for all elements
+  pdfTable.onCellBackgroundAdded(function (table) {
+    table.pdf.fillColor('#000000');
+  });
+
+  // add table header on all pages
+  pdfTable.onPageAdded(function (tb) {
+    tb.addHeader();
+  });
+
+  // compute width
+  let reservedWidth = 0;
+  let noHeadersWithReservedWidth = 0;
+  // find headers which need specific width
+  headers.forEach(function (header) {
+    if (header.width) {
+      // mark width as reserved
+      reservedWidth += header.width;
+      // count the number of headers with reserved width
+      noHeadersWithReservedWidth++;
+    }
+  });
+
+  // for rows without reserved width, split remaining document width (doc width - margins - reserved width) between remaining headers
+  const defaultRowWidth = (documentConfig.widthForPageSize - 2 * defaultDocumentConfiguration.margin - reservedWidth) / (headers.length - noHeadersWithReservedWidth);
+
+  // add all headers
+  headers.forEach(function (header) {
+    pdfTable.addColumn({
+      id: header.id,
+      header: header.header,
+      width: header.width || defaultRowWidth
+    })
+  });
+
+  // add table data
+  pdfTable.addBody(data);
+}
+
 module.exports = {
   createPDFList: createPDFList,
   createSVGDoc: createSVGDoc,
   createPdfDoc: createPdfDoc,
   createPersonProfile: createPersonProfile,
-  createQuestionnaire: createQuestionnaire
+  createQuestionnaire: createQuestionnaire,
+  createTableInPDFDocument: createTableInPDFDocument
 };

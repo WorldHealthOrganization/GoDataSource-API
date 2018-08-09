@@ -978,6 +978,12 @@
       "principalId": "read_outbreak",
       "permission": "ALLOW",
       "property": "exportFilteredOutbreaks"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "exportFilteredContactFollowUps"
     }
   ],
   "methods": {
@@ -3530,7 +3536,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); ; Note: this request also accepts 'date': 'date', 'locationId': 'locationId' on the first level in 'where'"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'date': 'date', 'locationId': 'locationId' on the first level in 'where'"
         }
       ],
       "returns": [
@@ -3714,6 +3720,47 @@
       "http": {
         "verb": "get",
         "path": "/export"
+      }
+    },
+    "prototype.exportFilteredContactFollowUps": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'includeContactAddress': boolean, 'includeContactPhoneNumber': boolean, 'groupResultsBy': enum ['case', 'location', 'riskLevel'] on the first level in 'where'"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export filtered list of cases",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/follow-ups/export"
       }
     }
   }
