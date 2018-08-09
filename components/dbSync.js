@@ -54,6 +54,9 @@ const syncRecord = function (logger, model, record, options, done) {
     options = {};
   }
 
+  // mark this operation as a sync
+  options._sync = true;
+
   let findRecord;
   // check if a record with the given id exists if record.id exists
   if (record.id !== undefined) {
