@@ -108,7 +108,7 @@ const syncRecord = function (logger, model, record, options, done) {
         if (dbRecord.deleted) {
           record.deleted = true;
           // record was just deleted
-        } else if (record.deleted) {
+        } else if (record.deleted === true || record.deleted.toLowerCase() === 'true' || record.deleted === 1) {
           // remove deleted markers
           delete record.deleted;
           delete record.deletedAt;
@@ -119,11 +119,21 @@ const syncRecord = function (logger, model, record, options, done) {
               // then destroy the record
               return dbRecord
                 .destroy(record)
-                .then(function (dbRecord) {
-                  return {
-                    record: dbRecord,
-                    flag: syncRecordFlags.REMOVED
-                  };
+                .then(function () {
+                  // get the record from the db to send it back
+                  return model
+                    .findOne({
+                      where: {
+                        id: record.id
+                      },
+                      deleted: true
+                    })
+                    .then(function (dbRecord) {
+                      return {
+                        record: dbRecord,
+                        flag: syncRecordFlags.REMOVED
+                      };
+                    });
                 });
             });
         }
