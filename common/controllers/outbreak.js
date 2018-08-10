@@ -4130,18 +4130,18 @@ module.exports = function (Outbreak) {
         }
         // define a list of table headers
         const headers = [];
-        // headers come from case models
-        Object.keys(app.models.case.fieldLabelsMap).forEach(function (propertyName) {
+        // headers come from contact model
+        Object.keys(app.models.contact.fieldLabelsMap).forEach(function (propertyName) {
           headers.push({
             id: propertyName,
             // use correct label translation for user language
-            header: dictionary.getTranslation(app.models.case.fieldLabelsMap[propertyName])
+            header: dictionary.getTranslation(app.models.contact.fieldLabelsMap[propertyName])
           });
         });
         // go through the results
         results.forEach(function (result) {
           // for the fields that use reference data
-          app.models.case.referenceDataFields.forEach(function (field) {
+          app.models.contact.referenceDataFields.forEach(function (field) {
             if (result[field]) {
               // get translation of the reference data
               result[field] = app.models.language.getFieldTranslationFromDictionary(result[field], contextUser.languageId, dictionary);
@@ -4153,6 +4153,68 @@ module.exports = function (Outbreak) {
           .then(function (file) {
             // and offer it for download
             app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Contacts List.${file.extension}`, callback);
+          })
+          .catch(callback);
+      });
+    });
+  };
+
+  /**
+   * Export filtered outbreaks to file
+   * @param filter
+   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param options
+   * @param callback
+   */
+  Outbreak.exportFilteredOutbreaks = function (filter, exportType, options, callback) {
+    // use get contacts functionality
+    Outbreak.find(filter, function (error, result) {
+      if (error) {
+        return callback(error);
+      }
+
+      // by default export CSV
+      if (!exportType) {
+        exportType = 'json';
+      } else {
+        // be more permissive, always convert to lowercase
+        exportType = exportType.toLowerCase();
+      }
+
+      // add support for filter parent
+      const results = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, filter);
+      const contextUser = app.utils.remote.getUserFromOptions(options);
+      // load user language dictionary
+      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+        // handle errors
+        if (error) {
+          return callback(error);
+        }
+        // define a list of table headers
+        const headers = [];
+        // headers come from contact model
+        Object.keys(app.models.outbreak.fieldLabelsMap).forEach(function (propertyName) {
+          headers.push({
+            id: propertyName,
+            // use correct label translation for user language
+            header: dictionary.getTranslation(app.models.outbreak.fieldLabelsMap[propertyName])
+          });
+        });
+        // go through the results
+        results.forEach(function (result) {
+          // for the fields that use reference data
+          app.models.outbreak.referenceDataFields.forEach(function (field) {
+            if (result[field]) {
+              // get translation of the reference data
+              result[field] = app.models.language.getFieldTranslationFromDictionary(result[field], contextUser.languageId, dictionary);
+            }
+          });
+        });
+        // create file with the results
+        app.utils.helpers.exportListFile(headers, results, exportType)
+          .then(function (file) {
+            // and offer it for download
+            app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Outbreak List.${file.extension}`, callback);
           })
           .catch(callback);
       });

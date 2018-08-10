@@ -169,6 +169,48 @@ const extractImportableFields = function (Model, data) {
 };
 
 /**
+ * Get a JSON that has XML friendly property names
+ * @param jsonObj
+ * @return {*}
+ */
+const getXmlFriendlyJson = function (jsonObj) {
+  // define a replacement
+  let _replacement;
+  // if the json is an array
+  if (Array.isArray(jsonObj)) {
+    // replacement must be an array
+    _replacement = [];
+    // go through all elements
+    jsonObj.forEach(function (jsObj) {
+      // and make them XML friendly
+      _replacement.push(getXmlFriendlyJson(jsObj));
+    });
+  }
+  // json is a non-empty object
+  else if (typeof jsonObj === 'object' && jsonObj != null) {
+    // replacement must be a non-empty object
+    _replacement = {};
+    // go trough all the object keys
+    Object.keys(jsonObj).forEach(function (property) {
+      // get XML friendly key
+      let replacementProperty = _.camelCase(property);
+      // if the value is a complex one
+      if (typeof jsonObj[property] === 'object' && jsonObj != null) {
+        // make it XML friendly
+        _replacement[replacementProperty] = getXmlFriendlyJson(jsonObj[property]);
+      } else {
+        // otherwise just store it
+        _replacement[replacementProperty] = jsonObj[property];
+      }
+    });
+  } else {
+    // empty object, just copy it
+    _replacement = jsonObj;
+  }
+  return _replacement;
+};
+
+/**
  * Export a list in a file
  * @param headers file list headers
  * @param dataSet {Array} actual data set
@@ -218,7 +260,7 @@ const exportListFile = function (headers, dataSet, fileType) {
           accumulator[currentValue.id] = `entry.${currentValue.header}`;
           return accumulator;
         }, {});
-        file.data = builder.buildObject(remapProperties(dataSet, xmlHeadersMap));
+        file.data = builder.buildObject(getXmlFriendlyJson(remapProperties(dataSet, xmlHeadersMap)));
         resolve(file);
         break;
       case 'csv':
