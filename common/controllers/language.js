@@ -143,15 +143,16 @@ module.exports = function (Language) {
             [translationFileHeaders.translation]: languageToken.translation
           });
         });
-        // build the worksheet based on the built JSON
-        const sheet = xlsx.utils.json_to_sheet(tokens);
-        // create a new workbook
-        const workbook = xlsx.utils.book_new();
-        // add the worksheet to workbook
-        xlsx.utils.book_append_sheet(workbook, sheet);
-        // send the file for downloading
-        app.utils.remote.helpers
-          .offerFileToDownload(xlsx.write(workbook, {type: 'buffer'}), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', `${self.name}.xlsx`, callback);
+        // create XLSX file
+        app.utils.spreadSheetFile.createXlsxFile(null, tokens, function (error, file) {
+          // handle errors
+          if (error) {
+            return callback(error);
+          }
+          // offer file for download
+          app.utils.remote.helpers
+            .offerFileToDownload(file, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', `${self.name}.xlsx`, callback);
+        });
       })
       .catch(callback)
   }

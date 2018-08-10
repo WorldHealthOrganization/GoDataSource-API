@@ -10,19 +10,25 @@ const xlsx = require('xlsx');
  */
 function buildSpreadSheet(headers, data) {
   // reformat data to use correct headers
-  const formattedData = [];
+  let formattedData = [];
 
-  // go through all entries
-  data.forEach(function (entry) {
-    // build formatted entry
-    const formattedEntry = {};
-    // use headers as properties
-    headers.forEach(function (header) {
-      formattedEntry[header.header] = entry[header.id];
+  // if headers were passed, reformat data
+  if (headers) {
+    // go through all entries
+    data.forEach(function (entry) {
+      // build formatted entry
+      const formattedEntry = {};
+      // use headers as properties
+      headers.forEach(function (header) {
+        formattedEntry[header.header] = entry[header.id];
+      });
+      // add formatted entry to the list
+      formattedData.push(formattedEntry);
     });
-    // add formatted entry to the list
-    formattedData.push(formattedEntry);
-  });
+  // otherwise use it as is
+  } else {
+    formattedData = data;
+  }
 
   // build the worksheet based on the built JSON
   return xlsx.utils.json_to_sheet(formattedData);
