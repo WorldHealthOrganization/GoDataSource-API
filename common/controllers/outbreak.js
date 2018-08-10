@@ -89,23 +89,6 @@ module.exports = function (Outbreak) {
         exportType = exportType.toLowerCase();
       }
 
-      // validate export type, only allow csv and pdf
-      if (['csv', 'pdf'].indexOf(exportType) === -1) {
-        return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {errorMessages: `Invalid Export Type: ${exportType}. Supported options: pdf, csv`}));
-      }
-
-      let fileBuilder;
-      let mimeType;
-
-      // set file builder and mime type according to exported type
-      if (exportType === 'csv') {
-        fileBuilder = app.utils.spreadSheetFile.createCsvFile;
-        mimeType = 'text/csv';
-      } else {
-        fileBuilder = app.utils.pdfDoc.createPDFList;
-        mimeType = 'application/pdf';
-      }
-
       // add support for filter parent
       const results = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, filter);
       const contextUser = app.utils.remote.getUserFromOptions(options);
@@ -143,13 +126,12 @@ module.exports = function (Outbreak) {
           });
         });
         // create file with the results
-        fileBuilder(headers, results, function (error, file) {
-          if (error) {
-            return callback(error);
-          }
-          // and offer it for download
-          app.utils.remote.helpers.offerFileToDownload(file, mimeType, `Case Line List.${exportType}`, callback);
-        });
+        app.utils.helpers.exportListFile(headers, results, exportType)
+          .then(function (file) {
+            // and offer it for download
+            app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Case Line List.${file.extension}`, callback);
+          })
+          .catch(callback);
       });
     })
   };

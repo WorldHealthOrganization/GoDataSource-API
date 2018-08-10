@@ -4,6 +4,11 @@
 const moment = require('moment');
 const chunkDateRange = require('chunk-date-range');
 const _ = require('lodash');
+const apiError = require('./apiError');
+const xml2js = require('xml2js');
+const spreadSheetFile = require('./spreadSheetFile');
+const pdfDoc = require('./pdfDoc');
+const streamUtils = require('./streamUtils');
 
 /**
  * Convert a Date object into moment UTC date and reset time to start of the day
@@ -35,21 +40,6 @@ const getUTCDateEndOfDay = function (date, dayOfWeek) {
 const getAsciiString = function (string) {
   return string.replace(/[^\x00-\x7F]/g, '');
 };
-
-/**
- * Convert a read to a buffer
- * @param stream
- * @param callback
- */
-function streamToBuffer(stream, callback) {
-  const chunks = [];
-  stream.on('data', function (chunk) {
-    chunks.push(chunk);
-  });
-  stream.on('end', function () {
-    callback(null, Buffer.concat(chunks));
-  });
-}
 
 /**
  * Split a date interval into chunks of specified length
@@ -116,14 +106,16 @@ const remapProperties = function (list, fieldsMap, valuesMap) {
     let result = {};
     // go trough the list of fields
     fields.forEach(function (field) {
-      // if no array position was specified, use position 0
-      fieldsMap[field] = fieldsMap[field].replace(/\[]/g, '[0]');
-      // remap property
-      _.set(result, fieldsMap[field], item[field]);
-      // if a values map was provided
-      if (valuesMap && valuesMap[field] && valuesMap[field][item[field]] !== undefined) {
-        // remap the values
-        _.set(result, fieldsMap[field], valuesMap[field][item[field]]);
+      if (fieldsMap[field]) {
+        // if no array position was specified, use position 0
+        fieldsMap[field] = fieldsMap[field].replace(/\[]/g, '[0]');
+        // remap property
+        _.set(result, fieldsMap[field], item[field]);
+        // if a values map was provided
+        if (valuesMap && valuesMap[field] && valuesMap[field][item[field]] !== undefined) {
+          // remap the values
+          _.set(result, fieldsMap[field], valuesMap[field][item[field]]);
+        }
       }
     });
     // add processed item to the final list
@@ -176,13 +168,124 @@ const extractImportableFields = function (Model, data) {
   return importableFields;
 };
 
+/**
+ * Export a list in a file
+ * @param headers file list headers
+ * @param dataSet {Array} actual data set
+ * @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
+ * @return {Promise<any>}
+ */
+const exportListFile = function (headers, dataSet, fileType) {
+
+  // define the file
+  const file = {
+    data: {},
+    mimeType: '',
+    extension: fileType
+  };
+
+  // promisify the file
+  return new Promise(function (resolve, reject) {
+    // data set must be an array
+    if (!Array.isArray(dataSet)) {
+      return reject(new Error('Invalid dataSet. DataSet must be an array.'));
+    }
+    // handle each file individually
+    switch (fileType) {
+      case 'json':
+        file.mimeType = 'application/json';
+        // build headers map
+        const jsonHeadersMap = headers.reduce(function (accumulator, currentValue) {
+          accumulator[currentValue.id] = currentValue.header;
+          return accumulator;
+        }, {});
+        file.data = JSON.stringify(remapProperties(dataSet, jsonHeadersMap),
+          // replace undefined with null so the JSON will contain all properties
+          function (key, value) {
+            if (value === undefined) {
+              value = null;
+            }
+            return value;
+          }, 2);
+        resolve(file);
+        break;
+      case 'xml':
+        file.mimeType = 'text/xml';
+        const builder = new xml2js.Builder();
+        // build headers map
+        const xmlHeadersMap = headers.reduce(function (accumulator, currentValue) {
+          // XML needs a repeating "container" property in order to simulate an array
+          accumulator[currentValue.id] = `entry.${currentValue.header}`;
+          return accumulator;
+        }, {});
+        file.data = builder.buildObject(remapProperties(dataSet, xmlHeadersMap));
+        resolve(file);
+        break;
+      case 'csv':
+        file.mimeType = 'text/csv';
+        spreadSheetFile.createCsvFile(headers, dataSet, function (error, csvFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = csvFile;
+          resolve(file);
+        });
+        break;
+      case 'xls':
+        file.mimeType = 'application/vnd.ms-excel';
+        spreadSheetFile.createXlsFile(headers, dataSet, function (error, xlsFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = xlsFile;
+          resolve(file);
+        });
+        break;
+      case 'xlsx':
+        file.mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        spreadSheetFile.createXlsxFile(headers, dataSet, function (error, xlsxFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = xlsxFile;
+          resolve(file);
+        });
+        break;
+      case 'ods':
+        file.mimeType = 'application/vnd.oasis.opendocument.spreadsheet';
+        spreadSheetFile.createOdsFile(headers, dataSet, function (error, odsFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = odsFile;
+          resolve(file);
+        });
+        break;
+      case 'pdf':
+        file.mimeType = 'application/pdf';
+        pdfDoc.createPDFList(headers, dataSet, function (error, pdfFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = pdfFile;
+          resolve(file);
+        });
+        break;
+      default:
+        reject(apiError.getError('REQUEST_VALIDATION_ERROR', {errorMessages: `Invalid Export Type: ${fileType}. Supported options: json, xml, csv, xls, xlsx, ods, pdf`}));
+        break;
+    }
+  });
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
-  streamToBuffer: streamToBuffer,
+  streamToBuffer: streamUtils.streamToBuffer,
   remapProperties: remapProperties,
   getUTCDateEndOfDay: getUTCDateEndOfDay,
   getAsciiString: getAsciiString,
   getChunksForInterval: getChunksForInterval,
   convertPropsToDate: convertPropsToDate,
-  extractImportableFields: extractImportableFields
+  extractImportableFields: extractImportableFields,
+  exportListFile: exportListFile
 };

@@ -3,7 +3,7 @@
 const PdfKit = require('pdfkit');
 const PdfTable = require('voilab-pdf-table');
 const svg2png = require('svg2png');
-const helpers = require('./helpers');
+const streamUtils = require('./streamUtils');
 const Jimp = require('jimp');
 
 // define a default document configuration
@@ -137,7 +137,7 @@ function createPDFList(headers, data, callback) {
   // add table data
   pdfTable.addBody(data);
   // convert document stream to buffer
-  helpers.streamToBuffer(document, callback);
+  streamUtils.streamToBuffer(document, callback);
   // finalize document
   document.end();
 }
@@ -173,7 +173,7 @@ function createSVGDoc(svgData, splitFactor, callback) {
   }
 
   // when done, send back document buffer
-  helpers.streamToBuffer(document, callback);
+  streamUtils.streamToBuffer(document, callback);
   // render a PNG from a SVG at a resolution of a rendered image, multiplied by the split factor
   svg2png(svgData, {width: renderImageSize.width * splitFactor, height: renderImageSize.height * splitFactor})
     .then(function (buffer) {

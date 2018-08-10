@@ -41,6 +41,53 @@ function createCsvFile(headers, data, callback) {
   callback(null, xlsx.utils.sheet_to_csv(sheet));
 }
 
+/**
+ * Create an excel file or defined type
+ * @param headers
+ * @param data
+ * @param type
+ * @param callback
+ */
+function createExcelFile(headers, data, type, callback) {
+  const sheet = buildSpreadSheet(headers, data);
+  const workBook = xlsx.utils.book_new();
+  xlsx.utils.book_append_sheet(workBook, sheet);
+  callback(null, xlsx.write(workBook, {type: 'buffer', bookType: type}));
+}
+
+/**
+ * Create XLS file
+ * @param headers
+ * @param data
+ * @param callback
+ */
+function createXlsFile(headers, data, callback) {
+  createExcelFile(headers, data, 'biff8', callback);
+}
+
+/**
+ * Create XLSX file
+ * @param headers
+ * @param data
+ * @param callback
+ */
+function createXlsxFile(headers, data, callback) {
+  createExcelFile(headers, data, 'xlsx', callback);
+}
+
+/**
+ * Create ODS file
+ * @param headers
+ * @param data
+ * @param callback
+ */
+function createOdsFile(headers, data, callback) {
+  createExcelFile(headers, data, 'ods', callback);
+}
+
 module.exports = {
-  createCsvFile: createCsvFile
+  createCsvFile: createCsvFile,
+  createXlsFile: createXlsFile,
+  createXlsxFile: createXlsxFile,
+  createOdsFile: createOdsFile
 };
