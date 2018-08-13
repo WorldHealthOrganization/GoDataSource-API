@@ -309,7 +309,7 @@ const createPersonProfile = function (doc, person, displayValues, title, numberO
 
   // display each field on a row
   Object.keys(person).forEach((fieldName) => {
-    // if property is array and has at least one element, display it on next page
+    // if property is array and has at least one element, create new paragraph
     if (Array.isArray(person[fieldName]) && person[fieldName][0]) {
       // top property
       doc.text(fieldName, initialXMargin).moveDown();
@@ -430,5 +430,6 @@ module.exports = {
   createPdfDoc: createPdfDoc,
   createPersonProfile: createPersonProfile,
   createQuestionnaire: createQuestionnaire,
-  createTableInPDFDocument: createTableInPDFDocument
+  createTableInPDFDocument: createTableInPDFDocument,
+  addTitle: addTitle
 };

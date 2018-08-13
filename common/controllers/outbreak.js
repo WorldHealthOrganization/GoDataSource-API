@@ -8,6 +8,7 @@ const templateParser = require('./../../components/templateParser');
 const referenceDataParser = require('./../../components/referenceDataParser');
 const genericHelpers = require('../../components/helpers');
 const async = require('async');
+const pdfUtils = app.utils.pdfDoc;
 
 module.exports = function (Outbreak) {
 
@@ -3914,7 +3915,6 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.exportCaseInvestigationTemplate = function (request, callback) {
     const models = app.models;
-    const pdfUtils = app.utils.pdfDoc;
     let template = this.caseInvestigationTemplate;
 
     // authenticated user's language, used to know in which language to translate
@@ -4352,7 +4352,16 @@ module.exports = function (Outbreak) {
               order: 'contactDate DESC',
               limit: 1,
               // remove the contacts that don't have relationships to cases
-              filterParent: true
+              filterParent: true,
+              // include the case model
+              include: [{
+                relation: 'people',
+                scope: {
+                  where: {
+                    type: 'case'
+                  }
+                }
+              }]
             }
           }]
         }, filter || {});
@@ -4367,42 +4376,7 @@ module.exports = function (Outbreak) {
       // add support for filter parent
       const results = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, filter);
 
-      // check if the results need to be grouped
-      if (groupResultsBy) {
-        // initialize grouped results
-        let groupedResults = {};
-        // loop through the results and group them
-        results.forEach(function (contact) {
-          // get identifier for grouping
-          let groupIdentifier;
-          switch (groupResultsBy) {
-            case groupByOptions.case:
-              // get case entry in the contact relationship
-              let caseItem = contact.relationships[0].persons.find(person => person.type === 'case');
-              groupIdentifier = caseItem.id;
-              break;
-            case groupByOptions.location:
-              // get contact residence location
-              contact.addresses = contact.addresses || [];
-              let residenceLocation = contact.addresses.find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
-              groupIdentifier = residenceLocation ? residenceLocation.locationId : null;
-              break;
-            case groupByOptions.riskLevel:
-              groupIdentifier = contact.riskLevel;
-              break;
-          }
-
-          if (!groupedResults[groupIdentifier]) {
-            groupedResults[groupIdentifier] = [];
-          }
-
-          // add contact in group
-          groupedResults[groupIdentifier].push(contact);
-        });
-
-
-      }
-
+      // get logged user information
       const contextUser = app.utils.remote.getUserFromOptions(options);
       // load user language dictionary
       app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
@@ -4410,8 +4384,121 @@ module.exports = function (Outbreak) {
         if (error) {
           return callback(error);
         }
+
+        // get contact properties to be printed
+        let contactProperties = ['firstName', 'middleName', 'lastName', 'dob', 'age', 'gender', 'riskLevel'];
+        // check for sent flags
+        if (includeContactAddress) {
+          contactProperties.push('addresses');
+        }
+        if (includeContactPhoneNumber) {
+          contactProperties.push('phoneNumber');
+        }
+
+        // group results if needed; Doing this after getting the dictionary as some group identifiers require translations
+        // initialize map of group identifiers values
+        let groupIdentifiersValues = {};
+        // initialize grouped results
+        let groupedResults = {};
+
+        // loop through the results and get the properties that will be exported;
+        // also group the contacts if needed
+        results.forEach(function (contact) {
+          // create contact representation to be printed;
+          contact.toPrint = {};
+          contactProperties.forEach(prop => contact.toPrint[prop] = contact[prop]);
+          // if addresses need to be added keep only the residence location
+          if (includeContactAddress) {
+            contact.toPrint.addresses = [contact.toPrint.addresses.find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE')];
+          }
+          // for the fields that use reference data
+          app.models.contact.referenceDataFields.forEach(function (field) {
+            if (contact.toPrint[field]) {
+              // get translation of the reference data
+              contact.toPrint[field] = dictionary.getTranslation(contact.toPrint[field]);
+            }
+          });
+          // translate labels
+          contact.toPrint = helpers.translateFieldLabels(contact.toPrint, 'contact', contextUser.languageId, dictionary);
+
+          // check if the results need to be grouped
+          if (groupResultsBy) {
+            // get identifier for grouping
+            let groupIdentifier;
+            switch (groupResultsBy) {
+              case groupByOptions.case:
+                // get case entry in the contact relationship
+                let caseItem = contact.relationships[0].persons.find(person => person.type === 'case');
+                groupIdentifier = caseItem.id;
+
+                // get identifier value only if the value was not previously calculated for another contact
+                if (!groupIdentifiersValues[groupIdentifier]) {
+                  let caseModel = contact.relationships[0].people[0];
+                  groupIdentifiersValues[groupIdentifier] = ['firstName', 'middleName', 'lastName'].reduce(function (result, property) {
+                    if (caseModel[property]) {
+                      result += (result.length ? ' ' : '') + caseModel[property];
+                    }
+                    return result;
+                  }, '');
+                }
+                break;
+              case groupByOptions.location:
+                // get contact residence location
+                contact.addresses = contact.addresses || [];
+                let residenceLocation = contact.addresses.find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
+                groupIdentifier = residenceLocation ? residenceLocation.locationId : null;
+
+                // get identifier value only if the value was not previously calculated for another contact
+                if (!groupIdentifiersValues[groupIdentifier]) {
+                  // for locationId we need to get the location; Adding a promise in the map to get the location name
+                  // the group Identifiers Values will be overwritten when the promise is resolved
+                  groupIdentifiersValues[groupIdentifier] = groupIdentifier ?
+                    // get location name
+                    app.models.location
+                      .findById(groupIdentifier)
+                      .then(function (location) {
+                        // initialize result
+                        let result;
+
+                        if (!location) {
+                          app.logger.error(`Location with ID ${groupIdentifier} for Contact ${contact.id} was not found in DB`);
+                          result = `LOCATION_NOT_FOUND (${groupIdentifier})`;
+                        } else {
+                          result = location.name;
+                        }
+
+                        // overwrite the group Identifiers Values entry
+                        groupIdentifiersValues[groupIdentifier] = result;
+
+                        return result;
+                      }) :
+                    // for null there is no need to make a request
+                    null
+                }
+                break;
+              case groupByOptions.riskLevel:
+                groupIdentifier = contact.riskLevel;
+
+                // get identifier value only if the value was not previously calculated for another contact
+                if (!groupIdentifiersValues[groupIdentifier]) {
+                  // for risk level get reference data translation
+                  groupIdentifiersValues[groupIdentifier] = dictionary.getTranslation(groupIdentifier);
+                }
+                break;
+            }
+
+            // intialize group entry in results if not already initialized
+            if (!groupedResults[groupIdentifier]) {
+              groupedResults[groupIdentifier] = [];
+            }
+
+            // add contact in group
+            groupedResults[groupIdentifier].push(contact);
+          }
+        });
+
         // initialize list of follow-up properties to be shown in table
-        let followUpProperties = ['date'];
+        let followUpProperties = ['date', 'performed'];
         // define a list of follow-up table headers
         let followUpsHeaders = [];
         // headers come from follow-up models;
@@ -4419,31 +4506,58 @@ module.exports = function (Outbreak) {
           followUpsHeaders.push({
             id: propertyName,
             // use correct label translation for user language
-            header: dictionary.getTranslation(app.models.case.fieldLabelsMap[propertyName])
-          });
-        });
-        // go through the results
-        results.forEach(function (result) {
-          // for the fields that use reference data
-          app.models.case.referenceDataFields.forEach(function (field) {
-            if (result[field]) {
-              // get translation of the reference data
-              result[field] = app.models.language.getFieldTranslationFromDictionary(result[field], contextUser.languageId, dictionary);
-            }
+            header: dictionary.getTranslation(app.models.followUp.fieldLabelsMap[propertyName])
           });
         });
 
-        let fileBuilder = app.utils.pdfDoc.createPDFList;
+        // generate pdf document
+        let doc = pdfUtils.createPdfDoc();
+
+        // add information to the doc
+        if (groupResultsBy) {
+          // add title for the group
+          Object.keys(groupedResults).forEach(function (groupIdentifier) {
+            pdfUtils.addTitle(doc, `Group ${groupIdentifier}`);
+
+            // print contacts
+            groupedResults[groupIdentifier].forEach(function (contact) {
+              // print profile
+              pdfUtils.createPersonProfile(doc, contact.toPrint, true, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
+
+              // print follow-ups table
+              pdfUtils.createTableInPDFDocument(followUpsHeaders, contact.followUps, doc);
+            })
+          });
+        } else {
+          // print contacts
+          results.forEach(function (contact) {
+            // print profile
+            pdfUtils.createPersonProfile(doc, contact.toPrint, true, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
+
+            // print follow-ups table
+            pdfUtils.createTableInPDFDocument(followUpsHeaders, contact.followUps.map(function(followUp) {
+              let res = {};
+              followUpProperties.forEach(function(prop) {
+                res[prop] = followUp[prop];
+              });
+              return res;
+            }), doc);
+          })
+        }
+
         let mimeType = 'application/pdf';
 
-        // create file with the results
-        fileBuilder(headers, results, function (error, file) {
+        // convert document stream to buffer
+        genericHelpers.streamToBuffer(doc, function (error, file) {
           if (error) {
             return callback(error);
           }
           // and offer it for download
-          app.utils.remote.helpers.offerFileToDownload(file, mimeType, `Case Line List.${exportType}`, callback);
+          app.utils.remote.helpers.offerFileToDownload(file, mimeType, `Contact Line List.pdf`, callback);
         });
+
+        // finalize document
+        doc.end();
       });
     })
   };

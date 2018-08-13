@@ -76,7 +76,7 @@ function deepSearchByRelationPropertyOnModel(model, filter) {
   // process each filter
   filter.include.forEach(function (include) {
     // if the include filter has a scope
-    if (include.relation && include.scope) {
+    if (model && include.relation && include.scope) {
       // perform the search (apply filtering)
       model[include.relation] = deepSearchByRelationProperty(model[include.relation], include.scope);
       // if the parent needs to be filtered and the relation was not found, clear the parent (set null)
