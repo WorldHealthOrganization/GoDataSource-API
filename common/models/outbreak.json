@@ -1593,7 +1593,7 @@
         },
         {
           "arg": "body",
-          "type": "caseProps",
+          "type": "case",
           "http": {
             "source": "body"
           },
