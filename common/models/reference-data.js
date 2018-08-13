@@ -126,6 +126,11 @@ module.exports = function (ReferenceData) {
       "id": "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE",
       "name": "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE",
       "description": "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_DESCRIPTION"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_COUNTRY",
+      "name": "LNG_REFERENCE_DATA_CATEGORY_COUNTRY",
+      "description": "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DESCRIPTION"
     }
   ];
 
