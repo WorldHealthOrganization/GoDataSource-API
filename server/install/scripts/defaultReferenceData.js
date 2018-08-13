@@ -30,7 +30,7 @@ function run(callback) {
                 categoryId: referenceDataCategory,
                 languageId: "english_us",
                 readOnly: true
-              })
+              });
             }
             return foundReferenceData;
           })
