@@ -75,65 +75,13 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportFilteredCases = function (filter, exportType, options, callback) {
-    // use get cases functionality
-    this.__get__cases(filter, function (error, result) {
-      if (error) {
-        return callback(error);
-      }
-
-      // by default export CSV
-      if (!exportType) {
-        exportType = 'json';
-      } else {
-        // be more permissive, always convert to lowercase
-        exportType = exportType.toLowerCase();
-      }
-
-      // add support for filter parent
-      const results = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, filter);
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      // load user language dictionary
-      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-        // handle errors
-        if (error) {
-          return callback(error);
+    const _filters = app.utils.remote.mergeFilters({
+        where: {
+          outbreakId: this.id
         }
-        // define a list of table headers
-        const headers = [];
-        // headers come from case models
-        Object.keys(app.models.case.fieldLabelsMap).forEach(function (propertyName) {
-          // show the field only if the user has it configured or it does not have any configuration set
-          if (
-            !contextUser.settings ||
-            !contextUser.settings.caseFields ||
-            contextUser.settings.caseFields.indexOf(propertyName) !== -1
-          ) {
-            headers.push({
-              id: propertyName,
-              // use correct label translation for user language
-              header: dictionary.getTranslation(app.models.case.fieldLabelsMap[propertyName])
-            });
-          }
-        });
-        // go through the results
-        results.forEach(function (result) {
-          // for the fields that use reference data
-          app.models.case.referenceDataFields.forEach(function (field) {
-            if (result[field]) {
-              // get translation of the reference data
-              result[field] = app.models.language.getFieldTranslationFromDictionary(result[field], contextUser.languageId, dictionary);
-            }
-          });
-        });
-        // create file with the results
-        app.utils.helpers.exportListFile(headers, results, exportType)
-          .then(function (file) {
-            // and offer it for download
-            app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Case Line List.${file.extension}`, callback);
-          })
-          .catch(callback);
-      });
-    });
+      },
+      filter || {});
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', options, callback);
   };
 
   /**
@@ -4105,58 +4053,13 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportFilteredContacts = function (filter, exportType, options, callback) {
-    // use get contacts functionality
-    this.__get__contacts(filter, function (error, result) {
-      if (error) {
-        return callback(error);
-      }
-
-      // by default export CSV
-      if (!exportType) {
-        exportType = 'json';
-      } else {
-        // be more permissive, always convert to lowercase
-        exportType = exportType.toLowerCase();
-      }
-
-      // add support for filter parent
-      const results = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, filter);
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      // load user language dictionary
-      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-        // handle errors
-        if (error) {
-          return callback(error);
+    const _filters = app.utils.remote.mergeFilters({
+        where: {
+          outbreakId: this.id
         }
-        // define a list of table headers
-        const headers = [];
-        // headers come from contact model
-        Object.keys(app.models.contact.fieldLabelsMap).forEach(function (propertyName) {
-          headers.push({
-            id: propertyName,
-            // use correct label translation for user language
-            header: dictionary.getTranslation(app.models.contact.fieldLabelsMap[propertyName])
-          });
-        });
-        // go through the results
-        results.forEach(function (result) {
-          // for the fields that use reference data
-          app.models.contact.referenceDataFields.forEach(function (field) {
-            if (result[field]) {
-              // get translation of the reference data
-              result[field] = app.models.language.getFieldTranslationFromDictionary(result[field], contextUser.languageId, dictionary);
-            }
-          });
-        });
-        // create file with the results
-        app.utils.helpers.exportListFile(headers, results, exportType)
-          .then(function (file) {
-            // and offer it for download
-            app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Contacts List.${file.extension}`, callback);
-          })
-          .catch(callback);
-      });
-    });
+      },
+      filter || {});
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, _filters, exportType, 'Contacts List', options, callback);
   };
 
   /**
@@ -4167,57 +4070,6 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.exportFilteredOutbreaks = function (filter, exportType, options, callback) {
-    // use get contacts functionality
-    Outbreak.find(filter, function (error, result) {
-      if (error) {
-        return callback(error);
-      }
-
-      // by default export CSV
-      if (!exportType) {
-        exportType = 'json';
-      } else {
-        // be more permissive, always convert to lowercase
-        exportType = exportType.toLowerCase();
-      }
-
-      // add support for filter parent
-      const results = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, filter);
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      // load user language dictionary
-      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-        // handle errors
-        if (error) {
-          return callback(error);
-        }
-        // define a list of table headers
-        const headers = [];
-        // headers come from contact model
-        Object.keys(app.models.outbreak.fieldLabelsMap).forEach(function (propertyName) {
-          headers.push({
-            id: propertyName,
-            // use correct label translation for user language
-            header: dictionary.getTranslation(app.models.outbreak.fieldLabelsMap[propertyName])
-          });
-        });
-        // go through the results
-        results.forEach(function (result) {
-          // for the fields that use reference data
-          app.models.outbreak.referenceDataFields.forEach(function (field) {
-            if (result[field]) {
-              // get translation of the reference data
-              result[field] = app.models.language.getFieldTranslationFromDictionary(result[field], contextUser.languageId, dictionary);
-            }
-          });
-        });
-        // create file with the results
-        app.utils.helpers.exportListFile(headers, results, exportType)
-          .then(function (file) {
-            // and offer it for download
-            app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Outbreak List.${file.extension}`, callback);
-          })
-          .catch(callback);
-      });
-    });
+    app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', options, callback);
   };
 };

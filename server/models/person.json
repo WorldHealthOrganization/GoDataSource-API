@@ -8,9 +8,6 @@
   "mongodb": {
     "collection": "person"
   },
-  "hidden": [
-    "outbreakId"
-  ],
   "properties": {
     "outbreakId": {
       "type": "string",

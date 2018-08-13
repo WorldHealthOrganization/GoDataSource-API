@@ -8,7 +8,7 @@ module.exports = function (Relationship) {
   // set flag to not get controller
   Relationship.hasController = false;
 
-  Relationship.fieldLabelsMap = {
+  Relationship.fieldLabelsMap = Object.assign({}, Relationship.fieldLabelsMap, {
     persons: 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS',
     'persons[].type': 'LNG_RELATIONSHIP_FIELD_LABEL_TYPE',
     'persons[].id': 'LNG_RELATIONSHIP_FIELD_LABEL_RELATED_PERSON',
@@ -23,7 +23,7 @@ module.exports = function (Relationship) {
     socialRelationshipTypeId: 'LNG_RELATIONSHIP_FIELD_LABEL_RELATION',
     clusterId: 'LNG_RELATIONSHIP_FIELD_LABEL_CLUSTER',
     comment: 'LNG_RELATIONSHIP_FIELD_LABEL_COMMENT'
-  };
+  });
 
   Relationship.referenceDataFieldsToCategoryMap = {
     certaintyLevelId: 'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL',

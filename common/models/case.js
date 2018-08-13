@@ -12,7 +12,7 @@ module.exports = function (Case) {
   ];
 
   // map language token labels for model properties
-  Case.fieldLabelsMap = {
+  Case.fieldLabelsMap = Object.assign({}, Case.fieldLabelsMap, {
     'firstName': 'LNG_CASE_FIELD_LABEL_FIRST_NAME',
     'middleName': 'LNG_CASE_FIELD_LABEL_MIDDLE_NAME',
     'lastName': 'LNG_CASE_FIELD_LABEL_LAST_NAME',
@@ -60,7 +60,7 @@ module.exports = function (Case) {
     'visualId': 'LNG_CASE_FIELD_LABEL_VISUAL_ID',
     'fillGeoLocation': 'LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION',
     'isDateOfReportingApproximate': 'LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE'
-  };
+  });
 
   Case.referenceDataFieldsToCategoryMap = {
     classification: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION',
@@ -104,4 +104,11 @@ module.exports = function (Case) {
     'transferRefused',
     'deceased'
   ];
+
+  Case.foreignKeyResolverMap = {
+    'addresses[].locationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    }
+  }
 };

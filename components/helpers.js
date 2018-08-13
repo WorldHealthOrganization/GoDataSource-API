@@ -9,6 +9,7 @@ const xml2js = require('xml2js');
 const spreadSheetFile = require('./spreadSheetFile');
 const pdfDoc = require('./pdfDoc');
 const streamUtils = require('./streamUtils');
+const async = require('async');
 
 /**
  * Convert a Date object into moment UTC date and reset time to start of the day
@@ -320,6 +321,187 @@ const exportListFile = function (headers, dataSet, fileType) {
   });
 };
 
+/**
+ * Get a referenced value. Similar to loDash _.get but it can map properties from arrays also
+ * @param data Source Object
+ * @param path Path to property e.g. addresses[].locationId
+ * @return {*}
+ */
+const getReferencedValue = function (data, path) {
+  // start with an empty result
+  let result;
+  // if the path contains arrays
+  if (/\[]/.test(path)) {
+    // result must be an array
+    result = [];
+    // ge position of the array marker
+    const arrayMarkerPosition = path.indexOf('[]');
+    // get path to the array
+    const arrayPath = path.substring(0, arrayMarkerPosition);
+    // get remaining part
+    const remainingPath = path.substring(arrayMarkerPosition + 3);
+    // go trough the array
+    _.get(data, arrayPath, []).forEach(function (dataItem, index) {
+      // if there still is a path left
+      if (remainingPath) {
+        // process it
+        let currentResult = getReferencedValue(dataItem, remainingPath);
+        if (!Array.isArray(currentResult)) {
+          currentResult = [currentResult];
+        }
+        currentResult.forEach(function (resultItem) {
+          result.push({
+            value: resultItem.value,
+            exactPath: `${arrayPath}[${index}].${resultItem.exactPath}`
+          });
+        })
+
+      } else {
+        // otherwise just push the result
+        result.push(result = {
+          value: dataItem,
+          exactPath: `${arrayPath}[${index}]`
+        });
+      }
+    });
+  } else {
+    // no arrays in the path, use loDash get
+    result = {
+      value: _.get(data, path),
+      exactPath: path
+    }
+  }
+  return result;
+};
+
+/**
+ * Resolve foreign keys for a model in a result set (this includes reference data)
+ * @param app
+ * @param Model
+ * @param resultSet
+ * @param languageDictionary
+ * @param [resolveReferenceData]
+ * @return {Promise<any>}
+ */
+const resolveModelForeignKeys = function (app, Model, resultSet, languageDictionary, resolveReferenceData) {
+
+  // by default also resolve reference data
+  if (resolveReferenceData === undefined) {
+    resolveReferenceData = true;
+  }
+
+  // promisify the response
+  return new Promise(function (resolve, reject) {
+
+    // build a list of queries (per model) in order to resolve foreign keys
+    const foreignKeyQueryMap = {};
+    // keep a flag for resolving foreign keys
+    let resolveForeignKeys = false;
+
+    // if the model has a resolver map
+    if (Model.foreignKeyResolverMap) {
+      // resolve foreign keys
+      resolveForeignKeys = true;
+    }
+
+    // build a map of entries in the result set that should be resolved once we have foreign key data
+    let resultSetResolverMap = {};
+
+    // go through the resultSet
+    resultSet.forEach(function (result, index) {
+      // check if foreign keys should be resolved
+      if (resolveForeignKeys) {
+        // go through the list of keys that needs to be resolved
+        Object.keys(Model.foreignKeyResolverMap).forEach(function (foreignKey) {
+          // get foreign key value
+          let foreignKeyValues = getReferencedValue(result, foreignKey);
+          // if it's single value, convert it to array (simplify the code)
+          if (!Array.isArray(foreignKeyValues)) {
+            foreignKeyValues = [foreignKeyValues];
+          }
+          // go through all the foreign key values
+          foreignKeyValues.forEach(function (foreignKeyValue) {
+            // store the map for the result set entry, that will be resolved later
+            resultSetResolverMap[`[${index}].${foreignKeyValue.exactPath}`] = {
+              modelName: Model.foreignKeyResolverMap[foreignKey].modelName,
+              value: foreignKeyValue.value,
+              useProperty: Model.foreignKeyResolverMap[foreignKey].useProperty
+            };
+            // update the query map with the data that needs to be queried
+            if (!foreignKeyQueryMap[Model.foreignKeyResolverMap[foreignKey].modelName]) {
+              foreignKeyQueryMap[Model.foreignKeyResolverMap[foreignKey].modelName] = [];
+            }
+            foreignKeyQueryMap[Model.foreignKeyResolverMap[foreignKey].modelName].push(foreignKeyValue.value);
+          });
+        });
+      }
+
+      // also resolve reference data if needed
+      if (resolveReferenceData) {
+        // for the fields that use reference data (special type of foreign key)
+        Model.referenceDataFields.forEach(function (field) {
+          if (result[field]) {
+            // get translation of the reference data
+            result[field] = languageDictionary.getTranslation(result[field]);
+          }
+        });
+      }
+    });
+
+    if (resolveForeignKeys) {
+      // build a list of queries that will be executed to resolve foreign keys
+      const queryForeignKeys = {};
+      // go through the entries in the query map
+      Object.keys(foreignKeyQueryMap).forEach(function (modelName) {
+        // add query operation (per model name)
+        queryForeignKeys[modelName] = function (callback) {
+          app.models[modelName]
+            .find({
+              where: {
+                id: {
+                  inq: foreignKeyQueryMap[modelName]
+                }
+              }
+            })
+            .then(function (results) {
+              callback(null, results);
+            })
+            .catch(callback);
+        };
+      });
+
+      // query models to resolve foreign keys
+      async.parallel(queryForeignKeys, function (error, foreignKeyQueryResults) {
+        // handle error
+        if (error) {
+          return reject(error);
+        }
+        // map foreign key results to models and index them by recordId
+        let foreignKeyResultsMap = {};
+        Object.keys(foreignKeyQueryResults).forEach(function (modelName) {
+          // create container for records
+          foreignKeyResultsMap[modelName] = {};
+          // index each instance using record Id
+          foreignKeyQueryResults[modelName].forEach(function (modelInstance) {
+            foreignKeyResultsMap[modelName][modelInstance.id] = modelInstance.toJSON();
+          })
+        });
+
+        // replace foreign key references with configured related model value
+        Object.keys(resultSetResolverMap).forEach(function (foreignKeyPath) {
+          // use the values from foreignKeysResults map
+          _.set(resultSet, foreignKeyPath, _.get(foreignKeyResultsMap, `${resultSetResolverMap[foreignKeyPath].modelName}.${resultSetResolverMap[foreignKeyPath].value}.${resultSetResolverMap[foreignKeyPath].useProperty}`));
+        });
+        // foreign keys resolved
+        resolve(resultSet);
+      });
+    } else {
+      // nothing more to resolve
+      resolve(resultSet);
+    }
+  });
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -329,5 +511,7 @@ module.exports = {
   getChunksForInterval: getChunksForInterval,
   convertPropsToDate: convertPropsToDate,
   extractImportableFields: extractImportableFields,
-  exportListFile: exportListFile
+  exportListFile: exportListFile,
+  getReferencedValue: getReferencedValue,
+  resolveModelForeignKeys: resolveModelForeignKeys
 };

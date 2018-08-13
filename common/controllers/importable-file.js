@@ -5,16 +5,6 @@ const templateParser = require('./../../components/templateParser');
 const _ = require('lodash');
 const async = require('async');
 
-const commonModelLabels = {
-  id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
-  createdAt: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
-  createdBy: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_BY',
-  updatedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',
-  updatedBy: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
-  deleted: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
-  deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT'
-};
-
 /**
  * Remove special chars and then lowercase the string
  * @param string
@@ -285,8 +275,8 @@ module.exports = function (ImportableFile) {
               });
             }
 
-            // merge model's field to label map with the common one
-            const fieldLabelsMap = Object.assign({}, app.models[modelName].fieldLabelsMap || {}, commonModelLabels);
+            // get model's field labels map
+            const fieldLabelsMap = app.models[modelName].fieldLabelsMap || {};
             // if the model has importable properties, get their headers and try to suggest some mappings
             if (app.models[modelName]._importableProperties && app.models[modelName]._importableProperties.length) {
               steps.push(function (callback) {
