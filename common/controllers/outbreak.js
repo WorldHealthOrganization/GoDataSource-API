@@ -49,6 +49,7 @@ module.exports = function (Outbreak) {
     'prototype.__get__contacts',
     'prototype.__get__cases',
     'prototype.__get__events',
+    'prototype.__get__followUps',
     'prototype.findCaseRelationships',
     'prototype.findContactRelationships',
     'prototype.findEventRelationships'
