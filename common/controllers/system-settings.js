@@ -69,13 +69,21 @@ module.exports = function (SystemSettings) {
   };
 
   /**
-   * Create a PDF file containing PNG images coming from SVG files
-   * @param svg
+   * Create a PDF file containing PNG images coming from SVG/PNG files
+   * @param image Image content
+   * @param imageType Image type (PNG, SVG)
    * @param splitFactor Split the image into a square matrix with a side of splitFactor (1 no split, 2 => 2x2 grid, 3 => 3x3 grid)
    * @param callback
    */
-  SystemSettings.createPdfFromSvg = function (svg, splitFactor, callback) {
-    app.utils.pdfDoc.createSVGDoc(svg, splitFactor, function (error, pdfDoc) {
+  SystemSettings.createPdfFromImage = function (image, imageType, splitFactor, callback) {
+    // make sure we have a good image type
+    if (!SystemSettings.imageTypes.hasOwnProperty(imageType.toUpperCase())) {
+      return callback(
+        app.utils.apiError.getError('INVALID_IMAGE_TYPE', { imageType: imageType })
+      );
+    }
+
+    app.utils.pdfDoc.createImageDoc(image, imageType, splitFactor, function (error, pdfDoc) {
       if (error) {
         return callback(error);
       }

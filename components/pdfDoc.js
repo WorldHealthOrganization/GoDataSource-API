@@ -178,14 +178,17 @@ function createPDFList(headers, data, callback) {
 }
 
 /**
- * Create a PDF file containing PNG images coming from SVG files
- * @param svgData
+ * Create a PDF file containing PNG images coming from SVG/PNG files
+ * @param imageData
+ * @param imageType Image types (SVG, PNG)
  * @param splitFactor Split the image into a square matrix with a side of splitFactor (1 no split, 2 => 2x2 grid, 3 => 3x3 grid)
  * @param callback
  */
-function createSVGDoc(svgData, splitFactor, callback) {
+function createImageDoc(imageData, imageType, splitFactor, callback) {
   // create a PDF doc
-  const document = createPdfDoc({size: 'A3'});
+  const document = createPdfDoc({
+    size: 'A3'
+  });
 
   // image size is A3 page - margins
   const imageSize = {
@@ -209,71 +212,81 @@ function createSVGDoc(svgData, splitFactor, callback) {
 
   // when done, send back document buffer
   streamUtils.streamToBuffer(document, callback);
-  // render a PNG from a SVG at a resolution of a rendered image, multiplied by the split factor
-  svg2png(svgData, {width: renderImageSize.width * splitFactor, height: renderImageSize.height * splitFactor})
-    .then(function (buffer) {
-      // check if we need to split the image
-      if (splitFactor > 1) {
-        // load the image into Jimp
-        Jimp.read(buffer)
-          .then(function (image) {
-            // store image parts
-            let images = [];
-            // build a matrix of images, each cropped to its own position in the matrix
-            for (let row = 0; row < splitFactor; row++) {
-              for (let column = 0; column < splitFactor; column++) {
-                images.push(image.clone().crop(column * renderImageSize.width, row * renderImageSize.height, renderImageSize.width, renderImageSize.height));
-              }
-            }
-            // keep a flag for first image (first page is auto-added, we don't want to add it twice)
-            let firstImage = true;
 
-            /**
-             * Add images to PDF doc
-             * @param done
-             */
-            function writeImageToPage(done) {
-              // get first image from the queue
-              const image = images.shift();
-              // if the image is a valid one
-              if (image) {
-                // if this is the first image added, do not add a new page
-                if (!firstImage) {
-                  document.addPage();
-                }
-                firstImage = false;
-                // get image buffer
-                image.getBuffer(Jimp.MIME_PNG, function (error, buffer) {
-                  if (error) {
-                    return done(error);
-                  }
-                  // store it in the document (fit to document size - margins)
-                  document.image(buffer, 50, 50, {fit: [imageSize.width, imageSize.height]});
-                  // move to the next page
-                  writeImageToPage(done);
-                });
-              } else {
-                // no more images to add, move along
-                done();
-              }
+  // build image buffer based on the image type
+  // operations are different
+  (new Promise((resolve) => {
+    if (imageType === app.models.systemSettings.imageTypes.PNG) {
+      return resolve(Buffer.from(imageData, 'base64'));
+    }
+
+    // render a PNG from a SVG at a resolution of a rendered image, multiplied by the split factor
+    return svg2png(imageData, {
+      width: renderImageSize.width * splitFactor,
+      height: renderImageSize.height * splitFactor
+    });
+  })).then(function (buffer) {
+    // check if we need to split the image
+    if (splitFactor > 1) {
+      // load the image into Jimp
+      Jimp.read(buffer)
+        .then(function (image) {
+          // store image parts
+          let images = [];
+          // build a matrix of images, each cropped to its own position in the matrix
+          for (let row = 0; row < splitFactor; row++) {
+            for (let column = 0; column < splitFactor; column++) {
+              images.push(image.clone().crop(column * renderImageSize.width, row * renderImageSize.height, renderImageSize.width, renderImageSize.height));
             }
-            // write images to pdf
-            writeImageToPage(function (error) {
-              if (error) {
-                return callback(error);
+          }
+          // keep a flag for first image (first page is auto-added, we don't want to add it twice)
+          let firstImage = true;
+
+          /**
+           * Add images to PDF doc
+           * @param done
+           */
+          function writeImageToPage(done) {
+            // get first image from the queue
+            const image = images.shift();
+            // if the image is a valid one
+            if (image) {
+              // if this is the first image added, do not add a new page
+              if (!firstImage) {
+                document.addPage();
               }
-              // finalize document
-              document.end();
-            });
-          })
-      } else {
-        // fit the image to page (page dimensions - margins)
-        document.image(buffer, 50, 50, {fit: [imageSize.width, imageSize.height]});
-        // finalize document
-        document.end();
-      }
-    })
-    .catch(callback);
+              firstImage = false;
+              // get image buffer
+              image.getBuffer(Jimp.MIME_PNG, function (error, buffer) {
+                if (error) {
+                  return done(error);
+                }
+                // store it in the document (fit to document size - margins)
+                document.image(buffer, 50, 50, {fit: [imageSize.width, imageSize.height]});
+                // move to the next page
+                writeImageToPage(done);
+              });
+            } else {
+              // no more images to add, move along
+              done();
+            }
+          }
+          // write images to pdf
+          writeImageToPage(function (error) {
+            if (error) {
+              return callback(error);
+            }
+            // finalize document
+            document.end();
+          });
+        })
+    } else {
+      // fit the image to page (page dimensions - margins)
+      document.image(buffer, 50, 50, {fit: [imageSize.width, imageSize.height]});
+      // finalize document
+      document.end();
+    }
+  }).catch(callback);
 }
 
 /**
@@ -412,7 +425,7 @@ const createPersonProfile = function (doc, person, displayValues, title, numberO
 
 module.exports = {
   createPDFList: createPDFList,
-  createSVGDoc: createSVGDoc,
+  createImageDoc: createImageDoc,
   createPdfDoc: createPdfDoc,
   createPersonProfile: createPersonProfile,
   createQuestionnaire: createQuestionnaire

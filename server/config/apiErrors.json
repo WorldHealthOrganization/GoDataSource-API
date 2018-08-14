@@ -134,5 +134,9 @@
   "FILE_ENCRYPTED_OR_ANONIMIZED": {
     "defaultStatusCode": 400,
     "messagePattern": "Exported file must be either encrypted or anonymized. Please either select some fields to be anynomized or provide a password for encryption"
+  },
+  "INVALID_IMAGE_TYPE": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Provided image type `<%= imageType %>` is invalid."
   }
 }

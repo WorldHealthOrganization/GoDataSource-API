@@ -151,13 +151,19 @@
         "path": "/generate-unique-id"
       }
     },
-    "createPdfFromSvg": {
+    "createPdfFromImage": {
       "accepts": [
         {
-          "arg": "svg",
+          "arg": "image",
           "type": "string",
           "required": true,
-          "description": "SVG content"
+          "description": "Image content"
+        },
+        {
+          "arg": "imageType",
+          "type": "string",
+          "required": true,
+          "description": "Image Type [PNG/SVG]"
         },
         {
           "arg": "splitFactor",
