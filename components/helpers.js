@@ -266,7 +266,7 @@ const exportListFile = function (headers, dataSet, fileType) {
         break;
       case 'csv':
         file.mimeType = 'text/csv';
-        spreadSheetFile.createCsvFile(headers, dataSet, function (error, csvFile) {
+        spreadSheetFile.createCsvFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, csvFile) {
           if (error) {
             return reject(error);
           }
@@ -276,7 +276,7 @@ const exportListFile = function (headers, dataSet, fileType) {
         break;
       case 'xls':
         file.mimeType = 'application/vnd.ms-excel';
-        spreadSheetFile.createXlsFile(headers, dataSet, function (error, xlsFile) {
+        spreadSheetFile.createXlsFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, xlsFile) {
           if (error) {
             return reject(error);
           }
@@ -286,7 +286,7 @@ const exportListFile = function (headers, dataSet, fileType) {
         break;
       case 'xlsx':
         file.mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-        spreadSheetFile.createXlsxFile(headers, dataSet, function (error, xlsxFile) {
+        spreadSheetFile.createXlsxFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, xlsxFile) {
           if (error) {
             return reject(error);
           }
@@ -296,7 +296,7 @@ const exportListFile = function (headers, dataSet, fileType) {
         break;
       case 'ods':
         file.mimeType = 'application/vnd.oasis.opendocument.spreadsheet';
-        spreadSheetFile.createOdsFile(headers, dataSet, function (error, odsFile) {
+        spreadSheetFile.createOdsFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, odsFile) {
           if (error) {
             return reject(error);
           }
@@ -306,7 +306,7 @@ const exportListFile = function (headers, dataSet, fileType) {
         break;
       case 'pdf':
         file.mimeType = 'application/pdf';
-        pdfDoc.createPDFList(headers, dataSet, function (error, pdfFile) {
+        pdfDoc.createPDFList(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, pdfFile) {
           if (error) {
             return reject(error);
           }
@@ -502,6 +502,72 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
   });
 };
 
+/**
+ * Flatten a multi level object to single level
+ * @param object
+ * @param prefix
+ * @param humanFriendly Use human friendly naming (e.g. "item 1 level sublevel" instead of "item[0].level.sublevel"). Default: false
+ */
+const getFlatObject = function (object, prefix, humanFriendly) {
+  // define result
+  let result = {};
+  // replace null/undefined prefix with empty string to simplify later operations
+  if (prefix == null) {
+    prefix = '';
+  }
+  // by default do not use human friendly naming
+  if (humanFriendly == null) {
+    humanFriendly = false;
+  }
+
+  // define property name (it will be updated later)
+  let propertyName;
+  // if the object is an array
+  if (Array.isArray(object)) {
+    // go trough all elements
+    object.forEach(function (item, index) {
+      // build it's property name
+      propertyName = `${prefix}[${index}]`;
+      if (humanFriendly) {
+        propertyName = `${prefix} ${index + 1}`.trim();
+      }
+      // if element is of complex type
+      if (item && typeof item === 'object') {
+        // process it
+        result = Object.assign({}, result, getFlatObject(item, propertyName, humanFriendly));
+      } else {
+        // simple type
+        result[propertyName] = item;
+      }
+    });
+    // element is object
+  } else if (typeof object === 'object') {
+    // go through its properties
+    Object.keys(object).forEach(function (property) {
+      // build property name
+      propertyName = prefix;
+      if (humanFriendly) {
+          propertyName = `${propertyName} ${property}`.trim();
+      } else {
+        if (propertyName.length) {
+          propertyName = `${propertyName}.${property}`;
+        } else {
+          propertyName = property;
+        }
+      }
+      // property is complex type
+      if (object[property] && typeof object[property] === 'object') {
+        // process it
+        result = Object.assign({}, result, getFlatObject(object[property], propertyName, humanFriendly));
+      } else {
+        // simple type
+        result[propertyName] = object[property];
+      }
+    });
+  }
+  return result;
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -513,5 +579,6 @@ module.exports = {
   extractImportableFields: extractImportableFields,
   exportListFile: exportListFile,
   getReferencedValue: getReferencedValue,
-  resolveModelForeignKeys: resolveModelForeignKeys
+  resolveModelForeignKeys: resolveModelForeignKeys,
+  getFlatObject: getFlatObject
 };

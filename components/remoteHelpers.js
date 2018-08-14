@@ -112,11 +112,27 @@ function exportFilteredModelsList(app, Model, filter, exportType, fileName, opti
       const headers = [];
       // headers come from model
       Object.keys(Model.fieldLabelsMap).forEach(function (propertyName) {
-        headers.push({
-          id: propertyName,
-          // use correct label translation for user language
-          header: dictionary.getTranslation(Model.fieldLabelsMap[propertyName])
-        });
+        // if a flat file is exported, data needs to be flattened, include 3 elements for each array
+        if (!['json', 'xml'].includes(exportType) && /\[]/.test(propertyName)) {
+          let maxElements = 3;
+          // pdf has a limited width, include only one element
+          if (exportType === 'pdf') {
+            maxElements = 1;
+          }
+          for (let i = 1; i <= maxElements; i++) {
+            headers.push({
+              id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
+              // use correct label translation for user language
+              header: `${dictionary.getTranslation(Model.fieldLabelsMap[propertyName])} [${i}]`
+            });
+          }
+        } else {
+          headers.push({
+            id: propertyName,
+            // use correct label translation for user language
+            header: dictionary.getTranslation(Model.fieldLabelsMap[propertyName])
+          });
+        }
       });
 
       // resolve model foreign keys (if any)
