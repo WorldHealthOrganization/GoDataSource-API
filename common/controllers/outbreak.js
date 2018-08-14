@@ -4434,12 +4434,7 @@ module.exports = function (Outbreak) {
                 // get identifier value only if the value was not previously calculated for another contact
                 if (!groupIdentifiersValues[groupIdentifier]) {
                   let caseModel = contact.relationships[0].people[0];
-                  groupIdentifiersValues[groupIdentifier] = ['firstName', 'middleName', 'lastName'].reduce(function (result, property) {
-                    if (caseModel[property]) {
-                      result += (result.length ? ' ' : '') + caseModel[property];
-                    }
-                    return result;
-                  }, '');
+                  groupIdentifiersValues[groupIdentifier] = app.models.person.getDisplayName(caseModel);
                 }
                 break;
               case groupByOptions.location:
@@ -4497,67 +4492,81 @@ module.exports = function (Outbreak) {
           }
         });
 
-        // initialize list of follow-up properties to be shown in table
-        let followUpProperties = ['date', 'performed'];
-        // define a list of follow-up table headers
-        let followUpsHeaders = [];
-        // headers come from follow-up models;
-        followUpProperties.forEach(function (propertyName) {
-          followUpsHeaders.push({
-            id: propertyName,
-            // use correct label translation for user language
-            header: dictionary.getTranslation(app.models.followUp.fieldLabelsMap[propertyName])
+        /**
+         * Create PDF document and export it
+         * @param callback
+         */
+        function createDocAndExport() {
+          // initialize list of follow-up properties to be shown in table
+          let followUpProperties = ['date', 'performed'];
+          // define a list of follow-up table headers
+          let followUpsHeaders = [];
+          // headers come from follow-up models;
+          followUpProperties.forEach(function (propertyName) {
+            followUpsHeaders.push({
+              id: propertyName,
+              // use correct label translation for user language
+              header: dictionary.getTranslation(app.models.followUp.fieldLabelsMap[propertyName])
+            });
           });
-        });
 
-        // generate pdf document
-        let doc = pdfUtils.createPdfDoc();
+          // generate pdf document
+          let doc = pdfUtils.createPdfDoc();
+          pdfUtils.addTitle(doc, `Contacts to be followed-up`);
 
-        // add information to the doc
-        if (groupResultsBy) {
-          // add title for the group
-          Object.keys(groupedResults).forEach(function (groupIdentifier) {
-            pdfUtils.addTitle(doc, `Group ${groupIdentifier}`);
+          // add information to the doc
+          if (groupResultsBy) {
+            // add title for the group
+            Object.keys(groupedResults).forEach(function (groupIdentifier) {
+              pdfUtils.addTitle(doc, `Group ${groupIdentifier}`);
 
+              // print contacts
+              groupedResults[groupIdentifier].forEach(function (contact, index) {
+                // print profile
+                pdfUtils.createPersonProfile(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
+
+                // print follow-ups table
+                pdfUtils.addTitle(doc, `Follow-ups`);
+                pdfUtils.createTableInPDFDocument(followUpsHeaders, contact.followUps, doc);
+              })
+            });
+          } else {
             // print contacts
-            groupedResults[groupIdentifier].forEach(function (contact) {
+            results.forEach(function (contact, index) {
               // print profile
-              pdfUtils.createPersonProfile(doc, contact.toPrint, true, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
+              pdfUtils.createPersonProfile(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
 
               // print follow-ups table
+              pdfUtils.addTitle(doc, `Follow-ups`);
               pdfUtils.createTableInPDFDocument(followUpsHeaders, contact.followUps, doc);
             })
-          });
-        } else {
-          // print contacts
-          results.forEach(function (contact) {
-            // print profile
-            pdfUtils.createPersonProfile(doc, contact.toPrint, true, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
+          }
 
-            // print follow-ups table
-            pdfUtils.createTableInPDFDocument(followUpsHeaders, contact.followUps.map(function(followUp) {
-              let res = {};
-              followUpProperties.forEach(function(prop) {
-                res[prop] = followUp[prop];
-              });
-              return res;
-            }), doc);
-          })
+          let mimeType = 'application/pdf';
+
+          // convert document stream to buffer
+          genericHelpers.streamToBuffer(doc, function (error, file) {
+            if (error) {
+              return callback(error);
+            }
+            // and offer it for download
+            app.utils.remote.helpers.offerFileToDownload(file, mimeType, `Contact Line List.pdf`, callback);
+          });
+
+          // finalize document
+          doc.end();
         }
 
-        let mimeType = 'application/pdf';
-
-        // convert document stream to buffer
-        genericHelpers.streamToBuffer(doc, function (error, file) {
-          if (error) {
-            return callback(error);
-          }
-          // and offer it for download
-          app.utils.remote.helpers.offerFileToDownload(file, mimeType, `Contact Line List.pdf`, callback);
-        });
-
-        // finalize document
-        doc.end();
+        // for group by location we need to get the locations
+        // promises are already created
+        if (groupResultsBy && groupResultsBy === groupByOptions.location) {
+          Promise.all(groupIdentifiersValues)
+            .then(function () {
+              createDocAndExport();
+            });
+        } else {
+          createDocAndExport();
+        }
       });
     })
   };

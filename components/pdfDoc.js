@@ -422,6 +422,9 @@ function createTableInPDFDocument(headers, data, document, documentConfig) {
 
   // add table data
   pdfTable.addBody(data);
+  // move cursor to next line and set margin
+  document.moveDown();
+  document.x = document.options.margin;
 }
 
 module.exports = {
