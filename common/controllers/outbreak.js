@@ -1407,6 +1407,9 @@ module.exports = function (Outbreak) {
             }
           });
 
+          // get chains length
+          result.transmissionChains.length = result.transmissionChains.chains.length;
+
           // select edges/nodes for the required nodes
           let nodesToSelect = Object.keys(nodesToSelectMap);
           if (nodesToSelect.length) {
@@ -1426,20 +1429,37 @@ module.exports = function (Outbreak) {
           }
 
           // update isolated nodes filter depending on active filter value
-          isolatedNodesFilter = app.utils.utils.remote
-            .mergeFilters({
-              where: {
-                id: {
-                  nin: Object.keys(result.nodes)
+          let followUpPeriod = self.periodOfFollowup;
+          // get day of the start of the follow-up period starting from today
+          let followUpStartDate = genericHelpers.getUTCDate().subtract(followUpPeriod, 'days');
+
+          if (activeFilter) {
+            // get cases/events reported in the last followUpPeriod days
+            isolatedNodesFilter = app.utils.remote
+              .mergeFilters({
+                where: {
+                  dateOfReporting: {
+                    gte: new Date(followUpStartDate)
+                  }
                 }
-              }
-            }, isolatedNodesFilter);
+              }, isolatedNodesFilter);
+          } else {
+            // get cases/events reported earlier than in the last followUpPeriod days
+            isolatedNodesFilter = app.utils.remote
+              .mergeFilters({
+                where: {
+                  dateOfReporting: {
+                    lt: new Date(followUpStartDate)
+                  }
+                }
+              }, isolatedNodesFilter);
+          }
         } else {
           result = transmissionChains;
         }
 
         // update isolated nodes filter
-        isolatedNodesFilter = app.utils.utils.remote
+        isolatedNodesFilter = app.utils.remote
           .mergeFilters({
             where: {
               id: {
