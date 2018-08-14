@@ -76,8 +76,10 @@ module.exports = function (SystemSettings) {
    * @param callback
    */
   SystemSettings.createPdfFromImage = function (image, imageType, splitFactor, callback) {
+    imageType = imageType.toUpperCase();
+
     // make sure we have a good image type
-    if (!SystemSettings.imageTypes.hasOwnProperty(imageType.toUpperCase())) {
+    if (!SystemSettings.imageTypes.hasOwnProperty(imageType)) {
       return callback(
         app.utils.apiError.getError('INVALID_IMAGE_TYPE', { imageType: imageType })
       );

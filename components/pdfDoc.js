@@ -5,6 +5,7 @@ const PdfTable = require('voilab-pdf-table');
 const svg2png = require('svg2png');
 const streamUtils = require('./streamUtils');
 const Jimp = require('jimp');
+const app = require('../server/server');
 
 // define a default document configuration
 const defaultDocumentConfiguration = {
@@ -216,6 +217,7 @@ function createImageDoc(imageData, imageType, splitFactor, callback) {
   // build image buffer based on the image type
   // operations are different
   (new Promise((resolve) => {
+    // TODO: app.models is undefined (require fails)
     if (imageType === app.models.systemSettings.imageTypes.PNG) {
       return resolve(Buffer.from(imageData, 'base64'));
     }
