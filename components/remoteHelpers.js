@@ -139,7 +139,7 @@ function exportFilteredModelsList(app, Model, filter, exportType, fileName, opti
       helpers.resolveModelForeignKeys(app, Model, results, dictionary)
         .then(function (results) {
           // execute before export hook
-          return beforeExport(results)
+          return beforeExport(results, dictionary)
             .then(function (results) {
               // create file with the results
               return app.utils.helpers.exportListFile(headers, results, exportType)

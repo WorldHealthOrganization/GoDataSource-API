@@ -4070,6 +4070,46 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.exportFilteredOutbreaks = function (filter, exportType, options, callback) {
-    app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', options, callback);
+
+    /**
+     * Translate the template
+     * @param template
+     * @param dictionary
+     */
+    function translateTemplate(template, dictionary) {
+      // go trough all questions
+      template.forEach(function (question) {
+        // translate text and answer type
+        ['text', 'answerType'].forEach(function (itemToTranslate) {
+          if (question[itemToTranslate]) {
+            question[itemToTranslate] = dictionary.getTranslation(question[itemToTranslate]);
+          }
+        });
+        // translate answers (if present)
+        if (question.answers) {
+          question.answers.forEach(function (answer) {
+            if (answer.label) {
+              answer.label = dictionary.getTranslation(answer.label);
+            }
+            // translate additional questions (if present)
+            if (answer.additionalQuestions) {
+              translateTemplate(answer.additionalQuestions, dictionary);
+            }
+          });
+        }
+      });
+    }
+    // export outbreaks list
+    app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', options, function (results, languageDictionary) {
+      results.forEach(function (result) {
+        // translate templates
+        ['caseInvestigationTemplate', 'labResultsTemplate', 'contactFollowUpTemplate'].forEach(function (template) {
+          if (result[template]) {
+            translateTemplate(result[template], languageDictionary);
+          }
+        });
+      });
+      return Promise.resolve(results)
+    }, callback);
   };
 };
