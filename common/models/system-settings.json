@@ -193,7 +193,7 @@
           }
         }
       ],
-      "description": "Create a PDF file containing PNG images coming from SVG files",
+      "description": "Create a PDF file containing PNG images coming from SVG/PNG files",
       "http": {
         "verb": "post",
         "path": "/image-to-pdf"
