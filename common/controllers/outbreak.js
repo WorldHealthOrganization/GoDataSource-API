@@ -81,7 +81,16 @@ module.exports = function (Outbreak) {
         }
       },
       filter || {});
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', options, callback);
+    // get logged in user
+    const contextUser = app.utils.remote.getUserFromOptions(options);
+    // define header restrictions
+    let headerRestrictions;
+    // if the user has a list of restricted fields configured
+    if (contextUser.settings && Array.isArray(contextUser.settings.caseFields) && contextUser.settings.caseFields.length) {
+      // use that list
+      headerRestrictions = contextUser.settings.caseFields;
+    }
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', options, headerRestrictions, callback);
   };
 
   /**
@@ -4059,7 +4068,7 @@ module.exports = function (Outbreak) {
         }
       },
       filter || {});
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, _filters, exportType, 'Contacts List', options, callback);
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, _filters, exportType, 'Contacts List', options, null, callback);
   };
 
   /**
@@ -4099,6 +4108,7 @@ module.exports = function (Outbreak) {
         }
       });
     }
+
     // export outbreaks list
     app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', options, function (results, languageDictionary) {
       results.forEach(function (result) {
@@ -4110,6 +4120,6 @@ module.exports = function (Outbreak) {
         });
       });
       return Promise.resolve(results)
-    }, callback);
+    }, null, callback);
   };
 };

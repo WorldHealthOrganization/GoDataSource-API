@@ -68,10 +68,11 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callba
  * @param exportType
  * @param fileName
  * @param options
+ * @param headersWhitelist {array|null}
  * @param [beforeExport] Optional result modifier before export
  * @param callback
  */
-function exportFilteredModelsList(app, Model, filter, exportType, fileName, options, beforeExport, callback) {
+function exportFilteredModelsList(app, Model, filter, exportType, fileName, options, headersWhitelist, beforeExport, callback) {
   // before export is optional
   if (!callback) {
     callback = beforeExport;
@@ -112,26 +113,33 @@ function exportFilteredModelsList(app, Model, filter, exportType, fileName, opti
       const headers = [];
       // headers come from model
       Object.keys(Model.fieldLabelsMap).forEach(function (propertyName) {
-        // if a flat file is exported, data needs to be flattened, include 3 elements for each array
-        if (!['json', 'xml'].includes(exportType) && /\[]/.test(propertyName)) {
-          let maxElements = 3;
-          // pdf has a limited width, include only one element
-          if (exportType === 'pdf') {
-            maxElements = 1;
-          }
-          for (let i = 1; i <= maxElements; i++) {
+        // check header restrictions, use property if there are no restrictions or the property is in the restricted (white)list
+        if (
+          !headersWhitelist ||
+          !headersWhitelist.length ||
+          headersWhitelist.includes(propertyName)
+        ) {
+          // if a flat file is exported, data needs to be flattened, include 3 elements for each array
+          if (!['json', 'xml'].includes(exportType) && /\[]/.test(propertyName)) {
+            let maxElements = 3;
+            // pdf has a limited width, include only one element
+            if (exportType === 'pdf') {
+              maxElements = 1;
+            }
+            for (let i = 1; i <= maxElements; i++) {
+              headers.push({
+                id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
+                // use correct label translation for user language
+                header: `${dictionary.getTranslation(Model.fieldLabelsMap[propertyName])} [${i}]`
+              });
+            }
+          } else {
             headers.push({
-              id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
+              id: propertyName,
               // use correct label translation for user language
-              header: `${dictionary.getTranslation(Model.fieldLabelsMap[propertyName])} [${i}]`
+              header: dictionary.getTranslation(Model.fieldLabelsMap[propertyName])
             });
           }
-        } else {
-          headers.push({
-            id: propertyName,
-            // use correct label translation for user language
-            header: dictionary.getTranslation(Model.fieldLabelsMap[propertyName])
-          });
         }
       });
 
