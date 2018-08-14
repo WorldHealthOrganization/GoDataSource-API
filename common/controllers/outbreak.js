@@ -69,90 +69,29 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Export filtered cases to PDF
+   * Export filtered cases to file
    * @param filter
-   * @param exportType
+   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param options
    * @param callback
    */
   Outbreak.prototype.exportFilteredCases = function (filter, exportType, options, callback) {
-    // use get cases functionality
-    this.__get__cases(filter, function (error, result) {
-      if (error) {
-        return callback(error);
-      }
-
-      // by default export CSV
-      if (!exportType) {
-        exportType = 'csv';
-      } else {
-        // be more permissive, always convert to lowercase
-        exportType = exportType.toLowerCase();
-      }
-
-      // validate export type, only allow csv and pdf
-      if (['csv', 'pdf'].indexOf(exportType) === -1) {
-        return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {errorMessages: `Invalid Export Type: ${exportType}. Supported options: pdf, csv`}));
-      }
-
-      let fileBuilder;
-      let mimeType;
-
-      // set file builder and mime type according to exported type
-      if (exportType === 'csv') {
-        fileBuilder = app.utils.spreadSheetFile.createCsvFile;
-        mimeType = 'text/csv';
-      } else {
-        fileBuilder = app.utils.pdfDoc.createPDFList;
-        mimeType = 'application/pdf';
-      }
-
-      // add support for filter parent
-      const results = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, filter);
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      // load user language dictionary
-      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-        // handle errors
-        if (error) {
-          return callback(error);
+    const _filters = app.utils.remote.mergeFilters({
+        where: {
+          outbreakId: this.id
         }
-        // define a list of table headers
-        const headers = [];
-        // headers come from case models
-        Object.keys(app.models.case.fieldLabelsMap).forEach(function (propertyName) {
-          // show the field only if the user has it configured or it does not have any configuration set
-          if (
-            !contextUser.settings ||
-            !contextUser.settings.caseFields ||
-            contextUser.settings.caseFields.indexOf(propertyName) !== -1
-          ) {
-            headers.push({
-              id: propertyName,
-              // use correct label translation for user language
-              header: dictionary.getTranslation(app.models.case.fieldLabelsMap[propertyName])
-            });
-          }
-        });
-        // go through the results
-        results.forEach(function (result) {
-          // for the fields that use reference data
-          app.models.case.referenceDataFields.forEach(function (field) {
-            if (result[field]) {
-              // get translation of the reference data
-              result[field] = app.models.language.getFieldTranslationFromDictionary(result[field], contextUser.languageId, dictionary);
-            }
-          });
-        });
-        // create file with the results
-        fileBuilder(headers, results, function (error, file) {
-          if (error) {
-            return callback(error);
-          }
-          // and offer it for download
-          app.utils.remote.helpers.offerFileToDownload(file, mimeType, `Case Line List.${exportType}`, callback);
-        });
-      });
-    })
+      },
+      filter || {});
+    // get logged in user
+    const contextUser = app.utils.remote.getUserFromOptions(options);
+    // define header restrictions
+    let headerRestrictions;
+    // if the user has a list of restricted fields configured
+    if (contextUser.settings && Array.isArray(contextUser.settings.caseFields) && contextUser.settings.caseFields.length) {
+      // use that list
+      headerRestrictions = contextUser.settings.caseFields;
+    }
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', options, headerRestrictions, callback);
   };
 
   /**
@@ -4217,5 +4156,74 @@ module.exports = function (Outbreak) {
         callback(null, result);
       })
       .catch(callback);
+  };
+
+  /**
+   * Export filtered contacts to file
+   * @param filter
+   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportFilteredContacts = function (filter, exportType, options, callback) {
+    const _filters = app.utils.remote.mergeFilters({
+        where: {
+          outbreakId: this.id
+        }
+      },
+      filter || {});
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, _filters, exportType, 'Contacts List', options, null, callback);
+  };
+
+  /**
+   * Export filtered outbreaks to file
+   * @param filter
+   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param options
+   * @param callback
+   */
+  Outbreak.exportFilteredOutbreaks = function (filter, exportType, options, callback) {
+
+    /**
+     * Translate the template
+     * @param template
+     * @param dictionary
+     */
+    function translateTemplate(template, dictionary) {
+      // go trough all questions
+      template.forEach(function (question) {
+        // translate text and answer type
+        ['text', 'answerType'].forEach(function (itemToTranslate) {
+          if (question[itemToTranslate]) {
+            question[itemToTranslate] = dictionary.getTranslation(question[itemToTranslate]);
+          }
+        });
+        // translate answers (if present)
+        if (question.answers) {
+          question.answers.forEach(function (answer) {
+            if (answer.label) {
+              answer.label = dictionary.getTranslation(answer.label);
+            }
+            // translate additional questions (if present)
+            if (answer.additionalQuestions) {
+              translateTemplate(answer.additionalQuestions, dictionary);
+            }
+          });
+        }
+      });
+    }
+
+    // export outbreaks list
+    app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', options, function (results, languageDictionary) {
+      results.forEach(function (result) {
+        // translate templates
+        ['caseInvestigationTemplate', 'labResultsTemplate', 'contactFollowUpTemplate'].forEach(function (template) {
+          if (result[template]) {
+            translateTemplate(result[template], languageDictionary);
+          }
+        });
+      });
+      return Promise.resolve(results)
+    }, null, callback);
   };
 };

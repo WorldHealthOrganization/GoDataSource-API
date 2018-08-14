@@ -4,6 +4,12 @@
 const moment = require('moment');
 const chunkDateRange = require('chunk-date-range');
 const _ = require('lodash');
+const apiError = require('./apiError');
+const xml2js = require('xml2js');
+const spreadSheetFile = require('./spreadSheetFile');
+const pdfDoc = require('./pdfDoc');
+const streamUtils = require('./streamUtils');
+const async = require('async');
 
 /**
  * Convert a Date object into moment UTC date and reset time to start of the day
@@ -35,21 +41,6 @@ const getUTCDateEndOfDay = function (date, dayOfWeek) {
 const getAsciiString = function (string) {
   return string.replace(/[^\x00-\x7F]/g, '');
 };
-
-/**
- * Convert a read to a buffer
- * @param stream
- * @param callback
- */
-function streamToBuffer(stream, callback) {
-  const chunks = [];
-  stream.on('data', function (chunk) {
-    chunks.push(chunk);
-  });
-  stream.on('end', function () {
-    callback(null, Buffer.concat(chunks));
-  });
-}
 
 /**
  * Split a date interval into chunks of specified length
@@ -116,14 +107,16 @@ const remapProperties = function (list, fieldsMap, valuesMap) {
     let result = {};
     // go trough the list of fields
     fields.forEach(function (field) {
-      // if no array position was specified, use position 0
-      fieldsMap[field] = fieldsMap[field].replace(/\[]/g, '[0]');
-      // remap property
-      _.set(result, fieldsMap[field], item[field]);
-      // if a values map was provided
-      if (valuesMap && valuesMap[field] && valuesMap[field][item[field]] !== undefined) {
-        // remap the values
-        _.set(result, fieldsMap[field], valuesMap[field][item[field]]);
+      if (fieldsMap[field]) {
+        // if no array position was specified, use position 0
+        fieldsMap[field] = fieldsMap[field].replace(/\[]/g, '[0]');
+        // remap property
+        _.set(result, fieldsMap[field], item[field]);
+        // if a values map was provided
+        if (valuesMap && valuesMap[field] && valuesMap[field][item[field]] !== undefined) {
+          // remap the values
+          _.set(result, fieldsMap[field], valuesMap[field][item[field]]);
+        }
       }
     });
     // add processed item to the final list
@@ -176,13 +169,416 @@ const extractImportableFields = function (Model, data) {
   return importableFields;
 };
 
+/**
+ * Get a JSON that has XML friendly property names
+ * @param jsonObj
+ * @return {*}
+ */
+const getXmlFriendlyJson = function (jsonObj) {
+  // define a replacement
+  let _replacement;
+  // if the json is an array
+  if (Array.isArray(jsonObj)) {
+    // replacement must be an array
+    _replacement = [];
+    // go through all elements
+    jsonObj.forEach(function (jsObj) {
+      // and make them XML friendly
+      _replacement.push(getXmlFriendlyJson(jsObj));
+    });
+  }
+  // json is a non-empty object
+  else if (typeof jsonObj === 'object' && jsonObj != null) {
+    // replacement must be a non-empty object
+    _replacement = {};
+    // go trough all the object keys
+    Object.keys(jsonObj).forEach(function (property) {
+      // get XML friendly key
+      let replacementProperty = _.camelCase(property);
+      // if the value is a complex one
+      if (typeof jsonObj[property] === 'object' && jsonObj != null) {
+        // make it XML friendly
+        _replacement[replacementProperty] = getXmlFriendlyJson(jsonObj[property]);
+      } else {
+        // otherwise just store it
+        _replacement[replacementProperty] = jsonObj[property];
+      }
+    });
+  } else {
+    // empty object, just copy it
+    _replacement = jsonObj;
+  }
+  return _replacement;
+};
+
+/**
+ * Export a list in a file
+ * @param headers file list headers
+ * @param dataSet {Array} actual data set
+ * @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
+ * @return {Promise<any>}
+ */
+const exportListFile = function (headers, dataSet, fileType) {
+
+  // define the file
+  const file = {
+    data: {},
+    mimeType: '',
+    extension: fileType
+  };
+
+  // promisify the file
+  return new Promise(function (resolve, reject) {
+    // data set must be an array
+    if (!Array.isArray(dataSet)) {
+      return reject(new Error('Invalid dataSet. DataSet must be an array.'));
+    }
+    // handle each file individually
+    switch (fileType) {
+      case 'json':
+        file.mimeType = 'application/json';
+        // build headers map
+        const jsonHeadersMap = headers.reduce(function (accumulator, currentValue) {
+          accumulator[currentValue.id] = currentValue.header;
+          return accumulator;
+        }, {});
+        file.data = JSON.stringify(remapProperties(dataSet, jsonHeadersMap),
+          // replace undefined with null so the JSON will contain all properties
+          function (key, value) {
+            if (value === undefined) {
+              value = null;
+            }
+            return value;
+          }, 2);
+        resolve(file);
+        break;
+      case 'xml':
+        file.mimeType = 'text/xml';
+        const builder = new xml2js.Builder();
+        // build headers map
+        const xmlHeadersMap = headers.reduce(function (accumulator, currentValue) {
+          // XML needs a repeating "container" property in order to simulate an array
+          accumulator[currentValue.id] = `entry.${currentValue.header}`;
+          return accumulator;
+        }, {});
+        file.data = builder.buildObject(getXmlFriendlyJson(remapProperties(dataSet, xmlHeadersMap)));
+        resolve(file);
+        break;
+      case 'csv':
+        file.mimeType = 'text/csv';
+        spreadSheetFile.createCsvFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, csvFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = csvFile;
+          resolve(file);
+        });
+        break;
+      case 'xls':
+        file.mimeType = 'application/vnd.ms-excel';
+        spreadSheetFile.createXlsFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, xlsFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = xlsFile;
+          resolve(file);
+        });
+        break;
+      case 'xlsx':
+        file.mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        spreadSheetFile.createXlsxFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, xlsxFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = xlsxFile;
+          resolve(file);
+        });
+        break;
+      case 'ods':
+        file.mimeType = 'application/vnd.oasis.opendocument.spreadsheet';
+        spreadSheetFile.createOdsFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, odsFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = odsFile;
+          resolve(file);
+        });
+        break;
+      case 'pdf':
+        file.mimeType = 'application/pdf';
+        pdfDoc.createPDFList(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, pdfFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = pdfFile;
+          resolve(file);
+        });
+        break;
+      default:
+        reject(apiError.getError('REQUEST_VALIDATION_ERROR', {errorMessages: `Invalid Export Type: ${fileType}. Supported options: json, xml, csv, xls, xlsx, ods, pdf`}));
+        break;
+    }
+  });
+};
+
+/**
+ * Get a referenced value. Similar to loDash _.get but it can map properties from arrays also
+ * @param data Source Object
+ * @param path Path to property e.g. addresses[].locationId
+ * @return {*}
+ */
+const getReferencedValue = function (data, path) {
+  // start with an empty result
+  let result;
+  // if the path contains arrays
+  if (/\[]/.test(path)) {
+    // result must be an array
+    result = [];
+    // ge position of the array marker
+    const arrayMarkerPosition = path.indexOf('[]');
+    // get path to the array
+    const arrayPath = path.substring(0, arrayMarkerPosition);
+    // get remaining part
+    const remainingPath = path.substring(arrayMarkerPosition + 3);
+    // go trough the array
+    _.get(data, arrayPath, []).forEach(function (dataItem, index) {
+      // if there still is a path left
+      if (remainingPath) {
+        // process it
+        let currentResult = getReferencedValue(dataItem, remainingPath);
+        if (!Array.isArray(currentResult)) {
+          currentResult = [currentResult];
+        }
+        currentResult.forEach(function (resultItem) {
+          result.push({
+            value: resultItem.value,
+            exactPath: `${arrayPath}[${index}].${resultItem.exactPath}`
+          });
+        })
+
+      } else {
+        // otherwise just push the result
+        result.push(result = {
+          value: dataItem,
+          exactPath: `${arrayPath}[${index}]`
+        });
+      }
+    });
+  } else {
+    // no arrays in the path, use loDash get
+    result = {
+      value: _.get(data, path),
+      exactPath: path
+    }
+  }
+  return result;
+};
+
+/**
+ * Resolve foreign keys for a model in a result set (this includes reference data)
+ * @param app
+ * @param Model
+ * @param resultSet
+ * @param languageDictionary
+ * @param [resolveReferenceData]
+ * @return {Promise<any>}
+ */
+const resolveModelForeignKeys = function (app, Model, resultSet, languageDictionary, resolveReferenceData) {
+
+  // by default also resolve reference data
+  if (resolveReferenceData === undefined) {
+    resolveReferenceData = true;
+  }
+
+  // promisify the response
+  return new Promise(function (resolve, reject) {
+
+    // build a list of queries (per model) in order to resolve foreign keys
+    const foreignKeyQueryMap = {};
+    // keep a flag for resolving foreign keys
+    let resolveForeignKeys = false;
+
+    // if the model has a resolver map
+    if (Model.foreignKeyResolverMap) {
+      // resolve foreign keys
+      resolveForeignKeys = true;
+    }
+
+    // build a map of entries in the result set that should be resolved once we have foreign key data
+    let resultSetResolverMap = {};
+
+    // go through the resultSet
+    resultSet.forEach(function (result, index) {
+      // check if foreign keys should be resolved
+      if (resolveForeignKeys) {
+        // go through the list of keys that needs to be resolved
+        Object.keys(Model.foreignKeyResolverMap).forEach(function (foreignKey) {
+          // get foreign key value
+          let foreignKeyValues = getReferencedValue(result, foreignKey);
+          // if it's single value, convert it to array (simplify the code)
+          if (!Array.isArray(foreignKeyValues)) {
+            foreignKeyValues = [foreignKeyValues];
+          }
+          // go through all the foreign key values
+          foreignKeyValues.forEach(function (foreignKeyValue) {
+            // store the map for the result set entry, that will be resolved later
+            resultSetResolverMap[`[${index}].${foreignKeyValue.exactPath}`] = {
+              modelName: Model.foreignKeyResolverMap[foreignKey].modelName,
+              value: foreignKeyValue.value,
+              useProperty: Model.foreignKeyResolverMap[foreignKey].useProperty
+            };
+            // update the query map with the data that needs to be queried
+            if (!foreignKeyQueryMap[Model.foreignKeyResolverMap[foreignKey].modelName]) {
+              foreignKeyQueryMap[Model.foreignKeyResolverMap[foreignKey].modelName] = [];
+            }
+            foreignKeyQueryMap[Model.foreignKeyResolverMap[foreignKey].modelName].push(foreignKeyValue.value);
+          });
+        });
+      }
+
+      // also resolve reference data if needed
+      if (resolveReferenceData) {
+        // for the fields that use reference data (special type of foreign key)
+        Model.referenceDataFields.forEach(function (field) {
+          if (result[field]) {
+            // get translation of the reference data
+            result[field] = languageDictionary.getTranslation(result[field]);
+          }
+        });
+      }
+    });
+
+    if (resolveForeignKeys) {
+      // build a list of queries that will be executed to resolve foreign keys
+      const queryForeignKeys = {};
+      // go through the entries in the query map
+      Object.keys(foreignKeyQueryMap).forEach(function (modelName) {
+        // add query operation (per model name)
+        queryForeignKeys[modelName] = function (callback) {
+          app.models[modelName]
+            .find({
+              where: {
+                id: {
+                  inq: foreignKeyQueryMap[modelName]
+                }
+              }
+            })
+            .then(function (results) {
+              callback(null, results);
+            })
+            .catch(callback);
+        };
+      });
+
+      // query models to resolve foreign keys
+      async.parallel(queryForeignKeys, function (error, foreignKeyQueryResults) {
+        // handle error
+        if (error) {
+          return reject(error);
+        }
+        // map foreign key results to models and index them by recordId
+        let foreignKeyResultsMap = {};
+        Object.keys(foreignKeyQueryResults).forEach(function (modelName) {
+          // create container for records
+          foreignKeyResultsMap[modelName] = {};
+          // index each instance using record Id
+          foreignKeyQueryResults[modelName].forEach(function (modelInstance) {
+            foreignKeyResultsMap[modelName][modelInstance.id] = modelInstance.toJSON();
+          })
+        });
+
+        // replace foreign key references with configured related model value
+        Object.keys(resultSetResolverMap).forEach(function (foreignKeyPath) {
+          // use the values from foreignKeysResults map
+          _.set(resultSet, foreignKeyPath, _.get(foreignKeyResultsMap, `${resultSetResolverMap[foreignKeyPath].modelName}.${resultSetResolverMap[foreignKeyPath].value}.${resultSetResolverMap[foreignKeyPath].useProperty}`));
+        });
+        // foreign keys resolved
+        resolve(resultSet);
+      });
+    } else {
+      // nothing more to resolve
+      resolve(resultSet);
+    }
+  });
+};
+
+/**
+ * Flatten a multi level object to single level
+ * @param object
+ * @param prefix
+ * @param humanFriendly Use human friendly naming (e.g. "item 1 level sublevel" instead of "item[0].level.sublevel"). Default: false
+ */
+const getFlatObject = function (object, prefix, humanFriendly) {
+  // define result
+  let result = {};
+  // replace null/undefined prefix with empty string to simplify later operations
+  if (prefix == null) {
+    prefix = '';
+  }
+  // by default do not use human friendly naming
+  if (humanFriendly == null) {
+    humanFriendly = false;
+  }
+
+  // define property name (it will be updated later)
+  let propertyName;
+  // if the object is an array
+  if (Array.isArray(object)) {
+    // go trough all elements
+    object.forEach(function (item, index) {
+      // build it's property name
+      propertyName = `${prefix}[${index}]`;
+      if (humanFriendly) {
+        propertyName = `${prefix} ${index + 1}`.trim();
+      }
+      // if element is of complex type
+      if (item && typeof item === 'object') {
+        // process it
+        result = Object.assign({}, result, getFlatObject(item, propertyName, humanFriendly));
+      } else {
+        // simple type
+        result[propertyName] = item;
+      }
+    });
+    // element is object
+  } else if (typeof object === 'object') {
+    // go through its properties
+    Object.keys(object).forEach(function (property) {
+      // build property name
+      propertyName = prefix;
+      if (humanFriendly) {
+          propertyName = `${propertyName} ${property}`.trim();
+      } else {
+        if (propertyName.length) {
+          propertyName = `${propertyName}.${property}`;
+        } else {
+          propertyName = property;
+        }
+      }
+      // property is complex type
+      if (object[property] && typeof object[property] === 'object') {
+        // process it
+        result = Object.assign({}, result, getFlatObject(object[property], propertyName, humanFriendly));
+      } else {
+        // simple type
+        result[propertyName] = object[property];
+      }
+    });
+  }
+  return result;
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
-  streamToBuffer: streamToBuffer,
+  streamToBuffer: streamUtils.streamToBuffer,
   remapProperties: remapProperties,
   getUTCDateEndOfDay: getUTCDateEndOfDay,
   getAsciiString: getAsciiString,
   getChunksForInterval: getChunksForInterval,
   convertPropsToDate: convertPropsToDate,
-  extractImportableFields: extractImportableFields
+  extractImportableFields: extractImportableFields,
+  exportListFile: exportListFile,
+  getReferencedValue: getReferencedValue,
+  resolveModelForeignKeys: resolveModelForeignKeys,
+  getFlatObject: getFlatObject
 };

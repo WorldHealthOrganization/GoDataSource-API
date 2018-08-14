@@ -4,7 +4,7 @@ module.exports = function (Contact) {
   // set flag to not get controller
   Contact.hasController = false;
 
-  Contact.fieldLabelsMap = {
+  Contact.fieldLabelsMap = Object.assign({}, Contact.fieldLabelsMap, {
     'firstName': 'LNG_CONTACT_FIELD_LABEL_FIRST_NAME',
     'middleName': 'LNG_CONTACT_FIELD_LABEL_MIDDLE_NAME',
     'lastName': 'LNG_CONTACT_FIELD_LABEL_LAST_NAME',
@@ -34,7 +34,7 @@ module.exports = function (Contact) {
     'addresses[].date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
     'fillGeoLocation': 'LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION',
     'isDateOfReportingApproximate': 'LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE'
-  };
+  });
 
   Contact.referenceDataFieldsToCategoryMap = {
     riskLevel: 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL',

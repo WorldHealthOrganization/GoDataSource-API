@@ -3,7 +3,7 @@
 const PdfKit = require('pdfkit');
 const PdfTable = require('voilab-pdf-table');
 const svg2png = require('svg2png');
-const helpers = require('./helpers');
+const streamUtils = require('./streamUtils');
 const Jimp = require('jimp');
 
 // define a default document configuration
@@ -78,7 +78,42 @@ function createPdfDoc(options) {
  * @param callback
  */
 function createPDFList(headers, data, callback) {
-  const document = createPdfDoc();
+  // default document config
+  const documentConfig = {};
+
+  // use different document sizes for different number of headers
+  switch (true) {
+    case headers.length <= 10:
+      documentConfig.size = 'A4';
+      documentConfig.widthForPageSize = 841;
+      break;
+    case headers.length > 10 && headers.length <= 20:
+      documentConfig.size = 'A3';
+      documentConfig.widthForPageSize = 1190;
+      break;
+    case headers.length > 20 && headers.length <= 30:
+      documentConfig.size = 'A2';
+      documentConfig.widthForPageSize = 1683;
+      break;
+    case headers.length > 30 && headers.length <= 40:
+      documentConfig.size = 'A1';
+      documentConfig.widthForPageSize = 2383;
+      break;
+    case headers.length > 40 && headers.length <= 50:
+      documentConfig.size = 'A0';
+      documentConfig.widthForPageSize = 3370;
+      break;
+    case headers.length > 50 && headers.length <= 60:
+      documentConfig.size = '2A0';
+      documentConfig.widthForPageSize = 4767;
+      break;
+    case headers.length > 60:
+      documentConfig.size = '4A0';
+      documentConfig.widthForPageSize = 6740;
+      break;
+  }
+
+  const document = createPdfDoc(documentConfig);
   const pdfTable = new PdfTable(document);
 
   // set default values for columns
@@ -123,7 +158,7 @@ function createPDFList(headers, data, callback) {
   });
 
   // for rows without reserved width, split remaining document width (doc width - margins - reserved width) between remaining headers
-  const defaultRowWidth = (defaultDocumentConfiguration.widthForPageSize - 2 * defaultDocumentConfiguration.margin - reservedWidth) / (headers.length - noHeadersWithReservedWidth);
+  const defaultRowWidth = (documentConfig.widthForPageSize - 2 * defaultDocumentConfiguration.margin - reservedWidth) / (headers.length - noHeadersWithReservedWidth);
 
   // add all headers
   headers.forEach(function (header) {
@@ -137,7 +172,7 @@ function createPDFList(headers, data, callback) {
   // add table data
   pdfTable.addBody(data);
   // convert document stream to buffer
-  helpers.streamToBuffer(document, callback);
+  streamUtils.streamToBuffer(document, callback);
   // finalize document
   document.end();
 }
@@ -173,7 +208,7 @@ function createSVGDoc(svgData, splitFactor, callback) {
   }
 
   // when done, send back document buffer
-  helpers.streamToBuffer(document, callback);
+  streamUtils.streamToBuffer(document, callback);
   // render a PNG from a SVG at a resolution of a rendered image, multiplied by the split factor
   svg2png(svgData, {width: renderImageSize.width * splitFactor, height: renderImageSize.height * splitFactor})
     .then(function (buffer) {

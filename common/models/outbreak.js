@@ -8,7 +8,7 @@ const moment = require('moment');
 
 module.exports = function (Outbreak) {
 
-  Outbreak.fieldLabelsMap = {
+  Outbreak.fieldLabelsMap = Object.assign({}, Outbreak.fieldLabelsMap, {
     name: 'LNG_OUTBREAK_FIELD_LABEL_NAME',
     description: 'LNG_OUTBREAK_FIELD_LABEL_DESCRIPTION',
     disease: 'LNG_OUTBREAK_FIELD_LABEL_DISEASE',
@@ -29,7 +29,7 @@ module.exports = function (Outbreak) {
     contactFollowUpTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_FOLLOWUP_TEMPLATE',
     labResultsTemplate: 'LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE',
     caseIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK'
-  };
+  });
 
   Outbreak.referenceDataFieldsToCategoryMap = {
     disease: 'LNG_REFERENCE_DATA_CATEGORY_DISEASE'

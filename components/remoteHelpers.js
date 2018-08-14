@@ -20,6 +20,7 @@ function offerFileToDownload(fileBuffer, mimeType, fileName, remoteCallback) {
  * @param req
  * @param requiredFields
  * @param requiredFiles
+ * @param Model
  * @param callback
  */
 function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callback) {
@@ -59,7 +60,110 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callba
   });
 }
 
+/**
+ * Export filtered model list
+ * @param app Inject app
+ * @param Model Model that will be exported
+ * @param filter
+ * @param exportType
+ * @param fileName
+ * @param options
+ * @param headersWhitelist {array|null}
+ * @param [beforeExport] Optional result modifier before export
+ * @param callback
+ */
+function exportFilteredModelsList(app, Model, filter, exportType, fileName, options, headersWhitelist, beforeExport, callback) {
+  // before export is optional
+  if (!callback) {
+    callback = beforeExport;
+    // by default before export is a no-op function that returns a promise
+    beforeExport = function (results) {
+      return new Promise(function (resolve) {
+        resolve(results);
+      });
+    }
+  }
+  // find results
+  Model.find(filter, function (error, result) {
+    // handle errors
+    if (error) {
+      return callback(error);
+    }
+
+    // by default export CSV
+    if (!exportType) {
+      exportType = 'json';
+    } else {
+      // be more permissive, always convert to lowercase
+      exportType = exportType.toLowerCase();
+    }
+
+    // add support for filter parent
+    const results = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, filter);
+    const contextUser = app.utils.remote.getUserFromOptions(options);
+
+    // load user language dictionary
+    app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+      // handle errors
+      if (error) {
+        return callback(error);
+      }
+
+      // define a list of table headers
+      const headers = [];
+      // headers come from model
+      Object.keys(Model.fieldLabelsMap).forEach(function (propertyName) {
+        // check header restrictions, use property if there are no restrictions or the property is in the restricted (white)list
+        if (
+          !headersWhitelist ||
+          !headersWhitelist.length ||
+          headersWhitelist.includes(propertyName)
+        ) {
+          // if a flat file is exported, data needs to be flattened, include 3 elements for each array
+          if (!['json', 'xml'].includes(exportType) && /\[]/.test(propertyName)) {
+            let maxElements = 3;
+            // pdf has a limited width, include only one element
+            if (exportType === 'pdf') {
+              maxElements = 1;
+            }
+            for (let i = 1; i <= maxElements; i++) {
+              headers.push({
+                id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
+                // use correct label translation for user language
+                header: `${dictionary.getTranslation(Model.fieldLabelsMap[propertyName])} [${i}]`
+              });
+            }
+          } else {
+            headers.push({
+              id: propertyName,
+              // use correct label translation for user language
+              header: dictionary.getTranslation(Model.fieldLabelsMap[propertyName])
+            });
+          }
+        }
+      });
+
+      // resolve model foreign keys (if any)
+      helpers.resolveModelForeignKeys(app, Model, results, dictionary)
+        .then(function (results) {
+          // execute before export hook
+          return beforeExport(results, dictionary)
+            .then(function (results) {
+              // create file with the results
+              return app.utils.helpers.exportListFile(headers, results, exportType)
+                .then(function (file) {
+                  // and offer it for download
+                  app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `${fileName}.${file.extension}`, callback);
+                });
+            });
+        })
+        .catch(callback);
+    });
+  });
+}
+
 module.exports = {
   offerFileToDownload: offerFileToDownload,
-  parseMultipartRequest: parseMultipartRequest
+  parseMultipartRequest: parseMultipartRequest,
+  exportFilteredModelsList: exportFilteredModelsList
 };
