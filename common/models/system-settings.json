@@ -196,7 +196,7 @@
       "description": "Create a PDF file containing PNG images coming from SVG files",
       "http": {
         "verb": "post",
-        "path": "/svg-to-pdf"
+        "path": "/image-to-pdf"
       }
     },
     "getServerUTCDate": {
