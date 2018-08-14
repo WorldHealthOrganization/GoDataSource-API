@@ -334,7 +334,7 @@ const getReferencedValue = function (data, path) {
   if (/\[]/.test(path)) {
     // result must be an array
     result = [];
-    // ge position of the array marker
+    // get position of the array marker
     const arrayMarkerPosition = path.indexOf('[]');
     // get path to the array
     const arrayPath = path.substring(0, arrayMarkerPosition);
