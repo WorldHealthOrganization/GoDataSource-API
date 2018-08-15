@@ -4319,6 +4319,12 @@ module.exports = function (Outbreak) {
       location: 'location',
       riskLevel: 'riskLevel'
     };
+    let groupByOptionsLNGTokens = {
+      case: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+      location: 'LNG_ADDRESS_FIELD_LABEL_LOCATION',
+      riskLevel: 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL'
+    };
+
     groupResultsBy = _.get(filter, 'where.groupResultsBy', null);
     if (groupResultsBy !== null) {
       // groupResultsBy was sent; remove it from the filter as it shouldn't reach DB
@@ -4512,13 +4518,13 @@ module.exports = function (Outbreak) {
 
           // generate pdf document
           let doc = pdfUtils.createPdfDoc();
-          pdfUtils.addTitle(doc, `Contacts to be followed-up`);
+          pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_WITH_FOLLOWUPS_DETAILS'));
 
           // add information to the doc
           if (groupResultsBy) {
             // add title for the group
             Object.keys(groupedResults).forEach(function (groupIdentifier) {
-              pdfUtils.addTitle(doc, `Group ${groupIdentifier}`);
+              pdfUtils.addTitle(doc, `${dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_GROUP_TITLE')} ${dictionary.getTranslation(groupByOptionsLNGTokens[groupResultsBy])}: ${groupIdentifiersValues[groupIdentifier]}`, 18);
 
               // print contacts
               groupedResults[groupIdentifier].forEach(function (contact, index) {
@@ -4526,7 +4532,7 @@ module.exports = function (Outbreak) {
                 pdfUtils.createPersonProfile(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
 
                 // print follow-ups table
-                pdfUtils.addTitle(doc, `Follow-ups`);
+                pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE'), 16);
                 pdfUtils.createTableInPDFDocument(followUpsHeaders, contact.followUps, doc);
               })
             });
@@ -4537,7 +4543,7 @@ module.exports = function (Outbreak) {
               pdfUtils.createPersonProfile(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
 
               // print follow-ups table
-              pdfUtils.addTitle(doc, `Follow-ups`);
+              pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE'), 16);
               pdfUtils.createTableInPDFDocument(followUpsHeaders, contact.followUps, doc);
             })
           }

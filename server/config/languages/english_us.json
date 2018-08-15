@@ -902,7 +902,10 @@
       "LNG_PAGE_TITLE_LAB_RESULTS_DETAILS": "Lab Results Details",
       "LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE": "Lab Results Questionnaire",
       "LNG_PAGE_TITLE_CONTACT_DETAILS": "Contact Details",
-      "LNG_PAGE_TITLE_CONTACT_RELATIONSHIP": "Contact Relationship"
+      "LNG_PAGE_TITLE_CONTACT_RELATIONSHIP": "Contact Relationship",
+      "LNG_PAGE_TITLE_CONTACT_WITH_FOLLOWUPS_DETAILS": "Contact With Follow-ups",
+      "LNG_PAGE_CONTACT_WITH_FOLLOWUPS_GROUP_TITLE": "Group by",
+      "LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE": "Follow-ups"
     },
     "countries": {
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AFGHANISTAN": "Afghanistan",

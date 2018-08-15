@@ -349,6 +349,9 @@ const createPersonProfile = function (doc, person, displayValues, title, numberO
           }
         });
       }
+
+      // reset margin
+      doc.x = initialXMargin;
     } else {
       doc.text(`${fieldName}: ${displayValues ? person[fieldName] : '_'.repeat(25)}`, initialXMargin).moveDown();
     }
