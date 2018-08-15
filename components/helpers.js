@@ -650,6 +650,15 @@ const getFlatObject = function (object, prefix, humanFriendly) {
   return result;
 };
 
+/**
+ * Format a date string for display purpose
+ * @param dateString
+ * @returns {string}
+ */
+const getDateDisplayValue = function (dateString) {
+  return new Date(dateString).toISOString();
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -662,5 +671,6 @@ module.exports = {
   exportListFile: exportListFile,
   getReferencedValue: getReferencedValue,
   resolveModelForeignKeys: resolveModelForeignKeys,
-  getFlatObject: getFlatObject
+  getFlatObject: getFlatObject,
+  getDateDisplayValue: getDateDisplayValue
 };

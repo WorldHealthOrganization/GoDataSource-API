@@ -365,9 +365,11 @@ const createPersonProfile = function (doc, person, displayValues, title, numberO
  * @param headers Table headers
  * @param data Table data
  * @param document PDF document in which to add table
- * @param documentConfig
+ * @param documentConfig Optional configuration
  */
 function createTableInPDFDocument(headers, data, document, documentConfig) {
+  documentConfig = documentConfig || defaultDocumentConfiguration;
+
   const pdfTable = new PdfTable(document);
 
   // set default values for columns
@@ -412,7 +414,7 @@ function createTableInPDFDocument(headers, data, document, documentConfig) {
   });
 
   // for rows without reserved width, split remaining document width (doc width - margins - reserved width) between remaining headers
-  const defaultRowWidth = (documentConfig.widthForPageSize - 2 * defaultDocumentConfiguration.margin - reservedWidth) / (headers.length - noHeadersWithReservedWidth);
+  const defaultRowWidth = (documentConfig.widthForPageSize - 2 * documentConfig.margin - reservedWidth) / (headers.length - noHeadersWithReservedWidth);
 
   // add all headers
   headers.forEach(function (header) {

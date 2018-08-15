@@ -48,7 +48,7 @@ module.exports = function (Case) {
     'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
     'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
-    'addresses[].typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE',
+    'addresses[].typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
     'addresses[].country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
     'addresses[].city': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY',
     'addresses[].addressLine1': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1',

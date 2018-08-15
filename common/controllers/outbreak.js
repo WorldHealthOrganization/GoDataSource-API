@@ -4410,18 +4410,36 @@ module.exports = function (Outbreak) {
         // loop through the results and get the properties that will be exported;
         // also group the contacts if needed
         results.forEach(function (contact) {
-          // create contact representation to be printed;
+          // create contact representation to be printed
           contact.toPrint = {};
-          contactProperties.forEach(prop => contact.toPrint[prop] = contact[prop]);
+          // set empty string for null/undefined values
+          contactProperties.forEach(prop => contact.toPrint[prop] = typeof contact[prop] !== 'undefined' && contact[prop] !== null ? contact[prop] : '');
+
+          // if there are values that need to be parsed, parse them (eg date fields)
+          app.models.contact.fieldsToParse.forEach(function (field) {
+            let contactFieldValue = genericHelpers.getReferencedValue(contact.toPrint, field);
+
+            // data field might be in an array; for that case we need to parse each array value
+            if (Array.isArray(contactFieldValue)) {
+              contactFieldValue.forEach(retrievedValue => _.set(contact.toPrint, retrievedValue.exactPath, app.models.contact.fieldToValueParsersMap[field](retrievedValue.value)))
+            } else if (contactFieldValue.value) {
+              _.set(contact.toPrint, contactFieldValue.exactPath, app.models.contact.fieldToValueParsersMap[field](contactFieldValue.value));
+            }
+          });
+
           // if addresses need to be added keep only the residence location
           if (includeContactAddress) {
             contact.toPrint.addresses = [contact.toPrint.addresses.find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE')];
           }
           // for the fields that use reference data
           app.models.contact.referenceDataFields.forEach(function (field) {
-            if (contact.toPrint[field]) {
-              // get translation of the reference data
-              contact.toPrint[field] = dictionary.getTranslation(contact.toPrint[field]);
+            let contactFieldValue = genericHelpers.getReferencedValue(contact.toPrint, field);
+
+            // reference data field might be in an array; for that case we need to translate each array value
+            if (Array.isArray(contactFieldValue)) {
+              contactFieldValue.forEach(retrievedValue => _.set(contact.toPrint, retrievedValue.exactPath, dictionary.getTranslation(retrievedValue.value)))
+            } else if (contactFieldValue.value) {
+              _.set(contact.toPrint, contactFieldValue.exactPath, dictionary.getTranslation(contactFieldValue.value));
             }
           });
           // translate labels

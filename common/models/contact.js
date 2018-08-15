@@ -1,5 +1,7 @@
 'use strict';
 
+const app = require('../../server/server');
+
 module.exports = function (Contact) {
   // set flag to not get controller
   Contact.hasController = false;
@@ -23,7 +25,7 @@ module.exports = function (Contact) {
     'deceased': 'LNG_CONTACT_FIELD_LABEL_DECEASED',
     'visualId': 'LNG_CONTACT_FIELD_LABEL_VISUAL_ID',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
-    'addresses[].typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE',
+    'addresses[].typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
     'addresses[].country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
     'addresses[].city': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY',
     'addresses[].addressLine1': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1',
@@ -45,6 +47,14 @@ module.exports = function (Contact) {
   };
 
   Contact.referenceDataFields = Object.keys(Contact.referenceDataFieldsToCategoryMap);
+
+  // add parsers for field values that require parsing when displayed (eg. in pdf)
+  Contact.fieldToValueParsersMap = {
+    dob: app.utils.helpers.getDateDisplayValue,
+    'addresses[].date': app.utils.helpers.getDateDisplayValue
+  };
+
+  Contact.fieldsToParse = Object.keys(Contact.fieldToValueParsersMap);
 
   Contact.foreignKeyResolverMap = {
     'addresses[].locationId': {
