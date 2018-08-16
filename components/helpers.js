@@ -220,6 +220,88 @@ const getXmlFriendlyJson = function (jsonObj) {
  */
 const exportListFile = function (headers, dataSet, fileType) {
 
+  /**
+   * Build headers map in a way compatible with files that support hierarchical structures (XML, JSON)
+   * @param headers
+   */
+  function buildHeadersMap(headers) {
+    // define a container for headers map
+    const jsonHeadersMap = {};
+    // go trough the headers
+    headers.forEach(function (header) {
+      // get property level separator
+      const separatorIndex = header.id.indexOf('.');
+      // if the separator is found
+      if (separatorIndex !== -1) {
+        // get the property
+        const property = header.id.substring(0, separatorIndex);
+        // get the rest of the path
+        const leftPath = header.id.substring(separatorIndex + 1);
+        // if the property was not defined before
+        if (!jsonHeadersMap[property]) {
+          // define it
+          jsonHeadersMap[property] = {};
+        }
+        // remap sub-levels
+        jsonHeadersMap[property] = Object.assign({}, jsonHeadersMap[property], buildHeadersMap([{
+          id: leftPath,
+          header: header.header
+        }]));
+      } else {
+        // simple property (one level) map it directly
+        jsonHeadersMap[header.id] = header.header;
+      }
+    });
+    return jsonHeadersMap;
+  }
+
+  /**
+   * (deep) Remap object properties
+   * @param source
+   * @param headersMap
+   */
+  function objectRemap(source, headersMap) {
+    // define result
+    const result = {};
+    // go through the headers map
+    Object.keys(headersMap).forEach(function (header) {
+      // if the map is for an array of complex elements
+      if (header.endsWith('[]') && typeof headersMap[header] === 'object') {
+        // remove array marker
+        const _header = header.replace('[]', '');
+        // result should be an array
+        result[headersMap[_header]] = [];
+        // if there is data in the source object
+        if (source[_header]) {
+          // go through each element
+          source[_header].forEach(function (item) {
+            // remap it and store it in the result
+            result[headersMap[_header]].push(objectRemap(item, headersMap[header]));
+          });
+        } else {
+          // just copy empty element
+          result[headersMap[_header]] = source[_header];
+        }
+        // type is an object
+      } else if (typeof headersMap[header] === 'object') {
+        // if the element is present in the source
+        if (source[header]) {
+          // remap it and add it in the result
+          result[headersMap[header]] = objectRemap(source[header], headersMap[header]);
+        } else {
+          // just copy empty element in the result
+          result[headersMap[header]] = source[header];
+        }
+        // simple element that was not yet mapped in the result (this is important as we may have labels for properties
+        // like "addresses" and "addresses[]" and we don't want simple types to overwrite complex types
+      } else if (result[headersMap[header]] === undefined) {
+        // copy the element in the result
+        result[headersMap[header]] = source[header];
+      }
+    });
+    return result;
+  }
+
   // define the file
   const file = {
     data: {},
@@ -238,11 +320,9 @@ const exportListFile = function (headers, dataSet, fileType) {
       case 'json':
         file.mimeType = 'application/json';
         // build headers map
-        const jsonHeadersMap = headers.reduce(function (accumulator, currentValue) {
-          accumulator[currentValue.id] = currentValue.header;
-          return accumulator;
-        }, {});
-        file.data = JSON.stringify(remapProperties(dataSet, jsonHeadersMap),
+        const jsonHeadersMap = buildHeadersMap(headers);
+        const remappedJsonDataset = dataSet.map(item => objectRemap(item, jsonHeadersMap));
+        file.data = JSON.stringify(remappedJsonDataset,
           // replace undefined with null so the JSON will contain all properties
           function (key, value) {
             if (value === undefined) {
@@ -256,12 +336,14 @@ const exportListFile = function (headers, dataSet, fileType) {
         file.mimeType = 'text/xml';
         const builder = new xml2js.Builder();
         // build headers map
-        const xmlHeadersMap = headers.reduce(function (accumulator, currentValue) {
-          // XML needs a repeating "container" property in order to simulate an array
-          accumulator[currentValue.id] = `entry.${currentValue.header}`;
-          return accumulator;
-        }, {});
-        file.data = builder.buildObject(getXmlFriendlyJson(remapProperties(dataSet, xmlHeadersMap)));
+        const xmlHeadersMap = buildHeadersMap(headers);
+        const remappedXmlDataset = dataSet.map(function (item) {
+          return {
+            // XML does not have an array data type, repeating an "entry" will simulate an array
+            entry: objectRemap(item, xmlHeadersMap)
+          };
+        });
+        file.data = builder.buildObject(getXmlFriendlyJson(remappedXmlDataset));
         resolve(file);
         break;
       case 'csv':
@@ -547,7 +629,7 @@ const getFlatObject = function (object, prefix, humanFriendly) {
       // build property name
       propertyName = prefix;
       if (humanFriendly) {
-          propertyName = `${propertyName} ${property}`.trim();
+        propertyName = `${propertyName} ${property}`.trim();
       } else {
         if (propertyName.length) {
           propertyName = `${propertyName}.${property}`;

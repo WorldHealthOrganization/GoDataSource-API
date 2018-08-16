@@ -539,6 +539,7 @@
       "LNG_CASE_FIELD_LABEL_GENDER": "日本の Gender",
       "LNG_CASE_FIELD_LABEL_CLASSIFICATION": "日本の Classification",
       "LNG_CASE_FIELD_LABEL_OCCUPATION": "日本の Occupation",
+      "LNG_CASE_FIELD_LABEL_DOCUMENTS": "日本の Documents",
       "LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE": "日本の Document Type",
       "LNG_CASE_FIELD_LABEL_RISK_LEVEL": "日本の Risk Level",
       "LNG_CASE_FIELD_LABEL_ISOLATION_DATES": "日本の Isolation Dates",
