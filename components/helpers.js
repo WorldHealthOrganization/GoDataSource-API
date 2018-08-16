@@ -520,13 +520,7 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
 
       // also resolve reference data if needed
       if (resolveReferenceData) {
-        // for the fields that use reference data (special type of foreign key)
-        Model.referenceDataFields.forEach(function (field) {
-          if (result[field]) {
-            // get translation of the reference data
-            result[field] = languageDictionary.getTranslation(result[field]);
-          }
-        });
+        resolveModelReferenceData(result, Model, languageDictionary);
       }
     });
 
@@ -659,6 +653,51 @@ const getDateDisplayValue = function (dateString) {
   return new Date(dateString).toISOString();
 };
 
+/**
+ * Resolve reference data fields;
+ * Note: The model instance JSON sent is updated
+ * @param modelInstanceJSON JSON representation of a model instance
+ * @param Model
+ * @param languageDictionary
+ */
+const resolveModelReferenceData = function (modelInstanceJSON, Model, languageDictionary) {
+  if (Model.referenceDataFields) {
+    // for the fields that use reference data
+    Model.referenceDataFields.forEach(function (field) {
+      let fieldValue = getReferencedValue(modelInstanceJSON, field);
+
+      // reference data field might be in an array; for that case we need to translate each array value
+      if (Array.isArray(fieldValue)) {
+        fieldValue.forEach(retrievedValue => _.set(modelInstanceJSON, retrievedValue.exactPath, languageDictionary.getTranslation(retrievedValue.value)))
+      } else if (fieldValue.value) {
+        _.set(modelInstanceJSON, fieldValue.exactPath, languageDictionary.getTranslation(fieldValue.value));
+      }
+    });
+  }
+};
+
+/**
+ * Parse fields values
+ * Note: The model instance JSON sent is updated
+ * @param modelInstanceJSON JSON representation of a model instance
+ * @param Model
+ */
+const parseModelFieldValues = function (modelInstanceJSON, Model) {
+  if (Model.fieldsToParse && Model.fieldToValueParsersMap) {
+    // if there are values that need to be parsed, parse them (eg date fields)
+    Model.fieldsToParse.forEach(function (field) {
+      let fieldValue = getReferencedValue(modelInstanceJSON, field);
+
+      // field might be in an array; for that case we need to parse each array value
+      if (Array.isArray(fieldValue)) {
+        fieldValue.forEach(retrievedValue => _.set(modelInstanceJSON, retrievedValue.exactPath, Model.fieldToValueParsersMap[field](retrievedValue.value)))
+      } else if (fieldValue.value) {
+        _.set(modelInstanceJSON, fieldValue.exactPath, Model.fieldToValueParsersMap[field](fieldValue.value));
+      }
+    });
+  }
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -672,5 +711,7 @@ module.exports = {
   getReferencedValue: getReferencedValue,
   resolveModelForeignKeys: resolveModelForeignKeys,
   getFlatObject: getFlatObject,
-  getDateDisplayValue: getDateDisplayValue
+  getDateDisplayValue: getDateDisplayValue,
+  resolveModelReferenceData: resolveModelReferenceData,
+  parseModelFieldValues: parseModelFieldValues
 };

@@ -4392,160 +4392,132 @@ module.exports = function (Outbreak) {
         }
 
         // get contact properties to be printed
-        let contactProperties = ['firstName', 'middleName', 'lastName', 'dob', 'age', 'gender', 'riskLevel'];
+        let contactProperties = app.models.contact.printFieldsinOrder;
         // check for sent flags
-        if (includeContactAddress) {
-          contactProperties.push('addresses');
+        if (!includeContactAddress) {
+          contactProperties.splice(contactProperties.indexOf('addresses'), 1);
         }
-        if (includeContactPhoneNumber) {
-          contactProperties.push('phoneNumber');
+        if (!includeContactPhoneNumber) {
+          contactProperties.splice(contactProperties.indexOf('phoneNumber'), 1);
         }
 
-        // group results if needed; Doing this after getting the dictionary as some group identifiers require translations
-        // initialize map of group identifiers values
-        let groupIdentifiersValues = {};
-        // initialize grouped results
-        let groupedResults = {};
+        // resolve models foreign keys (locationId in addresses)
+        // resolve reference data fields
+        genericHelpers.resolveModelForeignKeys(app, app.models.contact, results, dictionary, true)
+          .then(function (contactsList) {
+            // group results if needed; Doing this after getting the dictionary as some group identifiers require translations
+            // initialize map of group identifiers values
+            let groupIdentifiersValues = {};
+            // initialize grouped results
+            let groupedResults = {};
 
-        // loop through the results and get the properties that will be exported;
-        // also group the contacts if needed
-        results.forEach(function (contact) {
-          // create contact representation to be printed
-          contact.toPrint = {};
-          // set empty string for null/undefined values
-          contactProperties.forEach(prop => contact.toPrint[prop] = typeof contact[prop] !== 'undefined' && contact[prop] !== null ? contact[prop] : '');
+            // get usual place of residence translation as we will use it further
+            let usualPlaceOfResidence = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
 
-          // if there are values that need to be parsed, parse them (eg date fields)
-          app.models.contact.fieldsToParse.forEach(function (field) {
-            let contactFieldValue = genericHelpers.getReferencedValue(contact.toPrint, field);
+            // loop through the results and get the properties that will be exported;
+            // also group the contacts if needed
+            contactsList.forEach(function (contact) {
+              genericHelpers.parseModelFieldValues(contact, app.models.contact);
 
-            // data field might be in an array; for that case we need to parse each array value
-            if (Array.isArray(contactFieldValue)) {
-              contactFieldValue.forEach(retrievedValue => _.set(contact.toPrint, retrievedValue.exactPath, app.models.contact.fieldToValueParsersMap[field](retrievedValue.value)))
-            } else if (contactFieldValue.value) {
-              _.set(contact.toPrint, contactFieldValue.exactPath, app.models.contact.fieldToValueParsersMap[field](contactFieldValue.value));
-            }
-          });
+              // create contact representation to be printed
+              contact.toPrint = {};
+              // set empty string for null/undefined values
+              contactProperties.forEach(prop => contact.toPrint[prop] = typeof contact[prop] !== 'undefined' && contact[prop] !== null ? contact[prop] : '');
 
-          // if addresses need to be added keep only the residence location
-          if (includeContactAddress) {
-            contact.toPrint.addresses = [contact.toPrint.addresses.find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE')];
-          }
-          // for the fields that use reference data
-          app.models.contact.referenceDataFields.forEach(function (field) {
-            let contactFieldValue = genericHelpers.getReferencedValue(contact.toPrint, field);
+              // if addresses need to be added keep only the residence
+              // Note: the typeId was already translated so need to check against the translated value
+              if (includeContactAddress) {
+                contact.toPrint.addresses = [contact.toPrint.addresses.find(address => address.typeId === usualPlaceOfResidence)];
+              }
 
-            // reference data field might be in an array; for that case we need to translate each array value
-            if (Array.isArray(contactFieldValue)) {
-              contactFieldValue.forEach(retrievedValue => _.set(contact.toPrint, retrievedValue.exactPath, dictionary.getTranslation(retrievedValue.value)))
-            } else if (contactFieldValue.value) {
-              _.set(contact.toPrint, contactFieldValue.exactPath, dictionary.getTranslation(contactFieldValue.value));
-            }
-          });
-          // translate labels
-          contact.toPrint = helpers.translateFieldLabels(contact.toPrint, 'contact', contextUser.languageId, dictionary);
+              // translate labels
+              contact.toPrint = helpers.translateFieldLabels(contact.toPrint, 'contact', contextUser.languageId, dictionary);
 
-          // check if the results need to be grouped
-          if (groupResultsBy) {
-            // get identifier for grouping
-            let groupIdentifier;
-            switch (groupResultsBy) {
-              case groupByOptions.case:
-                // get case entry in the contact relationship
-                let caseItem = contact.relationships[0].persons.find(person => person.type === 'case');
-                groupIdentifier = caseItem.id;
+              // check if the results need to be grouped
+              if (groupResultsBy) {
+                // get identifier for grouping
+                let groupIdentifier;
+                switch (groupResultsBy) {
+                  case groupByOptions.case:
+                    // get case entry in the contact relationship
+                    let caseItem = contact.relationships[0].persons.find(person => person.type === 'case');
+                    groupIdentifier = caseItem.id;
 
-                // get identifier value only if the value was not previously calculated for another contact
-                if (!groupIdentifiersValues[groupIdentifier]) {
-                  let caseModel = contact.relationships[0].people[0];
-                  groupIdentifiersValues[groupIdentifier] = app.models.person.getDisplayName(caseModel);
+                    // get identifier value only if the value was not previously calculated for another contact
+                    if (!groupIdentifiersValues[groupIdentifier]) {
+                      let caseModel = contact.relationships[0].people[0];
+                      groupIdentifiersValues[groupIdentifier] = app.models.person.getDisplayName(caseModel);
+                    }
+                    break;
+                  case groupByOptions.location:
+                    // get contact residence location
+                    contact.addresses = contact.addresses || [];
+                    let residenceLocation = contact.addresses.find(address => address.typeId === usualPlaceOfResidence);
+                    groupIdentifier = residenceLocation ? residenceLocation.locationId : null;
+
+                    // get identifier value only if the value was not previously calculated for another contact
+                    if (!groupIdentifiersValues[groupIdentifier]) {
+                      // for locationId the location name was already retrieved
+                      groupIdentifiersValues[groupIdentifier] = groupIdentifier;
+                    }
+                    break;
+                  case groupByOptions.riskLevel:
+                    groupIdentifier = contact.riskLevel;
+
+                    // get identifier value only if the value was not previously calculated for another contact
+                    if (!groupIdentifiersValues[groupIdentifier]) {
+                      // for risk level get reference data translation
+                      groupIdentifiersValues[groupIdentifier] = dictionary.getTranslation(groupIdentifier);
+                    }
+                    break;
                 }
-                break;
-              case groupByOptions.location:
-                // get contact residence location
-                contact.addresses = contact.addresses || [];
-                let residenceLocation = contact.addresses.find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
-                groupIdentifier = residenceLocation ? residenceLocation.locationId : null;
 
-                // get identifier value only if the value was not previously calculated for another contact
-                if (!groupIdentifiersValues[groupIdentifier]) {
-                  // for locationId we need to get the location; Adding a promise in the map to get the location name
-                  // the group Identifiers Values will be overwritten when the promise is resolved
-                  groupIdentifiersValues[groupIdentifier] = groupIdentifier ?
-                    // get location name
-                    app.models.location
-                      .findById(groupIdentifier)
-                      .then(function (location) {
-                        // initialize result
-                        let result;
-
-                        if (!location) {
-                          app.logger.error(`Location with ID ${groupIdentifier} for Contact ${contact.id} was not found in DB`);
-                          result = `LOCATION_NOT_FOUND (${groupIdentifier})`;
-                        } else {
-                          result = location.name;
-                        }
-
-                        // overwrite the group Identifiers Values entry
-                        groupIdentifiersValues[groupIdentifier] = result;
-
-                        return result;
-                      }) :
-                    // for null there is no need to make a request
-                    null
+                // intialize group entry in results if not already initialized
+                if (!groupedResults[groupIdentifier]) {
+                  groupedResults[groupIdentifier] = [];
                 }
-                break;
-              case groupByOptions.riskLevel:
-                groupIdentifier = contact.riskLevel;
 
-                // get identifier value only if the value was not previously calculated for another contact
-                if (!groupIdentifiersValues[groupIdentifier]) {
-                  // for risk level get reference data translation
-                  groupIdentifiersValues[groupIdentifier] = dictionary.getTranslation(groupIdentifier);
-                }
-                break;
-            }
-
-            // intialize group entry in results if not already initialized
-            if (!groupedResults[groupIdentifier]) {
-              groupedResults[groupIdentifier] = [];
-            }
-
-            // add contact in group
-            groupedResults[groupIdentifier].push(contact);
-          }
-        });
-
-        /**
-         * Create PDF document and export it
-         * @param callback
-         */
-        function createDocAndExport() {
-          // initialize list of follow-up properties to be shown in table
-          let followUpProperties = ['date', 'performed'];
-          // define a list of follow-up table headers
-          let followUpsHeaders = [];
-          // headers come from follow-up models;
-          followUpProperties.forEach(function (propertyName) {
-            followUpsHeaders.push({
-              id: propertyName,
-              // use correct label translation for user language
-              header: dictionary.getTranslation(app.models.followUp.fieldLabelsMap[propertyName])
+                // add contact in group
+                groupedResults[groupIdentifier].push(contact);
+              }
             });
-          });
 
-          // generate pdf document
-          let doc = pdfUtils.createPdfDoc();
-          pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_WITH_FOLLOWUPS_DETAILS'));
+            // initialize list of follow-up properties to be shown in table
+            let followUpProperties = ['date', 'performed'];
+            // define a list of follow-up table headers
+            let followUpsHeaders = [];
+            // headers come from follow-up models;
+            followUpProperties.forEach(function (propertyName) {
+              followUpsHeaders.push({
+                id: propertyName,
+                // use correct label translation for user language
+                header: dictionary.getTranslation(app.models.followUp.fieldLabelsMap[propertyName])
+              });
+            });
 
-          // add information to the doc
-          if (groupResultsBy) {
-            // add title for the group
-            Object.keys(groupedResults).forEach(function (groupIdentifier) {
-              pdfUtils.addTitle(doc, `${dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_GROUP_TITLE')} ${dictionary.getTranslation(groupByOptionsLNGTokens[groupResultsBy])}: ${groupIdentifiersValues[groupIdentifier]}`, 18);
+            // generate pdf document
+            let doc = pdfUtils.createPdfDoc();
+            pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_WITH_FOLLOWUPS_DETAILS'));
 
+            // add information to the doc
+            if (groupResultsBy) {
+              // add title for the group
+              Object.keys(groupedResults).forEach(function (groupIdentifier) {
+                pdfUtils.addTitle(doc, `${dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_GROUP_TITLE')} ${dictionary.getTranslation(groupByOptionsLNGTokens[groupResultsBy])}: ${groupIdentifiersValues[groupIdentifier]}`, 18);
+
+                // print contacts
+                groupedResults[groupIdentifier].forEach(function (contact, index) {
+                  // print profile
+                  pdfUtils.createPersonProfile(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
+
+                  // print follow-ups table
+                  pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE'), 16);
+                  pdfUtils.createTableInPDFDocument(followUpsHeaders, contact.followUps, doc);
+                })
+              });
+            } else {
               // print contacts
-              groupedResults[groupIdentifier].forEach(function (contact, index) {
+              contactsList.forEach(function (contact, index) {
                 // print profile
                 pdfUtils.createPersonProfile(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
 
@@ -4553,44 +4525,24 @@ module.exports = function (Outbreak) {
                 pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE'), 16);
                 pdfUtils.createTableInPDFDocument(followUpsHeaders, contact.followUps, doc);
               })
-            });
-          } else {
-            // print contacts
-            results.forEach(function (contact, index) {
-              // print profile
-              pdfUtils.createPersonProfile(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
-
-              // print follow-ups table
-              pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE'), 16);
-              pdfUtils.createTableInPDFDocument(followUpsHeaders, contact.followUps, doc);
-            })
-          }
-
-          let mimeType = 'application/pdf';
-
-          // convert document stream to buffer
-          genericHelpers.streamToBuffer(doc, function (error, file) {
-            if (error) {
-              return callback(error);
             }
-            // and offer it for download
-            app.utils.remote.helpers.offerFileToDownload(file, mimeType, `Contact Line List.pdf`, callback);
-          });
 
-          // finalize document
-          doc.end();
-        }
+            let mimeType = 'application/pdf';
 
-        // for group by location we need to get the locations
-        // promises are already created
-        if (groupResultsBy && groupResultsBy === groupByOptions.location) {
-          Promise.all(groupIdentifiersValues)
-            .then(function () {
-              createDocAndExport();
+            // convert document stream to buffer
+            genericHelpers.streamToBuffer(doc, function (error, file) {
+              if (error) {
+                callback(error);
+              } else {
+                // and offer it for download
+                app.utils.remote.helpers.offerFileToDownload(file, mimeType, `Contact Line List.pdf`, callback);
+              }
             });
-        } else {
-          createDocAndExport();
-        }
+
+            // finalize document
+            doc.end();
+          })
+          .catch(callback);
       });
     })
   };

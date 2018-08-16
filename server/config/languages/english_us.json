@@ -640,7 +640,8 @@
       "LNG_CONTACT_FIELD_LABEL_LAST_NAME": "Last Name",
       "LNG_CONTACT_FIELD_LABEL_DATE_DECEASED": "Date of Decease",
       "LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER": "Document Number",
-      "LNG_CONTACT_FIELD_LABEL_VISUAL_ID": "Visual ID"
+      "LNG_CONTACT_FIELD_LABEL_VISUAL_ID": "Visual ID",
+      "LNG_CONTACT_FIELD_LABEL_DOCUMENTS": "Documents"
     },
     "uiContactsListPage": {
       "LNG_PAGE_LIST_CONTACTS_TITLE": "Contacts"

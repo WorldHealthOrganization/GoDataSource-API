@@ -1,6 +1,7 @@
 'use strict';
 
 const app = require('../../server/server');
+const dateParser = app.utils.helpers.getDateDisplayValue;
 
 module.exports = function (Contact) {
   // set flag to not get controller
@@ -14,6 +15,7 @@ module.exports = function (Contact) {
     'occupation': 'LNG_CONTACT_FIELD_LABEL_OCCUPATION',
     'age': 'LNG_CONTACT_FIELD_LABEL_AGE',
     'dob': 'LNG_CONTACT_FIELD_LABEL_DOB',
+    'documents': 'LNG_CONTACT_FIELD_LABEL_DOCUMENTS',
     'documents[].type': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE',
     'documents[].number': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER',
     'dateDeceased': 'LNG_CONTACT_FIELD_LABEL_DATE_DECEASED',
@@ -50,11 +52,30 @@ module.exports = function (Contact) {
 
   // add parsers for field values that require parsing when displayed (eg. in pdf)
   Contact.fieldToValueParsersMap = {
-    dob: app.utils.helpers.getDateDisplayValue,
-    'addresses[].date': app.utils.helpers.getDateDisplayValue
+    dob: dateParser,
+    dateDeceased: dateParser,
+    'addresses[].date': dateParser,
+    'followUps[].date': dateParser
   };
-
   Contact.fieldsToParse = Object.keys(Contact.fieldToValueParsersMap);
+
+  // contact fields to print
+  Contact.printFieldsinOrder = [
+    'firstName',
+    'middleName',
+    'lastName',
+    'gender',
+    'dob',
+    'age',
+    'occupation',
+    'phoneNumber',
+    'addresses',
+    'documents',
+    'riskLevel',
+    'riskReason',
+    'dateDeceased',
+    'deceased'
+  ];
 
   Contact.foreignKeyResolverMap = {
     'addresses[].locationId': {
