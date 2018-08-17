@@ -201,6 +201,8 @@ module.exports = function (ImportableFile) {
       file = files.file;
       modelName = fields.model;
       decryptPassword = null;
+
+      // if the decrypt password is valid, use it
       if (typeof fields.decryptPassword === 'string' && fields.decryptPassword.length) {
         decryptPassword = fields.decryptPassword;
       }

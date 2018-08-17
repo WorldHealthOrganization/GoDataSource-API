@@ -194,6 +194,7 @@ module.exports = function (ImportableFile) {
         details: `unsupported extension ${extension}. Supported file extensions: ${ImportableFile.supportedFileExtensions.join(', ')}`
       }));
     }
+
     // use appropriate content handler for file type
     let getHeaders;
     switch (extension) {
@@ -217,6 +218,7 @@ module.exports = function (ImportableFile) {
         return callback(error);
       }
 
+      // decrypt file if needed
       let decryptFile;
       if (decryptPassword) {
         decryptFile = app.utils.aesCrypto.decrypt(decryptPassword, buffer);
