@@ -7,6 +7,7 @@ const rr = require('rr');
 const templateParser = require('./../../components/templateParser');
 const referenceDataParser = require('./../../components/referenceDataParser');
 const genericHelpers = require('../../components/helpers');
+const async = require('async');
 
 module.exports = function (Outbreak) {
 
@@ -22,6 +23,7 @@ module.exports = function (Outbreak) {
     'prototype.__delete__contacts',
     'prototype.__delete__contacts__followUps',
     'prototype.__delete__contacts__relationships',
+    'prototype.__delete__events',
     'prototype.__create__clusters__relationships',
     'prototype.__delete__clusters__relationships',
     'prototype.__findById__clusters__relationships',
@@ -34,13 +36,22 @@ module.exports = function (Outbreak) {
     'prototype.__create__followUps',
     'prototype.__delete__followUps',
     'prototype.__updateById__followUps',
-    'prototype.__destroyById__followUps'
+    'prototype.__destroyById__followUps',
+    'prototype.__create__people',
+    'prototype.__delete__people',
+    'prototype.__findById__people',
+    'prototype.__updateById__people',
+    'prototype.__destroyById__people'
   ]);
 
   // attach search by relation property behavior on get contacts
   app.utils.remote.searchByRelationProperty.attachOnRemotes(Outbreak, [
     'prototype.__get__contacts',
-    'prototype.__get__cases'
+    'prototype.__get__cases',
+    'prototype.__get__events',
+    'prototype.findCaseRelationships',
+    'prototype.findContactRelationships',
+    'prototype.findEventRelationships'
   ]);
 
   /**
@@ -97,7 +108,7 @@ module.exports = function (Outbreak) {
 
       // add support for filter parent
       const results = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, filter);
-      const contextUser = options.remotingContext.req.authData.user;
+      const contextUser = app.utils.remote.getUserFromOptions(options);
       // load user language dictionary
       app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
         // handle errors
@@ -117,7 +128,7 @@ module.exports = function (Outbreak) {
             headers.push({
               id: propertyName,
               // use correct label translation for user language
-              header: app.models.language.getFieldTranslationFromDictionary(app.models.case.fieldLabelsMap[propertyName], contextUser.languageId, dictionary)
+              header: dictionary.getTranslation(app.models.case.fieldLabelsMap[propertyName])
             });
           }
         });
@@ -829,6 +840,31 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.generateFollowups = function (data, options, callback) {
+    // sanity checks
+    let invalidParams = {};
+    if (this.periodOfFollowup <= 0) {
+      invalidParams.periodOfFollowup = this.periodOfFollowup;
+    }
+    if (this.frequencyOfFollowUp <= 0) {
+      invalidParams.frequencyOfFollowUp = this.frequencyOfFollowUp;
+    }
+    if (this.frequencyOfFollowUpPerDay <= 0) {
+      invalidParams.frequencyOfFollowUpPerDay = this.frequencyOfFollowUpPerDay;
+    }
+
+    // stop follow up generation, if sanity checks failed
+    let invalidParamsNames = Object.keys(invalidParams);
+    if (invalidParamsNames.length) {
+      return callback(
+        app.utils.apiError.getError(
+          'INVALID_GENERATE_FOLLOWUP_PARAMS',
+          {
+            details: `Following outbreak params: [${invalidParamsNames.join(',')}] should be greater than 0`
+          }
+        )
+      )
+    }
+
     // if no followup period was sent in request, assume its just for one day
     data = data || {};
     data.followUpPeriod = data.followUpPeriod || 1;
@@ -1194,7 +1230,7 @@ module.exports = function (Outbreak) {
             include: ['relationships'],
             where: {
               outbreakId: outbreakId,
-              createdAt: {
+              dateOfReporting: {
                 gte: now.setDate(now.getDate() - noDaysNewContacts)
               }
             }
@@ -1348,7 +1384,7 @@ module.exports = function (Outbreak) {
     helpers.countContactsByFollowUpFlag({
       outbreakId: this.id,
       followUpFlag: 'performed',
-      resultProperty: 'contactsSeen'
+      resultProperty: 'contactsSeenCount'
     }, filter, callback);
   };
 
@@ -1362,7 +1398,7 @@ module.exports = function (Outbreak) {
     helpers.countContactsByFollowUpFlag({
       outbreakId: this.id,
       followUpFlag: 'lostToFollowUp',
-      resultProperty: 'contactsLostToFollowup'
+      resultProperty: 'contactsLostToFollowupCount'
     }, filter, callback);
   };
 
@@ -1382,7 +1418,8 @@ module.exports = function (Outbreak) {
     // start building a result
     const result = {
       newCases: 0,
-      total: 0
+      total: 0,
+      caseIDs: []
     };
 
     // use a cases index to make sure we don't count a case multiple times
@@ -1404,9 +1441,10 @@ module.exports = function (Outbreak) {
               if (!casesIndex[person.id]) {
                 casesIndex[person.id] = true;
                 result.total++;
-                // check if the case is new (date of symptoms is later than the threshold date)
-                if ((new Date(person.dateOfOnset)) >= newCasesFromDate) {
+                // check if the case is new (date of reporting is later than the threshold date)
+                if ((new Date(person.dateOfReporting)) >= newCasesFromDate) {
                   result.newCases++;
+                  result.caseIDs.push(person.id);
                 }
               }
             })
@@ -1508,7 +1546,7 @@ module.exports = function (Outbreak) {
           scope: {
             where: {
               type: 'contact',
-              createdAt: {
+              dateOfReporting: {
                 gte: now.setDate(now.getDate() - noDaysNewContacts)
               }
             },
@@ -1877,13 +1915,13 @@ module.exports = function (Outbreak) {
     // get outbreakId
     let outbreakId = this.id;
 
-    // get all cases that were created sooner or have 'dateBecomeCase' sooner than 'noDaysAmongContacts' ago
+    // get all cases that were reported sooner or have 'dateBecomeCase' sooner than 'noDaysAmongContacts' ago
     app.models.case.find(app.utils.remote
       .mergeFilters({
         where: {
           outbreakId: outbreakId,
           or: [{
-            createdAt: {
+            dateOfReporting: {
               gte: xDaysAgo
             }
           }, {
@@ -2372,7 +2410,7 @@ module.exports = function (Outbreak) {
         outbreakId: outbreakId,
         or: [{
           and: [{
-            createdAt: {
+            dateOfReporting: {
               // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
               between: periodInterval.slice()
             },
@@ -2387,7 +2425,7 @@ module.exports = function (Outbreak) {
           }
         }]
       },
-      order: 'createdAt ASC'
+      order: 'dateOfReporting ASC'
     };
 
     // initialize result
@@ -2412,8 +2450,8 @@ module.exports = function (Outbreak) {
         });
 
         cases.forEach(function (item) {
-          // get case date; it's either dateBecomeCase or createdAt
-          let caseDate = item.dateBecomeCase || item.createdAt;
+          // get case date; it's either dateBecomeCase or dateOfReporting
+          let caseDate = item.dateBecomeCase || item.dateOfReporting;
           // get period in which the case needs to be included
           let casePeriodInterval;
           switch (periodType) {
@@ -2756,6 +2794,529 @@ module.exports = function (Outbreak) {
     }
     return next();
   });
+
+  /**
+   * List of contacts/cases where inconsistencies were found between dates.
+   * Besides the contact/case properties each entry will also contain an 'inconsistencies' property (array of inconsistencies)
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.listInconsistenciesInKeyDates = function (filter, callback) {
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // get all the followups for the filtered period
+    app.models.person.find(app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId,
+          // getting only the cases and contacts as there are no inconsistencies to check for events
+          or: [{
+            // for contacts only get the ones where dateDeceased < date of birth; this check also applies for cases
+            $where: 'this.dateDeceased < this.dob',
+            type: {
+              in: ['contact', 'case']
+            }
+          }, {
+            // for case: compare against dob
+            type: 'case',
+            // first check for is dob exists to not make the other checks
+            dob: {
+              neq: null
+            },
+            or: [{
+              // dateOfInfection < date of birth
+              $where: 'this.dateOfInfection < this.dob',
+            }, {
+              // dateOfOnset < date of birth
+              $where: 'this.dateOfOnset < this.dob',
+            }, {
+              // dateBecomeCase < date of birth
+              $where: 'this.dateBecomeCase < this.dob',
+            }, {
+              // dateOfOutcome < date of birth
+              $where: 'this.dateOfOutcome < this.dob',
+            }]
+          }, {
+            // for case: compare against dateDeceased
+            type: 'case',
+            // first check for is dob exists to not make the other checks
+            dateDeceased: {
+              neq: null
+            },
+            or: [{
+              // dateOfInfection > dateDeceased
+              $where: 'this.dateOfInfection > this.dateDeceased',
+            }, {
+              // dateOfOnset > dateDeceased
+              $where: 'this.dateOfOnset > this.dateDeceased',
+            }, {
+              // dateBecomeCase > dateDeceased
+              $where: 'this.dateBecomeCase > this.dateDeceased',
+            }, {
+              // dateOfOutcome > dateDeceased
+              $where: 'this.dateOfOutcome > this.dateDeceased',
+            }]
+          }, {
+            // for case: compare dateOfInfection, dateOfOnset, dateBecomeCase, dateOfOutcome
+            type: 'case',
+            or: [{
+              // dateOfInfection > dateOfOnset
+              $where: 'this.dateOfInfection > this.dateOfOnset',
+            }, {
+              // dateOfInfection > dateBecomeCase
+              $where: 'this.dateOfInfection > this.dateBecomeCase',
+            }, {
+              // dateOfInfection > dateOfOutcome
+              $where: 'this.dateOfInfection > this.dateOfOutcome',
+            }, {
+              // dateOfOnset > dateBecomeCase
+              $where: 'this.dateOfOnset > this.dateBecomeCase',
+            }, {
+              // dateOfOnset > dateOfOutcome
+              $where: 'this.dateOfOnset > this.dateOfOutcome',
+            }, {
+              // dateBecomeCase > dateOfOutcome
+              $where: 'this.dateBecomeCase > this.dateOfOutcome',
+            }]
+          }, {
+            // for case: compare isolationDates, hospitalizationDates, incubationDates startDate/endDate for each item in them and against the date of birth and dateDeceased
+            type: 'case',
+            $where: `function () {
+              // initialize check result
+              var inconsistencyInKeyDates = false;
+              // get date of birth and dateDeceased
+              var dob = this.dob;
+              var dateDeceased = this.dateDeceased;
+
+              // loop through the isolationDates, hospitalizationDates, incubationDates and make comparisons
+              var datesContainers = ['isolationDates', 'hospitalizationDates', 'incubationDates'];
+              for (var i = 0; i < datesContainers.length; i++) {
+                // check if the datesContainer exists on the model
+                var datesContainer = datesContainers[i];
+                if (this[datesContainer] && this[datesContainer].length) {
+                  // loop through the dates; comparison stops at first successful check
+                  for (var j = 0; j < this[datesContainer].length; j++) {
+                    var dateEntry = this[datesContainer][j];
+
+                    // compare startDate with endDate
+                    inconsistencyInKeyDates = dateEntry.startDate > dateEntry.endDate ? true : false;
+
+                    // check for dob; both startDate and endDate must be after dob
+                    if (!inconsistencyInKeyDates && dob) {
+                      inconsistencyInKeyDates = dateEntry.startDate < dob ? true : false;
+                      inconsistencyInKeyDates = inconsistencyInKeyDates || (dateEntry.endDate < dob ? true : false);
+                    }
+
+                    // check for dateDeceased; both startDate and endDate must be before dob
+                    if (!inconsistencyInKeyDates && dateDeceased) {
+                      inconsistencyInKeyDates = dateEntry.startDate > dateDeceased ? true : false;
+                      inconsistencyInKeyDates = inconsistencyInKeyDates || (dateEntry.endDate > dateDeceased ? true : false);
+                    }
+
+                    // stop checks if an inconsistency was found
+                    if (inconsistencyInKeyDates) {
+                      break;
+                    }
+                  }
+                }
+
+                // stop checks if an inconsistency was found
+                if (inconsistencyInKeyDates) {
+                  break;
+                }
+              }
+              
+              return inconsistencyInKeyDates;
+            }`
+          }]
+        }
+      }, filter || {}))
+      .then(function (people) {
+        // loop through the people to add the inconsistencies array
+        people.forEach(function (person, index) {
+          // initialize inconsistencies
+          let inconsistencies = [];
+
+          // get dob and dateDeceased since they are used in the majority of comparisons
+          let dob = person.dob ? moment(person.dob) : null;
+          let dateDeceased = person.dateDeceased ? moment(person.dateDeceased) : null;
+          // also get the other dates
+          let dateOfInfection = person.dateOfInfection ? moment(person.dateOfInfection) : null;
+          let dateOfOnset = person.dateOfOnset ? moment(person.dateOfOnset) : null;
+          let dateBecomeCase = person.dateBecomeCase ? moment(person.dateBecomeCase) : null;
+          let dateOfOutcome = person.dateOfOutcome ? moment(person.dateOfOutcome) : null;
+
+          // for contacts only get the ones where dateDeceased < date of birth; this check also applies for cases
+          // no need to check for person type as the query was done only for contacts/cases
+          if (dob && dateDeceased && dob.isAfter(dateDeceased)) {
+            inconsistencies.push(['dob', 'dateDeceased']);
+          }
+
+          // for case:
+          if (person.type === 'case') {
+            // compare against dob
+            if (dob) {
+              // dateOfInfection < date of birth
+              if (dateOfInfection && dob.isAfter(dateOfInfection)) {
+                inconsistencies.push(['dob', 'dateOfInfection']);
+              }
+
+              // dateOfOnset < date of birth
+              if (dateOfOnset && dob.isAfter(dateOfOnset)) {
+                inconsistencies.push(['dob', 'dateOfOnset']);
+              }
+
+              // dateBecomeCase < date of birth
+              if (dateBecomeCase && dob.isAfter(dateBecomeCase)) {
+                inconsistencies.push(['dob', 'dateBecomeCase']);
+              }
+
+              // dateOfOutcome < date of birth
+              if (dateOfOutcome && dob.isAfter(dateOfOutcome)) {
+                inconsistencies.push(['dob', 'dateOfOutcome']);
+              }
+            }
+
+            // compare against dateDeceased
+            if (dateDeceased) {
+              // dateOfInfection > dateDeceased
+              if (dateOfInfection && dateOfInfection.isAfter(dateDeceased)) {
+                inconsistencies.push(['dateDeceased', 'dateOfInfection']);
+              }
+
+              // dateOfOnset > dateDeceased
+              if (dateOfOnset && dateOfOnset.isAfter(dateDeceased)) {
+                inconsistencies.push(['dateDeceased', 'dateOfOnset']);
+              }
+
+              // dateBecomeCase > dateDeceased
+              if (dateBecomeCase && dateBecomeCase.isAfter(dateDeceased)) {
+                inconsistencies.push(['dateDeceased', 'dateBecomeCase']);
+              }
+
+              // dateOfOutcome > dateDeceased
+              if (dateOfOutcome && dateOfOutcome.isAfter(dateDeceased)) {
+                inconsistencies.push(['dateDeceased', 'dateOfOutcome']);
+              }
+            }
+
+            // compare dateOfInfection, dateOfOnset, dateBecomeCase, dateOfOutcome
+            // dateOfInfection > dateOfOnset
+            if (dateOfInfection && dateOfOnset && dateOfInfection.isAfter(dateOfOnset)) {
+              inconsistencies.push(['dateOfInfection', 'dateOfOnset']);
+            }
+
+            // dateOfInfection > dateBecomeCase
+            if (dateOfInfection && dateBecomeCase && dateOfInfection.isAfter(dateBecomeCase)) {
+              inconsistencies.push(['dateOfInfection', 'dateBecomeCase']);
+            }
+
+            // dateOfInfection > dateOfOutcome
+            if (dateOfInfection && dateOfOutcome && dateOfInfection.isAfter(dateOfOutcome)) {
+              inconsistencies.push(['dateOfInfection', 'dateOfOutcome']);
+            }
+
+            // dateOfOnset > dateBecomeCase
+            if (dateOfOnset && dateBecomeCase && dateOfOnset.isAfter(dateBecomeCase)) {
+              inconsistencies.push(['dateOfOnset', 'dateBecomeCase']);
+            }
+
+            // dateOfOnset > dateOfOutcome
+            if (dateOfOnset && dateOfOutcome && dateOfOnset.isAfter(dateOfOutcome)) {
+              inconsistencies.push(['dateOfOnset', 'dateOfOutcome']);
+            }
+
+            // dateBecomeCase > dateOfOutcome
+            if (dateBecomeCase && dateOfOutcome && dateBecomeCase.isAfter(dateOfOutcome)) {
+              inconsistencies.push(['dateBecomeCase', 'dateOfOutcome']);
+            }
+
+            // compare isolationDates, hospitalizationDates, incubationDates startDate/endDate for each item in them and against the date of birth and dateDeceased
+            // loop through the isolationDates, hospitalizationDates, incubationDates and make comparisons
+            var datesContainers = ['isolationDates', 'hospitalizationDates', 'incubationDates'];
+            datesContainers.forEach(function (datesContainer) {
+              if (person[datesContainer] && person[datesContainer].length) {
+                // loop through the datesto find inconsistencies
+                person[datesContainer].forEach(function (dateEntry, dateEntryIndex) {
+                  // get startDate and endDate
+                  let startDate = moment(dateEntry.startDate);
+                  let endDate = moment(dateEntry.endDate);
+
+                  // compare startDate with endDate
+                  if (startDate.isAfter(endDate)) {
+                    inconsistencies.push([`${datesContainer}.${dateEntryIndex}.startDate`, `${datesContainer}.${dateEntryIndex}.endDate`]);
+                  }
+
+                  // check for dob; both startDate and endDate must be after dob
+                  if (dob) {
+                    if (dob.isAfter(startDate)) {
+                      inconsistencies.push(['dob', `${datesContainer}.${dateEntryIndex}.startDate`]);
+                    }
+
+                    if (dob.isAfter(endDate)) {
+                      inconsistencies.push(['dob', `${datesContainer}.${dateEntryIndex}.endDate`]);
+                    }
+                  }
+
+                  // check for dateDeceased; both startDate and endDate must be before dob
+                  if (dateDeceased) {
+                    if (startDate.isAfter(dateDeceased)) {
+                      inconsistencies.push(['dateDeceased', `${datesContainer}.${dateEntryIndex}.startDate`]);
+                    }
+
+                    if (endDate.isAfter(dateDeceased)) {
+                      inconsistencies.push(['dateDeceased', `${datesContainer}.${dateEntryIndex}.endDate`]);
+                    }
+                  }
+                });
+              }
+            });
+          }
+
+          // add inconsistencies in the person entry
+          people[index].inconsistencies = inconsistencies;
+        });
+
+        // send response
+        callback(null, people);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Restore a deleted reference data
+   * @param caseId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.restoreReferenceData = function (referenceDataId, options, callback) {
+    app.models.referenceData
+      .findOne({
+        deleted: true,
+        where: {
+          id: referenceDataId,
+          outbreakId: this.id,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.referenceData.modelName,
+            id: referenceDataId
+          });
+        }
+
+        // undo reference data delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Upload an importable file
+   * @param req
+   * @param file
+   * @param modelName
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.importableFileUpload = function (req, file, modelName, options, callback) {
+    app.controllers.importableFile.upload(req, file, modelName, options, this.id, callback);
+  };
+
+  /**
+   * Get an importable file (contents) using file id
+   * @param id
+   * @param callback
+   */
+  Outbreak.prototype.getImportableFileJsonById = function (id, callback) {
+    app.controllers.importableFile.getJsonById(id, callback);
+  };
+
+  /**
+   * Import an importable lab results file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.importImportableLabResultsFileUsingMap = function (body, options, callback) {
+    const self = this;
+    // get importable file
+    app.models.importableFile
+      .getTemporaryFileById(body.fileId, function (error, file) {
+        // handle errors
+        if (error) {
+          return callback(error);
+        }
+        try {
+          // parse file content
+          const rawlabResultsList = JSON.parse(file);
+          // remap properties & values
+          const labResultsList = app.utils.helpers.remapProperties(rawlabResultsList, body.map, body.valuesMap);
+          // build a list of create lab results operations
+          const createLabResults = [];
+          // define a container for error results
+          const createErrors = [];
+          // define a toString function to be used by error handler
+          createErrors.toString = function () {
+            return JSON.stringify(this);
+          };
+          // go through all entries
+          labResultsList.forEach(function (labResult, index) {
+            createLabResults.push(function (callback) {
+              // first check if the case id (person id) is valid
+              app.models.case
+                .findOne({
+                  where: {
+                    id: labResult.personId,
+                    outbreakId: self.id
+                  }
+                })
+                .then(function (caseInstance) {
+                  // if the person was not found, don't create the case, stop with error
+                  if (!caseInstance) {
+                    throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+                      model: app.models.case.modelName,
+                      id: labResult.personId
+                    });
+                  }
+                  // create the lab result
+                  return app.models.labResult
+                    .create(labResult, options)
+                    .then(function (result) {
+                      callback(null, result);
+                    });
+                })
+                .catch(function (error) {
+                  // on error, store the error, but don't stop, continue with other items
+                  createErrors.push(`Failed to import lab result ${index + 1}. Error: ${JSON.stringify(error)}`);
+                  callback(null, null);
+                });
+            });
+          });
+          // start importing lab results
+          async.parallelLimit(createLabResults, 10, function (error, results) {
+            // handle errors (should not be any)
+            if (error) {
+              return callback(error);
+            }
+            // if import errors were found
+            if (createErrors.length) {
+              // remove results that failed to be added
+              results = results.filter(result => result !== null);
+              // define a toString function to be used by error handler
+              results.toString = function () {
+                return JSON.stringify(this);
+              };
+              // return error with partial success
+              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+                model: app.models.labResult.modelName,
+                failed: createErrors,
+                success: results
+              }));
+            }
+            // send the result
+            callback(null, results);
+          });
+        } catch (error) {
+          // handle parse error
+          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
+            contentType: 'JSON',
+            details: error.message
+          }));
+        }
+      });
+  };
+
+  /**
+   * Build and return a pdf containing case investigation template
+   * @param request
+   * @param callback
+   */
+  Outbreak.prototype.exportCaseInvestigationTemplate = function (request, callback) {
+    const models = app.models;
+    const translateToken = models.language.getFieldTranslationFromDictionary;
+    const pdfUtils = app.utils.pdfDoc;
+    let template = this.caseInvestigationTemplate;
+
+    // authenticated user's language, used to know in which language to translate
+    let languageId = request.remotingContext.req.authData.userInstance.languageId;
+
+    // load user language dictionary
+    app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
+      // handle errors
+      if (error) {
+        return callback(error);
+      }
+
+      // translate case, lab results, contact fields
+      let caseModel = Object.assign({}, models.case.fieldLabelsMap);
+      caseModel.addresses = [models.address.fieldLabelsMap];
+      caseModel.documents = [models.document.fieldLabelsMap];
+
+      let caseFields = helpers.translateFieldLabels(caseModel, 'case', languageId, dictionary);
+      let contactFields = helpers.translateFieldLabels(models.contact.fieldLabelsMap, 'contact', languageId, dictionary);
+
+      // remove not needed properties from lab result/relationship field maps
+      let relationFieldsMap = Object.assign({}, models.relationship.fieldLabelsMap);
+      let labResultFieldsMap = Object.assign({}, models.labResult.fieldLabelsMap);
+      delete labResultFieldsMap.personId;
+      delete relationFieldsMap.persons;
+
+      let labResultsFields = helpers.translateFieldLabels(labResultFieldsMap, 'labResult', languageId, dictionary);
+      let relationFields = helpers.translateFieldLabels(relationFieldsMap, 'relationship', languageId, dictionary);
+
+      // translate template questions
+      let questions = Outbreak.helpers.parseTemplateQuestions(template, languageId, dictionary);
+
+      // generate pdf document
+      let doc = pdfUtils.createPdfDoc({
+        fontSize: 11,
+        layout: 'portrait'
+      });
+
+      // add a top margin of 2 lines for each page
+      doc.on('pageAdded', () => {
+        doc.moveDown(2);
+      });
+
+      // set margin top for first page here, to not change the entire createPdfDoc functionality
+      doc.moveDown(2);
+
+      // add case profile fields (empty)
+      pdfUtils.createPersonProfile(doc, caseFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
+
+      // add case investigation questionnaire into the pdf in a separate page
+      doc.addPage();
+      pdfUtils.createQuestionnaire(doc, questions, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE'));
+
+      // add lab results information into a separate page
+      doc.addPage();
+      pdfUtils.createPersonProfile(doc, labResultsFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_DETAILS'));
+      doc.addPage();
+      pdfUtils.createQuestionnaire(doc, questions, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE'));
+
+      // add contact relation template
+      doc.addPage();
+      pdfUtils.createPersonProfile(doc, contactFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
+      pdfUtils.createPersonProfile(doc, relationFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_RELATIONSHIP'));
+
+      // end the document stream
+      // to convert it into a buffer
+      doc.end();
+
+      // convert pdf stream to buffer and send it as response
+      genericHelpers.streamToBuffer(doc, (err, buffer) => {
+        if (err) {
+          callback(err);
+        } else {
+          app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', `case_investigation.pdf`, callback);
+        }
+      });
+    });
+  };
 
   Outbreak.prototype.caseDossier = function(cases, anonymousFields, options, callback) {
     // Get all requested cases, including their relationships and labResults

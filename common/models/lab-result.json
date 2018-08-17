@@ -5,56 +5,52 @@
   "options": {
     "validateUpsert": true
   },
-  "hidden": [
-    "personId"
-  ],
   "properties": {
     "personId": {
       "type": "string",
-      "readOnly": true
+      "readOnly": true,
+      "safeForImport": true
     },
     "dateSampleTaken": {
       "type": "date",
       "required": true
     },
     "dateSampleDelivered": {
-      "type": "date",
-      "required": true
+      "type": "date"
     },
     "dateTesting": {
-      "type": "date",
-      "required": true
+      "type": "date"
     },
     "dateOfResult": {
       "type": "date"
     },
     "labName": {
-      "type": "string",
-      "required": true
+      "type": "string"
+    },
+    "sampleIdentifier": {
+      "type": "string"
     },
     "sampleType": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "testType": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "result": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "quantitativeResult": {
       "type": "string"
     },
     "notes": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "status": {
       "type": "string",
-      "enum": ["inProgress", "completed"],
-      "required": true
+      "enum": [
+        "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_IN_PROGRESS",
+        "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_COMPLETED"
+      ]
     },
     "questionnaireAnswers": {
       "type": "object"

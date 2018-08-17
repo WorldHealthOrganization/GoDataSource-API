@@ -159,6 +159,11 @@
       "type": "hasMany",
       "model": "followUp",
       "foreignKey": "outbreakId"
+    },
+    "people": {
+      "type": "hasMany",
+      "model": "person",
+      "foreignKey": "outbreakId"
     }
   },
   "acls": [
@@ -880,6 +885,72 @@
       "principalId": "read_followup",
       "permission": "ALLOW",
       "property": "listLatestFollowUpsForContactsIfNotPerformed"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__get__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "__get__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__count__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "__count__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "listInconsistenciesInKeyDates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "listInconsistenciesInKeyDates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "restoreReferenceData"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "importableFileUpload"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getImportableFileJsonById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "importImportableLabResultsFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "exportCaseInvestigationTemplate"
     },
     {
       "principalType": "ROLE",
@@ -1860,7 +1931,10 @@
         {
           "arg": "type",
           "type": "string",
-          "enum": ["pdf", "csv"],
+          "enum": [
+            "pdf",
+            "csv"
+          ],
           "description": "Export type; can be: pdf or csv. Default: csv"
         },
         {
@@ -2078,12 +2152,26 @@
         {
           "arg": "counters",
           "type": {
-            "contactsSeen": "number",
+            "contactsSeenCount": "number",
+            "contactIDs": {
+              "type": [
+                "string"
+              ],
+              "description": "Array with IDs of contacts that are seen",
+              "required": true
+            },
             "teams": [
               {
                 "type": {
                   "id": "string",
-                  "contactsSeen": "number"
+                  "contactsSeenCount": "number",
+                  "contactIDs": {
+                    "type": [
+                      "string"
+                    ],
+                    "description": "Array with IDs of contacts that are seen",
+                    "required": true
+                  }
                 }
               }
             ]
@@ -2111,12 +2199,26 @@
         {
           "arg": "counters",
           "type": {
-            "contactsLostToFollowup": "number",
+            "contactsLostToFollowupCount": "number",
+            "contactIDs": {
+              "type": [
+                "string"
+              ],
+              "description": "Array with IDs of contacts that are lost to follow-up",
+              "required": true
+            },
             "teams": [
               {
                 "type": {
                   "id": "string",
-                  "contactsLostToFollowup": "number"
+                  "contactsLostToFollowupCount": "number",
+                  "contactIDs": {
+                    "type": [
+                      "string"
+                    ],
+                    "description": "Array with IDs of contacts that are lost to follow-up",
+                    "required": true
+                  }
                 }
               }
             ]
@@ -2196,7 +2298,8 @@
           "arg": "count",
           "type": {
             "newCases": "number",
-            "total": "number"
+            "total": "number",
+            "caseIds": ["string"]
           },
           "description": "Retrieve number of new cases in known transmission chains",
           "root": true,
@@ -2754,6 +2857,229 @@
       "http": {
         "verb": "get",
         "path": "/follow-ups/latest-by-contacts-if-not-performed"
+      }
+    },
+    "prototype.listInconsistenciesInKeyDates": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "people",
+          "type": [
+            "person"
+          ],
+          "description": "Array containing contacts/cases where inconsistencies were found between dates. Besides the contact/case properties each entry will also contain an 'inconsistencies' property (array of inconsistencies)",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "List of contacts/cases where inconsistencies were found between dates. Besides the contact/case properties each entry will also contain an 'inconsistencies' property (array of inconsistencies)",
+      "http": {
+        "verb": "get",
+        "path": "/people/inconsistencies-in-key-dates"
+      }
+    },
+    "prototype.restoreReferenceData": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for reference data"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "referenceData",
+          "type": [
+            "referenceData"
+          ],
+          "description": "Reference Data",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted Reference Data.",
+      "http": {
+        "verb": "post",
+        "path": "/reference-data/:nk/restore"
+      }
+    },
+    "prototype.importableFileUpload": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "file",
+          "type": "file"
+        },
+        {
+          "arg": "model",
+          "type": "string"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": {
+            "id": "string",
+            "fileHeaders": [
+              "string"
+            ],
+            "suggestedFieldMapping": {
+              "type": {
+                "<fileHeader>": {
+                  "type": "string",
+                  "description": "Model property"
+                }
+              }
+            },
+            "modelProperties": {
+              "type": {
+                "<modelProperty>": [{
+                  "type": "string",
+                  "description": "Model property label"
+                }]
+              }
+            },
+            "modelPropertyValues": {
+              "type": {
+                "<modelProperty>": [{
+                  "type": "string",
+                  "description": "Available values for a model property"
+                }]
+              }
+            },
+            "distinctFileColumnValues": {
+              "type": {
+                "<fileHeader>": [{
+                  "type": "string",
+                  "description": "Distinct values for column"
+                }]
+              }
+            }
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Upload a file and get file headers",
+      "http": {
+        "verb": "post",
+        "path": "/importable-files"
+      }
+    },
+    "prototype.getImportableFileJsonById": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Importable file ID",
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "json",
+          "type": [
+            "any"
+          ],
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Retrieve JSON version of an uploaded file",
+      "http": {
+        "verb": "get",
+        "path": "/importable-files/:id/json"
+      }
+    },
+    "prototype.importImportableLabResultsFileUsingMap": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithFieldAndReferenceDataMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "labResults",
+          "type": [
+            "labResult"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a list of lab results from a file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/cases/lab-results/import-importable-file-using-map"
+      }
+    },
+    "prototype.exportCaseInvestigationTemplate": {
+      "accepts": [
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export pdf containing case investigation template",
+      "http": {
+        "verb": "get",
+        "path": "/cases/export-investigation-template"
       }
     },
     "prototype.contactDossier": {

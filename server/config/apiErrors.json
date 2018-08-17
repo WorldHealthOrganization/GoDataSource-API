@@ -29,6 +29,10 @@
     "defaultStatusCode": 404,
     "messagePattern": "Unknown `<%= model %>` id `<%= id %>` in context of `<%= contextModel %>` id `<%= contextId %>`"
   },
+  "MODEL_CONFLICT": {
+    "defaultStatusCode": 409,
+    "messagePattern": "Model with id `<%= id %>` already exists"
+  },
   "INTERNAL_ERROR": {
     "defaultStatusCode": 500,
     "messagePattern": "Internal error: `<%= error %>`"
@@ -110,5 +114,17 @@
   "INVALID_CONTENT_OF_TYPE": {
     "defaultStatusCode": 422,
     "messagePattern": "Invalid <%= contentType %> content: <%= details%>"
+  },
+  "INVALID_GENERATE_FOLLOWUP_PARAMS": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid follow up generation parameters. Details: `<%= details %>`"
+  },
+  "IMPORT_PARTIAL_SUCCESS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Import Partial Success. Some `<%= model %>` instances failed to be imported. Successfully imported: <%= success %> \nFailed to be imported: <%= failed %>"
+  },
+  "INVALID_SNAPSHOT_FILE": {
+    "defaultStatusCode": 400,
+    "messagePattern": "The provided database snapshot is invalid."
   }
 }

@@ -8,6 +8,12 @@ const moment = require('moment');
 
 module.exports = function (Outbreak) {
 
+  Outbreak.referenceDataFieldsToCategoryMap = {
+    disease: 'LNG_REFERENCE_DATA_CATEGORY_DISEASE'
+  };
+
+  Outbreak.referenceDataFields = Object.keys(Outbreak.referenceDataFieldsToCategoryMap);
+
   const arrayFields = {
     'addresses': 'address',
     'documents': 'document',
@@ -22,7 +28,7 @@ module.exports = function (Outbreak) {
   // initialize model helpers
   Outbreak.helpers = {};
   // set a higher limit for event listeners to avoid warnings (we have quite a few listeners)
-  Outbreak.setMaxListeners(40);
+  Outbreak.setMaxListeners(50);
 
   /**
    * Checks whether the given follow up model is generated
@@ -517,6 +523,7 @@ module.exports = function (Outbreak) {
     // initialize result
     let results = {
       [resultProperty]: 0,
+      contactIDs: [],
       teams: []
     };
 
@@ -555,6 +562,8 @@ module.exports = function (Outbreak) {
                 contacts[contactId].teams[teamId][followUpFlag] = true;
                 // increase counter for team
                 teams[teamId][resultProperty]++;
+                // add contact ID in list of IDs
+                teams[teamId].contactIDs.push(followup.personId);
               }
             } else {
               // new teamId
@@ -566,11 +575,16 @@ module.exports = function (Outbreak) {
               // initialize team entry if doesn't already exist
               teams[teamId] = teams[teamId] || {
                 id: teamId,
+                contactIDs: [],
                 [resultProperty]: 0
               };
 
               // increase counter for the team
-              followup[followUpFlag] && teams[teamId][resultProperty]++;
+              if (followup[followUpFlag]) {
+                teams[teamId][resultProperty]++;
+                // add contact ID in list of IDs
+                teams[teamId].contactIDs.push(followup.personId);
+              }
             }
 
             // check if the previous flag value was  false and the current one is true
@@ -581,6 +595,8 @@ module.exports = function (Outbreak) {
               contacts[contactId][followUpFlag] = true;
               // increase successful total counter
               results[resultProperty]++;
+              // add contact ID in list of IDs
+              results.contactIDs.push(followup.personId);
             }
           } else {
             // first followup for the contact
@@ -597,14 +613,17 @@ module.exports = function (Outbreak) {
             // initialize team entry if doesn't already exist
             teams[teamId] = teams[teamId] || {
               id: teamId,
+              contactIDs: [],
               [resultProperty]: 0
             };
 
-            // increase counters if the follow-up flag is true
+            // increase counters if the follow-up flag is true; add contact ID in list of IDs
             // eg: if the contact was lost to follow-up
             if (followup[followUpFlag]) {
               results[resultProperty]++;
+              results.contactIDs.push(followup.personId);
               teams[teamId][resultProperty]++;
+              teams[teamId].contactIDs.push(followup.personId);
             }
           }
         });
@@ -729,7 +748,9 @@ module.exports = function (Outbreak) {
       'classification',
       'riskLevel',
       'riskReason',
-      'transferRefused'
+      'transferRefused',
+      'dateOfReporting',
+      'isDateOfReportingApproximate'
     ];
     // the following case props are array and should be treated differently
     const caseArrayProps = [
@@ -801,6 +822,46 @@ module.exports = function (Outbreak) {
     );
 
     return base;
+  };
+
+  /**
+   * Parse a outbreak template's questions by translating any tokens based on given dictionary reference
+   * Function works recursive by translating any additional questions of the answers
+   * @param questions
+   * @param languageId
+   * @param dictionary
+   */
+  Outbreak.helpers.parseTemplateQuestions = function (questions, languageId, dictionary) {
+    // cache translation function name, used in many places below
+    // include sanity check, fallback on initial value if no translation is found
+    let translateToken = function (text) {
+      let translatedText = app.models.language.getFieldTranslationFromDictionary(text, languageId, dictionary);
+      return translatedText ? translatedText : text;
+    };
+
+    // Translate all the questions, including additional questions of the answers
+    return (function translate(list) {
+      return list.map((question) => {
+        let questionResult = {
+          order: question.order,
+          question: translateToken(question.text),
+          answerType: question.answerType,
+          answers: question.answers
+        };
+
+        // do not try to translate answers that are free text
+        if (question.answerType !== 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT') {
+          questionResult.answers = question.answers.map((answer) => {
+            return {
+              label: translateToken(answer.label),
+              additionalQuestions: translate(answer.additionalQuestions || [])
+            };
+          });
+        }
+
+        return questionResult;
+      });
+    })(questions);
   };
 
   /**

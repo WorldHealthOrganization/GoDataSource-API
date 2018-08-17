@@ -124,11 +124,24 @@ module.exports = function (ImportableFile) {
       let range = /^[A-Za-z]+\d+:([A-Za-z])+\d+$/.exec(parsedData.Sheets[sheetName]['!ref']);
       // keep a list of headers
       let headers = [];
+      // keep a list of how many times a header appears
+      let sameHeaderCounter = {};
       if (range) {
         // look for headers in the range
         for (let i = 'A'.charCodeAt(0); i <= range[1].charCodeAt(0); i++) {
           if (parsedData.Sheets[sheetName][`${String.fromCharCode(i)}1`]) {
-            headers.push(parsedData.Sheets[sheetName][`${String.fromCharCode(i)}1`].v);
+            let headerValue = parsedData.Sheets[sheetName][`${String.fromCharCode(i)}1`].v;
+            // if this is the first time the header appears
+            if (sameHeaderCounter[headerValue] === undefined) {
+              // create an entry for it in the counter
+              sameHeaderCounter[headerValue] = 0;
+            } else {
+              // increment counter
+              sameHeaderCounter[headerValue]++;
+              // update header value to match those built by xlsx.utils.sheet_to_json
+              headerValue = `${headerValue}_${sameHeaderCounter[headerValue]}`;
+            }
+            headers.push(headerValue);
           }
         }
       }
@@ -205,7 +218,8 @@ module.exports = function (ImportableFile) {
         // send back file id and headers
         callback(error, {
           id: fileId,
-          headers: result.headers
+          headers: result.headers,
+          jsonObj: result.obj
         });
       });
     });

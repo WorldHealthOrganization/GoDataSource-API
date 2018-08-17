@@ -99,12 +99,13 @@ const getChunksForInterval = function (interval, chunk) {
 };
 
 /**
- * Remap a list of items using a map
+ * Remap a list of items using a map. Optionally remap their values using a values map
  * @param list
  * @param fieldsMap
+ * @param [valuesMap]
  * @return {Array}
  */
-const remapProperties = function (list, fieldsMap) {
+const remapProperties = function (list, fieldsMap, valuesMap) {
   // store final result
   let results = [];
   // get a list of source fields
@@ -116,7 +117,12 @@ const remapProperties = function (list, fieldsMap) {
     // go trough the list of fields
     fields.forEach(function (field) {
       // remap property
-      result[fieldsMap[field]] = item[field];
+      _.set(result, fieldsMap[field], item[field]);
+      // if a values map was provided
+      if (valuesMap[field] && valuesMap[field][item[field]] !== undefined) {
+        // remap the values
+      _.set(result, fieldsMap[field], valuesMap[field][item[field]]);
+      }
     });
     // add processed item to the final list
     results.push(result);
@@ -134,8 +140,11 @@ const convertPropsToDate = function (obj) {
       if (typeof obj[prop] == 'object' && obj[prop] !== null) {
         convertPropsToDate(obj[prop]);
       } else {
-        // we're only looking for strings properties to convert
-        if (typeof obj[prop] === 'string') {
+        // initialize date regexp
+        let dateRegexp = /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}\.\d{3}Z*)?$/;
+
+        // we're only looking for strings properties that have a date format to convert
+        if (typeof obj[prop] === 'string' && dateRegexp.test(obj[prop])) {
           // try to convert the string value to date, if valid, replace the old value
           let convertedDate = moment(obj[prop]);
           if (convertedDate.isValid()) {

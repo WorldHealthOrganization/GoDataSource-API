@@ -49,6 +49,10 @@ const defaultReferenceData = {
     'Negative',
     'Inconclusive'
   ],
+  'LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS': [
+    'In Progress',
+    'Completed'
+  ],
   'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE': [
     'National ID Card',
     'Passport',

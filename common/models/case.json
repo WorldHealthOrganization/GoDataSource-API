@@ -40,6 +40,9 @@
     "dateBecomeCase": {
       "type": "date"
     },
+    "outcomeId": {
+      "type": "string"
+    },
     "dateOfOutcome": {
       "type": "date"
     },
@@ -71,6 +74,10 @@
       "type": "object"
     }
   },
+  "excludeBaseProperties": [
+    "name",
+    "description"
+  ],
   "validations": [],
   "relations": {
     "labResults": {

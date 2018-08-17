@@ -46,17 +46,59 @@
         {
           "arg": "file",
           "type": "file"
+        },
+        {
+          "arg": "model",
+          "type": "string"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
         {
-          "arg": "id",
-          "type": "string",
-          "required": true
-        },
-        {
-          "arg": "headers",
-          "type": ["string"],
+          "arg": "result",
+          "type": {
+            "id": "string",
+            "fileHeaders": [
+              "string"
+            ],
+            "suggestedFieldMapping": {
+              "type": {
+                "<fileHeader>": {
+                  "type": "string",
+                  "description": "Model property"
+                }
+              }
+            },
+            "modelProperties": {
+              "type": {
+                "<modelProperty>": [{
+                  "type": "string",
+                  "description": "Model property label"
+                }]
+              }
+            },
+            "modelPropertyValues": {
+              "type": {
+                "<modelProperty>": [{
+                  "type": "string",
+                  "description": "Available values for a model property"
+                }]
+              }
+            },
+            "distinctFileColumnValues": {
+              "type": {
+                "<fileHeader>": [{
+                  "type": "string",
+                  "description": "Distinct values for column"
+                }]
+              }
+            }
+          },
+          "root": true,
           "required": true
         }
       ],
@@ -77,7 +119,7 @@
       "returns": [
         {
           "arg": "json",
-          "type": "any",
+          "type": ["any"],
           "required": true,
           "root": true
         }

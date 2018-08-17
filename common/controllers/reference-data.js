@@ -93,4 +93,33 @@ module.exports = function (ReferenceData) {
         }));
     });
   };
+
+  /**
+   * Restore a deleted reference data
+   * @param caseId
+   * @param options
+   * @param callback
+   */
+  ReferenceData.restore = function (id, options, callback) {
+    ReferenceData
+      .findOne({
+        deleted: true,
+        where: {
+          id: id,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: ReferenceData.modelName,
+            id: id
+          });
+        }
+
+        // undo reference data delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
+  };
 };

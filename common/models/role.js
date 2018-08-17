@@ -6,6 +6,9 @@ module.exports = function (Role) {
   // set flag to force using the controller
   Role.hasController = true;
 
+  // define the special permission used to validate client applications
+  Role.clientApplicationPermission = '$client_application';
+
   // define a list of custom (non-loopback-supported) relations
   Role.customRelations = {
     permissions: {

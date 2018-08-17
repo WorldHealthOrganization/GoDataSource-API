@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const uuid = require('uuid');
+const moment = require('moment');
 
 module.exports = function (SystemSettings) {
 
@@ -80,5 +81,18 @@ module.exports = function (SystemSettings) {
       }
       app.utils.remote.helpers.offerFileToDownload(pdfDoc, 'application/pdf', `${uuid.v4()}.pdf`, callback);
     });
-  }
+  };
+
+  /**
+   * Generate current UTC date of the server
+   * @param callback
+   */
+  SystemSettings.getServerUTCDate = function (callback) {
+    return callback(
+      null,
+      {
+        date: moment.utc()
+      }
+    );
+  };
 };

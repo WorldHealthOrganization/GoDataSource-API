@@ -30,13 +30,22 @@ module.exports = function (Case) {
     'riskReason': 'LNG_CASE_FIELD_LABEL_RISK_REASON',
     'dateOfOutcome': 'LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME',
     'deceased': 'LNG_CASE_FIELD_LABEL_DECEASED',
-    'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
     'type': 'LNG_CASE_FIELD_LABEL_TYPE',
     'isolationDates': 'LNG_CASE_FIELD_LABEL_ISOLATION_DATES',
     'hospitalizationDates': 'LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES',
     'incubationDates': 'LNG_CASE_FIELD_LABEL_INCUBATION_DATES',
+    'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
     'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
-    'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES'
+    'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
+  };
+
+  Case.referenceDataFieldsToCategoryMap = {
+    classification: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION',
+    riskLevel: 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL',
+    gender: 'LNG_REFERENCE_DATA_CATEGORY_GENDER',
+    occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
+    outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
+    'documents.type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE'
   };
 
   // keep a list of fields that use values from reference data
@@ -45,7 +54,7 @@ module.exports = function (Case) {
     'classification',
     'riskLevel',
     'occupation',
-    'documents.type'
+    'documents[].type'
   ];
 
   Case.printFieldsinOrder = [
@@ -73,5 +82,5 @@ module.exports = function (Case) {
     'isolationDates',
     'transferRefused',
     'deceased'
-  ]
+  ];
 };
