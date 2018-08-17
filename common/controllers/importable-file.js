@@ -206,6 +206,7 @@ module.exports = function (ImportableFile) {
       if (typeof fields.decryptPassword === 'string' && fields.decryptPassword.length) {
         decryptPassword = fields.decryptPassword;
       }
+
       // handle errors
       if (error) {
         return callback(error);
