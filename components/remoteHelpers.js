@@ -67,13 +67,13 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callba
  * @param filter
  * @param exportType
  * @param fileName
+ * @param encryptPassword {string|null}
  * @param options
  * @param headersWhitelist {array|null}
- * @param encryptPassword {string|null}
  * @param [beforeExport] Optional result modifier before export
  * @param callback
  */
-function exportFilteredModelsList(app, Model, filter, exportType, fileName, options, headersWhitelist, encryptPassword, beforeExport, callback) {
+function exportFilteredModelsList(app, Model, filter, exportType, fileName, encryptPassword, options, headersWhitelist, beforeExport, callback) {
   // before export is optional
   if (!callback) {
     callback = beforeExport;

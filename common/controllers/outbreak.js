@@ -92,10 +92,13 @@ module.exports = function (Outbreak) {
       // use that list
       headerRestrictions = contextUser.settings.caseFields;
     }
+
+    // if encrypt password is not valiid, remove it
     if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
       encryptPassword = null;
     }
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', options, headerRestrictions, encryptPassword, callback);
+
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, options, headerRestrictions, callback);
   };
 
   /**
@@ -4179,10 +4182,12 @@ module.exports = function (Outbreak) {
       },
       filter || {});
 
+    // if encrypt password is not valiid, remove it
     if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
       encryptPassword = null;
     }
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, _filters, exportType, 'Contacts List', options, null, encryptPassword, callback);
+
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, _filters, exportType, 'Contacts List', encryptPassword, options, null, callback);
   };
 
   /**
@@ -4224,12 +4229,13 @@ module.exports = function (Outbreak) {
       });
     }
 
+    // if encrypt password is not valid, remove it
     if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
       encryptPassword = null;
     }
 
     // export outbreaks list
-    app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', options, null, encryptPassword, function (results, languageDictionary) {
+    app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', encryptPassword, options, null, function (results, languageDictionary) {
       results.forEach(function (result) {
         // translate templates
         ['caseInvestigationTemplate', 'labResultsTemplate', 'contactFollowUpTemplate'].forEach(function (template) {
