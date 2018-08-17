@@ -44,4 +44,11 @@ module.exports = function (Contact) {
   };
 
   Contact.referenceDataFields = Object.keys(Contact.referenceDataFieldsToCategoryMap);
+
+  Contact.foreignKeyResolverMap = {
+    'addresses[].locationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    }
+  }
 };

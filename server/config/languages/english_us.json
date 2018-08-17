@@ -540,6 +540,7 @@
       "LNG_CASE_FIELD_LABEL_GENDER": "Gender",
       "LNG_CASE_FIELD_LABEL_CLASSIFICATION": "Classification",
       "LNG_CASE_FIELD_LABEL_OCCUPATION": "Occupation",
+      "LNG_CASE_FIELD_LABEL_DOCUMENTS": "Documents",
       "LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE": "Document Type",
       "LNG_CASE_FIELD_LABEL_RISK_LEVEL": "Risk Level",
       "LNG_CASE_FIELD_LABEL_ISOLATION_DATES": "Isolation Dates",

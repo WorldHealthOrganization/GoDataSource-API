@@ -4214,7 +4214,7 @@ module.exports = function (Outbreak) {
     }
 
     // export outbreaks list
-    app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', options, function (results, languageDictionary) {
+    app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', options, null, function (results, languageDictionary) {
       results.forEach(function (result) {
         // translate templates
         ['caseInvestigationTemplate', 'labResultsTemplate', 'contactFollowUpTemplate'].forEach(function (template) {
@@ -4224,6 +4224,6 @@ module.exports = function (Outbreak) {
         });
       });
       return Promise.resolve(results)
-    }, null, callback);
+    }, callback);
   };
 };
