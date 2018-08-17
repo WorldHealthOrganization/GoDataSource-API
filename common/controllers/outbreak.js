@@ -3319,6 +3319,8 @@ module.exports = function (Outbreak) {
   };
 
   Outbreak.prototype.caseDossier = function(cases, anonymousFields, options, callback) {
+    const questionnaire = this.labResultsTemplate.toJSON();
+    let questions = [];
     // Get all requested cases, including their relationships and labResults
     this.__get__cases({
       where: {
@@ -3402,18 +3404,12 @@ module.exports = function (Outbreak) {
             // Translate the values of the fields marked as reference data fields
             Outbreak.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models[personType].modelName, contextUser, dictionary);
 
-            // Keep only the fields that we want displayed (ex. no createdAt, updatedAt fields will be displayed
-            relationshipMember = _.pick(relationshipMember, Object.keys(app.models[personType].fieldLabelsMap));
-
             // Translate the remaining field labels
             relationshipMember = Outbreak.helpers.translateFieldLabels(relationshipMember, app.models[personType].modelName, contextUser.languageId, dictionary);
 
             relationship.person = relationshipMember;
 
             Outbreak.helpers.translateDataSetReferenceDataValues(relationship, app.models.relationship.modelName, contextUser, dictionary);
-
-            // Remove all fields that are of no interest
-            relationship = _.pick(relationship, Object.keys(app.models.relationship.fieldLabelsMap));
 
             // Translate all remaining keys
             relationship = Outbreak.helpers.translateFieldLabels(relationship, app.models.relationship.modelName, contextUser.languageId, dictionary);
@@ -3425,17 +3421,32 @@ module.exports = function (Outbreak) {
             sanitizedCases[caseIndex].labResults = [];
             Outbreak.helpers.translateDataSetReferenceDataValues(labResult, app.models.labResult.modelName, contextUser.languageId, dictionary);
 
-            labResult = _.pick(labResult, Object.keys(app.models.labResult.fieldLabelsMap));
+            questions = Outbreak.helpers.parseTemplateQuestions(questionnaire, contextUser.languageId, dictionary);
+
+            Object.keys(labResult.questionnaireAnswers).forEach((key) => {
+              let question = _.find(questions, (question) => {
+                return question.variable === key
+              });
+
+              if(question.answers) {
+                question.answers.forEach((answer) => {
+                  if (labResult.questionnaireAnswers[key].indexOf(answer.value) !== -1) {
+                    answer.selected = true;
+                  }
+                })
+              } else {
+                question.value = labResult.questionnaireAnswers[key];
+              }
+            });
 
             labResult = Outbreak.helpers.translateFieldLabels(labResult, app.models.labResult.modelName, contextUser.languageId, dictionary);
+
+            labResult.questionnaire = questions;
 
             sanitizedCases[caseIndex].labResults[labIndex] = labResult;
           });
 
           Outbreak.helpers.translateDataSetReferenceDataValues(person, app.models.case.modelName, contextUser, dictionary);
-
-          // Remove all fields that are of no interest
-          person =  _.pick(person, app.models.case.printFieldsinOrder);
 
           // Translate all remaining keys
           person  = Outbreak.helpers.translateFieldLabels(person, app.models.case.modelName, contextUser.languageId, dictionary);
@@ -3460,12 +3471,13 @@ module.exports = function (Outbreak) {
 
         const relationshipsTitle = app.models.language.getFieldTranslationFromDictionary("LNG_PAGE_ACTION_RELATIONSHIPS", contextUser.languageId, dictionary);
         const labResultsTitle = app.models.language.getFieldTranslationFromDictionary("LNG_PAGE_LIST_CASE_LAB_RESULTS_TITLE", contextUser.languageId, dictionary);
+        const questionnaireTitle = app.models.language.getFieldTranslationFromDictionary("LNG_PAGE_LIST_CASE_LAB_QUESTIONNAIRE_TITLE", contextUser.languageId, dictionary);
 
         // add case profile fields (empty)
         sanitizedCases.forEach((sanitizedCase, index) => {
           pdfUtils.displayModelDetails(doc, sanitizedCase.data, true, 'Case Information');
           pdfUtils.displayPersonRelationships(doc, sanitizedCase.relationships, relationshipsTitle);
-          pdfUtils.displayCaseLabResults(doc, sanitizedCase.labResults, labResultsTitle);
+          pdfUtils.displayCaseLabResults(doc, sanitizedCase.labResults, labResultsTitle, questionnaireTitle);
           if (index < sanitizedCases.length - 1) {
             doc.addPage();
           }

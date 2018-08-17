@@ -191,6 +191,13 @@ const prepareFieldsForPrint = function (model, dateFieldsList) {
   })
 };
 
+const replaceForeignKeys = function (model, modelName, callback) {
+  let cachedModels = {};
+  Object.keys(app.models[modelName].pathsToForeignKeys).forEach((path) => {
+
+  });
+}
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamToBuffer,

@@ -46,6 +46,33 @@ module.exports = function(Person) {
     'riskLevel',
     'occupation',
     'documents.type'
+  ];
+
+  Person.printFieldsinOrder = [
+    'firstName',
+    'middleName',
+    'lastName',
+    'gender',
+    'occupation',
+    'age',
+    'dob',
+    'classification',
+    'dateBecomeCase',
+    'dateDeceased',
+    'dateOfInfection',
+    'dateOfOnset',
+    'phoneNumber',
+    'riskLevel',
+    'riskReason',
+    'dateOfOutcome',
+    'deceased',
+    'documents',
+    'type',
+    'isolationDates',
+    'hospitalizationDates',
+    'incubationDates',
+    'transferRefused',
+    'addresses'
   ]
 
 };

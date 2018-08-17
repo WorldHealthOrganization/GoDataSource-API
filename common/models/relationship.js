@@ -28,8 +28,6 @@ module.exports = function (Relationship) {
   };
 
   Relationship.fieldLabelsMap = {
-    'relationships': 'LNG_RELATIONSHIP_FIELD_LABEL',
-    'persons': 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS',
     'contactDate': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE',
     'contactDateEstimated': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE_ESTIMATED',
     'certaintyLevelId': 'LNG_RELATIONSHIP_FIELD_LABEL_CERTAINTY_LEVEL',
@@ -38,6 +36,9 @@ module.exports = function (Relationship) {
     'exposureDurationId': 'LNG_RELATIONSHIP_FIELD_LABEL_EXPOSURE_DURATION',
     'socialRelationshipTypeId': 'LNG_RELATIONSHIP_FIELD_LABEL_SOCIAL_RELATIONSHIP_TYPE',
     'comment': 'LNG_RELATIONSHIP_FIELD_LABEL_COMMENT',
+  };
+
+  Relationship.relatedFieldLabelsMap = {
     'person': 'LNG_RELATIONSHIP_FIELD_LABEL_PERSON'
   };
 
@@ -50,7 +51,19 @@ module.exports = function (Relationship) {
     'person.gender',
     'person.occupation',
     'person.riskLevel'
-  ]
+  ];
+
+  Relationship.printFieldsinOrder = [
+    'contactDate',
+    'contactDateEstimated',
+    'certaintyLevelId',
+    'exposureTypeId',
+    'exposureFrequencyId',
+    'exposureDurationId',
+    'socialRelationshipTypeId',
+    'comment',
+    'person'
+  ];
 
   /**
    * Build or count transmission chains for an outbreak

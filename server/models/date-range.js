@@ -6,4 +6,9 @@ module.exports = function (DateRange) {
     'startDate': 'LNG_DATE_RANGE_FIELD_LABEL_START_DATE',
     'endDate': 'LNG_DATE_RANGE_FIELD_LABEL_END_DATE'
   }
+
+  DateRange.printFieldsinOrder = [
+    'startDate',
+    'endDate'
+  ]
 };

@@ -22,8 +22,31 @@ module.exports = function (Contact) {
     'occupation': 'LNG_CASE_FIELD_LABEL_OCCUPATION',
     'age': 'LNG_CASE_FIELD_LABEL_AGE',
     'dob': 'LNG_CASE_FIELD_LABEL_DOB',
+    'dateDeceased': 'LNG_CASE_FIELD_LABEL_DATE_DECEASED',
     'phoneNumber': 'LNG_CASE_FIELD_LABEL_PHONE_NUMBER',
     'riskLevel': 'LNG_CASE_FIELD_LABEL_RISK_LEVEL',
-    'riskReason': 'LNG_CASE_FIELD_LABEL_RISK_REASON'
+    'riskReason': 'LNG_CASE_FIELD_LABEL_RISK_REASON',
+    'deceased': 'LNG_CASE_FIELD_LABEL_DECEASED',
+    'type': 'LNG_CASE_FIELD_LABEL_TYPE',
+    'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
+    'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
   };
+
+  Contact.printFieldsinOrder = [
+    'firstName',
+    'middleName',
+    'lastName',
+    'gender',
+    'riskLevel',
+    'riskReason',
+    'occupation',
+    'age',
+    'dob',
+    'phoneNumber',
+    'type',
+    'documents',
+    'addresses',
+    'deceased',
+    'dateDeceased'
+  ]
 };

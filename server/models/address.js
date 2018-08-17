@@ -13,4 +13,16 @@ module.exports = function(Address) {
     'geoLocation': 'LNG_ADDRESS_FIELD_LABEL_GEOLOCATION',
     'date': 'LNG_ADDRESS_FIELD_LABEL_DATE'
   };
+
+  Address.printFieldsinOrder = [
+    'name',
+    'country',
+    'city',
+    'addressLine1',
+    'addressLine2',
+    'postalCode',
+    'locationId',
+    'geoLocation',
+    'date'
+  ]
 };

@@ -263,7 +263,7 @@ const addTitle = function (doc, title, fontSize) {
  * @param doc
  * @param questions
  */
-const createQuestionnaire = function (doc, questions, title) {
+const createQuestionnaire = function (doc, questions, withData, title) {
   // cache initial document margin
   const initialXMargin = doc.x;
 
@@ -280,14 +280,29 @@ const createQuestionnaire = function (doc, questions, title) {
       // answers type are written differently into the doc
       switch (item.answerType) {
         case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT':
-          doc.moveDown().text(`Answer: ${'_'.repeat(25)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
+          if(withData) {
+            doc.moveDown().text("Answer: " + item.value, isNested ? initialXMargin + 60 : initialXMargin + 20);
+          } else {
+            doc.moveDown().test(`Answer: ${'_'.repeat(25)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
+          }
           break;
         default:
           // NOTE: only first nested level is handled for additional questions
           item.answers.forEach((answer) => {
             doc.moveDown().text(answer.label, isNested ? initialXMargin + 85 : initialXMargin + 45);
             // we need to reduce rectangle height to be on the same height as the text
-            doc.moveUp().rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3, 15, 15).stroke().moveDown();
+            if(withData && answer.selected) {
+              doc.moveUp()
+                .rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3, 15, 15)
+                .moveTo(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3)
+                .lineTo(isNested ? initialXMargin + 60 + 15 : initialXMargin + 20 + 15, doc.y - 3 + 15)
+                .moveTo(isNested ? initialXMargin + 60 + 15 : initialXMargin + 20 + 15, doc.y - 3)
+                .lineTo(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3 + 15)
+                .stroke()
+                .moveDown();
+            } else {
+              doc.moveUp().rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3, 15, 15).stroke().moveDown();
+            }
 
             // handle additional questions
             if (answer.additionalQuestions.length) {
@@ -467,10 +482,12 @@ const displayPersonRelationships = function (doc, relationships, title) {
  * @param labResults
  * @param title
  */
-const displayCaseLabResults = function (doc, labResults, title) {
+const displayCaseLabResults = function (doc, labResults, title, questionnaireTitle) {
   labResults.forEach((labResult, index) => {
     doc.addPage();
-    displayModelDetails(doc, labResult, true, index === 0 ? title : null)
+    displayModelDetails(doc, _.omit(labResult, 'questionnaire'), true, index === 0 ? title : null);
+    doc.addPage();
+    createQuestionnaire(doc, labResult.questionnaire, true, questionnaireTitle);
   });
 };
 

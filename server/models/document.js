@@ -9,4 +9,9 @@ module.exports = function(Document) {
   Document.referenceDataFields = [
     'type'
   ]
+
+  Document.printFieldsinOrder = [
+    'type',
+    'number'
+  ]
 };
