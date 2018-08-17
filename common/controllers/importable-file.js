@@ -21,8 +21,11 @@ function stripSpecialCharsToLowerCase(string) {
  * @return {*[]}
  */
 function getModelNamesFor(modelName) {
+  const modelNames = [];
   // add model name to the list
-  const modelNames = [modelName];
+  if (modelName) {
+    modelNames.push(modelName);
+  }
   // when importing contact model, relationships are also imported
   if (modelName === 'contact') {
     modelNames.push('relationship');

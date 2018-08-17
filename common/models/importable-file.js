@@ -40,7 +40,7 @@ module.exports = function (ImportableFile) {
   function getJsonFileHeaders(file, callback) {
     // try and parse as a JSON
     try {
-      const jsonObj = JSON.parse(data);
+      const jsonObj = JSON.parse(file);
       // this needs to be a list (in order to get its headers)
       if (!Array.isArray(jsonObj)) {
         // error invalid content
@@ -80,7 +80,7 @@ module.exports = function (ImportableFile) {
    */
   function getXmlFileHeaders(file, callback) {
     // parse XML string
-    xml2js.parseString(data, {explicitRoot: false}, function (error, jsonObj) {
+    xml2js.parseString(file, {explicitRoot: false}, function (error, jsonObj) {
       // handle parse errors
       if (error) {
         return callback(error);
@@ -118,7 +118,7 @@ module.exports = function (ImportableFile) {
    */
   function getSpreadSheetFileHeaders(file, callback) {
     // parse XLS data
-    const parsedData = xlsx.read(data, {cellDates: true, cellNF: false, cellText: false});
+    const parsedData = xlsx.read(file, {cellDates: true, cellNF: false, cellText: false});
     // extract first sheet name (we only care about first sheet)
     let sheetName = parsedData.SheetNames.shift();
     // convert data to JSON
