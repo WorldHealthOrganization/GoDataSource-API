@@ -1946,6 +1946,11 @@
           "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
+          "arg": "encryptPassword",
+          "type": "string",
+          "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -3255,6 +3260,11 @@
           "type": "string"
         },
         {
+          "arg": "decryptPassword",
+          "type": "string",
+          "description": "If provided, the imported file will be decrypted using aes-256-ctr algorithm using the provided password"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -3593,6 +3603,11 @@
           "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
+          "arg": "encryptPassword",
+          "type": "string",
+          "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -3646,6 +3661,11 @@
             "pdf"
           ],
           "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+        },
+        {
+          "arg": "encryptPassword",
+          "type": "string",
+          "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
         },
         {
           "arg": "options",

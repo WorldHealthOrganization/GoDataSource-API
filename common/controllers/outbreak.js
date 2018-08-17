@@ -72,10 +72,11 @@ module.exports = function (Outbreak) {
    * Export filtered cases to file
    * @param filter
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param encryptPassword
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredCases = function (filter, exportType, options, callback) {
+  Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, options, callback) {
     const _filters = app.utils.remote.mergeFilters({
         where: {
           outbreakId: this.id
@@ -91,7 +92,10 @@ module.exports = function (Outbreak) {
       // use that list
       headerRestrictions = contextUser.settings.caseFields;
     }
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', options, headerRestrictions, callback);
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', options, headerRestrictions, encryptPassword, callback);
   };
 
   /**
@@ -3489,11 +3493,12 @@ module.exports = function (Outbreak) {
    * @param req
    * @param file
    * @param modelName
+   * @param decryptPassword
    * @param options
    * @param callback
    */
-  Outbreak.prototype.importableFileUpload = function (req, file, modelName, options, callback) {
-    app.controllers.importableFile.upload(req, file, modelName, options, this.id, callback);
+  Outbreak.prototype.importableFileUpload = function (req, file, modelName, decryptPassword, options, callback) {
+    app.controllers.importableFile.upload(req, file, modelName, decryptPassword, options, this.id, callback);
   };
 
   /**
@@ -4162,27 +4167,33 @@ module.exports = function (Outbreak) {
    * Export filtered contacts to file
    * @param filter
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param encryptPassword
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredContacts = function (filter, exportType, options, callback) {
+  Outbreak.prototype.exportFilteredContacts = function (filter, exportType, encryptPassword, options, callback) {
     const _filters = app.utils.remote.mergeFilters({
         where: {
           outbreakId: this.id
         }
       },
       filter || {});
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, _filters, exportType, 'Contacts List', options, null, callback);
+
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, _filters, exportType, 'Contacts List', options, null, encryptPassword, callback);
   };
 
   /**
    * Export filtered outbreaks to file
    * @param filter
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param encryptPassword
    * @param options
    * @param callback
    */
-  Outbreak.exportFilteredOutbreaks = function (filter, exportType, options, callback) {
+  Outbreak.exportFilteredOutbreaks = function (filter, exportType, encryptPassword, options, callback) {
 
     /**
      * Translate the template
@@ -4213,8 +4224,12 @@ module.exports = function (Outbreak) {
       });
     }
 
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+
     // export outbreaks list
-    app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', options, null, function (results, languageDictionary) {
+    app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', options, null, encryptPassword, function (results, languageDictionary) {
       results.forEach(function (result) {
         // translate templates
         ['caseInvestigationTemplate', 'labResultsTemplate', 'contactFollowUpTemplate'].forEach(function (template) {
