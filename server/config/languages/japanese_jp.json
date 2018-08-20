@@ -51,7 +51,7 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP_DESCRIPTION": "日本の This permission allows the approval of help items."
     },
     "referenceDataCategoryQuestionAnswerType": {
-      "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE": "日本の Answer type",
+      "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE": "日本の Question Answer type",
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DESCRIPTION": "日本の description_placeholder",
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT": "日本の Free Text",
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT_DESCRIPTION": "日本の description_placeholder",
@@ -67,7 +67,7 @@
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD_DESCRIPTION": "日本の description_placeholder"
     },
     "referenceDataCategoryQuestionCategory": {
-      "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY": "日本の Category",
+      "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY": "日本の Question Category",
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_DESCRIPTION": "日本の description_placeholder",
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL": "日本の Clinical",
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL_DESCRIPTION": "日本の description_placeholder"
