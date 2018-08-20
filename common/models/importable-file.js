@@ -33,14 +33,14 @@ module.exports = function (ImportableFile) {
   }
 
   /**
-   * Get JSON file and headers
-   * @param file
+   * Get JSON content and headers
+   * @param stringifiedJson
    * @param callback
    */
-  function getJsonFileHeaders(file, callback) {
+  function getJsonHeaders(stringifiedJson, callback) {
     // try and parse as a JSON
     try {
-      const jsonObj = JSON.parse(file);
+      const jsonObj = JSON.parse(stringifiedJson);
       // this needs to be a list (in order to get its headers)
       if (!Array.isArray(jsonObj)) {
         // error invalid content
@@ -74,13 +74,13 @@ module.exports = function (ImportableFile) {
   }
 
   /**
-   * Get XML file as JSON and its headers
-   * @param file
+   * Get XML string as JSON and its headers
+   * @param xmlString
    * @param callback
    */
-  function getXmlFileHeaders(file, callback) {
+  function getXmlHeaders(xmlString, callback) {
     // parse XML string
-    xml2js.parseString(file, {explicitRoot: false}, function (error, jsonObj) {
+    xml2js.parseString(xmlString, {explicitRoot: false}, function (error, jsonObj) {
       // handle parse errors
       if (error) {
         return callback(error);
@@ -112,13 +112,13 @@ module.exports = function (ImportableFile) {
   }
 
   /**
-   * Get XLS/XLSX/CSV/ODS file as JSON and its headers
-   * @param file
+   * Get XLS/XLSX/CSV/ODS fileContent as JSON and its headers
+   * @param fileContent
    * @param callback
    */
-  function getSpreadSheetFileHeaders(file, callback) {
+  function getSpreadSheetHeaders(fileContent, callback) {
     // parse XLS data
-    const parsedData = xlsx.read(file, {cellDates: true, cellNF: false, cellText: false});
+    const parsedData = xlsx.read(fileContent, {cellDates: true, cellNF: false, cellText: false});
     // extract first sheet name (we only care about first sheet)
     let sheetName = parsedData.SheetNames.shift();
     // convert data to JSON
@@ -199,16 +199,16 @@ module.exports = function (ImportableFile) {
     let getHeaders;
     switch (extension) {
       case '.json':
-        getHeaders = getJsonFileHeaders;
+        getHeaders = getJsonHeaders;
         break;
       case '.xml':
-        getHeaders = getXmlFileHeaders;
+        getHeaders = getXmlHeaders;
         break;
       case '.csv':
       case '.xls':
       case '.xlsx':
       case '.ods':
-        getHeaders = getSpreadSheetFileHeaders;
+        getHeaders = getSpreadSheetHeaders;
         break;
     }
 

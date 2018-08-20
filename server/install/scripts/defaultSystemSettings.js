@@ -23,6 +23,20 @@ const defaultSettings = {
     "backupInterval": 24,
     "dataRetentionInterval": 90,
     "location": ""
+  },
+  "anonymizeFields": {
+    "case": [
+      "firstName",
+      "middleName",
+      "lastName",
+      "addresses[].addressLine1"
+    ],
+    "contact": [
+      "firstName",
+      "middleName",
+      "lastName",
+      "addresses[].addressLine1"
+    ]
   }
 };
 
@@ -34,12 +48,19 @@ const defaultSettings = {
 function run(callback) {
 
   /**
-   * Add default settings
+   * Install default settings
    */
   SystemSettings
-    .create(defaultSettings)
+    .findOne()
+    .then(function (systemSettings) {
+      if(systemSettings){
+        return systemSettings.updateAttributes(defaultSettings);
+      } else {
+        return SystemSettings.create(defaultSettings);
+      }
+    })
     .then(function () {
-      console.log(`Added Default System Settings`);
+      console.log(`Install Default System Settings`);
       callback();
     })
     .catch(callback);

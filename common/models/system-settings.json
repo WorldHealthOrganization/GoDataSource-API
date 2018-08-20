@@ -27,6 +27,18 @@
     },
     "relationFields": {
       "type": ["string"]
+    },
+    "anonymizeFields": {
+      "type": {
+        "case": {
+          "type": ["string"],
+          "default": ["firstName", "middleName", "lastName", "addresses[].addressLine1"]
+        },
+        "contact": {
+          "type": ["string"],
+          "default": ["firstName", "middleName", "lastName", "addresses[].addressLine1"]
+        }
+      }
     }
   },
   "validations": [],
