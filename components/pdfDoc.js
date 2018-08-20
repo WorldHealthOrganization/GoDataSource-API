@@ -5,7 +5,6 @@ const PdfTable = require('voilab-pdf-table');
 const svg2png = require('svg2png');
 const streamUtils = require('./streamUtils');
 const Jimp = require('jimp');
-const app = require('../server/server');
 
 // define a default document configuration
 const defaultDocumentConfiguration = {
@@ -185,7 +184,9 @@ function createPDFList(headers, data, callback) {
  * @param splitFactor Split the image into a square matrix with a side of splitFactor (1 no split, 2 => 2x2 grid, 3 => 3x3 grid)
  * @param callback
  */
-function createImageDoc(imageData, imageType, splitFactor, callback) {
+const createImageDoc = function (imageData, imageType, splitFactor, callback) {
+  const app = require('./../server/server');
+
   // create a PDF doc
   const document = createPdfDoc({
     size: 'A3'
@@ -217,7 +218,6 @@ function createImageDoc(imageData, imageType, splitFactor, callback) {
   // build image buffer based on the image type
   // operations are different
   (new Promise((resolve) => {
-    // TODO: app.models is undefined (require fails)
     if (imageType === app.models.systemSettings.imageTypes.PNG) {
       return resolve(Buffer.from(imageData, 'base64'));
     }
@@ -226,7 +226,7 @@ function createImageDoc(imageData, imageType, splitFactor, callback) {
     return svg2png(imageData, {
       width: renderImageSize.width * splitFactor,
       height: renderImageSize.height * splitFactor
-    });
+    }).then((buffer) => resolve(buffer));
   })).then(function (buffer) {
     // check if we need to split the image
     if (splitFactor > 1) {
@@ -284,12 +284,12 @@ function createImageDoc(imageData, imageType, splitFactor, callback) {
         })
     } else {
       // fit the image to page (page dimensions - margins)
-      document.image(buffer, 50, 50, {fit: [imageSize.width, imageSize.height]});
+      document.image(buffer, 50, 50, { fit: [imageSize.width, imageSize.height] });
       // finalize document
       document.end();
     }
   }).catch(callback);
-}
+};
 
 /**
  * Helper function used to add a text (title in most cases) with a given font size
