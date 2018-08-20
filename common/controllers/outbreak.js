@@ -4285,10 +4285,14 @@ module.exports = function (Outbreak) {
    * Export filtered contacts follow-ups to PDF
    * PDF Information: List of contacts with follow-ups table
    * @param filter This request also accepts 'includeContactAddress': boolean, 'includeContactPhoneNumber': boolean, 'groupResultsBy': enum ['case', 'location', 'riskLevel'] on the first level in 'where'
+   * @param anonymizationFields Array containing properties that need to be anonymized
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredContactFollowUps = function (filter, options, callback) {
+  Outbreak.prototype.exportFilteredContactFollowUps = function (filter, anonymizationFields, options, callback) {
+    // normalize anonymizationFields; if received value is not an array we won't use it
+    anonymizationFields = Array.isArray(anonymizationFields) ? anonymizationFields : [];
+
     // initialize includeContactAddress and includeContactPhoneNumber filters
     let includeContactAddress, includeContactPhoneNumber;
     // check if the includeContactAddress filter was sent; accepting it only on the first level
