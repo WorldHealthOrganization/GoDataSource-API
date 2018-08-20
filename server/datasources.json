@@ -8,7 +8,8 @@
     "name": "mongoDb",
     "user": "root",
     "connector": "mongodb",
-    "allowExtendedOperators": true
+    "allowExtendedOperators": true,
+    "enableGeoIndexing": true
   },
   "email": {
     "name": "email",
