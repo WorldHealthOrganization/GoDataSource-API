@@ -117,6 +117,9 @@
     "Multiple Answers",
     "File Upload"
   ],
+  "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY": [
+    "Clinical"
+  ],
   "LNG_REFERENCE_DATA_CATEGORY_MISCELLANEOUS_CUSTOMIZABLE_UI_ELEMENT": [
     "Hospitalized Case"
   ],
