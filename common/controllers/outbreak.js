@@ -105,9 +105,7 @@ module.exports = function (Outbreak) {
 
       // file must be either encrypted or anonymized
       if (!encryptPassword) {
-        return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {
-          errorMessages: 'Exported file muse be either encrypted or anonymized. Please either select some fields to be anynomized or provide a password for encryption'
-        }));
+        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
       }
     }
 
@@ -4207,9 +4205,7 @@ module.exports = function (Outbreak) {
 
       // file must be either encrypted or anonymized
       if (!encryptPassword) {
-        return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {
-          errorMessages: 'Exported file muse be either encrypted or anonymized. Please either select some fields to be anynomized or provide a password for encryption'
-        }));
+        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
       }
     }
 
@@ -4267,9 +4263,7 @@ module.exports = function (Outbreak) {
 
       // file must be either encrypted or anonymized
       if (!encryptPassword) {
-        return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {
-          errorMessages: 'Exported file muse be either encrypted or anonymized. Please either select some fields to be anynomized or provide a password for encryption'
-        }));
+        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
       }
     }
 

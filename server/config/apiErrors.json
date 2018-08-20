@@ -130,5 +130,9 @@
   "DELETE_CONTACT_LAST_RELATIONSHIP": {
     "defaultStatusCode": 422,
     "messagePattern": "Cannot delete a contact's last relationship with a case or event. The contact with ID <%= contactIDs %> doesn't have an additional relationship with a case or event."
+  },
+  "FILE_ENCRYPTED_OR_ANONIMIZED": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Exported file must be either encrypted or anonymized. Please either select some fields to be anynomized or provide a password for encryption"
   }
 }
