@@ -1951,6 +1951,11 @@
           "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
         },
         {
+          "arg": "anonymizeFields",
+          "type": ["string"],
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -3608,6 +3613,11 @@
           "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
         },
         {
+          "arg": "anonymizeFields",
+          "type": ["string"],
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -3666,6 +3676,11 @@
           "arg": "encryptPassword",
           "type": "string",
           "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
+        },
+        {
+          "arg": "anonymizeFields",
+          "type": ["string"],
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
           "arg": "options",
