@@ -94,7 +94,7 @@ module.exports = function (Outbreak) {
       headerRestrictions = contextUser.settings.caseFields;
     }
 
-    // if encrypt password is not valiid, remove it
+    // if encrypt password is not valid, remove it
     if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
       encryptPassword = null;
     }
@@ -102,6 +102,13 @@ module.exports = function (Outbreak) {
     // make sure anonymizeFields is valid
     if (!Array.isArray(anonymizeFields)) {
       anonymizeFields = [];
+
+      // file must be either encrypted or anonymized
+      if (!encryptPassword) {
+        return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {
+          errorMessages: 'Exported file muse be either encrypted or anonymized. Please either select some fields to be anynomized or provide a password for encryption'
+        }));
+      }
     }
 
     app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, headerRestrictions, callback);
@@ -4189,7 +4196,7 @@ module.exports = function (Outbreak) {
       },
       filter || {});
 
-    // if encrypt password is not valiid, remove it
+    // if encrypt password is not valid, remove it
     if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
       encryptPassword = null;
     }
@@ -4197,6 +4204,13 @@ module.exports = function (Outbreak) {
     // make sure anonymizeFields is valid
     if (!Array.isArray(anonymizeFields)) {
       anonymizeFields = [];
+
+      // file must be either encrypted or anonymized
+      if (!encryptPassword) {
+        return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {
+          errorMessages: 'Exported file muse be either encrypted or anonymized. Please either select some fields to be anynomized or provide a password for encryption'
+        }));
+      }
     }
 
     app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, _filters, exportType, 'Contacts List', encryptPassword, anonymizeFields, options, null, callback);
@@ -4250,6 +4264,13 @@ module.exports = function (Outbreak) {
     // make sure anonymizeFields is valid
     if (!Array.isArray(anonymizeFields)) {
       anonymizeFields = [];
+
+      // file must be either encrypted or anonymized
+      if (!encryptPassword) {
+        return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {
+          errorMessages: 'Exported file muse be either encrypted or anonymized. Please either select some fields to be anynomized or provide a password for encryption'
+        }));
+      }
     }
 
     // export outbreaks list
