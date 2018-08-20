@@ -21,8 +21,11 @@ function stripSpecialCharsToLowerCase(string) {
  * @return {*[]}
  */
 function getModelNamesFor(modelName) {
+  const modelNames = [];
   // add model name to the list
-  const modelNames = [modelName];
+  if (modelName) {
+    modelNames.push(modelName);
+  }
   // when importing contact model, relationships are also imported
   if (modelName === 'contact') {
     modelNames.push('relationship');
@@ -185,11 +188,12 @@ module.exports = function (ImportableFile) {
    * @param req
    * @param file
    * @param modelName
+   * @param decryptPassword
    * @param options
    * @param [outbreakId]
    * @param callback
    */
-  ImportableFile.upload = function (req, file, modelName, options, outbreakId, callback) {
+  ImportableFile.upload = function (req, file, modelName, decryptPassword, options, outbreakId, callback) {
     // outbreakId is optional
     if (typeof outbreakId === "function") {
       callback = outbreakId;
@@ -199,12 +203,19 @@ module.exports = function (ImportableFile) {
     app.utils.remote.helpers.parseMultipartRequest(req, [], ['file'], ImportableFile, function (error, fields, files) {
       file = files.file;
       modelName = fields.model;
+      decryptPassword = null;
+
+      // if the decrypt password is valid, use it
+      if (typeof fields.decryptPassword === 'string' && fields.decryptPassword.length) {
+        decryptPassword = fields.decryptPassword;
+      }
+
       // handle errors
       if (error) {
         return callback(error);
       }
       // store the file and get its headers
-      ImportableFile.storeFileAndGetHeaders(file, function (error, result) {
+      ImportableFile.storeFileAndGetHeaders(file, decryptPassword, function (error, result) {
         // handle errors
         if (error) {
           return callback(error);
@@ -376,9 +387,9 @@ module.exports = function (ImportableFile) {
                 result,
                 // main model takes precedence on mapping
                 {suggestedFieldMapping: Object.assign(suggestedFieldMapping, result.suggestedFieldMapping)},
-                {modelProperties: Object.assign(result.modelProperties, {[modelName]:results[modelName].modelProperties})},
-                {modelPropertyValues: Object.assign(result.modelPropertyValues, {[modelName]:results[modelName].modelPropertyValues})}
-                );
+                {modelProperties: Object.assign(result.modelProperties, {[modelName]: results[modelName].modelProperties})},
+                {modelPropertyValues: Object.assign(result.modelPropertyValues, {[modelName]: results[modelName].modelPropertyValues})}
+              );
             } else {
               // main model results stay on first level
               result = Object.assign({}, result, results[modelName]);
