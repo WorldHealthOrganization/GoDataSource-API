@@ -23,7 +23,7 @@
     "address": {
       "type": "address"
     },
-    "fillGeolocation": {
+    "fillGeoLocation": {
       "type": "geopoint"
     },
     "questionnaireAnswers": {
