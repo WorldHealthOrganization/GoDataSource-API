@@ -1,77 +1,77 @@
 'use strict';
 
 /**
- * Anonymize fields of a dataSet
- * @param dataSet Array of (object) items
- * @param fields List of properties. Each property can either be a (string) property name or an object {name: '<propertyName>', replaceValue: '<replaceValue>'}
- * @param [replaceWith] Global replacer
- * @param callback
- * @return {*}
+ * Construct a nested map of properties from a flat list. E.g. prop.subProp[].level3prop => {prop: {subProp: {level3prop: true}}}
+ * @param fields
  */
-function anonymize(dataSet, fields, replaceWith, callback) {
-  fields = fields || [];
-  // replaceWith argument is optional
-  let useReplaceWith = true;
-  if (typeof  replaceWith === 'function') {
-    callback = replaceWith;
-    useReplaceWith = false;
-  }
-  // do some basic validation
-  if (!Array.isArray(dataSet)) {
-    return callback(new Error('dataSet must be an array of objects'));
-  }
-  if (!Array.isArray(fields)) {
-    return callback(new Error('fields must be an array of properties'));
-  }
-
-  const replaceMap = {};
-  const NO_REPLACE = '__NO_REPLACE__';
-
-  // set up replace values for each property (if any)
-  fields.forEach(function (sensitiveField) {
-    if (typeof sensitiveField === 'string') {
-      if (useReplaceWith) {
-        replaceMap[sensitiveField] = replaceWith;
+const getDeepFieldsMap = function (fields) {
+  // define fields map
+  let fieldsMap = {};
+  // if there are fields to be mapped
+  if (Array.isArray(fields) && fields.length) {
+    // go trough all of them
+    fields.forEach(function (fieldPath) {
+      // remove array markers (not needed)
+      const sanitizedFieldPath = fieldPath.replace(/\[]/g, '');
+      // get level separator
+      const separatorIndex = sanitizedFieldPath.indexOf('.');
+      // simple property type
+      if (separatorIndex === -1) {
+        fieldsMap[sanitizedFieldPath] = true;
       } else {
-        replaceMap[sensitiveField] = NO_REPLACE;
+        // complex property type, get prop name and remaining part
+        const propName = sanitizedFieldPath.substring(0, separatorIndex);
+        const leftPath = sanitizedFieldPath.substring(separatorIndex + 1);
+        // process complex property
+        fieldsMap[propName] = getDeepFieldsMap([leftPath]);
       }
-    } else if (typeof sensitiveField === 'object') {
-      replaceMap[sensitiveField.name] = sensitiveField.replaceValue;
-    }
-  });
-
-  // store a (flat) list of sensitive property names
-  const sensitiveProperties = Object.keys(replaceMap);
-
-  const resultSet = [];
-  try {
-    // go through all entries
-    dataSet.forEach(function (entry) {
-      // do some basic validation of each entry
-      if (typeof entry !== 'object' || Array.isArray(entry)) {
-        throw new Error('dataSet must be an array of objects');
-      }
-      const _entry = {};
-      // test & replace sensitive properties
-      Object.keys(entry).forEach(function (propertyName) {
-        if (sensitiveProperties.indexOf(propertyName) === -1) {
-          // non sensitive properties are copied
-          _entry[propertyName] = entry[propertyName];
-        } else if (replaceMap[propertyName] !== NO_REPLACE){
-          // properties that need to be replaced are replaced
-          _entry[propertyName] = replaceMap[propertyName];
-        }
-        // others are skipped
-      });
-      // update result set
-      resultSet.push(_entry);
     });
-    callback(null, resultSet);
-
-  } catch (error) {
-    return callback(error);
   }
-}
+  return fieldsMap;
+};
+
+/**
+ * Anonymize a list of fields in a json (object/list of objects)
+ * @param json
+ * @param fields
+ */
+const anonymize = function (json, fields) {
+  // define a field map
+  let fieldsMap;
+  // if the fields are passed as a list
+  if (Array.isArray(fields)) {
+    // nothing to be anonymized
+    if (!fields.length) {
+      return;
+    }
+    // get nested field map
+    fieldsMap = getDeepFieldsMap(fields);
+  } else {
+    // fields param is already a map
+    fieldsMap = fields;
+  }
+  // if the passed data is an array
+  if (Array.isArray(json)) {
+    // anonymize each entry
+    json.forEach(function (item) {
+      anonymize(item, fields);
+    });
+  } else {
+    // data is an object, go trough the properties
+    Object.keys(json).forEach(function (property) {
+      // check if the property needs to be anonymized
+      if (fieldsMap[property]) {
+        // if the property has sub-levels that need to be anonymized and the map contains sub-properties, anonymize recursively
+        if (typeof fieldsMap[property] === 'object' && json[property] && typeof json[property] === 'object') {
+          anonymize(json[property], fieldsMap[property]);
+        } else if (fieldsMap[property] === true) {
+          // map instructs to anonymize entire property
+          json[property] = '***';
+        }
+      }
+    });
+  }
+};
 
 module.exports = {
   anonymize: anonymize

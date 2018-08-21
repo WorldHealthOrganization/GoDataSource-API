@@ -978,6 +978,12 @@
       "principalId": "read_outbreak",
       "permission": "ALLOW",
       "property": "exportFilteredOutbreaks"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "exportFilteredContactFollowUps"
     }
   ],
   "methods": {
@@ -1949,6 +1955,13 @@
           "arg": "encryptPassword",
           "type": "string",
           "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
+        },
+        {
+          "arg": "anonymizeFields",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
           "arg": "options",
@@ -3525,7 +3538,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); ; Note: this request also accepts 'date': 'date', 'locationId': 'locationId' on the first level in 'where'"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'date': 'date', 'locationId': 'locationId' on the first level in 'where'"
         }
       ],
       "returns": [
@@ -3608,6 +3621,13 @@
           "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
         },
         {
+          "arg": "anonymizeFields",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -3668,6 +3688,13 @@
           "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
         },
         {
+          "arg": "anonymizeFields",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -3699,6 +3726,59 @@
       "http": {
         "verb": "get",
         "path": "/export"
+      }
+    },
+    "prototype.exportFilteredContactFollowUps": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'includeContactAddress': boolean, 'includeContactPhoneNumber': boolean, 'groupResultsBy': enum ['case', 'location', 'riskLevel'] on the first level in 'where'"
+        },
+        {
+          "arg": "encryptPassword",
+          "type": "string",
+          "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
+        },
+        {
+          "arg": "anonymizeFields",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export filtered list of cases",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/follow-ups/export"
       }
     }
   }

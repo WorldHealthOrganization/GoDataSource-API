@@ -68,12 +68,13 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callba
  * @param exportType
  * @param fileName
  * @param encryptPassword {string|null}
+ * @param anonymizeFields
  * @param options
  * @param headersWhitelist {array|null}
  * @param [beforeExport] Optional result modifier before export
  * @param callback
  */
-function exportFilteredModelsList(app, Model, filter, exportType, fileName, encryptPassword, options, headersWhitelist, beforeExport, callback) {
+function exportFilteredModelsList(app, Model, filter, exportType, fileName, encryptPassword, anonymizeFields, options, headersWhitelist, beforeExport, callback) {
   // before export is optional
   if (!callback) {
     callback = beforeExport;
@@ -151,6 +152,14 @@ function exportFilteredModelsList(app, Model, filter, exportType, fileName, encr
           return beforeExport(results, dictionary);
         })
         .then(function (results) {
+          // if a there are fields to be anonymized
+          if (anonymizeFields.length) {
+            // anonymize them
+            app.utils.anonymizeDatasetFields.anonymize(results, anonymizeFields);
+          }
+          return results;
+        })
+        .then(function (results) {
           // create file with the results
           return app.utils.helpers.exportListFile(headers, results, exportType)
         })
@@ -158,7 +167,7 @@ function exportFilteredModelsList(app, Model, filter, exportType, fileName, encr
           if (encryptPassword) {
             return app.utils.aesCrypto.encrypt(encryptPassword, file.data)
               .then(function (data) {
-               file.data = data;
+                file.data = data;
                 return file;
               });
           } else {

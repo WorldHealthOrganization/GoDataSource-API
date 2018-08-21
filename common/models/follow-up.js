@@ -7,6 +7,19 @@ module.exports = function (Followup) {
   // set flag to not get controller
   Followup.hasController = false;
 
+  // map language token labels for model properties
+  Followup.fieldLabelsMap = {
+    'date': 'LNG_FOLLOW_UP_FIELD_LABEL_DATE',
+    'performed': 'LNG_FOLLOW_UP_FIELD_LABEL_PERFORMED',
+    'lostToFollowUp': 'LNG_FOLLOW_UP_FIELD_LABEL_LOST_TO_FOLLOW_UP',
+    'address': 'LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS',
+    'fillGeolocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
+    'questionnaireAnswers': 'LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE',
+    'index': 'LNG_FOLLOW_UP_FIELD_LABEL_INDEX',
+    'teamId': 'LNG_FOLLOW_UP_FIELD_LABEL_TEAM',
+    'isGenerated': 'LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED'
+  };
+
   // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
   Followup.nestedGeoPoints = [
     'address.geoLocation'
@@ -26,7 +39,7 @@ module.exports = function (Followup) {
       where: {
         personId: ctx.instance.personId
       },
-      order: "date ASC"
+      order: 'date ASC'
     })
     .then((followUp) => {
       //If it is in the past, use it as a starting point for the index calculation

@@ -499,7 +499,7 @@
     },
     "addressFields": {
       "LNG_CASE_FIELD_LABEL_ADDRESSES": "Addresses",
-      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_NAME": "Name",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID": "Type",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY": "Country",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY": "CITY",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1": "Address Line 1",
@@ -640,7 +640,8 @@
       "LNG_CONTACT_FIELD_LABEL_LAST_NAME": "Last Name",
       "LNG_CONTACT_FIELD_LABEL_DATE_DECEASED": "Date of Decease",
       "LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER": "Document Number",
-      "LNG_CONTACT_FIELD_LABEL_VISUAL_ID": "Visual ID"
+      "LNG_CONTACT_FIELD_LABEL_VISUAL_ID": "Visual ID",
+      "LNG_CONTACT_FIELD_LABEL_DOCUMENTS": "Documents"
     },
     "uiContactsListPage": {
       "LNG_PAGE_LIST_CONTACTS_TITLE": "Contacts"
@@ -683,7 +684,10 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS": "Address",
       "LNG_FOLLOW_UP_FIELD_LABEL_PERFORMED": "Performed",
       "LNG_FOLLOW_UP_FIELD_LABEL_LOST_TO_FOLLOW_UP": "Lost to Follow-up",
-      "LNG_FOLLOW_UP_FIELD_LABEL_DELETED": "Deleted"
+      "LNG_FOLLOW_UP_FIELD_LABEL_DELETED": "Deleted",
+      "LNG_FOLLOW_UP_FIELD_LABEL_TEAM": "Team",
+      "LNG_FOLLOW_UP_FIELD_LABEL_INDEX": "Index",
+      "LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED": "Is Generated"
     },
     "uiFollowUpsListPage": {
       "LNG_PAGE_LIST_FOLLOW_UPS_TITLE": "Upcoming Follow-ups",
@@ -899,7 +903,10 @@
       "LNG_PAGE_TITLE_LAB_RESULTS_DETAILS": "Lab Results Details",
       "LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE": "Lab Results Questionnaire",
       "LNG_PAGE_TITLE_CONTACT_DETAILS": "Contact Details",
-      "LNG_PAGE_TITLE_CONTACT_RELATIONSHIP": "Contact Relationship"
+      "LNG_PAGE_TITLE_CONTACT_RELATIONSHIP": "Contact Relationship",
+      "LNG_PAGE_TITLE_CONTACT_WITH_FOLLOWUPS_DETAILS": "Contact With Follow-ups",
+      "LNG_PAGE_CONTACT_WITH_FOLLOWUPS_GROUP_TITLE": "Group by",
+      "LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE": "Follow-ups"
     },
     "countries": {
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AFGHANISTAN": "Afghanistan",
