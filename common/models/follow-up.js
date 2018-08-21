@@ -20,6 +20,11 @@ module.exports = function (Followup) {
     'isGenerated': 'LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED'
   };
 
+  // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
+  Followup.nestedGeoPoints = [
+    'address.geoLocation'
+  ];
+
   /**
    * Enhance follow up save to include index of the created follow up
    */
