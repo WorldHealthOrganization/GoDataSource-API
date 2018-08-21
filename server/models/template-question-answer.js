@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = function(Templatequestionanswer) {
+module.exports = function() {
 
 };

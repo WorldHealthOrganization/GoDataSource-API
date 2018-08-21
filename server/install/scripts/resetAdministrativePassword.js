@@ -97,10 +97,10 @@ function run(callback) {
             password: defaultAdmin.password,
             passwordChange: true
           });
-        })
+        });
     })
     .then(function () {
-      console.log(`Administrative password was reset`);
+      console.log('Administrative password was reset');
       callback();
     })
     .catch(callback);

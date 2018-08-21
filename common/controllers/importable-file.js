@@ -195,7 +195,7 @@ module.exports = function (ImportableFile) {
    */
   ImportableFile.upload = function (req, file, modelName, decryptPassword, options, outbreakId, callback) {
     // outbreakId is optional
-    if (typeof outbreakId === "function") {
+    if (typeof outbreakId === 'function') {
       callback = outbreakId;
       outbreakId = undefined;
     }
@@ -421,7 +421,7 @@ module.exports = function (ImportableFile) {
       }
       catch (error) {
         // handle JSON.parse errors
-        callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+        callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
           contentType: 'JSON',
           details: error.message
         }));

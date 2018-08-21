@@ -73,7 +73,7 @@ module.exports = function (Language) {
               let translation = ' ';
               // if the translation exists, use it
               if (parsedData.Sheets[sheetName][`B${index}`]) {
-                translation = parsedData.Sheets[sheetName][`B${index}`].v
+                translation = parsedData.Sheets[sheetName][`B${index}`].v;
               }
               // save raw data
               languageTokens.push({
@@ -154,6 +154,6 @@ module.exports = function (Language) {
             .offerFileToDownload(file, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', `${self.name}.xlsx`, callback);
         });
       })
-      .catch(callback)
-  }
+      .catch(callback);
+  };
 };

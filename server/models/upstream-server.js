@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = function(Upstreamserver) {
+module.exports = function() {
 
 };

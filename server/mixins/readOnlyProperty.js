@@ -119,7 +119,7 @@ module.exports = function (Model) {
       if (readReadOnlyProperties[Model.modelName].indexOf(propertyName) !== -1) {
         delete instanceData[propertyName];
       }
-    })
+    });
   };
 
   /**

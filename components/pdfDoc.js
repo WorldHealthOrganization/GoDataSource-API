@@ -228,7 +228,7 @@ const createImageDoc = function (imageData, imageType, splitFactor, callback) {
             // finalize document
             document.end();
           });
-        })
+        });
     } else {
       // fit the image to page (page dimensions - margins)
       document.image(buffer, 50, 50, { fit: [imageSize.width, imageSize.height] });
@@ -437,7 +437,7 @@ function createTableInPDFDocument(headers, data, document, documentConfig) {
       id: header.id,
       header: header.header,
       width: header.width || defaultRowWidth
-    })
+    });
   });
 
   // add table data

@@ -3,39 +3,39 @@
 const app = require('../../server');
 const SystemSettings = app.models.systemSettings;
 const defaultSettings = {
-  "upstreamServer": {
-    "name": "",
-    "description": "",
-    "url": "",
-    "credentials": {
-      "clientId": "",
-      "clientSecret": ""
+  'upstreamServer': {
+    'name': '',
+    'description': '',
+    'url': '',
+    'credentials': {
+      'clientId': '',
+      'clientSecret': ''
     },
-    "syncInterval": 0,
-    "syncOnEveryChange": false
+    'syncInterval': 0,
+    'syncOnEveryChange': false
   },
-  "clientApplications": [],
-  "dataBackup": {
-    "modules": [
-      "System Configuration",
-      "Data"
+  'clientApplications': [],
+  'dataBackup': {
+    'modules': [
+      'System Configuration',
+      'Data'
     ],
-    "backupInterval": 24,
-    "dataRetentionInterval": 90,
-    "location": ""
+    'backupInterval': 24,
+    'dataRetentionInterval': 90,
+    'location': ''
   },
-  "anonymizeFields": {
-    "case": [
-      "firstName",
-      "middleName",
-      "lastName",
-      "addresses[].addressLine1"
+  'anonymizeFields': {
+    'case': [
+      'firstName',
+      'middleName',
+      'lastName',
+      'addresses[].addressLine1'
     ],
-    "contact": [
-      "firstName",
-      "middleName",
-      "lastName",
-      "addresses[].addressLine1"
+    'contact': [
+      'firstName',
+      'middleName',
+      'lastName',
+      'addresses[].addressLine1'
     ]
   }
 };
@@ -60,7 +60,7 @@ function run(callback) {
       }
     })
     .then(function () {
-      console.log(`Install Default System Settings`);
+      console.log('Install Default System Settings');
       callback();
     })
     .catch(callback);

@@ -93,5 +93,5 @@ module.exports = function (Icon) {
           .offerFileToDownload(imageBuffer, `image/${extension}`, `${self.name}.${extension}`, callback);
       })
       .catch(callback);
-  }
+  };
 };

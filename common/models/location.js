@@ -41,7 +41,7 @@ module.exports = function (Location) {
             if (allLocations.indexOf(location.id) === -1) {
               foundLocations.push(location.id);
             } else {
-              app.logger.warn(`Detected loop in location hierarchy: location with id "${location.id}" is set as a child location for a location that is lower the hierarchy. Scanned locations ids: ${allLocations.join(', ')}`)
+              app.logger.warn(`Detected loop in location hierarchy: location with id "${location.id}" is set as a child location for a location that is lower the hierarchy. Scanned locations ids: ${allLocations.join(', ')}`);
             }
           });
           // consolidate them in the locations list
@@ -101,7 +101,7 @@ module.exports = function (Location) {
               if (allLocationsIds.indexOf(location.id) === -1) {
                 foundLocationsIds.push(location.id);
               } else {
-                app.logger.warn(`Detected loop in location hierarchy: location with id "${location.id}" is set as a child location for a location that is lower the hierarchy. Scanned locations ids: ${allLocationsIds.join(', ')}`)
+                app.logger.warn(`Detected loop in location hierarchy: location with id "${location.id}" is set as a child location for a location that is lower the hierarchy. Scanned locations ids: ${allLocationsIds.join(', ')}`);
               }
             }
           });
@@ -195,7 +195,7 @@ module.exports = function (Location) {
      */
     let parentLocationQuery = data.parentLocationId;
     if (!data.parentLocationId) {
-      parentLocationQuery = {eq: null}
+      parentLocationQuery = {eq: null};
     }
 
     /**
@@ -238,7 +238,7 @@ module.exports = function (Location) {
         let errors = [];
 
         if (location.name === data.name) {
-          errors.push(`A location with name = '${data.name}' and the same parentLocationId already exists.`)
+          errors.push(`A location with name = '${data.name}' and the same parentLocationId already exists.`);
         }
 
         if (location.synonyms && data.synonyms) {
@@ -246,15 +246,15 @@ module.exports = function (Location) {
             if (location.synonyms.indexOf(synonym) > -1) {
               errors.push(`A location with a '${synonym}' synonym and the same parentLocationId already exists.`);
             }
-          })
+          });
         }
 
-        throw(app.utils.apiError.getError("MODEL_IDENTIFIERS_ARE_NOT_UNIQUE_IN_CONTEXT", {
+        throw(app.utils.apiError.getError('MODEL_IDENTIFIERS_ARE_NOT_UNIQUE_IN_CONTEXT', {
           model: Location.modelName,
           details: errors.join(' ')
         }));
       }
-    })
+    });
   };
 
   /**
@@ -268,9 +268,9 @@ module.exports = function (Location) {
       }
     }).then((location) => {
       if (location) {
-        throw(app.utils.apiError.getError("DELETE_PARENT_MODEL", {model: Location.modelName}));
+        throw(app.utils.apiError.getError('DELETE_PARENT_MODEL', {model: Location.modelName}));
       }
-    })
+    });
   };
 
   /**
@@ -286,9 +286,9 @@ module.exports = function (Location) {
     })
       .then((location) => {
         if (location) {
-          throw(app.utils.apiError.getError("DEACTIVATE_PARENT_MODEL", {model: Location.modelName}));
+          throw(app.utils.apiError.getError('DEACTIVATE_PARENT_MODEL', {model: Location.modelName}));
         }
-      })
+      });
   };
 
 
@@ -460,7 +460,8 @@ module.exports = function (Location) {
 
     // build a list of create operations
     const createLocationOperations = [];
-    locationsList.forEach(function (location) {
+    locationsList.forEach(
+      function (location) {
         // build current location
         let _location = Object.assign({parentLocationId: parentLocationId}, location.location);
         // add create location operation
@@ -479,7 +480,7 @@ module.exports = function (Location) {
                 cb(null, createdLocation);
               }
             })
-            .catch(cb)
+            .catch(cb);
         });
       }
     );
@@ -506,7 +507,7 @@ module.exports = function (Location) {
       // this needs to be a list (in order to get its headers)
       if (!Array.isArray(locations)) {
         // error invalid content
-        return callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+        return callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
           contentType: 'JSON',
           details: 'it should contain an array'
         }));
@@ -515,7 +516,7 @@ module.exports = function (Location) {
       Location.createLocationsFromHierarchicalLocationsList(undefined, locations, options, callback);
     } catch (error) {
       // handle JSON.parse errors
-      callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+      callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
         contentType: 'JSON',
         details: error.message
       }));

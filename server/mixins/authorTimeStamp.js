@@ -45,8 +45,8 @@ module.exports = function (Model) {
   function getUserContextInformation(context) {
     let loggedInUser = getLoggedInUserFromOptions(context.options);
     return {
-      id: loggedInUser ? loggedInUser.id : 'unavailable',
-    }
+      id: loggedInUser ? loggedInUser.id : 'unavailable'
+    };
   }
 
   Model.defineProperty('createdAt', {
@@ -81,7 +81,7 @@ module.exports = function (Model) {
         context.instance.createdBy = user.id;
       }
       context.instance.updatedAt = new Date();
-      context.instance.updatedBy = user.id
+      context.instance.updatedBy = user.id;
     } else {
       context.data.updatedAt = new Date();
       context.data.updatedBy = user.id;

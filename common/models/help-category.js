@@ -23,7 +23,7 @@ module.exports = function (HelpCategory) {
     if(context.instance) {
       identifier = context.instance.name + `_${_.snakeCase(modelName).toUpperCase()}_`;
     } else {
-      identifier = "LNG_" + `${_.snakeCase(modelName).toUpperCase()}_`;
+      identifier = 'LNG_' + `${_.snakeCase(modelName).toUpperCase()}_`;
     }
     identifier += `${_.snakeCase(context.args.data[titleField]).toUpperCase()}`;
 
@@ -83,7 +83,7 @@ module.exports = function (HelpCategory) {
                   token: modelInstance.content,
                   languageId: language.id,
                   translation: context.req._original.content
-                }, context.args.options))
+                }, context.args.options));
             }
           });
         })
@@ -147,7 +147,7 @@ module.exports = function (HelpCategory) {
 
       let updateFields = [titleField];
 
-      if (modelName === "helpCategory" && context.req._original.description) {
+      if (modelName === 'helpCategory' && context.req._original.description) {
         updateFields.push('description');
       }
 
@@ -168,7 +168,7 @@ module.exports = function (HelpCategory) {
               .then((languageToken) => {
                 return languageToken.updateAttribute('translation', context.req._original[updateField], context.args.options);
               })
-          )
+          );
         }
       });
 
@@ -180,5 +180,5 @@ module.exports = function (HelpCategory) {
     } else {
       next();
     }
-  }
+  };
 };

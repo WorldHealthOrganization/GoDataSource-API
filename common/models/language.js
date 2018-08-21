@@ -55,7 +55,7 @@ module.exports = function (Language) {
       // start creating/updating tokens
       async.parallelLimit(createLanguageTokens, 10, function (error, results) {
         if (error) {
-          return reject(error)
+          return reject(error);
         }
         resolve(results);
       });
@@ -95,7 +95,7 @@ module.exports = function (Language) {
     // define check language function
     let checkIfLanguageIsEditable = Language.isEditable.bind(null, languageId);
     // if language is an instance
-    if (typeof language === "object") {
+    if (typeof language === 'object') {
       // get language id
       languageId = language.id;
       // update check function
@@ -164,5 +164,5 @@ module.exports = function (Language) {
    */
   Language.getFieldTranslationFromDictionary = function (field, languageId, dictionary) {
     return dictionary.getTranslation(field);
-  }
+  };
 };

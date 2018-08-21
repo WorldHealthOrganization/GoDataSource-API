@@ -9,7 +9,7 @@ module.exports = function (Location) {
   /**
    * Do not allow the creation of a location with a name/synonyms that is not unique in the same context
    */
-  Location.beforeRemote("create", function (context, modelInstance, next) {
+  Location.beforeRemote('create', function (context, modelInstance, next) {
     Location.validateModelIdentifiers(context.args.data)
       .then(() => {
         next();
@@ -21,7 +21,7 @@ module.exports = function (Location) {
    * Do not allow the update of a location with a name/synonyms that is not unique in the same context.
    * Do not allow the deactivation a location if it still has sub-locations that are active
    */
-  Location.beforeRemote("prototype.patchAttributes", function (context, modelInstance, next) {
+  Location.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
     Location.validateModelIdentifiers(context.args.data, context.instance.id)
       .then(() => {
         if (context.args.data.active === false) {
@@ -39,7 +39,7 @@ module.exports = function (Location) {
   /**
    * Do not allow the deletion of a location if it still has sub-locations
    */
-  Location.beforeRemote("deleteById", function (context, modelInstance, next) {
+  Location.beforeRemote('deleteById', function (context, modelInstance, next) {
     Location.checkIfCanDelete(context.args.id)
       .then(() => {
         next();
@@ -66,7 +66,7 @@ module.exports = function (Location) {
       })
       .then(function (locations) {
         app.utils.remote.helpers
-          .offerFileToDownload(JSON.stringify(Location.buildHierarchicalLocationsList(locations), null, 2), 'application/json', `locations.json`, callback);
+          .offerFileToDownload(JSON.stringify(Location.buildHierarchicalLocationsList(locations), null, 2), 'application/json', 'locations.json', callback);
       }).catch(callback);
   };
 
@@ -80,7 +80,7 @@ module.exports = function (Location) {
     let includeChildren;
     // check if the includeChildren filter was sent; accepting it only on the first level
     includeChildren = _.get(filter, 'where.includeChildren');
-    if (typeof includeChildren !== "undefined") {
+    if (typeof includeChildren !== 'undefined') {
       // includeChildren was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.includeChildren;
     } else {
@@ -175,7 +175,7 @@ module.exports = function (Location) {
           Location.importHierarchicalListFromJsonFile(hierarchicalList, options, callback);
         } catch (error) {
           // handle parse error
-          callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
             contentType: 'JSON',
             details: error.message
           }));

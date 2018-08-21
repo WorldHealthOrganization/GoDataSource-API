@@ -306,7 +306,7 @@ function beforeHook(context, modelInstance, next) {
     next(app.utils.apiError.getError('DUPLICATE_TEMPLATE_QUESTION_VARIABLE_OR_ANSWER_VALUE', {
       duplicateQuestionVariable: duplicateErrors.questions,
       duplicateAnswerValue: duplicateErrors.answers
-    }))
+    }));
   } else {
     next();
   }

@@ -41,19 +41,19 @@ module.exports = function (User) {
 
   /**
    * Make sure that whenever email appears, in a user related request, it is forced to be lowercase.
-  */
+   */
   User.beforeRemote('**', function (context, modelInstance, next) {
     if (_.get(context, 'args.data.email')) {
       context.args.data.email = context.args.data.email.toLowerCase();
     }
 
     // In the login's case, loopback adds the email to the credentials property instead of data
-    if(_.get(context, 'args.credentials.email')) {
+    if (_.get(context, 'args.credentials.email')) {
       context.args.credentials.email = context.args.credentials.email.toLowerCase();
     }
 
     // In the reset password with email's case, loopback adds the email to the options property instead of data
-    if(_.get(context, 'args.options.email')) {
+    if (_.get(context, 'args.options.email')) {
       context.args.options.email = context.args.options.email.toLowerCase();
     }
 
@@ -78,7 +78,7 @@ module.exports = function (User) {
       (done) => helpers.validateSecurityQuestions(reqBody.securityQuestions, (error) => helpers.collectErrorMessage(error, done))
     ], (err, errorMessages) => {
       if (err) {
-        return next(app.utils.apiError.getError('INTERNAL_ERROR', { error: 'Validation failed '} ));
+        return next(app.utils.apiError.getError('INTERNAL_ERROR', {error: 'Validation failed '}));
       }
 
       if (errorMessages) {
@@ -86,7 +86,7 @@ module.exports = function (User) {
         errorMessages = errorMessages.filter((e) => e);
 
         if (errorMessages.length) {
-          return next(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', { errorMessages: errorMessages.join() }));
+          return next(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {errorMessages: errorMessages.join()}));
         }
       }
 
@@ -112,7 +112,7 @@ module.exports = function (User) {
       (done) => helpers.validateSecurityQuestions(reqBody.securityQuestions, (error) => helpers.collectErrorMessage(error, done))
     ], (err, errorMessages) => {
       if (err) {
-        return next(app.utils.apiError.getError('INTERNAL_ERROR', { error: 'Validation failed '} ));
+        return next(app.utils.apiError.getError('INTERNAL_ERROR', {error: 'Validation failed '}));
       }
 
       if (errorMessages) {
@@ -120,7 +120,7 @@ module.exports = function (User) {
         errorMessages = errorMessages.filter((e) => e);
 
         if (errorMessages.length) {
-          return next(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', { errorMessages: errorMessages.join() }));
+          return next(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {errorMessages: errorMessages.join()}));
         }
       }
 
@@ -163,7 +163,7 @@ module.exports = function (User) {
 
     // if there are any validation errors, stop
     if (validationErrors.length) {
-      return callback(buildError('REQUEST_VALIDATION_ERROR', { errorMessages: validationErrors.join() }));
+      return callback(buildError('REQUEST_VALIDATION_ERROR', {errorMessages: validationErrors.join()}));
     }
 
     // search for the user based on the email
@@ -175,7 +175,7 @@ module.exports = function (User) {
       })
       .then((user) => {
         if (!user) {
-          throw buildError('PASSWORD_RECOVERY_FAILED', { details: 'User not found' });
+          throw buildError('PASSWORD_RECOVERY_FAILED', {details: 'User not found'});
         }
 
         // verify if user has any security questions set, if not stop at once
@@ -202,30 +202,28 @@ module.exports = function (User) {
 
           // generate a password reset token
           if (isValid) {
-              return user
-                .createAccessToken(
-                  {
-                    email: user.email,
-                    password: user.password
-                  },
-                  {
-                    ttl: config.passwordReset.ttl, // 15 minutes expiration time
-                    scopes: ['reset-password'],
-                  }
-                )
-                .then((token) => {
-                  return {
-                    token: token.id,
-                    ttl: token.ttl
-                  };
-                })
-                .catch(() => buildError('PASSWORD_RECOVERY_FAILED', { details: 'Failed to generate reset password token' }));
+            return user.createAccessToken(
+              {
+                email: user.email,
+                password: user.password
+              },
+              {
+                ttl: config.passwordReset.ttl, // 15 minutes expiration time
+                scopes: ['reset-password'],
+              })
+              .then((token) => {
+                return {
+                  token: token.id,
+                  ttl: token.ttl
+                };
+              })
+              .catch(() => buildError('PASSWORD_RECOVERY_FAILED', {details: 'Failed to generate reset password token'}));
           }
 
-          throw buildError('PASSWORD_RECOVERY_FAILED', { details: 'Invalid security questions' });
+          throw buildError('PASSWORD_RECOVERY_FAILED', {details: 'Invalid security questions'});
         }
 
-        throw buildError('PASSWORD_RECOVERY_FAILED', { details: 'Security questions recovery is disabled' });
+        throw buildError('PASSWORD_RECOVERY_FAILED', {details: 'Security questions recovery is disabled'});
       });
   };
 };

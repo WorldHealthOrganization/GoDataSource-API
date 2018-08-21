@@ -107,7 +107,7 @@ function deepSearchByRelationProperty(resource, filter) {
       if (res) {
         result.push(res);
       }
-    })
+    });
   } else {
     // single element, perform search
     result = deepSearchByRelationPropertyOnModel(resource, filter);

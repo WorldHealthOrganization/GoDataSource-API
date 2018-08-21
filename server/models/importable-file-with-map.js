@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = function(ImportableFileWithMap) {
+module.exports = function() {
 
 };

@@ -66,7 +66,7 @@ module.exports = function (Outbreak) {
         return callback(err);
       }
       callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
-    })
+    });
   };
 
   /**
@@ -79,7 +79,8 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
-    const _filters = app.utils.remote.mergeFilters({
+    const _filters = app.utils.remote.mergeFilters(
+      {
         where: {
           outbreakId: this.id
         }
@@ -122,7 +123,7 @@ module.exports = function (Outbreak) {
         if (outbreak) {
           return app.models.User.count({
             activeOutbreakId: outbreak.id
-          })
+          });
         } else {
           return 0;
         }
@@ -166,7 +167,7 @@ module.exports = function (Outbreak) {
   });
 
   /**
-   * Parsing the properties that are of type '["date"]' as Loopback doesn't save them correctly
+   * Parsing the properties that are of type '['date']' as Loopback doesn't save them correctly
    * Also set visual id
    */
   Outbreak.beforeRemote('prototype.__create__cases', function (context, modelInstance, next) {
@@ -207,7 +208,7 @@ module.exports = function (Outbreak) {
   });
 
   /**
-   * Parsing the properties that are of type '["date"]' as Loopback doesn't save them correctly
+   * Parsing the properties that are of type '['date']' as Loopback doesn't save them correctly
    * Validate visual identifier (optional)
    */
   Outbreak.beforeRemote('prototype.__updateById__cases', function (context, modelInstance, next) {
@@ -594,7 +595,7 @@ module.exports = function (Outbreak) {
         return app.models.relationship
           .find({
             where: {
-              "persons.id": contactId
+              'persons.id': contactId
             }
           });
       })
@@ -691,7 +692,7 @@ module.exports = function (Outbreak) {
         return app.models.relationship
           .find({
             where: {
-              "persons.id": caseId
+              'persons.id': caseId
             }
           });
       })
@@ -821,7 +822,7 @@ module.exports = function (Outbreak) {
             details: `Following outbreak params: [${invalidParamsNames.join(',')}] should be greater than 0`
           }
         )
-      )
+      );
     }
 
     // if no followup period was sent in request, assume its just for one day
@@ -896,7 +897,7 @@ module.exports = function (Outbreak) {
                           return reject(err);
                         }
                         return resolve(locations);
-                      })
+                      });
                   })
                     .then((locations) => {
                       team.locations = locations;
@@ -1061,7 +1062,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.getCaseQRResourceLink = function (caseId, callback) {
     Outbreak.helpers.getPersonQRResourceLink(this, 'case', caseId, function (error, qrCode) {
-      callback(null, qrCode, `image/png`, `attachment;filename=case-${caseId}.png`);
+      callback(null, qrCode, 'image/png', `attachment;filename=case-${caseId}.png`);
     });
   };
 
@@ -1072,7 +1073,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.getContactQRResourceLink = function (contactId, callback) {
     Outbreak.helpers.getPersonQRResourceLink(this, 'contact', contactId, function (error, qrCode) {
-      callback(null, qrCode, `image/png`, `attachment;filename=contact-${contactId}.png`);
+      callback(null, qrCode, 'image/png', `attachment;filename=contact-${contactId}.png`);
     });
   };
 
@@ -1083,7 +1084,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.getEventQRResourceLink = function (eventId, callback) {
     Outbreak.helpers.getPersonQRResourceLink(this, 'event', eventId, function (error, qrCode) {
-      callback(null, qrCode, `image/png`, `attachment;filename=event-${eventId}.png`);
+      callback(null, qrCode, 'image/png', `attachment;filename=event-${eventId}.png`);
     });
   };
 
@@ -1163,7 +1164,7 @@ module.exports = function (Outbreak) {
     let noDaysNewContacts;
     // check if the noDaysNewContacts filter was sent; accepting it only on the first level
     noDaysNewContacts = _.get(filter, 'where.noDaysNewContacts');
-    if (typeof noDaysNewContacts !== "undefined") {
+    if (typeof noDaysNewContacts !== 'undefined') {
       // noDaysNewContacts was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.noDaysNewContacts;
     } else {
@@ -1377,7 +1378,7 @@ module.exports = function (Outbreak) {
               let edge = edges[edgeId];
               // add edge in result if needed
               if (nodesToSelectMap[edge.persons[0].id] || nodesToSelectMap[edge.persons[1].id]) {
-                result.edges[edgeId] = edge
+                result.edges[edgeId] = edge;
               }
             });
 
@@ -1522,7 +1523,7 @@ module.exports = function (Outbreak) {
                   result.caseIDs.push(person.id);
                 }
               }
-            })
+            });
           }
         });
         callback(null, result);
@@ -1541,7 +1542,7 @@ module.exports = function (Outbreak) {
     let noLessContacts;
     // check if the noLessContacts filter was sent; accepting it only on the first level
     noLessContacts = _.get(filter, 'where.noLessContacts');
-    if (typeof noLessContacts !== "undefined") {
+    if (typeof noLessContacts !== 'undefined') {
       // noLessContacts was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.noLessContacts;
     } else {
@@ -1586,7 +1587,7 @@ module.exports = function (Outbreak) {
     let noDaysNewContacts;
     // check if the noDaysNewContacts filter was sent; accepting it only on the first level
     noDaysNewContacts = _.get(filter, 'where.noDaysNewContacts');
-    if (typeof noDaysNewContacts !== "undefined") {
+    if (typeof noDaysNewContacts !== 'undefined') {
       // noDaysNewContacts was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.noDaysNewContacts;
     } else {
@@ -1704,7 +1705,7 @@ module.exports = function (Outbreak) {
             id: event.id,
             newContactsCount: 0,
             contactIDs: []
-          }
+          };
         });
 
         // add the parsed events in the result
@@ -1973,7 +1974,7 @@ module.exports = function (Outbreak) {
     let noDaysAmongContacts;
     // check if the noDaysAmongContacts filter was sent; accepting it only on the first level
     noDaysAmongContacts = _.get(filter, 'where.noDaysAmongContacts');
-    if (typeof noDaysAmongContacts !== "undefined") {
+    if (typeof noDaysAmongContacts !== 'undefined') {
       // noDaysAmongContacts was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.noDaysAmongContacts;
     } else {
@@ -2035,7 +2036,7 @@ module.exports = function (Outbreak) {
     let noDaysNotSeen;
     // check if the noDaysNotSeen filter was sent; accepting it only on the first level
     noDaysNotSeen = _.get(filter, 'where.noDaysNotSeen');
-    if (typeof noDaysNotSeen !== "undefined") {
+    if (typeof noDaysNotSeen !== 'undefined') {
       // noDaysNotSeen was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.noDaysNotSeen;
     } else {
@@ -2337,7 +2338,7 @@ module.exports = function (Outbreak) {
 
       defaultFilter.where.date = {
         between: [today, tomorrow]
-      }
+      };
     }
 
     // get all the followups for the filtered period
@@ -2435,7 +2436,7 @@ module.exports = function (Outbreak) {
 
     // check if the periodType filter was sent; accepting it only on the first level
     periodType = _.get(filter, 'where.periodType');
-    if (typeof periodType !== "undefined") {
+    if (typeof periodType !== 'undefined') {
       // periodType was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.periodType;
     }
@@ -2447,10 +2448,10 @@ module.exports = function (Outbreak) {
     }
 
     // initialize periodInterval; keeping it as moment instances we need to use them further in the code
-    let periodInterval;
+    let periodInterval, today, todayEndOfDay, mondayStartOfDay, sundayEndOfDay, firstDayOfMonth, lastDayOfMonth;
     // check if the periodInterval filter was sent; accepting it only on the first level
     periodInterval = _.get(filter, 'where.periodInterval');
-    if (typeof periodInterval !== "undefined") {
+    if (typeof periodInterval !== 'undefined') {
       // periodInterval was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.periodInterval;
       // normalize periodInterval dates
@@ -2461,20 +2462,20 @@ module.exports = function (Outbreak) {
       switch (periodType) {
         case periodTypes.day:
           // get interval for today
-          let today = genericHelpers.getUTCDate();
-          let todayEndOfDay = genericHelpers.getUTCDateEndOfDay();
+          today = genericHelpers.getUTCDate();
+          todayEndOfDay = genericHelpers.getUTCDateEndOfDay();
           periodInterval = [today, todayEndOfDay];
           break;
         case periodTypes.week:
           // get interval for this week
-          let mondayStartOfDay = genericHelpers.getUTCDate(null, 1);
-          let sundayEndOfDay = genericHelpers.getUTCDateEndOfDay(null, 7);
+          mondayStartOfDay = genericHelpers.getUTCDate(null, 1);
+          sundayEndOfDay = genericHelpers.getUTCDateEndOfDay(null, 7);
           periodInterval = [mondayStartOfDay, sundayEndOfDay];
           break;
         case periodTypes.month:
           // get interval for this month
-          let firstDayOfMonth = genericHelpers.getUTCDate().startOf('month');
-          let lastDayOfMonth = genericHelpers.getUTCDateEndOfDay().endOf('month');
+          firstDayOfMonth = genericHelpers.getUTCDate().startOf('month');
+          lastDayOfMonth = genericHelpers.getUTCDateEndOfDay().endOf('month');
           periodInterval = [firstDayOfMonth, lastDayOfMonth];
           break;
       }
@@ -2484,7 +2485,7 @@ module.exports = function (Outbreak) {
     let includeTotals, includeDeaths;
     // check if the includeTotals filter was sent; accepting it only on the first level
     includeTotals = _.get(filter, 'where.includeTotals');
-    if (typeof includeTotals !== "undefined") {
+    if (typeof includeTotals !== 'undefined') {
       // includeTotals was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.includeTotals;
     } else {
@@ -2494,7 +2495,7 @@ module.exports = function (Outbreak) {
 
     // check if the includeDeaths filter was sent; accepting it only on the first level
     includeDeaths = _.get(filter, 'where.includeDeaths');
-    if (typeof includeDeaths !== "undefined") {
+    if (typeof includeDeaths !== 'undefined') {
       // includeDeaths was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.includeDeaths;
     } else {
@@ -2635,18 +2636,20 @@ module.exports = function (Outbreak) {
 
           if (addInPeriod) {
             // get period in which the case needs to be included
-            let casePeriodInterval;
+            let casePeriodInterval, today, todayEndOfDay, mondayStartOfDay, sundayEndOfDay, firstDayOfMonth,
+              lastDayOfMonth;
+
             switch (periodType) {
               case periodTypes.day:
                 // get interval for today
-                let today = genericHelpers.getUTCDate(caseDate).toString();
-                let todayEndOfDay = genericHelpers.getUTCDateEndOfDay(caseDate).toString();
+                today = genericHelpers.getUTCDate(caseDate).toString();
+                todayEndOfDay = genericHelpers.getUTCDateEndOfDay(caseDate).toString();
                 casePeriodInterval = [today, todayEndOfDay];
                 break;
               case periodTypes.week:
                 // get interval for this week
-                let mondayStartOfDay = genericHelpers.getUTCDate(caseDate, 1);
-                let sundayEndOfDay = genericHelpers.getUTCDateEndOfDay(caseDate, 7);
+                mondayStartOfDay = genericHelpers.getUTCDate(caseDate, 1);
+                sundayEndOfDay = genericHelpers.getUTCDateEndOfDay(caseDate, 7);
 
                 // we should use monday only if it is later than the first date of the periodInterval; else use the first date of the period interval
                 mondayStartOfDay = (mondayStartOfDay.isAfter(periodInterval[0]) ? mondayStartOfDay : periodInterval[0]).toString();
@@ -2658,8 +2661,8 @@ module.exports = function (Outbreak) {
                 break;
               case periodTypes.month:
                 // get interval for this month
-                let firstDayOfMonth = genericHelpers.getUTCDate(caseDate).startOf('month');
-                let lastDayOfMonth = genericHelpers.getUTCDateEndOfDay(caseDate).endOf('month');
+                firstDayOfMonth = genericHelpers.getUTCDate(caseDate).startOf('month');
+                lastDayOfMonth = genericHelpers.getUTCDateEndOfDay(caseDate).endOf('month');
 
                 // we should use first day of month only if it is later than the first date of the periodInterval; else use the first date of the period interval
                 firstDayOfMonth = (firstDayOfMonth.isAfter(periodInterval[0]) ? firstDayOfMonth : periodInterval[0]).toString();
@@ -2679,7 +2682,8 @@ module.exports = function (Outbreak) {
             // initialize location entry is not already initialized
             if (periodLocationIndex === -1) {
               periodLocationIndex = periodMap[casePeriodIdentifier].countersPerLocation.locations.push(
-                Object.assign({
+                Object.assign(
+                  {
                     id: caseLocationId,
                     totalCasesCount: 0,
                     caseIDs: []
@@ -2700,7 +2704,8 @@ module.exports = function (Outbreak) {
             // initialize location entry is not already initialized
             if (entireIntervalLocationIndex === -1) {
               entireIntervalLocationIndex = result.totalCasesCountersForIntervalPerLocation.locations.push(
-                Object.assign({
+                Object.assign(
+                  {
                     id: caseLocationId,
                     totalCasesCount: 0,
                     caseIDs: []
@@ -2822,7 +2827,8 @@ module.exports = function (Outbreak) {
             // initialize location entry is not already initialized
             if (totalLocationIndex === -1) {
               totalLocationIndex = result.totalCasesCountersPerLocation.locations.push(
-                Object.assign({
+                Object.assign(
+                  {
                     id: caseLocationId,
                     totalCasesCount: 0,
                     caseIDs: []
@@ -2923,30 +2929,28 @@ module.exports = function (Outbreak) {
 
     // retrieve all the case/contacts that should be merged, ordered by their last update date
     return Promise.all([
-      app.models.case
-        .find(
-          {
-            where: {
-              id: {
-                inq: data.ids
-              }
-            },
-            include: ['labResults'],
-            order: 'updatedAt DESC'
-          }
-        ),
-      app.models.contact
-        .find(
-          {
-            where: {
-              id: {
-                inq: data.ids
-              }
-            },
-            include: ['followUps'],
-            order: 'updatedAt DESC'
-          }
-        )
+      app.models.case.find(
+        {
+          where: {
+            id: {
+              inq: data.ids
+            }
+          },
+          include: ['labResults'],
+          order: 'updatedAt DESC'
+        }
+      ),
+      app.models.contact.find(
+        {
+          where: {
+            id: {
+              inq: data.ids
+            }
+          },
+          include: ['followUps'],
+          order: 'updatedAt DESC'
+        }
+      )
     ])
     // retrieve all relationships belonging to the case/contacts
       .then((listOfCaseAndContacts) => Promise
@@ -3832,7 +3836,6 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.importImportableOutbreaksFileUsingMap = function (body, options, callback) {
-    const self = this;
     // treat the sync as a regular operation, not really a sync
     options._sync = false;
     // get importable file
@@ -3996,7 +3999,7 @@ module.exports = function (Outbreak) {
         if (err) {
           callback(err);
         } else {
-          app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', `case_investigation.pdf`, callback);
+          app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'case_investigation.pdf', callback);
         }
       });
     });
@@ -4187,7 +4190,8 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportFilteredContacts = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
-    const _filters = app.utils.remote.mergeFilters({
+    const _filters = app.utils.remote.mergeFilters(
+      {
         where: {
           outbreakId: this.id
         }
@@ -4277,7 +4281,7 @@ module.exports = function (Outbreak) {
           }
         });
       });
-      return Promise.resolve(results)
+      return Promise.resolve(results);
     }, callback);
   };
 
@@ -4461,11 +4465,11 @@ module.exports = function (Outbreak) {
               // check if the results need to be grouped
               if (groupResultsBy) {
                 // get identifier for grouping
-                let groupIdentifier;
+                let groupIdentifier, caseItem, residenceLocation;
                 switch (groupResultsBy) {
                   case groupByOptions.case:
                     // get case entry in the contact relationship
-                    let caseItem = contact.relationships[0].persons.find(person => person.type === 'case');
+                    caseItem = contact.relationships[0].persons.find(person => person.type === 'case');
                     groupIdentifier = caseItem.id;
 
                     // get identifier value only if the value was not previously calculated for another contact
@@ -4477,7 +4481,7 @@ module.exports = function (Outbreak) {
                   case groupByOptions.location:
                     // get contact residence location
                     contact.addresses = contact.addresses || [];
-                    let residenceLocation = contact.addresses.find(address => address.typeId === usualPlaceOfResidence);
+                    residenceLocation = contact.addresses.find(address => address.typeId === usualPlaceOfResidence);
                     groupIdentifier = residenceLocation ? residenceLocation.locationId : null;
 
                     // get identifier value only if the value was not previously calculated for another contact
@@ -4538,7 +4542,7 @@ module.exports = function (Outbreak) {
                   // print follow-ups table
                   pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE'), 16);
                   pdfUtils.createTableInPDFDocument(followUpsHeaders, contact.followUps, doc);
-                })
+                });
               });
             } else {
               // print contacts
@@ -4549,7 +4553,7 @@ module.exports = function (Outbreak) {
                 // print follow-ups table
                 pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE'), 16);
                 pdfUtils.createTableInPDFDocument(followUpsHeaders, contact.followUps, doc);
-              })
+              });
             }
 
             return new Promise(function (resolve, reject) {
@@ -4572,14 +4576,14 @@ module.exports = function (Outbreak) {
 
               // finalize document
               doc.end();
-            })
+            });
           })
           .then(function (file) {
             // and offer it for download
-            app.utils.remote.helpers.offerFileToDownload(file, mimeType, `Contact Line List.pdf`, callback);
+            app.utils.remote.helpers.offerFileToDownload(file, mimeType, 'Contact Line List.pdf', callback);
           })
           .catch(callback);
       });
-    })
+    });
   };
 };

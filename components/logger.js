@@ -24,11 +24,13 @@ winston.loggers.add('fileLogger', {
 
 let logger = winston.loggers.get('fileLogger');
 
+/* eslint-disable no-console */
 // redirect console output to winston
 console.log = logger.debug;
 console.info = logger.info;
 console.warn = logger.warn;
 console.error = logger.error;
+/* eslint-enable no-console */
 
 // initialize flag to prevent attaching the transport flush handler multiple times
 let flushHandlerAdded = false;
@@ -64,7 +66,7 @@ logger.getTransactionLogger = function (transactionId) {
   ['debug', 'info', 'warn', 'error'].forEach(function (logMethod) {
     transactionLogger[logMethod] = function (message, metadata) {
       log(logMethod, message, metadata);
-    }
+    };
   });
 
   return transactionLogger;

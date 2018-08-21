@@ -1,4 +1,4 @@
 'use strict';
 
-module.exports = function(TemplateQuestion) {
+module.exports = function() {
 };
