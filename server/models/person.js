@@ -13,4 +13,10 @@ module.exports = function(Person) {
     }
   };
 
+  // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
+  Person.nestedGeoPoints = [
+    'addresses[].geoLocation',
+    'address.geoLocation'
+  ];
+
 };

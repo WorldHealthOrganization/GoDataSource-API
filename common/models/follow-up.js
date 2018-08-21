@@ -7,6 +7,11 @@ module.exports = function (Followup) {
   // set flag to not get controller
   Followup.hasController = false;
 
+  // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
+  Followup.nestedGeoPoints = [
+    'address.geoLocation'
+  ];
+
   /**
    * Enhance follow up save to include index of the created follow up
    */
