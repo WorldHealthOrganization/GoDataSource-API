@@ -23,7 +23,7 @@ module.exports = function (Sync) {
    * @param collectionsOpts
    * @param done
    */
-  Sync.exportDatabase = function (filter = { where: {} }, excludes = [], collectionsOpts = [], done) {
+  Sync.exportDatabase = function (filter = {where: {}}, excludes = [], collectionsOpts = [], done) {
     // defensive checks
     collectionsOpts.map((collectionOpts) => {
       collectionOpts.excludes = collectionOpts.excludes || [];
@@ -108,15 +108,14 @@ module.exports = function (Sync) {
             }
 
             // compress all collection files from the tmp dir into .tar file
-            tar
-              .c(
-                {
-                  gzip: true,
-                  file: archiveName,
-                  cwd: tmpDirName
-                },
-                filenames
-              )
+            tar.c(
+              {
+                gzip: true,
+                file: archiveName,
+                cwd: tmpDirName
+              },
+              filenames
+            )
               .then(() => done(null, archiveName));
           });
         }
@@ -133,7 +132,7 @@ module.exports = function (Sync) {
   Sync.syncDatabaseWithSnapshot = function (filePath, reqOptions, callback) {
     // create a temporary directory to store the database files
     // it always created the folder in the system temporary directory
-    let tmpDir = tmp.dirSync({ unsafeCleanup: true });
+    let tmpDir = tmp.dirSync({unsafeCleanup: true});
     let tmpDirName = tmpDir.name;
 
     // create a list that will contain list of collection with failed records
@@ -229,7 +228,7 @@ module.exports = function (Sync) {
               fs.unlink(filePath);
 
               if (Object.keys(failedIds).length) {
-                return callback(null, { failedRecords: failedIds });
+                return callback(null, {failedRecords: failedIds});
               }
 
               return callback();

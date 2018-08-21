@@ -6,8 +6,12 @@
   "extends": "eslint:recommended",
   "rules": {
     "indent": [
-      "off",
-      2
+      "error",
+      2,
+      {
+        "MemberExpression": 1,
+        "SwitchCase": 1
+      }
     ],
     "linebreak-style": [
       "error",

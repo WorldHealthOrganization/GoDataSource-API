@@ -346,19 +346,17 @@ module.exports = function (Relationship) {
       // Note: on delete the relationship cannot be the last contact relationship (this is validated on delete)
       // if there are 2 relationships returned check the latest one contactDate against the contactDate of the just created/updated/deleted relationship
       app.models.contact
-        .findById(
-          contactId,
-          {
-            include: {
-              relation: 'relationships',
-              scope: {
-                limit: 2,
-                order: 'contactDate DESC',
-                // include the deleted relationships if the operation was a delete
-                deleted: !!relationshipDeleted
-              }
+        .findById(contactId, {
+          include: {
+            relation: 'relationships',
+            scope: {
+              limit: 2,
+              order: 'contactDate DESC',
+              // include the deleted relationships if the operation was a delete
+              deleted: !!relationshipDeleted
             }
-          })
+          }
+        })
         .then(function (contact) {
           if (!contact) {
             app.logger.error(`Error when updating contact follow-up dates. Contact ID: ${contactId}. Contact was not found.`);

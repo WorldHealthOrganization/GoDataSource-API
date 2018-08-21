@@ -79,7 +79,8 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
-    const _filters = app.utils.remote.mergeFilters({
+    const _filters = app.utils.remote.mergeFilters(
+      {
         where: {
           outbreakId: this.id
         }
@@ -2681,7 +2682,8 @@ module.exports = function (Outbreak) {
             // initialize location entry is not already initialized
             if (periodLocationIndex === -1) {
               periodLocationIndex = periodMap[casePeriodIdentifier].countersPerLocation.locations.push(
-                Object.assign({
+                Object.assign(
+                  {
                     id: caseLocationId,
                     totalCasesCount: 0,
                     caseIDs: []
@@ -2702,7 +2704,8 @@ module.exports = function (Outbreak) {
             // initialize location entry is not already initialized
             if (entireIntervalLocationIndex === -1) {
               entireIntervalLocationIndex = result.totalCasesCountersForIntervalPerLocation.locations.push(
-                Object.assign({
+                Object.assign(
+                  {
                     id: caseLocationId,
                     totalCasesCount: 0,
                     caseIDs: []
@@ -2824,7 +2827,8 @@ module.exports = function (Outbreak) {
             // initialize location entry is not already initialized
             if (totalLocationIndex === -1) {
               totalLocationIndex = result.totalCasesCountersPerLocation.locations.push(
-                Object.assign({
+                Object.assign(
+                  {
                     id: caseLocationId,
                     totalCasesCount: 0,
                     caseIDs: []
@@ -2925,30 +2929,28 @@ module.exports = function (Outbreak) {
 
     // retrieve all the case/contacts that should be merged, ordered by their last update date
     return Promise.all([
-      app.models.case
-        .find(
-          {
-            where: {
-              id: {
-                inq: data.ids
-              }
-            },
-            include: ['labResults'],
-            order: 'updatedAt DESC'
-          }
-        ),
-      app.models.contact
-        .find(
-          {
-            where: {
-              id: {
-                inq: data.ids
-              }
-            },
-            include: ['followUps'],
-            order: 'updatedAt DESC'
-          }
-        )
+      app.models.case.find(
+        {
+          where: {
+            id: {
+              inq: data.ids
+            }
+          },
+          include: ['labResults'],
+          order: 'updatedAt DESC'
+        }
+      ),
+      app.models.contact.find(
+        {
+          where: {
+            id: {
+              inq: data.ids
+            }
+          },
+          include: ['followUps'],
+          order: 'updatedAt DESC'
+        }
+      )
     ])
     // retrieve all relationships belonging to the case/contacts
       .then((listOfCaseAndContacts) => Promise
@@ -4188,7 +4190,8 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportFilteredContacts = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
-    const _filters = app.utils.remote.mergeFilters({
+    const _filters = app.utils.remote.mergeFilters(
+      {
         where: {
           outbreakId: this.id
         }

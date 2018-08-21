@@ -35,30 +35,31 @@ module.exports = function (Followup) {
     }
 
     //Find the oldest existing followUp of the contact
-    app.models.followUp.findOne({
-      where: {
-        personId: ctx.instance.personId
-      },
-      order: 'date ASC'
-    })
-    .then((followUp) => {
-      //If it is in the past, use it as a starting point for the index calculation
-      if(followUp && daysSince(followUp.date, Date.now()) >= 0) {
-        ctx.instance.index = daysSince(followUp.date, ctx.instance.date) + 1;
-      } else {
-        //If no followUp exists in the past, initiate a new index
-        //If the followUp is part of a followUp generate action, use now() to calculate the index
-        if(ctx.instance.isGenerated) {
-          ctx.instance.index = daysSince(Date.now(), ctx.instance.date) + 1;
+    app.models.followUp
+      .findOne({
+        where: {
+          personId: ctx.instance.personId
+        },
+        order: 'date ASC'
+      })
+      .then((followUp) => {
+        //If it is in the past, use it as a starting point for the index calculation
+        if (followUp && daysSince(followUp.date, Date.now()) >= 0) {
+          ctx.instance.index = daysSince(followUp.date, ctx.instance.date) + 1;
         } else {
-          //If this is the first follow up and it is added separately (create followUp) set the index to 1.
-          ctx.instance.index = 1;
+          //If no followUp exists in the past, initiate a new index
+          //If the followUp is part of a followUp generate action, use now() to calculate the index
+          if (ctx.instance.isGenerated) {
+            ctx.instance.index = daysSince(Date.now(), ctx.instance.date) + 1;
+          } else {
+            //If this is the first follow up and it is added separately (create followUp) set the index to 1.
+            ctx.instance.index = 1;
+          }
         }
-      }
 
-      return next();
-    })
-    .catch((next));
+        return next();
+      })
+      .catch((next));
   });
 
   /**
@@ -66,7 +67,7 @@ module.exports = function (Followup) {
    * @param startDate
    * @param endDate
    */
-  const daysSince = function (startDate, endDate){
+  const daysSince = function (startDate, endDate) {
     return (moment(endDate).startOf('day')).diff(moment(startDate).startOf('day'), 'days');
   };
 };

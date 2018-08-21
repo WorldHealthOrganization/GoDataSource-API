@@ -31,7 +31,7 @@ module.exports = function (Sync) {
           return done(err);
         }
         return done(null, fs.createReadStream(fileName), 'application/octet-stream');
-    });
+      });
   };
 
   /**

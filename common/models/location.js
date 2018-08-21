@@ -460,7 +460,8 @@ module.exports = function (Location) {
 
     // build a list of create operations
     const createLocationOperations = [];
-    locationsList.forEach(function (location) {
+    locationsList.forEach(
+      function (location) {
         // build current location
         let _location = Object.assign({parentLocationId: parentLocationId}, location.location);
         // add create location operation

@@ -30,7 +30,7 @@ console.log = logger.debug;
 console.info = logger.info;
 console.warn = logger.warn;
 console.error = logger.error;
-/* eslint-disable enable-console */
+/* eslint-enable no-console */
 
 // initialize flag to prevent attaching the transport flush handler multiple times
 let flushHandlerAdded = false;
