@@ -44,6 +44,14 @@
       "required": true
     }
   },
+  "indexes": {
+    "address_geoLocation_index": {
+      "addresses.geoLocation": "2dsphere"
+    },
+    "fillGeoLocation_index": {
+      "fillGeoLocation": "2dsphere"
+    }
+  },
   "validations": [],
   "relations": {
     "contact": {

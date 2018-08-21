@@ -44,6 +44,11 @@
       "type": "address"
     }
   },
+  "indexes": {
+    "address_geoLocation_index": {
+      "address.geoLocation": "2dsphere"
+    }
+  },
   "excludeBaseProperties": [
     "firstName",
     "middleName",
