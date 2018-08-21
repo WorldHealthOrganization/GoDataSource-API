@@ -1,5 +1,8 @@
 'use strict';
 
+const app = require('../../server/server');
+const dateParser = app.utils.helpers.getDateDisplayValue;
+
 module.exports = function (Contact) {
   // set flag to not get controller
   Contact.hasController = false;
@@ -12,6 +15,7 @@ module.exports = function (Contact) {
     'occupation': 'LNG_CONTACT_FIELD_LABEL_OCCUPATION',
     'age': 'LNG_CONTACT_FIELD_LABEL_AGE',
     'dob': 'LNG_CONTACT_FIELD_LABEL_DOB',
+    'documents': 'LNG_CONTACT_FIELD_LABEL_DOCUMENTS',
     'documents[].type': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE',
     'documents[].number': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER',
     'dateDeceased': 'LNG_CONTACT_FIELD_LABEL_DATE_DECEASED',
@@ -23,7 +27,7 @@ module.exports = function (Contact) {
     'deceased': 'LNG_CONTACT_FIELD_LABEL_DECEASED',
     'visualId': 'LNG_CONTACT_FIELD_LABEL_VISUAL_ID',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
-    'addresses[].name': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_NAME',
+    'addresses[].typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
     'addresses[].country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
     'addresses[].city': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY',
     'addresses[].addressLine1': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1',
@@ -40,10 +44,38 @@ module.exports = function (Contact) {
     riskLevel: 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL',
     gender: 'LNG_REFERENCE_DATA_CATEGORY_GENDER',
     occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
-    'documents.type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE'
+    'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
+    'addresses[].typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE'
   };
 
   Contact.referenceDataFields = Object.keys(Contact.referenceDataFieldsToCategoryMap);
+
+  // add parsers for field values that require parsing when displayed (eg. in pdf)
+  Contact.fieldToValueParsersMap = {
+    dob: dateParser,
+    dateDeceased: dateParser,
+    'addresses[].date': dateParser,
+    'followUps[].date': dateParser
+  };
+  Contact.fieldsToParse = Object.keys(Contact.fieldToValueParsersMap);
+
+  // contact fields to print
+  Contact.printFieldsinOrder = [
+    'firstName',
+    'middleName',
+    'lastName',
+    'gender',
+    'dob',
+    'age',
+    'occupation',
+    'phoneNumber',
+    'addresses',
+    'documents',
+    'riskLevel',
+    'riskReason',
+    'dateDeceased',
+    'deceased'
+  ];
 
   Contact.foreignKeyResolverMap = {
     'addresses[].locationId': {

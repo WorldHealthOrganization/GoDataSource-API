@@ -498,7 +498,7 @@
     },
     "addressFields": {
       "LNG_CASE_FIELD_LABEL_ADDRESSES": "日本の Addresses",
-      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_NAME": "日本の Name",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE": "日本の Type",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY": "日本の Country",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY": "日本の CITY",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1": "日本の Address Line 1",
