@@ -54,7 +54,12 @@ module.exports = function (Model) {
       // go through each nested GeoPoint
       nestedGeoPoint.forEach(function (nestedPoint) {
         // if the nested GeoPoint is not in the desired format
-        if (nestedPoint.value && nestedPoint.value.coordinates && !nestedPoint.value.lng && !nestedPoint.value.lat) {
+        if (
+          nestedPoint.value &&
+          nestedPoint.value.coordinates &&
+          nestedPoint.value.lng === undefined &&
+          nestedPoint.value.lat === undefined
+        ) {
           // convert it
           _.set(data.target, nestedPoint.exactPath, {
             lat: nestedPoint.value.coordinates[1],
@@ -85,7 +90,12 @@ module.exports = function (Model) {
       // go through each nested GeoPoint
       nestedGeoPoint.forEach(function (nestedPoint) {
         // if the nested GeoPoint is not in the desired format
-        if (nestedPoint.value && !nestedPoint.value.coordinates && nestedPoint.value.lng && nestedPoint.value.lat) {
+        if (
+          nestedPoint.value &&
+          !nestedPoint.value.coordinates &&
+          nestedPoint.value.lng !== undefined &&
+          nestedPoint.value.lat !== undefined
+        ) {
           // convert it
           _.set(data.target, nestedPoint.exactPath, {
             coordinates: [nestedPoint.value.lng, nestedPoint.value.lat],
