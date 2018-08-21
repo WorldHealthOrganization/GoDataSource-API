@@ -650,7 +650,7 @@ const getFlatObject = function (object, prefix, humanFriendly) {
  * @returns {string}
  */
 const getDateDisplayValue = function (dateString) {
-  return new Date(dateString).toISOString();
+  return dateString && moment(dateString).isValid() ? new Date(dateString).toISOString() : dateString;
 };
 
 /**

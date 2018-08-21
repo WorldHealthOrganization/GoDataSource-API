@@ -1958,7 +1958,9 @@
         },
         {
           "arg": "anonymizeFields",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
@@ -3620,7 +3622,9 @@
         },
         {
           "arg": "anonymizeFields",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
@@ -3685,7 +3689,9 @@
         },
         {
           "arg": "anonymizeFields",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
@@ -3730,13 +3736,16 @@
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'includeContactAddress': boolean, 'includeContactPhoneNumber': boolean, 'groupResultsBy': enum ['case', 'location', 'riskLevel'] on the first level in 'where'"
         },
         {
-          "arg": "anonymizationFields",
+          "arg": "encryptPassword",
+          "type": "string",
+          "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
+        },
+        {
+          "arg": "anonymizeFields",
           "type": [
-            {
-              "type": "string"
-            }
+            "string"
           ],
-          "description": "Array containing properties that need to be anonymized"
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
           "arg": "options",

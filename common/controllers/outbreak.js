@@ -4285,13 +4285,26 @@ module.exports = function (Outbreak) {
    * Export filtered contacts follow-ups to PDF
    * PDF Information: List of contacts with follow-ups table
    * @param filter This request also accepts 'includeContactAddress': boolean, 'includeContactPhoneNumber': boolean, 'groupResultsBy': enum ['case', 'location', 'riskLevel'] on the first level in 'where'
-   * @param anonymizationFields Array containing properties that need to be anonymized
+   * @param encryptPassword
+   * @param anonymizeFields Array containing properties that need to be anonymized
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredContactFollowUps = function (filter, anonymizationFields, options, callback) {
-    // normalize anonymizationFields; if received value is not an array we won't use it
-    anonymizationFields = Array.isArray(anonymizationFields) ? anonymizationFields : [];
+  Outbreak.prototype.exportFilteredContactFollowUps = function (filter, encryptPassword, anonymizeFields, options, callback) {
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+
+      // file must be either encrypted or anonymized
+      if (!encryptPassword) {
+        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
+      }
+    }
 
     // initialize includeContactAddress and includeContactPhoneNumber filters
     let includeContactAddress, includeContactPhoneNumber;
@@ -4377,6 +4390,8 @@ module.exports = function (Outbreak) {
         }, filter || {});
     }
 
+    let mimeType = 'application/pdf';
+
     // use get contacts functionality
     this.__get__contacts(filter, function (error, result) {
       if (error) {
@@ -4417,6 +4432,12 @@ module.exports = function (Outbreak) {
 
             // get usual place of residence translation as we will use it further
             let usualPlaceOfResidence = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
+
+            // anonymize fields
+            if (anonymizeFields.length) {
+              // anonymize them
+              app.utils.anonymizeDatasetFields.anonymize(contactsList, anonymizeFields);
+            }
 
             // loop through the results and get the properties that will be exported;
             // also group the contacts if needed
@@ -4531,20 +4552,31 @@ module.exports = function (Outbreak) {
               })
             }
 
-            let mimeType = 'application/pdf';
+            return new Promise(function (resolve, reject) {
+              // convert document stream to buffer
+              genericHelpers.streamToBuffer(doc, function (error, file) {
+                if (error) {
+                  reject(error);
+                } else {
+                  // encrypt the file if needed
+                  if (encryptPassword) {
+                    app.utils.aesCrypto.encrypt(encryptPassword, file)
+                      .then(function (data) {
+                        resolve(data);
+                      });
+                  } else {
+                    resolve(file);
+                  }
+                }
+              });
 
-            // convert document stream to buffer
-            genericHelpers.streamToBuffer(doc, function (error, file) {
-              if (error) {
-                callback(error);
-              } else {
-                // and offer it for download
-                app.utils.remote.helpers.offerFileToDownload(file, mimeType, `Contact Line List.pdf`, callback);
-              }
-            });
-
-            // finalize document
-            doc.end();
+              // finalize document
+              doc.end();
+            })
+          })
+          .then(function (file) {
+            // and offer it for download
+            app.utils.remote.helpers.offerFileToDownload(file, mimeType, `Contact Line List.pdf`, callback);
           })
           .catch(callback);
       });
