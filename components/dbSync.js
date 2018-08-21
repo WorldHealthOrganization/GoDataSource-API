@@ -67,9 +67,9 @@ const syncRecord = function (logger, model, record, options, done) {
           id: record.id
         },
         deleted: true
-      })
+      });
   } else {
-    log('debug', `Record id not present`);
+    log('debug', 'Record id not present');
     // record id not present, don't search for a record
     findRecord = Promise.resolve();
   }

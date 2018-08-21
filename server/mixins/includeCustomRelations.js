@@ -39,7 +39,7 @@ module.exports = function (Model) {
             definition: Model.customRelations[relation]
           });
         }
-      // complex relation object
+        // complex relation object
       } else if (relation.relation) {
         // if this is a custom relation
         if (Model.customRelations[relation.relation]) {
@@ -70,6 +70,7 @@ module.exports = function (Model) {
     // get custom relations to be included
     let includeCustom = _.get(context, 'options.includeCustom', []);
     let promises = [];
+    let foreignKeyContainer, referencedIds;
     // for each relation, build a query based on the relation type
     includeCustom.forEach(function (customRelation) {
       let query;
@@ -86,8 +87,8 @@ module.exports = function (Model) {
           break;
         // base model contains a list of references to related model
         case 'belongsToManyComplex':
-          const foreignKeyContainer = modelInstance[customRelation.definition.foreignKeyContainer];
-          const referencedIds = [];
+          foreignKeyContainer = modelInstance[customRelation.definition.foreignKeyContainer];
+          referencedIds = [];
           // build list of referenced ids
           Array.isArray(foreignKeyContainer) && foreignKeyContainer.forEach(function (property) {
             referencedIds.push(_.get(property, customRelation.definition.foreignKey));

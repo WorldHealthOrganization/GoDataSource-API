@@ -68,5 +68,5 @@ module.exports = function (Followup) {
    */
   const daysSince = function (startDate, endDate){
     return (moment(endDate).startOf('day')).diff(moment(startDate).startOf('day'), 'days');
-  }
+  };
 };

@@ -83,7 +83,7 @@ function exportFilteredModelsList(app, Model, filter, exportType, fileName, encr
       return new Promise(function (resolve) {
         resolve(results);
       });
-    }
+    };
   }
   // find results
   Model.find(filter, function (error, result) {
@@ -161,7 +161,7 @@ function exportFilteredModelsList(app, Model, filter, exportType, fileName, encr
         })
         .then(function (results) {
           // create file with the results
-          return app.utils.helpers.exportListFile(headers, results, exportType)
+          return app.utils.helpers.exportListFile(headers, results, exportType);
         })
         .then(function (file) {
           if (encryptPassword) {

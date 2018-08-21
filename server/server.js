@@ -10,7 +10,9 @@ process.on('uncaughtException', function (e) {
     // stop process and log error
     app.logger.exitProcessAfterFlush(1);
   } else {
+    /* eslint-disable no-console */
     console.error(e);
+    /* eslint-enable no-console*/
     process.exit(1);
   }
 });

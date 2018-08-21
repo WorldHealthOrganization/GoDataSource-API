@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = function(Logdata) {
+module.exports = function() {
 
 };

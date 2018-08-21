@@ -111,5 +111,5 @@ module.exports = function (Case) {
       modelName: 'location',
       useProperty: 'name'
     }
-  }
+  };
 };

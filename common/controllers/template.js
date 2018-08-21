@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const templateParser = require('./../../components/templateParser');
 
 module.exports = function (Template) {

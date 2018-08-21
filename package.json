@@ -6,7 +6,7 @@
     "node": ">=4"
   },
   "scripts": {
-    "lint": "eslint .",
+    "lint": "./node_modules/.bin/eslint .",
     "start": "node .",
     "posttest": "npm run lint && nsp check",
     "init-database": "node ./server/install/install.js init-database",
@@ -44,7 +44,7 @@
     "xml2js": "^0.4.19"
   },
   "devDependencies": {
-    "eslint": "^3.17.1",
+    "eslint": "^3.19.0",
     "eslint-config-loopback": "^8.0.0",
     "nsp": "^2.1.0"
   },

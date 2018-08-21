@@ -153,7 +153,7 @@ module.exports = function (Outbreak) {
                   throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
                     model: app.models.person.modelName,
                     id: person.id
-                  })
+                  });
                 }
 
                 // do not allow event-event relationships

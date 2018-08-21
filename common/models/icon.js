@@ -53,7 +53,7 @@ module.exports = function (Icon) {
    * @return {*}
    */
   Icon.removeFromDisk = function (filePath) {
-    return app.models.storage.remove(filePath)
+    return app.models.storage.remove(filePath);
   };
 
 };

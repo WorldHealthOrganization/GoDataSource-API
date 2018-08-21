@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = function(Clientcredentials) {
+module.exports = function() {
 
 };

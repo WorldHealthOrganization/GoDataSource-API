@@ -83,8 +83,8 @@ module.exports = function (Model) {
     return {
       iPAddress: remoteAddress ? remoteAddress : 'unavailable',
       id: loggedInUser ? loggedInUser.id : 'unavailable',
-      role: loggedInUser ? loggedInUser.roles.reduce((rolesStr, role) => rolesStr += `${role.name} `, ``) : 'unavailable'
-    }
+      role: loggedInUser ? loggedInUser.roles.reduce((rolesStr, role) => rolesStr += `${role.name} `, '') : 'unavailable'
+    };
   }
 
   if (isMonitoredModel(Model)) {

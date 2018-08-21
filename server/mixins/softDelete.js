@@ -151,7 +151,7 @@ module.exports = function (Model) {
       });
 
     // return the promise only when needed
-    if (typeof cb !== "function") {
+    if (typeof cb !== 'function') {
       return promise;
     }
   };
@@ -204,7 +204,7 @@ module.exports = function (Model) {
       });
 
     // return the promise only when needed
-    if (typeof cb !== "function") {
+    if (typeof cb !== 'function') {
       return promise;
     }
   };
@@ -247,7 +247,7 @@ module.exports = function (Model) {
       });
 
     // return the promise only when needed
-    if (typeof cb !== "function") {
+    if (typeof cb !== 'function') {
       return promise;
     }
   };

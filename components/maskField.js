@@ -28,7 +28,7 @@ function getMaskPlaceholders(mask) {
     // look for all group matches
     [1, 2, 3, 4].forEach(function (groupMatch) {
       if (match[groupMatch]) {
-        placeholders.push(match[groupMatch])
+        placeholders.push(match[groupMatch]);
       }
     });
     match = maskRegExp.exec(mask);
@@ -72,7 +72,7 @@ function resolveMask(mask, numericValue, callback) {
   if (!maskIsValid(mask)) {
     return callback({
       code: 'INVALID_MASK',
-      message: `Invalid mask. The mask does not match the following pattern: /^(?:(?!š).)*(?:9*0+|9+0*)[^š]*$/.`
+      message: 'Invalid mask. The mask does not match the following pattern: /^(?:(?!š).)*(?:9*0+|9+0*)[^š]*$/.'
     });
   }
   let maskPlaceholders = getMaskPlaceholders(mask);
@@ -87,7 +87,7 @@ function resolveMask(mask, numericValue, callback) {
   if (stringValue.length > maxMaskLength) {
     return callback({
       code: 'MASK_TOO_SHORT',
-      message: `Cannot resolve mask. The numeric value is too big for current mask.`
+      message: 'Cannot resolve mask. The numeric value is too big for current mask.'
     });
   }
   // resolve the placeholders

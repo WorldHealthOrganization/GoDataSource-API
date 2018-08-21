@@ -1,7 +1,5 @@
 'use strict';
 
-const app = require('../../server/server');
-
 module.exports = function (Role) {
   // set flag to force using the controller
   Role.hasController = true;

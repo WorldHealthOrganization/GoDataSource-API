@@ -214,7 +214,7 @@ module.exports = function (Sync) {
 
                         return doneCollection();
                       }
-                    )
+                    );
                   } catch (parseError) {
                     app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
                     return doneCollection();
@@ -238,5 +238,5 @@ module.exports = function (Sync) {
         });
       }
     );
-  }
+  };
 };

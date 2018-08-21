@@ -12,5 +12,5 @@ module.exports = function(ExtendedPersistedModel) {
     updatedBy: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
     deleted: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
     deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT'
-  }
+  };
 };

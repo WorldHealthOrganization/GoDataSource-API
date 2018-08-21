@@ -82,5 +82,5 @@ module.exports = function (Contact) {
       modelName: 'location',
       useProperty: 'name'
     }
-  }
+  };
 };

@@ -44,7 +44,7 @@ module.exports = function (ImportableFile) {
       // this needs to be a list (in order to get its headers)
       if (!Array.isArray(jsonObj)) {
         // error invalid content
-        return callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+        return callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
           contentType: 'JSON',
           details: 'it should contain an array'
         }));
@@ -66,7 +66,7 @@ module.exports = function (ImportableFile) {
     }
     catch (error) {
       // handle JSON.parse errors
-      callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+      callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
         contentType: 'JSON',
         details: error.message
       }));
@@ -90,7 +90,7 @@ module.exports = function (ImportableFile) {
       // this needs to be a list (in order to get its headers)
       if (!Array.isArray(jsonObj[firstProp])) {
         // error invalid content
-        return callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+        return callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
           contentType: 'XML',
           details: 'it should contain an array'
         }));
@@ -122,7 +122,7 @@ module.exports = function (ImportableFile) {
     // extract first sheet name (we only care about first sheet)
     let sheetName = parsedData.SheetNames.shift();
     // convert data to JSON
-    let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName], {dateNF: 'YYYY-MM-DD"T"hh:mm:ss.000"Z"'});
+    let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName], {dateNF: 'YYYY-MM-DD\'T\'hh:mm:ss.000\'Z\''});
     // get sheer range
     let range = /^[A-Za-z]+\d+:([A-Za-z])+\d+$/.exec(parsedData.Sheets[sheetName]['!ref']);
     // keep a list of headers
@@ -245,7 +245,7 @@ module.exports = function (ImportableFile) {
             });
           });
         })
-        .catch(callback)
+        .catch(callback);
     });
   };
 };

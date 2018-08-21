@@ -1,6 +1,7 @@
 'use strict';
 
 module.exports = function (Address) {
+
   // map language token labels for model properties
   Address.fieldLabelsMap = {
     'typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',

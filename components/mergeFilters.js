@@ -15,14 +15,14 @@ function mergeIncludeFilters(includeFilters) {
       includeFilterMap[includeFilter] = {
         position: _includeFilters.push(includeFilter) - 1,
         complex: false
-      }
+      };
       // include is a complex type and it's the first occurrence of the include
     } else if (includeFilter.relation && (!includeFilterMap[includeFilter.relation])) {
       // update include array & mark relation as complex include
       includeFilterMap[includeFilter.relation] = {
         position: _includeFilters.push(includeFilter) - 1,
         complex: true
-      }
+      };
       // include is a complex type but the relation was already indexed as a simple type
     } else if (
       includeFilter.relation &&
@@ -85,7 +85,7 @@ function merge(filter, requestFilter = {}) {
       if (Array.isArray(filterElement.include) && filterElement.include.length) {
         _filter.include = _filter.include.concat(filterElement.include);
       } else if (typeof filterElement.include === 'string' || typeof filterElement.include === 'object') {
-        _filter.include.push(filterElement.include)
+        _filter.include.push(filterElement.include);
       }
     });
     _filter.include = mergeIncludeFilters(_filter.include);
