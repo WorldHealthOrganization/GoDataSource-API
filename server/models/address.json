@@ -33,9 +33,16 @@
       "type": "string"
     },
     "geoLocation": {
+      "required": false,
       "type": {
-        "lat": "number",
-        "lng": "number"
+        "lat": {
+          "type": "number",
+          "required": false
+        },
+        "lng": {
+          "type": "number",
+          "required": false
+        }
       }
     },
     "date": {
