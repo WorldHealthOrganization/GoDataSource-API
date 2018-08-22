@@ -936,11 +936,11 @@ module.exports = function (Outbreak) {
    * @param languageId
    * @param dictionary
    */
-  Outbreak.helpers.parseTemplateQuestions = function (questions, languageId, dictionary) {
+  Outbreak.helpers.parseTemplateQuestions = function (questions, dictionary) {
     // cache translation function name, used in many places below
     // include sanity check, fallback on initial value if no translation is found
     let translateToken = function (text) {
-      let translatedText = app.models.language.getFieldTranslationFromDictionary(text, languageId, dictionary);
+      let translatedText = dictionary.getTranslation(text);
       return translatedText ? translatedText : text;
     };
 
@@ -975,16 +975,15 @@ module.exports = function (Outbreak) {
    * Translate all marked referenceData fields of a model, or an array of models
    * @param modelName
    * @param model
-   * @param contextUser
    * @param dictionary
    */
-  // Outbreak.helpers.translateDataSetReferenceDataValues = function (dataSet, modelName, contextUser, dictionary) {
+  // Outbreak.helpers.translateDataSetReferenceDataValues = function (dataSet, modelName, dictionary) {
   //   if(Array.isArray(dataSet)) {
   //     dataSet.forEach((model) => {
-  //       Outbreak.helpers.translateModelReferenceDataValues(model, modelName, contextUser, dictionary)
+  //       Outbreak.helpers.translateModelReferenceDataValues(model, modelName, dictionary)
   //     })
   //   } else {
-  //     Outbreak.helpers.translateModelReferenceDataValues(dataSet, modelName, contextUser, dictionary)
+  //     Outbreak.helpers.translateModelReferenceDataValues(dataSet, modelName, dictionary)
   //   }
   // };
 
@@ -992,10 +991,9 @@ module.exports = function (Outbreak) {
    * Translate all marked referenceData fields of a dataSet
    * @param dataSet
    * @param modelName
-   * @param contextUser
    * @param dictionary
    */
-  Outbreak.helpers.translateDataSetReferenceDataValues = function (dataSet, modelName, contextUser, dictionary) {
+  Outbreak.helpers.translateDataSetReferenceDataValues = function (dataSet, modelName, dictionary) {
     let dataSetIsObject = false;
     if(!Array.isArray(dataSet)) {
       dataSet = [dataSet];
@@ -1006,7 +1004,7 @@ module.exports = function (Outbreak) {
       app.models[modelName].referenceDataFields.forEach((field) => {
         if (field.indexOf('.') === -1) {
           if (_.get(model, field)) {
-            _.set(model, field, app.models.language.getFieldTranslationFromDictionary(_.get(model, field), contextUser.languageId, dictionary));
+            _.set(model, field, dictionary.getTranslation(_.get(model, field)));
           }
         } else {
           let parentField = '';
@@ -1018,7 +1016,7 @@ module.exports = function (Outbreak) {
           } else {
             parentField = field.split('.')[0];
           }
-          Outbreak.helpers.translateDataSetReferenceDataValues(model[parentField], arrayFields[parentField], contextUser, dictionary);
+          Outbreak.helpers.translateDataSetReferenceDataValues(model[parentField], arrayFields[parentField], dictionary);
         }
       });
     });
@@ -1032,10 +1030,9 @@ module.exports = function (Outbreak) {
    * Translate all marked field labels of a model
    * @param modelName
    * @param model
-   * @param contextUser
    * @param dictionary
    */
-  Outbreak.helpers.translateFieldLabels = function (model, modelName, contextUser, dictionary) {
+  Outbreak.helpers.translateFieldLabels = function (model, modelName, dictionary) {
     let fieldsToTranslate = {};
     if (!app.models[modelName]) {
       fieldsToTranslate = nonModelObjects[modelName];
@@ -1050,12 +1047,12 @@ module.exports = function (Outbreak) {
       if(fieldsToTranslate && fieldsToTranslate[key]) {
         if(Array.isArray(value) && value.length && typeof(value[0]) === 'object' && arrayFields[key]) {
           value.forEach((element, index) => {
-            model[key][index] = Outbreak.helpers.translateFieldLabels(model[key][index], arrayFields[key], contextUser, dictionary);
+            model[key][index] = Outbreak.helpers.translateFieldLabels(model[key][index], arrayFields[key], dictionary);
           })
         } else if (typeof(value) === 'object' && Object.keys(value).length > 0) {
-          model[key] = Outbreak.helpers.translateFieldLabels(value, arrayFields[key], contextUser, dictionary);
+          model[key] = Outbreak.helpers.translateFieldLabels(value, arrayFields[key], dictionary);
         }
-        return app.models.language.getFieldTranslationFromDictionary(app.models[modelName] ? fieldsToTranslate[key] : nonModelObjects[modelName][key], contextUser.languageId, dictionary);
+        return dictionary.getTranslation(app.models[modelName] ? fieldsToTranslate[key] : nonModelObjects[modelName][key]);
       } else {
         return key;
       }

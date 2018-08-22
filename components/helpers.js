@@ -699,11 +699,10 @@ module.exports = {
   getUTCDateEndOfDay: getUTCDateEndOfDay,
   getAsciiString: getAsciiString,
   getChunksForInterval: getChunksForInterval,
-  convertPropsToDate: convertPropsToDate,
   extractImportableFields: extractImportableFields,
   exportListFile: exportListFile,
   getReferencedValue: getReferencedValue,
-  resolveModelForeignKeys: resolveModelForeignKeys,
+  resolveModelForeignKeys: resolveModelForeignKey
   getFlatObject: getFlatObject,
   convertPropsToDate: convertPropsToDate,
   prepareFieldsForPrint: prepareFieldsForPrint

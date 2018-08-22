@@ -46,7 +46,7 @@ module.exports = function (Relationship) {
   };
 
   Relationship.relatedFieldLabelsMap = {
-    'person': 'LNG_RELATIONSHIP_FIELD_LABEL_PERSON'
+    'person': 'LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON'
   };
 
   Relationship.printFieldsinOrder = [

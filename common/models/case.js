@@ -68,7 +68,8 @@ module.exports = function (Case) {
     gender: 'LNG_REFERENCE_DATA_CATEGORY_GENDER',
     occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
     outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
-    'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE'
+    'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
+    'addresses[].type': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
   };
 
   Case.referenceDataFields = Object.keys(Case.referenceDataFieldsToCategoryMap);
@@ -107,6 +108,10 @@ module.exports = function (Case) {
 
   Case.foreignKeyResolverMap = {
     'addresses[].locationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'relationships[].people[].addresses[].locationId': {
       modelName: 'location',
       useProperty: 'name'
     }

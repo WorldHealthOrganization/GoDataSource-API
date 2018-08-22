@@ -65,6 +65,7 @@ function createPdfDoc(options) {
     this.image(`${__dirname}/../resources/images/logo-black.png`, 50, 15, {height: 25});
     this.lineWidth(options.lineWidth);
     this.fontSize(options.fontSize);
+    this.font(`${__dirname}/../resources/fonts/NotoSansCJKjp-Regular.min.ttf`);
     addPageNumber(document);
   });
   // add first page
@@ -364,70 +365,70 @@ const createQuestionnaire = function (doc, questions, withData, title) {
  * @param title
  * @param numberOfEmptyEntries
  */
-const createPersonProfile = function (doc, person, displayValues, title, numberOfEmptyEntries) {
-  numberOfEmptyEntries = numberOfEmptyEntries || 2;
-
-  // add page title
-  if (title) {
-    addTitle(doc, title);
-    doc.moveDown();
-  }
-
-  // cache initial document margin
-  const initialXMargin = doc.x;
-
-  // display each field on a row
-  Object.keys(person).forEach((fieldName) => {
-    // if property is array and has at least one element, display it on next page
-    if (Array.isArray(person[fieldName]) && person[fieldName][0]) {
-      // top property
-      doc.text(fieldName, initialXMargin).moveDown();
-
-      // if this should be an empty form, display 2 entries of it
-      if (!displayValues) {
-        // there will always be an element in the array, containing field definitions
-        let fields = Object.keys(person[fieldName][0]);
-
-        // list of empty entries to add
-        let emptyEntries = new Array(numberOfEmptyEntries);
-        emptyEntries.fill(fields);
-
-        // number of empty entries to set
-        emptyEntries.forEach((fields, index, arr) => {
-          fields.forEach((field) => {
-            doc.text(`${field}: ${'_'.repeat(25)}`, initialXMargin + 20).moveDown();
-          });
-
-          // separate each group of fields
-          // if this is the last item do not move 2 lines
-          if (index !== arr.length - 1) {
-            doc.moveDown(2);
-          }
-        });
-      } else {
-        // display nested props
-        person[fieldName].forEach((item, index, arr) => {
-          Object.keys(item).forEach((prop) => {
-            doc.text(`${prop}: ${item[prop]}`, initialXMargin + 20).moveDown();
-          });
-
-          // space after each item in the list
-          // if this is the last item do not move 2 lines
-          if (index !== arr.length - 1) {
-            doc.moveDown(2);
-          }
-        });
-      }
-    } else {
-      doc.text(`${fieldName}: ${displayValues ? person[fieldName] : '_'.repeat(25)}`, initialXMargin).moveDown();
-    }
-  });
-
-  return doc;
-};
+// const createPersonProfile = function (doc, person, displayValues, title, numberOfEmptyEntries) {
+//   numberOfEmptyEntries = numberOfEmptyEntries || 2;
+//
+//   // add page title
+//   if (title) {
+//     addTitle(doc, title);
+//     doc.moveDown();
+//   }
+//
+//   // cache initial document margin
+//   const initialXMargin = doc.x;
+//
+//   // display each field on a row
+//   Object.keys(person).forEach((fieldName) => {
+//     // if property is array and has at least one element, display it on next page
+//     if (Array.isArray(person[fieldName]) && person[fieldName][0]) {
+//       // top property
+//       doc.text(fieldName, initialXMargin).moveDown();
+//
+//       // if this should be an empty form, display 2 entries of it
+//       if (!displayValues) {
+//         // there will always be an element in the array, containing field definitions
+//         let fields = Object.keys(person[fieldName][0]);
+//
+//         // list of empty entries to add
+//         let emptyEntries = new Array(numberOfEmptyEntries);
+//         emptyEntries.fill(fields);
+//
+//         // number of empty entries to set
+//         emptyEntries.forEach((fields, index, arr) => {
+//           fields.forEach((field) => {
+//             doc.text(`${field}: ${'_'.repeat(25)}`, initialXMargin + 20).moveDown();
+//           });
+//
+//           // separate each group of fields
+//           // if this is the last item do not move 2 lines
+//           if (index !== arr.length - 1) {
+//             doc.moveDown(2);
+//           }
+//         });
+//       } else {
+//         // display nested props
+//         person[fieldName].forEach((item, index, arr) => {
+//           Object.keys(item).forEach((prop) => {
+//             doc.text(`${prop}: ${item[prop]}`, initialXMargin + 20).moveDown();
+//           });
+//
+//           // space after each item in the list
+//           // if this is the last item do not move 2 lines
+//           if (index !== arr.length - 1) {
+//             doc.moveDown(2);
+//           }
+//         });
+//       }
+//     } else {
+//       doc.text(`${fieldName}: ${displayValues ? person[fieldName] : '_'.repeat(25)}`, initialXMargin).moveDown();
+//     }
+//   });
+//
+//   return doc;
+// };
 
 /**
- * Display a person specific fields
+ * Display a model's fields
  * Do not display actual values, only field names
  * DisplayValues flag is also supported, if true it will display the actual field values
  * This flag is needed to create empty profile pages
@@ -437,7 +438,9 @@ const createPersonProfile = function (doc, person, displayValues, title, numberO
  * @param displayValues
  * @param title
  */
-const displayModelDetails = function (doc, model, displayValues, title) {
+const displayModelDetails = function (doc, model, displayValues, title, numberOfEmptyEntries) {
+  numberOfEmptyEntries = numberOfEmptyEntries || 2;
+
   // add page title
   if (title) {
     addTitle(doc, title);
@@ -461,7 +464,11 @@ const displayModelDetails = function (doc, model, displayValues, title) {
         // there will always be an element in the array, containing field definitions
         let fields = Object.keys(model[fieldName][0]);
 
-        [fields, fields].forEach((fields, index, arr) => {
+        // list of empty entries to add
+        let emptyEntries = new Array(numberOfEmptyEntries);
+        emptyEntries.fill(fields);
+
+        emptyEntries.forEach((fields, index, arr) => {
           fields.forEach((field) => {
             doc.text(`${field}: ${'_'.repeat(25)}`, initialXMargin + 20).moveDown();
           });
@@ -530,7 +537,7 @@ module.exports = {
   createPDFList: createPDFList,
   createSVGDoc: createSVGDoc,
   createPdfDoc: createPdfDoc,
-  createPersonProfile: createPersonProfile,
+  // createPersonProfile: createPersonProfile,
   createQuestionnaire: createQuestionnaire,
   displayModelDetails: displayModelDetails,
   displayPersonRelationships: displayPersonRelationships,
