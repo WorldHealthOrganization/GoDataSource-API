@@ -55,8 +55,20 @@ module.exports = function (ImportableFile) {
             details: 'it should contain an array'
           }));
         }
-        // send back the parsed object and its headers (prop names of the first item)
-        callback(null, {obj: jsonObj, headers: Object.keys(jsonObj.shift())});
+        // build a list of headers
+        const headers = [];
+        // build the list by looking at the properties of all elements (not all items have all properties)
+        jsonObj.forEach(function (item) {
+          Object.keys(item).forEach(function (property) {
+            // add the header if not already included
+            if (!headers.includes(property)) {
+              headers.push(property);
+            }
+          });
+        });
+
+        // send back the parsed object and its headers
+        callback(null, {obj: jsonObj, headers: headers});
       }
       catch (error) {
         // handle JSON.parse errors
@@ -96,8 +108,19 @@ module.exports = function (ImportableFile) {
             details: 'it should contain an array'
           }));
         }
-        // send back the parsed object and its headers (prop names of the first item)
-        callback(null, {obj: jsonObj[firstProp], headers: Object.keys(jsonObj[firstProp].shift())});
+        // build a list of headers
+        const headers = [];
+        // build the list by looking at the properties of all elements (not all items have all properties)
+        jsonObj[firstProp].forEach(function (item) {
+          Object.keys(item).forEach(function (property) {
+            // add the header if not already included
+            if (!headers.includes(property)) {
+              headers.push(property);
+            }
+          });
+        });
+        // send back the parsed object and its headers
+        callback(null, {obj: jsonObj[firstProp], headers: headers});
       });
     });
   }
@@ -115,11 +138,11 @@ module.exports = function (ImportableFile) {
         return callback(error);
       }
       // parse XLS data
-      const parsedData = xlsx.read(data);
+      const parsedData = xlsx.read(data, {cellDates: true, cellNF: false, cellText: false});
       // extract first sheet name (we only care about first sheet)
       let sheetName = parsedData.SheetNames.shift();
       // convert data to JSON
-      let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName]);
+      let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName], {dateNF: 'YYYY-MM-DD"T"hh:mm:ss.000"Z"'});
       // get sheer range
       let range = /^[A-Za-z]+\d+:([A-Za-z])+\d+$/.exec(parsedData.Sheets[sheetName]['!ref']);
       // keep a list of headers

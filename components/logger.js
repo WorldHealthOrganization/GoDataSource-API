@@ -17,7 +17,8 @@ winston.loggers.add('fileLogger', {
     tailable: true
   },
   console: {
-    stderrLevels: ['error']
+    stderrLevels: ['error'],
+    level: config.logging.level
   }
 });
 

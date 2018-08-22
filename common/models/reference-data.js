@@ -121,6 +121,16 @@ module.exports = function (ReferenceData) {
       "id": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE",
       "name": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE",
       "description": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_DESCRIPTION"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE",
+      "name": "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE",
+      "description": "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_DESCRIPTION"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_COUNTRY",
+      "name": "LNG_REFERENCE_DATA_CATEGORY_COUNTRY",
+      "description": "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DESCRIPTION"
     }
   ];
 
@@ -136,7 +146,10 @@ module.exports = function (ReferenceData) {
       // get their list of reference data fields
       if (Array.isArray(Model.referenceDataFields)) {
         // build possible record usage list
-        ReferenceData.possibleRecordUsage[Model.modelName] = Model.referenceDataFields;
+        ReferenceData.possibleRecordUsage[Model.modelName] = Model.referenceDataFields.map(function (referenceDataField) {
+          // some fields contain array markers ([]) needed by some business logic, remove those here
+          return referenceDataField.replace(/\[]/g,'');
+        });
       }
     });
   });

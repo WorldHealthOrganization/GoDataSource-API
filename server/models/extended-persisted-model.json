@@ -7,12 +7,12 @@
   },
   "mixins": {
     "EnumProperty": true,
-    "ReadOnlyProperty": true,
     "UniqueValidator": true,
     "PatternValidator": true,
     "AuthorTimeStamp": true,
     "AuditLogger": true,
     "SoftDelete": true,
+    "ReadOnlyProperty": true,
     "AttachController": true,
     "IncludeCustomRelations": true
   },
@@ -23,7 +23,8 @@
       "id": true,
       "defaultFn": "uuidv4",
       "readOnly": true,
-      "unique": true
+      "unique": true,
+      "safeForImport": true
     }
   },
   "validations": [],

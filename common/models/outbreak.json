@@ -80,35 +80,26 @@
         "string"
       ]
     },
-    "colorContactNode": {
-      "type": "string"
-    },
-    "colorCaseClassifications": {
-      "type": "array"
-    },
-    "iconPeopleDied": {
-      "type": "string"
-    },
-    "iconEvents": {
-      "type": "string"
-    },
     "caseInvestigationTemplate": {
       "type": [
         "templateQuestion"
       ],
-      "required": true
+      "required": true,
+      "importTopLevelOnly": true
     },
     "contactFollowUpTemplate": {
       "type": [
         "templateQuestion"
       ],
-      "required": true
+      "required": true,
+      "importTopLevelOnly": true
     },
     "labResultsTemplate": {
       "type": [
         "templateQuestion"
       ],
-      "required": true
+      "required": true,
+      "importTopLevelOnly": true
     },
     "caseIdMask": {
       "type": "string",
@@ -975,6 +966,42 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "caseDossier"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "importImportableCasesFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "importImportableContactsFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "importImportableOutbreaksFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactsPerLocation"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "exportFilteredContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "exportFilteredOutbreaks"
     }
   ],
   "methods": {
@@ -1602,7 +1629,7 @@
         },
         {
           "arg": "body",
-          "type": "caseProps",
+          "type": "case",
           "http": {
             "source": "body"
           },
@@ -1932,10 +1959,15 @@
           "arg": "type",
           "type": "string",
           "enum": [
-            "pdf",
-            "csv"
+            "json",
+            "xml",
+            "csv",
+            "xls",
+            "xlsx",
+            "ods",
+            "pdf"
           ],
-          "description": "Export type; can be: pdf or csv. Default: csv"
+          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "options",
@@ -2092,7 +2124,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'active' boolean on the first level in 'where'"
         }
       ],
       "returns": [
@@ -2299,7 +2331,9 @@
           "type": {
             "newCases": "number",
             "total": "number",
-            "caseIds": ["string"]
+            "caseIds": [
+              "string"
+            ]
           },
           "description": "Retrieve number of new cases in known transmission chains",
           "root": true,
@@ -2795,29 +2829,342 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'periodType': enum [day, week, month], 'periodInterval':['date', 'date'] on the first level in 'where'"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'periodType': enum [day, week, month], 'periodInterval': ['date', 'date'], 'includeTotals': boolean (if false 'total' response properties are not calculated), 'includeDeaths': boolean (if false 'death' response properties are not calculated) on the first level in 'where'"
         }
       ],
       "returns": [
         {
           "arg": "counters",
           "type": {
-            "totalCasesCount": "number",
+            "totalCasesCount": {
+              "type": "number",
+              "description": "Total number of alive cases in the Outbreak. Present only if 'includeTotals' filter is sent as true"
+            },
+            "totalDeadCasesCount": {
+              "type": "number",
+              "description": "Total number of dead cases in the Outbreak. Present only if 'includeTotals' and 'includeDeaths' filters are sent as true"
+            },
+            "totalDeadConfirmedCasesCount": {
+              "type": "number",
+              "description": "Total number of dead confirmed cases in the Outbreak. Present only if 'includeTotals' and 'includeDeaths' filters are sent as true"
+            },
+            "totalCasesClassificationCounters": {
+              "type": {
+                "{caseClassification}": {
+                  "type": {
+                    "count": "number",
+                    "caseIDs": [
+                      "string"
+                    ],
+                    "locations": {
+                      "type": [
+                        {
+                          "type": {
+                            "id": "string",
+                            "totalCasesCount": {
+                              "type": "number",
+                              "description": "Total number of alive cases with the classification in the Outbreak at the location"
+                            },
+                            "caseIDs": {
+                              "type": [
+                                "string"
+                              ],
+                              "description": "Array containing the IDs of alive cases with the classification in the Outbreak at the location"
+                            }
+                          }
+                        }
+                      ],
+                      "description": "Object containing counters for cases with the classification per location"
+                    }
+                  }
+                }
+              },
+              "description": "Total number of cases per classification in the Outbreak. Present only if 'includeTotals' filters are sent as true"
+            },
+            "totalCasesCountersPerLocation": {
+              "type": {
+                "locations": {
+                  "type": [
+                    {
+                      "type": {
+                        "id": "string",
+                        "totalCasesCount": {
+                          "type": "number",
+                          "description": "Total number of alive cases in the Outbreak at the location"
+                        },
+                        "totalDeadCasesCount": {
+                          "type": "number",
+                          "description": "Total number of dead cases in the Outbreak at the location. Present only if 'includeDeaths' filter is sent as true"
+                        },
+                        "totalDeadConfirmedCasesCount": {
+                          "type": "number",
+                          "description": "Total number of dead confirmed cases in the Outbreak at the location. Present only if 'includeDeaths' filter is sent as true"
+                        },
+                        "caseIDs": {
+                          "type": [
+                            "string"
+                          ],
+                          "description": "Array containing the alive cases IDs in the Outbreak at the location"
+                        },
+                        "deadCaseIDs": {
+                          "type": [
+                            "string"
+                          ],
+                          "description": "Array containing the dead cases IDs in the Outbreak at the location. Present only if 'includeDeaths' filter is sent as true"
+                        },
+                        "deadConfirmedCaseIDs": {
+                          "type": [
+                            "string"
+                          ],
+                          "description": "Array containing the dead confirmed cases IDs in the Outbreak at the location. Present only if 'includeDeaths' filter is sent as true"
+                        }
+                      }
+                    }
+                  ],
+                  "description": "Object containing counters for cases per location"
+                }
+              },
+              "description": "Total number of cases per classification in the Outbreak in the provided interval (if no interval is provided the current day will be used)"
+            },
+            "caseIDs": {
+              "type": [
+                "string"
+              ],
+              "description": "Array containing the alive cases IDs in the Outbreak. Present only if 'includeTotals' filters are sent as true"
+            },
+            "deadCaseIDs": {
+              "type": [
+                "string"
+              ],
+              "description": "Array containing the dead cases IDs in the Outbreak. Present only if 'includeTotals' and 'includeDeaths' filters are sent as true"
+            },
+            "deadConfirmedCaseIDs": {
+              "type": [
+                "string"
+              ],
+              "description": "Array containing the dead confirmed cases IDs in the Outbreak. Present only if 'includeTotals' and 'includeDeaths' filters are sent as true"
+            },
+            "totalCasesForIntervalCount": {
+              "type": "number",
+              "description": "Total number of alive cases in the Outbreak for the interval provided (if no interval is provided the current day will be used)"
+            },
+            "totalDeadCasesForIntervalCount": {
+              "type": "number",
+              "description": "Total number of dead cases in the Outbreak for the interval provided (if no interval is provided the current day will be used). Present only if 'includeDeaths' filter is sent as true"
+            },
+            "totalDeadConfirmedCasesForIntervalCount": {
+              "type": "number",
+              "description": "Total number of dead confirmed cases in the Outbreak for the interval provided (if no interval is provided the current day will be used). Present only if 'includeDeaths' filter is sent as true"
+            },
+            "totalCasesClassificationCountersForInterval": {
+              "type": {
+                "{caseClassification}": {
+                  "type": {
+                    "count": "number",
+                    "caseIDs": [
+                      "string"
+                    ],
+                    "locations": {
+                      "type": [
+                        {
+                          "type": {
+                            "id": "string",
+                            "totalCasesCount": {
+                              "type": "number",
+                              "description": "Total number of alive cases with the classification in the Outbreak for the interval provided at the location"
+                            },
+                            "caseIDs": {
+                              "type": [
+                                "string"
+                              ],
+                              "description": "Array containing the IDs of alive cases with the classification in the Outbreak in the provided interval at the location"
+                            }
+                          }
+                        }
+                      ],
+                      "description": "Object containing counters for cases with the classification per location"
+                    }
+                  }
+                }
+              },
+              "description": "Total number of cases per classification in the Outbreak in the provided interval (if no interval is provided the current day will be used)"
+            },
+            "totalCasesCountersForIntervalPerLocation": {
+              "type": {
+                "locations": {
+                  "type": [
+                    {
+                      "type": {
+                        "id": "string",
+                        "totalCasesCount": {
+                          "type": "number",
+                          "description": "Total number of alive cases in the Outbreak for the interval provided at the location"
+                        },
+                        "totalDeadCasesCount": {
+                          "type": "number",
+                          "description": "Total number of dead cases in the Outbreak for the interval provided at the location. Present only if 'includeDeaths' filter is sent as true"
+                        },
+                        "totalDeadConfirmedCasesCount": {
+                          "type": "number",
+                          "description": "Total number of dead confirmed cases in the Outbreak for the interval provided at the location. Present only if 'includeDeaths' filter is sent as true"
+                        },
+                        "caseIDs": {
+                          "type": [
+                            "string"
+                          ],
+                          "description": "Array containing the alive cases IDs in the Outbreak in the provided interval at the location"
+                        },
+                        "deadCaseIDs": {
+                          "type": [
+                            "string"
+                          ],
+                          "description": "Array containing the dead cases IDs in the Outbreak in the provided interval at the location. Present only if 'includeDeaths' filter is sent as true"
+                        },
+                        "deadConfirmedCaseIDs": {
+                          "type": [
+                            "string"
+                          ],
+                          "description": "Array containing the dead confirmed cases IDs in the Outbreak in the provided interval at the location. Present only if 'includeDeaths' filter is sent as true"
+                        }
+                      }
+                    }
+                  ],
+                  "description": "Object containing counters for cases per location"
+                }
+              },
+              "description": "Total number of cases per classification in the Outbreak in the provided interval (if no interval is provided the current day will be used)"
+            },
+            "caseIDsForInterval": {
+              "type": [
+                "string"
+              ],
+              "description": "Array containing the alive cases IDs in the Outbreak in the provided interval (if no interval is provided the current day will be used)"
+            },
+            "deadCaseIDsForInterval": {
+              "type": [
+                "string"
+              ],
+              "description": "Array containing the dead cases IDs in the Outbreak in the provided interval. Present only if 'includeDeaths' filter is sent as true"
+            },
+            "deadConfirmedCaseIDsForInterval": {
+              "type": [
+                "string"
+              ],
+              "description": "Array containing the dead confirmed cases IDs in the Outbreak in the provided interval. Present only if 'includeDeaths' filter is sent as true"
+            },
             "period": {
               "type": [
                 {
                   "type": {
                     "start": "date",
                     "end": "date",
-                    "totalCasesCount": "number",
+                    "totalCasesCount": {
+                      "type": "number",
+                      "description": "Total number of alive cases in the Outbreak for the period"
+                    },
+                    "totalDeadCasesCount": {
+                      "type": "number",
+                      "description": "Total number of dead cases in the Outbreak for the period. Present only if and 'includeDeaths' filter is sent as true"
+                    },
+                    "totalDeadConfirmedCasesCount": {
+                      "type": "number",
+                      "description": "Total number of dead confirmed cases in the Outbreak for the period. Present only if 'includeDeaths' filter is sent as true"
+                    },
                     "classificationCounters": {
                       "type": {
-                        "{caseClassification}": "number"
+                        "{caseClassification}": {
+                          "type": {
+                            "count": "number",
+                            "caseIDs": [
+                              "string"
+                            ],
+                            "locations": {
+                              "type": [
+                                {
+                                  "type": {
+                                    "id": "string",
+                                    "totalCasesCount": {
+                                      "type": "number",
+                                      "description": "Total number of alive cases with the classification in the Outbreak for the period at the location"
+                                    },
+                                    "caseIDs": {
+                                      "type": [
+                                        "string"
+                                      ],
+                                      "description": "Array containing the IDs of alive cases with the classification in the Outbreak for the period at the location"
+                                    }
+                                  }
+                                }
+                              ],
+                              "description": "Object containing counters for cases with the classification per location"
+                            }
+                          }
+                        }
                       }
                     },
-                    "caseIDs": [
-                      "string"
-                    ]
+                    "countersPerLocation": {
+                      "type": {
+                        "locations": {
+                          "type": [
+                            {
+                              "type": {
+                                "id": "string",
+                                "totalCasesCount": {
+                                  "type": "number",
+                                  "description": "Total number of alive cases in the Outbreak for the period at the location"
+                                },
+                                "totalDeadCasesCount": {
+                                  "type": "number",
+                                  "description": "Total number of dead cases in the Outbreak for the period at the location. Present only if 'includeDeaths' filter is sent as true"
+                                },
+                                "totalDeadConfirmedCasesCount": {
+                                  "type": "number",
+                                  "description": "Total number of dead confirmed cases in the Outbreak for the period at the location. Present only if 'includeDeaths' filter is sent as true"
+                                },
+                                "caseIDs": {
+                                  "type": [
+                                    "string"
+                                  ],
+                                  "description": "Array containing the alive cases IDs in the Outbreak for the period at the location"
+                                },
+                                "deadCaseIDs": {
+                                  "type": [
+                                    "string"
+                                  ],
+                                  "description": "Array containing the dead cases IDs in the Outbreak for the period  at the location. Present only if 'includeDeaths' filter is sent as true"
+                                },
+                                "deadConfirmedCaseIDs": {
+                                  "type": [
+                                    "string"
+                                  ],
+                                  "description": "Array containing the dead confirmed cases IDs in the Outbreak for the period at the location. Present only if 'includeDeaths' filter is sent as true"
+                                }
+                              }
+                            }
+                          ],
+                          "description": "Object containing counters for cases per location"
+                        }
+                      },
+                      "description": "Total number of cases per classification in the Outbreak in the provided interval (if no interval is provided the current day will be used)"
+                    },
+                    "caseIDs": {
+                      "type": [
+                        "string"
+                      ],
+                      "description": "Array containing the alive cases IDs in the Outbreak for the period"
+                    },
+                    "deadCaseIDs": {
+                      "type": [
+                        "string"
+                      ],
+                      "description": "Array containing the dead cases IDs in the Outbreak for the period. Present only if 'includeDeaths' filter is sent as true"
+                    },
+                    "deadConfirmedCaseIDs": {
+                      "type": [
+                        "string"
+                      ],
+                      "description": "Array containing the dead confirmed cases IDs in the Outbreak for the period. Present only if 'includeDeaths' filter is sent as true"
+                    }
                   }
                 }
               ]
@@ -2955,26 +3302,32 @@
             },
             "modelProperties": {
               "type": {
-                "<modelProperty>": [{
-                  "type": "string",
-                  "description": "Model property label"
-                }]
+                "<modelProperty>": [
+                  {
+                    "type": "string",
+                    "description": "Model property label"
+                  }
+                ]
               }
             },
             "modelPropertyValues": {
               "type": {
-                "<modelProperty>": [{
-                  "type": "string",
-                  "description": "Available values for a model property"
-                }]
+                "<modelProperty>": [
+                  {
+                    "type": "string",
+                    "description": "Available values for a model property"
+                  }
+                ]
               }
             },
             "distinctFileColumnValues": {
               "type": {
-                "<fileHeader>": [{
-                  "type": "string",
-                  "description": "Distinct values for column"
-                }]
+                "<fileHeader>": [
+                  {
+                    "type": "string",
+                    "description": "Distinct values for column"
+                  }
+                ]
               }
             }
           },
@@ -3167,6 +3520,276 @@
       "http": {
         "verb": "post",
         "path": "/cases/dossier"
+      }
+    },
+    "prototype.importImportableCasesFileUsingMap": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithFieldAndReferenceDataMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "cases",
+          "type": [
+            "case"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a list of cases from a file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/cases/import-importable-file-using-map"
+      }
+    },
+    "prototype.importImportableContactsFileUsingMap": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithFieldAndReferenceDataMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "cases",
+          "type": [
+            "case"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a list of contacts from a file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/import-importable-file-using-map"
+      }
+    },
+    "importImportableOutbreaksFileUsingMap": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithFieldAndReferenceDataMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "cases",
+          "type": [
+            "case"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a list of outbreaks from a file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/import-importable-file-using-map"
+      }
+    },
+    "prototype.countContactsPerLocation": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); ; Note: this request also accepts 'date': 'date', 'locationId': 'locationId' on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "totalRegisteredContactsCount": {
+              "type": "number",
+              "description": "Total number of registered contacts for the outbreak"
+            },
+            "releasedContactsCount": {
+              "type": "number",
+              "description": "Number of released contacts for the outbreak"
+            },
+            "contactsUnderFollowUpCount": {
+              "type": "number",
+              "description": "Number of contacts for the outbreak that are still under follow-up"
+            },
+            "contactsSeenOnDateCount": {
+              "type": "number",
+              "description": "Number of contacts for the outbreak that were seen at their last follow-up"
+            },
+            "lastContactDateOfRelease": {
+              "type": "date",
+              "description": "Expected release of last contact in the outbreak (latest follow-up date for a contact)"
+            },
+            "locations": {
+              "type": [
+                {
+                  "type": {
+                    "id": "string",
+                    "totalRegisteredContactsCount": "number",
+                    "releasedContactsCount": "number",
+                    "contactsUnderFollowUpCount": "number",
+                    "contactsSeenOnDateCount": "number",
+                    "lastContactDateOfRelease": "date",
+                    "contactIDs": [
+                      "string"
+                    ]
+                  }
+                }
+              ],
+              "description": "Object containing counters for contacts per location"
+            }
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of contacts per location; Include counters for contacts under follow-up, contacts seen on date, contacts released as well as date for expected release of last contact",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/per-location/count"
+      }
+    },
+    "prototype.exportFilteredContacts": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "type",
+          "type": "string",
+          "enum": [
+            "json",
+            "xml",
+            "csv",
+            "xls",
+            "xlsx",
+            "ods",
+            "pdf"
+          ],
+          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export filtered list of contacts",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/export"
+      }
+    },
+    "exportFilteredOutbreaks": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "type",
+          "type": "string",
+          "enum": [
+            "json",
+            "xml",
+            "csv",
+            "xls",
+            "xlsx",
+            "ods",
+            "pdf"
+          ],
+          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export filtered list of outbreaks",
+      "http": {
+        "verb": "get",
+        "path": "/export"
       }
     }
   }

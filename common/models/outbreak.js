@@ -8,6 +8,29 @@ const moment = require('moment');
 
 module.exports = function (Outbreak) {
 
+  Outbreak.fieldLabelsMap = Object.assign({}, Outbreak.fieldLabelsMap, {
+    name: 'LNG_OUTBREAK_FIELD_LABEL_NAME',
+    description: 'LNG_OUTBREAK_FIELD_LABEL_DESCRIPTION',
+    disease: 'LNG_OUTBREAK_FIELD_LABEL_DISEASE',
+    'countries[]': 'LNG_OUTBREAK_FIELD_LABEL_COUNTRIES',
+    startDate: 'LNG_OUTBREAK_FIELD_LABEL_START_DATE',
+    endDate: 'LNG_OUTBREAK_FIELD_LABEL_END_DATE',
+    longPeriodsBetweenCaseOnset: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_LONG_PERIODS',
+    periodOfFollowup: 'LNG_OUTBREAK_FIELD_LABEL_DURATION_FOLLOWUP_DAYS',
+    frequencyOfFollowUp: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY',
+    frequencyOfFollowUpPerDay: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY_PER_DAY',
+    noDaysAmongContacts: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_AMONG_KNOWN_CONTACTS',
+    noDaysInChains: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_IN_KNOWN_TRANSMISSION_CHAINS',
+    noDaysNotSeen: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_NOT_SEEN',
+    noLessContacts: 'LNG_OUTBREAK_FIELD_LABEL_LESS_THAN_X_CONTACTS',
+    noDaysNewContacts: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_NEW_CONTACT',
+    'fieldsToDisplayNode[]': 'LNG_OUTBREAK_FIELD_LABEL_FIELDS_TO_DISPLAY_NODE',
+    caseInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CASE_INVESTIGATION_TEMPLATE',
+    contactFollowUpTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_FOLLOWUP_TEMPLATE',
+    labResultsTemplate: 'LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE',
+    caseIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK'
+  });
+
   Outbreak.referenceDataFieldsToCategoryMap = {
     disease: 'LNG_REFERENCE_DATA_CATEGORY_DISEASE'
   };
@@ -79,10 +102,16 @@ module.exports = function (Outbreak) {
    * @param personId
    * @param type
    * @param data
+   * @param [isCurrentPersonSource]
    * @param callback
    * @return {*}
    */
-  Outbreak.helpers.validateAndNormalizePeople = function (personId, type, data, callback) {
+  Outbreak.helpers.validateAndNormalizePeople = function (personId, type, data, isCurrentPersonSource, callback) {
+    // isCurrentPersonSource is optional and by default is true
+    if (callback === undefined) {
+      callback = isCurrentPersonSource;
+      isCurrentPersonSource = true;
+    }
     if (Array.isArray(data.persons) && data.persons.length) {
 
       let errors;
@@ -126,7 +155,7 @@ module.exports = function (Outbreak) {
         data.persons.push({
           id: personId,
           type: type,
-          source: true
+          [isCurrentPersonSource ? 'source' : 'target']: true
         });
       }
 
@@ -160,7 +189,7 @@ module.exports = function (Outbreak) {
                   }));
                 }
                 // this person is a target
-                data.persons[index].target = true;
+                data.persons[index][isCurrentPersonSource ? 'target' : 'source'] = true;
                 // set its type
                 data.persons[index].type = foundPerson.type;
               })
@@ -279,12 +308,16 @@ module.exports = function (Outbreak) {
 
   /**
    * Delete a relation for a person
+   * Do not allow deletion of the last relationship of a contact with a case/event
    * @param personId
    * @param relationshipId
    * @param options
    * @param callback
    */
   Outbreak.helpers.deletePersonRelationship = function (personId, relationshipId, options, callback) {
+    // initialize relationship instance; will be cached
+    let relationshipInstance;
+
     app.models.relationship
       .findOne({
         where: {
@@ -296,7 +329,71 @@ module.exports = function (Outbreak) {
         if (!relationship) {
           return {count: 0};
         }
-        return relationship.destroy(options);
+
+        // cache relationship
+        relationshipInstance = relationship;
+
+        // check if the relationship includes a contact; if so the last relationship of a contact with a case/event cannot be deleted
+        let relationshipContacts = relationship.persons.filter(person => person.type === 'contact');
+        if (relationshipContacts.length) {
+          // there are contacts in the relationship; check their other relationships;
+          // creating array of promises as the relation might be contact - contact
+          let promises = [];
+          relationshipContacts.forEach(function (contactEntry) {
+            promises.push(
+              // count contact relationships with case/events except the current relationship
+              app.models.relationship
+                .count({
+                  id: {
+                    neq: relationshipId
+                  },
+                  'persons.id': contactEntry.id,
+                  'persons.type': {
+                    in: ['case', 'event']
+                  }
+                })
+                .then(function (relNo) {
+                  if (!relNo) {
+                    // no other relationships with case/event exist for the contact; return the contactId to return it in an error message
+                    return contactEntry.id;
+                  } else {
+                    return;
+                  }
+                })
+            );
+          });
+
+          // execute promises
+          return Promise.all(promises);
+        } else {
+          return;
+        }
+      })
+      .then(function (result) {
+        // result can be undefined / object with count / array with contact ID elements to undefined elements
+        // for array of contact IDs need to throw error
+        if (typeof result === 'undefined') {
+          // delete relationship
+          return relationshipInstance.destroy(options);
+        }
+        else if (typeof result.count !== 'undefined') {
+          return result;
+        } else {
+          // result is an array
+          // get contact IDs from result if they exist
+          let contactIDs = result.filter(entry => typeof entry !== 'undefined');
+
+          // if result doesn't contain contact IDs the relationship will be deleted
+          if (!contactIDs.length) {
+            // delete relationship
+            return relationshipInstance.destroy(options);
+          } else {
+            // there are contacts with no other relationships with case/event; error
+            throw app.utils.apiError.getError('DELETE_CONTACT_LAST_RELATIONSHIP', {
+              contactIDs: contactIDs.join(', ')
+            });
+          }
+        }
       })
       .then(function (relationship) {
         callback(null, relationship);

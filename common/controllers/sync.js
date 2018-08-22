@@ -58,8 +58,28 @@ module.exports = function (Sync) {
         }));
       }
 
+      // build request context manually, because there is no logged user in action
+      let requestOptions = {
+        remotingContext: {
+          req: {
+            authData: {
+              user: {
+                id: req.clientId,
+                roles: [
+                  {
+                    name: app.models.role.clientApplicationPermission
+                  }
+                ]
+              }
+            },
+            headers: req.headers,
+            connection: req.connection
+          }
+        }
+      };
+
       // extract the archive to the temporary directory
-      Sync.syncDatabaseWithSnapshot(files.snapshot.path, done);
+      Sync.syncDatabaseWithSnapshot(files.snapshot.path, requestOptions, done);
     });
   };
 };

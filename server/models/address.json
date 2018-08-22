@@ -9,8 +9,10 @@
     "id"
   ],
   "properties": {
-    "name": {
-      "type": "string"
+    "typeId": {
+      "type": "string",
+      "required": true,
+      "default": "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE"
     },
     "country": {
       "type": "string"

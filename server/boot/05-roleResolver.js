@@ -223,6 +223,8 @@ module.exports = function (app) {
             // check if credentials have the correct format
             [clientId, clientSecret] = decodedCredentialsStr.split(':');
 
+            // cache client id on the context, it might be needed later in the handlers
+            context.remotingContext.req.clientId = clientId;
             if (!clientId || !clientSecret) {
               return done(buildError('ACCESS_DENIED', { accessErrors: 'Invalid credentials' }, 403));
             }
