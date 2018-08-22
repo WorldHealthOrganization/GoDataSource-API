@@ -9,7 +9,8 @@
     "user": "root",
     "connector": "mongodb",
     "allowExtendedOperators": true,
-    "enableGeoIndexing": true
+    "enableGeoIndexing": true,
+    "ignoreUndefined": true
   },
   "email": {
     "name": "email",

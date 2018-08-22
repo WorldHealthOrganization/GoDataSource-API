@@ -116,4 +116,9 @@ module.exports = function (Case) {
       useProperty: 'name'
     }
   };
+
+  // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
+  Case.nestedGeoPoints = [
+    'addresses[].geoLocation'
+  ];
 };

@@ -4,6 +4,18 @@ const app = require('../server');
 const _ = require('lodash');
 
 /**
+ * Workaround for a loopbpack/mongo issue:
+ * Loopback sends all model properties (at least those that have sub-definitions) without values to Mongo, as undefined. Mongo converts undefined in null
+ * There's a property (ignoreUndefined) for MongoDB driver, that will solve the issue, however the property is send
+ * in 'findAndModify' function. Saving indexed Geolocations in MongoDB with null values results in 'Can't extract geoKeys' error
+ * To work around this issue, we defined an invalid location (in the middle of pacific ocean) that will be saved for undefined
+ * GeoLocations. This special value is handled by the API and it will be removed from GET responses
+ * @type {number}
+ */
+const INVALID_LATITUDE = 0.0000000001;
+const INVALID_LONGITUDE = 179.0000000001;
+
+/**
  * Extract data source and target from context
  * @param context
  */
@@ -53,18 +65,41 @@ module.exports = function (Model) {
       }
       // go through each nested GeoPoint
       nestedGeoPoint.forEach(function (nestedPoint) {
-        // if the nested GeoPoint is not in the desired format
+        // data available in DB format
         if (
           nestedPoint.value &&
           nestedPoint.value.coordinates &&
-          nestedPoint.value.lng === undefined &&
-          nestedPoint.value.lat === undefined
+          nestedPoint.value.coordinates[0] != null &&
+          nestedPoint.value.coordinates[1] != null
         ) {
-          // convert it
+          let latitude = nestedPoint.value.coordinates[1];
+          let longitude = nestedPoint.value.coordinates[0];
+
+          // remove invalid values GeoLocations
+          if (latitude === INVALID_LATITUDE && longitude === INVALID_LONGITUDE) {
+            // no data available, unset the property
+            _.set(data.target, nestedPoint.exactPath, undefined);
+          } else {
+            // convert it
+            _.set(data.target, nestedPoint.exactPath, {
+              lat: latitude,
+              lng: longitude
+            });
+          }
+        } else if (
+          nestedPoint.value &&
+          nestedPoint.value.lat != null &&
+          nestedPoint.value.lng != null
+        ) {
+          // data available in read format
+          // make sure only lat and lng properties are used
           _.set(data.target, nestedPoint.exactPath, {
-            lat: nestedPoint.value.coordinates[1],
-            lng: nestedPoint.value.coordinates[0]
+            lat: nestedPoint.value.lat,
+            lng: nestedPoint.value.lng
           });
+        } else {
+          // no data available, unset the property
+          _.set(data.target, nestedPoint.exactPath, undefined);
         }
       });
     });
@@ -89,16 +124,32 @@ module.exports = function (Model) {
       }
       // go through each nested GeoPoint
       nestedGeoPoint.forEach(function (nestedPoint) {
-        // if the nested GeoPoint is not in the desired format
+        // data available in read format
         if (
           nestedPoint.value &&
-          !nestedPoint.value.coordinates &&
-          nestedPoint.value.lng !== undefined &&
-          nestedPoint.value.lat !== undefined
+          nestedPoint.value.lng != null &&
+          nestedPoint.value.lat != null
         ) {
           // convert it
           _.set(data.target, nestedPoint.exactPath, {
             coordinates: [nestedPoint.value.lng, nestedPoint.value.lat],
+            type: 'Point'
+          });
+        } else if (
+          nestedPoint.value &&
+          nestedPoint.value.coordinates &&
+          nestedPoint.value.coordinates[0] != null &&
+          nestedPoint.value.coordinates[1] != null
+        ) {
+          // data available in DB format
+          // make sure only coordinates and type properties are used
+          _.set(data.target, nestedPoint.exactPath, {
+            coordinates: nestedPoint.value.coordinates,
+            type: 'Point'
+          });
+        } else {
+          _.set(data.target, nestedPoint.exactPath, {
+            coordinates: [INVALID_LONGITUDE, INVALID_LATITUDE],
             type: 'Point'
           });
         }

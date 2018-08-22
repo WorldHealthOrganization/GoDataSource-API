@@ -60,9 +60,11 @@
     "./middleware/passwordResetError": {},
     "./middleware/authenticationError": {},
     "./middleware/mongoDBError": {},
+    "./middleware/internalError": {},
     "strong-error-handler": {
       "params": {
-        "log": true
+        "log": true,
+        "safeFields": ["code", "message", "details"]
       }
     }
   }
