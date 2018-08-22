@@ -53,18 +53,32 @@ module.exports = function (Model) {
       }
       // go through each nested GeoPoint
       nestedGeoPoint.forEach(function (nestedPoint) {
-        // if the nested GeoPoint is not in the desired format
+        // data available in DB format
         if (
           nestedPoint.value &&
           nestedPoint.value.coordinates &&
-          nestedPoint.value.lng === undefined &&
-          nestedPoint.value.lat === undefined
+          nestedPoint.value.coordinates[0] != null &&
+          nestedPoint.value.coordinates[1] != null
         ) {
           // convert it
           _.set(data.target, nestedPoint.exactPath, {
             lat: nestedPoint.value.coordinates[1],
             lng: nestedPoint.value.coordinates[0]
           });
+        } else if (
+          nestedPoint.value &&
+          nestedPoint.value.lat != null &&
+          nestedPoint.value.lng != null
+        ) {
+          // data available in read format
+          // make sure only lat and lng properties are used
+          _.set(data.target, nestedPoint.exactPath, {
+            lat: nestedPoint.value.lat,
+            lng: nestedPoint.value.lng
+          });
+        } else {
+          // no data available, unset the property
+          _.unset(data, nestedPoint.exactPath);
         }
       });
     });
@@ -89,18 +103,32 @@ module.exports = function (Model) {
       }
       // go through each nested GeoPoint
       nestedGeoPoint.forEach(function (nestedPoint) {
-        // if the nested GeoPoint is not in the desired format
+        // data available in read format
         if (
           nestedPoint.value &&
-          !nestedPoint.value.coordinates &&
-          nestedPoint.value.lng !== undefined &&
-          nestedPoint.value.lat !== undefined
+          nestedPoint.value.lng != null &&
+          nestedPoint.value.lat != null
         ) {
           // convert it
           _.set(data.target, nestedPoint.exactPath, {
             coordinates: [nestedPoint.value.lng, nestedPoint.value.lat],
             type: 'Point'
           });
+        } else if (
+          nestedPoint.value &&
+          nestedPoint.value.coordinates &&
+          nestedPoint.value.coordinates[0] != null &&
+          nestedPoint.value.coordinates[1] != null
+        ){
+          // data available in DB format
+          // make sure only coordinates and type properties are used
+          _.set(data.target, nestedPoint.exactPath, {
+            coordinates: nestedPoint.value.coordinates,
+            type: 'Point'
+          });
+        } else {
+          // no data available, unset the property
+          _.unset(data, nestedPoint.exactPath);
         }
       });
     });

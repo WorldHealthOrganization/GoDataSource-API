@@ -63,7 +63,8 @@
     "strong-error-handler": {
       "params": {
         "log": true
-      }
+      },
+      "safeFields": {"errorCode"},
     }
   }
 }
