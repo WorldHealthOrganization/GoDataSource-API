@@ -14,7 +14,8 @@
     "SoftDelete": true,
     "ReadOnlyProperty": true,
     "AttachController": true,
-    "IncludeCustomRelations": true
+    "IncludeCustomRelations": true,
+    "ConvertNestedGeoPoints": true
   },
   "replaceOnPUT": false,
   "properties": {

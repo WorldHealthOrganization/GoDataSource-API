@@ -157,6 +157,7 @@ const worker = {
           indexPerson1 = personIdToChainMap[person1],
           indexPerson2 = personIdToChainMap[person2];
 
+        let length;
         // treat each scenario separately
         switch (true) {
           // both people were found in (separate) chains
@@ -218,7 +219,7 @@ const worker = {
           // first appearance of both people
           default:
             // create a new chain
-            let length = transmissionChains.push([[person1, person2]]);
+            length = transmissionChains.push([[person1, person2]]);
             // set their map
             personIdToChainMap[person1] = personIdToChainMap[person2] = length - 1;
             // if the relation is active

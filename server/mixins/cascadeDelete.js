@@ -26,7 +26,7 @@ const availableOperationsMap = {
         // delete them (in series) and send back the number of deleted records
         // use series (instead of parallel) because we may have deep cascade (relations that cascade other relations)
         async.series(deleteOperations, function (error) {
-          callback(error, instancesToDelete.length)
+          callback(error, instancesToDelete.length);
         });
       })
       .catch(callback);
@@ -56,7 +56,7 @@ const availableOperationsMap = {
         // restore them (in series) and send back the number of restored records
         // use series (instead of parallel) because we may have deep cascade (relations that cascade other relations)
         async.series(restoreOperations, function (error) {
-          callback(error, instancesToRestore.length)
+          callback(error, instancesToRestore.length);
         });
       })
       .catch(callback);

@@ -33,145 +33,124 @@ module.exports = function (ImportableFile) {
   }
 
   /**
-   * Get JSON file and headers
-   * @param file
+   * Get JSON content and headers
+   * @param stringifiedJson
    * @param callback
    */
-  function getJsonFileHeaders(file, callback) {
-    // read the file
-    fs.readFile(file, function (error, data) {
-      // handle read errors
-      if (error) {
-        return callback(error);
-      }
-      // try and parse as a JSON
-      try {
-        const jsonObj = JSON.parse(data);
-        // this needs to be a list (in order to get its headers)
-        if (!Array.isArray(jsonObj)) {
-          // error invalid content
-          return callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
-            contentType: 'JSON',
-            details: 'it should contain an array'
-          }));
-        }
-        // build a list of headers
-        const headers = [];
-        // build the list by looking at the properties of all elements (not all items have all properties)
-        jsonObj.forEach(function (item) {
-          Object.keys(item).forEach(function (property) {
-            // add the header if not already included
-            if (!headers.includes(property)) {
-              headers.push(property);
-            }
-          });
-        });
-
-        // send back the parsed object and its headers
-        callback(null, {obj: jsonObj, headers: headers});
-      }
-      catch (error) {
-        // handle JSON.parse errors
-        callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
+  function getJsonHeaders(stringifiedJson, callback) {
+    // try and parse as a JSON
+    try {
+      const jsonObj = JSON.parse(stringifiedJson);
+      // this needs to be a list (in order to get its headers)
+      if (!Array.isArray(jsonObj)) {
+        // error invalid content
+        return callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
           contentType: 'JSON',
-          details: error.message
+          details: 'it should contain an array'
         }));
       }
-    });
-  }
-
-  /**
-   * Get XML file as JSON and its headers
-   * @param file
-   * @param callback
-   */
-  function getXmlFileHeaders(file, callback) {
-    // read the file
-    fs.readFile(file, function (error, data) {
-      // handle read errors
-      if (error) {
-        return callback(error);
-      }
-      // parse XML string
-      xml2js.parseString(data, {explicitRoot: false}, function (error, jsonObj) {
-        // handle parse errors
-        if (error) {
-          return callback(error);
-        }
-        // XML arrays are stored within a prop, get the first property of the object
-        const firstProp = Object.keys(jsonObj).shift();
-        // this needs to be a list (in order to get its headers)
-        if (!Array.isArray(jsonObj[firstProp])) {
-          // error invalid content
-          return callback(app.utils.apiError.getError("INVALID_CONTENT_OF_TYPE", {
-            contentType: 'XML',
-            details: 'it should contain an array'
-          }));
-        }
-        // build a list of headers
-        const headers = [];
-        // build the list by looking at the properties of all elements (not all items have all properties)
-        jsonObj[firstProp].forEach(function (item) {
-          Object.keys(item).forEach(function (property) {
-            // add the header if not already included
-            if (!headers.includes(property)) {
-              headers.push(property);
-            }
-          });
-        });
-        // send back the parsed object and its headers
-        callback(null, {obj: jsonObj[firstProp], headers: headers});
-      });
-    });
-  }
-
-  /**
-   * Get XLS/XLSX/CSV/ODS file as JSON and its headers
-   * @param file
-   * @param callback
-   */
-  function getSpreadSheetFileHeaders(file, callback) {
-    // read the file
-    fs.readFile(file, function (error, data) {
-      // handle read errors
-      if (error) {
-        return callback(error);
-      }
-      // parse XLS data
-      const parsedData = xlsx.read(data, {cellDates: true, cellNF: false, cellText: false});
-      // extract first sheet name (we only care about first sheet)
-      let sheetName = parsedData.SheetNames.shift();
-      // convert data to JSON
-      let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName], {dateNF: 'YYYY-MM-DD"T"hh:mm:ss.000"Z"'});
-      // get sheer range
-      let range = /^[A-Za-z]+\d+:([A-Za-z])+\d+$/.exec(parsedData.Sheets[sheetName]['!ref']);
-      // keep a list of headers
-      let headers = [];
-      // keep a list of how many times a header appears
-      let sameHeaderCounter = {};
-      if (range) {
-        // look for headers in the range
-        for (let i = 'A'.charCodeAt(0); i <= range[1].charCodeAt(0); i++) {
-          if (parsedData.Sheets[sheetName][`${String.fromCharCode(i)}1`]) {
-            let headerValue = parsedData.Sheets[sheetName][`${String.fromCharCode(i)}1`].v;
-            // if this is the first time the header appears
-            if (sameHeaderCounter[headerValue] === undefined) {
-              // create an entry for it in the counter
-              sameHeaderCounter[headerValue] = 0;
-            } else {
-              // increment counter
-              sameHeaderCounter[headerValue]++;
-              // update header value to match those built by xlsx.utils.sheet_to_json
-              headerValue = `${headerValue}_${sameHeaderCounter[headerValue]}`;
-            }
-            headers.push(headerValue);
+      // build a list of headers
+      const headers = [];
+      // build the list by looking at the properties of all elements (not all items have all properties)
+      jsonObj.forEach(function (item) {
+        Object.keys(item).forEach(function (property) {
+          // add the header if not already included
+          if (!headers.includes(property)) {
+            headers.push(property);
           }
-        }
-      }
-      // should always be an array (sheets are lists)
+        });
+      });
+
       // send back the parsed object and its headers
       callback(null, {obj: jsonObj, headers: headers});
+    }
+    catch (error) {
+      // handle JSON.parse errors
+      callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
+        contentType: 'JSON',
+        details: error.message
+      }));
+    }
+  }
+
+  /**
+   * Get XML string as JSON and its headers
+   * @param xmlString
+   * @param callback
+   */
+  function getXmlHeaders(xmlString, callback) {
+    // parse XML string
+    xml2js.parseString(xmlString, {explicitRoot: false}, function (error, jsonObj) {
+      // handle parse errors
+      if (error) {
+        return callback(error);
+      }
+      // XML arrays are stored within a prop, get the first property of the object
+      const firstProp = Object.keys(jsonObj).shift();
+      // this needs to be a list (in order to get its headers)
+      if (!Array.isArray(jsonObj[firstProp])) {
+        // error invalid content
+        return callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
+          contentType: 'XML',
+          details: 'it should contain an array'
+        }));
+      }
+      // build a list of headers
+      const headers = [];
+      // build the list by looking at the properties of all elements (not all items have all properties)
+      jsonObj[firstProp].forEach(function (item) {
+        Object.keys(item).forEach(function (property) {
+          // add the header if not already included
+          if (!headers.includes(property)) {
+            headers.push(property);
+          }
+        });
+      });
+      // send back the parsed object and its headers
+      callback(null, {obj: jsonObj[firstProp], headers: headers});
     });
+  }
+
+  /**
+   * Get XLS/XLSX/CSV/ODS fileContent as JSON and its headers
+   * @param fileContent
+   * @param callback
+   */
+  function getSpreadSheetHeaders(fileContent, callback) {
+    // parse XLS data
+    const parsedData = xlsx.read(fileContent, {cellDates: true, cellNF: false, cellText: false});
+    // extract first sheet name (we only care about first sheet)
+    let sheetName = parsedData.SheetNames.shift();
+    // convert data to JSON
+    let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName], {dateNF: 'YYYY-MM-DD\'T\'hh:mm:ss.000\'Z\''});
+    // get sheer range
+    let range = /^[A-Za-z]+\d+:([A-Za-z])+\d+$/.exec(parsedData.Sheets[sheetName]['!ref']);
+    // keep a list of headers
+    let headers = [];
+    // keep a list of how many times a header appears
+    let sameHeaderCounter = {};
+    if (range) {
+      // look for headers in the range
+      for (let i = 'A'.charCodeAt(0); i <= range[1].charCodeAt(0); i++) {
+        if (parsedData.Sheets[sheetName][`${String.fromCharCode(i)}1`]) {
+          let headerValue = parsedData.Sheets[sheetName][`${String.fromCharCode(i)}1`].v;
+          // if this is the first time the header appears
+          if (sameHeaderCounter[headerValue] === undefined) {
+            // create an entry for it in the counter
+            sameHeaderCounter[headerValue] = 0;
+          } else {
+            // increment counter
+            sameHeaderCounter[headerValue]++;
+            // update header value to match those built by xlsx.utils.sheet_to_json
+            headerValue = `${headerValue}_${sameHeaderCounter[headerValue]}`;
+          }
+          headers.push(headerValue);
+        }
+      }
+    }
+    // should always be an array (sheets are lists)
+    // send back the parsed object and its headers
+    callback(null, {obj: jsonObj, headers: headers});
   }
 
   /**
@@ -201,9 +180,10 @@ module.exports = function (ImportableFile) {
    * Store file and get its headers and file Id
    * @param file
    * @param callback
+   * @param decryptPassword
    * @return {*}
    */
-  ImportableFile.storeFileAndGetHeaders = function (file, callback) {
+  ImportableFile.storeFileAndGetHeaders = function (file, decryptPassword, callback) {
     // get file extension
     const extension = path.extname(file.name);
     // if extension is invalid
@@ -214,37 +194,58 @@ module.exports = function (ImportableFile) {
         details: `unsupported extension ${extension}. Supported file extensions: ${ImportableFile.supportedFileExtensions.join(', ')}`
       }));
     }
+
     // use appropriate content handler for file type
     let getHeaders;
     switch (extension) {
       case '.json':
-        getHeaders = getJsonFileHeaders;
+        getHeaders = getJsonHeaders;
         break;
       case '.xml':
-        getHeaders = getXmlFileHeaders;
+        getHeaders = getXmlHeaders;
         break;
       case '.csv':
       case '.xls':
       case '.xlsx':
       case '.ods':
-        getHeaders = getSpreadSheetFileHeaders;
+        getHeaders = getSpreadSheetHeaders;
         break;
     }
-    // get file headers
-    getHeaders(file.path, function (error, result) {
+
+    fs.readFile(file.path, function (error, buffer) {
       // handle error
       if (error) {
         return callback(error);
       }
-      // store file on dist
-      ImportableFile.temporaryStoreFileOnDisk(JSON.stringify(result.obj), function (error, fileId) {
-        // send back file id and headers
-        callback(error, {
-          id: fileId,
-          headers: result.headers,
-          jsonObj: result.obj
-        });
-      });
+
+      // decrypt file if needed
+      let decryptFile;
+      if (decryptPassword) {
+        decryptFile = app.utils.aesCrypto.decrypt(decryptPassword, buffer);
+      } else {
+        decryptFile = Promise.resolve(buffer);
+      }
+
+      decryptFile
+        .then(function (buffer) {
+          // get file headers
+          getHeaders(buffer, function (error, result) {
+            // handle error
+            if (error) {
+              return callback(error);
+            }
+            // store file on dist
+            ImportableFile.temporaryStoreFileOnDisk(JSON.stringify(result.obj), function (error, fileId) {
+              // send back file id and headers
+              callback(error, {
+                id: fileId,
+                headers: result.headers,
+                jsonObj: result.obj
+              });
+            });
+          });
+        })
+        .catch(callback);
     });
   };
 };

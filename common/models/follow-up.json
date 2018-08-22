@@ -23,7 +23,7 @@
     "address": {
       "type": "address"
     },
-    "fillGeolocation": {
+    "fillGeoLocation": {
       "type": "geopoint"
     },
     "questionnaireAnswers": {
@@ -42,6 +42,14 @@
     "outbreakId": {
       "type": "string",
       "required": true
+    }
+  },
+  "indexes": {
+    "address_geoLocation_index": {
+      "addresses.geoLocation": "2dsphere"
+    },
+    "fillGeoLocation_index": {
+      "fillGeoLocation": "2dsphere"
     }
   },
   "validations": [],

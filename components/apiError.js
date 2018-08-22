@@ -23,6 +23,6 @@ module.exports = {
       toString: function () {
         return JSON.stringify(this, null, 2);
       }
-    }
+    };
   }
 };

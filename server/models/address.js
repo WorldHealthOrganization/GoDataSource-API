@@ -1,9 +1,10 @@
 'use strict';
 
-module.exports = function(Address) {
+module.exports = function (Address) {
+
   // map language token labels for model properties
   Address.fieldLabelsMap = {
-    'type': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE',
+    'typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
     'country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
     'city': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY',
     'addressLine1': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1',

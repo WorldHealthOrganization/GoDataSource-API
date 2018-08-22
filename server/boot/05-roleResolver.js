@@ -27,7 +27,7 @@ module.exports = function (app) {
     }
 
     if (Array.isArray(accessError)) {
-      context.remotingContext.req.accessErrors = context.remotingContext.req.accessErrors.concat(accessError)
+      context.remotingContext.req.accessErrors = context.remotingContext.req.accessErrors.concat(accessError);
     } else {
       context.remotingContext.req.accessErrors.push(accessError);
     }
@@ -59,70 +59,6 @@ module.exports = function (app) {
   }
 
   /**
-   * Verify resource ownership
-   * @param permission
-   * @param context
-   * @param callback
-   */
-  function verifyResourceOwnership(permission, context, callback) {
-
-    /**
-     * Check model ownership
-     * @param model
-     */
-    function checkOwnership(model) {
-
-      // define regex for extracting modelId
-      let recordIdRegExp = new RegExp(`^\\/api\\/outbreaks\\/[^\\/]+\\/${model.modelName}s(?:\\/([^\\/?]+)|(?:$|\\?))`);
-
-      // extract model if from request
-      const recordIdMatch = context.remotingContext.req.originalUrl.match(recordIdRegExp);
-
-      if (recordIdMatch && recordIdMatch[1]) {
-        // recordId match found, check ownership
-        let isOwner = false;
-        // try to find the requested record
-        model
-          .findById(recordIdMatch[1])
-          .then(function (record) {
-            // if the record is found
-            if (record) {
-              // verify ownership
-              isOwner = (record.createdBy === context.remotingContext.req.authData.user.id);
-            }
-            if (!isOwner) {
-              storeMissingPermissionInContext(`${permission} (not record owner)`, context);
-            }
-            callback(null, isOwner);
-          })
-          .catch(callback);
-
-      } else if (recordIdMatch && context.remotingContext.req.method.toLowerCase() === 'post') {
-        // create request, allow access
-        callback(null, true);
-
-      } else {
-        storeMissingPermissionInContext(`${permission} (not record owner)`, context);
-        // recordId not found, deny access
-        callback(null, false);
-      }
-    }
-
-    // handle permissions that require ownership
-    switch (permission) {
-      case 'write_own_case':
-        checkOwnership(app.models.case);
-        break;
-      case 'write_own_contact':
-        checkOwnership(app.models.contact);
-        break;
-      default:
-        callback(null, false);
-        break;
-    }
-  }
-
-  /**
    * Verify if the user has permission to access an outbreak
    * Verify if the user does POST/PUT/DELETE actions on the active outbreak
    * @param permission
@@ -137,7 +73,7 @@ module.exports = function (app) {
     let accessErrors = [];
 
     // define regex for extracting outbreak id
-    let outbreakIdRegExp = new RegExp(`^\\/api\\/outbreaks\\/([^\\/?]+)(\\/[^\\/?]+)?`);
+    let outbreakIdRegExp = new RegExp('^\\/api\\/outbreaks\\/([^\\/?]+)(\\/[^\\/?]+)?');
     // extract id from request
     let outbreakIdMatch = context.remotingContext.req.originalUrl.match(outbreakIdRegExp);
 
@@ -149,12 +85,12 @@ module.exports = function (app) {
         userAuthData.outbreakIds.length &&
         userAuthData.outbreakIds.indexOf(outbreakIdMatch[1]) === -1
       ) {
-        accessErrors.push(`access denied to the given outbreak; the outbreak is not set as one of the user's accessible outbreaks`);
+        accessErrors.push('access denied to the given outbreak; the outbreak is not set as one of the user\'s accessible outbreaks');
       }
 
       // check if the user tries to do POST/PUT/DELETE on another outbreak related data than the active one (you can modify & delete inactive outbreaks)
       if (outbreakIdMatch[2] && context.remotingContext.req.method !== 'GET' && outbreakIdMatch[1] !== userAuthData.activeOutbreakId) {
-        accessErrors.push(`access to POST/PUT/DELETE actions on outbreak related data is granted only for the active outbreak`);
+        accessErrors.push('access to POST/PUT/DELETE actions on outbreak related data is granted only for the active outbreak');
       }
     }
 

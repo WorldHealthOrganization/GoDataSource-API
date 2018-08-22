@@ -48,7 +48,7 @@ module.exports = function (Case) {
     'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
     'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
-    'addresses[].name': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_NAME',
+    'addresses[].typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
     'addresses[].country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
     'addresses[].city': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY',
     'addresses[].addressLine1': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1',
@@ -69,7 +69,7 @@ module.exports = function (Case) {
     occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
     outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
     'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
-    'addresses[].type': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
+    'addresses[].typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE'
   };
 
   Case.referenceDataFields = Object.keys(Case.referenceDataFieldsToCategoryMap);
@@ -115,5 +115,5 @@ module.exports = function (Case) {
       modelName: 'location',
       useProperty: 'name'
     }
-  }
+  };
 };

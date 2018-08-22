@@ -27,6 +27,18 @@
     },
     "relationFields": {
       "type": ["string"]
+    },
+    "anonymizeFields": {
+      "type": {
+        "case": {
+          "type": ["string"],
+          "default": ["firstName", "middleName", "lastName", "addresses[].addressLine1"]
+        },
+        "contact": {
+          "type": ["string"],
+          "default": ["firstName", "middleName", "lastName", "addresses[].addressLine1"]
+        }
+      }
     }
   },
   "validations": [],
@@ -59,7 +71,7 @@
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
-      "property": "createPdfFromSvg"
+      "property": "createPdfFromImage"
     },
     {
       "principalType": "ROLE",
@@ -139,13 +151,19 @@
         "path": "/generate-unique-id"
       }
     },
-    "createPdfFromSvg": {
+    "createPdfFromImage": {
       "accepts": [
         {
-          "arg": "svg",
+          "arg": "image",
           "type": "string",
           "required": true,
-          "description": "SVG content"
+          "description": "Image content"
+        },
+        {
+          "arg": "imageType",
+          "type": "string",
+          "required": true,
+          "description": "Image Type [PNG/SVG]"
         },
         {
           "arg": "splitFactor",
@@ -175,10 +193,10 @@
           }
         }
       ],
-      "description": "Create a PDF file containing PNG images coming from SVG files",
+      "description": "Create a PDF file containing PNG images coming from SVG/PNG files",
       "http": {
         "verb": "post",
-        "path": "/svg-to-pdf"
+        "path": "/image-to-pdf"
       }
     },
     "getServerUTCDate": {

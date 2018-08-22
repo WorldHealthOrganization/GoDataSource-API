@@ -168,7 +168,7 @@ function run(callback) {
             return User
               .create(defaultAdmin)
               .then(function () {
-                return 'created.'
+                return 'created.';
               });
           } else if (rewrite) {
             return user

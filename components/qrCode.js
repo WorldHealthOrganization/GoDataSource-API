@@ -1,6 +1,6 @@
 'use strict';
 
-let qrImage = require("qr-image");
+let qrImage = require('qr-image');
 const TYPES = {
   RESOURCE_LINK: 'resource-link'
 };

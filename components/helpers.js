@@ -39,7 +39,9 @@ const getUTCDateEndOfDay = function (date, dayOfWeek) {
  * @return {*}
  */
 const getAsciiString = function (string) {
+  /* eslint-disable no-control-regex */
   return string.replace(/[^\x00-\x7F]/g, '');
+  /* eslint-enable no-control-regex */
 };
 
 /**
@@ -73,7 +75,7 @@ const getChunksForInterval = function (interval, chunk) {
     // we use 23:59 hours for end so we need to get the end of day for the previous day except for the last day in the interval since we already send it at 23:59 hours
     let end = getUTCDateEndOfDay(chunk.end);
     if (index !== chunks.length - 1) {
-      end.add(-1, 'd')
+      end.add(-1, 'd');
     }
 
     // create period identifier
@@ -83,7 +85,7 @@ const getChunksForInterval = function (interval, chunk) {
     result[identifier] = {
       start: start,
       end: end
-    }
+    };
   });
 
   return result;
@@ -315,14 +317,16 @@ const exportListFile = function (headers, dataSet, fileType) {
     if (!Array.isArray(dataSet)) {
       return reject(new Error('Invalid dataSet. DataSet must be an array.'));
     }
+
+    let headersMap, remappedDataSet, builder;
     // handle each file individually
     switch (fileType) {
       case 'json':
         file.mimeType = 'application/json';
         // build headers map
-        const jsonHeadersMap = buildHeadersMap(headers);
-        const remappedJsonDataset = dataSet.map(item => objectRemap(item, jsonHeadersMap));
-        file.data = JSON.stringify(remappedJsonDataset,
+        headersMap = buildHeadersMap(headers);
+        remappedDataSet = dataSet.map(item => objectRemap(item, headersMap));
+        file.data = JSON.stringify(remappedDataSet,
           // replace undefined with null so the JSON will contain all properties
           function (key, value) {
             if (value === undefined) {
@@ -334,16 +338,16 @@ const exportListFile = function (headers, dataSet, fileType) {
         break;
       case 'xml':
         file.mimeType = 'text/xml';
-        const builder = new xml2js.Builder();
+        builder = new xml2js.Builder();
         // build headers map
-        const xmlHeadersMap = buildHeadersMap(headers);
-        const remappedXmlDataset = dataSet.map(function (item) {
+        headersMap = buildHeadersMap(headers);
+        remappedDataSet = dataSet.map(function (item) {
           return {
             // XML does not have an array data type, repeating an "entry" will simulate an array
-            entry: objectRemap(item, xmlHeadersMap)
+            entry: objectRemap(item, headersMap)
           };
         });
-        file.data = builder.buildObject(getXmlFriendlyJson(remappedXmlDataset));
+        file.data = builder.buildObject(getXmlFriendlyJson(remappedDataSet));
         resolve(file);
         break;
       case 'csv':
@@ -436,7 +440,7 @@ const getReferencedValue = function (data, path) {
             value: resultItem.value,
             exactPath: `${arrayPath}[${index}].${resultItem.exactPath}`
           });
-        })
+        });
 
       } else {
         // otherwise just push the result
@@ -451,7 +455,7 @@ const getReferencedValue = function (data, path) {
     result = {
       value: _.get(data, path),
       exactPath: path
-    }
+    };
   }
   return result;
 };
@@ -520,13 +524,7 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
 
       // also resolve reference data if needed
       if (resolveReferenceData) {
-        // for the fields that use reference data (special type of foreign key)
-        Model.referenceDataFields.forEach(function (field) {
-          if (result[field]) {
-            // get translation of the reference data
-            result[field] = languageDictionary.getTranslation(result[field]);
-          }
-        });
+        resolveModelReferenceData(result, Model, languageDictionary);
       }
     });
 
@@ -566,7 +564,7 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
           // index each instance using record Id
           foreignKeyQueryResults[modelName].forEach(function (modelInstance) {
             foreignKeyResultsMap[modelName][modelInstance.id] = modelInstance.toJSON();
-          })
+          });
         });
 
         // replace foreign key references with configured related model value
@@ -651,6 +649,60 @@ const getFlatObject = function (object, prefix, humanFriendly) {
 };
 
 /**
+ * Format a date string for display purpose
+ * @param dateString
+ * @returns {string}
+ */
+const getDateDisplayValue = function (dateString) {
+  return dateString && moment(dateString).isValid() ? new Date(dateString).toISOString() : dateString;
+};
+
+/**
+ * Resolve reference data fields;
+ * Note: The model instance JSON sent is updated
+ * @param modelInstanceJSON JSON representation of a model instance
+ * @param Model
+ * @param languageDictionary
+ */
+const resolveModelReferenceData = function (modelInstanceJSON, Model, languageDictionary) {
+  if (Model.referenceDataFields) {
+    // for the fields that use reference data
+    Model.referenceDataFields.forEach(function (field) {
+      let fieldValue = getReferencedValue(modelInstanceJSON, field);
+
+      // reference data field might be in an array; for that case we need to translate each array value
+      if (Array.isArray(fieldValue)) {
+        fieldValue.forEach(retrievedValue => _.set(modelInstanceJSON, retrievedValue.exactPath, languageDictionary.getTranslation(retrievedValue.value)));
+      } else if (fieldValue.value) {
+        _.set(modelInstanceJSON, fieldValue.exactPath, languageDictionary.getTranslation(fieldValue.value));
+      }
+    });
+  }
+};
+
+/**
+ * Parse fields values
+ * Note: The model instance JSON sent is updated
+ * @param modelInstanceJSON JSON representation of a model instance
+ * @param Model
+ */
+const parseModelFieldValues = function (modelInstanceJSON, Model) {
+  if (Model.fieldsToParse && Model.fieldToValueParsersMap) {
+    // if there are values that need to be parsed, parse them (eg date fields)
+    Model.fieldsToParse.forEach(function (field) {
+      let fieldValue = getReferencedValue(modelInstanceJSON, field);
+
+      // field might be in an array; for that case we need to parse each array value
+      if (Array.isArray(fieldValue)) {
+        fieldValue.forEach(retrievedValue => _.set(modelInstanceJSON, retrievedValue.exactPath, Model.fieldToValueParsersMap[field](retrievedValue.value)));
+      } else if (fieldValue.value) {
+        _.set(modelInstanceJSON, fieldValue.exactPath, Model.fieldToValueParsersMap[field](fieldValue.value));
+      }
+    });
+  }
+};
+
+/**
  * Prepare a models fields for printing. So far, this means eliminating undefined values and formatting dates
  * @param model
  * @param dateFieldsList
@@ -699,11 +751,14 @@ module.exports = {
   getUTCDateEndOfDay: getUTCDateEndOfDay,
   getAsciiString: getAsciiString,
   getChunksForInterval: getChunksForInterval,
+  convertPropsToDate: convertPropsToDate,
   extractImportableFields: extractImportableFields,
   exportListFile: exportListFile,
   getReferencedValue: getReferencedValue,
-  resolveModelForeignKeys: resolveModelForeignKey
+  resolveModelForeignKeys: resolveModelForeignKeys,
   getFlatObject: getFlatObject,
-  convertPropsToDate: convertPropsToDate,
+  getDateDisplayValue: getDateDisplayValue,
+  resolveModelReferenceData: resolveModelReferenceData,
+  parseModelFieldValues: parseModelFieldValues,
   prepareFieldsForPrint: prepareFieldsForPrint
 };

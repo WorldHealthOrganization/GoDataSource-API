@@ -172,7 +172,7 @@ module.exports = function (Outbreak) {
                   throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
                     model: app.models.person.modelName,
                     id: person.id
-                  })
+                  });
                 }
 
                 // do not allow event-event relationships
@@ -408,13 +408,13 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.helpers.countPersonRelationships = function (personId, where, callback) {
-    const _filter = app.utils.remote
-      .mergeFilters({
-          where: {
-            'persons.id': personId
-          }
-        },
-        {where: where});
+    const _filter = app.utils.remote.mergeFilters(
+      {
+        where: {
+          'persons.id': personId
+        }
+      },
+      {where: where});
 
     app.models.relationship
       .count(_filter.where)
@@ -513,23 +513,23 @@ module.exports = function (Outbreak) {
    * @param filter Optional additional filter for the reference data
    */
   Outbreak.helpers.getSystemAndOwnReferenceData = function (outbreakId, filter) {
-    const _filter = app.utils.remote
-      .mergeFilters({
-          where: {
-            or: [
-              {
-                outbreakId: {
-                  eq: null
-                }
-              },
-              {
-                outbreakId: outbreakId
+    const _filter = app.utils.remote.mergeFilters(
+      {
+        where: {
+          or: [
+            {
+              outbreakId: {
+                eq: null
               }
-            ]
-          }
-        },
-        filter
-      );
+            },
+            {
+              outbreakId: outbreakId
+            }
+          ]
+        }
+      },
+      filter
+    );
 
     return app.models.referenceData
       .find(_filter);
@@ -751,7 +751,8 @@ module.exports = function (Outbreak) {
    */
   Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases = function (outbreak, filter, countOnly, callback) {
     // build a filter for finding cases who came from registered contacts and their relationships that appeared happened after they became cases
-    const _filter = {
+    const _filter =
+      {
         where: {
           outbreakId: outbreak.id,
           dateBecomeCase: {
@@ -768,8 +769,7 @@ module.exports = function (Outbreak) {
             }
           }
         ]
-      }
-    ;
+      };
     // find the cases
     app.models.case
       .find(_filter)

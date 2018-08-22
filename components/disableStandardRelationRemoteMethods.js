@@ -1,6 +1,6 @@
 'use strict';
 
-const disableRemoteMethods = require(`./disableRemoteMethods`);
+const disableRemoteMethods = require('./disableRemoteMethods');
 
 module.exports = function (model, relation) {
   disableRemoteMethods(model,

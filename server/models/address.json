@@ -33,7 +33,10 @@
       "type": "string"
     },
     "geoLocation": {
-      "type": "geopoint"
+      "type": {
+        "lat": "number",
+        "lng": "number"
+      }
     },
     "date": {
       "type": "date",

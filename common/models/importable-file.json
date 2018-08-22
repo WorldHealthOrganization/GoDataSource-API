@@ -52,6 +52,11 @@
           "type": "string"
         },
         {
+          "arg": "decryptPassword",
+          "type": "string",
+          "description": "If provided, the imported file will be decrypted using aes-256-ctr algorithm using the provided password"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"

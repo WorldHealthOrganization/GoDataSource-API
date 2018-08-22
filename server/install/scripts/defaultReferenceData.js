@@ -28,7 +28,6 @@ function run(callback) {
                 value: referenceDataItemKey,
                 description: `${referenceDataItemKey}_DESCRIPTION`,
                 categoryId: referenceDataCategory,
-                languageId: "english_us",
                 readOnly: true
               });
             }
