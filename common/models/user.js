@@ -103,18 +103,38 @@ module.exports = function (User) {
    * Send password reset email
    */
   User.on('resetPasswordRequest', function (info) {
+    // load user language dictionary
+    app.models.language.getLanguageDictionary(info.user.languageId, function (error, dictionary) {
+      if (error) {
+        return false;
+      }
 
-    const template = _.template(fs.readFileSync(path.resolve(`${__dirname}/../../server/views/passwordResetEmail.ejs`)));
-    const url = `${config.public.protocol}://${config.public.host}:${config.public.port}${config.passwordReset.path}`;
-    const html = _.template(config.passwordReset.text)({resetHref: `${url}?token=${info.accessToken.id}`});
+      // translate email body params
+      let subject = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT');
+      let paragraph1 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1');
+      let paragraph2 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2');
 
-    app.models.Email.send({
-      to: info.email,
-      from: config.passwordReset.from,
-      subject: config.passwordReset.subject,
-      html: template({
-        text: html
-      })
+      // second parameter should also be resolved as a template
+      // it contains the reset password url
+      const url = `${config.public.protocol}://${config.public.host}:${config.public.port}${config.passwordReset.path}`;
+      paragraph2 = _.template(paragraph2, { interpolate: /{{([\s\S]+?)}}/g })({ resetHref: `${url}?token=${info.accessToken.id}` });
+
+      // load the html email template
+      const template = _.template(fs.readFileSync(path.resolve(`${__dirname}/../../server/views/passwordResetEmail.ejs`)));
+
+      // resolve template params
+      let resolvedTemplate = template({
+        heading: subject,
+        paragraph1: paragraph1,
+        paragraph2: paragraph2
+      });
+
+      app.models.Email.send({
+        to: info.email,
+        from: config.passwordReset.from,
+        subject: config.passwordReset.subject,
+        html: resolvedTemplate
+      });
     });
   });
 };

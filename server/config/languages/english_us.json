@@ -1105,6 +1105,11 @@
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_YEMEN": "Yemen",
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ZAMBIA": "Zambia",
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ZIMBABWE": "Zimbabwe"
+    },
+    "passwordReset": {
+      "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT": "Password Reset",
+      "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1": "You've requested a password reset for your account.",
+      "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2": "Click <a href='{{resetHref}}'>here</a> to reset your password."
     }
   }
 }
