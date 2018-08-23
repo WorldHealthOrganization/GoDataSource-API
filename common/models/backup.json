@@ -1,0 +1,42 @@
+{
+  "name": "backup",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "userId": {
+      "type": "string",
+      "required": true
+    },
+    "automatic": {
+      "type": "boolean",
+      "required": true
+    }
+  },
+  "validations": [],
+  "acls": [],
+  "methods": {
+    "createBackup": {
+      "accepts": [
+        {
+          "arg": "params",
+          "description": "Backup specific params, if not given fallback on system settings",
+          "type": "dataBackup",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [],
+      "description": "Manual backup",
+      "http": {
+        "verb": "post",
+        "path": "/"
+      }
+    }
+  }
+}

@@ -223,5 +223,9 @@
   "sync": {
     "dataSource": "memory",
     "public": true
+  },
+  "backup": {
+    "dataSource": "mongoDb",
+    "public": true
   }
 }
