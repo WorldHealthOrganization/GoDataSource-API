@@ -89,4 +89,15 @@ module.exports = function (Sync) {
       Sync.syncDatabaseWithSnapshot(files.snapshot.path, requestOptions, done);
     });
   };
+
+  /**
+   * Retrieve the list of IDs for the client available outbreaks
+   * @param callback
+   */
+  Sync.getAvailableOutbreaksForClient = function (options, callback) {
+    let clientInformation = options.remotingContext.req.authData.client;
+    callback(null, {
+      outbreakIDs: clientInformation.outbreakIDs || []
+    });
+  };
 };

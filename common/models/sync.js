@@ -162,7 +162,8 @@ module.exports = function (Sync) {
       });
 
       // read each file's contents and sync with database
-      return async.parallel(
+      // not syncing in parallel to not load all collections in memory at once
+      return async.series(
         collectionsFiles.map((fileName) => (doneCollection) => {
           let filePath = `${tmpDirName}/${fileName}`;
 

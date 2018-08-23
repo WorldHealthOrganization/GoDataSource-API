@@ -24,6 +24,12 @@
       "principalId": "$client_application",
       "permissions": "ALLOW",
       "property": "importDatabaseSnapshot"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "getAvailableOutbreaksForClient"
     }
   ],
   "methods": {
@@ -32,7 +38,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Date filter"
+          "description": "This request accepts 'fromDate': date on the first level in 'where'"
         }
       ],
       "returns": [
@@ -83,6 +89,28 @@
       "http": {
         "verb": "post",
         "path": "/import-database-snapshot"
+      }
+    },
+    "getAvailableOutbreaksForClient": {
+      "accepts": [
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "outbreakIDs",
+          "type": ["string"],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Retrieve the list of IDs for the client available outbreaks",
+      "http": {
+        "verb": "get",
+        "path": "/available-outbreaks"
       }
     }
   }
