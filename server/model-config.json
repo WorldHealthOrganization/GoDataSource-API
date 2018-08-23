@@ -227,5 +227,9 @@
   "backup": {
     "dataSource": "mongoDb",
     "public": true
+  },
+  "backupParams": {
+    "dataSource": null,
+    "public": false
   }
 }

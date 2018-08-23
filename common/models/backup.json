@@ -13,6 +13,16 @@
     "automatic": {
       "type": "boolean",
       "required": true
+    },
+    "location": {
+      "type": "string",
+      "required": true
+    },
+    "modules": {
+      "type": [
+        "string"
+      ],
+      "required": true
     }
   },
   "validations": [],
@@ -23,15 +33,25 @@
         {
           "arg": "params",
           "description": "Backup specific params, if not given fallback on system settings",
-          "type": "dataBackup",
+          "type": "backupParams",
           "http": {
             "source": "body"
           },
           "root": true,
           "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
-      "returns": [],
+      "returns": [
+        {
+          "arg": "backupId",
+          "type": "number"
+        }
+      ],
       "description": "Manual backup",
       "http": {
         "verb": "post",
