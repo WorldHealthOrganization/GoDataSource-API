@@ -384,7 +384,7 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
       }
 
       // reset margin
-      doc.x = intialXMargin;
+      doc.x = initialXMargin;
     } else if (typeof(model[fieldName]) === 'object' && Object.keys(model[fieldName]).length) {
       doc.text(fieldName, initialXMargin).moveDown();
       doc.x += 20;

@@ -3932,6 +3932,7 @@ module.exports = function (Outbreak) {
 
       // translate case, lab results, contact fields
       let caseModel = Object.assign({}, models.case.fieldLabelsMap);
+      let contactModel = Object.assign({}, models.contact.fieldLabelsMap);
 
       // remove array properties from model definition (they are handled separately)
       Object.keys(caseModel).forEach(function (property) {
@@ -3943,8 +3944,11 @@ module.exports = function (Outbreak) {
       caseModel.addresses = [models.address.fieldLabelsMap];
       caseModel.documents = [models.document.fieldLabelsMap];
 
+      contactModel.addresses = [models.address.fieldLabelsMap];
+      contactModel.documents = [models.document.fieldLabelsMap];
+
       let caseFields = helpers.translateFieldLabels(caseModel, 'case', languageId, dictionary);
-      let contactFields = helpers.translateFieldLabels(models.contact.fieldLabelsMap, 'contact', languageId, dictionary);
+      let contactFields = helpers.translateFieldLabels(contactModel, 'contact', languageId, dictionary);
 
       // remove not needed properties from lab result/relationship field maps
       let relationFieldsMap = Object.assign({}, models.relationship.fieldLabelsMap);
@@ -4073,9 +4077,8 @@ module.exports = function (Outbreak) {
 
             // Anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
             // and format date type fields
-            app.utils.anonymizeDatasetFields.anonymize(person, anonymousFields, '***', (err, result) => {
-              person = app.utils.helpers.prepareFieldsForPrint(result, caseDossierDateFields);
-            });
+            app.utils.anonymizeDatasetFields.anonymize(person, anonymousFields)
+            person = app.utils.helpers.prepareFieldsForPrint(person, caseDossierDateFields);
 
             person.relationships.forEach((relationship, relationshipIndex) => {
               sanitizedCases[caseIndex].relationships = [];

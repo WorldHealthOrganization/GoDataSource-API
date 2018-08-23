@@ -16,11 +16,11 @@ module.exports = function (Address) {
   };
 
   Address.referenceDataFields = [
-    'type'
+    'typeId'
   ];
 
   Address.printFieldsinOrder = [
-    'type',
+    'typeId',
     'country',
     'city',
     'addressLine1',
