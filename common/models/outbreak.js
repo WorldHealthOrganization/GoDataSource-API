@@ -433,9 +433,14 @@ module.exports = function (Outbreak) {
    * @return {*}
    */
   Outbreak.helpers.attachFilterPeopleWithoutRelation = function (type, context, modelInstance, next) {
-    // Retrieve all relationships of requested type for the given outbreak
-    // Then filter cases based on relations count
-    if (context.args.filter && context.args.filter.noRelationships) {
+    // get custom noRelationships filter
+    const noRelationship = _.get(context, 'args.filter.where.noRelationships', false);
+    // remove custom filter before it reaches the model
+    _.unset(context, 'args.filter.where.noRelationships');
+
+    if (noRelationship) {
+      // Retrieve all relationships of requested type for the given outbreak
+      // Then filter cases based on relations count
       app.models.relationship
         .find({
           fields: ['persons'],

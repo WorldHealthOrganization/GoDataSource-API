@@ -102,7 +102,7 @@ module.exports = function (ReferenceData) {
 
   /**
    * Restore a deleted reference data
-   * @param caseId
+   * @param id
    * @param options
    * @param callback
    */

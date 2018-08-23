@@ -5,6 +5,9 @@
   "options": {
     "validateUpsert": true
   },
+  "mixins": {
+    "RemovePropertiesFromDefinition": true
+  },
   "hidden": [
     "id"
   ],
