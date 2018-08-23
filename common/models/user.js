@@ -106,6 +106,7 @@ module.exports = function (User) {
     // load user language dictionary
     app.models.language.getLanguageDictionary(info.user.languageId, function (error, dictionary) {
       if (error) {
+        app.logger.error(`Failed to retrieve tokens for the following language: ${info.user.languageId}`);
         return false;
       }
 
