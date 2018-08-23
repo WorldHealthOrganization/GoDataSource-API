@@ -137,7 +137,7 @@
     "public": false
   },
   "address": {
-    "dataSource": null,
+    "dataSource": "memory",
     "public": false
   },
   "relationship": {
