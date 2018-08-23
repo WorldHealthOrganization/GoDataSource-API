@@ -11,6 +11,9 @@ const app = require('../server');
  */
 function internalError(error, request, response, next) {
   if (!error.statusCode) {
+    // log original error
+    request.logger.error(error, error.stack);
+    // handle error
     next(app.utils.apiError.getError('INTERNAL_ERROR', {
       error: {
         code: error.code,
