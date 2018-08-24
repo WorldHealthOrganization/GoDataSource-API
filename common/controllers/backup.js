@@ -2,8 +2,7 @@
 
 // requires
 const app = require('../../server/server');
-const fs = require('fs');
-const path = require('path');
+const backup = require('../../components/backup');
 
 module.exports = function (Backup) {
 
@@ -23,10 +22,11 @@ module.exports = function (Backup) {
    * - location Absolute location of the backup file
    * - modules Application modules to backup
    * @param params
+   * @param requestOptions
    * @param done
    * @returns {*}
    */
-  Backup.createBackup = function (params, requestOptions, done) {
+  Backup.createManualBackup = function (params, requestOptions, done) {
     // defensive checks
     params = params || {};
 
@@ -40,57 +40,35 @@ module.exports = function (Backup) {
         params.location = params.location || systemSettings.dataBackup.location;
         params.modules = params.modules || systemSettings.dataBackup.modules;
 
-        // collect all collections that must be exported, based on the modules
-        let collections = [];
-        params.modules.forEach((module) => {
-          if (Backup.modules.hasOwnProperty(module)) {
-            collections.push(...Backup.modules[module]);
-          }
-        });
-
-        // make sure the location path of the backups exists and is accesible
-        fs.access(params.location, fs.F_OK, (accessError) => {
-          if (accessError) {
-            app.logger.error(`Backup location: ${params.location} is not OK. ${accessError}`);
-            return done(accessError);
-          }
-
-          // run the database export
-          app.models.sync.exportDatabase(null, collections, null, (exportError, archivePath) => {
-            if (exportError) {
-              app.logger.error(`Backup process failed. ${exportError}`);
-              return done(exportError);
-            }
-
-            // get file name from archive path
-            let fileParse = path.parse(archivePath);
-            let fileName = fileParse.name + fileParse.ext;
-
-            // build new path for the backup file
-            let newPath = `${params.location}/${fileName}`;
-
-            // copy the archive from temporary OS directory to the desired location
-            fs.copyFile(archivePath, newPath, (copyError) => {
-              if (copyError) {
-                app.logger.error(`Failed to copy backup file from path ${archivePath} to ${newPath}. ${copyError}`);
-                return done(copyError);
-              }
-
-              // create new backup record
-              app.models.backup
-                .create(
-                  {
-                    automatic: false,
-                    modules: params.modules,
-                    location: newPath,
-                    userId: userId
-                  }
-                )
-                .then((record) => done(null, record.id))
-                .catch((createError) => done(createError));
-            });
-          });
-        });
+        // create new backup
+        backup.create(userId, params.modules, params.location, (err, backupId) => done(err, backupId));
       });
+  };
+
+  /**
+   * Restore the system from a given backup file
+   * @param req
+   * @param backupFile
+   * @param done
+   */
+  Backup.restoreBackupFromFile = function (req, backupFile, done) {
+    const buildError = app.utils.apiError.getError;
+    const form = new formidable.IncomingForm();
+
+    form.parse(req, function (err, fields, files) {
+      if (err) {
+        return done(err);
+      }
+
+      // validates snapshot archive
+      if (!files.backupFile) {
+        // send back the error
+        return done(buildError('MISSING_REQUIRED_PROPERTY', {
+          model: Backup.modelName,
+          properties: 'backupFile'
+        }));
+      }
+
+
   };
 };

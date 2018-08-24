@@ -28,7 +28,7 @@
   "validations": [],
   "acls": [],
   "methods": {
-    "createBackup": {
+    "createManualBackup": {
       "accepts": [
         {
           "arg": "params",
@@ -37,8 +37,7 @@
           "http": {
             "source": "body"
           },
-          "root": true,
-          "required": true
+          "root": true
         },
         {
           "arg": "options",
