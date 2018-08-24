@@ -80,9 +80,12 @@ module.exports = function (Sync) {
               });
             }
 
+            // get mongoDB filter that will be sent; for some collections we might send additional filters
+            let mongoDBFilter = dbSync.collectionsFilterMap[collectionName] ? dbSync.collectionsFilterMap[collectionName](customFilter, filter) : customFilter;
+
             return connection
               .collection(allCollections[collectionName])
-              .find(customFilter, excludes, (err, result) => {
+              .find(mongoDBFilter, excludes, (err, result) => {
                 if (err) {
                   return callback(err);
                 }

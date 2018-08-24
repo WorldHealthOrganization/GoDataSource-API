@@ -22,6 +22,53 @@ const collectionsMap = {
   auditLog: 'auditLog'
 };
 
+/**
+ * Add outbreakId filter if found to a mongoDB filter;
+ * Note: the base mongoDB filter is not affected
+ * @param baseFilter MongoDB Base filter on which to add the outbreakId filter
+ * @param filter Filter from request in which to check for outbreakId filter
+ * @returns {*}
+ */
+function addOutbreakIdMongoFilter(baseFilter, filter) {
+  // check for outbreakId filter
+  let outbreakIdFilter = _.get(filter, 'where.outbreakId');
+
+  // initialize resulting filter
+  let result = null;
+  if (outbreakIdFilter) {
+    // start from base filter; Note that it can be null
+    result = Object.assign({}, baseFilter || {});
+
+    // parse the outbreakIdFilter to mongoDB format
+    if (typeof outbreakIdFilter === 'object') {
+      // accepting only inq option for the filter
+      if(outbreakIdFilter.inq) {
+        result.outbreakId = {
+          $in: outbreakIdFilter.inq
+        };
+      } else {
+        // filter is not accepted; not using the outbreakId filter
+      }
+    } else {
+      // filtering outbreakId by value
+      result.outbreakId = outbreakIdFilter;
+    }
+  }
+
+  return result;
+}
+
+// on export some additional filters might be applied on different collections
+// map collections to filter update functions
+const collectionsFilterMap = {
+  outbreak: addOutbreakIdMongoFilter,
+  person: addOutbreakIdMongoFilter,
+  labResult: addOutbreakIdMongoFilter,
+  followUp: addOutbreakIdMongoFilter,
+  relationship: addOutbreakIdMongoFilter,
+  cluster: addOutbreakIdMongoFilter
+};
+
 const syncRecordFlags = {
   UNTOUCHED: 'UNTOUCHED',
   CREATED: 'CREATED',
@@ -181,6 +228,7 @@ const syncRecord = function (logger, model, record, options, done) {
 
 module.exports = {
   collectionsMap: collectionsMap,
+  collectionsFilterMap: collectionsFilterMap,
   syncRecord: syncRecord,
   syncRecordFlags: syncRecordFlags
 };

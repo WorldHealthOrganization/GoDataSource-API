@@ -1109,6 +1109,11 @@
       "LNG_BACKUP_STATUS_SUCCESS": "日本の Success",
       "LNG_BACKUP_STATUS_FAILED": "日本の Failed",
       "LNG_BACKUP_STATUS_PENDING": "日本の In Progress"
+    },
+    "syncStatus": {
+      "LNG_SYNC_STATUS_IN_PROGRESS": "日本の In progress",
+      "LNG_SYNC_STATUS_SUCCESS": "日本の Success",
+      "LNG_SYNC_STATUS_FAILED": "日本の Failed"
     }
   }
 }

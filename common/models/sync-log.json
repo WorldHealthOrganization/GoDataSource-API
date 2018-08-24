@@ -10,13 +10,25 @@
       "type": "string",
       "required": true
     },
-    "syncProcessStartData": {
+    "syncProcessStartDate": {
       "type": "date",
       "required": true
     },
     "syncProcessCompletionDate": {
       "type": "date",
       "required": true
+    },
+    "syncStatus": {
+      "type": "string",
+      "enum": [
+        "LNG_SYNC_STATUS_IN_PROGRESS",
+        "LNG_SYNC_STATUS_SUCCESS",
+        "LNG_SYNC_STATUS_FAILED"
+      ],
+      "required": true
+    },
+    "failReason": {
+      "type": "string"
     }
   },
   "validations": [],

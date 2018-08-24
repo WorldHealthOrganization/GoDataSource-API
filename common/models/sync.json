@@ -112,6 +112,38 @@
         "verb": "get",
         "path": "/available-outbreaks"
       }
+    },
+    "sync": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": {
+          },
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "failedIds",
+          "description": "Failed records ids",
+          "type": "object",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Synchronize the database based on a given snapshot archive",
+      "http": {
+        "verb": "post",
+        "path": "/import-database-snapshot"
+      }
     }
   }
 }
