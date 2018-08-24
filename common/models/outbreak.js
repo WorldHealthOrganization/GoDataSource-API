@@ -52,9 +52,9 @@ module.exports = function (Outbreak) {
   const nonModelObjects = {
     geolocation: {
       lat: 'LNG_LATITUDE',
-      long: 'LNG_LONGITUDE'
+      lng: 'LNG_LONGITUDE'
     }
-  }
+  };
 
   // initialize model helpers
   Outbreak.helpers = {};
@@ -1046,21 +1046,25 @@ module.exports = function (Outbreak) {
       model = _.pick(model, app.models[modelName].printFieldsinOrder);
     }
 
-
-
-    return _.mapKeys(model, (value, key) => {
+    let translatedFieldsModel = {};
+    Object.keys(model).forEach(function(key) {
+      let value = model[key];
+      let newValue = value;
       if(fieldsToTranslate && fieldsToTranslate[key]) {
         if(Array.isArray(value) && value.length && typeof(value[0]) === 'object' && arrayFields[key]) {
+          newValue = [];
           value.forEach((element, index) => {
-            model[key][index] = Outbreak.helpers.translateFieldLabels(model[key][index], arrayFields[key], dictionary);
+            newValue[index] = Outbreak.helpers.translateFieldLabels(element, arrayFields[key], dictionary);
           })
         } else if (typeof(value) === 'object' && Object.keys(value).length > 0) {
-          model[key] = Outbreak.helpers.translateFieldLabels(value, arrayFields[key], dictionary);
+          newValue = Outbreak.helpers.translateFieldLabels(value, arrayFields[key], dictionary);
         }
-        return dictionary.getTranslation(app.models[modelName] ? fieldsToTranslate[key] : nonModelObjects[modelName][key]);
+        translatedFieldsModel[dictionary.getTranslation(app.models[modelName] ? fieldsToTranslate[key] : nonModelObjects[modelName][key])] = newValue;
       } else {
-        return key;
+        translatedFieldsModel[key] = value;
       }
-    })
+    });
+
+    return translatedFieldsModel;
   };
 };

@@ -372,7 +372,20 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
         // display nested props
         model[fieldName].forEach((item, index, arr) => {
           Object.keys(item).forEach((prop) => {
-            doc.text(`${prop}: ${item[prop]}`, initialXMargin + 20).moveDown();
+            if (Array.isArray(item[prop])) {
+              item.prop.forEach((subItem) => {
+                doc.text(prop, initialXMargin + 20).moveDown();
+                doc.x += 20;
+                displayModelDetails(doc, subItem, true);
+                doc.x = intialXMargin + 20;
+              })
+            } else if (typeof(item[prop]) === 'object') {
+              doc.text(prop, initialXMargin + 20).moveDown();
+              doc.x += 20;
+              displayModelDetails(doc, item[prop], true);
+            } else {
+              doc.text(`${prop}: ${item[prop]}`, initialXMargin + 20).moveDown()
+            }
           });
 
           // space after each item in the list

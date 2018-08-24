@@ -3947,8 +3947,8 @@ module.exports = function (Outbreak) {
       contactModel.addresses = [models.address.fieldLabelsMap];
       contactModel.documents = [models.document.fieldLabelsMap];
 
-      let caseFields = helpers.translateFieldLabels(caseModel, 'case', languageId, dictionary);
-      let contactFields = helpers.translateFieldLabels(contactModel, 'contact', languageId, dictionary);
+      let caseFields = helpers.translateFieldLabels(caseModel, 'case', dictionary);
+      let contactFields = helpers.translateFieldLabels(contactModel, 'contact', dictionary);
 
       // remove not needed properties from lab result/relationship field maps
       let relationFieldsMap = Object.assign({}, models.relationship.fieldLabelsMap);
@@ -3956,11 +3956,11 @@ module.exports = function (Outbreak) {
       delete labResultFieldsMap.personId;
       delete relationFieldsMap.persons;
 
-      let labResultsFields = helpers.translateFieldLabels(labResultFieldsMap, 'labResult', languageId, dictionary);
-      let relationFields = helpers.translateFieldLabels(relationFieldsMap, 'relationship', languageId, dictionary);
+      let labResultsFields = helpers.translateFieldLabels(labResultFieldsMap, 'labResult', dictionary);
+      let relationFields = helpers.translateFieldLabels(relationFieldsMap, 'relationship', dictionary);
 
       // translate template questions
-      let questions = Outbreak.helpers.parseTemplateQuestions(template, languageId, dictionary);
+      let questions = Outbreak.helpers.parseTemplateQuestions(template, dictionary);
 
       // generate pdf document
       let doc = pdfUtils.createPdfDoc({
@@ -4134,6 +4134,7 @@ module.exports = function (Outbreak) {
 
               labResult = Outbreak.helpers.translateFieldLabels(labResult, app.models.labResult.modelName, dictionary);
 
+              //Add the questionnaire separately (after field translations) because it will be displayed separately
               labResult.questionnaire = questions;
 
               sanitizedCases[caseIndex].labResults[labIndex] = labResult;
@@ -4646,7 +4647,7 @@ module.exports = function (Outbreak) {
               }
 
               // translate labels
-              contact.toPrint = helpers.translateFieldLabels(contact.toPrint, 'contact', contextUser.languageId, dictionary);
+              contact.toPrint = helpers.translateFieldLabels(contact.toPrint, 'contact', dictionary);
 
               // check if the results need to be grouped
               if (groupResultsBy) {
