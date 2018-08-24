@@ -281,7 +281,7 @@ const createQuestionnaire = function (doc, questions, withData, title) {
           if(withData) {
             doc.moveDown().text("Answer: " + item.value, isNested ? initialXMargin + 60 : initialXMargin + 20);
           } else {
-            doc.moveDown().test(`Answer: ${'_'.repeat(25)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
+            doc.moveDown().text(`Answer: ${'_'.repeat(25)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
           }
           break;
         default:

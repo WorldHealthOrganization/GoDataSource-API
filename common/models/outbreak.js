@@ -977,22 +977,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Translate all marked referenceData fields of a model, or an array of models
-   * @param modelName
-   * @param model
-   * @param dictionary
-   */
-  // Outbreak.helpers.translateDataSetReferenceDataValues = function (dataSet, modelName, dictionary) {
-  //   if(Array.isArray(dataSet)) {
-  //     dataSet.forEach((model) => {
-  //       Outbreak.helpers.translateModelReferenceDataValues(model, modelName, dictionary)
-  //     })
-  //   } else {
-  //     Outbreak.helpers.translateModelReferenceDataValues(dataSet, modelName, dictionary)
-  //   }
-  // };
-
-  /**
    * Translate all marked referenceData fields of a dataSet
    * @param dataSet
    * @param modelName

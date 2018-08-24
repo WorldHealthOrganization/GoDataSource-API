@@ -3981,13 +3981,13 @@ module.exports = function (Outbreak) {
 
       // add case investigation questionnaire into the pdf in a separate page
       doc.addPage();
-      pdfUtils.createQuestionnaire(doc, questions, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE'));
+      pdfUtils.createQuestionnaire(doc, questions, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE'));
 
       // add lab results information into a separate page
       doc.addPage();
       pdfUtils.displayModelDetails(doc, labResultsFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_DETAILS'));
       doc.addPage();
-      pdfUtils.createQuestionnaire(doc, questions, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE'));
+      pdfUtils.createQuestionnaire(doc, questions, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE'));
 
       // add contact relation template
       doc.addPage();
