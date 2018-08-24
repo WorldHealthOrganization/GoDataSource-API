@@ -51,14 +51,14 @@ module.exports = function (Backup) {
         // make sure the location path of the backups exists and is accesible
         fs.access(params.location, fs.F_OK, (accessError) => {
           if (accessError) {
-            // TODO: log the error and stop
+            app.logger.error(`Backup location: ${params.location} is not OK. ${accessError}`);
             return done(accessError);
           }
 
           // run the database export
           app.models.sync.exportDatabase(null, collections, null, (exportError, archivePath) => {
             if (exportError) {
-              // TODO: log the error
+              app.logger.error(`Backup process failed. ${exportError}`);
               return done(exportError);
             }
 
@@ -72,7 +72,7 @@ module.exports = function (Backup) {
             // copy the archive from temporary OS directory to the desired location
             fs.copyFile(archivePath, newPath, (copyError) => {
               if (copyError) {
-                // TODO: log the error
+                app.logger.error(`Failed to copy backup file from path ${archivePath} to ${newPath}. ${copyError}`);
                 return done(copyError);
               }
 
