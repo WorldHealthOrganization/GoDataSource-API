@@ -723,26 +723,19 @@ const prepareFieldsForPrint = function (model, dateFieldsList) {
       // translate the field from each element of the array type property
       model[mainKey].forEach((element) => {
         prepareFieldsForPrint(element, [subKey]);
-      })
+      });
     }
   });
 
   // Sanitize undefined fields
-  return _.mapValues(model, (value, key) => {
+  return _.mapValues(model, (value) => {
     if (value === undefined) {
       return ' ';
     } else {
       return value;
     }
-  })
-};
-
-const replaceForeignKeys = function (model, modelName, callback) {
-  let cachedModels = {};
-  Object.keys(app.models[modelName].pathsToForeignKeys).forEach((path) => {
-
   });
-}
+};
 
 module.exports = {
   getUTCDate: getUTCDate,

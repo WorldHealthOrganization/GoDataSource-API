@@ -279,7 +279,7 @@ const createQuestionnaire = function (doc, questions, withData, title) {
       switch (item.answerType) {
         case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT':
           if(withData) {
-            doc.moveDown().text("Answer: " + item.value, isNested ? initialXMargin + 60 : initialXMargin + 20);
+            doc.moveDown().text('Answer: ' + item.value, isNested ? initialXMargin + 60 : initialXMargin + 20);
           } else {
             doc.moveDown().text(`Answer: ${'_'.repeat(25)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
           }
@@ -338,7 +338,7 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
   // cache initial document margin
   if (!initialXMargin) {
     var initialXMargin = doc.x;
-  };
+  }
 
   // display each field on a row
   Object.keys(model).forEach((fieldName) => {
@@ -377,14 +377,14 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
                 doc.text(prop, initialXMargin + 20).moveDown();
                 doc.x += 20;
                 displayModelDetails(doc, subItem, true);
-                doc.x = intialXMargin + 20;
-              })
+                doc.x = initialXMargin + 20;
+              });
             } else if (typeof(item[prop]) === 'object') {
               doc.text(prop, initialXMargin + 20).moveDown();
               doc.x += 20;
               displayModelDetails(doc, item[prop], true);
             } else {
-              doc.text(`${prop}: ${item[prop]}`, initialXMargin + 20).moveDown()
+              doc.text(`${prop}: ${item[prop]}`, initialXMargin + 20).moveDown();
             }
           });
 
@@ -419,7 +419,7 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
 const displayPersonRelationships = function (doc, relationships, title) {
   relationships.forEach((relationship, index) => {
     doc.addPage();
-    displayModelDetails(doc, relationship, true, index === 0 ? title : null)
+    displayModelDetails(doc, relationship, true, index === 0 ? title : null);
   });
 };
 

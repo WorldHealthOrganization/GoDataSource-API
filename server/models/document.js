@@ -14,5 +14,5 @@ module.exports = function(Document) {
   Document.printFieldsinOrder = [
     'type',
     'number'
-  ]
+  ];
 };

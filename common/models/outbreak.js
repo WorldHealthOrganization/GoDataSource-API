@@ -1039,7 +1039,7 @@ module.exports = function (Outbreak) {
           newValue = [];
           value.forEach((element, index) => {
             newValue[index] = Outbreak.helpers.translateFieldLabels(element, arrayFields[key], dictionary);
-          })
+          });
         } else if (typeof(value) === 'object' && Object.keys(value).length > 0) {
           newValue = Outbreak.helpers.translateFieldLabels(value, arrayFields[key], dictionary);
         }
