@@ -100,4 +100,78 @@ module.exports = function (Sync) {
       outbreakIDs: clientInformation.outbreakIDs || []
     });
   };
+
+  /**
+   * Start sync process with a received upstream server
+   * @param callback
+   */
+  Sync.sync = function (data, options, callback) {
+    // validate data; check for required upstreamServerURL property in req body
+    if (!data.upstreamServerURL || typeof data.upstreamServerURL !== 'string') {
+      return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {
+        errorMessages: 'Missing required property "upstreamServerURL"'
+      }));
+    }
+
+    // initialize flag to know if the callback function was already called
+    // need to do this as we will call it and then continue doing some actions
+    let callbackCalled = false;
+
+    // initialize upstreamServer options container
+    let upstreamServerEntry;
+
+    // check if the received upstream server URL matches one from the configured upstream servers
+    app.models.systemSettings
+      .findOne()
+      .then(function (systemSettings) {
+        // initialize error
+        if (!systemSettings) {
+          throw app.utils.apiError.getError('INTERNAL_ERROR', {
+            error: 'System Settings were not found'
+          });
+        }
+
+        // find the upstream server entry that matches the received url
+        if (!Array.isArray(systemSettings.upstreamServers) || !(upstreamServerEntry = systemSettings.upstreamServers.find(serverEntry => serverEntry.url === data.upstreamServerURL))) {
+          throw app.utils.apiError.getError('UPSTREAM_SERVER_NOT_CONFIGURED', {
+            upstreamServerURL: data.upstreamServerURL
+          });
+        }
+
+        // upstream server was found; check if sync is enabled
+        if (!upstreamServerEntry.syncEnabled) {
+          throw app.utils.apiError.getError('UPSTREAM_SERVER_SYNC_DISABLED', {
+            upstreamServerName: upstreamServerEntry.name,
+            upstreamServerURL: upstreamServerEntry.url
+          });
+        }
+
+        // start sync with upstream server
+        // create syncLog entry in the DB
+        return app.models.syncLog.create({
+          syncServerUrl: upstreamServerEntry.url,
+          syncProcessStartDate: new Date(),
+          syncStatus: 'LNG_SYNC_STATUS_IN_PROGRESS'
+        }, options);
+      })
+      .then(function (syncLogEntry) {
+        // send response with the syncLogEntry ID
+        callback(null, syncLogEntry.id);
+        callbackCalled = true;
+
+        // continue sync
+        return Sync.getAvailableOutbreaks(upstreamServerEntry);
+      })
+      .then(function(outbreakIDs) {
+        let x = 2;
+      })
+      .catch(function (err) {
+        if(!callbackCalled) {
+          callback(err);
+          callbackCalled = true;
+        } else {
+          app.logger.debug(err);
+        }
+      });
+  };
 };

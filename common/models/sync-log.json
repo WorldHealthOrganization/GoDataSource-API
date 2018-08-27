@@ -15,8 +15,7 @@
       "required": true
     },
     "syncProcessCompletionDate": {
-      "type": "date",
-      "required": true
+      "type": "date"
     },
     "syncStatus": {
       "type": "string",

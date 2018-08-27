@@ -154,5 +154,13 @@
   "INVALID_FOLLOW_UP_DATE": {
     "defaultStatusCode": 400,
     "messagePattern": "Invalid follow up date, it exceeds the configured period."
+  },
+  "UPSTREAM_SERVER_NOT_CONFIGURED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Upstream server with url `<%= upstreamServerURL %>` is not configured in system settings"
+  },
+  "UPSTREAM_SERVER_SYNC_DISABLED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Sync with upstream server `<%= upstreamServerName %>` is disabled"
   }
 }

@@ -231,5 +231,9 @@
   "backupParams": {
     "dataSource": null,
     "public": false
+  },
+  "upstreamServerURL": {
+    "dataSource": null,
+    "public": false
   }
 }

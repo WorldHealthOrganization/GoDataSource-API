@@ -30,6 +30,12 @@
       "principalId": "$client_application",
       "permissions": "ALLOW",
       "property": "getAvailableOutbreaksForClient"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permissions": "ALLOW",
+      "property": "sync"
     }
   ],
   "methods": {
@@ -116,13 +122,14 @@
     "sync": {
       "accepts": [
         {
-          "arg": "body",
-          "type": {
-          },
+          "arg": "data",
+          "type": "object",
+          "model": "upstreamServerURL",
           "http": {
             "source": "body"
           },
-          "root": true
+          "root": true,
+          "required": true
         },
         {
           "arg": "options",
@@ -132,17 +139,16 @@
       ],
       "returns": [
         {
-          "arg": "failedIds",
-          "description": "Failed records ids",
-          "type": "object",
-          "root": true,
+          "arg": "id",
+          "description": "Sync log entry ID for the sync that was triggered",
+          "type": "string",
           "required": true
         }
       ],
-      "description": "Synchronize the database based on a given snapshot archive",
+      "description": "Synchronize the instance with upstream servers",
       "http": {
         "verb": "post",
-        "path": "/import-database-snapshot"
+        "path": "/"
       }
     }
   }

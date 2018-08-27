@@ -7,6 +7,7 @@ const app = require('../../server/server');
 const fs = require('fs');
 const dbSync = require('../../components/dbSync');
 const AdmZip = require('adm-zip');
+const request = require('request-promise-native');
 
 module.exports = function (Sync) {
   Sync.hasController = true;
@@ -239,4 +240,65 @@ module.exports = function (Sync) {
       );
     });
   };
+
+  /**
+   * Remove last character of a string if it's a '/'
+   * @param url
+   */
+  function normalizeURL(url) {
+    if (typeof url === 'string' && url.lastIndexOf('/') === url.length - 1) {
+      url = url.substring(0, url.length - 1);
+    }
+
+    return url;
+  }
+
+  let syncClient = function(upstreamServer) {
+    this.options = {
+      baseURL: upstreamServer.url,
+      auth: {
+        user: upstreamServer.credentials.clientId,
+        pass: upstreamServer.credentials.clientSecret
+      },
+      timeout: 300000
+    };
+
+    this.getAvailableOutbreaks = function () {
+      let requestOptions = Object.assign(this.options, {
+        method: 'GET',
+        json: true,
+        timeout: 30000
+      });
+
+
+    }
+  };
+
+  /**
+   * Connect to an upstream server and retrieve the available outbreaks IDs
+   * @param upstreamServer
+   * @param callback
+   */
+  Sync.getAvailableOutbreaks = function (upstreamServer) {
+    let requestOptions = {
+      uri: normalizeURL(upstreamServer.url) + '/available-outbreaks',
+      method: 'GET',
+      auth: {
+        user: upstreamServer.credentials.clientId,
+        pass: upstreamServer.credentials.clientSecret
+      },
+      timeout: 30000,
+      json: true
+    };
+
+    return request(requestOptions)
+      .then(function (response) {
+        let a = 2;
+        return response;
+      })
+      .catch(function(err) {
+        let x = 3;
+        return err;
+      })
+  }
 };
