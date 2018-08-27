@@ -65,7 +65,7 @@ module.exports = function (Sync) {
 
     return async
       .series(
-        Object.keys(collections).map((collectionName) => {
+        Object.keys(allCollections).map((collectionName) => {
           return (callback) => {
             // look up for any specific options
             let collectionOpts = collectionsOpts.filter((item) => item.name === collectionName)[0];
@@ -80,7 +80,7 @@ module.exports = function (Sync) {
             }
 
             return connection
-              .collection(collections[collectionName])
+              .collection(allCollections[collectionName])
               .find(customFilter, excludes, (err, result) => {
                 if (err) {
                   return callback(err);

@@ -68,7 +68,15 @@ module.exports = function (Backup) {
           properties: 'backupFile'
         }));
       }
+    });
+  };
 
-
+  /**
+   * Restore a backup from database using its ID
+   * @param backupId
+   * @param done
+   */
+  Backup.restoreBackup = function (backupId, done) {
+    backup.restore(backupId, done);
   };
 };

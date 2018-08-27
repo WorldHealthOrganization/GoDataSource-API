@@ -48,13 +48,27 @@
       "returns": [
         {
           "arg": "backupId",
-          "type": "number"
+          "type": "string"
         }
       ],
       "description": "Manual backup",
       "http": {
         "verb": "post",
-        "path": "/"
+        "path": "/create-backup"
+      }
+    },
+    "restoreBackup": {
+      "accepts": [
+        {
+          "arg": "backupId",
+          "type": "string"
+        }
+      ],
+      "returns": [],
+      "description": "Restore backup",
+      "http": {
+        "verb": "post",
+        "path": "/:backupId/restore"
       }
     }
   }

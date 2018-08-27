@@ -4,6 +4,10 @@
 const app = require('../server/server');
 const fs = require('fs');
 const path = require('path');
+const async = require('async');
+const tar = require('tar');
+const tmp = require('tmp');
+const dbSync = require('./dbSync');
 
 /**
  * Create a new backup file at the desired location and for given application modules
@@ -71,34 +75,127 @@ const createBackup = function (userId, modules, location, done) {
 /**
  * Restore the system using a backup entry
  * @param backupId
- * @param requestOptions
  * @param done
  */
-const restoreBackup = function (backupId, requestOptions, done) {
-  
+const restoreBackup = function (backupId, done) {
+  app.models.backup
+    .findOne({ where: { id: backupId } })
+    .then((backup) => {
+      if (!backup) {
+        return done(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+          model: app.models.backup.modelName,
+          id: backupId
+        }));
+      }
+
+      // begin backup restore
+      restoreBackupFromFile(backup.location, (err) => done(err));
+    })
+    .catch((err) => done(err));
 };
 
 /**
  * Restore a backup from file
- * Request options are required for logging to work as expected
  * @param filePath
- * @param requestOptions
  * @param done
  */
-const restoreBackupFromFile = function (filePath, requestOptions, done) {
+const restoreBackupFromFile = function (filePath, done) {
+  // cache reference to mongodb connection
+  let connection = app.dataSources.mongoDb.connector;
+
   // make sure the file actually exists and is accessible
-  fs.access(location, fs.F_OK, (accessError) => {
+  fs.access(filePath, fs.F_OK, (accessError) => {
     if (accessError) {
       app.logger.error(`Backup file: ${filePath} is not OK. ${accessError}`);
       return done(accessError);
     }
 
-    // run the synchronization process
-    app.models.sync.syncDatabaseWithSnapshot(filePath, requestOptions, done);
+    // // create a temporary directory to store the database files
+    // it always created the folder in the system temporary directory
+    let tmpDir = tmp.dirSync({unsafeCleanup: true});
+    let tmpDirName = tmpDir.name;
+
+    // extract the compressed database snapshot into the newly created temporary directory
+    tar.x(
+      {
+        cwd: tmpDirName,
+        file: filePath
+      },
+      (err) => {
+        if (err) {
+          return done(err);
+        }
+
+        // read all files in the temp dir
+        return fs.readdir(tmpDirName, (err, filenames) => {
+          if (err) {
+            return done(err);
+          }
+
+          // filter files that match a collection name
+          let collectionsFiles = filenames.filter((filename) => {
+            // split filename into 'collection name' and 'extension'
+            filename = filename.split('.');
+            return filename[0] && dbSync.collectionsMap.hasOwnProperty(filename[0]);
+          });
+
+          // read each file's contents and sync with database
+          return async.series(
+            collectionsFiles.map((fileName) => (doneCollection) => {
+              let filePath = `${tmpDirName}/${fileName}`;
+
+              return fs.readFile(
+                filePath,
+                {
+                  encoding: 'utf8'
+                },
+                (err, data) => {
+                  if (err) {
+                    app.logger.error(`Failed to read collection file ${filePath}. ${err}`);
+                    return doneCollection();
+                  }
+
+                  // parse file contents to JavaScript object
+                  try {
+                    let collectionRecords = JSON.parse(data);
+
+                    // split filename into 'collection name' and 'extension'
+                    let collectionName = fileName.split('.')[0];
+
+                    // get collection reference of the mongodb driver
+                    let collectionRef = connection.collection(dbSync.collectionsMap[collectionName]);
+
+                    // create a bulk operation
+                    const bulk = collectionRef.initializeOrderedBulkOp();
+
+                    // first remove all entries in the collection
+                    bulk.deleteMany({});
+
+                    // insert all entries from the file in the collection
+                    collectionRecords.forEach((record) => {
+                      bulk.insert(record);
+                    });
+
+                    // execute the bulk operations
+                    bulk.execute((err) => {
+                      // TODO: handle the error
+                      let a = 1;
+                    });
+                  } catch (parseError) {
+                    app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
+                    return doneCollection();
+                  }
+                });
+            }),
+            (err) => done(err)
+          );
+        });
+      });
   });
 };
 
 module.exports = {
   create: createBackup,
-  restore: restoreBackupFromFile
+  restore: restoreBackup,
+  restoreFromFile: restoreBackupFromFile
 };
