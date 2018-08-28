@@ -165,21 +165,22 @@ const restoreBackupFromFile = function (filePath, done) {
                     // get collection reference of the mongodb driver
                     let collectionRef = connection.collection(dbSync.collectionsMap[collectionName]);
 
-                    // create a bulk operation
-                    const bulk = collectionRef.initializeOrderedBulkOp();
+                    // remove all the documents from the collection, then bulk insert the ones from the file
+                    collectionRef.deleteMany({}, (err) => {
+                      // create a bulk operation
+                      const bulk = collectionRef.initializeOrderedBulkOp();
 
-                    // first remove all entries in the collection
-                    bulk.deleteMany({});
+                      // insert all entries from the file in the collection
+                      collectionRecords.forEach((record) => {
+                        bulk.insert(record);                      });
 
-                    // insert all entries from the file in the collection
-                    collectionRecords.forEach((record) => {
-                      bulk.insert(record);
-                    });
-
-                    // execute the bulk operations
-                    bulk.execute((err) => {
-                      // TODO: handle the error
-                      let a = 1;
+                      // execute the bulk operations
+                      bulk.execute((err) => {
+                        if (err) {
+                          app.logger.error(`Failed to insert records for collection ${collectionName}. ${err}`);
+                        }
+                        return doneCollection();
+                      });
                     });
                   } catch (parseError) {
                     app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
