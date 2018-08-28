@@ -2151,7 +2151,10 @@
                         "type": {
                           "startDate": "date",
                           "endDate": "date",
-                          "duration": "number"
+                          "duration": {
+                            "type": "number",
+                            "description": "Transmission chain duration in days"
+                          }
                         }
                       },
                       "active": "boolean"
@@ -2446,7 +2449,10 @@
                         "type": {
                           "startDate": "date",
                           "endDate": "date",
-                          "duration": "number"
+                          "duration": {
+                            "type": "number",
+                            "description": "Transmission chain duration in days"
+                          }
                         }
                       },
                       "active": "boolean"
