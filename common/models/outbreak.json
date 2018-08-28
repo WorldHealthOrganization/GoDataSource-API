@@ -2147,6 +2147,16 @@
                       "chain": [
                         "string"
                       ],
+                      "period": {
+                        "type": {
+                          "startDate": "date",
+                          "endDate": "date",
+                          "duration": {
+                            "type": "number",
+                            "description": "Transmission chain duration in days"
+                          }
+                        }
+                      },
                       "active": "boolean"
                     }
                   }
@@ -2435,6 +2445,16 @@
                       "chain": [
                         "string"
                       ],
+                      "period": {
+                        "type": {
+                          "startDate": "date",
+                          "endDate": "date",
+                          "duration": {
+                            "type": "number",
+                            "description": "Transmission chain duration in days"
+                          }
+                        }
+                      },
                       "active": "boolean"
                     }
                   }
