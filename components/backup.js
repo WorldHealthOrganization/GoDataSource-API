@@ -27,7 +27,7 @@ const createBackup = function (userId, modules, location, done) {
     }
   });
 
-  // make sure the location path of the backups exists and is accesible
+  // make sure the location path of the backups exists and is accessible
   fs.access(location, fs.F_OK, (accessError) => {
     if (accessError) {
       app.logger.error(`Backup location: ${location} is not OK. ${accessError}`);
