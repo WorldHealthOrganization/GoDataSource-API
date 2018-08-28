@@ -8,6 +8,7 @@ const fs = require('fs');
 const dbSync = require('../../components/dbSync');
 const AdmZip = require('adm-zip');
 const request = require('request-promise-native');
+const SyncClient = require('../../components/syncClient');
 
 module.exports = function (Sync) {
   Sync.hasController = true;
@@ -82,7 +83,7 @@ module.exports = function (Sync) {
             }
 
             // get mongoDB filter that will be sent; for some collections we might send additional filters
-            let mongoDBFilter = dbSync.collectionsFilterMap[collectionName] ? dbSync.collectionsFilterMap[collectionName](customFilter, filter) : customFilter;
+            let mongoDBFilter = dbSync.collectionsFilterMap[collectionName] ? dbSync.collectionsFilterMap[collectionName](collectionName, customFilter, filter) : customFilter;
 
             return connection
               .collection(allCollections[collectionName])
@@ -131,10 +132,12 @@ module.exports = function (Sync) {
    * Extract a database snapshot archive to a temporary directory
    * And sync with the current database
    * @param filePath
+   * @param syncLogEntry Sync log entry for the current sync
+   * @param outbreakIDs List of outbreak IDs for the outbreaks that can be synced
    * @param reqOptions
    * @param callback
    */
-  Sync.syncDatabaseWithSnapshot = function (filePath, reqOptions, callback) {
+  Sync.syncDatabaseWithSnapshot = function (filePath, syncLogEntry, outbreakIDs, reqOptions, callback) {
     // create a temporary directory to store the database files
     // it always created the folder in the system temporary directory
     let tmpDir = tmp.dirSync({unsafeCleanup: true});
@@ -177,56 +180,65 @@ module.exports = function (Sync) {
           // cache reference to Loopback's model
           let model = app.models[dbSync.collectionsMap[collectionName]];
 
-          return fs.readFile(
-            filePath,
-            {
-              encoding: 'utf8'
-            },
-            (err, data) => {
-              if (err) {
-                app.logger.error(`Failed to read collection file ${filePath}. ${err}`);
-                return doneCollection();
-              }
+              return fs.readFile(
+                filePath,
+                {
+                  encoding: 'utf8'
+                },
+                (err, data) => {
+                  // create failed records entry
+                  failedIds[collectionName] = [];
+
+                  if (err) {
+                    app.logger.error(`Sync ${syncLogEntry.id}: Failed to read collection file ${filePath}. ${err}`);
+                    failedIds[collectionName].push('Entire collection');
+                    return doneCollection();
+                  }
 
               // parse file contents to JavaScript object
               try {
                 let collectionRecords = JSON.parse(data);
 
-                // create failed records entry
-                failedIds[collectionName] = [];
+                    return async.parallel(
+                      collectionRecords.map((collectionRecord) => (doneRecord) => {
+                        // convert mongodb id notation to Loopback notation
+                        // to be consistent with external function calls
+                        collectionRecord.id = collectionRecord._id;
 
-                return async.parallel(
-                  collectionRecords.map((collectionRecord) => (doneRecord) => {
-                    // convert mongodb id notation to Loopback notation
-                    // to be consistent with external function calls
-                    collectionRecord.id = collectionRecord._id;
+                        // if needed for the collection, check for collectionRecord outbreakId
+                        if(outbreakIDs.length &&
+                          dbSync.collectionsImportFilterMap[collectionName] &&
+                          !dbSync.collectionsImportFilterMap[collectionName](collectionName, collectionRecord, outbreakIDs)) {
+                          app.logger.debug(`Sync ${syncLogEntry.id}: Skipped syncing record (collection: ${collectionName}, id: ${collectionRecord.id}) as it's outbreak ID is not accepted`);
+                          return doneRecord();
+                        }
 
-                    // sync the record with the main database
-                    dbSync.syncRecord(app.logger, model, collectionRecord, reqOptions, (err) => {
-                      if (err) {
-                        app.logger.debug(`Failed syncing record (id: ${collectionRecord.id}). Error: ${err.message}`);
-                        failedIds[collectionName].push(collectionRecord.id);
+                        // sync the record with the main database
+                        dbSync.syncRecord(app.logger, model, collectionRecord, reqOptions, (err) => {
+                          if (err) {
+                            app.logger.debug(`Sync ${syncLogEntry.id}: Failed syncing record (collection: ${collectionName}, id: ${collectionRecord.id}). Error: ${err.message}`);
+                            failedIds[collectionName].push(collectionRecord.id);
+                          }
+                          return doneRecord();
+                        });
+                      }),
+                      () => {
+                        if (!failedIds[collectionName].length) {
+                          delete failedIds[collectionName];
+                        }
+
+                        return doneCollection();
                       }
-                      return doneRecord();
-                    });
-                  }),
-                  () => {
-                    if (!failedIds[collectionName].length) {
-                      delete failedIds[collectionName];
-                    }
-
+                    );
+                  } catch (parseError) {
+                    app.logger.error(`Sync ${syncLogEntry.id}: Failed to parse collection file ${filePath}. ${parseError}`);
                     return doneCollection();
                   }
-                );
-              } catch (parseError) {
-                app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
-                return doneCollection();
-              }
-            });
-        }),
-        () => {
-          // remove temporary directory
-          tmpDir.removeCallback();
+                });
+            }),
+            () => {
+              // remove temporary directory
+              tmpDir.removeCallback();
 
           // remove temporary uploaded file
           fs.unlink(filePath);
@@ -242,63 +254,21 @@ module.exports = function (Sync) {
   };
 
   /**
-   * Remove last character of a string if it's a '/'
-   * @param url
+   * Retrieve the available outbreaks IDs from the upstream server
+   * @param upstreamServer
    */
-  function normalizeURL(url) {
-    if (typeof url === 'string' && url.lastIndexOf('/') === url.length - 1) {
-      url = url.substring(0, url.length - 1);
-    }
-
-    return url;
-  }
-
-  let syncClient = function(upstreamServer) {
-    this.options = {
-      baseURL: upstreamServer.url,
-      auth: {
-        user: upstreamServer.credentials.clientId,
-        pass: upstreamServer.credentials.clientSecret
-      },
-      timeout: 300000
-    };
-
-    this.getAvailableOutbreaks = function () {
-      let requestOptions = Object.assign(this.options, {
-        method: 'GET',
-        json: true,
-        timeout: 30000
-      });
-
-
-    }
+  Sync.getAvailableOutbreaksIDs = function (upstreamServer) {
+    let client = new SyncClient(upstreamServer);
+    return client.getAvailableOutbreaks();
   };
 
   /**
-   * Connect to an upstream server and retrieve the available outbreaks IDs
+   * Send database to server for import
    * @param upstreamServer
-   * @param callback
+   * @param DBSnapshotFileName
    */
-  Sync.getAvailableOutbreaks = function (upstreamServer) {
-    let requestOptions = {
-      uri: normalizeURL(upstreamServer.url) + '/available-outbreaks',
-      method: 'GET',
-      auth: {
-        user: upstreamServer.credentials.clientId,
-        pass: upstreamServer.credentials.clientSecret
-      },
-      timeout: 30000,
-      json: true
-    };
-
-    return request(requestOptions)
-      .then(function (response) {
-        let a = 2;
-        return response;
-      })
-      .catch(function(err) {
-        let x = 3;
-        return err;
-      })
-  }
+  Sync.sendDBSnapshotForImport = function (upstreamServer, DBSnapshotFileName) {
+    let client = new SyncClient(upstreamServer);
+    return client.sendDBSnapshotForImport(DBSnapshotFileName);
+  };
 };

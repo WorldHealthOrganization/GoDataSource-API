@@ -44,7 +44,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "This request accepts 'fromDate': date on the first level in 'where'"
+          "description": "This request accepts 'fromDate': date, 'outbreakId': {filterOperator}, 'exclude': ['modelName'] on the first level in 'where'"
         }
       ],
       "returns": [
@@ -80,14 +80,18 @@
         {
           "arg": "snapshot",
           "type": "file"
+        },
+        {
+          "arg": "asynchronous",
+          "type": "boolean",
+          "description": "Flag to specify whether the import is sync or async. Default: sync (false)"
         }
       ],
       "returns": [
         {
-          "arg": "failedIds",
-          "description": "Failed records ids",
-          "type": "object",
-          "root": true,
+          "arg": "syncLogId",
+          "description": "Sync log entry ID for the sync that was triggered",
+          "type": "string",
           "required": true
         }
       ],
@@ -108,7 +112,9 @@
       "returns": [
         {
           "arg": "outbreakIDs",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "root": true,
           "required": true
         }
@@ -139,7 +145,7 @@
       ],
       "returns": [
         {
-          "arg": "id",
+          "arg": "syncLogId",
           "description": "Sync log entry ID for the sync that was triggered",
           "type": "string",
           "required": true

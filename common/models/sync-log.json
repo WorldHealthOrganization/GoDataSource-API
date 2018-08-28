@@ -8,7 +8,11 @@
   "properties": {
     "syncServerUrl": {
       "type": "string",
-      "required": true
+      "description": "URL of the server with which the client is synced. Present in the entries for Client instances"
+    },
+    "syncClientId": {
+      "type": "string",
+      "description": "Client ID which is synced with the server. Present in the entries for Server instances"
     },
     "syncProcessStartDate": {
       "type": "date",
@@ -25,6 +29,16 @@
         "LNG_SYNC_STATUS_FAILED"
       ],
       "required": true
+    },
+    "syncOutbreakIDs": {
+      "type": [
+        "string"
+      ],
+      "description": "IDs of the synced outbreaks"
+    },
+    "syncInformationStartDate": {
+      "type": "date",
+      "description": "Start date from which the created/modified/deleted entries are synced. Information is synced until the 'syncProcessStartDate'"
     },
     "failReason": {
       "type": "string"

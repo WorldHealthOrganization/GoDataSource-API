@@ -20,6 +20,11 @@
       "type": "string",
       "required": true
     },
+    "timeout": {
+      "type": "number",
+      "required": true,
+      "description": "Request timeout in milliseconds"
+    },
     "credentials": {
       "type": "clientCredentials",
       "required": true

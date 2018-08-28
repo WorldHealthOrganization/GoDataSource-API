@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 // map of collections and their given corresponding collection name in database
 const collectionsMap = {
   systemSettings: 'systemSettings',
@@ -25,13 +27,21 @@ const collectionsMap = {
 /**
  * Add outbreakId filter if found to a mongoDB filter;
  * Note: the base mongoDB filter is not affected
+ * @param collectionName Collection name; Depending on collection name the filter might be different
  * @param baseFilter MongoDB Base filter on which to add the outbreakId filter
  * @param filter Filter from request in which to check for outbreakId filter
  * @returns {*}
  */
-function addOutbreakIdMongoFilter(baseFilter, filter) {
+function addOutbreakIdMongoFilter(collectionName, baseFilter, filter) {
   // check for outbreakId filter
   let outbreakIdFilter = _.get(filter, 'where.outbreakId');
+
+  // outbreak ID property is different in some models
+  let outbreakIDDBProp = 'outbreakId';
+  // update property name for outbreak model
+  if (collectionName === 'outbreak') {
+    outbreakIDDBProp = '_id';
+  }
 
   // initialize resulting filter
   let result = null;
@@ -42,8 +52,8 @@ function addOutbreakIdMongoFilter(baseFilter, filter) {
     // parse the outbreakIdFilter to mongoDB format
     if (typeof outbreakIdFilter === 'object') {
       // accepting only inq option for the filter
-      if(outbreakIdFilter.inq) {
-        result.outbreakId = {
+      if (outbreakIdFilter.inq) {
+        result[outbreakIDDBProp] = {
           $in: outbreakIdFilter.inq
         };
       } else {
@@ -51,11 +61,34 @@ function addOutbreakIdMongoFilter(baseFilter, filter) {
       }
     } else {
       // filtering outbreakId by value
-      result.outbreakId = outbreakIdFilter;
+      result[outbreakIDDBProp] = outbreakIdFilter;
     }
   }
 
   return result;
+}
+
+/**
+ * Filter record by outbreakId
+ * @param collectionName Collection name; Depending on collection name the filter might be different
+ * @param record Record; JSON model instance
+ * @param outbreakIDs List of outbreak IDs for the outbreaks that can be imported
+ * @returns {*}
+ */
+function isImportableRecord(collectionName, record, outbreakIDs) {
+  // initialize importable flag
+  let importable = true;
+
+  // check for outbreakIDs
+  if(outbreakIDs.length) {
+    // get record outbreakId
+    let recordOutbreakId = collectionName === 'outbreak' ? record._id : record.outbreakId;
+
+    // check if the found outbreakId is accepted
+    importable = outbreakIDs.indexOf(recordOutbreakId) !== -1;
+  }
+
+  return importable;
 }
 
 // on export some additional filters might be applied on different collections
@@ -67,6 +100,17 @@ const collectionsFilterMap = {
   followUp: addOutbreakIdMongoFilter,
   relationship: addOutbreakIdMongoFilter,
   cluster: addOutbreakIdMongoFilter
+};
+
+// on import some additional filters might be applied on different collections
+// map collections to functions that calculate if the record needs to be imported
+const collectionsImportFilterMap = {
+  outbreak: isImportableRecord,
+  person: isImportableRecord,
+  labResult: isImportableRecord,
+  followUp: isImportableRecord,
+  relationship: isImportableRecord,
+  cluster: isImportableRecord
 };
 
 const syncRecordFlags = {
@@ -229,6 +273,7 @@ const syncRecord = function (logger, model, record, options, done) {
 module.exports = {
   collectionsMap: collectionsMap,
   collectionsFilterMap: collectionsFilterMap,
+  collectionsImportFilterMap: collectionsImportFilterMap,
   syncRecord: syncRecord,
   syncRecordFlags: syncRecordFlags
 };

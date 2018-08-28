@@ -17,6 +17,7 @@ function getRequestFromOptions(options) {
 
 /**
  * Get logged in user from options (if available)
+ * Might be a client instance for sync requests
  * @param options
  * @returns {*}
  */
@@ -25,7 +26,11 @@ function getLoggedInUserFromOptions(options) {
   let loggedInUser;
 
   if (request && request.authData) {
-    loggedInUser = request.authData.user;
+    if (request.authData.user) {
+      loggedInUser = request.authData.user;
+    } else if (request.authData.client) {
+      loggedInUser = request.authData.client;
+    }
   }
 
   return loggedInUser;
@@ -39,13 +44,25 @@ module.exports = function (Model) {
 
   /**
    * Extract user information from request
+   * Might be a client for sync requests
    * @param context
    * @returns {{id: string}}
    */
   function getUserContextInformation(context) {
     let loggedInUser = getLoggedInUserFromOptions(context.options);
+    // get the ID; initialize as unavailable
+    let id = 'unavailable';
+    // check for client instance or user
+    if (loggedInUser) {
+      if (loggedInUser.credentials) {
+        id = `Sync. Client Id: ${loggedInUser.credentials.clientId}`;
+      } else if (loggedInUser.id) {
+        id = loggedInUser.id;
+      }
+    }
+
     return {
-      id: loggedInUser ? loggedInUser.id : 'unavailable'
+      id: id
     };
   }
 
