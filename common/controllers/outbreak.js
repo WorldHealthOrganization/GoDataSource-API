@@ -287,6 +287,23 @@ module.exports = function (Outbreak) {
     next();
   });
 
+  Outbreak.beforeRemote('count', function (context, modelInstance, next) {
+    const restrictedOutbreakIds = _.get(context, 'req.authData.user.outbreakIds', []);
+    if (restrictedOutbreakIds.length) {
+      let filter = Object.assign({}, {where: context.args.where ? context.args.where : {}});
+      filter = app.utils.remote
+        .mergeFilters({
+          where: {
+            id: {
+              in: restrictedOutbreakIds
+            }
+          }
+        }, filter || {});
+      context.args.where = filter.where;
+    }
+    next();
+  });
+
   /**
    * Find relations for a case
    * @param caseId
