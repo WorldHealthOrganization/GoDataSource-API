@@ -1097,6 +1097,11 @@
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_YEMEN": "日本の Yemen",
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ZAMBIA": "日本の Zambia",
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ZIMBABWE": "日本の Zimbabwe"
+    },
+    "passwordReset": {
+      "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT": "日本の Password Reset",
+      "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1": "日本の You've requested a password reset for your account.",
+      "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2": "日本の Click <a href='{{resetHref}}'>here</a> to reset your password."
     }
   }
 }
