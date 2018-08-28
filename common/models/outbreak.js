@@ -37,25 +37,6 @@ module.exports = function (Outbreak) {
 
   Outbreak.referenceDataFields = Object.keys(Outbreak.referenceDataFieldsToCategoryMap);
 
-  const arrayFields = {
-    'addresses': 'address',
-    'documents': 'document',
-    'hospitalizationDates': 'dateRange',
-    'incubationDates': 'dateRange',
-    'isolationDates': 'dateRange',
-    'person': 'person',
-    'labResults': 'labResult',
-    'relationships': 'relationship',
-    'geoLocation': 'geolocation'
-  };
-
-  const nonModelObjects = {
-    geolocation: {
-      lat: 'LNG_LATITUDE',
-      lng: 'LNG_LONGITUDE'
-    }
-  };
-
   // initialize model helpers
   Outbreak.helpers = {};
   // set a higher limit for event listeners to avoid warnings (we have quite a few listeners)
@@ -974,81 +955,5 @@ module.exports = function (Outbreak) {
         return questionResult;
       });
     })(questions);
-  };
-
-  /**
-   * Translate all marked referenceData fields of a dataSet
-   * @param dataSet
-   * @param modelName
-   * @param dictionary
-   */
-  Outbreak.helpers.translateDataSetReferenceDataValues = function (dataSet, modelName, dictionary) {
-    let dataSetIsObject = false;
-    if(!Array.isArray(dataSet)) {
-      dataSet = [dataSet];
-      dataSetIsObject = true;
-    }
-
-    dataSet.forEach((model) => {
-      app.models[modelName].referenceDataFields.forEach((field) => {
-        if (field.indexOf('.') === -1) {
-          if (_.get(model, field)) {
-            _.set(model, field, dictionary.getTranslation(_.get(model, field)));
-          }
-        } else {
-          let parentField = '';
-          // Separate the string into the name of the array/object type property and the name of the field that needs to be translated
-          // We know the parent field is either an array or an object (since it contains a `.` in it's name) but here we
-          // check which type it is and extract the parent field's name accordingly.
-          if (field.indexOf('[].') !== -1) {
-            parentField = field.split('[].')[0];
-          } else {
-            parentField = field.split('.')[0];
-          }
-          Outbreak.helpers.translateDataSetReferenceDataValues(model[parentField], arrayFields[parentField], dictionary);
-        }
-      });
-    });
-
-    if (dataSetIsObject) {
-      dataSet = dataSet[0];
-    }
-  };
-
-  /**
-   * Translate all marked field labels of a model
-   * @param modelName
-   * @param model
-   * @param dictionary
-   */
-  Outbreak.helpers.translateFieldLabels = function (model, modelName, dictionary) {
-    let fieldsToTranslate = {};
-    if (!app.models[modelName]) {
-      fieldsToTranslate = nonModelObjects[modelName];
-    } else {
-      fieldsToTranslate = Object.assign(app.models[modelName].fieldLabelsMap, app.models[modelName].relatedFieldLabelsMap);
-      model = _.pick(model, app.models[modelName].printFieldsinOrder);
-    }
-
-    let translatedFieldsModel = {};
-    Object.keys(model).forEach(function(key) {
-      let value = model[key];
-      let newValue = value;
-      if(fieldsToTranslate && fieldsToTranslate[key]) {
-        if(Array.isArray(value) && value.length && typeof(value[0]) === 'object' && arrayFields[key]) {
-          newValue = [];
-          value.forEach((element, index) => {
-            newValue[index] = Outbreak.helpers.translateFieldLabels(element, arrayFields[key], dictionary);
-          });
-        } else if (typeof(value) === 'object' && Object.keys(value).length > 0) {
-          newValue = Outbreak.helpers.translateFieldLabels(value, arrayFields[key], dictionary);
-        }
-        translatedFieldsModel[dictionary.getTranslation(app.models[modelName] ? fieldsToTranslate[key] : nonModelObjects[modelName][key])] = newValue;
-      } else {
-        translatedFieldsModel[key] = value;
-      }
-    });
-
-    return translatedFieldsModel;
   };
 };

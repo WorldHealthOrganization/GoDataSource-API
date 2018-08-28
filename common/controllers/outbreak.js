@@ -4009,8 +4009,15 @@ module.exports = function (Outbreak) {
     });
   };
 
-  Outbreak.prototype.caseDossier = function(cases, anonymousFields, options, callback) {
-    const questionnaire = this.labResultsTemplate.toJSON();
+  /**
+   * Build and return a pdf containing a case's information, relationships and lab results (dossier)
+   * @param cases
+   * @param anonymousFields
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.caseDossier = function (cases, anonymousFields, options, callback) {
+    const labResultsQuestionnaire = this.labResultsTemplate.toJSON();
     let questions = [];
     // Get all requested cases, including their relationships and labResults
     this.__get__cases({
@@ -4032,7 +4039,7 @@ module.exports = function (Outbreak) {
           relation: 'labResults'
         }
       ]
-    }, function(error, results) {
+    }, function (error, results) {
       if (error) {
         return callback(error);
       }
@@ -4041,44 +4048,47 @@ module.exports = function (Outbreak) {
       const languageId = options.remotingContext.req.authData.user.languageId;
       let sanitizedCases = [];
 
-      //an array with all the expected dateType fields found in an extended case model (including relationships and labResults)
-      const caseDossierDateFields = ['dob', 'isolationDates.startDate', 'isolationDates.endDate', 'hospitalizationDates.startDate', 'hospitalizationDates.endDate',
-        'incubationDates.startDate', 'incubationDates.endDate', 'addresses.date', 'dateBecomeCase', 'dateDeceased', 'dateOfInfection', 'dateOfOnset', 'dateOfOutcome',
-        'relationships.contactDate', 'relationships.people.dob', 'relationships.people.addresses.date', 'labResults.dateSampleTaken', 'labResults.dateSampleDelivered', 'labResults.dateTesting', 'labResults.dateOfResult'];
+      // An array with all the expected date type fields found in an extended case model (including relationships and labResults)
+      const caseDossierDateFields = ['dob', 'isolationDates[].startDate', 'isolationDates[].endDate', 'hospitalizationDates[].startDate', 'hospitalizationDates[].endDate',
+        'incubationDates[].startDate', 'incubationDates[].endDate', 'addresses[].date', 'dateBecomeCase', 'dateDeceased', 'dateOfInfection', 'dateOfOnset',
+        'dateOfOutcome', 'relationships[].contactDate', 'relationships[].people[].dob', 'relationships[].people[].addresses[].date', 'labResults[].dateSampleTaken',
+        'labResults[].dateSampleDelivered', 'labResults[].dateTesting', 'labResults[].dateOfResult'
+      ];
 
-      //get the language dictionary
+      // Get the language dictionary
       app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
         // handle errors
         if (error) {
           return callback(error);
         }
 
+        // Transform all DB models into JSONs for better handling
+        // We call the variable "person" only because "case" is a javascript reserved word
+        results.forEach((person, caseIndex) => {
+          results[caseIndex] = person.toJSON();
+          // Since relationships is a custom relation, the relationships collection is included differently in the case model,
+          // and not converted by the initial toJSON method.
+          person.relationships.forEach((relationship, relationshipIndex) => {
+            person.relationships[relationshipIndex] = relationship.toJSON();
+            relationship.people.forEach((member, memberIndex) => {
+              relationship.people[memberIndex] = member.toJSON();
+            })
+          })
+        });
+
+        // Replace all foreign keys with readable data
         genericHelpers.resolveModelForeignKeys(app, app.models.case, results, dictionary)
           .then((results) => {
             // transform the model into a simple JSON
             results.forEach((person, caseIndex) => {
-              if(typeof person.toJSON === 'function') {
-                person = person.toJSON();
-
-                // since relationships is a custom relation, the relationships collection is included differently in the case model,
-                // and not converted by the initial toJSON method.
-                person.relationships.forEach((relationship, index) => {
-                  if(typeof relationship.toJSON === 'function') {
-                    person.relationships[index] = relationship.toJSON();
-                  }
-                  relationship.people.forEach((member, index) => {
-                    if (typeof member.toJSON === 'function') {
-                      relationship.people[index] = member.toJSON();
-                    }
-                  });
-                });
-              }
               sanitizedCases[caseIndex] = {};
 
               // Anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
-              // and format date type fields
+              // and formatting date type fields
               app.utils.anonymizeDatasetFields.anonymize(person, anonymousFields);
-              person = app.utils.helpers.prepareFieldsForPrint(person, caseDossierDateFields);
+              app.utils.helpers.formatDateFields(person, caseDossierDateFields);
+              app.utils.helpers.formatUndefinedValues(person);
+
 
               person.relationships.forEach((relationship, relationshipIndex) => {
                 sanitizedCases[caseIndex].relationships = [];
@@ -4088,40 +4098,38 @@ module.exports = function (Outbreak) {
                   return member.id !== person.id;
                 });
 
-                let personType = relationshipMember.type;
+                // Translate the values of the fields marked as reference data fields on the case/contact model
+                app.utils.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models[relationshipMember.type], dictionary);
 
-                if(typeof relationshipMember.toJSON === 'function') {
-                  relationshipMember = relationshipMember.toJSON();
-                }
-
-                // Translate the values of the fields marked as reference data fields
-                Outbreak.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models[personType].modelName, dictionary);
-
-                // Translate the remaining field labels
-                relationshipMember = Outbreak.helpers.translateFieldLabels(relationshipMember, app.models[personType].modelName, dictionary);
-
+                // Assign the person to the relationship to be displayed as part of it
                 relationship.person = relationshipMember;
 
-                Outbreak.helpers.translateDataSetReferenceDataValues(relationship, app.models.relationship.modelName, dictionary);
+                // Translate the values of the fields marked as reference data fields on the relationship model
+                app.utils.helpers.translateDataSetReferenceDataValues(relationship, app.models.relationship, dictionary);
 
-                // Translate all remaining keys
-                relationship = Outbreak.helpers.translateFieldLabels(relationship, app.models.relationship.modelName, dictionary);
+                // Translate all remaining keys of the relationship model
+                relationship = app.utils.helpers.translateFieldLabels(app, relationship, app.models.relationship.modelName, dictionary);
 
+                // Add the sanitized relationship to the object to be printed
                 sanitizedCases[caseIndex].relationships[relationshipIndex] = relationship;
               });
 
               person.labResults.forEach((labResult, labIndex) => {
                 sanitizedCases[caseIndex].labResults = [];
-                Outbreak.helpers.translateDataSetReferenceDataValues(labResult, app.models.labResult.modelName, dictionary);
 
-                questions = Outbreak.helpers.parseTemplateQuestions(questionnaire, dictionary);
+                // Translate the values of the fields marked as reference data fields on the lab result model
+                app.utils.helpers.translateDataSetReferenceDataValues(labResult, app.models.labResult, dictionary);
 
+                // Translate the questions and the answers from the lab results
+                questions = Outbreak.helpers.parseTemplateQuestions(labResultsQuestionnaire, dictionary);
+
+                // Since we are presenting all the answers, mark the one that was selected, for each question
                 Object.keys(labResult.questionnaireAnswers).forEach((key) => {
                   let question = _.find(questions, (question) => {
                     return question.variable === key;
                   });
 
-                  if(question.answers) {
+                  if (question.answers) {
                     question.answers.forEach((answer) => {
                       if (labResult.questionnaireAnswers[key].indexOf(answer.value) !== -1) {
                         answer.selected = true;
@@ -4132,19 +4140,20 @@ module.exports = function (Outbreak) {
                   }
                 });
 
-                labResult = Outbreak.helpers.translateFieldLabels(labResult, app.models.labResult.modelName, dictionary);
+                // Translate the remaining fields on the lab result model
+                labResult = app.utils.helpers.translateFieldLabels(app, labResult, app.models.labResult.modelName, dictionary);
 
-                //Add the questionnaire separately (after field translations) because it will be displayed separately
+                // Add the questionnaire separately (after field translations) because it will be displayed separately
                 labResult.questionnaire = questions;
 
+                // Add the sanitized lab results to the object to be printed
                 sanitizedCases[caseIndex].labResults[labIndex] = labResult;
               });
 
-              Outbreak.helpers.translateDataSetReferenceDataValues(person, app.models.case.modelName, dictionary);
-
               // Translate all remaining keys
-              person  = Outbreak.helpers.translateFieldLabels(person, app.models.case.modelName, dictionary);
+              person = app.utils.helpers.translateFieldLabels(app, person, app.models.case.modelName, dictionary);
 
+              // Add the sanitized case to the object to be printed
               sanitizedCases[caseIndex].data = person;
             });
 
@@ -4163,21 +4172,20 @@ module.exports = function (Outbreak) {
             // set margin top for first page here, to not change the entire createPdfDoc functionality
             doc.moveDown(2);
 
+            // Translate the pdf section titles
             const relationshipsTitle = dictionary.getTranslation('LNG_PAGE_ACTION_RELATIONSHIPS');
             const labResultsTitle = dictionary.getTranslation('LNG_PAGE_LIST_CASE_LAB_RESULTS_TITLE');
             const questionnaireTitle = dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE');
 
-            // add case profile fields (empty)
+            // Print all the data
             sanitizedCases.forEach((sanitizedCase, index) => {
               pdfUtils.displayModelDetails(doc, sanitizedCase.data, true, 'Case Information');
               pdfUtils.displayPersonRelationships(doc, sanitizedCase.relationships, relationshipsTitle);
-              pdfUtils.displayCaseLabResults(doc, sanitizedCase.labResults, labResultsTitle, questionnaireTitle);
+              pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedCase.labResults, labResultsTitle, questionnaireTitle);
               if (index < sanitizedCases.length - 1) {
                 doc.addPage();
               }
             });
-
-            doc.end();
 
             // convert pdf stream to buffer and send it as response
             genericHelpers.streamToBuffer(doc, (err, buffer) => {
@@ -4187,10 +4195,205 @@ module.exports = function (Outbreak) {
                 app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'case_dossier.pdf', callback);
               }
             });
+
+            doc.end();
           });
       });
     });
   };
+
+  /**
+   * Build and return a pdf containing a contact's information, relationships and follow ups (dossier)
+   * @param contacts
+   * @param anonymousFields
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.contactDossier = function (contacts, anonymousFields, options, callback) {
+    const followUpQuestionnaire = this.contactFollowUpTemplate.toJSON();
+    let questions = [];
+    // Get all requested contacts, including their relationships and followUps
+    this.__get__contacts({
+      where: {
+        id: {
+          inq: contacts
+        }
+      },
+      include: [
+        {
+          relation: 'relationships',
+          scope: {
+            include: {
+              relation: 'people'
+            }
+          }
+        },
+        {
+          relation: 'followUps'
+        }
+      ]
+    }, function (error, results) {
+      if (error) {
+        return callback(error);
+      }
+
+      const pdfUtils = app.utils.pdfDoc;
+      const languageId = options.remotingContext.req.authData.user.languageId;
+      let sanitizedContacts = [];
+
+      // An array with all the expected date type fields found in an extended contact model (including relationships and followUps)
+      const contactDossierDateFields = ['dob', 'addresses[].date', 'relationships[].contactDate', 'relationships[].people[].dob',
+        'relationships[].people[].dateBecomeCase', 'relationships[].people[].dateOfInfection', 'relationships[].people[].dateOfOnset',
+        'relationships[].people[].dateOfOutcome', 'relationships[].people[].isolationDates[].startDate', 'relationships[].people[].isolationDates[].endDate',
+        'relationships[].people[].hospitalizationDates[].startDate', 'relationships[].people[].hospitalizationDates[].endDate',
+        'relationships[].people[].incubationDates[].startDate', 'relationships[].people[].incubationDates[].endDate', 'relationships[].people[].addresses[].date',
+        'followUps[].date', 'followUps[].address.date'
+      ];
+
+      // Get the language dictionary
+      app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
+        // handle errors
+        if (error) {
+          return callback(error);
+        }
+
+        // Transform all DB models into JSONs for better handling
+        results.forEach((contact, contactIndex) => {
+          results[contactIndex] = contact.toJSON();
+          // since relationships is a custom relation, the relationships collection is included differently in the case model,
+          // and not converted by the initial toJSON method.
+          contact.relationships.forEach((relationship, relationshipIndex) => {
+            contact.relationships[relationshipIndex] = relationship.toJSON();
+            relationship.people.forEach((member, memberIndex) => {
+              relationship.people[memberIndex] = member.toJSON();
+            })
+          })
+        });
+
+        // Replace all foreign keys with readable data
+        genericHelpers.resolveModelForeignKeys(app, app.models.contact, results, dictionary)
+          .then((results) => {
+            results.forEach((contact, contactIndex) => {
+              sanitizedContacts[contactIndex] = {};
+
+              // Anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
+              // and format date type fields
+              app.utils.anonymizeDatasetFields.anonymize(contact, anonymousFields);
+              app.utils.helpers.formatDateFields(contact, contactDossierDateFields);
+              app.utils.helpers.formatUndefinedValues(contact);
+
+
+              contact.relationships.forEach((relationship, relationshipIndex) => {
+                sanitizedContacts[contactIndex].relationships = [];
+
+                // extract the person with which the contact has a relationship
+                let relationshipMember = _.find(relationship.people, (member) => {
+                  return member.id !== contact.id;
+                });
+
+                // Translate the values of the fields marked as reference data fields on the case/contact model
+                app.utils.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models[relationshipMember.type], dictionary);
+
+                // Assign the person to the relationship to be displayed as part of it
+                relationship.person = relationshipMember;
+
+                // Translate the values of the fields marked as reference data fields on the relationship model
+                app.utils.helpers.translateDataSetReferenceDataValues(relationship, app.models.relationship, dictionary);
+
+                // Translate all remaining keys of the relationship model
+                relationship = app.utils.helpers.translateFieldLabels(app, relationship, app.models.relationship.modelName, dictionary);
+
+                // Add the sanitized relationship to the object to be printed
+                sanitizedContacts[contactIndex].relationships[relationshipIndex] = relationship;
+              });
+
+              contact.followUps.forEach((followUp, followUpIndex) => {
+                sanitizedContacts[contactIndex].followUps = [];
+
+                // Translate the values of the fields marked as reference data fields on the lab result model
+                app.utils.helpers.translateDataSetReferenceDataValues(followUp, app.models.followUp, dictionary);
+
+                // Translate the questions and the answers from the follow up
+                questions = Outbreak.helpers.parseTemplateQuestions(followUpQuestionnaire, dictionary);
+
+                // Since we are presenting all the answers, mark the one that was selected, for each question
+                Object.keys(followUp.questionnaireAnswers).forEach((key) => {
+                  let question = _.find(questions, (question) => {
+                    return question.variable === key;
+                  });
+
+                  if (question.answers) {
+                    question.answers.forEach((answer) => {
+                      if (followUp.questionnaireAnswers[key].indexOf(answer.value) !== -1) {
+                        answer.selected = true;
+                      }
+                    });
+                  } else {
+                    question.value = followUp.questionnaireAnswers[key];
+                  }
+                });
+
+                // Translate the remaining fields on the follow up model
+                followUp = app.utils.helpers.translateFieldLabels(app, followUp, app.models.followUp.modelName, dictionary);
+
+                // Add the questionnaire separately (after field translations) because it will be displayed separately
+                followUp.questionnaire = questions;
+
+                // Add the sanitized follow ups to the object to be printed
+                sanitizedContacts[contactIndex].followUps[followUpIndex] = followUp;
+              });
+
+              // Translate all remaining keys
+              contact = app.utils.helpers.translateFieldLabels(app, contact, app.models.contact.modelName, dictionary);
+
+              // Add the sanitized contact to the object to be printed
+              sanitizedContacts[contactIndex].data = contact;
+            });
+
+            // generate pdf document
+            let doc = pdfUtils.createPdfDoc({
+              fontSize: 11,
+              layout: 'portrait',
+              margin: 20
+            });
+
+            // add a top margin of 2 lines for each page
+            doc.on('pageAdded', () => {
+              doc.moveDown(2);
+            });
+
+            // set margin top for first page here, to not change the entire createPdfDoc functionality
+            doc.moveDown(2);
+
+            const relationshipsTitle = dictionary.getTranslation('LNG_PAGE_ACTION_RELATIONSHIPS');
+            const followUpsTitle = dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE');
+            const followUpQuestionnaireTitle = dictionary.getTranslation('LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE');
+
+            // Print all the data
+            sanitizedContacts.forEach((sanitizedContact, index) => {
+              pdfUtils.displayModelDetails(doc, sanitizedContact.data, true, 'Case Information');
+              pdfUtils.displayPersonRelationships(doc, sanitizedContact.relationships, relationshipsTitle);
+              pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedContact.followUps, followUpsTitle, followUpQuestionnaireTitle);
+              if (index < sanitizedContacts.length - 1) {
+                doc.addPage();
+              }
+            });
+
+            // convert pdf stream to buffer and send it as response
+            genericHelpers.streamToBuffer(doc, (err, buffer) => {
+              if (err) {
+                callback(err);
+              } else {
+                app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'case_dossier.pdf', callback);
+              }
+            });
+
+            doc.end();
+          });
+      });
+    });
+  };
+
 
   /**
    * Count the total number of contacts per location; Include counters for contacts under follow-up, contacts seen on date, contacts released as well as date for expected release of last contact

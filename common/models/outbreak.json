@@ -3461,9 +3461,14 @@
     "prototype.contactDossier": {
       "accepts": [
         {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "arg": "contacts",
+          "type": ["string"],
+          "description": "Array of contacts for which the dossiers will be generated"
+        },
+        {
+          "arg": "data",
+          "type": ["string"],
+          "description": "Array of fields to be anonymized"
         },
         {
           "arg": "options",

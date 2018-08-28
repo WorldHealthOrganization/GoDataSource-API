@@ -11,6 +11,26 @@ const pdfDoc = require('./pdfDoc');
 const streamUtils = require('./streamUtils');
 const async = require('async');
 
+const arrayFields = {
+  'addresses': 'address',
+  'address': 'address',
+  'documents': 'document',
+  'hospitalizationDates': 'dateRange',
+  'incubationDates': 'dateRange',
+  'isolationDates': 'dateRange',
+  'person': 'person',
+  'labResults': 'labResult',
+  'relationships': 'relationship',
+  'geoLocation': 'geolocation'
+};
+
+const nonModelObjects = {
+  geolocation: {
+    lat: 'LNG_LATITUDE',
+    lng: 'LNG_LONGITUDE'
+  }
+};
+
 /**
  * Convert a Date object into moment UTC date and reset time to start of the day
  * Additionally if dayOfWeek is sent the function will return the date for the date's corresponding day of the week
@@ -426,7 +446,7 @@ const getReferencedValue = function (data, path) {
     const arrayPath = path.substring(0, arrayMarkerPosition);
     // get remaining part
     const remainingPath = path.substring(arrayMarkerPosition + 3);
-    // go trough the array
+    // go through the array
     _.get(data, arrayPath, []).forEach(function (dataItem, index) {
       // if there still is a path left
       if (remainingPath) {
@@ -524,7 +544,7 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
 
       // also resolve reference data if needed
       if (resolveReferenceData) {
-        resolveModelReferenceData(result, Model, languageDictionary);
+        translateDataSetReferenceDataValues(result, Model, languageDictionary);
       }
     });
 
@@ -658,29 +678,6 @@ const getDateDisplayValue = function (dateString) {
 };
 
 /**
- * Resolve reference data fields;
- * Note: The model instance JSON sent is updated
- * @param modelInstanceJSON JSON representation of a model instance
- * @param Model
- * @param languageDictionary
- */
-const resolveModelReferenceData = function (modelInstanceJSON, Model, languageDictionary) {
-  if (Model.referenceDataFields) {
-    // for the fields that use reference data
-    Model.referenceDataFields.forEach(function (field) {
-      let fieldValue = getReferencedValue(modelInstanceJSON, field);
-
-      // reference data field might be in an array; for that case we need to translate each array value
-      if (Array.isArray(fieldValue)) {
-        fieldValue.forEach(retrievedValue => _.set(modelInstanceJSON, retrievedValue.exactPath, languageDictionary.getTranslation(retrievedValue.value)));
-      } else if (fieldValue.value) {
-        _.set(modelInstanceJSON, fieldValue.exactPath, languageDictionary.getTranslation(fieldValue.value));
-      }
-    });
-  }
-};
-
-/**
  * Parse fields values
  * Note: The model instance JSON sent is updated
  * @param modelInstanceJSON JSON representation of a model instance
@@ -703,38 +700,112 @@ const parseModelFieldValues = function (modelInstanceJSON, Model) {
 };
 
 /**
- * Prepare a models fields for printing. So far, this means eliminating undefined values and formatting dates
+ * Format all the marked date type fields on the model
  * @param model
  * @param dateFieldsList
  * @returns {Object}
  */
-const prepareFieldsForPrint = function (model, dateFieldsList) {
+const formatDateFields = function (model, dateFieldsList) {
 
   // Format date fields
   dateFieldsList.forEach((field) => {
-    if(field.indexOf('.') === -1) {
-      if (_.get(model, field)) {
-        _.set(model, field, new Date(_.get(model, field)).toISOString());
-      }
+    let reference = getReferencedValue(model, field);
+    if (Array.isArray(reference)) {
+      reference.forEach((indicator) => {
+        _.set(model, indicator.exactPath, indicator.value ? getDateDisplayValue(indicator.value) : ' ');
+      })
     } else {
-      // separate the string into the name of the array type property and the name the field that needs to be translated
-      let mainKey = field.split('.')[0];
-      let subKey = field.split('.').slice(1).join('.');
-      // translate the field from each element of the array type property
-      model[mainKey].forEach((element) => {
-        prepareFieldsForPrint(element, [subKey]);
+      _.set(model, reference.exactPath, reference.value ? getDateDisplayValue(reference.value) : ' ');
+    }
+  });
+};
+
+/**
+ * Format all undefined fields on the model
+ * @param model
+ */
+const formatUndefinedValues = function (model) {
+  Object.keys(model).forEach((key) => {
+    if (Array.isArray(model[key])) {
+      model[key].forEach((child) => {
+        formatUndefinedValues(child);
+      })
+    } else if (typeof(model[key]) === 'object') {
+      formatUndefinedValues(model[key]);
+    } else if (model[key] === undefined) {
+      _.set(model, key, ' ');
+    }
+  })
+};
+
+/**
+ * Translate all marked referenceData fields of a dataSet
+ * @param dataSet
+ * @param Model
+ * @param dictionary
+ */
+const translateDataSetReferenceDataValues = function (dataSet, Model, dictionary) {
+  if (Model.referenceDataFields) {
+    let dataSetIsObject = false;
+    if (!Array.isArray(dataSet)) {
+      dataSet = [dataSet];
+      dataSetIsObject = true;
+    }
+
+    dataSet.forEach((model) => {
+      Model.referenceDataFields.forEach((field) => {
+        let reference = getReferencedValue(model, field);
+        if (Array.isArray(reference)) {
+          reference.forEach((indicator) => {
+            _.set(model, indicator.exactPath, indicator.value ? dictionary.getTranslation(indicator.value) : ' ');
+          })
+        } else {
+          _.set(model, reference.exactPath, reference.value ? dictionary.getTranslation(reference.value) : ' ');
+        }
       });
+    });
+
+    if (dataSetIsObject) {
+      dataSet = dataSet[0];
+    }
+  }
+};
+
+/**
+ * Translate all marked field labels of a model
+ * @param modelName
+ * @param model
+ * @param dictionary
+ */
+const translateFieldLabels = function (app, model, modelName, dictionary) {
+  let fieldsToTranslate = {};
+  if (!app.models[modelName]) {
+    fieldsToTranslate = nonModelObjects[modelName];
+  } else {
+    fieldsToTranslate = Object.assign(app.models[modelName].fieldLabelsMap, app.models[modelName].relatedFieldLabelsMap);
+    model = _.pick(model, app.models[modelName].printFieldsinOrder);
+  }
+
+  let translatedFieldsModel = {};
+  Object.keys(model).forEach(function (key) {
+    let value = model[key];
+    let newValue = value;
+    if (fieldsToTranslate && fieldsToTranslate[key]) {
+      if (Array.isArray(value) && value.length && typeof(value[0]) === 'object' && arrayFields[key]) {
+        newValue = [];
+        value.forEach((element, index) => {
+          newValue[index] = translateFieldLabels(app, element, arrayFields[key], dictionary);
+        });
+      } else if (typeof(value) === 'object' && Object.keys(value).length > 0) {
+        newValue = translateFieldLabels(app, value, arrayFields[key], dictionary);
+      }
+      translatedFieldsModel[dictionary.getTranslation(app.models[modelName] ? fieldsToTranslate[key] : nonModelObjects[modelName][key])] = newValue;
+    } else {
+      translatedFieldsModel[key] = value;
     }
   });
 
-  // Sanitize undefined fields
-  return _.mapValues(model, (value) => {
-    if (value === undefined) {
-      return ' ';
-    } else {
-      return value;
-    }
-  });
+  return translatedFieldsModel;
 };
 
 module.exports = {
@@ -751,7 +822,9 @@ module.exports = {
   resolveModelForeignKeys: resolveModelForeignKeys,
   getFlatObject: getFlatObject,
   getDateDisplayValue: getDateDisplayValue,
-  resolveModelReferenceData: resolveModelReferenceData,
   parseModelFieldValues: parseModelFieldValues,
-  prepareFieldsForPrint: prepareFieldsForPrint
+  formatDateFields: formatDateFields,
+  formatUndefinedValues: formatUndefinedValues,
+  translateDataSetReferenceDataValues: translateDataSetReferenceDataValues,
+  translateFieldLabels: translateFieldLabels
 };

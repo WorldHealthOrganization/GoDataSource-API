@@ -81,6 +81,18 @@ module.exports = function (Contact) {
     'addresses[].locationId': {
       modelName: 'location',
       useProperty: 'name'
+    },
+    'relationships[].people[].addresses[].locationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'followUps[].address.locationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'followUps[].teamId': {
+      modelName: 'team',
+      useProperty: 'name'
     }
   };
 

@@ -222,6 +222,7 @@ const createImageDoc = function (imageData, imageType, splitFactor, callback) {
               done();
             }
           }
+
           // write images to pdf
           writeImageToPage(function (error) {
             if (error) {
@@ -233,7 +234,7 @@ const createImageDoc = function (imageData, imageType, splitFactor, callback) {
         });
     } else {
       // fit the image to page (page dimensions - margins)
-      document.image(buffer, 50, 50, { fit: [imageSize.width, imageSize.height] });
+      document.image(buffer, 50, 50, {fit: [imageSize.width, imageSize.height]});
       // finalize document
       document.end();
     }
@@ -278,7 +279,7 @@ const createQuestionnaire = function (doc, questions, withData, title) {
       // answers type are written differently into the doc
       switch (item.answerType) {
         case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT':
-          if(withData) {
+          if (withData) {
             doc.moveDown().text('Answer: ' + item.value, isNested ? initialXMargin + 60 : initialXMargin + 20);
           } else {
             doc.moveDown().text(`Answer: ${'_'.repeat(25)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
@@ -289,7 +290,7 @@ const createQuestionnaire = function (doc, questions, withData, title) {
           item.answers.forEach((answer) => {
             doc.moveDown().text(answer.label, isNested ? initialXMargin + 85 : initialXMargin + 45);
             // we need to reduce rectangle height to be on the same height as the text
-            if(withData && answer.selected) {
+            if (withData && answer.selected) {
               doc.moveUp()
                 .rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3, 15, 15)
                 .moveTo(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3)
@@ -336,9 +337,7 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
   }
 
   // cache initial document margin
-  if (!initialXMargin) {
-    var initialXMargin = doc.x;
-  }
+  const initialXMargin = doc.x;
 
   // display each field on a row
   Object.keys(model).forEach((fieldName) => {
@@ -426,15 +425,15 @@ const displayPersonRelationships = function (doc, relationships, title) {
 /**
  * Display a case's lab results
  * @param doc
- * @param labResults
+ * @param sections
  * @param title
  */
-const displayCaseLabResults = function (doc, labResults, title, questionnaireTitle) {
-  labResults.forEach((labResult, index) => {
+const displayPersonSectionsWithQuestionnaire = function (doc, sections, title, questionnaireTitle) {
+  sections.forEach((section, index) => {
     doc.addPage();
-    displayModelDetails(doc, _.omit(labResult, 'questionnaire'), true, index === 0 ? title : null);
+    displayModelDetails(doc, _.omit(section, 'questionnaire'), true, index === 0 ? title : null);
     doc.addPage();
-    createQuestionnaire(doc, labResult.questionnaire, true, questionnaireTitle);
+    createQuestionnaire(doc, section.questionnaire, true, questionnaireTitle);
   });
 };
 
@@ -517,7 +516,7 @@ module.exports = {
   createQuestionnaire: createQuestionnaire,
   displayModelDetails: displayModelDetails,
   displayPersonRelationships: displayPersonRelationships,
-  displayCaseLabResults: displayCaseLabResults,
+  displayPersonSectionsWithQuestionnaire: displayPersonSectionsWithQuestionnaire,
   createTableInPDFDocument: createTableInPDFDocument,
   addTitle: addTitle
 };
