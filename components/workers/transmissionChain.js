@@ -284,6 +284,64 @@ const worker = {
         activeChainsCount: activeChainsLength
       };
     } else {
+
+      // keep a map of edges (person:person) to edge data to easily locate edge (relation) data for transmission chain edges
+      const edgesMap = {};
+      // go through all edges
+      Object.keys(edges).forEach(function (edgeId) {
+        const edge = edges[edgeId];
+        if (!edgesMap[`${edge.persons[0].id}:${edge.persons[1].id}`]) {
+          // map them using a double index (person1:person2 & person2:person1) to locate the data regardless of how the edge is built
+          edgesMap[`${edge.persons[0].id}:${edge.persons[1].id}`] =
+            edgesMap[`${edge.persons[1].id}:${edge.persons[0].id}`] = [];
+        }
+        edgesMap[`${edge.persons[0].id}:${edge.persons[1].id}`].push(edge);
+      });
+
+      // go through the chains list
+      _chains.chains.forEach(function (chain) {
+        // go through all edges of a chain
+        chain.chain.forEach(function (edge) {
+          // get edge data
+          edgesMap[`${edge[0]}:${edge[1]}`].forEach(function (edgeData) {
+            // get contact date
+            const contactDate = new Date(edgeData.contactDate);
+            // keep a flag for changing data (to know when to re-calculate duration)
+            let hadChanges = false;
+            // start building period
+            if (!chain.period) {
+              // mark this as a change
+              hadChanges = true;
+              // start with first contact date
+              chain.period = {
+                startDate: contactDate,
+                endDate: contactDate,
+                duration: 0
+              };
+            }
+            // if the contact date is earlier the current start date
+            if (chain.period.startDate > contactDate) {
+              // mark this as a change
+              hadChanges = true;
+              // change current start date with the contact date
+              chain.period.startDate = contactDate;
+            }
+            // if the contact date is later than current end date
+            if (chain.period.endDate < contactDate) {
+              // mark this as a change
+              hadChanges = true;
+              // change current end date with the contact date
+              chain.period.endDate = contactDate;
+            }
+            // if there were changes
+            if (hadChanges) {
+              // re-calculate duration (in days)
+              chain.period.duration = Math.round((chain.period.endDate.getTime() - chain.period.startDate.getTime()) / 86400000);
+            }
+          });
+        });
+      });
+
       // return info about nodes, edges and the actual chains
       result = {
         nodes: nodes,

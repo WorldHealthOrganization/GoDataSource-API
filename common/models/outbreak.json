@@ -2147,6 +2147,13 @@
                       "chain": [
                         "string"
                       ],
+                      "period": {
+                        "type": {
+                          "startDate": "date",
+                          "endDate": "date",
+                          "duration": "number"
+                        }
+                      },
                       "active": "boolean"
                     }
                   }
@@ -2435,6 +2442,13 @@
                       "chain": [
                         "string"
                       ],
+                      "period": {
+                        "type": {
+                          "startDate": "date",
+                          "endDate": "date",
+                          "duration": "number"
+                        }
+                      },
                       "active": "boolean"
                     }
                   }
