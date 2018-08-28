@@ -172,7 +172,8 @@ const restoreBackupFromFile = function (filePath, done) {
 
                       // insert all entries from the file in the collection
                       collectionRecords.forEach((record) => {
-                        bulk.insert(record);                      });
+                        bulk.insert(record);
+                      });
 
                       // execute the bulk operations
                       bulk.execute((err) => {

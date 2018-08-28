@@ -45,7 +45,7 @@ const routines = {
       return console.error('No valid script name passed. Use -- script=<scriptName> to specify a script');
     }
     script = script.pop();
-    console.log(`Running install script ${script}`);
+    console.log(`Running install script ${script}`);w
     [
       require(`./scripts/${script}`)
     ].forEach(function (installScript) {
