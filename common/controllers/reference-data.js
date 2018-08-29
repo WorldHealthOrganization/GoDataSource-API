@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const referenceDataParser = require('./../../components/referenceDataParser');
+const async = require('async');
 
 module.exports = function (ReferenceData) {
 

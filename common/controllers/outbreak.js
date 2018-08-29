@@ -4641,6 +4641,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.importImportableReferenceDataFileUsingMap = function (body, options, callback) {
+    const self = this;
     // treat the sync as a regular operation, not really a sync
     options._sync = false;
     // get importable file
@@ -4666,6 +4667,8 @@ module.exports = function (Outbreak) {
           // go through all entries
           referenceDataList.forEach(function (referenceDataItem, index) {
             syncReferenceData.push(function (callback) {
+              // add outbreak id
+              referenceDataItem.outbreakId = self.id;
               // sync reference data
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.referenceData, referenceDataItem, options)
                 .then(function (syncResult) {
