@@ -186,9 +186,20 @@ module.exports = function (Model) {
           instance.isValid = function (callback) {
             callback(true);
           };
+
+          // initialize props to be updated
+          let props = {
+            [deletedFlag]: true,
+          };
+
+          // update the deletedAt property only if the action is not a sync or the property is missing from the instance
+          if(!hasOptions || !options._sync || !instance[deletedAt]) {
+            props[deletedAt] = new Date();
+          }
+
           return instance
           // sending additional options in order to have access to the remoting context in the next hooks
-            .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()}, hasOptions ? options : {})
+            .updateAttributes(props, hasOptions ? options : {})
             .then(function () {
               return {count: 1};
             });
@@ -233,9 +244,20 @@ module.exports = function (Model) {
     this.isValid = function (callback) {
       callback(true);
     };
+
+    // initialize properties that need to be updated on delete
+    let props = {
+      [deletedFlag]: true
+    };
+
+    // update the deletedAt property only if the action is not a sync or the property is missing from the instance
+    if(!hasOptions || !options._sync || !this[deletedAt]) {
+      props[deletedAt] = new Date();
+    }
+
     const promise = this
     // sending additional options in order to have access to the remoting context in the next hooks
-      .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()}, hasOptions ? options : {})
+      .updateAttributes(props, hasOptions ? options : {})
       .then(function () {
         return {count: 1};
       })

@@ -4,6 +4,7 @@ const fs = require('fs');
 const formidable = require('formidable');
 const app = require('../../server/server');
 const dbSync = require('../../components/dbSync');
+const _ = require('lodash');
 
 module.exports = function (Sync) {
   /**
@@ -236,7 +237,7 @@ module.exports = function (Sync) {
 
         // continue sync
         // get available outbreakIDs for the client
-        return Sync.getAvailableOutbreaksIDs(upstreamServerEntry);
+        return Sync.getAvailableOutbreaksIDs(upstreamServerEntry, syncLogEntry);
       })
       .then(function (outbreakIDs) {
         app.logger.debug(`Sync ${syncLogEntry.id}: Sync will be done for ${outbreakIDs.length ? ('the following outbreaks: ' + outbreakIDs.join(', ')) : 'all the outbreaks in the system'}`);
@@ -256,11 +257,11 @@ module.exports = function (Sync) {
           .then(function (lastSyncLogEntry) {
             if (!lastSyncLogEntry) {
               // there was no sync done with the upstream server; will sync all data from the DB
-              app.logger.debug(`Sync ${syncLogEntry.id}: No sync log was found for the upstream server with URL '${upstreamServerEntry.url}'. Syncing all data from the DB.`);
+              app.logger.debug(`Sync ${syncLogEntry.id}: No successful sync was found for the upstream server with URL '${upstreamServerEntry.url}'. Syncing all data from the DB.`);
             } else {
               // get date from which we will sync the data
               syncLogEntry.syncInformationStartDate = lastSyncLogEntry.syncProcessStartDate;
-              app.logger.debug(`Sync ${syncLogEntry.id}: Latest sync with the upstream server (${upstreamServerEntry.url}) was done on '${new Date(syncLogEntry.syncInformationStartDate).toISOString()}'. Syncing data from that date onwards`);
+              app.logger.debug(`Sync ${syncLogEntry.id}: Latest successful sync with the upstream server (${upstreamServerEntry.url}) was done on '${new Date(syncLogEntry.syncInformationStartDate).toISOString()}'. Syncing data from that date onwards`);
             }
 
             // save added details in the sync log entry
@@ -316,10 +317,13 @@ module.exports = function (Sync) {
       })
       .then(function (exportedDBFileName) {
         // 2: send DB to be synced on the upstream server
-        // get available outbreakIDs for the client
-        return Sync.sendDBSnapshotForImport(upstreamServerEntry, exportedDBFileName);
+        return Sync.sendDBSnapshotForImport(upstreamServerEntry, exportedDBFileName, true, syncLogEntry);
       })
-      .then(function (serverSyncLogEntryId) {
+      .then(function () {
+        // 3: get DB from the upstream server
+        return Sync.getDBSnapshotFromUpstreamServer(upstreamServerEntry, true, syncLogEntry);
+      })
+      .then(function(dbSnapshotFileName) {
         let x = 2;
       })
       .catch(function (err) {

@@ -162,5 +162,9 @@
   "UPSTREAM_SERVER_SYNC_DISABLED": {
     "defaultStatusCode": 422,
     "messagePattern": "Sync with upstream server `<%= upstreamServerName %>` is disabled"
+  },
+  "UPSTREAM_SERVER_SYNC_FAILED": {
+    "defaultStatusCode": 424,
+    "messagePattern": "Sync with upstream server `<%= upstreamServerName %>` failed"
   }
 }

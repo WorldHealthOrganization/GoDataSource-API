@@ -211,16 +211,15 @@ const syncRecord = function (logger, model, record, options, done) {
             record.deleted === 1
           )
         ) {
-          // remove deleted markers
+          // remove deleted flag; keeping deletedAt property as we need to not change it when the model is destroyed
           delete record.deleted;
-          delete record.deletedAt;
           // make sure the record is up to date
           return dbRecord
             .updateAttributes(record, options)
             .then(function (dbRecord) {
               // then destroy the record
               return dbRecord
-                .destroy(record)
+                .destroy(options)
                 .then(function () {
                   // get the record from the db to send it back
                   return model

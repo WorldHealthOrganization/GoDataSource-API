@@ -91,16 +91,28 @@ module.exports = function (Model) {
   });
 
   Model.observe('before save', function (context, next) {
+    // normalize context options
+    context.options = context.options || {};
+    // get user information
     let user = getUserContextInformation(context);
     if (context.instance) {
       if (context.isNewInstance) {
-        context.instance.createdAt = new Date();
+        // update createdAt property if it's not a sync or the property is missing from the instance
+        if (!context.options._sync || !context.instance.createdAt) {
+          context.instance.createdAt = new Date();
+        }
         context.instance.createdBy = user.id;
       }
-      context.instance.updatedAt = new Date();
+      // update updatedAt property if it's not a sync or the property is missing from the instance
+      if (!context.options._sync || !context.instance.updatedAt) {
+        context.instance.updatedAt = new Date();
+      }
       context.instance.updatedBy = user.id;
     } else {
-      context.data.updatedAt = new Date();
+      // update updatedAt property if it's not a sync or the property is missing from the instance
+      if (!context.options._sync || !context.instance.updatedAt) {
+        context.data.updatedAt = new Date();
+      }
       context.data.updatedBy = user.id;
     }
     return next();

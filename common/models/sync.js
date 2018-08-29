@@ -9,6 +9,7 @@ const dbSync = require('../../components/dbSync');
 const AdmZip = require('adm-zip');
 const request = require('request-promise-native');
 const SyncClient = require('../../components/syncClient');
+const asyncActionsSettings = require('../../server/config.json').asyncActionsSettings;
 
 module.exports = function (Sync) {
   Sync.hasController = true;
@@ -206,7 +207,7 @@ module.exports = function (Sync) {
                         collectionRecord.id = collectionRecord._id;
 
                         // if needed for the collection, check for collectionRecord outbreakId
-                        if(outbreakIDs.length &&
+                        if (outbreakIDs.length &&
                           dbSync.collectionsImportFilterMap[collectionName] &&
                           !dbSync.collectionsImportFilterMap[collectionName](collectionName, collectionRecord, outbreakIDs)) {
                           app.logger.debug(`Sync ${syncLogEntry.id}: Skipped syncing record (collection: ${collectionName}, id: ${collectionRecord.id}) as it's outbreak ID is not accepted`);
@@ -256,9 +257,10 @@ module.exports = function (Sync) {
   /**
    * Retrieve the available outbreaks IDs from the upstream server
    * @param upstreamServer
+   * @param syncLogEntry
    */
-  Sync.getAvailableOutbreaksIDs = function (upstreamServer) {
-    let client = new SyncClient(upstreamServer);
+  Sync.getAvailableOutbreaksIDs = function (upstreamServer, syncLogEntry) {
+    let client = new SyncClient(upstreamServer, syncLogEntry);
     return client.getAvailableOutbreaks();
   };
 
@@ -266,9 +268,148 @@ module.exports = function (Sync) {
    * Send database to server for import
    * @param upstreamServer
    * @param DBSnapshotFileName
+   * @param asynchronous Flag to specify to the server whether the import should be done sync/async
+   * @param syncLogEntry
    */
-  Sync.sendDBSnapshotForImport = function (upstreamServer, DBSnapshotFileName) {
-    let client = new SyncClient(upstreamServer);
-    return client.sendDBSnapshotForImport(DBSnapshotFileName);
+  Sync.sendDBSnapshotForImport = function (upstreamServer, DBSnapshotFileName, asynchronous, syncLogEntry) {
+    // asynchronous flag needs to be parsed to string as this is how it is needed for the request
+    if (typeof asynchronous !== 'string') {
+      // if boolean was sent recognize it and parse it to string
+      asynchronous = asynchronous === true ? 'true' : 'false';
+    }
+
+    // get client to upstream server
+    let client = new SyncClient(upstreamServer, syncLogEntry);
+
+    // depending on the asynchronous flag we need to return directly the response or wait do checks to see if the import was successful
+    if (asynchronous === 'true') {
+      // import is async
+      app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import is being done in async mode`);
+      return client.sendDBSnapshotForImport(DBSnapshotFileName, asynchronous)
+        .then(function (syncLogId) {
+          app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import: received upstream server sync log id: ${syncLogId}`);
+          // import started and syncLog entry was created
+          // need to check at defined intervals the syncLog entry status
+          // checking until a defined period passes
+          return new Promise(function (resolve, reject) {
+            app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import: Checking upstream server sync status for ${asyncActionsSettings.actionTimeout} milliseconds at an interval of ${asyncActionsSettings.intervalTimeout} milliseconds`);
+            let totalActionsTimeout, actionTimeout;
+            // create timeout until to check for sync log entry status
+            totalActionsTimeout = setTimeout(function () {
+              // timeout is reached and the import action was not finished
+              app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import failed. Upstream server sync status was not updated in time (${asyncActionsSettings.actionTimeout} milliseconds)`);
+
+              // clear action timeout
+              clearTimeout(actionTimeout);
+
+              // return error
+              reject(app.utils.apiError.getError('UPSTREAM_SERVER_SYNC_FAILED', {
+                upstreamServerName: client.upstreamServerName,
+                failReason: `Upstream server sync status was not updated in time (${asyncActionsSettings.actionTimeout} milliseconds)`
+              }));
+            }, asyncActionsSettings.actionTimeout);
+
+            // get syncLog entry to check status
+            function getSyncLogEntry() {
+              client.getSyncLogEntry(syncLogId)
+                .then(function (syncLogEntry) {
+                  // check syncStatus
+                  if (syncLogEntry.syncStatus === 'LNG_SYNC_STATUS_IN_PROGRESS') {
+                    // upstream server import is in progress; nothing to do
+                    app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import is in progress`);
+                    // check again after the interval has passed
+                    actionTimeout = setTimeout(getSyncLogEntry, asyncActionsSettings.intervalTimeout);
+                    return;
+                  }
+
+                  if (syncLogEntry.syncStatus === 'LNG_SYNC_STATUS_FAILED') {
+                    // upstream server import failed
+                    app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import failed: upstream server sync status is 'failed'. Fail reason ${syncLogEntry.failReason}`);
+                    reject(app.utils.apiError.getError('UPSTREAM_SERVER_SYNC_FAILED', {
+                      upstreamServerName: client.upstreamServerName,
+                      failReason: syncLogEntry.failReason
+                    }));
+                  } else {
+                    // upstream server import success
+                    app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import success`);
+                    resolve(syncLogId);
+                  }
+
+                  // clear totalActions timeout
+                  clearTimeout(totalActionsTimeout);
+                })
+                .catch(function (err) {
+                  // syncLogEntry couldn't be retrieved; log error; will retry on the next interval
+                  app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import: Couldn't check upstream server sync status. Retrying after the next interval. Error ${err}`);
+                  // check again after the interval has passed
+                  actionTimeout = setTimeout(getSyncLogEntry, asyncActionsSettings.intervalTimeout);
+                });
+            }
+
+            // start upstream server sync log status checks
+            actionTimeout = setTimeout(getSyncLogEntry, asyncActionsSettings.intervalTimeout);
+          });
+        });
+    } else {
+      // import is sync; nothing else to do
+      app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import is being done in sync mode`);
+      return client.sendDBSnapshotForImport(DBSnapshotFileName, asynchronous)
+        .then(function (syncLogId) {
+          app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import success. Received upstream server sync log id: ${syncLogId}`);
+          return syncLogId;
+        });
+    }
+  };
+
+  /**
+   * Get database from server
+   * @param upstreamServer
+   * @param asynchronous Flag to specify to the server whether the import should be done sync/async
+   * @param syncLogEntry
+   */
+  Sync.getDBSnapshotFromUpstreamServer = function (upstreamServer, asynchronous, syncLogEntry) {
+    if (typeof asynchronous !== 'boolean') {
+      asynchronous = false;
+    }
+
+    // get client to upstream server
+    let client = new SyncClient(upstreamServer, syncLogEntry);
+
+    // initialize filter for DB snapshot export
+    let filter = {
+      where: {
+        exclude: [
+          'systemSettings',
+          'team',
+          'user',
+          'role'
+        ]
+      }
+    };
+
+    // get data from date
+    if (syncLogEntry.syncInformationStartDate) {
+      filter.where.fromDate = syncLogEntry.syncInformationStartDate;
+    }
+
+    // depending on the asynchronous flag we need to return directly the response or wait do checks to see if the export was successful
+    if (asynchronous === 'true') {
+      // export is async
+      // TODO Use backup functionality to do the export async
+      app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export is being done in sync mode`);
+      return client.getDatabaseSnapshot(filter, asynchronous)
+        .then(function (dbSnapshotFileName) {
+          app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export success. DB snapshot saved at: ${dbSnapshotFileName}`);
+          return dbSnapshotFileName;
+        });
+    } else {
+      // export is sync; nothing else to do
+      app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export is being done in sync mode`);
+      return client.getDatabaseSnapshot(filter, asynchronous)
+        .then(function (dbSnapshotFileName) {
+          app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export success. DB snapshot saved at: ${dbSnapshotFileName}`);
+          return dbSnapshotFileName;
+        });
+    }
   };
 };
