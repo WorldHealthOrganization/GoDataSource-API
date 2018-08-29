@@ -4640,7 +4640,7 @@ module.exports = function (Outbreak) {
    * @param options
    * @param callback
    */
-  Outbreak.importImportableReferenceDataFileUsingMap = function (body, options, callback) {
+  Outbreak.prototype.importImportableReferenceDataFileUsingMap = function (body, options, callback) {
     // treat the sync as a regular operation, not really a sync
     options._sync = false;
     // get importable file
