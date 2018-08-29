@@ -4072,8 +4072,8 @@ module.exports = function (Outbreak) {
             person.relationships[relationshipIndex] = relationship.toJSON();
             relationship.people.forEach((member, memberIndex) => {
               relationship.people[memberIndex] = member.toJSON();
-            })
-          })
+            });
+          });
         });
 
         // Replace all foreign keys with readable data
@@ -4266,8 +4266,8 @@ module.exports = function (Outbreak) {
             contact.relationships[relationshipIndex] = relationship.toJSON();
             relationship.people.forEach((member, memberIndex) => {
               relationship.people[memberIndex] = member.toJSON();
-            })
-          })
+            });
+          });
         });
 
         // Replace all foreign keys with readable data

@@ -713,7 +713,7 @@ const formatDateFields = function (model, dateFieldsList) {
     if (Array.isArray(reference)) {
       reference.forEach((indicator) => {
         _.set(model, indicator.exactPath, indicator.value ? getDateDisplayValue(indicator.value) : ' ');
-      })
+      });
     } else {
       _.set(model, reference.exactPath, reference.value ? getDateDisplayValue(reference.value) : ' ');
     }
@@ -729,13 +729,13 @@ const formatUndefinedValues = function (model) {
     if (Array.isArray(model[key])) {
       model[key].forEach((child) => {
         formatUndefinedValues(child);
-      })
+      });
     } else if (typeof(model[key]) === 'object') {
       formatUndefinedValues(model[key]);
     } else if (model[key] === undefined) {
       _.set(model, key, ' ');
     }
-  })
+  });
 };
 
 /**
@@ -758,7 +758,7 @@ const translateDataSetReferenceDataValues = function (dataSet, Model, dictionary
         if (Array.isArray(reference)) {
           reference.forEach((indicator) => {
             _.set(model, indicator.exactPath, indicator.value ? dictionary.getTranslation(indicator.value) : ' ');
-          })
+          });
         } else {
           _.set(model, reference.exactPath, reference.value ? dictionary.getTranslation(reference.value) : ' ');
         }
