@@ -360,7 +360,7 @@ module.exports = function (ReferenceData) {
     }
 
     // new record
-    if (context.instance.categoryId && context.instance.value) {
+    if (!context.currentInstance && context.instance.categoryId && context.instance.value) {
       // start building identifier
       let identifier = '';
       // if this belongs to an outbreak
