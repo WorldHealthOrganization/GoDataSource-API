@@ -359,6 +359,23 @@ module.exports = function (ImportableFile) {
                   .catch(callback);
               });
             }
+
+            // reference data has categoryId as a 'reference data' type but is not related to other reference data, it is reference data
+            if (modelName === app.models.referenceData.modelName) {
+              steps.push(function (callback) {
+                // get distinct column values (if not taken already) (to map categoyId)
+                if (!Object.keys(result.distinctFileColumnValues).length) {
+                  result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
+                }
+                // add categoryId as a reference data item
+                results[modelName] = Object.assign({}, results[modelName], {
+                  modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, {
+                    categoryId: app.models.referenceData.availableCategories
+                  })
+                });
+                callback();
+              });
+            }
           }
         });
 

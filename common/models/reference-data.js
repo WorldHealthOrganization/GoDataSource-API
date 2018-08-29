@@ -138,6 +138,16 @@ module.exports = function (ReferenceData) {
     }
   ];
 
+  // map language token labels for model properties
+  ReferenceData.fieldLabelsMap = Object.assign({}, ReferenceData.fieldLabelsMap, {
+    'categoryId': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CATEGORY_ID',
+    'value': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_VALUE',
+    'description': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_DESCRIPTION',
+    'icon': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ICON',
+    'color': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_COLOR',
+    'active': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ACTIVE',
+  });
+
   /**
    * Keep a list of places where reference data might be used so we can safely delete a record
    */

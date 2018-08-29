@@ -137,6 +137,26 @@ module.exports = function (ReferenceData) {
    * @param callback
    */
   ReferenceData.exportFilteredReferenceData = function (filter, exportType, options, callback) {
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, filter, exportType, 'Reference Data', null, [], options, null, callback);
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, filter, exportType, 'Reference Data', null, [], options, null, function (results) {
+      // translate value and description fields
+      return new Promise(function (resolve, reject) {
+        // load context user
+        const contextUser = app.utils.remote.getUserFromOptions(options);
+        // load user language dictionary
+        app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+          // handle errors
+          if (error) {
+            return reject(error);
+          }
+          // go through all results
+          results.forEach(function (result) {
+            // translate value and description
+            result.value = dictionary.getTranslation(result.value);
+            result.description = dictionary.getTranslation(result.description);
+          });
+          resolve(results);
+        });
+      });
+    }, callback);
   };
 };

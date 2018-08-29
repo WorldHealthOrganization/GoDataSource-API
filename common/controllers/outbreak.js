@@ -4611,6 +4611,108 @@ module.exports = function (Outbreak) {
         }
       },
       filter || {});
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, _filters, exportType, 'Reference Data', null, [], options, null, callback);
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, _filters, exportType, 'Reference Data', null, [], options, null, function (results) {
+      // translate value and description fields
+      return new Promise(function (resolve, reject) {
+        // load context user
+        const contextUser = app.utils.remote.getUserFromOptions(options);
+        // load user language dictionary
+        app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+          // handle errors
+          if (error) {
+            return reject(error);
+          }
+          // go trough all results
+          results.forEach(function (result) {
+            // translate value and description
+            result.value = dictionary.getTranslation(result.value);
+            result.description = dictionary.getTranslation(result.description);
+          });
+          resolve(results);
+        });
+      });
+    }, callback);
+  };
+
+  /**
+   * Import an importable reference data file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.importImportableReferenceDataFileUsingMap = function (body, options, callback) {
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
+    // get importable file
+    app.models.importableFile
+      .getTemporaryFileById(body.fileId, function (error, file) {
+        // handle errors
+        if (error) {
+          return callback(error);
+        }
+        try {
+          // parse file content
+          const rawReferenceDataList = JSON.parse(file);
+          // remap properties & values
+          const referenceDataList = app.utils.helpers.remapProperties(rawReferenceDataList, body.map, body.valuesMap);
+          // build a list of sync operations
+          const syncReferenceData = [];
+          // define a container for error results
+          const syncErrors = [];
+          // define a toString function to be used by error handler
+          syncErrors.toString = function () {
+            return JSON.stringify(this);
+          };
+          // go through all entries
+          referenceDataList.forEach(function (referenceDataItem, index) {
+            syncReferenceData.push(function (callback) {
+              // sync reference data
+              return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.referenceData, referenceDataItem, options)
+                .then(function (syncResult) {
+                  callback(null, syncResult.record);
+                })
+                .catch(function (error) {
+                  // on error, store the error, but don't stop, continue with other items
+                  syncErrors.push({
+                    message: `Failed to import reference data ${index + 1}`,
+                    error: error,
+                    recordNo: index + 1
+                  });
+                  callback(null, null);
+                });
+            });
+          });
+          // start importing reference data
+          async.parallelLimit(syncReferenceData, 10, function (error, results) {
+            // handle errors (should not be any)
+            if (error) {
+              return callback(error);
+            }
+            // if import errors were found
+            if (syncErrors.length) {
+              // remove results that failed to be added
+              results = results.filter(result => result !== null);
+              // define a toString function to be used by error handler
+              results.toString = function () {
+                return JSON.stringify(this);
+              };
+              // return error with partial success
+              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+                model: app.models.referenceData.modelName,
+                failed: syncErrors,
+                success: results
+              }));
+            }
+            // send the result
+            callback(null, results);
+          });
+        } catch (error) {
+          // handle parse error
+          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
+            contentType: 'JSON',
+            details: error.message
+          }));
+        }
+      });
   };
 };
