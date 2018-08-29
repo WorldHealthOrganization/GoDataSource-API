@@ -301,7 +301,7 @@ const exportListFile = function (headers, dataSet, fileType) {
         result[headersMap[header]] = source[header];
         // handle dates separately
         if (source[header] instanceof Date) {
-          result[headersMap[header]] = source[header].toISOString();
+          result[headersMap[header]] = getDateDisplayValue(source[header]);
         }
       }
     });
@@ -643,7 +643,7 @@ const getFlatObject = function (object, prefix, humanFriendly) {
       if (object[property] && typeof object[property] === 'object') {
         // handle dates separately
         if (object[property] instanceof Date) {
-          result[propertyName] = object[property].toISOString();
+          result[propertyName] = getDateDisplayValue(object[property]);
         } else {
           // process it
           result = Object.assign({}, result, getFlatObject(object[property], propertyName, humanFriendly));
