@@ -134,9 +134,9 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
       body: {
         asynchronous: asynchronous
       },
-      qs: qs.stringify({
-        filter: filter
-      }),
+      qs: {
+        filter: JSON.stringify(filter)
+      },
       timeout: 60000
     });
 
@@ -148,12 +148,15 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
     return new Promise(function (resolve, reject) {
       request(requestOptions)
         .on('response', function (response) {
-          resolve(dbSnapshotFileName);
         })
         .on('error', function (error) {
           reject(error);
         })
-        .pipe(fs.createWriteStream(dbSnapshotFileName));
+        .pipe(fs.createWriteStream(dbSnapshotFileName))
+        .on('finish', function() {
+          resolve(dbSnapshotFileName);
+        })
+      ;
     });
   };
 };
