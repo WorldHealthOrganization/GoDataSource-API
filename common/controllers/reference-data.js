@@ -128,4 +128,15 @@ module.exports = function (ReferenceData) {
       })
       .catch(callback);
   };
+
+  /**
+   * Export filtered reference data to a file
+   * @param filter
+   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param options
+   * @param callback
+   */
+  ReferenceData.exportFilteredReferenceData = function (filter, exportType, options, callback) {
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, filter, exportType, 'Reference Data', null, [], options, null, callback);
+  };
 };
