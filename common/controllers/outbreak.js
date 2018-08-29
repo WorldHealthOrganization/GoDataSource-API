@@ -70,6 +70,21 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Allows count requests with advanced filters (like the ones we can use on GET requests)
+   * to be mode on outbreak/{id}/events.
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountEvents = function (filter, callback) {
+    this.__get__events(filter, function (err, res) {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
+    });
+  };
+
+  /**
    * Export filtered cases to file
    * @param filter
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
@@ -164,6 +179,20 @@ module.exports = function (Outbreak) {
     // filter information based on available permissions
     Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('contact', context);
     next();
+  });
+
+  /**
+   * Attach before remote (GET outbreaks/{id}/cases/filtered-count) hooks
+   */
+  Outbreak.beforeRemote('prototype.filteredCountCases', function (context, modelInstance, next) {
+    Outbreak.helpers.attachFilterPeopleWithoutRelation('case', context, modelInstance, next);
+  });
+
+  /**
+   * Attach before remote (GET outbreaks/{id}/events/filtered-count) hooks
+   */
+  Outbreak.beforeRemote('prototype.filteredCountEvents', function (context, modelInstance, next) {
+    Outbreak.helpers.attachFilterPeopleWithoutRelation('event', context, modelInstance, next);
   });
 
   /**
@@ -3479,7 +3508,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Restore a deleted reference data
-   * @param caseId
+   * @param referenceDataId
    * @param options
    * @param callback
    */

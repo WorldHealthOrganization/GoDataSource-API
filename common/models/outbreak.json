@@ -687,6 +687,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "filteredCountEvents"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "filteredCountEvents"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "countIndependentTransmissionChains"
@@ -1934,6 +1946,28 @@
       "http": {
         "verb": "get",
         "path": "/cases/filtered-count"
+      }
+    },
+    "prototype.filteredCountEvents": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of events that pass the filter",
+          "required": true
+        }
+      ],
+      "description": "Counts the cases that pass a filter (which can now accept relations)",
+      "http": {
+        "verb": "get",
+        "path": "/events/filtered-count"
       }
     },
     "prototype.exportFilteredCases": {
