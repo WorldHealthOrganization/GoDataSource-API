@@ -147,7 +147,7 @@
       "principalId": "write_reference_data",
       "permission": "ALLOW",
       "property": "importImportableReferenceDataFileUsingMap"
-    },
+    }
   ],
   "methods": {
     "getAvailableCategories": {
