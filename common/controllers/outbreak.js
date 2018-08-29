@@ -4612,7 +4612,7 @@ module.exports = function (Outbreak) {
       },
       filter || {});
     app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, _filters, exportType, 'Reference Data', null, [], options, null, function (results) {
-      // translate value and description fields
+      // translate category, value and description fields
       return new Promise(function (resolve, reject) {
         // load context user
         const contextUser = app.utils.remote.getUserFromOptions(options);
@@ -4624,7 +4624,8 @@ module.exports = function (Outbreak) {
           }
           // go trough all results
           results.forEach(function (result) {
-            // translate value and description
+            // translate category, value and description
+            result.categoryId = dictionary.getTranslation(result.categoryId);
             result.value = dictionary.getTranslation(result.value);
             result.description = dictionary.getTranslation(result.description);
           });
