@@ -7,8 +7,7 @@
   },
   "properties": {
     "userId": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "location": {
       "type": "string",

@@ -1,8 +1,9 @@
 'use strict';
 
 // requires
-const CronJob = require('node-cron').CronJob;
+const cron = require('node-cron');
 const async = require('async');
+const fs = require('fs');
 
 module.exports = function (app) {
   // build list of routines to be executed
@@ -32,19 +33,24 @@ module.exports = function (app) {
               // load the backup module
               let backup = require('../../components/backup');
 
-              // schedule the backup cron
-              let backupCron = new CronJob(`* * ${backupIntervalHours} * * *`, function () {
-                backup.createBackup(null, backupSettings.modules, backupSettings.location);
-              });
+              // if intervals are 0, then don't schedule
+              if (backupIntervalHours >= 1) {
+                app.logger.debug('Scheduled automatic backup');
+                // schedule the backup cron
+                let backupCron = cron.schedule(`* * ${backupIntervalHours} * * *`, function () {
+                  backup.create(null, backupSettings.modules, backupSettings.location, () => {});
+                });
+                backupCron.start();
+              }
+              if (retentionIntervalDays) {
+                app.logger.debug('Scheduled automatic backup cleanup');
 
-              // schedule the backup cleanup cron
-              let backupCleanupCron = new CronJob(`* * * ${retentionIntervalDays} * *`, function () {
-                backup.removeBackups(Date.now());
-              });
-
-              // start the backup cron jobs
-              backupCron.start();
-              backupCleanupCron.start();
+                // schedule the backup cleanup cron
+                let backupCleanupCron = cron.schedule(`* * * ${retentionIntervalDays} * *`, function () {
+                  backup.removeBackups(new Date());
+                });
+                backupCleanupCron.start();
+              }
             });
           }
         });
