@@ -10,10 +10,6 @@
       "type": "string",
       "required": true
     },
-    "automatic": {
-      "type": "boolean",
-      "required": true
-    },
     "location": {
       "type": "string",
       "required": true
@@ -23,6 +19,9 @@
         "string"
       ],
       "required": true
+    },
+    "date": {
+      "type": "date"
     }
   },
   "validations": [],

@@ -59,7 +59,7 @@ const createBackup = function (userId, modules, location, done) {
         models.backup
           .create(
             {
-              automatic: false,
+              date: Date.now(),
               modules: modules,
               location: newPath,
               userId: userId
@@ -196,8 +196,46 @@ const restoreBackupFromFile = function (filePath, done) {
   });
 };
 
+/**
+ * Used to clean-up backups older than given current date
+ * It deletes records in the database and archives on the disk
+ * @param currentDate
+ */
+const removeBackups = function (currentDate) {
+  const backupModel = app.models.backup;
+
+  // retrieve all backups that are older
+  backupModel
+    .find({
+      where: {
+        date: {
+          lt: currentDate
+        }
+      }
+    })
+    .then((olderBackups) => {
+      olderBackups.forEach((backup) => {
+        if (backup.location) {
+          fs.unlink(backup.location, (err) => {
+            if (err) {
+              app.logger.warn(`Failed to remove ${backup.location} for ${backup.id}. ${err}`);
+            }
+          });
+        }
+
+        // remove the backup record
+        backupModel.deleteById(backup.id, (err) => {
+          if (err) {
+            app.logger.warn(`Failed to remove backup record: ${backup.id} from database. ${err}`);
+          }
+        });
+      });
+    });
+};
+
 module.exports = {
   create: createBackup,
   restore: restoreBackup,
-  restoreFromFile: restoreBackupFromFile
+  restoreFromFile: restoreBackupFromFile,
+  removeBackups: removeBackups
 };
