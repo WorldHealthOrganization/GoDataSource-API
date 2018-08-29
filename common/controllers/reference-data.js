@@ -137,6 +137,6 @@ module.exports = function (ReferenceData) {
    * @param callback
    */
   ReferenceData.exportFilteredReferenceData = function (filter, exportType, options, callback) {
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, filter, exportType, 'ReferenceData', null, [], options, null, callback);
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, filter, exportType, 'Reference Data', null, [], options, null, callback);
   };
 };

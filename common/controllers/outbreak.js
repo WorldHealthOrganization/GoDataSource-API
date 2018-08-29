@@ -4611,6 +4611,6 @@ module.exports = function (Outbreak) {
         }
       },
       filter || {});
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, _filters, exportType, 'ReferenceData', null, [], options, null, callback);
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, _filters, exportType, 'Reference Data', null, [], options, null, callback);
   };
 };
