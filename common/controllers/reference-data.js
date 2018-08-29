@@ -1,26 +1,9 @@
 'use strict';
 
 const app = require('../../server/server');
-const referenceDataParser = require('./../../components/referenceDataParser');
 const async = require('async');
 
 module.exports = function (ReferenceData) {
-
-  /**
-   * Before create hook
-   */
-  ReferenceData.beforeRemote('create', function (context, modelInstance, next) {
-    // parse referenceData to create language tokens
-    referenceDataParser.beforeCreateHook(context, modelInstance, next);
-  });
-
-  /**
-   * After update hook
-   */
-  ReferenceData.afterRemote('create', function (context, modelInstance, next) {
-    // after successfully creating reference data, also create translations for it.
-    referenceDataParser.afterCreateHook(context, modelInstance, next);
-  });
 
   /**
    * Before update reference data hook
@@ -53,17 +36,8 @@ module.exports = function (ReferenceData) {
         // unhandled error
         return next(error);
       }
-      // parse referenceData to update language tokens
-      referenceDataParser.beforeUpdateHook(context, modelInstance, next);
+      next();
     });
-  });
-
-  /**
-   * After update reference data hook
-   */
-  ReferenceData.afterRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    // after successfully updating reference data, also update translations for it.
-    referenceDataParser.afterUpdateHook(context, modelInstance, next);
   });
 
   /**

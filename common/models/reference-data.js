@@ -1,6 +1,7 @@
 'use strict';
 
 const app = require('../../server/server');
+const _ = require('lodash');
 
 module.exports = function (ReferenceData) {
 
@@ -162,7 +163,7 @@ module.exports = function (ReferenceData) {
         // build possible record usage list
         ReferenceData.possibleRecordUsage[Model.modelName] = Model.referenceDataFields.map(function (referenceDataField) {
           // some fields contain array markers ([]) needed by some business logic, remove those here
-          return referenceDataField.replace(/\[]/g,'');
+          return referenceDataField.replace(/\[]/g, '');
         });
       }
     });
@@ -333,4 +334,196 @@ module.exports = function (ReferenceData) {
       })
       .catch(_callback);
   };
+
+  /**
+   * Generate a language/translatable identifier for a category + value combination
+   * @param category
+   * @param value
+   * @return {string}
+   */
+  ReferenceData.getTranslatableIdentifierForValue = function(category, value) {
+    return `${category}_${_.snakeCase(value).toUpperCase()}`;
+  };
+
+
+  /**
+   * Prepare language tokens for translation (before save hook)
+   * @param context
+   * @param next
+   * @return {*}
+   */
+  function prepareLanguageTokens(context, next) {
+
+    // do not execute hooks on sync
+    if (context.options && context.options._sync) {
+      return next();
+    }
+
+    // new record
+    if (context.instance.categoryId && context.instance.value) {
+      // start building identifier
+      let identifier = '';
+      // if this belongs to an outbreak
+      if (context.instance.outbreakId != null) {
+        // include outbreak marker and outbreak id in the identifier
+        identifier = `LNG_${app.models.outbreak.modelName.toUpperCase()}_${context.instance.outbreakId.toUpperCase()}_`;
+      }
+      // update identifier based on the available data
+      identifier += ReferenceData.getTranslatableIdentifierForValue(context.instance.categoryId, context.instance.value);
+      // store original values
+      const original = {
+        value: context.instance.value,
+        description: context.instance.description,
+      };
+      // replace data with identifiers
+      context.instance.id = identifier;
+      context.instance.value = identifier;
+      // update description only if value was sent to not set a language token for an non-existent value
+      if (context.instance.description) {
+        context.instance.description = `${identifier}_DESCRIPTION`;
+      }
+      // store original values
+      _.set(context, `options.${ReferenceData.modelName}._original`, original);
+
+    } else if (context.currentInstance && context.data && (context.data.value || context.data.description)) {
+      // record is being updated
+
+      // initialize original values storage
+      const original = {};
+      // look for changes in value or description
+      ['value', 'description'].forEach(function (property) {
+        // if the property was sent (changed)
+        if (context.data[property]) {
+          // get its original value
+          original[property] = context.data[property];
+          // remove the value from data (prevent updates) - only translations will be updated
+          delete context.data[property];
+          // description is optional, if it was sent and not present
+          if (property === 'description' && !context.currentInstance.description) {
+            // add it
+            context.data[property] = `${context.currentInstance.id}_DESCRIPTION`;
+          }
+        }
+      });
+      // store original values
+      _.set(context, `options.${ReferenceData.modelName}._original`, original);
+    }
+    next();
+  }
+
+  /**
+   * Translate language tokens (after save hook)
+   * @param context
+   * @param next
+   * @return {*}
+   */
+  function translateLanguageTokens(context, next) {
+
+    // do not execute hooks on save
+    if (context.options && context.options._sync) {
+      return next();
+    }
+
+    // get original values
+    const original = _.get(context, `options.${ReferenceData.modelName}._original`);
+
+    // check if there were any original values stored
+    if (original) {
+      // get logged user languageId
+      const languageId = context.options.remotingContext.req.authData.user.languageId;
+      // build a list of update actions
+      const updateActions = [];
+
+      // create update promises
+      ['value', 'description'].forEach(function (property) {
+        // if a value was sent
+        if (original[property] != null) {
+          // build token
+          let token = context.instance.id;
+          // for description property
+          if (property === 'description') {
+            // add description suffix
+            token += '__DESCRIPTION';
+          }
+
+          // find the token associated with the value
+          updateActions.push(
+            // try to find the language token
+            app.models.languageToken
+              .findOne({
+                where: {
+                  token: token,
+                  languageId: languageId
+                }
+              })
+              .then(function (languageToken) {
+                // if found
+                if (languageToken) {
+                  // update its translation
+                  return languageToken
+                    .updateAttributes({
+                      translation: original[property]
+                    }, context.options);
+                  // token not found
+                } else {
+                  // get installed languages and create description tokens for each one that does not have the token
+                  return app.models.language
+                    .find()
+                    .then(function (languages) {
+                      // loop through all the languages and create new token promises for each language that does not have the token for each new token
+                      return Promise.all(languages.map((language) => {
+                        // try to find the token
+                        return app.models.languageToken
+                          .findOne({
+                            where: {
+                              token: token,
+                              languageId: language.id
+                            }
+                          })
+                          .then(function (languageToken) {
+                            // if the token was not found
+                            if (!languageToken) {
+                              // create it
+                              return app.models.languageToken
+                                .create({
+                                  token: token,
+                                  languageId: language.id,
+                                  translation: original[property]
+                                }, context.options);
+                            } else {
+                              // token found, nothing to do, translation is meant for a different language
+                            }
+                          });
+                      }));
+                    });
+                }
+              })
+          );
+        }
+      });
+
+      // perform update operations
+      Promise.all(updateActions)
+        .then(function () {
+          next();
+        })
+        .catch(next);
+
+    } else {
+      return next();
+    }
+  }
+
+
+  // add before save hooks
+  ReferenceData.observe('before save', function (context, next) {
+    // prepare language tokens for translation
+    prepareLanguageTokens(context, next);
+  });
+
+  // add after save hooks
+  ReferenceData.observe('after save', function (context, next) {
+    // set up translations for language tokens
+    translateLanguageTokens(context, next);
+  });
 };
