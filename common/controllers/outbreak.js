@@ -4586,4 +4586,31 @@ module.exports = function (Outbreak) {
       });
     });
   };
+
+  /**
+   * Export filtered reference data to a file
+   * @param filter
+   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportFilteredReferenceData = function (filter, exportType, options, callback) {
+    const _filters = app.utils.remote.mergeFilters(
+      {
+        where: {
+          or: [
+            {
+              outbreakId: {
+                eq: null
+              }
+            },
+            {
+              outbreakId: this.id
+            }
+          ]
+        }
+      },
+      filter || {});
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, _filters, exportType, 'ReferenceData', null, [], options, null, callback);
+  };
 };

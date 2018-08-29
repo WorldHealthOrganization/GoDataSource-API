@@ -429,7 +429,7 @@ function createTableInPDFDocument(headers, data, document, documentConfig) {
   });
 
   // for rows without reserved width, split remaining document width (doc width - margins - reserved width) between remaining headers
-  const defaultRowWidth = (documentConfig.widthForPageSize - 2 * documentConfig.margin - reservedWidth) / (headers.length - noHeadersWithReservedWidth);
+  const defaultRowWidth = (documentConfig.widthForPageSize - 2 * document.options.margin - reservedWidth) / (headers.length - noHeadersWithReservedWidth);
 
   // add all headers
   headers.forEach(function (header) {

@@ -984,6 +984,12 @@
       "principalId": "read_followup",
       "permission": "ALLOW",
       "property": "exportFilteredContactFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "exportFilteredReferenceData"
     }
   ],
   "methods": {
@@ -3799,6 +3805,61 @@
       "http": {
         "verb": "get",
         "path": "/contacts/follow-ups/export"
+      }
+    },
+    "prototype.exportFilteredReferenceData": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "type",
+          "type": "string",
+          "enum": [
+            "json",
+            "xml",
+            "csv",
+            "xls",
+            "xlsx",
+            "ods",
+            "pdf"
+          ],
+          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export filtered list of reference data",
+      "http": {
+        "verb": "get",
+        "path": "/reference-data/export"
       }
     }
   }

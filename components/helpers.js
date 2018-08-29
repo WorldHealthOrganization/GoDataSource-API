@@ -295,10 +295,14 @@ const exportListFile = function (headers, dataSet, fileType) {
           result[headersMap[header]] = source[header];
         }
         // simple element that was not yet mapped in the result (this is important as we may have labels for properties
-        // like "addresses" and "addresses[]" and we don't want simple types to overwrite complex types
+        // like "addresses" and "addresses[]" and we don't want simple types to overwrite complex types)
       } else if (result[headersMap[header]] === undefined) {
         // copy the element in the result
         result[headersMap[header]] = source[header];
+        // handle dates separately
+        if (source[header] instanceof Date) {
+          result[headersMap[header]] = source[header].toISOString();
+        }
       }
     });
     return result;
@@ -637,8 +641,13 @@ const getFlatObject = function (object, prefix, humanFriendly) {
       }
       // property is complex type
       if (object[property] && typeof object[property] === 'object') {
-        // process it
-        result = Object.assign({}, result, getFlatObject(object[property], propertyName, humanFriendly));
+        // handle dates separately
+        if (object[property] instanceof Date) {
+          result[propertyName] = object[property].toISOString();
+        } else {
+          // process it
+          result = Object.assign({}, result, getFlatObject(object[property], propertyName, humanFriendly));
+        }
       } else {
         // simple type
         result[propertyName] = object[property];
