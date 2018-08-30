@@ -106,23 +106,27 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, header
  * @param dataSet
  */
 function getDistinctPropertyValues(dataSet) {
-  const distinctPropertyValues = {};
-  // traverse the dataset
-  dataSet.forEach(function (item) {
-    Object.keys(item).forEach(function (propName) {
-      // define container for property values (if not defined)
-      if (!distinctPropertyValues[propName]) {
-        distinctPropertyValues[propName] = {};
-      }
-      // store the value as property name to ensure uniqueness without performing a search
-      distinctPropertyValues[propName][item[propName]] = true;
-    });
+  // flatten object
+  const flatDataSet = app.utils.helpers.getFlatObject(dataSet);
+  // keep a map of distinct values (to ensure unicity)
+  let distinctValuesMap = {};
+  // go through all the keys
+  Object.keys(flatDataSet).forEach(function (property) {
+    // sanitize key (remove array markers and leading '.' if present)
+    const sanitizedProperty = property.replace(/\[\d+]/g, '').replace(/^\./, '');
+    // if the property was not present in the set
+    if (!distinctValuesMap[sanitizedProperty]) {
+      // add it
+      distinctValuesMap[sanitizedProperty] = {};
+    }
+    // add the value as a key (to ensure unicity)
+    distinctValuesMap[sanitizedProperty][flatDataSet[property]] = true;
   });
   // when done, transform results to arrays
-  Object.keys(distinctPropertyValues).forEach(function (propName) {
-    distinctPropertyValues[propName] = Object.keys(distinctPropertyValues[propName]);
+  Object.keys(distinctValuesMap).forEach(function (propName) {
+    distinctValuesMap[propName] = Object.keys(distinctValuesMap[propName]);
   });
-  return distinctPropertyValues;
+  return distinctValuesMap;
 }
 
 /**
@@ -357,6 +361,23 @@ module.exports = function (ImportableFile) {
                     callback(null, results[modelName]);
                   })
                   .catch(callback);
+              });
+            }
+
+            // reference data has categoryId as a 'reference data' type but is not related to other reference data, it is reference data
+            if (modelName === app.models.referenceData.modelName) {
+              steps.push(function (callback) {
+                // get distinct column values (if not taken already) (to map categoyId)
+                if (!Object.keys(result.distinctFileColumnValues).length) {
+                  result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
+                }
+                // add categoryId as a reference data item
+                results[modelName] = Object.assign({}, results[modelName], {
+                  modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, {
+                    categoryId: app.models.referenceData.availableCategories
+                  })
+                });
+                callback();
               });
             }
           }

@@ -2,7 +2,6 @@
 
 const app = require('../../server');
 const referenceData = app.models.referenceData;
-const referenceDataParser = require('./../../../components/referenceDataParser');
 const defaultReferenceData = require('./defaultReferenceData.json');
 
 /**
@@ -17,10 +16,11 @@ function run(callback) {
     // go through all reference data items
     defaultReferenceData[referenceDataCategory].forEach(function (referenceDataItem) {
       // build item key
-      let referenceDataItemKey = referenceDataParser.getTranslatableIdentifierForValue(referenceDataCategory, referenceDataItem);
+      let referenceDataItemKey = referenceData.getTranslatableIdentifierForValue(referenceDataCategory, referenceDataItem);
       // create reference data item (if not already there
       promises.push(
-        referenceData.findById(referenceDataItemKey)
+        referenceData
+          .findById(referenceDataItemKey)
           .then(function (foundReferenceData) {
             if (!foundReferenceData) {
               return referenceData.create({
@@ -29,6 +29,8 @@ function run(callback) {
                 description: `${referenceDataItemKey}_DESCRIPTION`,
                 categoryId: referenceDataCategory,
                 readOnly: true
+              }, {
+                _sync: true
               });
             }
             return foundReferenceData;
