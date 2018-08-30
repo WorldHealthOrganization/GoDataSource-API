@@ -37,7 +37,7 @@ module.exports = function (app) {
               if (backupIntervalHours >= 1) {
                 app.logger.debug('Scheduled automatic backup');
                 // schedule the backup cron
-                let backupCron = cron.schedule(`* * ${backupIntervalHours} * * *`, function () {
+                let backupCron = cron.schedule(`1 * * * * *`, function () {
                   const backupModel = app.models.backup;
 
                   // create new backup record with pending status
