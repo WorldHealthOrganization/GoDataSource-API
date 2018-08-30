@@ -33,7 +33,7 @@ module.exports = function (Backup) {
     // get the id of the authenticated user from request options
     let userId = requestOptions.accessToken.userId;
 
-    // retrieve system settings, used to fallback on default data backup settings, if not available in the request
+    // retrieve system settings, fallback on default data backup settings, if not available in the request
     app.models.systemSettings
       .findOne()
       .then((systemSettings) => {

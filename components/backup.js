@@ -8,9 +8,10 @@ const async = require('async');
 const tar = require('tar');
 const tmp = require('tmp');
 const dbSync = require('./dbSync');
+const helpers = require('../components/helpers');
 
 /**
- * Create a new backup file at the desired location and for given application modules
+ * Create a new backup
  * @param userId
  * @param modules
  * @param location
@@ -18,21 +19,19 @@ const dbSync = require('./dbSync');
  */
 const createBackup = function (userId, modules, location, done) {
   const models = app.models;
+  const backupModel = app.models.backup;
 
   // collect all collections that must be exported, based on the modules
   let collections = [];
   modules.forEach((module) => {
-    if (models.backup.modules.hasOwnProperty(module)) {
-      collections.push(...app.models.backup.modules[module]);
+    if (backupModel.modules.hasOwnProperty(module)) {
+      collections.push(...backupModel.modules[module]);
     }
   });
 
-  // make sure the location path of the backups exists and is accessible
-  fs.access(location, fs.F_OK, (accessError) => {
-    if (accessError) {
-      app.logger.error(`Backup location: ${location} is not OK. ${accessError}`);
-      return done(accessError);
-    }
+  try {
+    // make sure the location path of the backups exists and is accessible
+    helpers.isPathOK(location);
 
     // run the database export
     models.sync.exportDatabase(null, collections, null, (exportError, archivePath) => {
@@ -51,11 +50,11 @@ const createBackup = function (userId, modules, location, done) {
       // copy the archive from temporary OS directory to the desired location
       fs.copyFile(archivePath, newPath, (copyError) => {
         if (copyError) {
-          app.logger.error(`Failed to copy backup file from path ${archivePath} to ${newPath}. ${copyError}`);
+          app.logger.error(`Failed to copy backup file from ${archivePath} to ${newPath}. ${copyError}`);
           return done(copyError);
         }
 
-        // create new backup record
+        // create new backup record in database
         models.backup
           .create(
             {
@@ -69,17 +68,24 @@ const createBackup = function (userId, modules, location, done) {
           .catch((createError) => done(createError));
       });
     });
-  });
+  } catch (pathAccessError) {
+    app.logger.error(`Backup location: ${location} is not OK. ${pathAccessError}`);
+    return done(pathAccessError);
+  }
 };
 
 /**
- * Restore the system using a backup entry
+ * Restore the system using a backup file
  * @param backupId
  * @param done
  */
 const restoreBackup = function (backupId, done) {
   app.models.backup
-    .findOne({ where: { id: backupId } })
+    .findOne({
+      where: {
+        id: backupId
+      }
+    })
     .then((backup) => {
       if (!backup) {
         return done(app.utils.apiError.getError('MODEL_NOT_FOUND', {
@@ -103,19 +109,15 @@ const restoreBackupFromFile = function (filePath, done) {
   // cache reference to mongodb connection
   let connection = app.dataSources.mongoDb.connector;
 
-  // make sure the file actually exists and is accessible
-  fs.access(filePath, fs.F_OK, (accessError) => {
-    if (accessError) {
-      app.logger.error(`Backup file: ${filePath} is not OK. ${accessError}`);
-      return done(accessError);
-    }
+  try {
+    // make sure the location path of the backups exists and is accessible
+    helpers.isPathOK(filePath);
 
-    // // create a temporary directory to store the database files
-    // it always created the folder in the system temporary directory
-    let tmpDir = tmp.dirSync({unsafeCleanup: true});
+    // create a temporary directory to store the backup files
+    let tmpDir = tmp.dirSync({ unsafeCleanup: true });
     let tmpDirName = tmpDir.name;
 
-    // extract the compressed database snapshot into the newly created temporary directory
+    // extract backup archive
     tar.x(
       {
         cwd: tmpDirName,
@@ -126,7 +128,7 @@ const restoreBackupFromFile = function (filePath, done) {
           return done(err);
         }
 
-        // read all files in the temp dir
+        // read backup files in the temporary dir
         return fs.readdir(tmpDirName, (err, filenames) => {
           if (err) {
             return done(err);
@@ -139,7 +141,7 @@ const restoreBackupFromFile = function (filePath, done) {
             return filename[0] && dbSync.collectionsMap.hasOwnProperty(filename[0]);
           });
 
-          // read each file's contents and sync with database
+          // start restoring the database using provided collection files
           return async.series(
             collectionsFiles.map((fileName) => (doneCollection) => {
               let filePath = `${tmpDirName}/${fileName}`;
@@ -176,6 +178,8 @@ const restoreBackupFromFile = function (filePath, done) {
                       });
 
                       // execute the bulk operations
+                      // in case an error has occurred, log it and continue
+                      // we do not stop the operation
                       bulk.execute((err) => {
                         if (err) {
                           app.logger.error(`Failed to insert records for collection ${collectionName}. ${err}`);
@@ -193,11 +197,15 @@ const restoreBackupFromFile = function (filePath, done) {
           );
         });
       });
-  });
+
+  } catch (pathAccessError) {
+    app.logger.error(`Backup location: ${location} is not OK. ${pathAccessError}`);
+    return done(pathAccessError);
+  }
 };
 
 /**
- * Used to clean-up backups older than given current date
+ * Used to clean up older backups
  * It deletes records in the database and archives on the disk
  * @param currentDate
  */
