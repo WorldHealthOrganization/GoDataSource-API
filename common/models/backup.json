@@ -10,8 +10,7 @@
       "type": "string"
     },
     "location": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "modules": {
       "type": [
@@ -21,6 +20,15 @@
     },
     "date": {
       "type": "date"
+    },
+    "status": {
+      "type": "number",
+      "enum": [
+        0,
+        1,
+        2
+      ],
+      "description": "Backup status: 0 success, 1 failed, 2 pending. Not be confused with restore, this status is for backup creation"
     }
   },
   "validations": [],

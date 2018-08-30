@@ -6,6 +6,13 @@ const fs = require('fs');
 module.exports = function (Backup) {
   Backup.hasController = true;
 
+  // list of backup statuses
+  Backup.status = {
+    SUCCESS: 0,
+    FAILED: 1,
+    PENDING: 2
+  };
+
   // application modules and their corresponding database collections
   // a module can group one or more collections
   Backup.modules = {

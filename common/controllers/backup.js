@@ -27,6 +27,9 @@ module.exports = function (Backup) {
    * @returns {*}
    */
   Backup.createManualBackup = function (params, requestOptions, done) {
+    // cache backup model reference
+    const backupModel = app.models.backup;
+
     // defensive checks
     params = params || {};
 
@@ -40,8 +43,31 @@ module.exports = function (Backup) {
         params.location = params.location || systemSettings.dataBackup.location;
         params.modules = params.modules || systemSettings.dataBackup.modules;
 
-        // create new backup
-        backup.create(userId, params.modules, params.location, (err, backupId) => done(err, backupId));
+        // create new backup record with pending status
+        backupModel
+          .create(
+            {
+              date: Date.now(),
+              modules: params.modules,
+              location: null,
+              userId: userId,
+              status: backupModel.status.PENDING
+            }
+          )
+          .then((record) => {
+            // start the backup process
+            // when done update backup status and file location
+            backup.create(params.modules, params.location, (err, backupFilePath) => {
+              let newStatus = backupModel.status.SUCCESS;
+              if (err) {
+                newStatus = backupModel.status.FAILED;
+              }
+              record.updateAttributes({ status: newStatus, location: backupFilePath });
+            });
+            // send the response back to the user, do not wait for the backup to finish
+            return done(null, record.id);
+          })
+          .catch((createError) => done(createError));
       });
   };
 

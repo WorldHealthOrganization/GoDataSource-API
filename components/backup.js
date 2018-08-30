@@ -12,12 +12,12 @@ const helpers = require('../components/helpers');
 
 /**
  * Create a new backup
- * @param userId
+ * Returns the path of the backup file
  * @param modules
  * @param location
  * @param done
  */
-const createBackup = function (userId, modules, location, done) {
+const createBackup = function (modules, location, done) {
   const models = app.models;
   const backupModel = app.models.backup;
 
@@ -53,19 +53,7 @@ const createBackup = function (userId, modules, location, done) {
           app.logger.error(`Failed to copy backup file from ${archivePath} to ${newPath}. ${copyError}`);
           return done(copyError);
         }
-
-        // create new backup record in database
-        models.backup
-          .create(
-            {
-              date: Date.now(),
-              modules: modules,
-              location: newPath,
-              userId: userId
-            }
-          )
-          .then((record) => done(null, record.id))
-          .catch((createError) => done(createError));
+        return done(null, newPath);
       });
     });
   } catch (pathAccessError) {

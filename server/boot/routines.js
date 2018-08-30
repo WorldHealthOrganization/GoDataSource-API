@@ -38,7 +38,30 @@ module.exports = function (app) {
                 app.logger.debug('Scheduled automatic backup');
                 // schedule the backup cron
                 let backupCron = cron.schedule(`* * ${backupIntervalHours} * * *`, function () {
-                  backup.create(null, backupSettings.modules, backupSettings.location, () => {});
+                  const backupModel = app.models.backup;
+
+                  // create new backup record with pending status
+                  backupModel
+                    .create(
+                      {
+                        date: Date.now(),
+                        modules: backupSettings.modules,
+                        location: null,
+                        userId: null,
+                        status: backupModel.status.PENDING
+                      }
+                    )
+                    .then((record) => {
+                      // start the backup process
+                      // when done update backup status and file location
+                      backup.create(backupSettings.modules, backupSettings.location, (err, backupFilePath) => {
+                        let newStatus = backupModel.status.SUCCESS;
+                        if (err) {
+                          newStatus = backupModel.status.FAILED;
+                        }
+                        record.updateAttributes({ status: newStatus, location: backupFilePath });
+                      });
+                    });
                 });
                 backupCron.start();
               }
