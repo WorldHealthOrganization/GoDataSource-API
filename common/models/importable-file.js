@@ -53,10 +53,12 @@ module.exports = function (ImportableFile) {
       const headers = [];
       // build the list by looking at the properties of all elements (not all items have all properties)
       jsonObj.forEach(function (item) {
-        Object.keys(item).forEach(function (property) {
+        // go through all properties of flatten item
+        Object.keys(app.utils.helpers.getFlatObject(item)).forEach(function (property) {
+          const sanitizedProperty = property.replace(/\[\d+]/g, '').replace(/^\./, '');
           // add the header if not already included
-          if (!headers.includes(property)) {
-            headers.push(property);
+          if (!headers.includes(sanitizedProperty)) {
+            headers.push(sanitizedProperty);
           }
         });
       });
@@ -99,10 +101,12 @@ module.exports = function (ImportableFile) {
       const headers = [];
       // build the list by looking at the properties of all elements (not all items have all properties)
       jsonObj[firstProp].forEach(function (item) {
-        Object.keys(item).forEach(function (property) {
+        // go through all properties of flatten item
+        Object.keys(app.utils.helpers.getFlatObject(item)).forEach(function (property) {
+          const sanitizedProperty = property.replace(/\[\d+]/g, '').replace(/^\./, '');
           // add the header if not already included
-          if (!headers.includes(property)) {
-            headers.push(property);
+          if (!headers.includes(sanitizedProperty)) {
+            headers.push(sanitizedProperty);
           }
         });
       });
