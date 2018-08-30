@@ -206,6 +206,28 @@ const restoreBackupFromFile = function (filePath, done) {
 };
 
 /**
+ * Used to delete backups after a manual restore and for retention routine
+ * @param backup
+ */
+const removeBackup = function (backup) {
+  if (backup.location) {
+    fs.unlink(backup.location, (err) => {
+      if (err) {
+        app.logger.warn(`Failed to remove ${backup.location} for ${backup.id}. ${err}`);
+      }
+    });
+  }
+
+  // remove the backup record
+  app.models.backup.deleteById(backup.id, (err) => {
+    if (err) {
+      app.logger.warn(`Failed to remove backup record: ${backup.id} from database. ${err}`);
+    }
+  });
+};
+
+
+/**
  * Used to clean up older backups
  * It deletes records in the database and archives on the disk
  * @param currentDate
@@ -222,29 +244,13 @@ const removeBackups = function (currentDate) {
         }
       }
     })
-    .then((olderBackups) => {
-      olderBackups.forEach((backup) => {
-        if (backup.location) {
-          fs.unlink(backup.location, (err) => {
-            if (err) {
-              app.logger.warn(`Failed to remove ${backup.location} for ${backup.id}. ${err}`);
-            }
-          });
-        }
-
-        // remove the backup record
-        backupModel.deleteById(backup.id, (err) => {
-          if (err) {
-            app.logger.warn(`Failed to remove backup record: ${backup.id} from database. ${err}`);
-          }
-        });
-      });
-    });
+    .then((olderBackups) => olderBackups.forEach((backup) => removeBackup(backup)));
 };
 
 module.exports = {
   create: createBackup,
   restore: restoreBackup,
+  remove: removeBackup,
   restoreFromFile: restoreBackupFromFile,
   removeBackups: removeBackups
 };

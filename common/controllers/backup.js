@@ -103,6 +103,17 @@ module.exports = function (Backup) {
    * @param done
    */
   Backup.restoreBackup = function (backupId, done) {
-    backup.restore(backupId, done);
+    backup.restore(backupId, (err) => {
+      if (err) {
+        return done(err);
+      }
+      // remove backup record and file
+      app.models.backup
+        .findById(backupId)
+        .then((backup) => backup.remove(backup));
+
+      // do not wait for removal
+      return done();
+    });
   };
 };
