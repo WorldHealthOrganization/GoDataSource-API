@@ -157,6 +157,19 @@ const restoreBackupFromFile = function (filePath, done) {
 
                     // remove all the documents from the collection, then bulk insert the ones from the file
                     collectionRef.deleteMany({}, (err) => {
+                      // if delete fails, don't continue
+                      if (err) {
+                        app.logger.error(`Failed to delete database records of collection: ${collectionName}. ${err}`);
+                        return doneCollection();
+                      }
+
+                      // if there are no records in the files just
+                      // skip it
+                      if (!collectionRecords.length) {
+                        app.logger.debug(`Collection ${collectionName} has no records in the file. Skipping it.`);
+                        return doneCollection();
+                      }
+
                       // create a bulk operation
                       const bulk = collectionRef.initializeOrderedBulkOp();
 
