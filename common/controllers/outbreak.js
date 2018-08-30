@@ -1233,9 +1233,9 @@ module.exports = function (Outbreak) {
       // find people that match the filter
       findFilteredPeople = app.models.person
         .find(personFilter)
-        .then(function (person) {
+        .then(function (people) {
           // return their IDs
-          return person.map(person => person.id);
+          return people.map(person => person.id);
         });
     } else {
       // no filter passed, nothing to do
@@ -1360,9 +1360,9 @@ module.exports = function (Outbreak) {
       // find people that match the filter
       findFilteredPeople = app.models.person
         .find(personFilter)
-        .then(function (person) {
+        .then(function (people) {
           // return their IDs
-          return person.map(person => person.id);
+          return people.map(person => person.id);
         });
     } else {
       // no filter passed, nothing to do
