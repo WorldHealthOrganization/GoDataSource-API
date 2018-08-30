@@ -1518,17 +1518,18 @@ module.exports = function (Outbreak) {
                 }
               }, isolatedNodesFilter);
 
-        // get isolated nodes as well (nodes that were never part of a relationship)
-        app.models.person
-          .find(isolatedNodesFilter)
-          .then(function (isolatedNodes) {
-            // add all the isolated nodes to the complete list of nodes
-            isolatedNodes.forEach(function (isolatedNode) {
-              result.nodes[isolatedNode.id] = isolatedNode.toJSON();
-            });
-            callback(null, result);
-          })
-          .catch(callback);
+            // get isolated nodes as well (nodes that were never part of a relationship)
+            app.models.person
+              .find(isolatedNodesFilter)
+              .then(function (isolatedNodes) {
+                // add all the isolated nodes to the complete list of nodes
+                isolatedNodes.forEach(function (isolatedNode) {
+                  result.nodes[isolatedNode.id] = isolatedNode.toJSON();
+                });
+                callback(null, result);
+              })
+              .catch(callback);
+          });
       });
   };
 
