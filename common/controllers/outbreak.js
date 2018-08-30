@@ -1217,7 +1217,7 @@ module.exports = function (Outbreak) {
     // initialize a person filter (will contain filters applicable on person entity)
     let personFilter;
     // if person filter was sent
-    if (filter.person) {
+    if (filter && filter.person) {
       // get it; ask only for IDs
       personFilter = app.utils.remote
         .mergeFilters({
@@ -1261,7 +1261,7 @@ module.exports = function (Outbreak) {
         }
         // count transmission chains
         app.models.relationship
-          .countTransmissionChains(this.id, this.periodOfFollowup, filter, function (error, noOfChains) {
+          .countTransmissionChains(self.id, self.periodOfFollowup, filter, function (error, noOfChains) {
             if (error) {
               return callback(error);
             }
@@ -1297,14 +1297,17 @@ module.exports = function (Outbreak) {
             // if there was a people filter
             if (personIds) {
               // use it for isolated nodes as well
-              isolatedNodesFilter = app.utils.remote
+              // merge filter knows how to handle filters, but count accepts only 'where'
+              const filter = app.utils.remote
                 .mergeFilters({
                   where: {
                     id: {
                       inq: personIds
                     }
                   }
-                }, isolatedNodesFilter);
+                }, {where: isolatedNodesFilter});
+              // extract merged 'where' property
+              isolatedNodesFilter = filter.where;
             }
             // find other isolated nodes (nodes that were never in a relationship)
             app.models.person
@@ -1338,7 +1341,7 @@ module.exports = function (Outbreak) {
     // initialize a person filter (will contain filters applicable on person entity)
     let personFilter;
     // if person filter was sent
-    if (filter.person) {
+    if (filter && filter.person) {
       // get it; ask only for IDs
       personFilter = app.utils.remote
         .mergeFilters({
@@ -1385,7 +1388,7 @@ module.exports = function (Outbreak) {
         }
         // get transmission chains
         app.models.relationship
-          .getTransmissionChains(this.id, this.periodOfFollowup, filter, function (error, transmissionChains) {
+          .getTransmissionChains(self.id, self.periodOfFollowup, filter, function (error, transmissionChains) {
             if (error) {
               return callback(error);
             }
