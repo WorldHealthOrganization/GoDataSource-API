@@ -21,7 +21,8 @@ module.exports = function (Backup) {
       'language',
       'languageToken',
       'referenceData',
-      'helpCategory'
+      'helpCategory',
+      'auditLog'
     ],
     'Data': [
       'template',
