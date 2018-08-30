@@ -1214,49 +1214,114 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countIndependentTransmissionChains = function (filter, callback) {
     const self = this;
-    // count transmission chains
-    app.models.relationship
-      .countTransmissionChains(this.id, this.periodOfFollowup, filter, function (error, noOfChains) {
-        if (error) {
-          return callback(error);
-        }
-        // get node IDs
-        const nodeIds = Object.keys(noOfChains.nodes);
-        // count isolated nodes
-        const isolatedNodesNo = Object.keys(noOfChains.isolatedNodes).reduce(function (accumulator, currentValue) {
-          if (noOfChains.isolatedNodes[currentValue]) {
-            accumulator++;
-          }
-          return accumulator;
-        }, 0);
-        // find other isolated nodes (nodes that were never in a relationship)
-        app.models.person
-          .count({
-            outbreakId: self.id,
-            or: [
-              {
-                type: 'case',
-                classification: {
-                  inq: app.models.case.nonDiscardedCaseClassifications
+    // initialize a person filter (will contain filters applicable on person entity)
+    let personFilter;
+    // if person filter was sent
+    if (filter && filter.person) {
+      // get it; ask only for IDs
+      personFilter = app.utils.remote
+        .mergeFilters({
+          fields: ['id']
+        }, filter.person);
+      // remove original filter
+      delete filter.person;
+    }
+    // build a find filtered people if necessary
+    let findFilteredPeople;
+    // if we have a person filter
+    if (personFilter) {
+      // find people that match the filter
+      findFilteredPeople = app.models.person
+        .find(personFilter)
+        .then(function (people) {
+          // return their IDs
+          return people.map(person => person.id);
+        });
+    } else {
+      // no filter passed, nothing to do
+      findFilteredPeople = Promise.resolve(null);
+    }
+
+    findFilteredPeople
+      .then(function (personIds) {
+        // if there was a people filter
+        if (personIds) {
+          // make sure both people in a relation match the filter passed
+          filter = app.utils.remote
+            .mergeFilters({
+              where: {
+                'persons.0.id': {
+                  inq: personIds
+                },
+                'persons.1.id': {
+                  inq: personIds
                 }
-              },
-              {
-                type: 'event'
               }
-            ],
-            id: {
-              nin: nodeIds
+            }, filter);
+        }
+        // count transmission chains
+        app.models.relationship
+          .countTransmissionChains(self.id, self.periodOfFollowup, filter, function (error, noOfChains) {
+            if (error) {
+              return callback(error);
             }
-          })
-          .then(function (isolatedNodesCount) {
-            // total list of isolated nodes is composed by the nodes that were never in a relationship + the ones that
-            // come from relationships that were invalidated as part of the chain
-            noOfChains.isolatedNodesCount = isolatedNodesCount + isolatedNodesNo;
-            delete noOfChains.isolatedNodes;
-            delete noOfChains.nodes;
-            callback(null, noOfChains);
-          })
-          .catch(callback);
+            // get node IDs
+            const nodeIds = Object.keys(noOfChains.nodes);
+            // count isolated nodes
+            const isolatedNodesNo = Object.keys(noOfChains.isolatedNodes).reduce(function (accumulator, currentValue) {
+              if (noOfChains.isolatedNodes[currentValue]) {
+                accumulator++;
+              }
+              return accumulator;
+            }, 0);
+
+            // build a filter of isolated nodes
+            let isolatedNodesFilter = {
+              outbreakId: self.id,
+              or: [
+                {
+                  type: 'case',
+                  classification: {
+                    inq: app.models.case.nonDiscardedCaseClassifications
+                  }
+                },
+                {
+                  type: 'event'
+                }
+              ],
+              id: {
+                nin: nodeIds
+              }
+            };
+
+            // if there was a people filter
+            if (personIds) {
+              // use it for isolated nodes as well
+              // merge filter knows how to handle filters, but count accepts only 'where'
+              const filter = app.utils.remote
+                .mergeFilters({
+                  where: {
+                    id: {
+                      inq: personIds
+                    }
+                  }
+                }, {where: isolatedNodesFilter});
+              // extract merged 'where' property
+              isolatedNodesFilter = filter.where;
+            }
+            // find other isolated nodes (nodes that were never in a relationship)
+            app.models.person
+              .count(isolatedNodesFilter)
+              .then(function (isolatedNodesCount) {
+                // total list of isolated nodes is composed by the nodes that were never in a relationship + the ones that
+                // come from relationships that were invalidated as part of the chain
+                noOfChains.isolatedNodesCount = isolatedNodesCount + isolatedNodesNo;
+                delete noOfChains.isolatedNodes;
+                delete noOfChains.nodes;
+                callback(null, noOfChains);
+              })
+              .catch(callback);
+          });
       });
   };
 
@@ -1273,138 +1338,198 @@ module.exports = function (Outbreak) {
       delete filter.where.active;
     }
 
+    // initialize a person filter (will contain filters applicable on person entity)
+    let personFilter;
+    // if person filter was sent
+    if (filter && filter.person) {
+      // get it; ask only for IDs
+      personFilter = app.utils.remote
+        .mergeFilters({
+          fields: ['id']
+        }, filter.person);
+      // remove original filter
+      delete filter.person;
+    }
+
     const self = this;
-    // get transmission chains
-    app.models.relationship
-      .getTransmissionChains(this.id, this.periodOfFollowup, filter, function (error, transmissionChains) {
-        if (error) {
-          return callback(error);
-        }
 
-        // initialize result
-        let result;
+    // build a find filtered people if necessary
+    let findFilteredPeople;
+    // if we have a person filter
+    if (personFilter) {
+      // find people that match the filter
+      findFilteredPeople = app.models.person
+        .find(personFilter)
+        .then(function (people) {
+          // return their IDs
+          return people.map(person => person.id);
+        });
+    } else {
+      // no filter passed, nothing to do
+      findFilteredPeople = Promise.resolve(null);
+    }
 
-        // initialize isolated nodes filter
-        let isolatedNodesFilter = {
-          where: {
-            outbreakId: self.id,
-            or: [
-              {
-                type: 'case',
-                classification: {
-                  inq: app.models.case.nonDiscardedCaseClassifications
+    findFilteredPeople
+      .then(function (personIds) {
+        // if there was a people filter
+        if (personIds) {
+          // make sure both people in a relation match the filter passed
+          filter = app.utils.remote
+            .mergeFilters({
+              where: {
+                'persons.0.id': {
+                  inq: personIds
+                },
+                'persons.1.id': {
+                  inq: personIds
                 }
-              },
-              {
-                type: 'event'
               }
-            ]
-          }
-        };
+            }, filter);
+        }
+        // get transmission chains
+        app.models.relationship
+          .getTransmissionChains(self.id, self.periodOfFollowup, filter, function (error, transmissionChains) {
+            if (error) {
+              return callback(error);
+            }
 
-        // depending on activeFilter we need to filter the transmissionChains
-        if (typeof activeFilter !== 'undefined') {
-          result = {
-            transmissionChains: {
-              chains: []
-            },
-            nodes: {},
-            edges: {}
-          };
+            // initialize result
+            let result;
 
-          // initialize helper nodes to select map
-          let nodesToSelectMap = {};
+            // initialize isolated nodes filter
+            let isolatedNodesFilter = {
+              where: {
+                outbreakId: self.id,
+                or: [
+                  {
+                    type: 'case',
+                    classification: {
+                      inq: app.models.case.nonDiscardedCaseClassifications
+                    }
+                  },
+                  {
+                    type: 'event'
+                  }
+                ]
+              }
+            };
 
-          // filter the transmission chains based on the activeFilter
-          let chains = _.get(transmissionChains, 'transmissionChains.chains');
-          chains.forEach(function (chain) {
-            if (chain.active === activeFilter) {
-              // add chain in result
-              result.transmissionChains.chains.push(chain);
+            // if there was a people filter
+            if (personIds) {
+              // use it for isolated nodes as well
+              isolatedNodesFilter = app.utils.remote
+                .mergeFilters({
+                  where: {
+                    id: {
+                      inq: personIds
+                    }
+                  }
+                }, isolatedNodesFilter);
+            }
+            // depending on activeFilter we need to filter the transmissionChains
+            if (typeof activeFilter !== 'undefined') {
+              result = {
+                transmissionChains: {
+                  chains: []
+                },
+                nodes: {},
+                edges: {}
+              };
 
-              // get nodes in the chain if not already selected
-              chain.chain.forEach(function (edgeComponents) {
-                edgeComponents.forEach(function (comp) {
-                  if (!nodesToSelectMap[comp]) {
-                    nodesToSelectMap[comp] = true;
+              // initialize helper nodes to select map
+              let nodesToSelectMap = {};
+
+              // filter the transmission chains based on the activeFilter
+              let chains = _.get(transmissionChains, 'transmissionChains.chains');
+              chains.forEach(function (chain) {
+                if (chain.active === activeFilter) {
+                  // add chain in result
+                  result.transmissionChains.chains.push(chain);
+
+                  // get nodes in the chain if not already selected
+                  chain.chain.forEach(function (edgeComponents) {
+                    edgeComponents.forEach(function (comp) {
+                      if (!nodesToSelectMap[comp]) {
+                        nodesToSelectMap[comp] = true;
+                      }
+                    });
+                  });
+                }
+              });
+
+              // get chains length
+              result.transmissionChains.length = result.transmissionChains.chains.length;
+
+              // select edges/nodes for the required nodes
+              let nodesToSelect = Object.keys(nodesToSelectMap);
+              if (nodesToSelect.length) {
+                // get edges
+                let edges = _.get(transmissionChains, 'edges', {});
+                Object.keys(edges).forEach(function (edgeId) {
+                  let edge = edges[edgeId];
+                  // add edge in result if needed
+                  if (nodesToSelectMap[edge.persons[0].id] || nodesToSelectMap[edge.persons[1].id]) {
+                    result.edges[edgeId] = edge;
                   }
                 });
-              });
+
+                // get nodes
+                let nodes = _.get(transmissionChains, 'nodes', {});
+                nodesToSelect.forEach(nodeId => result.nodes[nodeId] = nodes[nodeId]);
+              }
+
+              // update isolated nodes filter depending on active filter value
+              let followUpPeriod = self.periodOfFollowup;
+              // get day of the start of the follow-up period starting from today
+              let followUpStartDate = genericHelpers.getUTCDate().subtract(followUpPeriod, 'days');
+
+              if (activeFilter) {
+                // get cases/events reported in the last followUpPeriod days
+                isolatedNodesFilter = app.utils.remote
+                  .mergeFilters({
+                    where: {
+                      dateOfReporting: {
+                        gte: new Date(followUpStartDate)
+                      }
+                    }
+                  }, isolatedNodesFilter);
+              } else {
+                // get cases/events reported earlier than in the last followUpPeriod days
+                isolatedNodesFilter = app.utils.remote
+                  .mergeFilters({
+                    where: {
+                      dateOfReporting: {
+                        lt: new Date(followUpStartDate)
+                      }
+                    }
+                  }, isolatedNodesFilter);
+              }
+            } else {
+              result = transmissionChains;
             }
+
+            // update isolated nodes filter
+            isolatedNodesFilter = app.utils.remote
+              .mergeFilters({
+                where: {
+                  id: {
+                    nin: Object.keys(result.nodes)
+                  }
+                }
+              }, isolatedNodesFilter);
+
+            // get isolated nodes as well (nodes that were never part of a relationship)
+            app.models.person
+              .find(isolatedNodesFilter)
+              .then(function (isolatedNodes) {
+                // add all the isolated nodes to the complete list of nodes
+                isolatedNodes.forEach(function (isolatedNode) {
+                  result.nodes[isolatedNode.id] = isolatedNode;
+                });
+                callback(null, result);
+              })
+              .catch(callback);
           });
-
-          // get chains length
-          result.transmissionChains.length = result.transmissionChains.chains.length;
-
-          // select edges/nodes for the required nodes
-          let nodesToSelect = Object.keys(nodesToSelectMap);
-          if (nodesToSelect.length) {
-            // get edges
-            let edges = _.get(transmissionChains, 'edges', {});
-            Object.keys(edges).forEach(function (edgeId) {
-              let edge = edges[edgeId];
-              // add edge in result if needed
-              if (nodesToSelectMap[edge.persons[0].id] || nodesToSelectMap[edge.persons[1].id]) {
-                result.edges[edgeId] = edge;
-              }
-            });
-
-            // get nodes
-            let nodes = _.get(transmissionChains, 'nodes', {});
-            nodesToSelect.forEach(nodeId => result.nodes[nodeId] = nodes[nodeId]);
-          }
-
-          // update isolated nodes filter depending on active filter value
-          let followUpPeriod = self.periodOfFollowup;
-          // get day of the start of the follow-up period starting from today
-          let followUpStartDate = genericHelpers.getUTCDate().subtract(followUpPeriod, 'days');
-
-          if (activeFilter) {
-            // get cases/events reported in the last followUpPeriod days
-            isolatedNodesFilter = app.utils.remote
-              .mergeFilters({
-                where: {
-                  dateOfReporting: {
-                    gte: new Date(followUpStartDate)
-                  }
-                }
-              }, isolatedNodesFilter);
-          } else {
-            // get cases/events reported earlier than in the last followUpPeriod days
-            isolatedNodesFilter = app.utils.remote
-              .mergeFilters({
-                where: {
-                  dateOfReporting: {
-                    lt: new Date(followUpStartDate)
-                  }
-                }
-              }, isolatedNodesFilter);
-          }
-        } else {
-          result = transmissionChains;
-        }
-
-        // update isolated nodes filter
-        isolatedNodesFilter = app.utils.remote
-          .mergeFilters({
-            where: {
-              id: {
-                nin: Object.keys(result.nodes)
-              }
-            }
-          }, isolatedNodesFilter);
-
-        // get isolated nodes as well (nodes that were never part of a relationship)
-        app.models.person
-          .find(isolatedNodesFilter)
-          .then(function (isolatedNodes) {
-            // add all the isolated nodes to the complete list of nodes
-            isolatedNodes.forEach(function (isolatedNode) {
-              result.nodes[isolatedNode.id] = isolatedNode;
-            });
-            callback(null, result);
-          })
-          .catch(callback);
       });
   };
 
