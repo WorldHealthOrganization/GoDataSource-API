@@ -110,9 +110,8 @@ module.exports = function (Backup) {
       // remove backup record and file
       app.models.backup
         .findById(backupId)
-        .then((backup) => backup.remove(backup));
+        .then((restoredBackup) => backup.remove(restoredBackup));
 
-      // do not wait for removal
       return done();
     });
   };
