@@ -62,7 +62,7 @@ module.exports = function (Backup) {
               if (err) {
                 newStatus = backupModel.status.FAILED;
               }
-              record.updateAttributes({ status: newStatus, location: backupFilePath });
+              record.updateAttributes({status: newStatus, location: backupFilePath});
             });
             // send the response back to the user, do not wait for the backup to finish
             return done(null, record.id);

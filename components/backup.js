@@ -200,7 +200,7 @@ const restoreBackupFromFile = function (filePath, done) {
       });
 
   } catch (pathAccessError) {
-    app.logger.error(`Backup location: ${location} is not OK. ${pathAccessError}`);
+    app.logger.error(`Backup location: ${filePath} is not OK. ${pathAccessError}`);
     return done(pathAccessError);
   }
 };
