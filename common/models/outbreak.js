@@ -42,6 +42,19 @@ module.exports = function (Outbreak) {
   // set a higher limit for event listeners to avoid warnings (we have quite a few listeners)
   Outbreak.setMaxListeners(50);
 
+  // The permissions that influence an user's ability to see a person's data
+  Outbreak.personReadPermissions = [
+    'read_case',
+    'read_contact'
+  ];
+
+  // The fields that will be displayed when a user receives a person's data even though he does not
+  // have permission to see it (ex. reports, chains of transmission, etc)
+  Outbreak.noPersonReadPermissionFields = [
+    'id',
+    'type'
+  ];
+
   /**
    * Checks whether the given follow up model is generated
    * Checks that update/create dates are on the same
@@ -593,7 +606,7 @@ module.exports = function (Outbreak) {
     // if the required permission is missing
     if (permissions.indexOf(requiredPermissionMap[type]) === -1) {
       // use restricted field
-      filter = createRestrictedFilter(filter, ['id', 'relationships', 'persons', 'people']);
+      filter = createRestrictedFilter(filter, [...Outbreak.noPersonReadPermissionFields, 'relationships', 'persons', 'people']);
       // update filter
       _.set(context, 'args.filter', filter);
     }
@@ -749,8 +762,8 @@ module.exports = function (Outbreak) {
         include: [
           {
             relation: 'relationships',
-            fields: ['id', 'contactDate'],
             scope: {
+              fields: ['id', 'contactDate'],
               filterParent: true
             }
           }
@@ -980,5 +993,41 @@ module.exports = function (Outbreak) {
       }
       return key;
     });
+  };
+  /**
+   * Get the user's person read permissions
+   * @param context
+   * @returns {*}
+   */
+  Outbreak.helpers.getUsersPersonReadPermissions= function (context) {
+    let userPermissions = context.req.authData.user.permissionsList;
+
+    // Keep only the read person permissions that the user has
+    let personReadPermissions = (userPermissions.filter(value => -1 !== Outbreak.personReadPermissions.indexOf(value)));
+
+    // Keep only the unique values
+    personReadPermissions = [...new Set(personReadPermissions)];
+
+    return personReadPermissions;
+  };
+
+  /**
+   * Hide fields that the user does not have permission to see on a person model (case/contact/event)
+   * @param model
+   */
+  Outbreak.helpers.limitPersonInformation = function (model, permissions) {
+    const personReadPermissionMap = {
+      'contact': 'read_contact',
+      'case': 'read_case',
+      'event': 'read_case'
+    };
+
+    if (permissions.indexOf(personReadPermissionMap[model.type]) === -1) {
+      for (let key in model) {
+        if (Outbreak.noPersonReadPermissionFields.indexOf(key) === -1) {
+          delete model[key];
+        }
+      }
+    }
   };
 };
