@@ -393,7 +393,12 @@ function extractVariablesAndAnswerOptions(template) {
         answerType: question.answerType
       };
       // if the question has predefined answers
-      if (Array.isArray(question.answers)) {
+      if (
+        ['LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER',
+          'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS'
+        ].includes(question.answerType) &&
+        Array.isArray(question.answers)
+      ) {
         // store a list of variables
         variable.answers = [];
         // go through the list of answers
