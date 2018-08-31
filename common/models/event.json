@@ -59,7 +59,8 @@
     "gender",
     "phoneNumber",
     "occupation",
-    "addresses"
+    "addresses",
+    "documents"
   ],
   "validations": [],
   "relations": {},
