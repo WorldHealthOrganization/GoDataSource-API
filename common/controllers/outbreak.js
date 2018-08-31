@@ -1538,10 +1538,10 @@ module.exports = function (Outbreak) {
    * check the user's permissions and return only the fields he has access to
    */
   Outbreak.afterRemote('prototype.getIndependentTransmissionChains', function (context, modelInstance, next) {
-    let personReadPermissions = Outbreak.helpers.getUsersPersonReadPermissions(context);
+    let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
 
     Object.keys(modelInstance.nodes).forEach((key) => {
-      Outbreak.helpers.limitPersonInformation(modelInstance.nodes[key], personReadPermissions);
+      Outbreak.helpers.limitPersonInformation(modelInstance.nodes[key], personTypesWithReadAccess);
     });
     next();
   });
@@ -4869,3 +4869,4 @@ module.exports = function (Outbreak) {
       });
   };
 };
+f
