@@ -290,7 +290,7 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('count', function (context, modelInstance, next) {
     const restrictedOutbreakIds = _.get(context, 'req.authData.user.outbreakIds', []);
     if (restrictedOutbreakIds.length) {
-      let filter = Object.assign({}, {where: context.args.where ? context.args.where : {}});
+      let filter = { where: _.get(context, 'args.where', {}) };
       filter = app.utils.remote
         .mergeFilters({
           where: {
