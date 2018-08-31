@@ -1,8 +1,5 @@
 'use strict';
 
-// requires
-const fs = require('fs');
-
 module.exports = function (Backup) {
   Backup.hasController = true;
 

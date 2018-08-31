@@ -45,15 +45,13 @@ module.exports = function (Backup) {
 
         // create new backup record with pending status
         backupModel
-          .create(
-            {
-              date: Date.now(),
-              modules: params.modules,
-              location: null,
-              userId: userId,
-              status: backupModel.status.PENDING
-            }
-          )
+          .create({
+            date: Date.now(),
+            modules: params.modules,
+            location: null,
+            userId: userId,
+            status: backupModel.status.PENDING
+          })
           .then((record) => {
             // start the backup process
             // when done update backup status and file location
@@ -69,32 +67,6 @@ module.exports = function (Backup) {
           })
           .catch((createError) => done(createError));
       });
-  };
-
-  /**
-   * Restore the system from a given backup file
-   * @param req
-   * @param backupFile
-   * @param done
-   */
-  Backup.restoreBackupFromFile = function (req, backupFile, done) {
-    const buildError = app.utils.apiError.getError;
-    const form = new formidable.IncomingForm();
-
-    form.parse(req, function (err, fields, files) {
-      if (err) {
-        return done(err);
-      }
-
-      // validates snapshot archive
-      if (!files.backupFile) {
-        // send back the error
-        return done(buildError('MISSING_REQUIRED_PROPERTY', {
-          model: Backup.modelName,
-          properties: 'backupFile'
-        }));
-      }
-    });
   };
 
   /**

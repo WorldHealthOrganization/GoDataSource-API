@@ -42,15 +42,13 @@ module.exports = function (app) {
 
                   // create new backup record with pending status
                   backupModel
-                    .create(
-                      {
-                        date: Date.now(),
-                        modules: backupSettings.modules,
-                        location: null,
-                        userId: null,
-                        status: backupModel.status.PENDING
-                      }
-                    )
+                    .create({
+                      date: Date.now(),
+                      modules: backupSettings.modules,
+                      location: null,
+                      userId: null,
+                      status: backupModel.status.PENDING
+                    })
                     .then((record) => {
                       // start the backup process
                       // when done update backup status and file location
@@ -59,7 +57,7 @@ module.exports = function (app) {
                         if (err) {
                           newStatus = backupModel.status.FAILED;
                         }
-                        record.updateAttributes({ status: newStatus, location: backupFilePath });
+                        record.updateAttributes({status: newStatus, location: backupFilePath});
                       });
                     });
                 });
