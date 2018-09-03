@@ -69,7 +69,7 @@ module.exports = function (Case) {
     occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
     outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
     'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
-    'addresses[].typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE'
+    'addresses[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE'
   };
 
   Case.referenceDataFields = Object.keys(Case.referenceDataFieldsToCategoryMap);

@@ -112,6 +112,137 @@ const getChunksForInterval = function (interval, chunk) {
 };
 
 /**
+ * Process a flat map into a a map that groups array properties under sub-entities
+ * @param flatMap
+ * @param prefix
+ * @return {{prefix: *, map: {}}}
+ */
+function processMapLists(flatMap, prefix) {
+  // build result structure
+  const processedMap = {
+    prefix: prefix,
+    map: {}
+  };
+  // go through the map
+  Object.keys(flatMap).forEach(function (sourcePath) {
+    // look for array markers in the source path
+    const sourceListMarkerIndex = sourcePath.indexOf('[]');
+    // look for array markers in the destination path
+    const destinationMarkerIndex = flatMap[sourcePath].indexOf('[]');
+    // source map contains an array
+    if (sourceListMarkerIndex !== -1) {
+      // array to array map
+      if (destinationMarkerIndex !== -1) {
+        // get parent source path
+        const parentSourcePath = sourcePath.substring(0, sourceListMarkerIndex);
+        // init result map for parent property (if not already present)
+        if (!processedMap.map[parentSourcePath]) {
+          processedMap.map[parentSourcePath] = {};
+        }
+        // get remaining path
+        const leftSourcePath = sourcePath.substring(sourceListMarkerIndex + 3);
+        // assume there is nothing left to process
+        const dataSetLeftToProcess = {};
+        // if there still is path to be processed
+        if (leftSourcePath.length) {
+          // fill dataSet left to process
+          dataSetLeftToProcess[sourcePath.substring(sourceListMarkerIndex + 3)] = flatMap[sourcePath].substring(destinationMarkerIndex + 3);
+        }
+        // merge existing map with the result of processing remaining map
+        processedMap.map[parentSourcePath] = _.merge(
+          processedMap.map[parentSourcePath],
+          processMapLists(
+            dataSetLeftToProcess,
+            flatMap[sourcePath].substring(0, destinationMarkerIndex)
+          )
+        );
+      } else {
+        // unsupported scenario, cannot map array of objects to single object
+      }
+    } else {
+      // simple map, no arrays
+      processedMap.map[sourcePath] = flatMap[sourcePath];
+    }
+  });
+  // return processed map
+  return processedMap;
+}
+
+/**
+ * Remap dataSet properties & values using a processed map
+ * @param dataSet
+ * @param processedMap
+ * @param valuesMap
+ * @param parentPath
+ * @return {Array}
+ */
+function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, parentPath) {
+  // process only if there's something to process
+  if (Array.isArray(dataSet)) {
+    // initialize results container
+    const results = [];
+    // go through all the items in the dataSet
+    dataSet.forEach(function (item) {
+      // start building the result
+      const result = {};
+      // get source paths list
+      const sourcePaths = Object.keys(processedMap.map);
+      // if there are source paths to process
+      if (sourcePaths.length) {
+        // go through the source paths
+        sourcePaths.forEach(function (sourcePath) {
+          // build parent path prefix
+          const parentPathPrefix = parentPath ? `${parentPath}.` : '';
+          // if the source path is an object, it means that it contains children items that need to be processed
+          if (typeof processedMap.map[sourcePath] === 'object') {
+            // store children results after they were processed
+            _.set(
+              result,
+              processedMap.map[sourcePath].prefix,
+              // process children items
+              remapPropertiesUsingProcessedMap(
+                // get dataSet that needs to be processed
+                _.get(item, sourcePath),
+                // use sub-map
+                processedMap.map[sourcePath],
+                valuesMap,
+                // build path to the item that's being processed (will be used by values mapper)
+                `${parentPathPrefix}${sourcePath}[]`
+              )
+            );
+          // simple mapping, no arrays
+          } else {
+            // get the resolved value
+            const value = _.get(item, sourcePath);
+            // define a replacement parent value
+            let replaceValueParent;
+            // check if the value has a replacement value defined
+            if (
+              value !== undefined &&
+              typeof value !== 'object' &&
+              (replaceValueParent = valuesMap[`${parentPathPrefix}${sourcePath}`])
+              && replaceValueParent[value] !== undefined
+            ) {
+              // use that replacement value
+              _.set(result, `${processedMap.map[sourcePath]}`, replaceValueParent[value]);
+            } else {
+              // no replacement value defined, use resolved value
+              _.set(result, `${processedMap.map[sourcePath]}`, value);
+            }
+          }
+        });
+        // store the result
+        results.push(result);
+      } else {
+        // nothing to process, copy as is
+        results.push(item);
+      }
+    });
+    return results;
+  }
+}
+
+/**
  * Remap a list of items using a map. Optionally remap their values using a values map
  * @param list
  * @param fieldsMap
@@ -119,32 +250,7 @@ const getChunksForInterval = function (interval, chunk) {
  * @return {Array}
  */
 const remapProperties = function (list, fieldsMap, valuesMap) {
-  // store final result
-  let results = [];
-  // get a list of source fields
-  let fields = Object.keys(fieldsMap);
-  // go through the list of items
-  list.forEach(function (item) {
-    // build each individual item
-    let result = {};
-    // go trough the list of fields
-    fields.forEach(function (field) {
-      if (fieldsMap[field]) {
-        // if no array position was specified, use position 0
-        fieldsMap[field] = fieldsMap[field].replace(/\[]/g, '[0]');
-        // remap property
-        _.set(result, fieldsMap[field], item[field]);
-        // if a values map was provided
-        if (valuesMap && valuesMap[field] && valuesMap[field][item[field]] !== undefined) {
-          // remap the values
-          _.set(result, fieldsMap[field], valuesMap[field][item[field]]);
-        }
-      }
-    });
-    // add processed item to the final list
-    results.push(result);
-  });
-  return results;
+  return remapPropertiesUsingProcessedMap(list, processMapLists(fieldsMap), valuesMap);
 };
 
 /**

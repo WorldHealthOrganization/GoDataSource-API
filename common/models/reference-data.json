@@ -143,6 +143,12 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "exportFilteredReferenceData"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_reference_data",
+      "permission": "ALLOW",
+      "property": "importImportableReferenceDataFileUsingMap"
     }
   ],
   "methods": {
@@ -302,6 +308,39 @@
       "http": {
         "verb": "get",
         "path": "/export"
+      }
+    },
+    "importImportableReferenceDataFileUsingMap": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithFieldAndReferenceDataMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "referenceData",
+          "type": [
+            "referenceData"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a list of reference data from a file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/import-importable-file-using-map"
       }
     }
   }

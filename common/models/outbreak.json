@@ -687,6 +687,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "filteredCountEvents"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "filteredCountEvents"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "countIndependentTransmissionChains"
@@ -1014,6 +1026,12 @@
       "principalId": "read_outbreak",
       "permission": "ALLOW",
       "property": "exportFilteredReferenceData"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "importImportableReferenceDataFileUsingMap"
     }
   ],
   "methods": {
@@ -1943,7 +1961,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts a `noRelationships` flag on the first level of `where`."
         }
       ],
       "returns": [
@@ -1958,6 +1976,28 @@
       "http": {
         "verb": "get",
         "path": "/cases/filtered-count"
+      }
+    },
+    "prototype.filteredCountEvents": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts a `noRelationships` flag on the first level of `where`."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of events that pass the filter",
+          "required": true
+        }
+      ],
+      "description": "Counts the cases that pass a filter (which can now accept relations)",
+      "http": {
+        "verb": "get",
+        "path": "/events/filtered-count"
       }
     },
     "prototype.exportFilteredCases": {
@@ -2113,7 +2153,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a (full) person filter on 'person' property of the filter."
         }
       ],
       "returns": [
@@ -2148,7 +2188,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'active' boolean on the first level in 'where'"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'active' boolean on the first level in 'where' and a (full) person filter on 'person' property of the filter"
         }
       ],
       "returns": [
@@ -3976,6 +4016,39 @@
       "http": {
         "verb": "get",
         "path": "/reference-data/export"
+      }
+    },
+    "prototype.importImportableReferenceDataFileUsingMap": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithFieldAndReferenceDataMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "referenceData",
+          "type": [
+            "referenceData"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a list of reference data from a file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/reference-data/import-importable-file-using-map"
       }
     }
   }
