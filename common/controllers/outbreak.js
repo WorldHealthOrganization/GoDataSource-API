@@ -69,6 +69,21 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Allows count requests with advanced filters (like the ones we can use on GET requests)
+   * to be mode on outbreak/{id}/events.
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountEvents = function (filter, callback) {
+    this.__get__events(filter, function (err, res) {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
+    });
+  };
+
+  /**
    * Export filtered cases to file
    * @param filter
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
@@ -163,6 +178,20 @@ module.exports = function (Outbreak) {
     // filter information based on available permissions
     Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('contact', context);
     next();
+  });
+
+  /**
+   * Attach before remote (GET outbreaks/{id}/cases/filtered-count) hooks
+   */
+  Outbreak.beforeRemote('prototype.filteredCountCases', function (context, modelInstance, next) {
+    Outbreak.helpers.attachFilterPeopleWithoutRelation('case', context, modelInstance, next);
+  });
+
+  /**
+   * Attach before remote (GET outbreaks/{id}/events/filtered-count) hooks
+   */
+  Outbreak.beforeRemote('prototype.filteredCountEvents', function (context, modelInstance, next) {
+    Outbreak.helpers.attachFilterPeopleWithoutRelation('event', context, modelInstance, next);
   });
 
   /**
@@ -282,6 +311,23 @@ module.exports = function (Outbreak) {
             }
           }
         }, context.args.filter || {});
+    }
+    next();
+  });
+
+  Outbreak.beforeRemote('count', function (context, modelInstance, next) {
+    const restrictedOutbreakIds = _.get(context, 'req.authData.user.outbreakIds', []);
+    if (restrictedOutbreakIds.length) {
+      let filter = { where: _.get(context, 'args.where', {}) };
+      filter = app.utils.remote
+        .mergeFilters({
+          where: {
+            id: {
+              in: restrictedOutbreakIds
+            }
+          }
+        }, filter || {});
+      context.args.where = filter.where;
     }
     next();
   });
@@ -1524,7 +1570,7 @@ module.exports = function (Outbreak) {
               .then(function (isolatedNodes) {
                 // add all the isolated nodes to the complete list of nodes
                 isolatedNodes.forEach(function (isolatedNode) {
-                  result.nodes[isolatedNode.id] = isolatedNode;
+                  result.nodes[isolatedNode.id] = isolatedNode.toJSON();
                 });
                 callback(null, result);
               })
@@ -1532,6 +1578,19 @@ module.exports = function (Outbreak) {
           });
       });
   };
+
+  /**
+   * Since this endpoint returns person data without checking if the user has the required read permissions,
+   * check the user's permissions and return only the fields he has access to
+   */
+  Outbreak.afterRemote('prototype.getIndependentTransmissionChains', function (context, modelInstance, next) {
+    let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+
+    Object.keys(modelInstance.nodes).forEach((key) => {
+      Outbreak.helpers.limitPersonInformation(modelInstance.nodes[key], personTypesWithReadAccess);
+    });
+    next();
+  });
 
   /**
    * Set outbreakId for created follow-ups
@@ -1869,6 +1928,21 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Since this endpoint returns person data without checking if the user has the required read permissions,
+   * check the user's permissions and return only the fields he has access to
+   */
+  Outbreak.afterRemote('prototype.longPeriodsBetweenDatesOfOnsetInTransmissionChains', function(context, modelInstance, next) {
+    let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+
+    modelInstance.forEach((relationship) => {
+      relationship.people.forEach((person) => {
+        Outbreak.helpers.limitPersonInformation(person, personTypesWithReadAccess);
+      });
+    });
+    next();
+  });
+
+  /**
    * Build new transmission chains from registered contacts who became cases
    * @param filter
    * @param callback
@@ -1876,6 +1950,19 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.buildNewChainsFromRegisteredContactsWhoBecameCases = function (filter, callback) {
     Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases(this, filter, false, callback);
   };
+
+  /**
+   * Since this endpoint returns person data without checking if the user has the required read permissions,
+   * check the user's permissions and return only the fields he has access to
+   */
+  Outbreak.afterRemote('prototype.buildNewChainsFromRegisteredContactsWhoBecameCases', function(context, modelInstance, next) {
+    let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+
+    Object.keys(modelInstance.nodes).forEach((key) => {
+      Outbreak.helpers.limitPersonInformation(modelInstance.nodes[key], personTypesWithReadAccess);
+    });
+    next();
+  });
 
   /**
    * Count new transmission chains from registered contacts who became cases
@@ -2055,6 +2142,22 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+
+  /**
+   * Since this endpoint returns person data without checking if the user has the required read permissions,
+   * check the user's permissions and return only the fields he has access to
+   */
+  Outbreak.afterRemote('prototype.findSecondaryCasesWithDateOfOnsetBeforePrimaryCase', function(context, modelInstance, next) {
+    let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+
+    modelInstance.forEach((personPair) => {
+      Outbreak.helpers.limitPersonInformation(personPair.primaryCase, personTypesWithReadAccess);
+      Outbreak.helpers.limitPersonInformation(personPair.secondaryCase, personTypesWithReadAccess);
+    });
+
+    next();
+  });
 
   /**
    * Count the new cases in the previous X days detected among known contacts
@@ -3571,7 +3674,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Restore a deleted reference data
-   * @param caseId
+   * @param referenceDataId
    * @param options
    * @param callback
    */
