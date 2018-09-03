@@ -170,7 +170,7 @@ function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, pare
       const sourcePaths = Object.keys(processedMap.map);
       // if there are source paths to process
       if (sourcePaths.length) {
-        // go thought he source paths
+        // go through the source paths
         sourcePaths.forEach(function (sourcePath) {
           // build parent path prefix
           const parentPathPrefix = parentPath ? `${parentPath}.` : '';
