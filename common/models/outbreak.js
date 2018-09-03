@@ -108,26 +108,27 @@ module.exports = function (Outbreak) {
     }
     if (Array.isArray(data.persons) && data.persons.length) {
 
-      let errors;
+      let errors = [];
       let persons = [];
 
-      data.persons.forEach(function (person, index) {
-        // validate each person item
-        if (person.id === undefined) {
-          if (!errors) {
-            errors = [];
-          }
-          errors.push(`"persons[${index}]" must contain "id"`);
-          // add only other people
-        } else if (person.id !== personId) {
-          // make sure type is not set (it will be set later on)
-          delete person.type;
-          persons.push(person);
-        }
-      });
+      // We allow the user to send multiple persons in a create relationships request but we only use the first one.
+      // We do this so that we can "silently" treat an user error.
+      let person = data.persons[0];
+
+      // validate the person item
+      if (person.id === undefined) {
+        errors.push(`"persons[0]" must contain "id"`);
+      // add only other people
+      } else if (person.id === personId) {
+        errors.push('You cannot link a person to itself');
+      } else {
+        // make sure type is not set (it will be set later on)
+        delete person.type;
+        persons.push(person);
+      }
 
       // check validation errors
-      if (errors) {
+      if (errors.length) {
         return callback(app.utils.apiError.getError('VALIDATION_ERROR', {
           model: app.models.relationship.modelName,
           details: errors.join(', ')
