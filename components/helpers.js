@@ -133,8 +133,7 @@ function processMapLists(flatMap, prefix) {
           processedMap.map[parentSourcePath],
           processMapLists(
             dataSetLeftToProcess,
-            flatMap[sourcePath].substring(0, destinationMarkerIndex
-            )
+            flatMap[sourcePath].substring(0, destinationMarkerIndex)
           )
         );
       } else {
