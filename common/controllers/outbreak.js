@@ -4070,8 +4070,8 @@ module.exports = function (Outbreak) {
           // and not converted by the initial toJSON method.
           person.relationships.forEach((relationship, relationshipIndex) => {
             person.relationships[relationshipIndex] = relationship.toJSON();
-            relationship.people.forEach((member, memberIndex) => {
-              relationship.people[memberIndex] = member.toJSON();
+            person.relationships[relationshipIndex].people.forEach((member, memberIndex) => {
+              person.relationships[relationshipIndex].people[memberIndex] = member.toJSON();
             });
           });
         });
@@ -4089,7 +4089,7 @@ module.exports = function (Outbreak) {
               app.utils.helpers.formatDateFields(person, caseDossierDateFields);
               app.utils.helpers.formatUndefinedValues(person);
 
-
+              // Prepare the case's relationships for printing
               person.relationships.forEach((relationship, relationshipIndex) => {
                 sanitizedCases[caseIndex].relationships = [];
 
@@ -4114,6 +4114,7 @@ module.exports = function (Outbreak) {
                 sanitizedCases[caseIndex].relationships[relationshipIndex] = relationship;
               });
 
+              // Prepare the  de case's lab results and lab results questionnaires for printing.
               person.labResults.forEach((labResult, labIndex) => {
                 sanitizedCases[caseIndex].labResults = [];
 
@@ -4264,8 +4265,8 @@ module.exports = function (Outbreak) {
           // and not converted by the initial toJSON method.
           contact.relationships.forEach((relationship, relationshipIndex) => {
             contact.relationships[relationshipIndex] = relationship.toJSON();
-            relationship.people.forEach((member, memberIndex) => {
-              relationship.people[memberIndex] = member.toJSON();
+            contact.relationships[relationshipIndex].people.forEach((member, memberIndex) => {
+              contact.relationships[relationshipIndex].people[memberIndex] = member.toJSON();
             });
           });
         });
@@ -4282,7 +4283,7 @@ module.exports = function (Outbreak) {
               app.utils.helpers.formatDateFields(contact, contactDossierDateFields);
               app.utils.helpers.formatUndefinedValues(contact);
 
-
+              // Prepare the contact's relationships for printing
               contact.relationships.forEach((relationship, relationshipIndex) => {
                 sanitizedContacts[contactIndex].relationships = [];
 
@@ -4307,6 +4308,7 @@ module.exports = function (Outbreak) {
                 sanitizedContacts[contactIndex].relationships[relationshipIndex] = relationship;
               });
 
+              // Prepare the contact's followUps for printing
               contact.followUps.forEach((followUp, followUpIndex) => {
                 sanitizedContacts[contactIndex].followUps = [];
 

@@ -416,10 +416,12 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
  * @param title
  */
 const displayPersonRelationships = function (doc, relationships, title) {
-  relationships.forEach((relationship, index) => {
-    doc.addPage();
-    displayModelDetails(doc, relationship, true, index === 0 ? title : null);
-  });
+  if (relationships && Array.isArray(relationships)) {
+    relationships.forEach((relationship, index) => {
+      doc.addPage();
+      displayModelDetails(doc, relationship, true, index === 0 ? title : null);
+    });
+  }
 };
 
 /**
@@ -429,12 +431,14 @@ const displayPersonRelationships = function (doc, relationships, title) {
  * @param title
  */
 const displayPersonSectionsWithQuestionnaire = function (doc, sections, title, questionnaireTitle) {
-  sections.forEach((section, index) => {
-    doc.addPage();
-    displayModelDetails(doc, _.omit(section, 'questionnaire'), true, index === 0 ? title : null);
-    doc.addPage();
-    createQuestionnaire(doc, section.questionnaire, true, questionnaireTitle);
-  });
+  if (sections && Array.isArray(sections)) {
+    sections.forEach((section, index) => {
+      doc.addPage();
+      displayModelDetails(doc, _.omit(section, 'questionnaire'), true, index === 0 ? title : null);
+      doc.addPage();
+      createQuestionnaire(doc, section.questionnaire, true, questionnaireTitle);
+    });
+  }
 };
 
 /**
