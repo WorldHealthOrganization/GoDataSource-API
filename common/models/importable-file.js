@@ -55,7 +55,7 @@ module.exports = function (ImportableFile) {
       jsonObj.forEach(function (item) {
         // go through all properties of flatten item
         Object.keys(app.utils.helpers.getFlatObject(item)).forEach(function (property) {
-          const sanitizedProperty = property.replace(/\[\d+]/g, '').replace(/^\./, '');
+          const sanitizedProperty = property.replace(/\[\d+]/g, '[]').replace(/^\[]\.*/, '');
           // add the header if not already included
           if (!headers.includes(sanitizedProperty)) {
             headers.push(sanitizedProperty);
@@ -103,7 +103,7 @@ module.exports = function (ImportableFile) {
       jsonObj[firstProp].forEach(function (item) {
         // go through all properties of flatten item
         Object.keys(app.utils.helpers.getFlatObject(item)).forEach(function (property) {
-          const sanitizedProperty = property.replace(/\[\d+]/g, '').replace(/^\./, '');
+          const sanitizedProperty = property.replace(/\[\d+]/g, '[]').replace(/^\[]\.*/, '');
           // add the header if not already included
           if (!headers.includes(sanitizedProperty)) {
             headers.push(sanitizedProperty);
