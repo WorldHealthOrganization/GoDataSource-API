@@ -8,6 +8,7 @@
  * To run the script, simply type 'mongo <path-to-this-file> in the terminal'
  */
 
+/* eslint-disable */
 db = db.getSiblingDB('go-data');
 
 db.relationship.find({}).forEach((relationship) => {
@@ -60,3 +61,4 @@ db.relationship.find({}).forEach((relationship) => {
       }
     }
 });
+/* eslint-enable */
