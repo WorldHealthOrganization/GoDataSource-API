@@ -443,7 +443,7 @@ module.exports = function (ReferenceData) {
           // for description property
           if (property === 'description') {
             // add description suffix
-            token += '__DESCRIPTION';
+            token += '_DESCRIPTION';
           }
 
           // find the token associated with the value
