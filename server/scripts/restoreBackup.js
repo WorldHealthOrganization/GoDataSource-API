@@ -16,11 +16,12 @@ if (!file) {
 backup.restoreFromFile(file.pop(), (err) => {
   if (err) {
     console.error(err);
+    process.exit(1);
   }
 
   // stop with success
   console.log('Successfully restored backup');
-  process.exit(1);
+  process.exit();
 });
 
 

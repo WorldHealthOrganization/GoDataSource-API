@@ -19,7 +19,7 @@ const helpers = require('../components/helpers');
  */
 const createBackup = function (modules, location, done) {
   const models = app.models;
-  const backupModel = app.models.backup;
+  const backupModel = models.backup;
 
   // collect all collections that must be exported, based on the modules
   let collections = [];
@@ -208,22 +208,32 @@ const restoreBackupFromFile = function (filePath, done) {
 /**
  * Used to delete backups after a manual restore and for retention routine
  * @param backup
+ * @param callback
  */
-const removeBackup = function (backup) {
-  if (backup.location) {
-    fs.unlink(backup.location, (err) => {
-      if (err) {
-        app.logger.warn(`Failed to remove ${backup.location} for ${backup.id}. ${err}`);
+const removeBackup = function (backup, callback) {
+  return async.series([
+    (done) => {
+      if (backup.location) {
+        fs.unlink(backup.location, (err) => {
+          if (err) {
+            app.logger.warn(`Failed to remove ${backup.location} for ${backup.id}. ${err}`);
+            return done(err);
+          }
+          return done();
+        });
       }
-    });
-  }
-
-  // remove the backup record
-  app.models.backup.deleteById(backup.id, (err) => {
-    if (err) {
-      app.logger.warn(`Failed to remove backup record: ${backup.id} from database. ${err}`);
+    },
+    (done) => {
+      // remove the backup record
+      app.models.backup.deleteById(backup.id, (err) => {
+        if (err) {
+          app.logger.warn(`Failed to remove backup record: ${backup.id} from database. ${err}`);
+          return done(err);
+        }
+        return done();
+      });
     }
-  });
+  ], (err) => callback(err));
 };
 
 

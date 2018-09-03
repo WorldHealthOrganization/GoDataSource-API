@@ -820,6 +820,8 @@ const parseModelFieldValues = function (modelInstanceJSON, Model) {
 
 /**
  * Checks if a directory/file is readable/writable and visible to the calling process
+ * Access sync function is throwing error in case file is not ok
+ * Make sure to treat it
  * @param path
  */
 const isPathOK = function (path) {

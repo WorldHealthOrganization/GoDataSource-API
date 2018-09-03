@@ -22,11 +22,11 @@
       "type": "date"
     },
     "status": {
-      "type": "number",
+      "type": "string",
       "enum": [
-        0,
-        1,
-        2
+        "LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS_SUCCESS",
+        "LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS_FAILED",
+        "LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS_IN_PROGRESS"
       ],
       "description": "Backup status: 0 success, 1 failed, 2 pending. Not be confused with restore, this status is for backup creation"
     }
@@ -89,11 +89,33 @@
           "type": "string"
         }
       ],
-      "returns": [],
+      "returns": [
+        {
+          "arg": "error"
+        }
+      ],
       "description": "Restore backup",
       "http": {
         "verb": "post",
         "path": "/:backupId/restore"
+      }
+    },
+    "removeBackup": {
+      "accepts": [
+        {
+          "arg": "backupId",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "error"
+        }
+      ],
+      "description": "Remove backup",
+      "http": {
+        "verb": "post",
+        "path": "/:backupId/remove"
       }
     }
   }

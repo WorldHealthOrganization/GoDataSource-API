@@ -8,8 +8,11 @@ module.exports = function (Language) {
 
   // language tokens should not be managed via API
   app.utils.remote.disableRemoteMethods(Language, [
-    'create',
-    'prototype.patchAttributes'
+    'prototype.__create__languageTokens',
+    'prototype.__delete__languageTokens',
+    'prototype.__findById__languageTokens',
+    'prototype.__updateById__languageTokens',
+    'prototype.__destroyById__languageTokens',
   ]);
 
   Language.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
