@@ -7,6 +7,7 @@ const xml2js = require('xml2js');
 const xlsx = require('xlsx');
 const os = require('os');
 const uuid = require('uuid');
+const sort = require('alphanum-sort');
 
 module.exports = function (ImportableFile) {
 
@@ -55,7 +56,7 @@ module.exports = function (ImportableFile) {
       jsonObj.forEach(function (item) {
         // go through all properties of flatten item
         Object.keys(app.utils.helpers.getFlatObject(item)).forEach(function (property) {
-          const sanitizedProperty = property.replace(/\[\d+]/g, '').replace(/^\./, '');
+          const sanitizedProperty = property.replace(/\[\d+]/g, '[]').replace(/^\[]\.*/, '');
           // add the header if not already included
           if (!headers.includes(sanitizedProperty)) {
             headers.push(sanitizedProperty);
@@ -103,7 +104,7 @@ module.exports = function (ImportableFile) {
       jsonObj[firstProp].forEach(function (item) {
         // go through all properties of flatten item
         Object.keys(app.utils.helpers.getFlatObject(item)).forEach(function (property) {
-          const sanitizedProperty = property.replace(/\[\d+]/g, '').replace(/^\./, '');
+          const sanitizedProperty = property.replace(/\[\d+]/g, '[]').replace(/^\[]\.*/, '');
           // add the header if not already included
           if (!headers.includes(sanitizedProperty)) {
             headers.push(sanitizedProperty);
@@ -127,30 +128,41 @@ module.exports = function (ImportableFile) {
     let sheetName = parsedData.SheetNames.shift();
     // convert data to JSON
     let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName], {dateNF: 'YYYY-MM-DD\'T\'hh:mm:ss.000\'Z\''});
-    // get sheer range
-    let range = /^[A-Za-z]+\d+:([A-Za-z])+\d+$/.exec(parsedData.Sheets[sheetName]['!ref']);
+    // get columns by walking through the keys and using only the first row
+    const columns = sort(Object.keys(parsedData.Sheets[sheetName]).filter(function (item) {
+      // ignore ref property
+      if (item === '!ref') {
+        return false;
+      }
+      // get data index
+      const matches = item.match(/(\d+)/);
+      if (matches && matches[1]) {
+        // get only first row
+        return parseInt(matches[1]) === 1;
+      }
+      return false;
+    }));
     // keep a list of headers
     let headers = [];
     // keep a list of how many times a header appears
     let sameHeaderCounter = {};
-    if (range) {
-      // look for headers in the range
-      for (let i = 'A'.charCodeAt(0); i <= range[1].charCodeAt(0); i++) {
-        if (parsedData.Sheets[sheetName][`${String.fromCharCode(i)}1`]) {
-          let headerValue = parsedData.Sheets[sheetName][`${String.fromCharCode(i)}1`].v;
-          // if this is the first time the header appears
-          if (sameHeaderCounter[headerValue] === undefined) {
-            // create an entry for it in the counter
-            sameHeaderCounter[headerValue] = 0;
-          } else {
-            // increment counter
-            sameHeaderCounter[headerValue]++;
-            // update header value to match those built by xlsx.utils.sheet_to_json
-            headerValue = `${headerValue}_${sameHeaderCounter[headerValue]}`;
-          }
-          headers.push(headerValue);
+    // if columns found
+    if (columns.length) {
+      // go through all columns
+      columns.forEach(function (columnId) {
+        let headerValue = parsedData.Sheets[sheetName][`${columnId}`].v;
+        // if this is the first time the header appears
+        if (sameHeaderCounter[headerValue] === undefined) {
+          // create an entry for it in the counter
+          sameHeaderCounter[headerValue] = 0;
+        } else {
+          // increment counter
+          sameHeaderCounter[headerValue]++;
+          // update header value to match those built by xlsx.utils.sheet_to_json
+          headerValue = `${headerValue}_${sameHeaderCounter[headerValue]}`;
         }
-      }
+        headers.push(headerValue);
+      });
     }
     // should always be an array (sheets are lists)
     // send back the parsed object and its headers
