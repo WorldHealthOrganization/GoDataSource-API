@@ -184,6 +184,9 @@ const restoreBackupFromFile = function (filePath, done) {
                       bulk.execute((err) => {
                         if (err) {
                           app.logger.error(`Failed to insert records for collection ${collectionName}. ${err}`);
+                          // this is a database connection error, should stop here
+                          return doneCollection(err);
+
                         }
                         return doneCollection();
                       });
@@ -211,6 +214,8 @@ const restoreBackupFromFile = function (filePath, done) {
  * @param callback
  */
 const removeBackup = function (backup, callback) {
+  let a = 1;
+
   return async.series([
     (done) => {
       if (backup.location) {

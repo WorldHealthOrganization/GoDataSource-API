@@ -39,7 +39,7 @@ module.exports = function (Backup) {
      * Helper function used to create backup
      * Needed to not write the functionality multiple times in case of if condition
      */
-    const createBackup = function (modules, location) {
+    const createBackup = function (location, modules) {
       // create new backup record with pending status
       backupModel
         .create({
@@ -52,7 +52,7 @@ module.exports = function (Backup) {
         .then((record) => {
           // start the backup process
           // when done update backup status and file location
-          backup.create(params.modules, location, (err, backupFilePath) => {
+          backup.create(modules, location, (err, backupFilePath) => {
             let newStatus = backupModel.status.SUCCESS;
             if (err) {
               newStatus = backupModel.status.FAILED;
@@ -69,7 +69,7 @@ module.exports = function (Backup) {
     if (params.location && params.modules) {
       createBackup(params.location, params.modules);
     } else {
-      models.systemSettings
+      app.models.systemSettings
         .findOne()
         .then((systemSettings) => {
           let location = params.location || systemSettings.dataBackup.location;
@@ -106,8 +106,8 @@ module.exports = function (Backup) {
           id: backupId
         }
       })
-      .then((backup) => {
-        if (!backup) {
+      .then((backupItem) => {
+        if (!backupItem) {
           return done(app.utils.apiError.getError('MODEL_NOT_FOUND', {
             model: backupModel.modelName,
             id: backupId
@@ -115,7 +115,7 @@ module.exports = function (Backup) {
         }
 
         // remove the backup
-        backup.removeBackup(backup, done);
+        backup.remove(backupItem, done);
       })
       .catch((err) => done(err));
   };

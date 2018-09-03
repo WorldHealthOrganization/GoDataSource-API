@@ -26,9 +26,9 @@
       "enum": [
         "LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS_SUCCESS",
         "LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS_FAILED",
-        "LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS_IN_PROGRESS"
+        "LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS_PENDING"
       ],
-      "description": "Backup status: 0 success, 1 failed, 2 pending. Not be confused with restore, this status is for backup creation"
+      "description": "Backup status"
     }
   },
   "validations": [],
