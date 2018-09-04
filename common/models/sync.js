@@ -19,12 +19,15 @@ module.exports = function (Sync) {
    *   - exclude some properties
    * - custom filter { fromDate: Date } to only retrieve records past a given date
    * @param filter
-   * @param excludes
+   * @param collections
    * @param collectionsOpts
    * @param done
    */
-  Sync.exportDatabase = function (filter = {where: {}}, excludes = [], collectionsOpts = [], done) {
+  Sync.exportDatabase = function (filter, collections, collectionsOpts, done) {
     // defensive checks
+    filter = filter || {where: {}};
+    collections = collections || [];
+    collectionsOpts = collectionsOpts || [];
     collectionsOpts.map((collectionOpts) => {
       collectionOpts.excludes = collectionOpts.excludes || [];
       collectionOpts.shouldEncrypt = collectionOpts.shouldEncrypt || false;
@@ -44,13 +47,16 @@ module.exports = function (Sync) {
       };
     }
 
-    // create a copy of the collections map and exclude the ones from the list of excludes (if any)
-    let collections = Object.assign({}, dbSync.collectionsMap);
-    Object.keys(collections).forEach((collectionName) => {
-      if (excludes.indexOf(collectionName) !== -1) {
-        delete collections[collectionName];
-      }
-    });
+    // create a copy of the collections map and keep only the ones from the collection list given
+    // if passed collection is empty, continue with all the collections
+    let allCollections = Object.assign({}, dbSync.collectionsMap);
+    if (collections.length) {
+      Object.keys(allCollections).forEach((collectionName) => {
+        if (collections.indexOf(collectionName) === -1) {
+          delete allCollections[collectionName];
+        }
+      });
+    }
 
     // create a temporary directory to store the database files
     // it always created the folder in the system temporary directory
@@ -59,7 +65,7 @@ module.exports = function (Sync) {
 
     return async
       .series(
-        Object.keys(collections).map((collectionName) => {
+        Object.keys(allCollections).map((collectionName) => {
           return (callback) => {
             // look up for any specific options
             let collectionOpts = collectionsOpts.filter((item) => item.name === collectionName)[0];
@@ -74,7 +80,7 @@ module.exports = function (Sync) {
             }
 
             return connection
-              .collection(collections[collectionName])
+              .collection(allCollections[collectionName])
               .find(customFilter, excludes, (err, result) => {
                 if (err) {
                   return callback(err);

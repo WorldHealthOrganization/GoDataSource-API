@@ -18,7 +18,8 @@ const collectionsMap = {
   team: 'team',
   user: 'user',
   role: 'role',
-  cluster: 'cluster'
+  cluster: 'cluster',
+  auditLog: 'auditLog'
 };
 
 const syncRecordFlags = {

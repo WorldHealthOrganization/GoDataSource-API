@@ -3,6 +3,7 @@
 const fs = require('fs');
 const formidable = require('formidable');
 const app = require('../../server/server');
+const dbSync = require('../../components/dbSync');
 
 module.exports = function (Sync) {
   /**
@@ -15,15 +16,21 @@ module.exports = function (Sync) {
     filter = filter || {};
     filter.where = filter.where || {};
 
-    Sync.exportDatabase(
-      filter,
-      // excluding the following properties specially for mobile
-      [
+    // for mobile list of collections that are exported is restricted
+    let collections = Object.keys(dbSync.collectionsMap);
+    if (filter.mobile) {
+      let excludedCollections = [
         'systemSettings',
         'template',
         'icon',
         'helpCategory'
-      ],
+      ];
+      collections = collections.filter((collection) => excludedCollections.indexOf(collection) === -1);
+    }
+
+    Sync.exportDatabase(
+      filter,
+      collections,
       // no collection specific options
       [],
       (err, fileName) => {

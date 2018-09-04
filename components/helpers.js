@@ -10,6 +10,7 @@ const spreadSheetFile = require('./spreadSheetFile');
 const pdfDoc = require('./pdfDoc');
 const streamUtils = require('./streamUtils');
 const async = require('async');
+const fs = require('fs');
 
 /**
  * Convert a Date object into moment UTC date and reset time to start of the day
@@ -817,6 +818,16 @@ const parseModelFieldValues = function (modelInstanceJSON, Model) {
   }
 };
 
+/**
+ * Checks if a directory/file is readable/writable and visible to the calling process
+ * Access sync function is throwing error in case file is not ok
+ * Make sure to treat it
+ * @param path
+ */
+const isPathOK = function (path) {
+  fs.accessSync(path, fs.constants.R_OK | fs.constants.W_OK);
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -832,5 +843,6 @@ module.exports = {
   getFlatObject: getFlatObject,
   getDateDisplayValue: getDateDisplayValue,
   resolveModelReferenceData: resolveModelReferenceData,
-  parseModelFieldValues: parseModelFieldValues
+  parseModelFieldValues: parseModelFieldValues,
+  isPathOK: isPathOK
 };
