@@ -209,7 +209,7 @@ module.exports = function (Outbreak) {
       // If we are trying to link two contacts, keep the contact we are linking to as the source
       if (persons[0].type === 'contact') {
         persons[0].target = true;
-        persons[1].source = true
+        persons[1].source = true;
       // If we are linking a case/event to a contact, set the contact as the target
       } else {
         persons[0].source = true;
