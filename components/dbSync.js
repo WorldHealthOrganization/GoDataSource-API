@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const helpers = require('./helpers');
 
 // map of collections and their given corresponding collection name in database
 const collectionsMap = {
@@ -80,7 +81,7 @@ function isImportableRecord(collectionName, record, outbreakIDs) {
   let importable = true;
 
   // check for outbreakIDs
-  if(outbreakIDs.length) {
+  if (outbreakIDs.length) {
     // get record outbreakId
     let recordOutbreakId = collectionName === 'outbreak' ? record._id : record.outbreakId;
 
@@ -140,6 +141,46 @@ const syncRecord = function (logger, model, record, options, done) {
     logger[level](`dbSync::syncRecord ${model.modelName}: ${message}`);
   }
 
+  // convert first level GeoPoints to valid Loopback GeoPoint on sync action
+  // on sync the GeoPoint is received as it is saved in the DB (contains coordinates)
+  // Loopback expects lat/lng instead of coordinates and breaks
+  // we need to covert coordinates to lat/lng before trying to create/update
+  function convertGeoPointToLoopbackFormat(record, model) {
+    // get list of properties and check if there are any that would require parsing (geopoint properties)
+    let modelProperties = model.definition.rawProperties;
+    let geoPointProperties = Object.keys(modelProperties).filter(property => modelProperties[property].type === 'geopoint');
+
+    // if model definition contains first level GeoPoints parse them
+    if (geoPointProperties.length) {
+      // convert each GeoPoint
+      geoPointProperties.forEach(function (property) {
+        // get current value and path
+        let geoPoint = helpers.getReferencedValue(record, property);
+
+        // always works with same data type (simplify logic)
+        if (!Array.isArray(geoPoint)) {
+          geoPoint = [geoPoint];
+        }
+        // go through each GeoPoint
+        geoPoint.forEach(function (point) {
+          // if the GeoPoint is not in the desired format
+          if (
+            point.value &&
+            point.value.coordinates &&
+            point.value.lng === undefined &&
+            point.value.lat === undefined
+          ) {
+            // convert it
+            _.set(record, point.exactPath, {
+              lat: point.value.coordinates[1],
+              lng: point.value.coordinates[0]
+            });
+          }
+        });
+      });
+    }
+  }
+
   // options is optional parameter
   if (typeof options === 'function') {
     done = options;
@@ -170,6 +211,9 @@ const syncRecord = function (logger, model, record, options, done) {
     .then(function (dbRecord) {
       // record not found, create it
       if (!dbRecord) {
+        // update geopoint properties
+        convertGeoPointToLoopbackFormat(record, model);
+
         log('debug', `Record not found (id: ${record.id}), creating record.`);
         return model
           .create(record, options)
@@ -184,6 +228,9 @@ const syncRecord = function (logger, model, record, options, done) {
       // if record was created from third parties, it might not have updated/created timestamps
       // in this case, just create a new record with new id
       if (!record.updatedAt) {
+        // update geopoint properties
+        convertGeoPointToLoopbackFormat(record, model);
+
         log('debug', `Record found (id: ${record.id}) but data received is missing updatedAt property, probably comes from external system, creating new record (with new id).`);
         delete record.id;
         return model
@@ -199,6 +246,9 @@ const syncRecord = function (logger, model, record, options, done) {
       // if updated timestamp is greater than the one in the main database, update
       // also make sure that if the record is soft deleted, it stays that way
       if (dbRecord.updatedAt.getTime() < new Date(record.updatedAt).getTime()) {
+        // update geopoint properties
+        convertGeoPointToLoopbackFormat(record, model);
+
         log('debug', `Record found (id: ${record.id}), updating record`);
         if (dbRecord.deleted) {
           record.deleted = true;

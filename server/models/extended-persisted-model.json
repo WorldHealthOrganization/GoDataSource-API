@@ -15,8 +15,7 @@
     "ReadOnlyProperty": true,
     "AttachController": true,
     "IncludeCustomRelations": true,
-    "ConvertNestedGeoPoints": true,
-    "ConvertFirstLevelGeoPointsOnSync": true
+    "ConvertNestedGeoPoints": true
   },
   "replaceOnPUT": false,
   "properties": {
