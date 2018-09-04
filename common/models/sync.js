@@ -132,6 +132,7 @@ module.exports = function (Sync) {
   /**
    * Extract a database snapshot archive to a temporary directory
    * And sync with the current database
+   * Note: The sync doesn't stop at an error but the entire action will return an error for failed collection/collection record
    * @param filePath
    * @param syncLogEntry Sync log entry for the current sync
    * @param outbreakIDs List of outbreak IDs for the outbreaks that can be synced
@@ -146,6 +147,9 @@ module.exports = function (Sync) {
 
     // create a list that will contain list of collection with failed records
     let failedIds = {};
+
+    // create a list that will contain list of collections that failed entirely
+    let failedCollections = [];
 
     // extract the compressed database snapshot into the newly created temporary directory
     try {
@@ -233,6 +237,8 @@ module.exports = function (Sync) {
                     );
                   } catch (parseError) {
                     app.logger.error(`Sync ${syncLogEntry.id}: Failed to parse collection file ${filePath}. ${parseError}`);
+                    // keep failed collections
+                    failedCollections.push(collectionName);
                     return doneCollection();
                   }
                 });
@@ -244,11 +250,23 @@ module.exports = function (Sync) {
           // remove temporary uploaded file
           fs.unlink(filePath);
 
-          if (Object.keys(failedIds).length) {
-            return callback(null, {failedRecords: failedIds});
-          }
+              // The sync doesn't stop at an error but the entire action will return an error for failed collection/collection record
+              // check for failed collections/collection records
+              // initialize error
+              let err = null;
+              if (failedCollections.length) {
+                err = `Failed collections: ${failedCollections.join(', ')}`;
+              }
+              let collectionsWithFailedRecords = Object.keys(failedIds);
+              if (collectionsWithFailedRecords.length) {
+                err = err || '';
+                err += `Failed records: `;
+                collectionsWithFailedRecords.forEach(function (collectionName) {
+                  err += `Collection ${collectionName}. Records: ${failedIds[collectionName].join(', ')}`;
+                });
+              }
 
-          return callback();
+          return callback(err);
         }
       );
     });

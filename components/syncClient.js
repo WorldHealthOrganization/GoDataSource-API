@@ -4,6 +4,7 @@ const request = require('request');
 const fs = require('fs');
 const tmp = require('tmp');
 const qs = require('querystring');
+const app = require('../../server/server');
 
 /**
  * Remove last character of a string if it's a '/'
@@ -148,6 +149,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
     return new Promise(function (resolve, reject) {
       request(requestOptions)
         .on('response', function (response) {
+          app.logger.debug(response.status);
         })
         .on('error', function (error) {
           reject(error);

@@ -166,5 +166,9 @@
   "UPSTREAM_SERVER_SYNC_FAILED": {
     "defaultStatusCode": 424,
     "messagePattern": "Sync with upstream server `<%= upstreamServerName %>` failed"
+  },
+  "INSTANCE_SYNC_FAILED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Instance sync failed: `<%= syncError %>`"
   }
 }

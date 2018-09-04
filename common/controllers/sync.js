@@ -50,6 +50,8 @@ module.exports = function (Sync) {
    * @param done
    */
   Sync.importDatabaseSnapshot = function (req, snapshot, asynchronous, done) {
+    const buildError = app.utils.apiError.getError;
+
     /**
      * Import action callback; Depending on the asynchronous it can be called with/without the callback
      * @param err
@@ -58,7 +60,7 @@ module.exports = function (Sync) {
      * @param requestOptions
      * @param callback
      */
-    function importCallback(err, result, syncLogEntry, requestOptions, callback) {
+    function importCallback(err, syncLogEntry, requestOptions, callback) {
       // update syncLogEntry
       syncLogEntry.syncProcessCompletionDate = new Date();
 
@@ -69,15 +71,6 @@ module.exports = function (Sync) {
       } else {
         app.logger.debug(`Sync ${syncLogEntry.id}: Success`);
         syncLogEntry.syncStatus = 'LNG_SYNC_STATUS_SUCCESS';
-      }
-
-      // check for failedRecords in the result
-      if (result && result.failedRecords) {
-        // log the failed records
-        app.logger.debug(`Sync ${syncLogEntry.id}: Sync succeeded with some failed records`);
-        Object.keys(result.failedRecords).forEach(function (collectionName) {
-          app.logger.debug(`Sync ${syncLogEntry.id}: Failed Records in '${collectionName}' collection: ${result.failedRecords[collectionName].join(', ')}`);
-        });
       }
 
       // save sync log entry
@@ -91,10 +84,11 @@ module.exports = function (Sync) {
         });
 
       // call callback if received; don't wait for sync log entry to be updated
-      callback && callback(err, syncLogEntry.id);
+      callback && callback(err ? buildError('INSTANCE_SYNC_FAILED', {
+        syncError: err.toString ? err.toString() : err
+      }) : null, syncLogEntry.id);
     }
 
-    const buildError = app.utils.apiError.getError;
     const form = new formidable.IncomingForm();
 
     form.parse(req, function (err, fields, files) {
@@ -138,9 +132,9 @@ module.exports = function (Sync) {
         .then(function (syncLogEntry) {
           if (!asynchronous) {
             // extract the archive to the temporary directory
-            Sync.syncDatabaseWithSnapshot(files.snapshot.path, syncLogEntry, outbreakIDs, requestOptions, function (err, result) {
+            Sync.syncDatabaseWithSnapshot(files.snapshot.path, syncLogEntry, outbreakIDs, requestOptions, function (err) {
               // send done function to return the response
-              importCallback(err, result, syncLogEntry, requestOptions, done);
+              importCallback(err, syncLogEntry, requestOptions, done);
             });
           } else {
             // import is done asynchronous
@@ -148,9 +142,9 @@ module.exports = function (Sync) {
             done(null, syncLogEntry.id);
 
             // extract the archive to the temporary directory
-            Sync.syncDatabaseWithSnapshot(files.snapshot.path, syncLogEntry, outbreakIDs, requestOptions, function (err, result) {
+            Sync.syncDatabaseWithSnapshot(files.snapshot.path, syncLogEntry, outbreakIDs, requestOptions, function (err) {
               // don't send the done function as the response was already sent
-              importCallback(err, result, syncLogEntry, requestOptions);
+              importCallback(err, syncLogEntry, requestOptions);
             });
           }
         })
@@ -323,8 +317,29 @@ module.exports = function (Sync) {
         // 3: get DB from the upstream server
         return Sync.getDBSnapshotFromUpstreamServer(upstreamServerEntry, true, syncLogEntry);
       })
-      .then(function(dbSnapshotFileName) {
-        let x = 2;
+      .then(function (upstreamServerDBSnapshotFileName) {
+        // 4. import the received DB
+        Sync.syncDatabaseWithSnapshot(upstreamServerDBSnapshotFileName, syncLogEntry, syncLogEntry.syncOutbreakIDs, options, function (err) {
+          if (err) {
+            throw err;
+          }
+
+          // sync was successful
+          // update syncLogEntry
+          app.logger.debug(`Sync ${syncLogEntry.id}: Success`);
+          syncLogEntry.syncProcessCompletionDate = new Date();
+          syncLogEntry.syncStatus = 'LNG_SYNC_STATUS_SUCCESS';
+
+          // save sync log entry
+          syncLogEntry
+            .save(options)
+            .then(function () {
+              // nothing to do; sync log entry was saved
+            })
+            .catch(function (err) {
+              app.logger.debug(`Sync ${syncLogEntry.id}: Error updating sync log entry status. ${err}`);
+            });
+        });
       })
       .catch(function (err) {
         if (!callbackCalled) {
@@ -333,6 +348,7 @@ module.exports = function (Sync) {
         } else {
           app.logger.debug(`Sync ${syncLogEntry.id}: Error ${err}`);
           // update sync log status
+          syncLogEntry.syncProcessCompletionDate = new Date();
           syncLogEntry.syncStatus = 'LNG_SYNC_STATUS_FAILED';
           syncLogEntry.failReason = err.toString ? err.toString() : err;
           syncLogEntry
