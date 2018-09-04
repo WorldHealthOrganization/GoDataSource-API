@@ -160,7 +160,7 @@ const restoreBackupFromFile = function (filePath, done) {
                       // if delete fails, don't continue
                       if (err) {
                         app.logger.error(`Failed to delete database records of collection: ${collectionName}. ${err}`);
-                        return doneCollection();
+                        return doneCollection(err);
                       }
 
                       // if there are no records in the files just
