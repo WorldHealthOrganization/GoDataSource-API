@@ -4943,4 +4943,34 @@ module.exports = function (Outbreak) {
         cluster.findPeople(filter, callback);
       });
   };
+
+  /**
+   * Since this endpoint returns person data without checking if the user has the required read permissions,
+   * check the user's permissions and return only the fields he has access to
+   */
+  Outbreak.afterRemote('prototype.findPeopleInCluster', function (context, people, next) {
+    const personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+
+    people.forEach((person, index) => {
+      person = person.toJSON();
+      Outbreak.helpers.limitPersonInformation(person, personTypesWithReadAccess);
+      people[index] = person;
+    });
+    next();
+  });
+
+  /**
+   * Since this endpoint returns person data without checking if the user has the required read permissions,
+   * check the user's permissions and return only the fields he has access to
+   */
+  Outbreak.afterRemote('prototype.__get__people', function (context, people, next) {
+    const personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+
+    people.forEach((person, index) => {
+      person = person.toJSON();
+      Outbreak.helpers.limitPersonInformation(person, personTypesWithReadAccess);
+      people[index] = person;
+    });
+    next();
+  });
 };
