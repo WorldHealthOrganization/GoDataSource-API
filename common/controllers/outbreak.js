@@ -3956,7 +3956,7 @@ module.exports = function (Outbreak) {
                   // promisify next step
                   return new Promise(function (resolve, reject) {
                     // normalize people
-                    Outbreak.helpers.validateAndNormalizePeople(contactRecord.id, 'contact', relationshipData, false, function (error, persons) {
+                    Outbreak.helpers.validateAndNormalizePeople(contactRecord.id, 'contact', relationshipData, function (error, persons) {
                       if (error) {
                         return reject(error);
                       }
