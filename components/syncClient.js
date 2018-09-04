@@ -4,7 +4,7 @@ const request = require('request');
 const fs = require('fs');
 const tmp = require('tmp');
 const qs = require('querystring');
-const app = require('../../server/server');
+const app = require('../server/server');
 
 /**
  * Remove last character of a string if it's a '/'
