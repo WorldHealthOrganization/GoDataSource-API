@@ -825,7 +825,7 @@ const parseModelFieldValues = function (modelInstanceJSON, Model) {
  * @param path
  */
 const isPathOK = function (path) {
-  return fs.accessSync(path, fs.constants.R_OK | fs.constants.W_OK);
+  fs.accessSync(path, fs.constants.R_OK | fs.constants.W_OK);
 };
 
 module.exports = {

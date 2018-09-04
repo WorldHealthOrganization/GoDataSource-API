@@ -179,14 +179,11 @@ const restoreBackupFromFile = function (filePath, done) {
                       });
 
                       // execute the bulk operations
-                      // in case an error has occurred, log it and continue
-                      // we do not stop the operation
                       bulk.execute((err) => {
                         if (err) {
                           app.logger.error(`Failed to insert records for collection ${collectionName}. ${err}`);
-                          // this is a database connection error, should stop here
+                          // stop at once, if any error has occurred
                           return doneCollection(err);
-
                         }
                         return doneCollection();
                       });
@@ -214,8 +211,6 @@ const restoreBackupFromFile = function (filePath, done) {
  * @param callback
  */
 const removeBackup = function (backup, callback) {
-  let a = 1;
-
   return async.series([
     (done) => {
       if (backup.location) {

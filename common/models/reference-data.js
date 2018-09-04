@@ -136,11 +136,6 @@ module.exports = function (ReferenceData) {
       'id': 'LNG_REFERENCE_DATA_CATEGORY_COUNTRY',
       'name': 'LNG_REFERENCE_DATA_CATEGORY_COUNTRY',
       'description': 'LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DESCRIPTION'
-    },
-    {
-      'id': 'LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS',
-      'name': 'LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS',
-      'description': 'LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS_DESCRIPTION'
     }
   ];
 

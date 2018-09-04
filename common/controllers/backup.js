@@ -81,11 +81,10 @@ module.exports = function (Backup) {
 
   /**
    * Restore a backup from database using its ID
-   * @param backupId
    * @param done
    */
-  Backup.restoreBackup = function (backupId, done) {
-    backup.restore(backupId, (err) => {
+  Backup.prototype.restoreBackup = function (done) {
+    backup.restore(this.id, (err) => {
       if (err) {
         return done(err);
       }
@@ -95,11 +94,11 @@ module.exports = function (Backup) {
 
   /**
    * Removes a backup entry from database and from file system
-   * @param backupId
    * @param done
    */
-  Backup.removeBackup = function (backupId, done) {
+  Backup.prototype.removeBackup = function (done) {
     const backupModel = app.models.backup;
+    const backupId = this.id;
     backupModel
       .findOne({
         where: {

@@ -24,9 +24,9 @@
     "status": {
       "type": "string",
       "enum": [
-        "LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS_SUCCESS",
-        "LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS_FAILED",
-        "LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS_PENDING"
+        "LNG_BACKUP_STATUS_SUCCESS",
+        "LNG_BACKUP_STATUS_FAILED",
+        "LNG_BACKUP_STATUS_PENDING"
       ],
       "description": "Backup status"
     }
@@ -82,13 +82,7 @@
         "path": "/create-backup"
       }
     },
-    "restoreBackup": {
-      "accepts": [
-        {
-          "arg": "backupId",
-          "type": "string"
-        }
-      ],
+    "prototype.restoreBackup": {
       "returns": [
         {
           "arg": "error"
@@ -97,16 +91,10 @@
       "description": "Restore backup",
       "http": {
         "verb": "post",
-        "path": "/:backupId/restore"
+        "path": "/restore"
       }
     },
-    "removeBackup": {
-      "accepts": [
-        {
-          "arg": "backupId",
-          "type": "string"
-        }
-      ],
+    "prototype.removeBackup": {
       "returns": [
         {
           "arg": "error"
@@ -115,7 +103,7 @@
       "description": "Remove backup",
       "http": {
         "verb": "post",
-        "path": "/:backupId/remove"
+        "path": "/remove"
       }
     }
   }

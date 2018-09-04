@@ -5,9 +5,9 @@ module.exports = function (Backup) {
 
   // list of backup statuses
   Backup.status = {
-    SUCCESS: "LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS_SUCCESS",
-    FAILED: "LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS_FAILED",
-    PENDING: "LNG_REFERENCE_DATA_CATEGORY_BACKUP_STATUS_PENDING"
+    SUCCESS: "LNG_BACKUP_STATUS_SUCCESS",
+    FAILED: "LNG_BACKUP_STATUS_FAILED",
+    PENDING: "LNG_BACKUP_STATUS_PENDING"
   };
 
   // application modules and their corresponding database collections
