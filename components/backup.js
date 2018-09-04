@@ -1,11 +1,11 @@
 'use strict';
 
 // requires
+const AdmZip = require('adm-zip');
 const app = require('../server/server');
 const fs = require('fs');
 const path = require('path');
 const async = require('async');
-const tar = require('tar');
 const tmp = require('tmp');
 const dbSync = require('./dbSync');
 const helpers = require('../components/helpers');
@@ -106,98 +106,90 @@ const restoreBackupFromFile = function (filePath, done) {
     let tmpDirName = tmpDir.name;
 
     // extract backup archive
-    tar.x(
-      {
-        cwd: tmpDirName,
-        file: filePath
-      },
-      (err) => {
-        if (err) {
-          return done(err);
-        }
+    let archive = new AdmZip(filePath);
+    archive.extractAllTo(tmpDirName);
 
-        // read backup files in the temporary dir
-        return fs.readdir(tmpDirName, (err, filenames) => {
-          if (err) {
-            return done(err);
-          }
+    // read backup files in the temporary dir
+    return fs.readdir(tmpDirName, (err, filenames) => {
+      if (err) {
+        return done(err);
+      }
 
-          // filter files that match a collection name
-          let collectionsFiles = filenames.filter((filename) => {
-            // split filename into 'collection name' and 'extension'
-            filename = filename.split('.');
-            return filename[0] && dbSync.collectionsMap.hasOwnProperty(filename[0]);
-          });
-
-          // start restoring the database using provided collection files
-          return async.series(
-            collectionsFiles.map((fileName) => (doneCollection) => {
-              let filePath = `${tmpDirName}/${fileName}`;
-
-              return fs.readFile(
-                filePath,
-                {
-                  encoding: 'utf8'
-                },
-                (err, data) => {
-                  if (err) {
-                    app.logger.error(`Failed to read collection file ${filePath}. ${err}`);
-                    return doneCollection();
-                  }
-
-                  // parse file contents to JavaScript object
-                  try {
-                    let collectionRecords = JSON.parse(data);
-
-                    // split filename into 'collection name' and 'extension'
-                    let collectionName = fileName.split('.')[0];
-
-                    // get collection reference of the mongodb driver
-                    let collectionRef = connection.collection(dbSync.collectionsMap[collectionName]);
-
-                    // remove all the documents from the collection, then bulk insert the ones from the file
-                    collectionRef.deleteMany({}, (err) => {
-                      // if delete fails, don't continue
-                      if (err) {
-                        app.logger.error(`Failed to delete database records of collection: ${collectionName}. ${err}`);
-                        return doneCollection(err);
-                      }
-
-                      // if there are no records in the files just
-                      // skip it
-                      if (!collectionRecords.length) {
-                        app.logger.debug(`Collection ${collectionName} has no records in the file. Skipping it.`);
-                        return doneCollection();
-                      }
-
-                      // create a bulk operation
-                      const bulk = collectionRef.initializeOrderedBulkOp();
-
-                      // insert all entries from the file in the collection
-                      collectionRecords.forEach((record) => {
-                        bulk.insert(record);
-                      });
-
-                      // execute the bulk operations
-                      bulk.execute((err) => {
-                        if (err) {
-                          app.logger.error(`Failed to insert records for collection ${collectionName}. ${err}`);
-                          // stop at once, if any error has occurred
-                          return doneCollection(err);
-                        }
-                        return doneCollection();
-                      });
-                    });
-                  } catch (parseError) {
-                    app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
-                    return doneCollection();
-                  }
-                });
-            }),
-            (err) => done(err)
-          );
-        });
+      // filter files that match a collection name
+      let collectionsFiles = filenames.filter((filename) => {
+        // split filename into 'collection name' and 'extension'
+        filename = filename.split('.');
+        return filename[0] && dbSync.collectionsMap.hasOwnProperty(filename[0]);
       });
+
+      // start restoring the database using provided collection files
+      return async.series(
+        collectionsFiles.map((fileName) => (doneCollection) => {
+          let filePath = `${tmpDirName}/${fileName}`;
+
+          return fs.readFile(
+            filePath,
+            {
+              encoding: 'utf8'
+            },
+            (err, data) => {
+              if (err) {
+                app.logger.error(`Failed to read collection file ${filePath}. ${err}`);
+                return doneCollection();
+              }
+
+              // parse file contents to JavaScript object
+              try {
+                let collectionRecords = JSON.parse(data);
+
+                // split filename into 'collection name' and 'extension'
+                let collectionName = fileName.split('.')[0];
+
+                // get collection reference of the mongodb driver
+                let collectionRef = connection.collection(dbSync.collectionsMap[collectionName]);
+
+                // remove all the documents from the collection, then bulk insert the ones from the file
+                collectionRef.deleteMany({}, (err) => {
+                  // if delete fails, don't continue
+                  if (err) {
+                    app.logger.error(`Failed to delete database records of collection: ${collectionName}. ${err}`);
+                    return doneCollection(err);
+                  }
+
+                  // if there are no records in the files just
+                  // skip it
+                  if (!collectionRecords.length) {
+                    app.logger.debug(`Collection ${collectionName} has no records in the file. Skipping it.`);
+                    return doneCollection();
+                  }
+
+                  // create a bulk operation
+                  const bulk = collectionRef.initializeOrderedBulkOp();
+
+                  // insert all entries from the file in the collection
+                  collectionRecords.forEach((record) => {
+                    bulk.insert(record);
+                  });
+
+                  // execute the bulk operations
+                  bulk.execute((err) => {
+                    if (err) {
+                      app.logger.error(`Failed to insert records for collection ${collectionName}. ${err}`);
+                      // stop at once, if any error has occurred
+                      return doneCollection(err);
+                    }
+                    return doneCollection();
+                  });
+                });
+              } catch (parseError) {
+                app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
+                return doneCollection();
+              }
+            });
+        }),
+        (err) => done(err)
+      );
+    });
 
   } catch (pathAccessError) {
     app.logger.error(`Backup location: ${filePath} is not OK. ${pathAccessError}`);

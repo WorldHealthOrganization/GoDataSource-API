@@ -1,11 +1,12 @@
 'use strict';
 
-const tar = require('tar');
+// requires
 const tmp = require('tmp');
 const async = require('async');
 const app = require('../../server/server');
 const fs = require('fs');
 const dbSync = require('../../components/dbSync');
+const AdmZip = require('adm-zip');
 
 module.exports = function (Sync) {
   Sync.hasController = true;
@@ -105,7 +106,7 @@ module.exports = function (Sync) {
           }
 
           // archive file name
-          let archiveName = `${tmpDirName}/db_snapshot_${Date.now()}.tar.gz`;
+          let archiveName = `${tmpDirName}/db_snapshot_${Date.now()}.zip`;
 
           // retrieve all files in the temporary directory
           return fs.readdir(tmpDirName, function (err, filenames) {
@@ -113,16 +114,12 @@ module.exports = function (Sync) {
               return done(err);
             }
 
-            // compress all collection files from the tmp dir into .tar file
-            tar.c(
-              {
-                gzip: true,
-                file: archiveName,
-                cwd: tmpDirName
-              },
-              filenames
-            )
-              .then(() => done(null, archiveName));
+            // compress all collection files from the tmp dir into .zip file
+            let zip = new AdmZip();
+            zip.addLocalFolder(tmpDirName);
+            zip.writeZip(archiveName);
+
+            return done(null, archiveName);
           });
         }
       );
@@ -145,103 +142,94 @@ module.exports = function (Sync) {
     let failedIds = {};
 
     // extract the compressed database snapshot into the newly created temporary directory
-    tar.x(
-      {
-        cwd: tmpDirName,
-        file: filePath
-      },
-      (err) => {
-        if (err) {
-          return callback(err);
-        }
+    let archive = new AdmZip(filePath);
+    archive.extractAllTo(tmpDirName);
 
-        // read all files in the temp dir
-        return fs.readdir(tmpDirName, (err, filenames) => {
-          if (err) {
-            return callback(err);
-          }
+    // read all files in the temp dir
+    return fs.readdir(tmpDirName, (err, filenames) => {
+      if (err) {
+        return callback(err);
+      }
 
-          // filter files that match a collection name
-          let collectionsFiles = filenames.filter((filename) => {
-            // split filename into 'collection name' and 'extension'
-            filename = filename.split('.');
-            return filename[0] && dbSync.collectionsMap.hasOwnProperty(filename[0]);
-          });
+      // filter files that match a collection name
+      let collectionsFiles = filenames.filter((filename) => {
+        // split filename into 'collection name' and 'extension'
+        filename = filename.split('.');
+        return filename[0] && dbSync.collectionsMap.hasOwnProperty(filename[0]);
+      });
 
-          // read each file's contents and sync with database
-          return async.parallel(
-            collectionsFiles.map((fileName) => (doneCollection) => {
-              let filePath = `${tmpDirName}/${fileName}`;
+      // read each file's contents and sync with database
+      return async.parallel(
+        collectionsFiles.map((fileName) => (doneCollection) => {
+          let filePath = `${tmpDirName}/${fileName}`;
 
-              // split filename into 'collection name' and 'extension'
-              let collectionName = fileName.split('.')[0];
+          // split filename into 'collection name' and 'extension'
+          let collectionName = fileName.split('.')[0];
 
-              // cache reference to Loopback's model
-              let model = app.models[dbSync.collectionsMap[collectionName]];
+          // cache reference to Loopback's model
+          let model = app.models[dbSync.collectionsMap[collectionName]];
 
-              return fs.readFile(
-                filePath,
-                {
-                  encoding: 'utf8'
-                },
-                (err, data) => {
-                  if (err) {
-                    app.logger.error(`Failed to read collection file ${filePath}. ${err}`);
-                    return doneCollection();
-                  }
-
-                  // parse file contents to JavaScript object
-                  try {
-                    let collectionRecords = JSON.parse(data);
-
-                    // create failed records entry
-                    failedIds[collectionName] = [];
-
-                    return async.parallel(
-                      collectionRecords.map((collectionRecord) => (doneRecord) => {
-                        // convert mongodb id notation to Loopback notation
-                        // to be consistent with external function calls
-                        collectionRecord.id = collectionRecord._id;
-
-                        // sync the record with the main database
-                        dbSync.syncRecord(app.logger, model, collectionRecord, reqOptions, (err) => {
-                          if (err) {
-                            app.logger.debug(`Failed syncing record (id: ${collectionRecord.id}). Error: ${err.message}`);
-                            failedIds[collectionName].push(collectionRecord.id);
-                          }
-                          return doneRecord();
-                        });
-                      }),
-                      () => {
-                        if (!failedIds[collectionName].length) {
-                          delete failedIds[collectionName];
-                        }
-
-                        return doneCollection();
-                      }
-                    );
-                  } catch (parseError) {
-                    app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
-                    return doneCollection();
-                  }
-                });
-            }),
-            () => {
-              // remove temporary directory
-              tmpDir.removeCallback();
-
-              // remove temporary uploaded file
-              fs.unlink(filePath);
-
-              if (Object.keys(failedIds).length) {
-                return callback(null, {failedRecords: failedIds});
+          return fs.readFile(
+            filePath,
+            {
+              encoding: 'utf8'
+            },
+            (err, data) => {
+              if (err) {
+                app.logger.error(`Failed to read collection file ${filePath}. ${err}`);
+                return doneCollection();
               }
 
-              return callback();
-            }
-          );
-        });
-      }
-    );
+              // parse file contents to JavaScript object
+              try {
+                let collectionRecords = JSON.parse(data);
+
+                // create failed records entry
+                failedIds[collectionName] = [];
+
+                return async.parallel(
+                  collectionRecords.map((collectionRecord) => (doneRecord) => {
+                    // convert mongodb id notation to Loopback notation
+                    // to be consistent with external function calls
+                    collectionRecord.id = collectionRecord._id;
+
+                    // sync the record with the main database
+                    dbSync.syncRecord(app.logger, model, collectionRecord, reqOptions, (err) => {
+                      if (err) {
+                        app.logger.debug(`Failed syncing record (id: ${collectionRecord.id}). Error: ${err.message}`);
+                        failedIds[collectionName].push(collectionRecord.id);
+                      }
+                      return doneRecord();
+                    });
+                  }),
+                  () => {
+                    if (!failedIds[collectionName].length) {
+                      delete failedIds[collectionName];
+                    }
+
+                    return doneCollection();
+                  }
+                );
+              } catch (parseError) {
+                app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
+                return doneCollection();
+              }
+            });
+        }),
+        () => {
+          // remove temporary directory
+          tmpDir.removeCallback();
+
+          // remove temporary uploaded file
+          fs.unlink(filePath);
+
+          if (Object.keys(failedIds).length) {
+            return callback(null, {failedRecords: failedIds});
+          }
+
+          return callback();
+        }
+      );
+    });
   };
 };
