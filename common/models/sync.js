@@ -108,19 +108,12 @@ module.exports = function (Sync) {
           // archive file name
           let archiveName = `${tmpDirName}/db_snapshot_${Date.now()}.zip`;
 
-          // retrieve all files in the temporary directory
-          return fs.readdir(tmpDirName, function (err, filenames) {
-            if (err) {
-              return done(err);
-            }
+          // compress all collection files from the tmp dir into .zip file
+          let zip = new AdmZip();
+          zip.addLocalFolder(tmpDirName);
+          zip.writeZip(archiveName);
 
-            // compress all collection files from the tmp dir into .zip file
-            let zip = new AdmZip();
-            zip.addLocalFolder(tmpDirName);
-            zip.writeZip(archiveName);
-
-            return done(null, archiveName);
-          });
+          return done(null, archiveName);
         }
       );
   };
