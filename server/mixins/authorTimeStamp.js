@@ -110,7 +110,7 @@ module.exports = function (Model) {
       context.instance.updatedBy = user.id;
     } else {
       // update updatedAt property if it's not a sync or the property is missing from the instance
-      if (!context.options._sync || !context.instance.updatedAt) {
+      if (!context.options._sync || !context.data.updatedAt) {
         context.data.updatedAt = new Date();
       }
       context.data.updatedBy = user.id;

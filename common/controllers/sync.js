@@ -319,26 +319,30 @@ module.exports = function (Sync) {
       })
       .then(function (upstreamServerDBSnapshotFileName) {
         // 4. import the received DB
-        Sync.syncDatabaseWithSnapshot(upstreamServerDBSnapshotFileName, syncLogEntry, syncLogEntry.syncOutbreakIDs, options, function (err) {
-          if (err) {
-            throw err;
-          }
+        return new Promise(function (resolve, reject) {
+          Sync.syncDatabaseWithSnapshot(upstreamServerDBSnapshotFileName, syncLogEntry, syncLogEntry.syncOutbreakIDs, options, function (err) {
+            if (err) {
+              reject(err);
+            }
 
-          // sync was successful
-          // update syncLogEntry
-          app.logger.debug(`Sync ${syncLogEntry.id}: Success`);
-          syncLogEntry.syncProcessCompletionDate = new Date();
-          syncLogEntry.syncStatus = 'LNG_SYNC_STATUS_SUCCESS';
+            // sync was successful
+            // update syncLogEntry
+            app.logger.debug(`Sync ${syncLogEntry.id}: Success`);
+            syncLogEntry.syncProcessCompletionDate = new Date();
+            syncLogEntry.syncStatus = 'LNG_SYNC_STATUS_SUCCESS';
 
-          // save sync log entry
-          syncLogEntry
-            .save(options)
-            .then(function () {
-              // nothing to do; sync log entry was saved
-            })
-            .catch(function (err) {
-              app.logger.debug(`Sync ${syncLogEntry.id}: Error updating sync log entry status. ${err}`);
-            });
+            // save sync log entry
+            syncLogEntry
+              .save(options)
+              .then(function () {
+                // nothing to do; sync log entry was saved
+              })
+              .catch(function (err) {
+                app.logger.debug(`Sync ${syncLogEntry.id}: Error updating sync log entry status. ${err}`);
+              });
+
+            resolve();
+          });
         });
       })
       .catch(function (err) {
