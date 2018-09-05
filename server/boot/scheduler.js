@@ -20,7 +20,7 @@ const shouldExecute = function (startTime, interval, timeUnit) {
 
 module.exports = function (app) {
   // routines configuration file path
-  let routinesConfigFilePath = path.resolve(__dirname, '../routines.json');
+  let routinesConfigFilePath = path.resolve(__dirname, 'scheduler.json');
 
   // routines config
   let routinesConfig;
@@ -44,7 +44,9 @@ module.exports = function (app) {
         // if intervals are 0, then don't schedule
         if (interval < 1) {
           // remove the old backup routine configuration
-          delete routinesConfig.backup;
+          if (routinesConfig.backup) {
+            delete routinesConfig.backup;
+          }
           app.logger.warn('Backup interval is less than configured threshold.');
           return done();
         }
@@ -57,6 +59,9 @@ module.exports = function (app) {
             timeUnit: 'h',
             interval: interval
           };
+        } else {
+          // make sure the interval didn't change in the meantime
+          routinesConfig.backup.interval = interval;
         }
 
         // cache routines backup config
@@ -110,7 +115,9 @@ module.exports = function (app) {
         // if intervals are 0, then don't schedule
         if (interval < 1) {
           // remove the old backup routine configuration
-          delete routinesConfig.backup;
+          if (routinesConfig.backupCleanup) {
+            delete routinesConfig.backupCleanup;
+          }
           app.logger.warn('Backup retention interval is less than configured threshold.');
           return done();
         }
@@ -123,6 +130,9 @@ module.exports = function (app) {
             timeUnit: 'd',
             interval: interval
           };
+        } else {
+          // make sure the interval didn't change in the meantime
+          routinesConfig.backupCleanup.interval = interval;
         }
 
         // cache routines backup config
