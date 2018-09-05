@@ -106,8 +106,13 @@ const restoreBackupFromFile = function (filePath, done) {
     let tmpDirName = tmpDir.name;
 
     // extract backup archive
-    let archive = new AdmZip(filePath);
-    archive.extractAllTo(tmpDirName);
+    try {
+      let archive = new AdmZip(filePath);
+      archive.extractAllTo(tmpDirName);
+    } catch (zipError) {
+      app.logger.error(`Failed to extract zip archive: ${filePath}. ${zipError}`);
+      return done(zipError);
+    }
 
     // read backup files in the temporary dir
     return fs.readdir(tmpDirName, (err, filenames) => {

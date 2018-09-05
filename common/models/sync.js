@@ -109,9 +109,14 @@ module.exports = function (Sync) {
           let archiveName = `${tmpDirName}/db_snapshot_${Date.now()}.zip`;
 
           // compress all collection files from the tmp dir into .zip file
-          let zip = new AdmZip();
-          zip.addLocalFolder(tmpDirName);
-          zip.writeZip(archiveName);
+          try {
+            let zip = new AdmZip();
+            zip.addLocalFolder(tmpDirName);
+            zip.writeZip(archiveName);
+          } catch (zipError) {
+            app.logger.error(`Failed to create zip file. ${zipError}`);
+            return done(zipError);
+          }
 
           return done(null, archiveName);
         }
@@ -135,8 +140,13 @@ module.exports = function (Sync) {
     let failedIds = {};
 
     // extract the compressed database snapshot into the newly created temporary directory
-    let archive = new AdmZip(filePath);
-    archive.extractAllTo(tmpDirName);
+    try {
+      let archive = new AdmZip(filePath);
+      archive.extractAllTo(tmpDirName);
+    } catch (zipError) {
+      app.logger.error(`Failed to extract zip archive: ${filePath}. ${zipError}`);
+      return callback(zipError);
+    }
 
     // read all files in the temp dir
     return fs.readdir(tmpDirName, (err, filenames) => {
