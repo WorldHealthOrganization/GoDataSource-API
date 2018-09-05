@@ -318,7 +318,7 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('count', function (context, modelInstance, next) {
     const restrictedOutbreakIds = _.get(context, 'req.authData.user.outbreakIds', []);
     if (restrictedOutbreakIds.length) {
-      let filter = { where: _.get(context, 'args.where', {}) };
+      let filter = {where: _.get(context, 'args.where', {})};
       filter = app.utils.remote
         .mergeFilters({
           where: {
@@ -1931,7 +1931,7 @@ module.exports = function (Outbreak) {
    * Since this endpoint returns person data without checking if the user has the required read permissions,
    * check the user's permissions and return only the fields he has access to
    */
-  Outbreak.afterRemote('prototype.longPeriodsBetweenDatesOfOnsetInTransmissionChains', function(context, modelInstance, next) {
+  Outbreak.afterRemote('prototype.longPeriodsBetweenDatesOfOnsetInTransmissionChains', function (context, modelInstance, next) {
     let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
 
     modelInstance.forEach((relationship) => {
@@ -1955,7 +1955,7 @@ module.exports = function (Outbreak) {
    * Since this endpoint returns person data without checking if the user has the required read permissions,
    * check the user's permissions and return only the fields he has access to
    */
-  Outbreak.afterRemote('prototype.buildNewChainsFromRegisteredContactsWhoBecameCases', function(context, modelInstance, next) {
+  Outbreak.afterRemote('prototype.buildNewChainsFromRegisteredContactsWhoBecameCases', function (context, modelInstance, next) {
     let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
 
     Object.keys(modelInstance.nodes).forEach((key) => {
@@ -2148,7 +2148,7 @@ module.exports = function (Outbreak) {
    * Since this endpoint returns person data without checking if the user has the required read permissions,
    * check the user's permissions and return only the fields he has access to
    */
-  Outbreak.afterRemote('prototype.findSecondaryCasesWithDateOfOnsetBeforePrimaryCase', function(context, modelInstance, next) {
+  Outbreak.afterRemote('prototype.findSecondaryCasesWithDateOfOnsetBeforePrimaryCase', function (context, modelInstance, next) {
     let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
 
     modelInstance.forEach((personPair) => {
@@ -4912,4 +4912,63 @@ module.exports = function (Outbreak) {
         }
       });
   };
+
+  /**
+   * Find the list of people in a cluster
+   * @param clusterId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findPeopleInCluster = function (clusterId, filter, callback) {
+    // find the requested cluster
+    app.models.cluster
+      .findOne({
+        where: {
+          id: clusterId,
+          outbreakId: this.id
+        }
+      })
+      .then(function (cluster) {
+        // if the cluster was not found
+        if (!cluster) {
+          // stop with error
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.cluster.modelName,
+            id: clusterId
+          }));
+        }
+        // otherwise find people in that cluster
+        cluster.findPeople(filter, callback);
+      });
+  };
+
+  /**
+   * Since this endpoint returns person data without checking if the user has the required read permissions,
+   * check the user's permissions and return only the fields he has access to
+   */
+  Outbreak.afterRemote('prototype.findPeopleInCluster', function (context, people, next) {
+    const personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+
+    people.forEach((person, index) => {
+      person = person.toJSON();
+      Outbreak.helpers.limitPersonInformation(person, personTypesWithReadAccess);
+      people[index] = person;
+    });
+    next();
+  });
+
+  /**
+   * Since this endpoint returns person data without checking if the user has the required read permissions,
+   * check the user's permissions and return only the fields he has access to
+   */
+  Outbreak.afterRemote('prototype.__get__people', function (context, people, next) {
+    const personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+
+    people.forEach((person, index) => {
+      person = person.toJSON();
+      Outbreak.helpers.limitPersonInformation(person, personTypesWithReadAccess);
+      people[index] = person;
+    });
+    next();
+  });
 };

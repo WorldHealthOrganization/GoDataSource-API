@@ -1008,6 +1008,18 @@
       "principalId": "write_outbreak",
       "permission": "ALLOW",
       "property": "importImportableReferenceDataFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "findPeopleInCluster"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "findPeopleInCluster"
     }
   ],
   "methods": {
@@ -3933,6 +3945,34 @@
       "http": {
         "verb": "post",
         "path": "/reference-data/import-importable-file-using-map"
+      }
+    },
+    "prototype.findPeopleInCluster": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "ID of the cluster"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a (full) relationship filter on 'relationship' property of the filter."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "people",
+          "type": ["person"],
+          "description": "List of people in the cluster",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Find the people inside a cluster",
+      "http": {
+        "verb": "get",
+        "path": "/clusters/:fk/people"
       }
     }
   }
