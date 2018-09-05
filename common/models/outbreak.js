@@ -1036,4 +1036,3 @@ module.exports = function (Outbreak) {
     }
   };
 };
-3
