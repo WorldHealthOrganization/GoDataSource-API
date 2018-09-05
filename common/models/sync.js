@@ -332,8 +332,8 @@ module.exports = function (Sync) {
             function getSyncLogEntry() {
               client.getSyncLogEntry(syncLogId)
                 .then(function (syncLogEntry) {
-                  // check syncStatus
-                  if (syncLogEntry.syncStatus === 'LNG_SYNC_STATUS_IN_PROGRESS') {
+                  // check sync status
+                  if (syncLogEntry.status === 'LNG_SYNC_STATUS_IN_PROGRESS') {
                     // upstream server import is in progress; nothing to do
                     app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import is in progress`);
                     // check again after the interval has passed
@@ -341,7 +341,7 @@ module.exports = function (Sync) {
                     return;
                   }
 
-                  if (syncLogEntry.syncStatus === 'LNG_SYNC_STATUS_FAILED') {
+                  if (syncLogEntry.status === 'LNG_SYNC_STATUS_FAILED') {
                     // upstream server import failed
                     app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import failed: upstream server sync status is 'failed'. Fail reason ${syncLogEntry.failReason}`);
                     reject(app.utils.apiError.getError('UPSTREAM_SERVER_SYNC_FAILED', {
@@ -409,8 +409,8 @@ module.exports = function (Sync) {
     filter.where.collections = Object.keys(dbSync.collectionsMap).filter((collection) => excludeList.indexOf(collection) === -1);
 
     // get data from date
-    if (syncLogEntry.syncInformationStartDate) {
-      filter.where.fromDate = syncLogEntry.syncInformationStartDate;
+    if (syncLogEntry.informationStartDate) {
+      filter.where.fromDate = syncLogEntry.informationStartDate;
     }
 
     // depending on the asynchronous flag we need to return directly the response or wait do checks to see if the export was successful

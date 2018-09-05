@@ -47,6 +47,11 @@
           "description": "This request accepts 'fromDate': date, 'outbreakId': 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}, 'collections': ['modelName'] on the first level in 'where'"
         },
         {
+          "arg": "asynchronous",
+          "type": "boolean",
+          "description": "Flag to specify whether the export is sync or async. Default: sync (false)"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -95,7 +100,7 @@
         },
         {
           "arg": "asynchronous",
-          "type": "boolean",
+          "type": "string",
           "description": "Flag to specify whether the import is sync or async. Default: sync (false)"
         }
       ],

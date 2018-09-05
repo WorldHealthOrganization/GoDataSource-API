@@ -11,10 +11,11 @@ module.exports = function (Sync) {
    * Retrieve a compressed snapshot of the database
    * Date filter is supported ({ fromDate: Date })
    * @param filter
+   * @param asynchronous Flag to specify whether the export is sync or async. Default: sync (false)
    * @param options Options from request
    * @param done
    */
-  Sync.getDatabaseSnapshot = function (filter, options, done) {
+  Sync.getDatabaseSnapshot = function (filter, asynchronous, options, done) {
     filter = filter || {};
     filter.where = filter.where || {};
 
@@ -22,8 +23,8 @@ module.exports = function (Sync) {
     let outbreakIDFilter = _.get(filter, 'where.outbreakId');
     // get allowed outbreaks IDs for the client
     let allowedOutbreakIDs = _.get(options, 'remotingContext.req.authData.client.outbreakIDs', []);
-    // initialize flag to know if the outbreakId filter is not empty
-    let outbreakIDFilterExists = false;
+    // initialize list of IDs for the outbreaks that will be exported
+    let exportedOutbreakIDs = [];
 
     // the outbreakID filter is accepted as an {inq: ['outbreak ID']} filter of a string value
     if(outbreakIDFilter) {
@@ -38,7 +39,7 @@ module.exports = function (Sync) {
         // check if all the requested outbreak IDs are allowed
         // if the allowedOutbreakIDs is an empty array all the outbreakIDs are allowed
         if (!allowedOutbreakIDs.length) {
-          // leave the outbreakId filter in the received filter
+          // nothing to do; will use the received outbreakIDs from the filter
         } else {
           let disallowedOutbreakIDs = requestOutbreakIDs.filter(outbreakID => allowedOutbreakIDs.indexOf(outbreakID) === -1);
           if (disallowedOutbreakIDs.length) {
@@ -49,20 +50,23 @@ module.exports = function (Sync) {
           }
         }
 
-        // after the checks the outbreakId filter remains in the filter
-        outbreakIDFilterExists = true;
+        // outbreaks that will be filtered are the ones from the received filter; no need to changes the filter
+        exportedOutbreakIDs = requestOutbreakIDs;
       } else {
         // an empty outbreakId filter was sent; nothing to do here, will use the client allowed outbreakIDs
       }
     }
 
-    // set the client allowed outbreakIDs in the filter if the received outbreakId filter was empty
-    if (!outbreakIDFilterExists && allowedOutbreakIDs.length) {
+    // set the client allowed outbreakIDs in the filter if the received outbreakId filter was empty/invalid
+    if (!exportedOutbreakIDs.length && allowedOutbreakIDs.length) {
       // outbreakId filter was not sent or is in an invalid format
       // use the allowedOutbreakIDs as filter
       filter.where.outbreakId = {
         inq: allowedOutbreakIDs
       };
+
+      // keep exportedOutbreakIDs data
+      exportedOutbreakIDs = allowedOutbreakIDs;
     }
 
     // initialize list of models to be excluded
@@ -87,17 +91,49 @@ module.exports = function (Sync) {
       collections = collections.filter((collection) => excludeList.indexOf(collection) === -1);
     }
 
-    Sync.exportDatabase(
-      filter,
-      collections,
-      // no collection specific options
-      [],
-      (err, fileName) => {
-        if (err) {
-          return done(err);
+    // get asynchronous flag value; default: false
+    asynchronous = asynchronous || false;
+
+    // create sync log entry
+    app.models.databaseExportLog
+      .create({
+        syncClientId: options.remotingContext.req.authData.client.credentials.clientId,
+        actionStartDate: new Date(),
+        status: 'LNG_SYNC_STATUS_IN_PROGRESS',
+        outbreakIDs: exportedOutbreakIDs
+      }, requestOptions)
+      .then(function (syncLogEntry) {
+        if (!asynchronous) {
+          Sync.exportDatabase(
+            filter,
+            collections,
+            // no collection specific options
+            [],
+            (err, fileName) => {
+              if (err) {
+                return done(err);
+              }
+              return app.utils.remote.helpers.offerFileToDownload(fs.createReadStream(fileName), 'application/octet-stream', fileName, done);
+            });
+
+          // extract the archive to the temporary directory
+          Sync.syncDatabaseWithSnapshot(files.snapshot.path, syncLogEntry, outbreakIDs, requestOptions, function (err) {
+            // send done function to return the response
+            importCallback(err, syncLogEntry, requestOptions, done);
+          });
+        } else {
+          // import is done asynchronous
+          // send response; don't wait for import
+          done(null, syncLogEntry.id);
+
+          // extract the archive to the temporary directory
+          Sync.syncDatabaseWithSnapshot(files.snapshot.path, syncLogEntry, outbreakIDs, requestOptions, function (err) {
+            // don't send the done function as the response was already sent
+            importCallback(err, syncLogEntry, requestOptions);
+          });
         }
-        return app.utils.remote.helpers.offerFileToDownload(fs.createReadStream(fileName), 'application/octet-stream', fileName, done);
-      });
+      })
+      .catch(done);
   };
 
   /**
@@ -120,15 +156,15 @@ module.exports = function (Sync) {
      */
     function importCallback(err, syncLogEntry, requestOptions, callback) {
       // update syncLogEntry
-      syncLogEntry.syncProcessCompletionDate = new Date();
+      syncLogEntry.actionCompletionDate = new Date();
 
       if (err) {
         app.logger.debug(`Sync ${syncLogEntry.id}: Error ${err}`);
-        syncLogEntry.syncStatus = 'LNG_SYNC_STATUS_FAILED';
+        syncLogEntry.status = 'LNG_SYNC_STATUS_FAILED';
         syncLogEntry.failReason = err.toString ? err.toString() : err;
       } else {
         app.logger.debug(`Sync ${syncLogEntry.id}: Success`);
-        syncLogEntry.syncStatus = 'LNG_SYNC_STATUS_SUCCESS';
+        syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS';
       }
 
       // save sync log entry
@@ -183,9 +219,9 @@ module.exports = function (Sync) {
       app.models.syncLog
         .create({
           syncClientId: req.authData.client.credentials.clientId,
-          syncProcessStartDate: new Date(),
-          syncStatus: 'LNG_SYNC_STATUS_IN_PROGRESS',
-          syncOutbreakIDs: outbreakIDs
+          actionStartDate: new Date(),
+          status: 'LNG_SYNC_STATUS_IN_PROGRESS',
+          outbreakIDs: outbreakIDs
         }, requestOptions)
         .then(function (syncLogEntry) {
           if (!asynchronous) {
@@ -273,8 +309,8 @@ module.exports = function (Sync) {
         // create syncLog entry in the DB
         return app.models.syncLog.create({
           syncServerUrl: upstreamServerEntry.url,
-          syncProcessStartDate: new Date(),
-          syncStatus: 'LNG_SYNC_STATUS_IN_PROGRESS'
+          actionStartDate: new Date(),
+          status: 'LNG_SYNC_STATUS_IN_PROGRESS'
         }, options);
       })
       .then(function (syncLog) {
@@ -294,7 +330,7 @@ module.exports = function (Sync) {
       .then(function (outbreakIDs) {
         app.logger.debug(`Sync ${syncLogEntry.id}: Sync will be done for ${outbreakIDs.length ? ('the following outbreaks: ' + outbreakIDs.join(', ')) : 'all the outbreaks in the system'}`);
         // save retrieve outbreak IDs on the sync log entry
-        syncLogEntry.syncOutbreakIDs = outbreakIDs;
+        syncLogEntry.outbreakIDs = outbreakIDs;
 
         // check if the outbreaks with the given IDs were ever successfully synced with the upstream server
         // we will only sync daca updated from the last sync
@@ -302,9 +338,9 @@ module.exports = function (Sync) {
           .findOne({
             where: {
               syncServerUrl: upstreamServerEntry.url,
-              syncStatus: 'LNG_SYNC_STATUS_SUCCESS'
+              status: 'LNG_SYNC_STATUS_SUCCESS'
             },
-            order: 'syncProcessStartDate DESC'
+            order: 'actionStartDate DESC'
           })
           .then(function (lastSyncLogEntry) {
             if (!lastSyncLogEntry) {
@@ -312,8 +348,8 @@ module.exports = function (Sync) {
               app.logger.debug(`Sync ${syncLogEntry.id}: No successful sync was found for the upstream server with URL '${upstreamServerEntry.url}'. Syncing all data from the DB.`);
             } else {
               // get date from which we will sync the data
-              syncLogEntry.syncInformationStartDate = lastSyncLogEntry.syncProcessStartDate;
-              app.logger.debug(`Sync ${syncLogEntry.id}: Latest successful sync with the upstream server (${upstreamServerEntry.url}) was done on '${new Date(syncLogEntry.syncInformationStartDate).toISOString()}'. Syncing data from that date onwards`);
+              syncLogEntry.informationStartDate = lastSyncLogEntry.actionStartDate;
+              app.logger.debug(`Sync ${syncLogEntry.id}: Latest successful sync with the upstream server (${upstreamServerEntry.url}) was done on '${new Date(syncLogEntry.informationStartDate).toISOString()}'. Syncing data from that date onwards`);
             }
 
             // save added details in the sync log entry
@@ -334,13 +370,13 @@ module.exports = function (Sync) {
           where: {}
         };
         // get data from date
-        if (syncLogEntry.syncInformationStartDate) {
-          filter.where.fromDate = syncLogEntry.syncInformationStartDate;
+        if (syncLogEntry.informationStartDate) {
+          filter.where.fromDate = syncLogEntry.informationStartDate;
         }
         // get data from the required outbreaks
-        if (Array.isArray(syncLogEntry.syncOutbreakIDs) && syncLogEntry.syncOutbreakIDs.length) {
+        if (Array.isArray(syncLogEntry.outbreakIDs) && syncLogEntry.outbreakIDs.length) {
           filter.where.outbreakId = {
-            inq: syncLogEntry.syncOutbreakIDs
+            inq: syncLogEntry.outbreakIDs
           };
         }
 
@@ -381,7 +417,7 @@ module.exports = function (Sync) {
       .then(function (upstreamServerDBSnapshotFileName) {
         // 4. import the received DB
         return new Promise(function (resolve, reject) {
-          Sync.syncDatabaseWithSnapshot(upstreamServerDBSnapshotFileName, syncLogEntry, syncLogEntry.syncOutbreakIDs, options, function (err) {
+          Sync.syncDatabaseWithSnapshot(upstreamServerDBSnapshotFileName, syncLogEntry, syncLogEntry.outbreakIDs, options, function (err) {
             if (err) {
               reject(err);
             }
@@ -389,8 +425,8 @@ module.exports = function (Sync) {
             // sync was successful
             // update syncLogEntry
             app.logger.debug(`Sync ${syncLogEntry.id}: Success`);
-            syncLogEntry.syncProcessCompletionDate = new Date();
-            syncLogEntry.syncStatus = 'LNG_SYNC_STATUS_SUCCESS';
+            syncLogEntry.actionCompletionDate = new Date();
+            syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS';
 
             // save sync log entry
             syncLogEntry
@@ -413,8 +449,8 @@ module.exports = function (Sync) {
         } else {
           app.logger.debug(`Sync ${syncLogEntry.id}: Error ${err}`);
           // update sync log status
-          syncLogEntry.syncProcessCompletionDate = new Date();
-          syncLogEntry.syncStatus = 'LNG_SYNC_STATUS_FAILED';
+          syncLogEntry.actionCompletionDate = new Date();
+          syncLogEntry.status = 'LNG_SYNC_STATUS_FAILED';
           syncLogEntry.failReason = err.toString ? err.toString() : err;
           syncLogEntry
             .save(options)
