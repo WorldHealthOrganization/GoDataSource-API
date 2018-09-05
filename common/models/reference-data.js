@@ -383,7 +383,7 @@ module.exports = function (ReferenceData) {
         context.instance.description = `${identifier}_DESCRIPTION`;
       }
       // store original values
-      _.set(context, `options.${ReferenceData.modelName}._original`, original);
+      _.set(context, `options.${ReferenceData.modelName}._original[${context.instance.id}]`, original);
 
     } else if (context.currentInstance && context.data && (context.data.value || context.data.description)) {
       // record is being updated
@@ -406,7 +406,7 @@ module.exports = function (ReferenceData) {
         }
       });
       // store original values
-      _.set(context, `options.${ReferenceData.modelName}._original`, original);
+      _.set(context, `options.${ReferenceData.modelName}._original[${context.currentInstance.id}]`, original);
     }
     next();
   }
@@ -425,7 +425,7 @@ module.exports = function (ReferenceData) {
     }
 
     // get original values
-    const original = _.get(context, `options.${ReferenceData.modelName}._original`);
+    const original = _.get(context, `options.${ReferenceData.modelName}._original[${context.instance.id}]`);
 
     // check if there were any original values stored
     if (original) {

@@ -1113,6 +1113,11 @@
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT": "Password Reset",
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1": "You've requested a password reset for your account.",
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2": "Click <a href='{{resetHref}}'>here</a> to reset your password."
+    },
+    "backupStatus": {
+      "LNG_BACKUP_STATUS_SUCCESS": "Success",
+      "LNG_BACKUP_STATUS_FAILED": "Failed",
+      "LNG_BACKUP_STATUS_PENDING": "In Progress"
     }
   }
 }

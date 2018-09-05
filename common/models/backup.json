@@ -1,0 +1,110 @@
+{
+  "name": "backup",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "userId": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "modules": {
+      "type": [
+        "string"
+      ],
+      "required": true
+    },
+    "date": {
+      "type": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "LNG_BACKUP_STATUS_SUCCESS",
+        "LNG_BACKUP_STATUS_FAILED",
+        "LNG_BACKUP_STATUS_PENDING"
+      ],
+      "description": "Backup status"
+    }
+  },
+  "validations": [],
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "createManualBackup"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "restoreBackup"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "find"
+    }
+  ],
+  "methods": {
+    "createManualBackup": {
+      "accepts": [
+        {
+          "arg": "params",
+          "description": "Backup specific params, if not given fallback on system settings",
+          "type": "backupParams",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "backupId",
+          "type": "string"
+        }
+      ],
+      "description": "Manual backup",
+      "http": {
+        "verb": "post",
+        "path": "/create-backup"
+      }
+    },
+    "prototype.restoreBackup": {
+      "returns": [
+        {
+          "arg": "error"
+        }
+      ],
+      "description": "Restore backup",
+      "http": {
+        "verb": "post",
+        "path": "/restore"
+      }
+    },
+    "prototype.removeBackup": {
+      "returns": [
+        {
+          "arg": "error"
+        }
+      ],
+      "description": "Remove backup",
+      "http": {
+        "verb": "post",
+        "path": "/remove"
+      }
+    }
+  }
+}

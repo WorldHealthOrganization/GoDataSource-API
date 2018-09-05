@@ -10,6 +10,7 @@ const spreadSheetFile = require('./spreadSheetFile');
 const pdfDoc = require('./pdfDoc');
 const streamUtils = require('./streamUtils');
 const async = require('async');
+const fs = require('fs');
 
 const arrayFields = {
   'addresses': 'address',
@@ -815,6 +816,16 @@ const parseModelFieldValues = function (modelInstanceJSON, Model) {
 };
 
 /**
+ * Checks if a directory/file is readable/writable and visible to the calling process
+ * Access sync function is throwing error in case file is not ok
+ * Make sure to treat it
+ * @param path
+ */
+const isPathOK = function (path) {
+  fs.accessSync(path, fs.constants.R_OK | fs.constants.W_OK);
+};
+
+/**
  * Format all the marked date type fields on the model
  * @param model
  * @param dateFieldsList
@@ -938,6 +949,7 @@ module.exports = {
   getFlatObject: getFlatObject,
   getDateDisplayValue: getDateDisplayValue,
   parseModelFieldValues: parseModelFieldValues,
+  isPathOK: isPathOK,
   formatDateFields: formatDateFields,
   formatUndefinedValues: formatUndefinedValues,
   translateDataSetReferenceDataValues: translateDataSetReferenceDataValues,
