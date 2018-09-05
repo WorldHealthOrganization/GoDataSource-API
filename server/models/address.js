@@ -15,6 +15,22 @@ module.exports = function (Address) {
     'date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE'
   };
 
+  Address.referenceDataFields = [
+    'typeId'
+  ];
+
+  Address.printFieldsinOrder = [
+    'typeId',
+    'country',
+    'city',
+    'addressLine1',
+    'addressLine2',
+    'postalCode',
+    'locationId',
+    'geoLocation',
+    'date'
+  ];
+
 
   /**
    * Workaround for a loopbpack/mongo issue:

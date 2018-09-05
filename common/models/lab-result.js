@@ -30,6 +30,21 @@ module.exports = function (LabResult) {
 
   LabResult.referenceDataFields = Object.keys(LabResult.referenceDataFieldsToCategoryMap);
 
+  LabResult.printFieldsinOrder = [
+    'status',
+    'labName',
+    'testType',
+    'dateTesting',
+    'result',
+    'dateOfResult',
+    'sampleType',
+    'dateSampleTaken',
+    'dateSampleDelivered',
+    'sampleIdentifier',
+    'quantitativeResult',
+    'notes'
+  ];
+
   LabResult.extendedForm = {
     template: 'labResultsTemplate',
     containerProperty: 'questionnaireAnswers'

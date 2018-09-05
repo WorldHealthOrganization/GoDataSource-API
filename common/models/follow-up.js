@@ -20,9 +20,24 @@ module.exports = function (Followup) {
     'isGenerated': 'LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED'
   };
 
+  Followup.referenceDataFieldsToCategoryMap = {
+    'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE'
+  };
+
+  Followup.referenceDataFields = Object.keys(Followup.referenceDataFieldsToCategoryMap);
+
   // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
   Followup.nestedGeoPoints = [
     'address.geoLocation'
+  ];
+
+  Followup.printFieldsinOrder = [
+    'date',
+    'performed',
+    'lostToFollowUp',
+    'address',
+    'index',
+    'teamId'
   ];
 
   /**
