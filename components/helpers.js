@@ -211,7 +211,7 @@ function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, pare
                 `${parentPathPrefix}${sourcePath}[]`
               )
             );
-          // simple mapping, no arrays
+            // simple mapping, no arrays
           } else {
             // get the resolved value
             const value = _.get(item, sourcePath);
@@ -934,6 +934,61 @@ const translateFieldLabels = function (app, model, modelName, dictionary) {
   return translatedFieldsModel;
 };
 
+/**
+ * When searching by a location, include all sub-locations
+ * @param app
+ * @param filter
+ * @param callback
+ */
+const includeSubLocationsInLocationFilter = function (app, filter, callback) {
+  // build a list of search actions
+  const searchForLocations = [];
+  // go through all filter properties
+  Object.keys(filter).forEach(function (propertyName) {
+    // search for the parentLocationIdFilter
+    if (propertyName.includes('parentLocationIdFilter')) {
+      // handle only string type
+      if (typeof filter[propertyName] === 'string') {
+        // search for sub-locations
+        searchForLocations.push(function (callback) {
+          app.models.location
+            .getSubLocations([filter[propertyName]], [], function (error, locationIds) {
+              if (error) {
+                return callback(error);
+              }
+              // replace original filter with actual location filter and use found location ids
+              filter[propertyName.replace('parentLocationIdFilter', 'locationId')] = {
+                inq: locationIds
+              };
+              // remove original filter
+              delete filter[propertyName];
+              callback();
+            });
+        });
+      }
+    } else if (Array.isArray(filter[propertyName])) {
+      // for array elements, go through all properties of the array
+      filter[propertyName].forEach(function (item) {
+        // if the item is an object
+        if (item && typeof item === 'object') {
+          // process it recursively
+          searchForLocations.push(function (callback) {
+            includeSubLocationsInLocationFilter(app, item, callback);
+          });
+        }
+      });
+    } else if (filter[propertyName] && typeof filter[propertyName] === 'object') {
+      // if the element is an object
+      searchForLocations.push(function (callback) {
+        // process it recursively
+        includeSubLocationsInLocationFilter(app, filter[propertyName], callback);
+      });
+    }
+  });
+  // perform searches
+  async.series(searchForLocations, callback);
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -953,5 +1008,6 @@ module.exports = {
   formatDateFields: formatDateFields,
   formatUndefinedValues: formatUndefinedValues,
   translateDataSetReferenceDataValues: translateDataSetReferenceDataValues,
-  translateFieldLabels: translateFieldLabels
+  translateFieldLabels: translateFieldLabels,
+  includeSubLocationsInLocationFilter: includeSubLocationsInLocationFilter
 };
