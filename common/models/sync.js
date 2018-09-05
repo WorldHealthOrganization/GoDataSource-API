@@ -46,7 +46,7 @@ module.exports = function (Sync) {
       // doing this because createdAt and updatedAt are equal when a record is created
       customFilter = {
         updatedAt: {
-          $gte: filter.where.fromDate
+          $gte: new Date(filter.where.fromDate)
         }
       };
     }
@@ -248,7 +248,8 @@ module.exports = function (Sync) {
               tmpDir.removeCallback();
 
               // remove temporary uploaded file
-              fs.unlink(filePath, () => {});
+              fs.unlink(filePath, () => {
+              });
 
               // The sync doesn't stop at an error but the entire action will return an error for failed collection/collection record
               // check for failed collections/collection records
@@ -395,15 +396,17 @@ module.exports = function (Sync) {
 
     // initialize filter for DB snapshot export
     let filter = {
-      where: {
-        exclude: [
-          'systemSettings',
-          'team',
-          'user',
-          'role'
-        ]
-      }
+      where: {}
     };
+
+    // get all collections except the following
+    let excludeList = [
+      'systemSettings',
+      'team',
+      'user',
+      'role'
+    ];
+    filter.where.collections = Object.keys(dbSync.collectionsMap).filter((collection) => excludeList.indexOf(collection) === -1);
 
     // get data from date
     if (syncLogEntry.syncInformationStartDate) {

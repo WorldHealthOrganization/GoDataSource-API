@@ -11,22 +11,80 @@ module.exports = function (Sync) {
    * Retrieve a compressed snapshot of the database
    * Date filter is supported ({ fromDate: Date })
    * @param filter
+   * @param options Options from request
    * @param done
    */
-  Sync.getDatabaseSnapshot = function (filter, done) {
+  Sync.getDatabaseSnapshot = function (filter, options, done) {
     filter = filter || {};
     filter.where = filter.where || {};
 
-    // for mobile list of collections that are exported is restricted
+    // check for received outbreakIDs in filter
+    let outbreakIDFilter = _.get(filter, 'where.outbreakId');
+    // get allowed outbreaks IDs for the client
+    let allowedOutbreakIDs = _.get(options, 'remotingContext.req.authData.client.outbreakIDs', []);
+    // initialize flag to know if the outbreakId filter is not empty
+    let outbreakIDFilterExists = false;
+
+    // the outbreakID filter is accepted as an {inq: ['outbreak ID']} filter of a string value
+    if(outbreakIDFilter) {
+      let requestOutbreakIDs = [];
+      if (typeof outbreakIDFilter === 'object' && outbreakIDFilter !== null && Array.isArray(outbreakIDFilter.inq)) {
+        requestOutbreakIDs = outbreakIDFilter.inq;
+      } else if (typeof outbreakIDFilter === 'string') {
+        requestOutbreakIDs = [outbreakIDFilter];
+      }
+
+      if (requestOutbreakIDs.length) {
+        // check if all the requested outbreak IDs are allowed
+        // if the allowedOutbreakIDs is an empty array all the outbreakIDs are allowed
+        if (!allowedOutbreakIDs.length) {
+          // leave the outbreakId filter in the received filter
+        } else {
+          let disallowedOutbreakIDs = requestOutbreakIDs.filter(outbreakID => allowedOutbreakIDs.indexOf(outbreakID) === -1);
+          if (disallowedOutbreakIDs.length) {
+            // some disallowed outbreak IDs were requested; return error
+            return done(app.utils.apiError.getError('ACCESS_DENIED', {
+              accessErrors: `Client is not allowed to access the following outbreaks: ${disallowedOutbreakIDs.join(', ')}`
+            }, 403));
+          }
+        }
+
+        // after the checks the outbreakId filter remains in the filter
+        outbreakIDFilterExists = true;
+      } else {
+        // an empty outbreakId filter was sent; nothing to do here, will use the client allowed outbreakIDs
+      }
+    }
+
+    // set the client allowed outbreakIDs in the filter if the received outbreakId filter was empty
+    if (!outbreakIDFilterExists && allowedOutbreakIDs.length) {
+      // outbreakId filter was not sent or is in an invalid format
+      // use the allowedOutbreakIDs as filter
+      filter.where.outbreakId = {
+        inq: allowedOutbreakIDs
+      };
+    }
+
+    // initialize list of models to be excluded
+    // this list is used if the filter.where.collections is not present
+    let excludeList = [
+      'systemSettings',
+      'template',
+      'icon',
+      'helpCategory'
+    ];
+
+    // initialize list of collections to be exported
     let collections = Object.keys(dbSync.collectionsMap);
-    if (filter.mobile) {
-      let excludedCollections = [
-        'systemSettings',
-        'template',
-        'icon',
-        'helpCategory'
-      ];
-      collections = collections.filter((collection) => excludedCollections.indexOf(collection) === -1);
+
+    // check for collections filter
+    let collectionsFilter = _.get(filter, 'where.collections');
+    if (Array.isArray(collectionsFilter)) {
+      // export the received collections
+      collections = collectionsFilter;
+    } else {
+      // exclude the excludeList collections from the export
+      collections = collections.filter((collection) => excludeList.indexOf(collection) === -1);
     }
 
     Sync.exportDatabase(
@@ -38,7 +96,7 @@ module.exports = function (Sync) {
         if (err) {
           return done(err);
         }
-        return done(null, fs.createReadStream(fileName), 'application/octet-stream');
+        return app.utils.remote.helpers.offerFileToDownload(fs.createReadStream(fileName), 'application/octet-stream', fileName, done);
       });
   };
 
@@ -287,17 +345,20 @@ module.exports = function (Sync) {
         }
 
         // 1: export local DB
+        // export all collections except the following
+        let excludeList = [
+          'systemSettings',
+          'team',
+          'user',
+          'role'
+        ];
+        let collections = Object.keys(dbSync.collectionsMap).filter((collection) => excludeList.indexOf(collection) === -1);
+
         app.logger.debug(`Sync ${syncLogEntry.id}: Exporting DB.`);
         return new Promise(function (resolve, reject) {
           Sync.exportDatabase(
             filter,
-            // excluding the following models for sync
-            [
-              'systemSettings',
-              'team',
-              'user',
-              'role'
-            ],
+            collections,
             // no collection specific options
             [],
             (err, fileName) => {

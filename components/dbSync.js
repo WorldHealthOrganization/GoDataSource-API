@@ -37,18 +37,16 @@ function addOutbreakIdMongoFilter(collectionName, baseFilter, filter) {
   // check for outbreakId filter
   let outbreakIdFilter = _.get(filter, 'where.outbreakId');
 
-  // outbreak ID property is different in some models
-  let outbreakIDDBProp = 'outbreakId';
-  // update property name for outbreak model
-  if (collectionName === 'outbreak') {
-    outbreakIDDBProp = '_id';
-  }
-
   // initialize resulting filter
-  let result = null;
+  // start from base filter; Note that it can be null
+  let result = Object.assign({}, baseFilter || {});
   if (outbreakIdFilter) {
-    // start from base filter; Note that it can be null
-    result = Object.assign({}, baseFilter || {});
+    // outbreak ID property is different in some models
+    let outbreakIDDBProp = 'outbreakId';
+    // update property name for outbreak model
+    if (collectionName === 'outbreak') {
+      outbreakIDDBProp = '_id';
+    }
 
     // parse the outbreakIdFilter to mongoDB format
     if (typeof outbreakIdFilter === 'object') {
