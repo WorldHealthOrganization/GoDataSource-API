@@ -257,10 +257,43 @@ const removeBackups = function (currentDate) {
     .then((olderBackups) => olderBackups.forEach((backup) => removeBackup(backup)));
 };
 
+/**
+ * Retrieve system settings get backup timings, check backup location
+ * Used mainly for backup routines (create, cleanup)
+ * @parma done
+ */
+const preRoutine = function (done) {
+  // retrieve system settings and get backup timings
+  app.models.systemSettings
+    .findOne()
+    .then((systemSettings) => {
+      // data backup configuration is not available, do nothing
+      if (!systemSettings.dataBackup) {
+        app.logger.warn('Backup settings not available.');
+        return done(true);
+      }
+
+      // cache backup settings
+      let backupSettings = systemSettings.dataBackup;
+
+      // make sure the backup location is ok
+      fs.access(backupSettings.location, fs.F_OK, (accessError) => {
+        if (accessError) {
+          app.logger.error(`Configured backup location: ${backupSettings.location} is not OK. ${accessError}`);
+          return done(accessError);
+        }
+
+        return done(null, backupSettings);
+      });
+    });
+};
+
+
 module.exports = {
   create: createBackup,
   restore: restoreBackup,
   remove: removeBackup,
   restoreFromFile: restoreBackupFromFile,
-  removeBackups: removeBackups
+  removeBackups: removeBackups,
+  preRoutine: preRoutine
 };

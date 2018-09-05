@@ -22,7 +22,7 @@ const defaultSettings = {
     ],
     'backupInterval': 24,
     'dataRetentionInterval': 90,
-    'location': ''
+    'location': 'backups'
   },
   'anonymizeFields': {
     'case': [
