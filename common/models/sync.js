@@ -247,8 +247,8 @@ module.exports = function (Sync) {
               // remove temporary directory
               tmpDir.removeCallback();
 
-          // remove temporary uploaded file
-          fs.unlink(filePath);
+              // remove temporary uploaded file
+              fs.unlink(filePath, () => {});
 
               // The sync doesn't stop at an error but the entire action will return an error for failed collection/collection record
               // check for failed collections/collection records
