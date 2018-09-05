@@ -104,6 +104,7 @@ module.exports = function (Sync) {
       }, requestOptions)
       .then(function (syncLogEntry) {
         if (!asynchronous) {
+          // TODO
           Sync.exportDatabase(
             filter,
             collections,
