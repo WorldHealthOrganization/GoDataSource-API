@@ -177,8 +177,22 @@ module.exports = function (Outbreak) {
                 // set its type
                 data.persons[index].type = foundPerson.type;
 
-                // set the person assignments (source/target)
-                Outbreak.helpers.setPersonAssignments(data.persons);
+                // Set the person assignments (source/target)
+                // If the trying to link to an event or a case, set it as the source.
+                if (['event', 'case'].includes(data.persons[1].type)) {
+                  data.persons[0].target = true;
+                  data.persons[1].source = true;
+                } else {
+                  // If we are trying to link two contacts, keep the contact we are linking to as the source
+                  if (data.persons[0].type === 'contact') {
+                    data.persons[0].target = true;
+                    data.persons[1].source = true;
+                    // If we are linking a case/event to a contact, set the contact as the target
+                  } else {
+                    data.persons[0].source = true;
+                    data.persons[1].target = true;
+                  }
+                }
               })
           );
         }
@@ -191,30 +205,6 @@ module.exports = function (Outbreak) {
         .catch(callback);
     } else {
       callback(null, data.persons);
-    }
-  };
-
-  /**
-   * Sets the target/source properties of a relationship's persons.
-   * This function assumes that the persons array is correct (contains 2 persons,
-   * and the person we are linking to is on the second position)
-   * @param persons
-   */
-  Outbreak.helpers.setPersonAssignments = function (persons) {
-    // If the person we are trying to link to is a case/event, it can only be the source
-    if (['event', 'case'].includes(persons[1].type)) {
-      persons[0].target = true;
-      persons[1].source = true;
-    } else {
-      // If we are trying to link two contacts, keep the contact we are linking to as the source
-      if (persons[0].type === 'contact') {
-        persons[0].target = true;
-        persons[1].source = true;
-      // If we are linking a case/event to a contact, set the contact as the target
-      } else {
-        persons[0].source = true;
-        persons[1].target = true;
-      }
     }
   };
 
@@ -1046,3 +1036,4 @@ module.exports = function (Outbreak) {
     }
   };
 };
+3
