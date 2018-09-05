@@ -138,5 +138,13 @@
   "INVALID_IMAGE_TYPE": {
     "defaultStatusCode": 400,
     "messagePattern": "Provided image type `<%= imageType %>` is invalid."
+  },
+  "EXTERNAL_API_CONNECTION_ERROR": {
+    "defaultStatusCode": 503,
+    "messagePattern": "Communication with external service (<%= serviceName %>) failed"
+  },
+  "UNEXPECTED_EXTERNAL_API_RESPONSE": {
+    "defaultStatusCode": 500,
+    "messagePattern": "External service (<%= serviceName %>) returned an invalid response"
   }
 }
