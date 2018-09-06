@@ -947,12 +947,21 @@ const includeSubLocationsInLocationFilter = function (app, filter, callback) {
   Object.keys(filter).forEach(function (propertyName) {
     // search for the parentLocationIdFilter
     if (propertyName.includes('parentLocationIdFilter')) {
-      // handle only string type
+      // start with no location filter
+      let parentLocationFilter;
+      // handle string type
       if (typeof filter[propertyName] === 'string') {
+        parentLocationFilter = [filter[propertyName]];
+        // handle include type
+      } else if (typeof filter[propertyName] === 'object' && Array.isArray(filter[propertyName].inq)) {
+        parentLocationFilter = filter[propertyName].inq;
+      }
+      // if a parent location filter was specified
+      if (parentLocationFilter) {
         // search for sub-locations
         searchForLocations.push(function (callback) {
           app.models.location
-            .getSubLocations([filter[propertyName]], [], function (error, locationIds) {
+            .getSubLocations(parentLocationFilter, [], function (error, locationIds) {
               if (error) {
                 return callback(error);
               }
