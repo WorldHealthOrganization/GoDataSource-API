@@ -8,14 +8,57 @@ const _ = require('lodash');
 
 module.exports = function (Sync) {
   /**
-   * Retrieve a compressed snapshot of the database
-   * Date filter is supported ({ fromDate: Date })
+   * Get Database Snapshot in sync/async mode
    * @param filter
-   * @param asynchronous Flag to specify whether the export is sync or async. Default: sync (false)
-   * @param options Options from request
+   * @param asynchronous
+   * @param options
    * @param done
+   * @returns {*}
    */
-  Sync.getDatabaseSnapshot = function (filter, asynchronous, options, done) {
+  function getDatabaseSnapshot(filter, asynchronous, options, done) {
+    /**
+     * Update export log entry and offer file for download if needed
+     * @param err
+     * @param fileName
+     * @param exportLogEntry
+     * @param options
+     */
+    function exportCallback(err, fileName, exportLogEntry, options, done) {
+      // update exportLogEntry
+      exportLogEntry.actionCompletionDate = new Date();
+
+      if (err) {
+        app.logger.debug(`Export ${exportLogEntry.id}: Error ${err}`);
+        exportLogEntry.status = 'LNG_SYNC_STATUS_FAILED';
+        exportLogEntry.failReason = err.toString ? err.toString() : err;
+      } else {
+        app.logger.debug(`Sync ${exportLogEntry.id}: Success`);
+        exportLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS';
+        exportLogEntry.location = fileName;
+      }
+
+      // save sync log entry
+      exportLogEntry
+        .save(options)
+        .then(function () {
+          // nothing to do; sync log entry was saved
+        })
+        .catch(function (err) {
+          app.logger.debug(`Sync ${exportLogEntry.id}: Error updating export log entry status. ${err}`);
+        });
+
+      // check if a callback function was received; In that case we need to return the file
+      if (done) {
+        if (err) {
+          return done(err);
+        }
+        return app.utils.remote.helpers.offerFileToDownload(fs.createReadStream(fileName), 'application/octet-stream', fileName, done);
+      }
+    }
+
+    // get asynchronous flag value; default: false
+    asynchronous = asynchronous || false;
+
     filter = filter || {};
     filter.where = filter.where || {};
 
@@ -27,7 +70,7 @@ module.exports = function (Sync) {
     let exportedOutbreakIDs = [];
 
     // the outbreakID filter is accepted as an {inq: ['outbreak ID']} filter of a string value
-    if(outbreakIDFilter) {
+    if (outbreakIDFilter) {
       let requestOutbreakIDs = [];
       if (typeof outbreakIDFilter === 'object' && outbreakIDFilter !== null && Array.isArray(outbreakIDFilter.inq)) {
         requestOutbreakIDs = outbreakIDFilter.inq;
@@ -91,48 +134,121 @@ module.exports = function (Sync) {
       collections = collections.filter((collection) => excludeList.indexOf(collection) === -1);
     }
 
-    // get asynchronous flag value; default: false
-    asynchronous = asynchronous || false;
-
-    // create sync log entry
+    // create export log entry
     app.models.databaseExportLog
       .create({
         syncClientId: options.remotingContext.req.authData.client.credentials.clientId,
         actionStartDate: new Date(),
         status: 'LNG_SYNC_STATUS_IN_PROGRESS',
         outbreakIDs: exportedOutbreakIDs
-      }, requestOptions)
-      .then(function (syncLogEntry) {
+      }, options)
+      .then(function (exportLogEntry) {
         if (!asynchronous) {
-          // TODO
           Sync.exportDatabase(
             filter,
             collections,
             // no collection specific options
             [],
             (err, fileName) => {
-              if (err) {
-                return done(err);
-              }
-              return app.utils.remote.helpers.offerFileToDownload(fs.createReadStream(fileName), 'application/octet-stream', fileName, done);
+              // send the done function as the response needs to be returned
+              exportCallback(err, fileName, exportLogEntry, options, done);
+            });
+        } else {
+          // export is done asynchronous
+          // send response; don't wait for export
+          done(null, exportLogEntry.id);
+
+          // export the DB
+          Sync.exportDatabase(
+            filter,
+            collections,
+            // no collection specific options
+            [],
+            (err, fileName) => {
+              // don't send the done function as the response was already sent
+              exportCallback(err, fileName, exportLogEntry, options);
+            });
+        }
+      })
+      .catch(done);
+  }
+
+  /**
+   * Retrieve a compressed snapshot of the database
+   * Date filter is supported ({ fromDate: Date })
+   * outbreakId filter is supported: 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}
+   * collections filter is supported: ['modelName']
+   * @param filter
+   * @param options Options from request
+   * @param done
+   */
+  Sync.getDatabaseSnapshot = function (filter, options, done) {
+    getDatabaseSnapshot(filter, false, options, done);
+  };
+
+  /**
+   * Export a compressed snapshot of the database. Return an exportLogEntry ID
+   * This action is used for asynchronous processes
+   * Date filter is supported ({ fromDate: Date })
+   * outbreakId filter is supported: 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}
+   * collections filter is supported: ['modelName']
+   * @param filter
+   * @param options Options from request
+   * @param done
+   */
+  Sync.getDatabaseSnapshotAsynchronous = function (filter, options, done) {
+    getDatabaseSnapshot(filter, true, options, done);
+  };
+
+  /**
+   * Download an already exported snapshot of the database
+   * @param exportLogId
+   * @param options Options from request
+   * @param done
+   */
+  Sync.getExportedDatabaseSnapshot = function (exportLogId, options, done) {
+    // get export log entry
+    app.models.databaseExportLog
+      .findById(exportLogId)
+      .then(function (exportLogEntry) {
+        if (!exportLogEntry) {
+          return done(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.databaseExportLog.modelName,
+            id: exportLogId
+          }));
+        }
+
+        // check export log status and location
+        if (exportLogEntry.status === 'LNG_SYNC_STATUS_IN_PROGRESS') {
+          return done(app.utils.apiError.getError('INSTANCE_EXPORT_STILL_IN_PROGRESS'));
+        } else if (exportLogEntry.status === 'LNG_SYNC_STATUS_FAILED') {
+          return done(app.utils.apiError.getError('INSTANCE_EXPORT_FAILED', {
+            failReason: exportLogEntry.failReason
+          }));
+        }
+
+        // exportLogEntry status is success; check for location and file
+        if (!exportLogEntry.location || !fs.existsSync(exportLogEntry.location)) {
+          // fail the exportLogEntry
+          exportLogEntry
+            .updateAttributes({
+              status: 'LNG_SYNC_STATUS_FAILED',
+              failReason: 'Export location is missing or file cannot be found'
+            })
+            .then(() => {
+              // nothing to do
+            })
+            .catch((err) => {
+              app.logger.debug(`Failed to save export log entry '${exportLogEntry.id}': Error ${err}`);
             });
 
-          // extract the archive to the temporary directory
-          Sync.syncDatabaseWithSnapshot(files.snapshot.path, syncLogEntry, outbreakIDs, requestOptions, function (err) {
-            // send done function to return the response
-            importCallback(err, syncLogEntry, requestOptions, done);
-          });
-        } else {
-          // import is done asynchronous
-          // send response; don't wait for import
-          done(null, syncLogEntry.id);
-
-          // extract the archive to the temporary directory
-          Sync.syncDatabaseWithSnapshot(files.snapshot.path, syncLogEntry, outbreakIDs, requestOptions, function (err) {
-            // don't send the done function as the response was already sent
-            importCallback(err, syncLogEntry, requestOptions);
-          });
+          return done(app.utils.apiError.getError('INSTANCE_EXPORT_FAILED', {
+            failReason: exportLogEntry.failReason
+          }));
         }
+
+        // download file
+        return app.utils.remote.helpers.offerFileToDownload(fs.createReadStream(exportLogEntry.location), 'application/octet-stream', exportLogEntry.location, done);
       })
       .catch(done);
   };

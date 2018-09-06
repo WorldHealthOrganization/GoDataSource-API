@@ -15,6 +15,11 @@
   "acls": [
     {
       "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "$client_application",
       "permissions": "ALLOW",
       "property": "getDatabaseSnapshot"
@@ -36,6 +41,18 @@
       "principalId": "write_sys_config",
       "permissions": "ALLOW",
       "property": "sync"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "getDatabaseSnapshotAsynchronous"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "getExportedDatabaseSnapshot"
     }
   ],
   "methods": {
@@ -45,11 +62,6 @@
           "arg": "filter",
           "type": "object",
           "description": "This request accepts 'fromDate': date, 'outbreakId': 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}, 'collections': ['modelName'] on the first level in 'where'"
-        },
-        {
-          "arg": "asynchronous",
-          "type": "boolean",
-          "description": "Flag to specify whether the export is sync or async. Default: sync (false)"
         },
         {
           "arg": "options",
@@ -83,6 +95,72 @@
       "http": {
         "verb": "get",
         "path": "/database-snapshot"
+      }
+    },
+    "getDatabaseSnapshotAsynchronous": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "This request accepts 'fromDate': date, 'outbreakId': 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}, 'collections': ['modelName'] on the first level in 'where'"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "exportLogId",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "description": "Export a compressed snapshot of the database in the tmp folder. The action is done asynchronous and the response contains an exportLogId",
+      "http": {
+        "verb": "get",
+        "path": "/database-snapshot-asynchronous"
+      }
+    },
+    "getExportedDatabaseSnapshot": {
+      "accepts": [
+        {
+          "arg": "exportLogId",
+          "type": "string"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Download an already exported snapshot of the database.",
+      "http": {
+        "verb": "get",
+        "path": "/exported-database-snapshot/:exportLogId"
       }
     },
     "importDatabaseSnapshot": {

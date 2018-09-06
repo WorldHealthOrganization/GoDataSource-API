@@ -36,6 +36,18 @@ module.exports = function (app) {
   }
 
   /**
+   * Store Authorization Required error in context
+   * @param authorizationError
+   * @param context
+   */
+  function storeAuthorizationErrorsInContext(authorizationError, context) {
+    if (!context.remotingContext.req.authorizationErrors) {
+      context.remotingContext.req.authorizationErrors = [];
+    }
+    context.remotingContext.req.authorizationErrors.push(authorizationError);
+  }
+
+  /**
    * Verify if a user has the correct access permission
    * @param permission
    * @param context
@@ -138,19 +150,23 @@ module.exports = function (app) {
 
       // check authorization header and client credentials
       if (!reqHeaders.authorization) {
-        return done(buildError('ACCESS_DENIED', {accessErrors: 'No Authorization header found'}, 403));
+        app.logger.debug(`No Authorization header found`);
+        return done(null, false);
       }
       let parts = reqHeaders.authorization.split(' ');
       if (parts.length !== 2) {
-        return done(buildError('ACCESS_DENIED', {accessErrors: 'Format is Authorization: Basic [token]'}, 403));
+        app.logger.debug(`Authorization header format is 'Authorization: Basic [token]'`);
+        return done(null, false);
       }
       // check the used credentials against the ones found in system settings
       if (!clientInformation || !usedCredentials || clientCredentials.clientSecret !== usedCredentials.clientSecret) {
-        return done(buildError('ACCESS_DENIED', {accessErrors: 'Invalid credentials'}, 403));
+        storeAuthorizationErrorsInContext('Invalid credentials', context);
+        return done(null, false);
       }
       // check if client is active
       if (!clientInformation.active) {
-        return done(buildError('ACCESS_DENIED', {accessErrors: 'Client is not active'}, 403));
+        storeAccessErrorsInContext('Client is not active', context);
+        return done(null, false);
       }
 
       return done(null, true);
