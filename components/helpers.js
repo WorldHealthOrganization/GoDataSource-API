@@ -953,7 +953,7 @@ const includeSubLocationsInLocationFilter = function (app, filter, callback) {
       if (typeof filter[propertyName] === 'string') {
         parentLocationFilter = [filter[propertyName]];
         // handle include type
-      } else if (typeof filter[propertyName] === 'object' && Array.isArray(filter[propertyName].inq)) {
+      } else if (filter[propertyName] && typeof filter[propertyName] === 'object' && Array.isArray(filter[propertyName].inq)) {
         parentLocationFilter = filter[propertyName].inq;
       }
       // if a parent location filter was specified
