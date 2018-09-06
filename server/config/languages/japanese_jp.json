@@ -902,6 +902,7 @@
       "LNG_PAGE_TITLE_CONTACT_RELATIONSHIP": "日本の Contact Relationship"
     },
     "countries": {
+      "LNG_REFERENCE_DATA_CATEGORY_COUNTRY": "日本の Country",
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AFGHANISTAN": "日本の Afghanistan",
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ALBANIA": "日本の Albania",
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ALGERIA": "日本の Algeria",
