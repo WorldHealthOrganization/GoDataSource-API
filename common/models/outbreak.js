@@ -97,16 +97,10 @@ module.exports = function (Outbreak) {
    * @param personId
    * @param type
    * @param data
-   * @param [isCurrentPersonSource]
    * @param callback
    * @return {*}
    */
-  Outbreak.helpers.validateAndNormalizePeople = function (personId, type, data, isCurrentPersonSource, callback) {
-    // isCurrentPersonSource is optional and by default is true
-    if (callback === undefined) {
-      callback = isCurrentPersonSource;
-      isCurrentPersonSource = true;
-    }
+  Outbreak.helpers.validateAndNormalizePeople = function (personId, type, data, callback) {
     if (Array.isArray(data.persons) && data.persons.length) {
 
       let errors = [];
@@ -114,7 +108,7 @@ module.exports = function (Outbreak) {
 
       // We allow the user to send multiple persons in a create relationships request but we only use the first one.
       // We do this so that we can "silently" treat an user error.
-      let person = data.persons[0];
+      let person = {id: data.persons[0].id};
 
       // validate the person item
       if (person.id === undefined) {
@@ -123,8 +117,6 @@ module.exports = function (Outbreak) {
       } else if (person.id === personId) {
         errors.push('You cannot link a person to itself');
       } else {
-        // make sure type is not set (it will be set later on)
-        delete person.type;
         persons.push(person);
       }
 
@@ -150,8 +142,7 @@ module.exports = function (Outbreak) {
       if (data.persons.length) {
         data.persons.push({
           id: personId,
-          type: type,
-          [isCurrentPersonSource ? 'source' : 'target']: true
+          type: type
         });
       }
 
@@ -184,10 +175,25 @@ module.exports = function (Outbreak) {
                     id: person.id
                   }));
                 }
-                // this person is a target
-                data.persons[index][isCurrentPersonSource ? 'target' : 'source'] = true;
                 // set its type
                 data.persons[index].type = foundPerson.type;
+
+                // Set the person assignments (source/target)
+                // If the trying to link to an event or a case, set it as the source.
+                if (['event', 'case'].includes(data.persons[1].type)) {
+                  data.persons[0].target = true;
+                  data.persons[1].source = true;
+                } else {
+                  // If we are trying to link two contacts, keep the contact we are linking to as the source
+                  if (data.persons[0].type === 'contact') {
+                    data.persons[0].target = true;
+                    data.persons[1].source = true;
+                    // If we are linking a case/event to a contact, set the contact as the target
+                  } else {
+                    data.persons[0].source = true;
+                    data.persons[1].target = true;
+                  }
+                }
               })
           );
         }
@@ -213,11 +219,10 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.helpers.createPersonRelationship = function (outbreakId, personId, type, data, options, callback) {
-    Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error, persons) {
+    Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error) {
       if (error) {
         return callback(error);
       }
-      data.persons = persons;
       app.models.relationship.removeReadOnlyProperties(data);
       app.models.relationship
         .create(Object.assign(data, {outbreakId: outbreakId}), options)
@@ -271,11 +276,10 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.helpers.updatePersonRelationship = function (personId, relationshipId, type, data, options, callback) {
-    Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error, persons) {
+    Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error) {
       if (error) {
         return callback(error);
       }
-      data.person = persons;
       app.models.relationship
         .findOne({
           where: {
