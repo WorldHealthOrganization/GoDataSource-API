@@ -164,20 +164,14 @@ const cliArguments = {
 };
 
 /**
- * Output a message to stdout/stderr and optionally end process. For errors, process is automatically stopped
+ * Output a message to stdout/stderr and end process
  * @param message
  * @param isError
- * @param exit
  */
-function output(message, isError, exit) {
+function output(message, isError) {
   // use stderr/stdout per message type
   process[isError ? 'stderr' : 'stdout'].write(`${message}\n`);
-  if (isError) {
-    process.exit(1);
-  }
-  if (exit) {
-    process.exit();
-  }
+  process.exit(isError ? 1 : 0);
 }
 
 // define the list of supported commands
@@ -213,6 +207,9 @@ if (!argument) {
   output(`No valid argument specified. Available arguments: \n- ${supportedArguments.join('\n- ')}`, true);
 }
 
+// define vars to be used later
+let argumentValue, convertedValue;
+
 /**
  * Handle CLI commands
  */
@@ -223,24 +220,24 @@ switch (command) {
       output(`Setting ${argument} is not allowed`, true);
     }
     // set command must specify an argument value (the next process argument after command argument)
-    const argumentValue = args[argumentIndex + 1];
+    argumentValue = args[argumentIndex + 1];
     if (argumentValue === undefined) {
       output(`No argument value sent. You can specify argument value like this: ${command} ${argument} <argumentValue>`, true);
     }
     // convert the value to expected format
-    const convertedValue = cliArguments[argument][command].convertor(argumentValue);
+    convertedValue = cliArguments[argument][command].convertor(argumentValue);
     // update the value in the configuration
-    _.set(cliArguments[argument].source.data, cliArguments[argument].paramPath, cliArguments[argument][command].convertor(argumentValue));
+    _.set(cliArguments[argument].source.data, cliArguments[argument].paramPath, convertedValue);
     // update configuration
     fs.writeFile(cliArguments[argument].source.path, JSON.stringify(cliArguments[argument].source.data, null, 2), function (error) {
       if (error) {
         output(JSON.stringify(error), true);
       }
-      output(`Success: ${command} ${argument} ${convertedValue.toString()}`, false, true);
+      output(`Success: ${command} ${argument} ${convertedValue.toString()}`, false);
     });
     break;
   case 'get':
     // read the configuration value
-    output(cliArguments[argument][command].convertor(_.get(cliArguments[argument].source.data, cliArguments[argument].paramPath)), false, true);
+    output(cliArguments[argument][command].convertor(_.get(cliArguments[argument].source.data, cliArguments[argument].paramPath)), false);
     break;
 }
