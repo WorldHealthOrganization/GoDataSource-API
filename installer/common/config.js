@@ -2,7 +2,9 @@
 
 const fs = require('fs');
 const _ = require('lodash');
+const args = process.argv;
 
+// define the list of sources
 const sources = {
   config: {
     path: `${__dirname}/../../server/config.json`,
@@ -14,42 +16,190 @@ const sources = {
   }
 };
 
-const args = process.argv;
-
-const CLI = {
-  set: {
-    apiPort: {
-      source: sources.config,
-      path: 'port',
+// define a list of supported CLI arguments, along with their configuration
+const cliArguments = {
+  apiPort: {
+    source: sources.config,
+    paramPath: 'port',
+    get: {
+      convertor: e => e.toString()
+    },
+    set: {
+      allowed: true,
       convertor: e => parseInt(e)
     }
   },
-  get: {
-    apiPort: {
-      source: sources.config,
-      path: 'port',
+  publicPort: {
+    source: sources.config,
+    paramPath: 'public.port',
+    get: {
       convertor: e => e.toString()
+    },
+    set: {
+      allowed: true,
+      convertor: e => parseInt(e)
     }
-  }
+  },
+  publicHost: {
+    source: sources.config,
+    paramPath: 'public.host',
+    get: {
+      convertor: e => e
+    },
+    set: {
+      allowed: true,
+      convertor: e => e
+    }
+  },
+  logLevel: {
+    source: sources.config,
+    paramPath: 'logging.level',
+    get: {
+      convertor: e => e
+    },
+    set: {
+      allowed: true,
+      convertor: e => e
+    }
+  },
+  dbHost: {
+    source: sources.dataSources,
+    paramPath: 'mongoDb.host',
+    get: {
+      convertor: e => e
+    },
+    set: {
+      allowed: true,
+      convertor: e => e
+    }
+  },
+  dbPort: {
+    source: sources.dataSources,
+    paramPath: 'mongoDb.port',
+    get: {
+      convertor: e => e.toString()
+    },
+    set: {
+      allowed: true,
+      convertor: e => parseInt(e)
+    }
+  },
+  dbUser: {
+    source: sources.dataSources,
+    paramPath: 'mongoDb.user',
+    get: {
+      convertor: e => e
+    },
+    set: {
+      allowed: true,
+      convertor: e => e
+    }
+  },
+  dbPassword: {
+    source: sources.dataSources,
+    paramPath: 'mongoDb.password',
+    get: {
+      convertor: e => e
+    },
+    set: {
+      allowed: true,
+      convertor: e => e
+    }
+  },
+  smtpHost: {
+    source: sources.dataSources,
+    paramPath: 'email.transports.0.host',
+    get: {
+      convertor: e => e
+    },
+    set: {
+      allowed: true,
+      convertor: e => e
+    }
+  },
+  smtpPort: {
+    source: sources.dataSources,
+    paramPath: 'email.transports.0.port',
+    get: {
+      convertor: e => e.toString()
+    },
+    set: {
+      allowed: true,
+      convertor: e => parseInt(e)
+    }
+  },
+  smtpSecure: {
+    source: sources.dataSources,
+    paramPath: 'email.transports.0.secure',
+    get: {
+      convertor: e => e.toString()
+    },
+    set: {
+      allowed: true,
+      convertor: e => e === 'true'
+    }
+  },
+  smtpUser: {
+    source: sources.dataSources,
+    paramPath: 'email.transports.0.auth.user',
+    get: {
+      convertor: e => e
+    },
+    set: {
+      allowed: true,
+      convertor: e => e
+    }
+  },
+  smtpPassword: {
+    source: sources.dataSources,
+    paramPath: 'email.transports.0.auth.pass',
+    get: {
+      convertor: e => e
+    },
+    set: {
+      allowed: true,
+      convertor: e => e
+    }
+  },
 };
 
-const supportedCommands = Object.keys(CLI);
+/**
+ * Output a message to stdout/stderr and optionally end process. For errors, process is automatically stopped
+ * @param message
+ * @param isError
+ * @param exit
+ */
+function output(message, isError, exit) {
+  // use stderr/stdout per message type
+  process[isError ? 'stderr' : 'stdout'].write(`${message}\n`);
+  if (isError) {
+    process.exit(1);
+  }
+  if (exit) {
+    process.exit();
+  }
+}
 
+// define the list of supported commands
+const supportedCommands = ['get', 'set'];
+
+// get the command from the process arguments
 let command;
-
 supportedCommands.forEach(function (supportedCommand) {
   if (!command && args.includes(supportedCommand)) {
     command = supportedCommand;
   }
 });
 
+// check if the command is invalid
 if (!command) {
-  process.stderr.write(`\nNo valid command specified. Available commands: \n- ${supportedCommands.join('\n- ')}\n`);
-  process.exit(1);
+  output(`No valid command specified. Available commands: \n- ${supportedCommands.join('\n- ')}`, true);
 }
 
-const supportedArguments = Object.keys(CLI[command]);
+// define the list of supported arguments
+const supportedArguments = Object.keys(cliArguments);
 
+// get the command argument from the process arguments
 let argument;
 let argumentIndex;
 supportedArguments.forEach(function (supportedArgument) {
@@ -58,31 +208,39 @@ supportedArguments.forEach(function (supportedArgument) {
   }
 });
 
+// check if the command argument is valid
 if (!argument) {
-  process.stderr.write(`\nNo valid argument specified. Available arguments: \n- ${supportedArguments.join('\n- ')}\n`);
-  process.exit(1);
+  output(`No valid argument specified. Available arguments: \n- ${supportedArguments.join('\n- ')}`, true);
 }
 
+/**
+ * Handle CLI commands
+ */
 switch (command) {
   case 'set':
-    let argumentValue = args[argumentIndex + 1];
-    if (argumentValue === undefined){
-      process.stderr.write(`\nNo argument value sent. You can specify argument value like this: ${command} ${argument} <argumentValue>`);
-      process.exit(1);
+    // check if setting the argument is allowed
+    if (!cliArguments[argument][command].allowed) {
+      output(`Setting ${argument} is not allowed`, true);
     }
-    let convertedValue =  CLI[command][argument].convertor(argumentValue);
-    _.set(CLI[command][argument].source.data, CLI[command][argument].path, CLI[command][argument].convertor(argumentValue));
-    fs.writeFile(CLI[command][argument].source.path, JSON.stringify(CLI[command][argument].source.data, null, 2), function (error) {
+    // set command must specify an argument value (the next process argument after command argument)
+    const argumentValue = args[argumentIndex + 1];
+    if (argumentValue === undefined) {
+      output(`No argument value sent. You can specify argument value like this: ${command} ${argument} <argumentValue>`, true);
+    }
+    // convert the value to expected format
+    const convertedValue = cliArguments[argument][command].convertor(argumentValue);
+    // update the value in the configuration
+    _.set(cliArguments[argument].source.data, cliArguments[argument].paramPath, cliArguments[argument][command].convertor(argumentValue));
+    // update configuration
+    fs.writeFile(cliArguments[argument].source.path, JSON.stringify(cliArguments[argument].source.data, null, 2), function (error) {
       if (error) {
-        process.stderr.write(JSON.stringify(error));
-        process.exit(1);
+        output(JSON.stringify(error), true);
       }
-      process.stdout.write(`Success: ${command} ${argument} ${convertedValue.toString()}`);
-      process.exit();
+      output(`Success: ${command} ${argument} ${convertedValue.toString()}`, false, true);
     });
     break;
   case 'get':
-    process.stdout.write(CLI[command][argument].convertor(_.get(CLI[command][argument].source.data, CLI[command][argument].path)));
-    process.exit();
+    // read the configuration value
+    output(cliArguments[argument][command].convertor(_.get(cliArguments[argument].source.data, cliArguments[argument].paramPath)), false, true);
     break;
 }
