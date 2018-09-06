@@ -3379,8 +3379,10 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('**', function (context, modelInstance, next) {
     if (context.args.filter) {
       genericHelpers.convertPropsToDate(context.args.filter);
+      genericHelpers.includeSubLocationsInLocationFilter(app, context.args.filter, next);
+    } else {
+      return next();
     }
-    return next();
   });
 
   /**
