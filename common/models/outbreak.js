@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const _ = require('lodash');
+const genericHelpers = require('../../components/helpers');
 
 // used to manipulate dates
 const moment = require('moment');
@@ -956,7 +957,8 @@ module.exports = function (Outbreak) {
         };
 
         // do not try to translate answers that are free text
-        if (question.answerType !== 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT') {
+        if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER'
+          || question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
           questionResult.answers = question.answers.map((answer) => {
             return {
               label: translateToken(answer.label),
@@ -968,7 +970,7 @@ module.exports = function (Outbreak) {
 
         return questionResult;
       });
-    })(questions);
+    })(_.filter(questions, question => question.answerType !== 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD'));
   };
 
   /**
@@ -1006,5 +1008,36 @@ module.exports = function (Outbreak) {
         }
       }
     }
+  };
+
+  /**
+   * Format the questions object for easier printing
+   * @param answers
+   * @param questions
+   */
+  Outbreak.helpers.prepareQuestionsForPrint = function (answers, questions) {
+    Object.keys(answers).forEach((key) => {
+      let question = _.find(questions, (question) => {
+        return question.variable === key;
+      });
+
+      if (question && question.answers) {
+        question.answers.forEach((answer) => {
+          if (answers[key].indexOf(answer.value) !== -1) {
+            answer.selected = true;
+          }
+
+          if (answer.additionalQuestions) {
+            Outbreak.helpers.prepareQuestionsForPrint(answers, answer.additionalQuestions);
+          }
+        });
+      } else if (question && !question.answers) {
+        if (answers[key] instanceof Date || genericHelpers.dateRegexp.test(answers[key])) {
+          question.value = genericHelpers.getDateDisplayValue(answers[key]);
+        } else {
+          question.value = answers[key];
+        }
+      }
+    });
   };
 };
