@@ -61,6 +61,7 @@ module.exports = function (Followup) {
         }
 
         // set index based on the difference in days from start date until the follow up set date
+        // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
         ctx.instance.index = daysSince(person.followUp.originalStartDate, ctx.instance.date) + 1;
 
         return next();
