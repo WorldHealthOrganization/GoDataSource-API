@@ -122,23 +122,40 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
   };
 
   /**
-   * GET database snapshot from server
-   * @param filter Filter to be sent in the request
-   * @param asynchronous
+   * GET export log entry for given ID
+   * @param syncLogId
    * @returns {Promise}
    */
-  this.getDatabaseSnapshot = function (filter, asynchronous) {
+  this.getExportLogEntry = function (exportLogId) {
+    let requestOptions = Object.assign(this.options, {
+      method: 'GET',
+      uri: 'database-export-logs/' + exportLogId,
+      json: true
+    });
+
+    return new Promise(function (resolve, reject) {
+      request(requestOptions, function (error, response, body) {
+        if (error) {
+          return reject(error);
+        } else {
+          resolve(body);
+        }
+      });
+    })
+  };
+
+  /**
+   * GET database snapshot from server
+   * @param filter Filter to be sent in the request
+   * @returns {Promise}
+   */
+  this.getDatabaseSnapshot = function (filter) {
     let requestOptions = Object.assign(this.options, {
       method: 'GET',
       uri: 'sync/database-snapshot',
-      json: true,
-      body: {
-        asynchronous: asynchronous
-      },
       qs: {
         filter: JSON.stringify(filter)
-      },
-      timeout: 60000
+      }
     });
 
     // get path for saving the DB; will be saved in system tmp directory
@@ -160,6 +177,34 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
         })
       ;
     });
+  };
+
+  /**
+   * Trigger database export on the server
+   * @param filter Filter to be sent in the request
+   * @returns {Promise}
+   */
+  this.triggerUpstreamServerDatabaseExport = function (filter) {
+    let requestOptions = Object.assign(this.options, {
+      method: 'GET',
+      uri: 'sync/database-snapshot-asynchronous',
+      json: true,
+      qs: {
+        filter: JSON.stringify(filter)
+      }
+    });
+
+    return new Promise(function (resolve, reject) {
+      // get the exportLog ID
+      request(requestOptions, function (error, response, body) {
+        if (error) {
+          return reject(error);
+        } else {
+          // body contains the exportLogId; return it
+          resolve(body.exportLogId);
+        }
+      });
+    })
   };
 };
 

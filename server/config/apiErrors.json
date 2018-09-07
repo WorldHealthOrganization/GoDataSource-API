@@ -171,6 +171,10 @@
     "defaultStatusCode": 424,
     "messagePattern": "Sync with upstream server `<%= upstreamServerName %>` failed"
   },
+  "UPSTREAM_SERVER_EXPORT_FAILED": {
+    "defaultStatusCode": 424,
+    "messagePattern": "Database export of the upstream server `<%= upstreamServerName %>` failed"
+  },
   "INSTANCE_SYNC_FAILED": {
     "defaultStatusCode": 422,
     "messagePattern": "Instance sync failed: `<%= syncError %>`"
