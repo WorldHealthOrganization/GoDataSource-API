@@ -146,6 +146,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
 
   /**
    * GET database snapshot from server
+   * Database export is done in sync mode
    * @param filter Filter to be sent in the request
    * @returns {Promise}
    */
@@ -205,6 +206,39 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
         }
       });
     })
+  };
+
+  /**
+   * Download database snapshot from server
+   * Database export was already done
+   * @param exportLogId
+   * @returns {Promise}
+   */
+  this.getExportedDatabaseSnapshot = function (exportLogId) {
+    let requestOptions = Object.assign(this.options, {
+      method: 'GET',
+      uri: 'exported-database-snapshot/' + exportLogId
+    });
+
+    // get path for saving the DB; will be saved in system tmp directory
+    let tmpDir = tmp.dirSync();
+    let tmpDirName = tmpDir.name;
+    let dbSnapshotFileName = `${tmpDirName}/db_snapshot_${this.upstreamServerName}_${Date.now()}.tar.gz`;
+
+    return new Promise(function (resolve, reject) {
+      request(requestOptions)
+        .on('response', function (response) {
+          app.logger.debug(response.status);
+        })
+        .on('error', function (error) {
+          reject(error);
+        })
+        .pipe(fs.createWriteStream(dbSnapshotFileName))
+        .on('finish', function() {
+          resolve(dbSnapshotFileName);
+        })
+      ;
+    });
   };
 };
 

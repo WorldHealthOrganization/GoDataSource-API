@@ -481,6 +481,13 @@ module.exports = function (Sync) {
             // start upstream server export log status checks
             actionTimeout = setTimeout(getExportLogEntry, asyncActionsSettings.intervalTimeout);
           });
+        })
+        .then(function (exportLogId) {
+          return client.getExportedDatabaseSnapshot(exportLogId)
+            .then(function (dbSnapshotFileName) {
+              app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export success. DB snapshot saved at: ${dbSnapshotFileName}`);
+              return dbSnapshotFileName;
+            });
         });
     } else {
       // export is sync; nothing else to do
