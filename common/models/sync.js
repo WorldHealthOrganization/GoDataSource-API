@@ -399,14 +399,8 @@ module.exports = function (Sync) {
       where: {}
     };
 
-    // get all collections except the following
-    let excludeList = [
-      'systemSettings',
-      'team',
-      'user',
-      'role'
-    ];
-    filter.where.collections = Object.keys(dbSync.collectionsMap).filter((collection) => excludeList.indexOf(collection) === -1);
+    // get all sync collections
+    filter.where.collections = dbSync.syncCollections;
 
     // get data from date
     if (syncLogEntry.informationStartDate) {

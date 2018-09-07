@@ -40,7 +40,7 @@
     "port": 3001
   },
   "asyncActionsSettings": {
-    "intervalTimeout": "1000",
-    "actionTimeout": "60000"
+    "intervalTimeout": "10000",
+    "actionTimeout": "600000"
   }
 }

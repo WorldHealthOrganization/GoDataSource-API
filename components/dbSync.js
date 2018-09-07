@@ -25,6 +25,16 @@ const collectionsMap = {
   auditLog: 'auditLog'
 };
 
+// on sync we need get all collections except the following
+let syncExcludeList = [
+  'systemSettings',
+  'team',
+  'user',
+  'role',
+  'auditLog'
+];
+let syncCollections = Object.keys(collectionsMap).filter((collection) => syncExcludeList.indexOf(collection) === -1);
+
 /**
  * Add outbreakId filter if found to a mongoDB filter;
  * Note: the base mongoDB filter is not affected
@@ -322,5 +332,6 @@ module.exports = {
   collectionsFilterMap: collectionsFilterMap,
   collectionsImportFilterMap: collectionsImportFilterMap,
   syncRecord: syncRecord,
-  syncRecordFlags: syncRecordFlags
+  syncRecordFlags: syncRecordFlags,
+  syncCollections: syncCollections
 };

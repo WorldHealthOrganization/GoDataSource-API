@@ -498,14 +498,8 @@ module.exports = function (Sync) {
         }
 
         // 1: export local DB
-        // export all collections except the following
-        let excludeList = [
-          'systemSettings',
-          'team',
-          'user',
-          'role'
-        ];
-        let collections = Object.keys(dbSync.collectionsMap).filter((collection) => excludeList.indexOf(collection) === -1);
+        // export the sync collections
+        let collections = dbSync.syncCollections;
 
         app.logger.debug(`Sync ${syncLogEntry.id}: Exporting DB.`);
         return new Promise(function (resolve, reject) {
