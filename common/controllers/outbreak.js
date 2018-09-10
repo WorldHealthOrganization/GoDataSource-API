@@ -1011,7 +1011,9 @@ module.exports = function (Outbreak) {
                     }
 
                     // last follow up day, based on the given period, starting from today
-                    let lastToGenerateFollowUpDay = genericHelpers.getUTCDate().add(data.followUpPeriod, 'days');
+                    let lastToGenerateFollowUpDay = genericHelpers.getUTCDate()
+                      // doing this to not generate follow ups for today and next day in case period is 1
+                      .add(data.followUpPeriod <= 1 ? 0 : data.followUpPeriod, 'days');
 
                     // if given follow up period is higher than the last incubation day, just use it as a threshold for generation
                     if (lastToGenerateFollowUpDay.diff(lastIncubationDay, 'days') > 0) {
