@@ -7,7 +7,6 @@ const app = require('../../server/server');
 const fs = require('fs');
 const dbSync = require('../../components/dbSync');
 const AdmZip = require('adm-zip');
-const request = require('request-promise-native');
 const SyncClient = require('../../components/syncClient');
 const asyncActionsSettings = require('../../server/config.json').asyncActionsSettings;
 
@@ -185,87 +184,87 @@ module.exports = function (Sync) {
           // cache reference to Loopback's model
           let model = app.models[dbSync.collectionsMap[collectionName]];
 
-              return fs.readFile(
-                filePath,
-                {
-                  encoding: 'utf8'
-                },
-                (err, data) => {
-                  // create failed records entry
-                  failedIds[collectionName] = [];
+          return fs.readFile(
+            filePath,
+            {
+              encoding: 'utf8'
+            },
+            (err, data) => {
+              // create failed records entry
+              failedIds[collectionName] = [];
 
-                  if (err) {
-                    app.logger.error(`Sync ${syncLogEntry.id}: Failed to read collection file ${filePath}. ${err}`);
-                    failedIds[collectionName].push('Entire collection');
-                    return doneCollection();
-                  }
+              if (err) {
+                app.logger.error(`Sync ${syncLogEntry.id}: Failed to read collection file ${filePath}. ${err}`);
+                failedIds[collectionName].push('Entire collection');
+                return doneCollection();
+              }
 
               // parse file contents to JavaScript object
               try {
                 let collectionRecords = JSON.parse(data);
 
-                    return async.parallel(
-                      collectionRecords.map((collectionRecord) => (doneRecord) => {
-                        // convert mongodb id notation to Loopback notation
-                        // to be consistent with external function calls
-                        collectionRecord.id = collectionRecord._id;
+                return async.parallel(
+                  collectionRecords.map((collectionRecord) => (doneRecord) => {
+                    // convert mongodb id notation to Loopback notation
+                    // to be consistent with external function calls
+                    collectionRecord.id = collectionRecord._id;
 
-                        // if needed for the collection, check for collectionRecord outbreakId
-                        if (outbreakIDs.length &&
-                          dbSync.collectionsImportFilterMap[collectionName] &&
-                          !dbSync.collectionsImportFilterMap[collectionName](collectionName, collectionRecord, outbreakIDs)) {
-                          app.logger.debug(`Sync ${syncLogEntry.id}: Skipped syncing record (collection: ${collectionName}, id: ${collectionRecord.id}) as it's outbreak ID is not accepted`);
-                          return doneRecord();
-                        }
+                    // if needed for the collection, check for collectionRecord outbreakId
+                    if (outbreakIDs.length &&
+                      dbSync.collectionsImportFilterMap[collectionName] &&
+                      !dbSync.collectionsImportFilterMap[collectionName](collectionName, collectionRecord, outbreakIDs)) {
+                      app.logger.debug(`Sync ${syncLogEntry.id}: Skipped syncing record (collection: ${collectionName}, id: ${collectionRecord.id}) as it's outbreak ID is not accepted`);
+                      return doneRecord();
+                    }
 
-                        // sync the record with the main database
-                        dbSync.syncRecord(app.logger, model, collectionRecord, reqOptions, (err) => {
-                          if (err) {
-                            app.logger.debug(`Sync ${syncLogEntry.id}: Failed syncing record (collection: ${collectionName}, id: ${collectionRecord.id}). Error: ${err.message}`);
-                            failedIds[collectionName].push(collectionRecord.id);
-                          }
-                          return doneRecord();
-                        });
-                      }),
-                      () => {
-                        if (!failedIds[collectionName].length) {
-                          delete failedIds[collectionName];
-                        }
-
-                        return doneCollection();
+                    // sync the record with the main database
+                    dbSync.syncRecord(app.logger, model, collectionRecord, reqOptions, (err) => {
+                      if (err) {
+                        app.logger.debug(`Sync ${syncLogEntry.id}: Failed syncing record (collection: ${collectionName}, id: ${collectionRecord.id}). Error: ${err.message}`);
+                        failedIds[collectionName].push(collectionRecord.id);
                       }
-                    );
-                  } catch (parseError) {
-                    app.logger.error(`Sync ${syncLogEntry.id}: Failed to parse collection file ${filePath}. ${parseError}`);
-                    // keep failed collections
-                    failedCollections.push(collectionName);
+                      return doneRecord();
+                    });
+                  }),
+                  () => {
+                    if (!failedIds[collectionName].length) {
+                      delete failedIds[collectionName];
+                    }
+
                     return doneCollection();
                   }
-                });
-            }),
-            () => {
-              // remove temporary directory
-              tmpDir.removeCallback();
-
-              // remove temporary uploaded file
-              fs.unlink(filePath, () => {
-              });
-
-              // The sync doesn't stop at an error but the entire action will return an error for failed collection/collection record
-              // check for failed collections/collection records
-              // initialize error
-              let err = null;
-              if (failedCollections.length) {
-                err = `Failed collections: ${failedCollections.join(', ')}`;
+                );
+              } catch (parseError) {
+                app.logger.error(`Sync ${syncLogEntry.id}: Failed to parse collection file ${filePath}. ${parseError}`);
+                // keep failed collections
+                failedCollections.push(collectionName);
+                return doneCollection();
               }
-              let collectionsWithFailedRecords = Object.keys(failedIds);
-              if (collectionsWithFailedRecords.length) {
-                err = err || '';
-                err += `Failed records: `;
-                collectionsWithFailedRecords.forEach(function (collectionName) {
-                  err += `Collection ${collectionName}. Records: ${failedIds[collectionName].join(', ')}. `;
-                });
-              }
+            });
+        }),
+        () => {
+          // remove temporary directory
+          tmpDir.removeCallback();
+
+          // remove temporary uploaded file
+          fs.unlink(filePath, () => {
+          });
+
+          // The sync doesn't stop at an error but the entire action will return an error for failed collection/collection record
+          // check for failed collections/collection records
+          // initialize error
+          let err = null;
+          if (failedCollections.length) {
+            err = `Failed collections: ${failedCollections.join(', ')}`;
+          }
+          let collectionsWithFailedRecords = Object.keys(failedIds);
+          if (collectionsWithFailedRecords.length) {
+            err = err || '';
+            err += `Failed records: `;
+            collectionsWithFailedRecords.forEach(function (collectionName) {
+              err += `Collection ${collectionName}. Records: ${failedIds[collectionName].join(', ')}. `;
+            });
+          }
 
           return callback(err);
         }
