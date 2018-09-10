@@ -891,20 +891,9 @@ module.exports = function (Outbreak) {
     // retrieve list of contacts that has a relationship with events/cases and is eligible for generation
     app.models.contact
       .find({
-        include: {
-          relation: 'relationships',
-          scope: {
-            where: {
-              or: [
-                {
-                  'persons.type': 'case'
-                },
-                {
-                  'persons.type': 'event'
-                }
-              ]
-            },
-            order: 'contactDate DESC'
+        where: {
+          followUp: {
+            exists: true
           }
         }
       })
