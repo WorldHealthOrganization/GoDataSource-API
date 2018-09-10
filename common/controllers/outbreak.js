@@ -875,18 +875,12 @@ module.exports = function (Outbreak) {
     data.followUpPeriod = data.followUpPeriod || 1;
 
     // cache outbreak's follow up options
-    let outbreakFollowUpPeriod = ++this.periodOfFollowup;
     let outbreakFollowUpFreq = this.frequencyOfFollowUp;
     let outbreakFollowUpPerDay = this.frequencyOfFollowUpPerDay;
 
     // list of generated follow ups to be returned in the response
     // grouped per contact
     let generateResponse = [];
-
-    // make sure follow up period given in the request does not exceed outbreak's follow up period
-    if (data.followUpPeriod > outbreakFollowUpPeriod) {
-      data.followUpPeriod = outbreakFollowUpPeriod;
-    }
 
     // retrieve list of contacts that has a relationship with events/cases and is eligible for generation
     app.models.contact
@@ -974,12 +968,12 @@ module.exports = function (Outbreak) {
                       }
                     }
 
+                    // cache last incubation day for the contact
+                    let lastIncubationDay = genericHelpers.getUTCDate(contact.followUp.endDate);
+
                     // follow ups to be generated for the given contact
                     // each one contains a specific date
                     let contactFollowUpsToAdd = [];
-
-                    // cache last contact's last incubation day
-                    let incubationLastDay = genericHelpers.getUTCDate(contact.followUp.endDate);
 
                     // check a weird case when the last follow up was yesterday and not performed
                     // but today is the last day of incubation
@@ -990,7 +984,7 @@ module.exports = function (Outbreak) {
                       // check if last follow up is generated and not performed
                       // also checks that, the scheduled date is the same last day of incubation
                       if (helpers.isNewGeneratedFollowup(lastFollowUp)
-                        && genericHelpers.getUTCDate(lastFollowUp.date).isSame(incubationLastDay, 'd')) {
+                        && genericHelpers.getUTCDate(lastFollowUp.date).isSame(lastIncubationDay, 'd')) {
 
                         contactFollowUpsToAdd.push(
                           app.models.followUp
@@ -1016,8 +1010,16 @@ module.exports = function (Outbreak) {
                       }
                     }
 
+                    // last follow up day, based on given period, starting from last exposure date
+                    let lastToGenerateFollowUpDay = genericHelpers.getUTCDate().add(data.followUpPeriod, 'days');
+
+                    // if given follow up period is higher than the last incubation day, just use it as a threshold for generation
+                    if (lastToGenerateFollowUpDay.diff(lastIncubationDay, 'days') > 0) {
+                      lastToGenerateFollowUpDay = lastIncubationDay;
+                    }
+
                     // generate follow up, starting from today
-                    for (let now = genericHelpers.getUTCDate(); now <= incubationLastDay; now.add(outbreakFollowUpFreq, 'day')) {
+                    for (let now = genericHelpers.getUTCDate(); now <= lastToGenerateFollowUpDay; now.add(outbreakFollowUpFreq, 'day')) {
                       let generatedFollowUps = [];
                       for (let i = 0; i < outbreakFollowUpPerDay; i++) {
                         generatedFollowUps.push(
