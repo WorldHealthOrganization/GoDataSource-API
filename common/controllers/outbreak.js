@@ -1010,7 +1010,7 @@ module.exports = function (Outbreak) {
                       }
                     }
 
-                    // last follow up day, based on given period, starting from last exposure date
+                    // last follow up day, based on the given period, starting from today
                     let lastToGenerateFollowUpDay = genericHelpers.getUTCDate().add(data.followUpPeriod, 'days');
 
                     // if given follow up period is higher than the last incubation day, just use it as a threshold for generation
