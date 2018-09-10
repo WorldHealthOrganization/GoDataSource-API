@@ -160,4 +160,12 @@ module.exports = function (SystemSettings) {
       callback(null, application);
     });
   };
+
+  /**
+   * Expose build information via API
+   * @param callback
+   */
+  SystemSettings.getVersion = function (callback) {
+    callback(null, app.utils.helpers.getBuildInformation());
+  };
 };
