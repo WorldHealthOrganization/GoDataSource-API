@@ -11,6 +11,7 @@ const pdfDoc = require('./pdfDoc');
 const streamUtils = require('./streamUtils');
 const async = require('async');
 const fs = require('fs');
+const packageJson = require('../package');
 
 const arrayFields = {
   'addresses': 'address',
@@ -999,6 +1000,19 @@ const includeSubLocationsInLocationFilter = function (app, filter, callback) {
   async.series(searchForLocations, callback);
 };
 
+/**
+ * Get Build Information
+ * @return {{platform: *, type: *, version: *, build: *}}
+ */
+const getBuildInformation = function () {
+  return {
+    platform: _.get(packageJson, 'build.platform', 'windows-x86'),
+    type: _.get(packageJson, 'build.type', 'hub'),
+    version: _.get(packageJson, 'build.version', _.get(packageJson, 'version', 'hub')),
+    build: _.get(packageJson, 'build.build', 'development'),
+  };
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1019,5 +1033,6 @@ module.exports = {
   formatUndefinedValues: formatUndefinedValues,
   translateDataSetReferenceDataValues: translateDataSetReferenceDataValues,
   translateFieldLabels: translateFieldLabels,
-  includeSubLocationsInLocationFilter: includeSubLocationsInLocationFilter
+  includeSubLocationsInLocationFilter: includeSubLocationsInLocationFilter,
+  getBuildInformation: getBuildInformation
 };

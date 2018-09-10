@@ -78,6 +78,12 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "getServerUTCDate"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "getVersion"
     }
   ],
   "methods": {
@@ -218,6 +224,28 @@
       "http": {
         "verb": "get",
         "path": "/utc-date"
+      }
+    },
+    "getVersion": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "version",
+          "type": {
+            "platform": "string",
+            "type": "string",
+            "build": "string",
+            "version": "string"
+          },
+          "description": "Version Information",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get application version information.",
+      "http": {
+        "verb": "get",
+        "path": "/version"
       }
     }
   }

@@ -147,14 +147,14 @@ module.exports = function (app) {
             // cache client id on the context, it might be needed later in the handlers
             context.remotingContext.req.clientId = clientId;
             if (!clientId || !clientSecret) {
-              return done(buildError('ACCESS_DENIED', { accessErrors: 'Invalid credentials' }, 403));
+              return done(buildError('ACCESS_DENIED', {accessErrors: 'Invalid credentials'}, 403));
             }
           }
         } else {
-          return done(buildError('ACCESS_DENIED', { accessErrors: 'Format is Authorization: Basic [token]' }, 403));
+          return done(buildError('ACCESS_DENIED', {accessErrors: 'Format is Authorization: Basic [token]'}, 403));
         }
       } else {
-        return done(buildError('ACCESS_DENIED', { accessErrors: 'No Authorization header found' }, 403));
+        return done(buildError('ACCESS_DENIED', {accessErrors: 'No Authorization header found'}, 403));
       }
 
       // flag that indicates whether the client is ok
@@ -178,7 +178,7 @@ module.exports = function (app) {
               // check password
               hasAccess = clients[clientIndex].credentials.clientSecret === clientSecret;
             } else {
-              return done(buildError('ACCESS_DENIED', { accessErrors: 'Client is not active' }, 403));
+              return done(buildError('ACCESS_DENIED', {accessErrors: 'Client is not active'}, 403));
             }
           }
 
@@ -186,7 +186,7 @@ module.exports = function (app) {
             return done(null, hasAccess);
           }
 
-          return done(buildError('ACCESS_DENIED', { accessErrors: 'Client credentials are wrong' }, 403));
+          return done(buildError('ACCESS_DENIED', {accessErrors: 'Client credentials are wrong'}, 403));
         });
     });
   }

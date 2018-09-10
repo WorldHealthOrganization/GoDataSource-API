@@ -138,5 +138,9 @@
   "INVALID_IMAGE_TYPE": {
     "defaultStatusCode": 400,
     "messagePattern": "Provided image type `<%= imageType %>` is invalid."
+  },
+  "ACCESS_DENIED_TO_ROUTE_FOR_APP": {
+    "defaultStatusCode": 403,
+    "messagePattern": "The requested route (`<%= route %>`) is not accessible on <%= app %> deployment."
   }
 }

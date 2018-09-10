@@ -81,7 +81,7 @@ module.exports = function (SystemSettings) {
     // make sure we have a good image type
     if (!SystemSettings.imageTypes.hasOwnProperty(imageType)) {
       return callback(
-        app.utils.apiError.getError('INVALID_IMAGE_TYPE', { imageType: imageType })
+        app.utils.apiError.getError('INVALID_IMAGE_TYPE', {imageType: imageType})
       );
     }
 
@@ -104,5 +104,13 @@ module.exports = function (SystemSettings) {
         date: moment.utc()
       }
     );
+  };
+
+  /**
+   * Expose build information via API
+   * @param callback
+   */
+  SystemSettings.getVersion = function (callback) {
+    callback(null, app.utils.helpers.getBuildInformation());
   };
 };
