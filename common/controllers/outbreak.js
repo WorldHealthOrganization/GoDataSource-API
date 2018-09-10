@@ -3379,8 +3379,10 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('**', function (context, modelInstance, next) {
     if (context.args.filter) {
       genericHelpers.convertPropsToDate(context.args.filter);
+      genericHelpers.includeSubLocationsInLocationFilter(app, context.args.filter, next);
+    } else {
+      return next();
     }
-    return next();
   });
 
   /**
@@ -3956,12 +3958,10 @@ module.exports = function (Outbreak) {
                   // promisify next step
                   return new Promise(function (resolve, reject) {
                     // normalize people
-                    Outbreak.helpers.validateAndNormalizePeople(contactRecord.id, 'contact', relationshipData, false, function (error, persons) {
+                    Outbreak.helpers.validateAndNormalizePeople(contactRecord.id, 'contact', relationshipData, function (error) {
                       if (error) {
                         return reject(error);
                       }
-                      // update persons with normalized persons
-                      relationshipData.person = persons;
                       // sync relationship
                       return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.relationship, relationshipData, options)
                         .then(function (syncedRelationship) {

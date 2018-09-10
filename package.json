@@ -7,6 +7,7 @@
   },
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
+    "build": "./node_modules/gulp/bin/gulp.js",
     "start": "node .",
     "posttest": "npm run lint && nsp check",
     "init-database": "node ./server/install/install.js init-database",
@@ -16,12 +17,14 @@
     "restore-backup": "node ./server/scripts/restoreBackup.js"
   },
   "dependencies": {
+    "adm-zip": "^0.4.11",
     "alphanum-sort": "^1.0.2",
     "async": "^2.6.0",
     "bcrypt": "^2.0.1",
     "chunk-date-range": "^0.1.0",
     "compression": "^1.0.3",
     "cors": "^2.5.2",
+    "express": "^4.16.3",
     "formidable": "^1.2.1",
     "helmet": "^3.10.0",
     "jimp": "^0.2.28",
@@ -31,7 +34,6 @@
     "loopback-component-explorer": "^6.0.0",
     "loopback-connector-mongodb": "^3.6.0",
     "moment": "^2.22.2",
-    "node-cron": "^1.2.1",
     "pdfkit": "^0.8.3",
     "qr-image": "^3.2.0",
     "request": "^2.88.0",
@@ -39,7 +41,6 @@
     "serve-favicon": "^2.0.1",
     "strong-error-handler": "^2.0.0",
     "svg2png": "^4.1.1",
-    "tar": "^4.4.4",
     "tmp": "0.0.33",
     "uuid": "^3.2.1",
     "voilab-pdf-table": "^0.4.0",
@@ -50,7 +51,12 @@
   "devDependencies": {
     "eslint": "^3.19.0",
     "eslint-config-loopback": "^8.0.0",
-    "nsp": "^2.1.0"
+    "gulp": "^3.9.1",
+    "gulp-clean": "^0.4.0",
+    "gulp-uglify": "^3.0.1",
+    "gulp-uglify-es": "^1.0.4",
+    "nsp": "^2.1.0",
+    "pump": "^3.0.0"
   },
   "repository": {
     "type": "",
