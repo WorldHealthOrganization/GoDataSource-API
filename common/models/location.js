@@ -9,6 +9,90 @@ module.exports = function (Location) {
   // set flag to not get controller
   Location.hasController = true;
 
+
+  /**
+   * Keep a list of places where location might be used so we can safely delete a record
+   */
+  Location.possibleRecordUsage = {};
+
+  // after the application started (all models finished loading)
+  app.on('started', function () {
+    // go through all models
+    app.models().forEach(function (Model) {
+      // get their list of location fields
+      if (Array.isArray(Model.locationFields)) {
+        // build possible record usage list
+        Location.possibleRecordUsage[Model.modelName] = Model.locationFields.map(function (locationField) {
+          // some fields contain array markers ([]) needed by some business logic, remove those here
+          return locationField.replace(/\[]/g, '');
+        });
+      }
+    });
+  });
+
+  /**
+   * Get usage for a Location
+   * @param recordId
+   * @param filter
+   * @param justCount
+   * @return {Promise<any[] | never>}
+   */
+  Location.findModelUsage = function (recordId, filter, justCount) {
+    const checkUsages = [];
+    const modelNames = Object.keys(Location.possibleRecordUsage);
+    // go through possible usage list
+    modelNames.forEach(function (modelName) {
+      const orQuery = [];
+      // build a search query using the fields that might contain the information
+      Location.possibleRecordUsage[modelName].forEach(function (field) {
+        orQuery.push({[field]: recordId});
+      });
+
+      // build filter
+      const _filter = app.utils.remote
+        .mergeFilters({
+          where: {
+            or: orQuery
+          }
+        }, filter);
+
+      // count/find the results
+      if (justCount) {
+        checkUsages.push(
+          app.models[modelName].count(_filter.where)
+        );
+      } else {
+        checkUsages.push(
+          app.models[modelName].find(_filter)
+        );
+      }
+    });
+    return Promise.all(checkUsages)
+      .then(function (results) {
+        // associate the results with the queried models
+        const resultSet = {};
+        results.forEach(function (result, index) {
+          resultSet[modelNames[index]] = result;
+        });
+        return resultSet;
+      });
+  };
+
+
+  /**
+   * Check if a record is in use
+   * @param recordId
+   * @return {Promise<boolean | never>}
+   */
+  Location.isRecordInUse = function (recordId) {
+    return Location.findModelUsage(recordId, {}, true)
+      .then(function (results) {
+        return Object.values(results).reduce(function (a, b) {
+          return a + b;
+        }) > 0;
+      });
+  };
+
   /**
    * Get sub-locations for a list of locations. Result is an array of location IDs
    * @param parentLocations Array of location Ids for which to get the sublocations
@@ -258,19 +342,30 @@ module.exports = function (Location) {
   };
 
   /**
-   * A location can be deleted only if all sub-locations have been deleted first. Assuming all the data is valid,
+   * A location can be deleted only if all sub-locations have been deleted first and location is not in use. Assuming all the data is valid,
    * this check is done only for the direct sub-locations and not recurrently for all sub-locations.
    */
   Location.checkIfCanDelete = function (locationId) {
-    return Location.findOne({
-      where: {
-        parentLocationId: locationId
-      }
-    }).then((location) => {
-      if (location) {
-        throw(app.utils.apiError.getError('DELETE_PARENT_MODEL', {model: Location.modelName}));
-      }
-    });
+    return Location
+      .findOne({
+        where: {
+          parentLocationId: locationId
+        }
+      })
+      .then((location) => {
+        if (location) {
+          throw(app.utils.apiError.getError('DELETE_PARENT_MODEL', {model: Location.modelName}));
+        }
+        return Location.isRecordInUse(locationId);
+      })
+      .then((recordInUse) => {
+        if (recordInUse) {
+          throw(app.utils.apiError.getError('MODEL_IN_USE', {
+            model: Location.modelName,
+            id: locationId
+          }));
+        }
+      });
   };
 
   /**
@@ -278,12 +373,13 @@ module.exports = function (Location) {
    * this check is done only for the direct sub-locations and not recurrently for all sub-locations.
    */
   Location.checkIfCanDeactivate = function (data, locationId) {
-    return Location.findOne({
-      where: {
-        parentLocationId: locationId,
-        active: true
-      }
-    })
+    return Location
+      .findOne({
+        where: {
+          parentLocationId: locationId,
+          active: true
+        }
+      })
       .then((location) => {
         if (location) {
           throw(app.utils.apiError.getError('DEACTIVATE_PARENT_MODEL', {model: Location.modelName}));
