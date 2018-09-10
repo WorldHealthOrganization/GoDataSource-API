@@ -3,7 +3,6 @@
 const request = require('request');
 const fs = require('fs');
 const tmp = require('tmp');
-const qs = require('querystring');
 const app = require('../server/server');
 
 /**
@@ -41,19 +40,74 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
   this.syncLogEntry = syncLogEntry;
 
   /**
+   * Send request to server
+   * @param requestOptions
+   * @param callback
+   */
+  this.sendRequest = function(requestOptions, callback) {
+    // log request
+    app.logger.debug(`Sync ${this.syncLogEntry.id}: Sent request to upstream server: ${requestOptions.method} /${requestOptions.uri}${requestOptions.qs ? '?' + JSON.stringify(requestOptions.qs) : ''}`);
+
+    // send request
+    return request(requestOptions, callback);
+  };
+
+  /**
+   * Check error and response values to figure out if the request succeeded
+   * @param error
+   * @param response
+   * @param expectedStatusCode
+   */
+  this.getErrorResponse = function(error, response, expectedStatusCode) {
+    // set success Status code. Default: 200
+    let successStatusCode = expectedStatusCode || 200;
+
+    if (error) {
+      // log error
+      app.logger.debug(`Sync ${this.syncLogEntry.id}: Error connecting to upstream server`);
+
+      return app.utils.apiError.getError('EXTERNAL_API_CONNECTION_ERROR', {
+        serviceName: 'Upstream server',
+        error: error
+      });
+    }
+
+    // log response
+    app.logger.debug(`Sync ${this.syncLogEntry.id}: Received response from upstream server. Status code: ${response.statusCode}`);
+    if(response.body) {
+      app.logger.debug(`Sync ${this.syncLogEntry.id}: Body: ${typeof response.body === 'object' ? JSON.stringify(response.body, null, 2) : response.body}`);
+    }
+
+    if (response.statusCode !== successStatusCode) {
+      return app.utils.apiError.getError('UNEXPECTED_EXTERNAL_API_RESPONSE', {
+        serviceName: 'Upstream server',
+        error: `Expected status code: ${successStatusCode}. Received: ${response.statusCode}`
+      });
+    }
+
+    // no error
+    return;
+  };
+
+  /**
    * Get available outbreaks IDs list
    * @returns {Promise}
    */
   this.getAvailableOutbreaks = function () {
-    let requestOptions = Object.assign(this.options, {
+    let requestOptions = Object.assign({}, this.options, {
       method: 'GET',
       uri: 'sync/available-outbreaks',
       json: true
     });
 
+    let that = this;
+
     return new Promise(function (resolve, reject) {
       // get the available outbreaks IDs
-      request(requestOptions, function (error, response, body) {
+      that.sendRequest(requestOptions, function (error, response, body) {
+        // get error response depending on error and response status code
+        error = that.getErrorResponse(error, response);
+
         if (error) {
           return reject(error);
         } else {
@@ -71,7 +125,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
    * @returns {Promise}
    */
   this.sendDBSnapshotForImport = function (DBSnapshotFileName, asynchronous) {
-    let requestOptions = Object.assign(this.options, {
+    let requestOptions = Object.assign({}, this.options, {
       method: 'POST',
       uri: 'sync/import-database-snapshot',
       formData: {
@@ -80,8 +134,13 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
       }
     });
 
+    let that = this;
+
     return new Promise(function (resolve, reject) {
-      request(requestOptions, function (error, response, body) {
+      that.sendRequest(requestOptions, function (error, response, body) {
+        // get error response depending on error and response status code
+        error = that.getErrorResponse(error, response);
+
         if (error) {
           return reject(error);
         } else {
@@ -91,7 +150,10 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
             // body contains the sync log ID; return it
             resolve(body.syncLogId);
           } catch (parseError) {
-            reject(parseError);
+            reject(app.utils.apiError.getError('UNEXPECTED_EXTERNAL_API_RESPONSE', {
+              serviceName: 'Upstream server',
+              error: `Response parse error: ${parseError}`
+            }));
           }
         }
       });
@@ -104,14 +166,19 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
    * @returns {Promise}
    */
   this.getSyncLogEntry = function (syncLogId) {
-    let requestOptions = Object.assign(this.options, {
+    let requestOptions = Object.assign({}, this.options, {
       method: 'GET',
       uri: 'sync-logs/' + syncLogId,
       json: true
     });
 
+    let that = this;
+
     return new Promise(function (resolve, reject) {
-      request(requestOptions, function (error, response, body) {
+      that.sendRequest(requestOptions, function (error, response, body) {
+        // get error response depending on error and response status code
+        error = that.getErrorResponse(error, response);
+
         if (error) {
           return reject(error);
         } else {
@@ -127,14 +194,19 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
    * @returns {Promise}
    */
   this.getExportLogEntry = function (exportLogId) {
-    let requestOptions = Object.assign(this.options, {
+    let requestOptions = Object.assign({}, this.options, {
       method: 'GET',
       uri: 'database-export-logs/' + exportLogId,
       json: true
     });
 
+    let that = this;
+
     return new Promise(function (resolve, reject) {
-      request(requestOptions, function (error, response, body) {
+      that.sendRequest(requestOptions, function (error, response, body) {
+        // get error response depending on error and response status code
+        error = that.getErrorResponse(error, response);
+
         if (error) {
           return reject(error);
         } else {
@@ -151,7 +223,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
    * @returns {Promise}
    */
   this.getDatabaseSnapshot = function (filter) {
-    let requestOptions = Object.assign(this.options, {
+    let requestOptions = Object.assign({}, this.options, {
       method: 'GET',
       uri: 'sync/database-snapshot',
       qs: {
@@ -159,21 +231,31 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
       }
     });
 
+    let that = this;
+
     // get path for saving the DB; will be saved in system tmp directory
     let tmpDir = tmp.dirSync();
     let tmpDirName = tmpDir.name;
     let dbSnapshotFileName = `${tmpDirName}/db_snapshot_${this.upstreamServerName}_${Date.now()}.tar.gz`;
 
     return new Promise(function (resolve, reject) {
-      request(requestOptions)
+      that.sendRequest(requestOptions)
         .on('response', function (response) {
-          app.logger.debug(response.status);
+          // get error response depending on response status code
+          let error = that.getErrorResponse(null, response);
+
+          // if error, reject the promise and don't wait for pipe process to finish
+          if (error) {
+            return reject(error);
+          }
         })
         .on('error', function (error) {
+          // get error response
+          error = that.getErrorResponse(error);
           reject(error);
         })
         .pipe(fs.createWriteStream(dbSnapshotFileName))
-        .on('finish', function() {
+        .on('finish', function () {
           resolve(dbSnapshotFileName);
         })
       ;
@@ -186,7 +268,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
    * @returns {Promise}
    */
   this.triggerUpstreamServerDatabaseExport = function (filter) {
-    let requestOptions = Object.assign(this.options, {
+    let requestOptions = Object.assign({}, this.options, {
       method: 'GET',
       uri: 'sync/database-snapshot-asynchronous',
       json: true,
@@ -195,9 +277,14 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
       }
     });
 
+    let that = this;
+
     return new Promise(function (resolve, reject) {
       // get the exportLog ID
-      request(requestOptions, function (error, response, body) {
+      that.sendRequest(requestOptions, function (error, response, body) {
+        // get error response depending on error and response status code
+        error = that.getErrorResponse(error, response);
+
         if (error) {
           return reject(error);
         } else {
@@ -215,10 +302,12 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
    * @returns {Promise}
    */
   this.getExportedDatabaseSnapshot = function (exportLogId) {
-    let requestOptions = Object.assign(this.options, {
+    let requestOptions = Object.assign({}, this.options, {
       method: 'GET',
-      uri: 'exported-database-snapshot/' + exportLogId
+      uri: 'sync/exported-database-snapshot/' + exportLogId
     });
+
+    let that = this;
 
     // get path for saving the DB; will be saved in system tmp directory
     let tmpDir = tmp.dirSync();
@@ -226,15 +315,23 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
     let dbSnapshotFileName = `${tmpDirName}/db_snapshot_${this.upstreamServerName}_${Date.now()}.tar.gz`;
 
     return new Promise(function (resolve, reject) {
-      request(requestOptions)
+      that.sendRequest(requestOptions)
         .on('response', function (response) {
-          app.logger.debug(response.status);
+          // get error response depending on response status code
+          let error = that.getErrorResponse(null, response);
+
+          // if error, reject the promise and don't wait for pipe process to finish
+          if (error) {
+            return reject(error);
+          }
         })
         .on('error', function (error) {
+          // get error response
+          error = that.getErrorResponse(error);
           reject(error);
         })
         .pipe(fs.createWriteStream(dbSnapshotFileName))
-        .on('finish', function() {
+        .on('finish', function () {
           resolve(dbSnapshotFileName);
         })
       ;

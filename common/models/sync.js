@@ -150,6 +150,8 @@ module.exports = function (Sync) {
     // create a list that will contain list of collections that failed entirely
     let failedCollections = [];
 
+    app.logger.debug(`Sync ${syncLogEntry.id}: Importing the DB at ${filePath}`);
+
     // extract the compressed database snapshot into the newly created temporary directory
     try {
       let archive = new AdmZip(filePath);
@@ -407,7 +409,7 @@ module.exports = function (Sync) {
     }
 
     // depending on the asynchronous flag we need to return directly the response or wait do checks to see if the export was successful
-    if (asynchronous === 'true') {
+    if (asynchronous) {
       // export is async
       app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export is being done in sync mode`);
       return client.triggerUpstreamServerDatabaseExport(filter)
