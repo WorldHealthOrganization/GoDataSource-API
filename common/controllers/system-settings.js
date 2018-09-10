@@ -118,7 +118,7 @@ module.exports = function (SystemSettings) {
     const basePath = `${config.updatesServer.protocol}://${config.updatesServer.host}:${config.updatesServer.port}/api/applications`;
     // query updates server for updates
     request({
-      uri: `${basePath}/update`,
+      uri: `${basePath}/check-for-updates`,
       qs: {
         platform: packageJson.build.platform,
         type: packageJson.build.type,
