@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "server/server.js",
   "engines": {
-    "node": ">=4"
+    "node": ">=8"
   },
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
@@ -36,6 +36,7 @@
     "moment": "^2.22.2",
     "pdfkit": "^0.8.3",
     "qr-image": "^3.2.0",
+    "request": "^2.88.0",
     "rr": "^0.1.0",
     "serve-favicon": "^2.0.1",
     "strong-error-handler": "^2.0.0",
@@ -62,5 +63,9 @@
     "url": ""
   },
   "license": "UNLICENSED",
-  "description": "WHO's Go.Data API"
+  "description": "WHO's Go.Data API",
+  "build": {
+    "platform": "windows-x86",
+    "type": "hub"
+  }
 }
