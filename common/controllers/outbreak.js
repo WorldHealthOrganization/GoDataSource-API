@@ -912,8 +912,8 @@ module.exports = function (Outbreak) {
         // follow up add statements
         let followsUpsToAdd = [];
 
-        // filter contacts that have no relationships
-        contacts = contacts.filter((item) => item.relationships.length);
+        // filter contacts that were exposed
+        contacts = contacts.filter((item) => item.followUp);
 
         // retrieve the last follow up that is brand new for contacts
         return Promise
@@ -989,21 +989,14 @@ module.exports = function (Outbreak) {
                     // each one contains a specific date
                     let contactFollowUpsToAdd = [];
 
-                    // follow ups to be added for the given contact
-                    // choose contact date from the latest relationship with a case/event
-                    let lastSickDate = genericHelpers.getUTCDate(contact.relationships[0].contactDate);
-
-                    // build the contact's last date of follow up, based on the days count given in the request
-                    let incubationLastDay = genericHelpers.getUTCDate(lastSickDate).add(data.followUpPeriod, 'd');
+                    // cache last contact's last incubation day
+                    let incubationLastDay = genericHelpers.getUTCDate(contact.followUp.endDate);
 
                     // check a weird case when the last follow up was yesterday and not performed
                     // but today is the last day of incubation
                     // it should generate a follow up for today, no matter the follow up period sent in request
                     if (contact.followUpsLists.length) {
                       let lastFollowUp = contact.followUpsLists[0];
-
-                      // build the contact's last date of follow up, no matter the period given in the request
-                      let incubationLastDay = genericHelpers.getUTCDate(lastSickDate).add(outbreakFollowUpPeriod, 'd');
 
                       // check if last follow up is generated and not performed
                       // also checks that, the scheduled date is the same last day of incubation
