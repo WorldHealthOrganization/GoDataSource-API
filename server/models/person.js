@@ -81,6 +81,11 @@ module.exports = function (Person) {
     'address.geoLocation'
   ];
 
+  Person.locationFields = [
+    'addresses[].locationId',
+    'address.locationId'
+  ];
+
   /**
    * Construct and return the display name of the person
    */

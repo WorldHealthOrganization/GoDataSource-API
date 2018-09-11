@@ -40,6 +40,10 @@ module.exports = function (Followup) {
     'teamId'
   ];
 
+  Followup.locationFields = [
+    'address.locationId'
+  ];
+
   /**
    * Enhance follow up save to include index of the created follow up
    */

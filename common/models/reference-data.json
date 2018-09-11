@@ -190,9 +190,15 @@
         "description": "Record usage locations",
         "arg": "data",
         "type": {
+          "template": [],
+          "outbreak": [],
+          "followUp": [],
+          "labResult": [],
           "case": [],
           "contact": [],
-          "outbreak": []
+          "address": [],
+          "relationship": [],
+          "event": []
         },
         "root": true,
         "required": true
