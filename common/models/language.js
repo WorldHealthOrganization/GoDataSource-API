@@ -40,7 +40,6 @@ module.exports = function (Language) {
                 // if not found, create it
                 return app.models.languageToken
                   .create({
-                    id: app.models.languageToken.generateID(languageToken.token, self.id),
                     token: languageToken.token,
                     languageId: self.id,
                     translation: languageToken.translation

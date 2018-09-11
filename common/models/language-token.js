@@ -14,5 +14,24 @@ module.exports = function (LanguageToken) {
    */
   LanguageToken.generateID = function (token, languageId) {
     return `${token}_${_.snakeCase(languageId).toUpperCase()}`;
-  }
+  };
+
+  /**
+   * On create, generate and add an ID to the language token instance
+   */
+  LanguageToken.observe('before save', function (context, next) {
+    // do not execute hook on sync
+    if (context.options && context.options._sync) {
+      return next();
+    }
+
+    // we are interested only on new instances
+    if (!context.isNewInstance) {
+      return next();
+    }
+
+    // set ID
+    context.instance.id = LanguageToken.generateID(context.instance.token, context.instance.languageId);
+    next();
+  });
 };

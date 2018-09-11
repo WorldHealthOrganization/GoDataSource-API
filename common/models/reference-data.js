@@ -486,7 +486,6 @@ module.exports = function (ReferenceData) {
                               // create it
                               return app.models.languageToken
                                 .create({
-                                  id: app.models.languageToken.generateID(token, language.id),
                                   token: token,
                                   languageId: language.id,
                                   translation: original[property]
