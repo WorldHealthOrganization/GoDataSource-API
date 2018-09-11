@@ -42,6 +42,7 @@ languageList.forEach(function (language) {
           // go through all language tokens of each section
           Object.keys(language.sections[section]).forEach(function (token) {
             languageTokens.push({
+              id: app.models.languageToken.generateID(token, language.id),
               token: token,
               translation: language.sections[section][token]
             });

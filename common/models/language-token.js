@@ -1,6 +1,18 @@
 'use strict';
 
-module.exports = function (Languagetoken) {
+const _ = require('lodash');
+
+module.exports = function (LanguageToken) {
   // set flag to not get controller
-  Languagetoken.hasController = false;
+  LanguageToken.hasController = false;
+
+  /**
+   * Generate Language token ID based on token and language ID
+   * @param token
+   * @param languageId
+   * @returns {string}
+   */
+  LanguageToken.generateID = function (token, languageId) {
+    return `${token}_${_.snakeCase(languageId).toUpperCase()}`;
+  }
 };

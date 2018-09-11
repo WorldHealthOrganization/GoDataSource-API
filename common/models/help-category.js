@@ -63,6 +63,7 @@ module.exports = function (HelpCategory) {
           return languages.forEach((language) => {
             tokenPromises.push(app.models.languageToken
               .create({
+                id: app.models.languageToken.generateID(modelInstance[titleField], language.id),
                 token: modelInstance[titleField],
                 languageId: language.id,
                 translation: context.req._original[titleField]
@@ -71,6 +72,7 @@ module.exports = function (HelpCategory) {
             if(modelName === 'helpCategory') {
               tokenPromises.push(app.models.languageToken
                 .create({
+                  id: app.models.languageToken.generateID(modelInstance.description, language.id),
                   token: modelInstance.description,
                   languageId: language.id,
                   translation: context.req._original.description ? context.req._original.description : ' '
@@ -80,6 +82,7 @@ module.exports = function (HelpCategory) {
             if(modelName === 'helpItem') {
               tokenPromises.push(app.models.languageToken
                 .create({
+                  id: app.models.languageToken.generateID(modelInstance.content, language.id),
                   token: modelInstance.content,
                   languageId: language.id,
                   translation: context.req._original.content

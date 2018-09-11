@@ -96,6 +96,7 @@ function saveLanguageTokens(context, next) {
               // shouldn't get here
               return tokens.notFound.push(app.models.languageToken
                 .create({
+                  id: app.models.languageToken.generateID(questions[qindex].text, languageId),
                   token: questions[qindex].text,
                   translation: originalValues[qindex].text,
                   languageId: languageId
@@ -136,6 +137,7 @@ function saveLanguageTokens(context, next) {
                   // shouldn't get here
                   return tokens.notFound.push(app.models.languageToken
                     .create({
+                      id: app.models.languageToken.generateID(answers[aindex].label, languageId),
                       token: answers[aindex].label,
                       translation: originalValues[qindex].answers[aindex].label,
                       languageId: languageId
@@ -189,6 +191,8 @@ function saveLanguageTokens(context, next) {
         // loop through all the languages and create new token promises for each language for each new token
         languages.forEach(function (language) {
           tokens.new.forEach(function (token) {
+            // add ID to the token
+            token.id = app.models.languageToken.generateID(token.token, language.id);
             // add languageId and create token
             token.languageId = language.id;
             tokenPromises.push(app.models.languageToken
