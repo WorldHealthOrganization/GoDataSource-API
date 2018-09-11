@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "adm-zip": "^0.4.11",
+    "ajv": "^6.5.3",
     "alphanum-sort": "^1.0.2",
     "async": "^2.6.0",
     "bcrypt": "^2.0.1",
