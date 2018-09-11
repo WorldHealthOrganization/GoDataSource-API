@@ -13,7 +13,7 @@ module.exports = function (Person) {
     }
   };
 
-  Person.fieldLabelsMap = {
+  Person.fieldLabelsMap = Object.assign({}, Person.fieldLabelsMap, {
     'firstName': 'LNG_CASE_FIELD_LABEL_FIRST_NAME',
     'middleName': 'LNG_CASE_FIELD_LABEL_MIDDLE_NAME',
     'lastName': 'LNG_CASE_FIELD_LABEL_LAST_NAME',
@@ -38,7 +38,7 @@ module.exports = function (Person) {
     'incubationDates': 'LNG_CASE_FIELD_LABEL_INCUBATION_DATES',
     'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
-  };
+  });
 
   Person.referenceDataFields = [
     'gender',
