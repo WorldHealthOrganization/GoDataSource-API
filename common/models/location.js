@@ -258,19 +258,30 @@ module.exports = function (Location) {
   };
 
   /**
-   * A location can be deleted only if all sub-locations have been deleted first. Assuming all the data is valid,
+   * A location can be deleted only if all sub-locations have been deleted first and location is not in use. Assuming all the data is valid,
    * this check is done only for the direct sub-locations and not recurrently for all sub-locations.
    */
   Location.checkIfCanDelete = function (locationId) {
-    return Location.findOne({
-      where: {
-        parentLocationId: locationId
-      }
-    }).then((location) => {
-      if (location) {
-        throw(app.utils.apiError.getError('DELETE_PARENT_MODEL', {model: Location.modelName}));
-      }
-    });
+    return Location
+      .findOne({
+        where: {
+          parentLocationId: locationId
+        }
+      })
+      .then((location) => {
+        if (location) {
+          throw(app.utils.apiError.getError('DELETE_PARENT_MODEL', {model: Location.modelName}));
+        }
+        return Location.isRecordInUse(locationId);
+      })
+      .then((recordInUse) => {
+        if (recordInUse) {
+          throw(app.utils.apiError.getError('MODEL_IN_USE', {
+            model: Location.modelName,
+            id: locationId
+          }));
+        }
+      });
   };
 
   /**
@@ -278,12 +289,13 @@ module.exports = function (Location) {
    * this check is done only for the direct sub-locations and not recurrently for all sub-locations.
    */
   Location.checkIfCanDeactivate = function (data, locationId) {
-    return Location.findOne({
-      where: {
-        parentLocationId: locationId,
-        active: true
-      }
-    })
+    return Location
+      .findOne({
+        where: {
+          parentLocationId: locationId,
+          active: true
+        }
+      })
       .then((location) => {
         if (location) {
           throw(app.utils.apiError.getError('DEACTIVATE_PARENT_MODEL', {model: Location.modelName}));
