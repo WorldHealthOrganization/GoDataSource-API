@@ -413,18 +413,18 @@ module.exports = function (Sync) {
       // export is async
       app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export is being done in sync mode`);
       return client.triggerUpstreamServerDatabaseExport(filter)
-        .then(function (exportLogId) {
-          app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export: received upstream server export log id: ${exportLogId}`);
+        .then(function (databaseExportLogId) {
+          app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export: received upstream server DB export log id: ${databaseExportLogId}`);
           // export started and exportLog entry was created
           // need to check at defined intervals the exportLog entry status
           // checking until a defined period passes
           return new Promise(function (resolve, reject) {
-            app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export: Checking upstream server export status for ${asyncActionsSettings.actionTimeout} milliseconds at an interval of ${asyncActionsSettings.intervalTimeout} milliseconds`);
+            app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export: Checking upstream server DB export status for ${asyncActionsSettings.actionTimeout} milliseconds at an interval of ${asyncActionsSettings.intervalTimeout} milliseconds`);
             let totalActionsTimeout, actionTimeout;
             // create timeout until to check for export log entry status
             totalActionsTimeout = setTimeout(function () {
               // timeout is reached and the export action was not finished
-              app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export failed. Upstream server export status was not updated in time (${asyncActionsSettings.actionTimeout} milliseconds)`);
+              app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export failed. Upstream server DB export status was not updated in time (${asyncActionsSettings.actionTimeout} milliseconds)`);
 
               // clear action timeout
               clearTimeout(actionTimeout);
@@ -432,18 +432,18 @@ module.exports = function (Sync) {
               // return error
               reject(app.utils.apiError.getError('UPSTREAM_SERVER_EXPORT_FAILED', {
                 upstreamServerName: client.upstreamServerName,
-                failReason: `Upstream server export status was not updated in time (${asyncActionsSettings.actionTimeout} milliseconds)`
+                failReason: `Upstream server DB export status was not updated in time (${asyncActionsSettings.actionTimeout} milliseconds)`
               }));
             }, asyncActionsSettings.actionTimeout);
 
             // get exportLog entry to check status
             function getExportLogEntry() {
-              client.getExportLogEntry(exportLogId)
+              client.getExportLogEntry(databaseExportLogId)
                 .then(function (exportLogEntry) {
                   // check export status
                   if (exportLogEntry.status === 'LNG_SYNC_STATUS_IN_PROGRESS') {
                     // upstream server export is in progress; nothing to do
-                    app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server export is in progress`);
+                    app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export is in progress`);
                     // check again after the interval has passed
                     actionTimeout = setTimeout(getExportLogEntry, asyncActionsSettings.intervalTimeout);
                     return;
@@ -451,15 +451,15 @@ module.exports = function (Sync) {
 
                   if (exportLogEntry.status === 'LNG_SYNC_STATUS_FAILED') {
                     // upstream server export failed
-                    app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server export failed: upstream server export status is 'failed'. Fail reason ${exportLogEntry.failReason}`);
+                    app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export failed: upstream server DB export status is 'failed'. Fail reason ${exportLogEntry.failReason}`);
                     reject(app.utils.apiError.getError('UPSTREAM_SERVER_EXPORT_FAILED', {
                       upstreamServerName: client.upstreamServerName,
                       failReason: exportLogEntry.failReason
                     }));
                   } else {
                     // upstream server export success
-                    app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server export success`);
-                    resolve(exportLogId);
+                    app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export success`);
+                    resolve(databaseExportLogId);
                   }
 
                   // clear totalActions timeout
@@ -467,7 +467,7 @@ module.exports = function (Sync) {
                 })
                 .catch(function (err) {
                   // exportLogEntry couldn't be retrieved; log error; will retry on the next interval
-                  app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server export: Couldn't check upstream server export status. Retrying after the next interval. Error ${err}`);
+                  app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export: Couldn't check upstream server DB export status. Retrying after the next interval. Error ${err}`);
                   // check again after the interval has passed
                   actionTimeout = setTimeout(getExportLogEntry, asyncActionsSettings.intervalTimeout);
                 });
@@ -477,8 +477,8 @@ module.exports = function (Sync) {
             actionTimeout = setTimeout(getExportLogEntry, asyncActionsSettings.intervalTimeout);
           });
         })
-        .then(function (exportLogId) {
-          return client.getExportedDatabaseSnapshot(exportLogId)
+        .then(function (databaseExportLogId) {
+          return client.getExportedDatabaseSnapshot(databaseExportLogId)
             .then(function (dbSnapshotFileName) {
               app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export success. DB snapshot saved at: ${dbSnapshotFileName}`);
               return dbSnapshotFileName;

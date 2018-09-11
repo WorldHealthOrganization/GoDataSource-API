@@ -112,12 +112,12 @@
       ],
       "returns": [
         {
-          "arg": "exportLogId",
+          "arg": "databaseExportLogId",
           "type": "string",
           "required": true
         }
       ],
-      "description": "Export a compressed snapshot of the database in the tmp folder. The action is done asynchronous and the response contains an exportLogId",
+      "description": "Export a compressed snapshot of the database in the tmp folder. The action is done asynchronous and the response contains a databaseExportLogId",
       "http": {
         "verb": "get",
         "path": "/database-snapshot-asynchronous"
@@ -126,7 +126,7 @@
     "getExportedDatabaseSnapshot": {
       "accepts": [
         {
-          "arg": "exportLogId",
+          "arg": "databaseExportLogId",
           "type": "string"
         },
         {
@@ -160,7 +160,7 @@
       "description": "Download an already exported snapshot of the database.",
       "http": {
         "verb": "get",
-        "path": "/exported-database-snapshot/:exportLogId"
+        "path": "/exported-database-snapshot/:databaseExportLogId"
       }
     },
     "importDatabaseSnapshot": {

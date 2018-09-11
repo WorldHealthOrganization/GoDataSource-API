@@ -32,7 +32,7 @@ module.exports = function (Sync) {
         exportLogEntry.status = 'LNG_SYNC_STATUS_FAILED';
         exportLogEntry.failReason = err.toString ? err.toString() : err;
       } else {
-        app.logger.debug(`Sync ${exportLogEntry.id}: Success`);
+        app.logger.debug(`Export ${exportLogEntry.id}: Success`);
         exportLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS';
         exportLogEntry.location = fileName;
       }
@@ -42,9 +42,10 @@ module.exports = function (Sync) {
         .save(options)
         .then(function () {
           // nothing to do; sync log entry was saved
+          app.logger.debug(`Export ${exportLogEntry.id}: Updated export log entry status.`);
         })
         .catch(function (err) {
-          app.logger.debug(`Sync ${exportLogEntry.id}: Error updating export log entry status. ${err}`);
+          app.logger.debug(`Export ${exportLogEntry.id}: Error updating export log entry status. ${err}`);
         });
 
       // check if a callback function was received; In that case we need to return the file
@@ -118,7 +119,8 @@ module.exports = function (Sync) {
       'systemSettings',
       'template',
       'icon',
-      'helpCategory'
+      'helpCategory',
+      'auditLog'
     ];
 
     // initialize list of collections to be exported
@@ -178,6 +180,7 @@ module.exports = function (Sync) {
    * Date filter is supported ({ fromDate: Date })
    * outbreakId filter is supported: 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}
    * collections filter is supported: ['modelName']
+   * Eg filter: {"where": {"fromDate": "dateString", "outbreakId": "outbreak ID", "collections": ["person", "outbreak", ...]}}
    * @param filter
    * @param options Options from request
    * @param done
@@ -192,6 +195,7 @@ module.exports = function (Sync) {
    * Date filter is supported ({ fromDate: Date })
    * outbreakId filter is supported: 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}
    * collections filter is supported: ['modelName']
+   * Eg filter: {"where": {"fromDate": "dateString", "outbreakId": "outbreak ID", "collections": ["person", "outbreak", ...]}}
    * @param filter
    * @param options Options from request
    * @param done
@@ -202,19 +206,19 @@ module.exports = function (Sync) {
 
   /**
    * Download an already exported snapshot of the database
-   * @param exportLogId
+   * @param databaseExportLogId Database Export log ID
    * @param options Options from request
    * @param done
    */
-  Sync.getExportedDatabaseSnapshot = function (exportLogId, options, done) {
+  Sync.getExportedDatabaseSnapshot = function (databaseExportLogId, options, done) {
     // get export log entry
     app.models.databaseExportLog
-      .findById(exportLogId)
+      .findById(databaseExportLogId)
       .then(function (exportLogEntry) {
         if (!exportLogEntry) {
           return done(app.utils.apiError.getError('MODEL_NOT_FOUND', {
             model: app.models.databaseExportLog.modelName,
-            id: exportLogId
+            id: databaseExportLogId
           }));
         }
 
@@ -237,9 +241,10 @@ module.exports = function (Sync) {
             })
             .then(() => {
               // nothing to do
+              app.logger.debug(`Export ${exportLogEntry.id}: Updated DB export log entry status`);
             })
             .catch((err) => {
-              app.logger.debug(`Failed to save export log entry '${exportLogEntry.id}': Error ${err}`);
+              app.logger.debug(`Export ${exportLogEntry.id}: Failed to save DB export log entry: Error ${err}`);
             });
 
           return done(app.utils.apiError.getError('INSTANCE_EXPORT_FAILED', {
@@ -289,6 +294,7 @@ module.exports = function (Sync) {
         .save(requestOptions)
         .then(function () {
           // nothing to do; sync log entry was saved
+          app.logger.debug(`Sync ${syncLogEntry.id}: Updated sync log entry status`);
         })
         .catch(function (err) {
           app.logger.debug(`Sync ${syncLogEntry.id}: Error updating sync log entry status. ${err}`);
@@ -435,6 +441,7 @@ module.exports = function (Sync) {
         syncLogEntry = syncLog;
 
         // send response with the syncLogEntry ID
+        // the sync action continues after the response is sent with the syncLogEntry being updated when the sync fails/succeeds
         callback(null, syncLogEntry.id);
         callbackCalled = true;
 

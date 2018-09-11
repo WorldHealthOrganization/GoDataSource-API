@@ -44,7 +44,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
    * @param requestOptions
    * @param callback
    */
-  this.sendRequest = function(requestOptions, callback) {
+  this.sendRequest = function (requestOptions, callback) {
     // log request
     app.logger.debug(`Sync ${this.syncLogEntry.id}: Sent request to upstream server: ${requestOptions.method} /${requestOptions.uri}${requestOptions.qs ? '?' + JSON.stringify(requestOptions.qs) : ''}`);
 
@@ -58,7 +58,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
    * @param response
    * @param expectedStatusCode
    */
-  this.getErrorResponse = function(error, response, expectedStatusCode) {
+  this.getErrorResponse = function (error, response, expectedStatusCode) {
     // set success Status code. Default: 200
     let successStatusCode = expectedStatusCode || 200;
 
@@ -74,7 +74,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
 
     // log response
     app.logger.debug(`Sync ${this.syncLogEntry.id}: Received response from upstream server. Status code: ${response.statusCode}`);
-    if(response.body) {
+    if (response.body) {
       app.logger.debug(`Sync ${this.syncLogEntry.id}: Body: ${typeof response.body === 'object' ? JSON.stringify(response.body, null, 2) : response.body}`);
     }
 
@@ -190,13 +190,13 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
 
   /**
    * GET export log entry for given ID
-   * @param syncLogId
+   * @param databaseExportLogId
    * @returns {Promise}
    */
-  this.getExportLogEntry = function (exportLogId) {
+  this.getExportLogEntry = function (databaseExportLogId) {
     let requestOptions = Object.assign({}, this.options, {
       method: 'GET',
-      uri: 'database-export-logs/' + exportLogId,
+      uri: 'database-export-logs/' + databaseExportLogId,
       json: true
     });
 
@@ -288,8 +288,8 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
         if (error) {
           return reject(error);
         } else {
-          // body contains the exportLogId; return it
-          resolve(body.exportLogId);
+          // body contains the databaseExportLogId; return it
+          resolve(body.databaseExportLogId);
         }
       });
     })
@@ -298,13 +298,13 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
   /**
    * Download database snapshot from server
    * Database export was already done
-   * @param exportLogId
+   * @param databaseExportLogId Database Export log ID
    * @returns {Promise}
    */
-  this.getExportedDatabaseSnapshot = function (exportLogId) {
+  this.getExportedDatabaseSnapshot = function (databaseExportLogId) {
     let requestOptions = Object.assign({}, this.options, {
       method: 'GET',
-      uri: 'sync/exported-database-snapshot/' + exportLogId
+      uri: 'sync/exported-database-snapshot/' + databaseExportLogId
     });
 
     let that = this;
@@ -333,8 +333,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
         .pipe(fs.createWriteStream(dbSnapshotFileName))
         .on('finish', function () {
           resolve(dbSnapshotFileName);
-        })
-      ;
+        });
     });
   };
 };
