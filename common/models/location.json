@@ -101,6 +101,18 @@
       "principalId": "write_sys_config",
       "permission": "ALLOW",
       "property": "importImportableFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getUsage"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "countUsage"
     }
   ],
   "methods": {
@@ -238,6 +250,55 @@
         "verb": "post",
         "path": "/import-importable-file-using-map"
       }
+    },
+    "prototype.getUsage": {
+      "description": "Find usage for a record.",
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": {
+        "description": "Record usage locations",
+        "arg": "data",
+        "type": {
+          "followUp": [],
+          "case": [],
+          "contact": [],
+          "event": []
+        },
+        "root": true,
+        "required": true
+      },
+      "http": [
+        {
+          "verb": "get",
+          "path": "/usage"
+        }
+      ]
+    },
+    "prototype.countUsage": {
+      "description": "Count usage for a record.",
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": {
+        "arg": "count",
+        "type": "integer",
+        "required": true
+      },
+      "http": [
+        {
+          "verb": "get",
+          "path": "/usage/count"
+        }
+      ]
     }
   }
 }
