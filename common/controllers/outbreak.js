@@ -887,16 +887,16 @@ module.exports = function (Outbreak) {
       .find({
         where: {
           followUp: {
-            exists: true
+            neq: null
+          },
+          'followUp.endDate': {
+            gte: genericHelpers.getUTCDate().toDate()
           }
         }
       })
       .then((contacts) => {
         // follow up add statements
         let followsUpsToAdd = [];
-
-        // filter contacts that were exposed
-        contacts = contacts.filter((item) => item.followUp);
 
         // retrieve the last follow up that is brand new for contacts
         return Promise
