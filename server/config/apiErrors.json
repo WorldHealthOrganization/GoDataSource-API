@@ -150,5 +150,9 @@
   "ACCESS_DENIED_TO_ROUTE_FOR_APP": {
     "defaultStatusCode": 403,
     "messagePattern": "The requested route (`<%= route %>`) is not accessible on <%= app %> deployment."
+  },
+  "INVALID_FOLLOW_UP_DATE": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid follow up date, it exceeds the configured period."
   }
 }

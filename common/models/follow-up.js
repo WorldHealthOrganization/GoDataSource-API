@@ -53,32 +53,24 @@ module.exports = function (Followup) {
       return next();
     }
 
-    //Find the oldest existing followUp of the contact
-    app.models.followUp
-      .findOne({
-        where: {
-          personId: ctx.instance.personId
-        },
-        order: 'date ASC'
-      })
-      .then((followUp) => {
-        //If it is in the past, use it as a starting point for the index calculation
-        if (followUp && daysSince(followUp.date, Date.now()) >= 0) {
-          ctx.instance.index = daysSince(followUp.date, ctx.instance.date) + 1;
-        } else {
-          //If no followUp exists in the past, initiate a new index
-          //If the followUp is part of a followUp generate action, use now() to calculate the index
-          if (ctx.instance.isGenerated) {
-            ctx.instance.index = daysSince(Date.now(), ctx.instance.date) + 1;
-          } else {
-            //If this is the first follow up and it is added separately (create followUp) set the index to 1.
-            ctx.instance.index = 1;
-          }
+    // retrieve the owner of the follow up to fetch followup original date
+    app.models.person
+      .findById(ctx.instance.personId)
+      .then((person) => {
+        // if follow up is not within configured start/end dates throw error
+        let startDate = moment(person.followUp.originalStartDate);
+        let endDate = moment(person.followUp.endDate);
+        if (!moment(ctx.instance.date).startOf('day').isBetween(startDate, endDate, 'day', '[]')) {
+          return next(app.utils.apiError.getError('INVALID_FOLLOW_UP_DATE'));
         }
+
+        // set index based on the difference in days from start date until the follow up set date
+        // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
+        ctx.instance.index = daysSince(person.followUp.originalStartDate, ctx.instance.date) + 1;
 
         return next();
       })
-      .catch((next));
+      .catch(next);
   });
 
   /**
