@@ -149,26 +149,6 @@ module.exports = function (ReferenceData) {
     'active': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ACTIVE',
   });
 
-  /**
-   * Keep a list of places where reference data might be used so we can safely delete a record
-   */
-  ReferenceData.possibleRecordUsage = {};
-
-  // after the application started (all models finished loading)
-  app.on('started', function () {
-    // go through all models
-    app.models().forEach(function (Model) {
-      // get their list of reference data fields
-      if (Array.isArray(Model.referenceDataFields)) {
-        // build possible record usage list
-        ReferenceData.possibleRecordUsage[Model.modelName] = Model.referenceDataFields.map(function (referenceDataField) {
-          // some fields contain array markers ([]) needed by some business logic, remove those here
-          return referenceDataField.replace(/\[]/g, '');
-        });
-      }
-    });
-  });
-
   // keep a map of reference data available categories mapped by category id (for easy reference in relations)
   ReferenceData.availableCategoriesMap = {};
   ReferenceData.availableCategories.forEach(function (category) {
@@ -206,73 +186,6 @@ module.exports = function (ReferenceData) {
   });
 
   /**
-   * Get usage for a reference data
-   * @param recordId
-   * @param filter
-   * @param justCount
-   * @param callback
-   */
-  ReferenceData.findModelUsage = function (recordId, filter, justCount, callback) {
-    const checkUsages = [];
-    const modelNames = Object.keys(ReferenceData.possibleRecordUsage);
-    // go through possible usage list
-    modelNames.forEach(function (modelName) {
-      const orQuery = [];
-      // build a search query using the fields that might contain the information
-      ReferenceData.possibleRecordUsage[modelName].forEach(function (field) {
-        orQuery.push({[field]: recordId});
-      });
-
-      // build filter
-      const _filter = app.utils.remote
-        .mergeFilters({
-          where: {
-            or: orQuery
-          }
-        }, filter);
-
-      // count/find the results
-      if (justCount) {
-        checkUsages.push(
-          app.models[modelName].count(_filter.where)
-        );
-      } else {
-        checkUsages.push(
-          app.models[modelName].find(_filter)
-        );
-      }
-    });
-    Promise.all(checkUsages)
-      .then(function (results) {
-        // associate the results with the queried models
-        const resultSet = {};
-        results.forEach(function (result, index) {
-          resultSet[modelNames[index]] = result;
-        });
-        callback(null, resultSet);
-      })
-      .catch(callback);
-  };
-
-  /**
-   * Check if a record is in use
-   * @param recordId
-   * @param callback
-   */
-  ReferenceData.isRecordInUse = function (recordId, callback) {
-    ReferenceData.findModelUsage(recordId, {}, true, function (error, results) {
-      if (error) {
-        return callback(error);
-      }
-      callback(null,
-        // count all of the results, if > 0 then the record is used
-        Object.values(results).reduce(function (a, b) {
-          return a + b;
-        }) > 0);
-    });
-  };
-
-  /**
    * Check if an entry is editable (!readOnly + !inUse)
    * @param referenceData|referenceDataId
    * @param callback
@@ -299,20 +212,20 @@ module.exports = function (ReferenceData) {
         }));
       }
       // record is writable, check usage
-      ReferenceData.isRecordInUse(referenceDataId, function (error, recordInUse) {
-        if (error) {
-          return callback(error);
-        }
-        // record in use
-        if (recordInUse) {
-          // send back an error
-          return callback(app.utils.apiError.getError('MODEL_IN_USE', {
-            model: ReferenceData.modelName,
-            id: referenceDataId
-          }));
-        }
-        return callback(null, true);
-      });
+      ReferenceData
+        .isRecordInUse(referenceDataId)
+        .then(function (recordInUse) {
+          // record in use
+          if (recordInUse) {
+            // send back an error
+            return callback(app.utils.apiError.getError('MODEL_IN_USE', {
+              model: ReferenceData.modelName,
+              id: referenceDataId
+            }));
+          }
+          return callback(null, true);
+        })
+        .catch(callback);
     }
 
     // if this a reference data item, check readOnly field
@@ -341,7 +254,7 @@ module.exports = function (ReferenceData) {
    * @param value
    * @return {string}
    */
-  ReferenceData.getTranslatableIdentifierForValue = function(category, value) {
+  ReferenceData.getTranslatableIdentifierForValue = function (category, value) {
     return `${category}_${_.snakeCase(value).toUpperCase()}`;
   };
 
