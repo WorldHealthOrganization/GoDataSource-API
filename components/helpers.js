@@ -33,8 +33,6 @@ const nonModelObjects = {
   }
 };
 
-const dateRegexp = /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}\.\d{3}Z*)?$/;
-
 /**
  * Convert a Date object into moment UTC date and reset time to start of the day
  * Additionally if dayOfWeek is sent the function will return the date for the date's corresponding day of the week
@@ -269,7 +267,7 @@ const convertPropsToDate = function (obj) {
       } else {
 
         // we're only looking for strings properties that have a date format to convert
-        if (typeof obj[prop] === 'string' && dateRegexp.test(obj[prop])) {
+        if (typeof obj[prop] === 'string' && isValidDate(obj[prop])) {
           // try to convert the string value to date, if valid, replace the old value
           let convertedDate = moment(obj[prop]);
           if (convertedDate.isValid()) {
@@ -1013,6 +1011,12 @@ const getBuildInformation = function () {
   };
 };
 
+const isValidDate = function (date) {
+  const dateRegexp = /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}\.\d{3}Z*)?$/;
+
+  return dateRegexp.test(date);
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1021,7 +1025,7 @@ module.exports = {
   getAsciiString: getAsciiString,
   getChunksForInterval: getChunksForInterval,
   convertPropsToDate: convertPropsToDate,
-  dateRegexp: dateRegexp,
+  isValidDate: isValidDate,
   extractImportableFields: extractImportableFields,
   exportListFile: exportListFile,
   getReferencedValue: getReferencedValue,

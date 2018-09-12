@@ -290,6 +290,9 @@ const createQuestionnaire = function (doc, questions, withData, title) {
             doc.moveDown().text(`Answer: ${'_'.repeat(25)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
           }
           break;
+        // File uploads are not handled when printing a pdf
+        case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD':
+          break;
         case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER':
         case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS':
           // NOTE: only first nested level is handled for additional questions

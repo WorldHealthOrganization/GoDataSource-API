@@ -1031,12 +1031,12 @@ module.exports = function (Outbreak) {
             answer.selected = true;
           }
 
-          if (answer.additionalQuestions) {
+          if (answer.additionalQuestions && answer.additionalQuestions.length) {
             Outbreak.helpers.prepareQuestionsForPrint(answers, answer.additionalQuestions);
           }
         });
       } else if (question && !question.answers) {
-        if (answers[key] instanceof Date || genericHelpers.dateRegexp.test(answers[key])) {
+        if (answers[key] instanceof Date || genericHelpers.isValidDate(answers[key])) {
           question.value = genericHelpers.getDateDisplayValue(answers[key]);
         } else {
           question.value = answers[key];
