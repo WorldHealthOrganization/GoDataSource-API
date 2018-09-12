@@ -459,15 +459,33 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "filteredCountCaseRelationships"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "countContactRelationships"
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "filteredCountContactRelationships"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "countEventRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "filteredCountEventRelationships"
     },
     {
       "principalType": "ROLE",
@@ -4151,6 +4169,87 @@
       "http": {
         "verb": "get",
         "path": "/follow-ups/filtered-count"
+      }
+    },
+    "prototype.filteredCountCaseRelationships": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationships (that pass the filter) of a case",
+          "required": true
+        }
+      ],
+      "description": "Counts the relationships that pass a filter (which now can accept relations) of a case",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/relationships/filteredCount"
+      }
+    },
+    "prototype.filteredCountContactRelationships": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationships (that pass the filter) of a contact",
+          "required": true
+        }
+      ],
+      "description": "Counts the relationships that pass a filter (which now can accept relations) of a case",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/relationships/filteredCount"
+      }
+    },
+    "prototype.filteredCountEventRelationships": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationships (that pass the filter) of an event",
+          "required": true
+        }
+      ],
+      "description": "Counts the relationships that pass a filter (which now can accept relations) of a case",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/events/filteredCount"
       }
     }
   }

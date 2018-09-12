@@ -569,6 +569,28 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Count filtered relations for a case
+   * @param caseId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountCaseRelationships = function (caseId, filter, callback) {
+    // make sure case is valid
+    app.models.case
+      .findById(caseId)
+      .then((caseModel) => {
+        if (!caseModel) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.case.modelName,
+            id: caseId
+          }));
+        }
+        helpers.filteredCountPersonRelationships(caseId, filter, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
    * Count relations for a contact
    * @param contactId
    * @param where
@@ -591,7 +613,29 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Count relations for a event
+   * Count filtered relations for a contact
+   * @param contactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountContactRelationships = function (contactId, filter, callback) {
+    // make sure case is valid
+    app.models.contact
+      .findById(contactId)
+      .then((contact) => {
+        if (!contact) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.contact.modelName,
+            id: contactId
+          }));
+        }
+        helpers.filteredCountPersonRelationships(contactId, filter, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count relations for an event
    * @param eventId
    * @param where
    * @param callback
@@ -608,6 +652,28 @@ module.exports = function (Outbreak) {
           }));
         }
         helpers.countPersonRelationships(eventId, where, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count filtered relations for an event
+   * @param eventId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountEventRelationships = function (eventId, filter, callback) {
+    // make sure case is valid
+    app.models.event
+      .findById(eventId)
+      .then((event) => {
+        if (!event) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.event.modelName,
+            id: eventId
+          }));
+        }
+        helpers.filteredCountPersonRelationships(eventId, filter, callback);
       })
       .catch(callback);
   };
