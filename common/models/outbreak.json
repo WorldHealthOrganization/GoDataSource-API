@@ -1044,6 +1044,12 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "findPeopleInCluster"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "filteredCountFollowUps"
     }
   ],
   "methods": {
@@ -4089,6 +4095,28 @@
       "http": {
         "verb": "get",
         "path": "/clusters/:fk/people"
+      }
+    },
+    "prototype.filteredCountFollowUps": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of follow-ups that pass the filter",
+          "required": true
+        }
+      ],
+      "description": "Counts the follow-ups that pass a filter (which now can accept relations)",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/filtered-count"
       }
     }
   }
