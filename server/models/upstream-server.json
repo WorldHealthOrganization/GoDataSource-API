@@ -20,17 +20,28 @@
       "type": "string",
       "required": true
     },
+    "timeout": {
+      "type": "number",
+      "required": true,
+      "description": "Request timeout in milliseconds"
+    },
     "credentials": {
       "type": "clientCredentials",
       "required": true
     },
     "syncInterval": {
       "type": "number",
-      "required": true
+      "required": true,
+      "description": "0 means automatic sync is disabled"
     },
     "syncOnEveryChange": {
       "type": "boolean",
       "required": true
+    },
+    "syncEnabled": {
+      "type": "boolean",
+      "required": true,
+      "description": "Enable/disable sync with this server"
     }
   },
   "validations": [],

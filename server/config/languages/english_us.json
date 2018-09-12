@@ -1112,6 +1112,11 @@
       "LNG_BACKUP_STATUS_SUCCESS": "Success",
       "LNG_BACKUP_STATUS_FAILED": "Failed",
       "LNG_BACKUP_STATUS_PENDING": "In Progress"
+    },
+    "syncStatus": {
+      "LNG_SYNC_STATUS_IN_PROGRESS": "In progress",
+      "LNG_SYNC_STATUS_SUCCESS": "Success",
+      "LNG_SYNC_STATUS_FAILED": "Failed"
     }
   }
 }

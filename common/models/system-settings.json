@@ -9,8 +9,12 @@
     "id"
   ],
   "properties": {
-    "upstreamServer": {
-      "type": "upstreamServer"
+    "upstreamServers": {
+      "type": [
+        {
+          "type": "upstreamServer"
+        }
+      ]
     },
     "clientApplications": {
       "type": [

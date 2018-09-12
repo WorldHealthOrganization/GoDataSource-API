@@ -1,5 +1,5 @@
 {
-  "name": "syncLog",
+  "name": "databaseExportLog",
   "base": "databaseActionLog",
   "idInjection": true,
   "options": {
@@ -10,23 +10,24 @@
   ],
   "scope": {
     "where": {
-      "type": "sync"
+      "type": "export"
     }
   },
   "properties": {
     "type": {
       "type": "string",
       "required": true,
-      "default": "sync",
+      "default": "export",
       "readOnly": true
-    },
-    "syncServerUrl": {
-      "type": "string",
-      "description": "URL of the server with which the client is synced. Present in the entries for Client instances"
     },
     "syncClientId": {
       "type": "string",
-      "description": "Client ID which is synced with the server. Present in the entries for Server instances"
+      "description": "Client ID which triggered the export",
+      "required": true
+    },
+    "location": {
+      "type": "string",
+      "description": "Export file location"
     }
   },
   "validations": [],
