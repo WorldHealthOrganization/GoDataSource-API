@@ -35,6 +35,8 @@
         "LNG_REFERENCE_DATA_CATEGORY_OUTCOME",
         "LNG_REFERENCE_DATA_CATEGORY_MISCELLANEOUS_CUSTOMIZABLE_UI_ELEMENT",
         "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE",
+        "LNG_REFERENCE_DATA_CATEGORY_SOCIAL_RELATIONSHIP_TYPE",
+        "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_COUNTRY"
       ]
@@ -188,9 +190,15 @@
         "description": "Record usage locations",
         "arg": "data",
         "type": {
+          "template": [],
+          "outbreak": [],
+          "followUp": [],
+          "labResult": [],
           "case": [],
           "contact": [],
-          "outbreak": []
+          "address": [],
+          "relationship": [],
+          "event": []
         },
         "root": true,
         "required": true

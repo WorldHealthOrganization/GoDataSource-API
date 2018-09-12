@@ -78,7 +78,8 @@ module.exports = function (app) {
     let outbreakIdMatch = context.remotingContext.req.originalUrl.match(outbreakIdRegExp);
 
     // check if the request is for outbreak or subresource
-    if (outbreakIdMatch && outbreakIdMatch[1]) {
+    // this check assumes that in the path, 'outbreak/' is followed by it's id. However, there are a few instances where that is not the case
+    if (outbreakIdMatch && outbreakIdMatch[1] && !['count', 'export', 'import-importable-file-using-map'].includes(outbreakIdMatch[1])) {
       // check if user has outbreak ids restrictions and check if he has access to the given outbreak
       if (userAuthData.outbreakIds &&
         Array.isArray(userAuthData.outbreakIds) &&
@@ -109,24 +110,8 @@ module.exports = function (app) {
   Role.availablePermissionsKeys.forEach(function (permission) {
 
     Role.registerResolver(permission, function (permission, context, callback) {
-      let _callback = callback;
-
-      /**
-       * DEPRECATED feature
-       // if the permission requires ownership of the object
-       if (permission.indexOf('_own_') !== -1) {
-          // after verifying the user has the permission, also verify ownership
-          _callback = function (error, hasPermission) {
-            if (error || !hasPermission) {
-              return callback(error, hasPermission);
-            }
-            return verifyResourceOwnership(permission, context, callback);
-          }
-        }
-       */
-
       // after verifying the user has the permission, also verify ownership
-      _callback = function (error, hasPermission) {
+      const _callback = function (error, hasPermission) {
         if (error || !hasPermission) {
           return callback(error, hasPermission);
         }
@@ -162,14 +147,14 @@ module.exports = function (app) {
             // cache client id on the context, it might be needed later in the handlers
             context.remotingContext.req.clientId = clientId;
             if (!clientId || !clientSecret) {
-              return done(buildError('ACCESS_DENIED', { accessErrors: 'Invalid credentials' }, 403));
+              return done(buildError('ACCESS_DENIED', {accessErrors: 'Invalid credentials'}, 403));
             }
           }
         } else {
-          return done(buildError('ACCESS_DENIED', { accessErrors: 'Format is Authorization: Basic [token]' }, 403));
+          return done(buildError('ACCESS_DENIED', {accessErrors: 'Format is Authorization: Basic [token]'}, 403));
         }
       } else {
-        return done(buildError('ACCESS_DENIED', { accessErrors: 'No Authorization header found' }, 403));
+        return done(buildError('ACCESS_DENIED', {accessErrors: 'No Authorization header found'}, 403));
       }
 
       // flag that indicates whether the client is ok
@@ -193,7 +178,7 @@ module.exports = function (app) {
               // check password
               hasAccess = clients[clientIndex].credentials.clientSecret === clientSecret;
             } else {
-              return done(buildError('ACCESS_DENIED', { accessErrors: 'Client is not active' }, 403));
+              return done(buildError('ACCESS_DENIED', {accessErrors: 'Client is not active'}, 403));
             }
           }
 
@@ -201,7 +186,7 @@ module.exports = function (app) {
             return done(null, hasAccess);
           }
 
-          return done(buildError('ACCESS_DENIED', { accessErrors: 'Client credentials are wrong' }, 403));
+          return done(buildError('ACCESS_DENIED', {accessErrors: 'Client credentials are wrong'}, 403));
         });
     });
   }

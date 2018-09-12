@@ -10,6 +10,28 @@ const spreadSheetFile = require('./spreadSheetFile');
 const pdfDoc = require('./pdfDoc');
 const streamUtils = require('./streamUtils');
 const async = require('async');
+const fs = require('fs');
+const packageJson = require('../package');
+
+const arrayFields = {
+  'addresses': 'address',
+  'address': 'address',
+  'documents': 'document',
+  'hospitalizationDates': 'dateRange',
+  'incubationDates': 'dateRange',
+  'isolationDates': 'dateRange',
+  'person': 'person',
+  'labResults': 'labResult',
+  'relationships': 'relationship',
+  'geoLocation': 'geolocation'
+};
+
+const nonModelObjects = {
+  geolocation: {
+    lat: 'LNG_LATITUDE',
+    lng: 'LNG_LONGITUDE'
+  }
+};
 
 /**
  * Convert a Date object into moment UTC date and reset time to start of the day
@@ -92,6 +114,137 @@ const getChunksForInterval = function (interval, chunk) {
 };
 
 /**
+ * Process a flat map into a a map that groups array properties under sub-entities
+ * @param flatMap
+ * @param prefix
+ * @return {{prefix: *, map: {}}}
+ */
+function processMapLists(flatMap, prefix) {
+  // build result structure
+  const processedMap = {
+    prefix: prefix,
+    map: {}
+  };
+  // go through the map
+  Object.keys(flatMap).forEach(function (sourcePath) {
+    // look for array markers in the source path
+    const sourceListMarkerIndex = sourcePath.indexOf('[]');
+    // look for array markers in the destination path
+    const destinationMarkerIndex = flatMap[sourcePath].indexOf('[]');
+    // source map contains an array
+    if (sourceListMarkerIndex !== -1) {
+      // array to array map
+      if (destinationMarkerIndex !== -1) {
+        // get parent source path
+        const parentSourcePath = sourcePath.substring(0, sourceListMarkerIndex);
+        // init result map for parent property (if not already present)
+        if (!processedMap.map[parentSourcePath]) {
+          processedMap.map[parentSourcePath] = {};
+        }
+        // get remaining path
+        const leftSourcePath = sourcePath.substring(sourceListMarkerIndex + 3);
+        // assume there is nothing left to process
+        const dataSetLeftToProcess = {};
+        // if there still is path to be processed
+        if (leftSourcePath.length) {
+          // fill dataSet left to process
+          dataSetLeftToProcess[sourcePath.substring(sourceListMarkerIndex + 3)] = flatMap[sourcePath].substring(destinationMarkerIndex + 3);
+        }
+        // merge existing map with the result of processing remaining map
+        processedMap.map[parentSourcePath] = _.merge(
+          processedMap.map[parentSourcePath],
+          processMapLists(
+            dataSetLeftToProcess,
+            flatMap[sourcePath].substring(0, destinationMarkerIndex)
+          )
+        );
+      } else {
+        // unsupported scenario, cannot map array of objects to single object
+      }
+    } else {
+      // simple map, no arrays
+      processedMap.map[sourcePath] = flatMap[sourcePath];
+    }
+  });
+  // return processed map
+  return processedMap;
+}
+
+/**
+ * Remap dataSet properties & values using a processed map
+ * @param dataSet
+ * @param processedMap
+ * @param valuesMap
+ * @param parentPath
+ * @return {Array}
+ */
+function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, parentPath) {
+  // process only if there's something to process
+  if (Array.isArray(dataSet)) {
+    // initialize results container
+    const results = [];
+    // go through all the items in the dataSet
+    dataSet.forEach(function (item) {
+      // start building the result
+      const result = {};
+      // get source paths list
+      const sourcePaths = Object.keys(processedMap.map);
+      // if there are source paths to process
+      if (sourcePaths.length) {
+        // go through the source paths
+        sourcePaths.forEach(function (sourcePath) {
+          // build parent path prefix
+          const parentPathPrefix = parentPath ? `${parentPath}.` : '';
+          // if the source path is an object, it means that it contains children items that need to be processed
+          if (typeof processedMap.map[sourcePath] === 'object') {
+            // store children results after they were processed
+            _.set(
+              result,
+              processedMap.map[sourcePath].prefix,
+              // process children items
+              remapPropertiesUsingProcessedMap(
+                // get dataSet that needs to be processed
+                _.get(item, sourcePath),
+                // use sub-map
+                processedMap.map[sourcePath],
+                valuesMap,
+                // build path to the item that's being processed (will be used by values mapper)
+                `${parentPathPrefix}${sourcePath}[]`
+              )
+            );
+            // simple mapping, no arrays
+          } else {
+            // get the resolved value
+            const value = _.get(item, sourcePath);
+            // define a replacement parent value
+            let replaceValueParent;
+            // check if the value has a replacement value defined
+            if (
+              value !== undefined &&
+              typeof value !== 'object' &&
+              (replaceValueParent = valuesMap[`${parentPathPrefix}${sourcePath}`])
+              && replaceValueParent[value] !== undefined
+            ) {
+              // use that replacement value
+              _.set(result, `${processedMap.map[sourcePath]}`, replaceValueParent[value]);
+            } else {
+              // no replacement value defined, use resolved value
+              _.set(result, `${processedMap.map[sourcePath]}`, value);
+            }
+          }
+        });
+        // store the result
+        results.push(result);
+      } else {
+        // nothing to process, copy as is
+        results.push(item);
+      }
+    });
+    return results;
+  }
+}
+
+/**
  * Remap a list of items using a map. Optionally remap their values using a values map
  * @param list
  * @param fieldsMap
@@ -99,32 +252,7 @@ const getChunksForInterval = function (interval, chunk) {
  * @return {Array}
  */
 const remapProperties = function (list, fieldsMap, valuesMap) {
-  // store final result
-  let results = [];
-  // get a list of source fields
-  let fields = Object.keys(fieldsMap);
-  // go through the list of items
-  list.forEach(function (item) {
-    // build each individual item
-    let result = {};
-    // go trough the list of fields
-    fields.forEach(function (field) {
-      if (fieldsMap[field]) {
-        // if no array position was specified, use position 0
-        fieldsMap[field] = fieldsMap[field].replace(/\[]/g, '[0]');
-        // remap property
-        _.set(result, fieldsMap[field], item[field]);
-        // if a values map was provided
-        if (valuesMap && valuesMap[field] && valuesMap[field][item[field]] !== undefined) {
-          // remap the values
-          _.set(result, fieldsMap[field], valuesMap[field][item[field]]);
-        }
-      }
-    });
-    // add processed item to the final list
-    results.push(result);
-  });
-  return results;
+  return remapPropertiesUsingProcessedMap(list, processMapLists(fieldsMap), valuesMap);
 };
 
 /**
@@ -430,7 +558,7 @@ const getReferencedValue = function (data, path) {
     const arrayPath = path.substring(0, arrayMarkerPosition);
     // get remaining part
     const remainingPath = path.substring(arrayMarkerPosition + 3);
-    // go trough the array
+    // go through the array
     _.get(data, arrayPath, []).forEach(function (dataItem, index) {
       // if there still is a path left
       if (remainingPath) {
@@ -528,7 +656,7 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
 
       // also resolve reference data if needed
       if (resolveReferenceData) {
-        resolveModelReferenceData(result, Model, languageDictionary);
+        translateDataSetReferenceDataValues(result, Model, languageDictionary);
       }
     });
 
@@ -667,29 +795,6 @@ const getDateDisplayValue = function (dateString) {
 };
 
 /**
- * Resolve reference data fields;
- * Note: The model instance JSON sent is updated
- * @param modelInstanceJSON JSON representation of a model instance
- * @param Model
- * @param languageDictionary
- */
-const resolveModelReferenceData = function (modelInstanceJSON, Model, languageDictionary) {
-  if (Model.referenceDataFields) {
-    // for the fields that use reference data
-    Model.referenceDataFields.forEach(function (field) {
-      let fieldValue = getReferencedValue(modelInstanceJSON, field);
-
-      // reference data field might be in an array; for that case we need to translate each array value
-      if (Array.isArray(fieldValue)) {
-        fieldValue.forEach(retrievedValue => _.set(modelInstanceJSON, retrievedValue.exactPath, languageDictionary.getTranslation(retrievedValue.value)));
-      } else if (fieldValue.value) {
-        _.set(modelInstanceJSON, fieldValue.exactPath, languageDictionary.getTranslation(fieldValue.value));
-      }
-    });
-  }
-};
-
-/**
  * Parse fields values
  * Note: The model instance JSON sent is updated
  * @param modelInstanceJSON JSON representation of a model instance
@@ -711,6 +816,203 @@ const parseModelFieldValues = function (modelInstanceJSON, Model) {
   }
 };
 
+/**
+ * Checks if a directory/file is readable/writable and visible to the calling process
+ * Access sync function is throwing error in case file is not ok
+ * Make sure to treat it
+ * @param path
+ */
+const isPathOK = function (path) {
+  fs.accessSync(path, fs.constants.R_OK | fs.constants.W_OK);
+};
+
+/**
+ * Format all the marked date type fields on the model
+ * @param model
+ * @param dateFieldsList
+ * @returns {Object}
+ */
+const formatDateFields = function (model, dateFieldsList) {
+
+  // Format date fields
+  dateFieldsList.forEach((field) => {
+    let reference = getReferencedValue(model, field);
+    if (Array.isArray(reference)) {
+      reference.forEach((indicator) => {
+        _.set(model, indicator.exactPath, indicator.value ? getDateDisplayValue(indicator.value) : ' ');
+      });
+    } else {
+      _.set(model, reference.exactPath, reference.value ? getDateDisplayValue(reference.value) : ' ');
+    }
+  });
+};
+
+/**
+ * Format all undefined fields on the model
+ * @param model
+ */
+const formatUndefinedValues = function (model) {
+  Object.keys(model).forEach((key) => {
+    if (Array.isArray(model[key])) {
+      model[key].forEach((child) => {
+        formatUndefinedValues(child);
+      });
+    } else if (typeof(model[key]) === 'object') {
+      formatUndefinedValues(model[key]);
+    } else if (model[key] === undefined) {
+      _.set(model, key, ' ');
+    }
+  });
+};
+
+/**
+ * Translate all marked referenceData fields of a dataSet
+ * @param dataSet
+ * @param Model
+ * @param dictionary
+ */
+const translateDataSetReferenceDataValues = function (dataSet, Model, dictionary) {
+  if (Model.referenceDataFields) {
+    let dataSetIsObject = false;
+    if (!Array.isArray(dataSet)) {
+      dataSet = [dataSet];
+      dataSetIsObject = true;
+    }
+
+    dataSet.forEach((model) => {
+      Model.referenceDataFields.forEach((field) => {
+        let reference = getReferencedValue(model, field);
+        if (Array.isArray(reference)) {
+          reference.forEach((indicator) => {
+            _.set(model, indicator.exactPath, indicator.value ? dictionary.getTranslation(indicator.value) : ' ');
+          });
+        } else {
+          _.set(model, reference.exactPath, reference.value ? dictionary.getTranslation(reference.value) : ' ');
+        }
+      });
+    });
+
+    if (dataSetIsObject) {
+      dataSet = dataSet[0];
+    }
+  }
+};
+
+/**
+ * Translate all marked field labels of a model
+ * @param app
+ * @param modelName
+ * @param model
+ * @param dictionary
+ */
+const translateFieldLabels = function (app, model, modelName, dictionary) {
+  let fieldsToTranslate = {};
+  if (!app.models[modelName]) {
+    fieldsToTranslate = nonModelObjects[modelName];
+  } else {
+    fieldsToTranslate = Object.assign(app.models[modelName].fieldLabelsMap, app.models[modelName].relatedFieldLabelsMap);
+    model = _.pick(model, app.models[modelName].printFieldsinOrder);
+  }
+
+  let translatedFieldsModel = {};
+  Object.keys(model).forEach(function (key) {
+    let value = model[key];
+    let newValue = value;
+    if (fieldsToTranslate && fieldsToTranslate[key]) {
+      if (Array.isArray(value) && value.length && typeof(value[0]) === 'object' && arrayFields[key]) {
+        newValue = [];
+        value.forEach((element, index) => {
+          newValue[index] = translateFieldLabels(app, element, arrayFields[key], dictionary);
+        });
+      } else if (typeof(value) === 'object' && Object.keys(value).length > 0) {
+        newValue = translateFieldLabels(app, value, arrayFields[key], dictionary);
+      }
+      translatedFieldsModel[dictionary.getTranslation(app.models[modelName] ? fieldsToTranslate[key] : nonModelObjects[modelName][key])] = newValue;
+    } else {
+      translatedFieldsModel[key] = value;
+    }
+  });
+
+  return translatedFieldsModel;
+};
+
+/**
+ * When searching by a location, include all sub-locations
+ * @param app
+ * @param filter
+ * @param callback
+ */
+const includeSubLocationsInLocationFilter = function (app, filter, callback) {
+  // build a list of search actions
+  const searchForLocations = [];
+  // go through all filter properties
+  Object.keys(filter).forEach(function (propertyName) {
+    // search for the parentLocationIdFilter
+    if (propertyName.includes('parentLocationIdFilter')) {
+      // start with no location filter
+      let parentLocationFilter;
+      // handle string type
+      if (typeof filter[propertyName] === 'string') {
+        parentLocationFilter = [filter[propertyName]];
+        // handle include type
+      } else if (filter[propertyName] && typeof filter[propertyName] === 'object' && Array.isArray(filter[propertyName].inq)) {
+        parentLocationFilter = filter[propertyName].inq;
+      }
+      // if a parent location filter was specified
+      if (parentLocationFilter) {
+        // search for sub-locations
+        searchForLocations.push(function (callback) {
+          app.models.location
+            .getSubLocations(parentLocationFilter, [], function (error, locationIds) {
+              if (error) {
+                return callback(error);
+              }
+              // replace original filter with actual location filter and use found location ids
+              filter[propertyName.replace('parentLocationIdFilter', 'locationId')] = {
+                inq: locationIds
+              };
+              // remove original filter
+              delete filter[propertyName];
+              callback();
+            });
+        });
+      }
+    } else if (Array.isArray(filter[propertyName])) {
+      // for array elements, go through all properties of the array
+      filter[propertyName].forEach(function (item) {
+        // if the item is an object
+        if (item && typeof item === 'object') {
+          // process it recursively
+          searchForLocations.push(function (callback) {
+            includeSubLocationsInLocationFilter(app, item, callback);
+          });
+        }
+      });
+    } else if (filter[propertyName] && typeof filter[propertyName] === 'object') {
+      // if the element is an object
+      searchForLocations.push(function (callback) {
+        // process it recursively
+        includeSubLocationsInLocationFilter(app, filter[propertyName], callback);
+      });
+    }
+  });
+  // perform searches
+  async.series(searchForLocations, callback);
+};
+
+/**
+ * Get Build Information
+ * @return {{platform: *, type: *, version: *, build: *}}
+ */
+const getBuildInformation = function () {
+  return {
+    platform: _.get(packageJson, 'build.platform', 'windows-x86'),
+    type: _.get(packageJson, 'build.type', 'hub'),
+    version: _.get(packageJson, 'build.version', _.get(packageJson, 'version')),
+    build: _.get(packageJson, 'build.build', 'development'),
+  };
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -725,6 +1027,12 @@ module.exports = {
   resolveModelForeignKeys: resolveModelForeignKeys,
   getFlatObject: getFlatObject,
   getDateDisplayValue: getDateDisplayValue,
-  resolveModelReferenceData: resolveModelReferenceData,
-  parseModelFieldValues: parseModelFieldValues
+  parseModelFieldValues: parseModelFieldValues,
+  isPathOK: isPathOK,
+  formatDateFields: formatDateFields,
+  formatUndefinedValues: formatUndefinedValues,
+  translateDataSetReferenceDataValues: translateDataSetReferenceDataValues,
+  translateFieldLabels: translateFieldLabels,
+  includeSubLocationsInLocationFilter: includeSubLocationsInLocationFilter,
+  getBuildInformation: getBuildInformation
 };

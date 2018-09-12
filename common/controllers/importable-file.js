@@ -113,7 +113,7 @@ function getDistinctPropertyValues(dataSet) {
   // go through all the keys
   Object.keys(flatDataSet).forEach(function (property) {
     // sanitize key (remove array markers and leading '.' if present)
-    const sanitizedProperty = property.replace(/\[\d+]/g, '').replace(/^\./, '');
+    const sanitizedProperty = property.replace(/\[\d+]/g, '[]').replace(/^\[]\.*/, '');
     // if the property was not present in the set
     if (!distinctValuesMap[sanitizedProperty]) {
       // add it
@@ -374,7 +374,7 @@ module.exports = function (ImportableFile) {
                 // add categoryId as a reference data item
                 results[modelName] = Object.assign({}, results[modelName], {
                   modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, {
-                    categoryId: app.models.referenceData.availableCategories
+                    categoryId: app.models.referenceData.availableCategories.map(item => Object.assign({label: item.name}, item))
                   })
                 });
                 callback();

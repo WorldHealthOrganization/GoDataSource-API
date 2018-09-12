@@ -96,38 +96,31 @@ module.exports = function (Outbreak) {
    * @param personId
    * @param type
    * @param data
-   * @param [isCurrentPersonSource]
    * @param callback
    * @return {*}
    */
-  Outbreak.helpers.validateAndNormalizePeople = function (personId, type, data, isCurrentPersonSource, callback) {
-    // isCurrentPersonSource is optional and by default is true
-    if (callback === undefined) {
-      callback = isCurrentPersonSource;
-      isCurrentPersonSource = true;
-    }
+  Outbreak.helpers.validateAndNormalizePeople = function (personId, type, data, callback) {
     if (Array.isArray(data.persons) && data.persons.length) {
 
-      let errors;
+      let errors = [];
       let persons = [];
 
-      data.persons.forEach(function (person, index) {
-        // validate each person item
-        if (person.id === undefined) {
-          if (!errors) {
-            errors = [];
-          }
-          errors.push(`"persons[${index}]" must contain "id"`);
-          // add only other people
-        } else if (person.id !== personId) {
-          // make sure type is not set (it will be set later on)
-          delete person.type;
-          persons.push(person);
-        }
-      });
+      // We allow the user to send multiple persons in a create relationships request but we only use the first one.
+      // We do this so that we can "silently" treat an user error.
+      let person = {id: data.persons[0].id};
+
+      // validate the person item
+      if (person.id === undefined) {
+        errors.push('"persons[0]" must contain "id"');
+      // add only other people
+      } else if (person.id === personId) {
+        errors.push('You cannot link a person to itself');
+      } else {
+        persons.push(person);
+      }
 
       // check validation errors
-      if (errors) {
+      if (errors.length) {
         return callback(app.utils.apiError.getError('VALIDATION_ERROR', {
           model: app.models.relationship.modelName,
           details: errors.join(', ')
@@ -148,8 +141,7 @@ module.exports = function (Outbreak) {
       if (data.persons.length) {
         data.persons.push({
           id: personId,
-          type: type,
-          [isCurrentPersonSource ? 'source' : 'target']: true
+          type: type
         });
       }
 
@@ -182,10 +174,25 @@ module.exports = function (Outbreak) {
                     id: person.id
                   }));
                 }
-                // this person is a target
-                data.persons[index][isCurrentPersonSource ? 'target' : 'source'] = true;
                 // set its type
                 data.persons[index].type = foundPerson.type;
+
+                // Set the person assignments (source/target)
+                // If the trying to link to an event or a case, set it as the source.
+                if (['event', 'case'].includes(data.persons[1].type)) {
+                  data.persons[0].target = true;
+                  data.persons[1].source = true;
+                } else {
+                  // If we are trying to link two contacts, keep the contact we are linking to as the source
+                  if (data.persons[0].type === 'contact') {
+                    data.persons[0].target = true;
+                    data.persons[1].source = true;
+                    // If we are linking a case/event to a contact, set the contact as the target
+                  } else {
+                    data.persons[0].source = true;
+                    data.persons[1].target = true;
+                  }
+                }
               })
           );
         }
@@ -211,11 +218,10 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.helpers.createPersonRelationship = function (outbreakId, personId, type, data, options, callback) {
-    Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error, persons) {
+    Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error) {
       if (error) {
         return callback(error);
       }
-      data.persons = persons;
       app.models.relationship.removeReadOnlyProperties(data);
       app.models.relationship
         .create(Object.assign(data, {outbreakId: outbreakId}), options)
@@ -269,11 +275,10 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.helpers.updatePersonRelationship = function (personId, relationshipId, type, data, options, callback) {
-    Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error, persons) {
+    Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error) {
       if (error) {
         return callback(error);
       }
-      data.person = persons;
       app.models.relationship
         .findOne({
           where: {
@@ -935,11 +940,11 @@ module.exports = function (Outbreak) {
    * @param languageId
    * @param dictionary
    */
-  Outbreak.helpers.parseTemplateQuestions = function (questions, languageId, dictionary) {
+  Outbreak.helpers.parseTemplateQuestions = function (questions, dictionary) {
     // cache translation function name, used in many places below
     // include sanity check, fallback on initial value if no translation is found
     let translateToken = function (text) {
-      let translatedText = app.models.language.getFieldTranslationFromDictionary(text, languageId, dictionary);
+      let translatedText = dictionary.getTranslation(text);
       return translatedText ? translatedText : text;
     };
 
@@ -949,6 +954,7 @@ module.exports = function (Outbreak) {
         let questionResult = {
           order: question.order,
           question: translateToken(question.text),
+          variable: question.variable,
           answerType: question.answerType,
           answers: question.answers
         };
@@ -958,6 +964,7 @@ module.exports = function (Outbreak) {
           questionResult.answers = question.answers.map((answer) => {
             return {
               label: translateToken(answer.label),
+              value: answer.value,
               additionalQuestions: translate(answer.additionalQuestions || [])
             };
           });
@@ -968,32 +975,6 @@ module.exports = function (Outbreak) {
     })(questions);
   };
 
-  // person specific array fields
-  const arrayFields = {
-    addresses: 'address',
-    documents: 'document'
-  };
-
-  /**
-   * Translate all marked field labels of a model
-   * @param modelName
-   * @param model
-   * @param languageId
-   * @param dictionary
-   */
-  Outbreak.helpers.translateFieldLabels = function (model, modelName, languageId, dictionary) {
-    return _.mapKeys(model, (value, key) => {
-      if (app.models[modelName].fieldLabelsMap[key]) {
-        if (Array.isArray(value) && value.length && typeof(value[0]) === 'object' && arrayFields[key]) {
-          value.forEach((element, index) => {
-            model[key][index] = Outbreak.helpers.translateFieldLabels(element, arrayFields[key], languageId, dictionary);
-          });
-        }
-        return app.models.language.getFieldTranslationFromDictionary(app.models[modelName].fieldLabelsMap[key], languageId, dictionary);
-      }
-      return key;
-    });
-  };
   /**
    * Get the user's person read permissions
    * @param context

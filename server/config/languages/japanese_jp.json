@@ -896,6 +896,7 @@
       "LNG_PAGE_TITLE_CONTACT_RELATIONSHIP": "日本の Contact Relationship"
     },
     "countries": {
+      "LNG_REFERENCE_DATA_CATEGORY_COUNTRY": "日本の Country",
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AFGHANISTAN": "日本の Afghanistan",
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ALBANIA": "日本の Albania",
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ALGERIA": "日本の Algeria",
@@ -1097,6 +1098,11 @@
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT": "日本の Password Reset",
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1": "日本の You've requested a password reset for your account.",
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2": "日本の Click <a href='{{resetHref}}'>here</a> to reset your password."
+    },
+    "backupStatus": {
+      "LNG_BACKUP_STATUS_SUCCESS": "日本の Success",
+      "LNG_BACKUP_STATUS_FAILED": "日本の Failed",
+      "LNG_BACKUP_STATUS_PENDING": "日本の In Progress"
     }
   }
 }

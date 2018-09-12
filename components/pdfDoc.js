@@ -5,6 +5,7 @@ const PdfTable = require('voilab-pdf-table');
 const svg2png = require('svg2png');
 const streamUtils = require('./streamUtils');
 const Jimp = require('jimp');
+const _ = require('lodash');
 
 // define a default document configuration
 const defaultDocumentConfiguration = {
@@ -64,6 +65,7 @@ function createPdfDoc(options) {
     this.image(`${__dirname}/../resources/images/logo-black.png`, 50, 15, {height: 25});
     this.lineWidth(options.lineWidth);
     this.fontSize(options.fontSize);
+    this.font(`${__dirname}/../resources/fonts/NotoSansCJKjp-Regular.min.ttf`);
     addPageNumber(document);
   });
   // add first page
@@ -220,6 +222,7 @@ const createImageDoc = function (imageData, imageType, splitFactor, callback) {
               done();
             }
           }
+
           // write images to pdf
           writeImageToPage(function (error) {
             if (error) {
@@ -231,7 +234,7 @@ const createImageDoc = function (imageData, imageType, splitFactor, callback) {
         });
     } else {
       // fit the image to page (page dimensions - margins)
-      document.image(buffer, 50, 50, { fit: [imageSize.width, imageSize.height] });
+      document.image(buffer, 50, 50, {fit: [imageSize.width, imageSize.height]});
       // finalize document
       document.end();
     }
@@ -259,7 +262,7 @@ const addTitle = function (doc, title, fontSize) {
  * @param doc
  * @param questions
  */
-const createQuestionnaire = function (doc, questions, title) {
+const createQuestionnaire = function (doc, questions, withData, title) {
   // cache initial document margin
   const initialXMargin = doc.x;
 
@@ -276,14 +279,29 @@ const createQuestionnaire = function (doc, questions, title) {
       // answers type are written differently into the doc
       switch (item.answerType) {
         case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT':
-          doc.moveDown().text(`Answer: ${'_'.repeat(25)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
+          if (withData) {
+            doc.moveDown().text('Answer: ' + item.value, isNested ? initialXMargin + 60 : initialXMargin + 20);
+          } else {
+            doc.moveDown().text(`Answer: ${'_'.repeat(25)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
+          }
           break;
         default:
           // NOTE: only first nested level is handled for additional questions
           item.answers.forEach((answer) => {
             doc.moveDown().text(answer.label, isNested ? initialXMargin + 85 : initialXMargin + 45);
             // we need to reduce rectangle height to be on the same height as the text
-            doc.moveUp().rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3, 15, 15).stroke().moveDown();
+            if (withData && answer.selected) {
+              doc.moveUp()
+                .rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3, 15, 15)
+                .moveTo(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3)
+                .lineTo(isNested ? initialXMargin + 60 + 15 : initialXMargin + 20 + 15, doc.y - 3 + 15)
+                .moveTo(isNested ? initialXMargin + 60 + 15 : initialXMargin + 20 + 15, doc.y - 3)
+                .lineTo(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3 + 15)
+                .stroke()
+                .moveDown();
+            } else {
+              doc.moveUp().rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3, 15, 15).stroke().moveDown();
+            }
 
             // handle additional questions
             if (answer.additionalQuestions.length) {
@@ -299,7 +317,7 @@ const createQuestionnaire = function (doc, questions, title) {
 };
 
 /**
- * Display a person specific fields
+ * Display a model's fields
  * Do not display actual values, only field names
  * DisplayValues flag is also supported, if true it will display the actual field values
  * This flag is needed to create empty profile pages
@@ -308,9 +326,8 @@ const createQuestionnaire = function (doc, questions, title) {
  * @param person
  * @param displayValues
  * @param title
- * @param numberOfEmptyEntries
  */
-const createPersonProfile = function (doc, person, displayValues, title, numberOfEmptyEntries) {
+const displayModelDetails = function (doc, model, displayValues, title, numberOfEmptyEntries) {
   numberOfEmptyEntries = numberOfEmptyEntries || 2;
 
   // add page title
@@ -323,16 +340,16 @@ const createPersonProfile = function (doc, person, displayValues, title, numberO
   const initialXMargin = doc.x;
 
   // display each field on a row
-  Object.keys(person).forEach((fieldName) => {
-    // if property is array and has at least one element, create new paragraph
-    if (Array.isArray(person[fieldName]) && person[fieldName][0]) {
+  Object.keys(model).forEach((fieldName) => {
+    // if property is array and has at least one element, display it on next page
+    if (Array.isArray(model[fieldName]) && model[fieldName][0]) {
       // top property
       doc.text(fieldName, initialXMargin).moveDown();
 
       // if this should be an empty form, display 2 entries of it
       if (!displayValues) {
         // there will always be an element in the array, containing field definitions
-        let fields = Object.keys(person[fieldName][0]);
+        let fields = Object.keys(model[fieldName][0]);
 
         // list of empty entries to add
         let emptyEntries = new Array(numberOfEmptyEntries);
@@ -352,9 +369,22 @@ const createPersonProfile = function (doc, person, displayValues, title, numberO
         });
       } else {
         // display nested props
-        person[fieldName].forEach((item, index, arr) => {
+        model[fieldName].forEach((item, index, arr) => {
           Object.keys(item).forEach((prop) => {
-            doc.text(`${prop}: ${item[prop]}`, initialXMargin + 20).moveDown();
+            if (Array.isArray(item[prop])) {
+              item.prop.forEach((subItem) => {
+                doc.text(prop, initialXMargin + 20).moveDown();
+                doc.x += 20;
+                displayModelDetails(doc, subItem, true);
+                doc.x = initialXMargin + 20;
+              });
+            } else if (typeof(item[prop]) === 'object') {
+              doc.text(prop, initialXMargin + 20).moveDown();
+              doc.x += 20;
+              displayModelDetails(doc, item[prop], true);
+            } else {
+              doc.text(`${prop}: ${item[prop]}`, initialXMargin + 20).moveDown();
+            }
           });
 
           // space after each item in the list
@@ -367,12 +397,48 @@ const createPersonProfile = function (doc, person, displayValues, title, numberO
 
       // reset margin
       doc.x = initialXMargin;
+    } else if (typeof(model[fieldName]) === 'object' && Object.keys(model[fieldName]).length) {
+      doc.text(fieldName, initialXMargin).moveDown();
+      doc.x += 20;
+      displayModelDetails(doc, model[fieldName], true);
     } else {
-      doc.text(`${fieldName}: ${displayValues ? person[fieldName] : '_'.repeat(25)}`, initialXMargin).moveDown();
+      doc.text(`${fieldName}: ${displayValues ? model[fieldName] : '_'.repeat(25)}`, initialXMargin).moveDown();
     }
   });
 
   return doc;
+};
+
+/**
+ * Display a case/contact's relationships
+ * @param doc
+ * @param relationships
+ * @param title
+ */
+const displayPersonRelationships = function (doc, relationships, title) {
+  if (relationships && Array.isArray(relationships)) {
+    relationships.forEach((relationship, index) => {
+      doc.addPage();
+      displayModelDetails(doc, relationship, true, index === 0 ? title : null);
+    });
+  }
+};
+
+/**
+ * Display a case's lab results
+ * @param doc
+ * @param sections
+ * @param title
+ */
+const displayPersonSectionsWithQuestionnaire = function (doc, sections, title, questionnaireTitle) {
+  if (sections && Array.isArray(sections)) {
+    sections.forEach((section, index) => {
+      doc.addPage();
+      displayModelDetails(doc, _.omit(section, 'questionnaire'), true, index === 0 ? title : null);
+      doc.addPage();
+      createQuestionnaire(doc, section.questionnaire, true, questionnaireTitle);
+    });
+  }
 };
 
 /**
@@ -451,8 +517,10 @@ module.exports = {
   createPDFList: createPDFList,
   createImageDoc: createImageDoc,
   createPdfDoc: createPdfDoc,
-  createPersonProfile: createPersonProfile,
   createQuestionnaire: createQuestionnaire,
+  displayModelDetails: displayModelDetails,
+  displayPersonRelationships: displayPersonRelationships,
+  displayPersonSectionsWithQuestionnaire: displayPersonSectionsWithQuestionnaire,
   createTableInPDFDocument: createTableInPDFDocument,
   addTitle: addTitle
 };

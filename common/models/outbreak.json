@@ -687,6 +687,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "filteredCountEvents"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "filteredCountEvents"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "countIndependentTransmissionChains"
@@ -945,6 +957,30 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "contactDossier"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "caseDossier"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "contactDossier"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "caseDossier"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_case",
       "permission": "ALLOW",
       "property": "importImportableCasesFileUsingMap"
@@ -996,6 +1032,18 @@
       "principalId": "write_outbreak",
       "permission": "ALLOW",
       "property": "importImportableReferenceDataFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "findPeopleInCluster"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "findPeopleInCluster"
     }
   ],
   "methods": {
@@ -1925,7 +1973,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts a `noRelationships` flag on the first level of `where`."
         }
       ],
       "returns": [
@@ -1940,6 +1988,28 @@
       "http": {
         "verb": "get",
         "path": "/cases/filtered-count"
+      }
+    },
+    "prototype.filteredCountEvents": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts a `noRelationships` flag on the first level of `where`."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of events that pass the filter",
+          "required": true
+        }
+      ],
+      "description": "Counts the cases that pass a filter (which can now accept relations)",
+      "http": {
+        "verb": "get",
+        "path": "/events/filtered-count"
       }
     },
     "prototype.exportFilteredCases": {
@@ -3466,6 +3536,98 @@
         "path": "/cases/export-investigation-template"
       }
     },
+    "prototype.contactDossier": {
+      "accepts": [
+        {
+          "arg": "contacts",
+          "type": ["string"],
+          "description": "Array of contacts for which the dossiers will be generated"
+        },
+        {
+          "arg": "data",
+          "type": ["string"],
+          "description": "Array of fields to be anonymized"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export dossier for one or more contacts",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/dossier"
+      }
+    },
+    "prototype.caseDossier": {
+      "accepts": [
+        {
+          "arg": "cases",
+          "type": ["string"],
+          "description": "Array of cases for which the dossiers will be generated"
+        },
+        {
+          "arg": "data",
+          "type": ["string"],
+          "description": "Array of fields to be anonymized"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export dossier for one or more cases",
+      "http": {
+        "verb": "post",
+        "path": "/cases/dossier"
+      }
+    },
     "prototype.importImportableCasesFileUsingMap": {
       "accepts": [
         {
@@ -3899,6 +4061,34 @@
       "http": {
         "verb": "post",
         "path": "/reference-data/import-importable-file-using-map"
+      }
+    },
+    "prototype.findPeopleInCluster": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "ID of the cluster"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a (full) relationship filter on 'relationship' property of the filter."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "people",
+          "type": ["person"],
+          "description": "List of people in the cluster",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Find the people inside a cluster",
+      "http": {
+        "verb": "get",
+        "path": "/clusters/:fk/people"
       }
     }
   }
