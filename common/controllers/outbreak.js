@@ -5364,4 +5364,19 @@ module.exports = function (Outbreak) {
     });
     next();
   });
+
+  /**
+   * Allows count requests with advanced filters (like the ones we can use on GET requests)
+   * to be mode on outbreak/{id}/follow-ups.
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountFollowUps = function (filter, callback) {
+    this.__get__followUps(filter, function (err, res) {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
+    });
+  };
 };
