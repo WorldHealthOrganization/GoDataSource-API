@@ -425,6 +425,32 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Count filtered relations for a person
+   * @param personId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.helpers.filteredCountPersonRelationships = function (personId, filter, callback) {
+    const _filter = app.utils.remote.mergeFilters(
+      {
+        where: {
+          'persons.id': personId
+        }
+      },
+      filter
+    );
+
+    app.models.relationship
+      .find(_filter)
+      .then((result) => {
+        callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, _filter).length);
+      })
+      .catch((error) => {
+        callback(error);
+      });
+  };
+
+  /**
    * Attach filter people without relation behavior (before remote hook)
    * @param type
    * @param context
