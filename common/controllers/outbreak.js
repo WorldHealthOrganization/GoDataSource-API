@@ -70,6 +70,19 @@ module.exports = function (Outbreak) {
 
   /**
    * Allows count requests with advanced filters (like the ones we can use on GET requests)
+   * to be made on outbreak/{id}/contacts.
+   */
+  Outbreak.prototype.filteredCountContacts = function (filter, callback) {
+    this.__get__contacts(filter, function (err, res) {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
+    });
+  };
+
+  /**
+   * Allows count requests with advanced filters (like the ones we can use on GET requests)
    * to be mode on outbreak/{id}/events.
    * @param filter
    * @param callback
