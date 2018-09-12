@@ -124,9 +124,38 @@ function attachOnRemote(Model, remote) {
   /**
    * Attach the behavior on specified remote
    */
+  Model.beforeRemote(remote, function (context, model, next) {
+    // native pagination is incompatible with filter search by relation property
+    const skip = _.get(context, 'args.filter.skip');
+    const limit = _.get(context, 'args.filter.limit');
+    // store skip for custom pagination
+    if (skip !== undefined) {
+      // remove skip from native pagination
+      delete context.args.filter.skip;
+      _.set(context, 'args.filter._deep.skip', skip);
+    }
+    // store limit for custom pagination
+    if (limit !== undefined) {
+      // remove limit from native pagination
+      delete context.args.filter.limit;
+      _.set(context, 'args.filter._deep.limit', limit);
+    }
+    next();
+  });
+
+  /**
+   * Attach the behavior on specified remote
+   */
   Model.afterRemote(remote, function (context, model, next) {
     // overwrite the found results
     context.result = deepSearchByRelationProperty(context.result, _.get(context, 'args.filter', {}));
+    // custom pagination
+    const skip = _.get(context, 'args.filter._deep.skip', 0);
+    let limit = _.get(context, 'args.filter._deep.limit');
+    if (limit !== undefined) {
+      limit = limit + skip;
+    }
+    context.result = context.result.slice(skip, limit);
     next();
   });
 }
