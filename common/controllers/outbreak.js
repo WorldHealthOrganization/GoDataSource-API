@@ -4319,21 +4319,7 @@ module.exports = function (Outbreak) {
                 questions = Outbreak.helpers.parseTemplateQuestions(labResultsQuestionnaire, dictionary);
 
                 // Since we are presenting all the answers, mark the one that was selected, for each question
-                Object.keys(labResult.questionnaireAnswers).forEach((key) => {
-                  let question = _.find(questions, (question) => {
-                    return question.variable === key;
-                  });
-
-                  if (question.answers) {
-                    question.answers.forEach((answer) => {
-                      if (labResult.questionnaireAnswers[key].indexOf(answer.value) !== -1) {
-                        answer.selected = true;
-                      }
-                    });
-                  } else {
-                    question.value = labResult.questionnaireAnswers[key];
-                  }
-                });
+                Outbreak.helpers.prepareQuestionsForPrint(labResult.questionnaireAnswers, questions);
 
                 // Translate the remaining fields on the lab result model
                 labResult = app.utils.helpers.translateFieldLabels(app, labResult, app.models.labResult.modelName, dictionary);
@@ -4513,21 +4499,7 @@ module.exports = function (Outbreak) {
                 questions = Outbreak.helpers.parseTemplateQuestions(followUpQuestionnaire, dictionary);
 
                 // Since we are presenting all the answers, mark the one that was selected, for each question
-                Object.keys(followUp.questionnaireAnswers).forEach((key) => {
-                  let question = _.find(questions, (question) => {
-                    return question.variable === key;
-                  });
-
-                  if (question.answers) {
-                    question.answers.forEach((answer) => {
-                      if (followUp.questionnaireAnswers[key].indexOf(answer.value) !== -1) {
-                        answer.selected = true;
-                      }
-                    });
-                  } else {
-                    question.value = followUp.questionnaireAnswers[key];
-                  }
-                });
+                Outbreak.helpers.prepareQuestionsForPrint(followUp.questionnaireAnswers, questions);
 
                 // Translate the remaining fields on the follow up model
                 followUp = app.utils.helpers.translateFieldLabels(app, followUp, app.models.followUp.modelName, dictionary);
