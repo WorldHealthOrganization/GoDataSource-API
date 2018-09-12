@@ -28,6 +28,14 @@
       "required": true,
       "readOnly": true
     },
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "gender": {
+      "type": "string",
+      "required": true
+    },
     "riskLevel": {
       "type": "string"
     },

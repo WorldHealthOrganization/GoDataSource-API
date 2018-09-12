@@ -31,6 +31,14 @@ function authenticationErrorHandler(error, request, response, next) {
     ) {
       error = app.utils.apiError.getError('ACCESS_DENIED', {accessErrors: request.accessErrors.join(', ')}, 403);
     }
+
+    // check for authorization errors
+    if (
+      Array.isArray(request.authorizationErrors) &&
+      request.authorizationErrors.length
+    ) {
+      error = app.utils.apiError.getError('AUTHORIZATION_REQUIRED', {authorizationErrors: request.authorizationErrors.join(', ')});
+    }
   }
   next(error);
 }

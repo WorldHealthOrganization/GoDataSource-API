@@ -15,6 +15,11 @@
   "acls": [
     {
       "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "$client_application",
       "permissions": "ALLOW",
       "property": "getDatabaseSnapshot"
@@ -24,6 +29,30 @@
       "principalId": "$client_application",
       "permissions": "ALLOW",
       "property": "importDatabaseSnapshot"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "getAvailableOutbreaksForClient"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permissions": "ALLOW",
+      "property": "sync"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "getDatabaseSnapshotAsynchronous"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "getExportedDatabaseSnapshot"
     }
   ],
   "methods": {
@@ -32,7 +61,12 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Date filter"
+          "description": "This request accepts 'fromDate': date, 'outbreakId': 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}, 'collections': ['modelName'] on the first level in 'where'"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -48,12 +82,85 @@
           "http": {
             "target": "header"
           }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
         }
       ],
       "description": "Retrieve a compressed snapshot of the database.",
       "http": {
         "verb": "get",
         "path": "/database-snapshot"
+      }
+    },
+    "getDatabaseSnapshotAsynchronous": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "This request accepts 'fromDate': date, 'outbreakId': 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}, 'collections': ['modelName'] on the first level in 'where'"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "databaseExportLogId",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "description": "Export a compressed snapshot of the database in the tmp folder. The action is done asynchronous and the response contains a databaseExportLogId",
+      "http": {
+        "verb": "get",
+        "path": "/database-snapshot-asynchronous"
+      }
+    },
+    "getExportedDatabaseSnapshot": {
+      "accepts": [
+        {
+          "arg": "databaseExportLogId",
+          "type": "string"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Download an already exported snapshot of the database.",
+      "http": {
+        "verb": "get",
+        "path": "/exported-database-snapshot/:databaseExportLogId"
       }
     },
     "importDatabaseSnapshot": {
@@ -68,14 +175,18 @@
         {
           "arg": "snapshot",
           "type": "file"
+        },
+        {
+          "arg": "asynchronous",
+          "type": "string",
+          "description": "Flag to specify whether the import is sync or async. Default: sync (false)"
         }
       ],
       "returns": [
         {
-          "arg": "failedIds",
-          "description": "Failed records ids",
-          "type": "object",
-          "root": true,
+          "arg": "syncLogId",
+          "description": "Sync log entry ID for the sync that was triggered",
+          "type": "string",
           "required": true
         }
       ],
@@ -83,6 +194,62 @@
       "http": {
         "verb": "post",
         "path": "/import-database-snapshot"
+      }
+    },
+    "getAvailableOutbreaksForClient": {
+      "accepts": [
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "outbreakIDs",
+          "type": [
+            "string"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Retrieve the list of IDs for the client available outbreaks",
+      "http": {
+        "verb": "get",
+        "path": "/available-outbreaks"
+      }
+    },
+    "sync": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "upstreamServerURL",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "syncLogId",
+          "description": "Sync log entry ID for the sync that was triggered",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "description": "Synchronize the instance with upstream servers",
+      "http": {
+        "verb": "post",
+        "path": "/"
       }
     }
   }

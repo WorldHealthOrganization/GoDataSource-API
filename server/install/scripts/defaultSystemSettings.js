@@ -3,17 +3,7 @@
 const app = require('../../server');
 const SystemSettings = app.models.systemSettings;
 const defaultSettings = {
-  'upstreamServer': {
-    'name': '',
-    'description': '',
-    'url': '',
-    'credentials': {
-      'clientId': '',
-      'clientSecret': ''
-    },
-    'syncInterval': 0,
-    'syncOnEveryChange': false
-  },
+  'upstreamServers': [],
   'clientApplications': [],
   'dataBackup': {
     'modules': [

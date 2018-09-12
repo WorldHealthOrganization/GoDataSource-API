@@ -1,9 +1,78 @@
 'use strict';
 
+const app = require('../../server/server');
+
 module.exports = function (SystemSettings) {
 
   SystemSettings.imageTypes = {
     SVG: 'SVG',
     PNG: 'PNG'
   };
+
+  /**
+   * Validate client credentials.clientId uniqueness
+   * Validate upstream servers url uniqueness
+   */
+  SystemSettings.observe('before save', function (context, callback) {
+    // initialize validation error
+    let errorMessages = '', errorInfo = {};
+
+    // get clients
+    let clients = context.instance ? context.instance.clientApplications : context.data.clientApplications;
+
+    // check if clients are set
+    if (Array.isArray(clients)) {
+      // initialize map of client IDs in order to find duplicates
+      let clientIDs = {};
+      clients.forEach(function (client) {
+        let clientID = client.credentials.clientId;
+        if (!clientIDs[clientID]) {
+          // initialize counter for client ID
+          clientIDs[clientID] = 0;
+        }
+        clientIDs[clientID]++;
+      });
+
+      // get duplicate client IDs
+      let duplicateClientIDs = Object.keys(clientIDs).filter(clientID => clientIDs[clientID] > 1);
+      if (duplicateClientIDs.length) {
+        // duplicate client IDs were found; return validation error
+        errorMessages = `Client IDs must be unique. Duplicate client IDs: ${duplicateClientIDs.join(', ')}. `;
+        errorInfo.duplicateClientIDs = duplicateClientIDs;
+      }
+    }
+
+    // get upstream servers
+    let upstreamServers = context.instance ? context.instance.upstreamServers : context.data.upstreamServers;
+
+    // check if servers are set
+    if (Array.isArray(upstreamServers)) {
+      // initialize map of server URLs in order to find duplicates
+      let serverURLs = {};
+      upstreamServers.forEach(function (server) {
+        let serverURL = server.url;
+        if (!serverURLs[serverURL]) {
+          // initialize counter for server URL
+          serverURLs[serverURL] = 0;
+        }
+        serverURLs[serverURL]++;
+      });
+
+      // get duplicate server URLs
+      let duplicateServerURLs = Object.keys(serverURLs).filter(serverURL => serverURLs[serverURL] > 1);
+      if (duplicateServerURLs.length) {
+        // duplicate server URLs were found; return validation error
+        errorMessages += `Server URLs must be unique. Duplicate server URLs: ${duplicateServerURLs.join(', ')}.`;
+        errorInfo.duplicateServerURLs = duplicateServerURLs;
+      }
+    }
+
+    // check for validation error
+    if (errorMessages.length) {
+      errorInfo.errorMessages = errorMessages;
+      return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', errorInfo));
+    }
+
+    return callback();
+  });
 };

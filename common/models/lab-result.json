@@ -54,6 +54,10 @@
     },
     "questionnaireAnswers": {
       "type": "object"
+    },
+    "outbreakId": {
+      "type": "string",
+      "required": true
     }
   },
   "validations": [],

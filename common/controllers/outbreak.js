@@ -1601,6 +1601,15 @@ module.exports = function (Outbreak) {
   });
 
   /**
+   * Set outbreakId for created lab results
+   */
+  Outbreak.beforeRemote('prototype.__create__cases__labResults', function (context, modelInstance, next) {
+    // set outbreakId
+    context.args.data.outbreakId = context.instance.id;
+    next();
+  });
+
+  /**
    * Count the seen contacts
    * Note: The contacts are counted in total and per team. If a contact is seen by 2 teams it will be counted once in total and once per each team.
    * @param filter
@@ -3774,6 +3783,10 @@ module.exports = function (Outbreak) {
                       id: labResult.personId
                     });
                   }
+
+                  // set outbreakId
+                  labResult.outbreakId = self.id;
+
                   // sync the record
                   return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.labResult, labResult, options)
                     .then(function (result) {
