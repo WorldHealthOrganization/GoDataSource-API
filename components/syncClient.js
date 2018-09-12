@@ -236,7 +236,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
     // get path for saving the DB; will be saved in system tmp directory
     let tmpDir = tmp.dirSync();
     let tmpDirName = tmpDir.name;
-    let dbSnapshotFileName = `${tmpDirName}/db_snapshot_${this.upstreamServerName}_${Date.now()}.tar.gz`;
+    let dbSnapshotFileName = `${tmpDirName}/db_snapshot_${this.upstreamServerName}_${Date.now()}.zip`;
 
     return new Promise(function (resolve, reject) {
       that.sendRequest(requestOptions)
@@ -312,7 +312,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
     // get path for saving the DB; will be saved in system tmp directory
     let tmpDir = tmp.dirSync();
     let tmpDirName = tmpDir.name;
-    let dbSnapshotFileName = `${tmpDirName}/db_snapshot_${this.upstreamServerName}_${Date.now()}.tar.gz`;
+    let dbSnapshotFileName = `${tmpDirName}/db_snapshot_${this.upstreamServerName}_${Date.now()}.zip`;
 
     return new Promise(function (resolve, reject) {
       that.sendRequest(requestOptions)

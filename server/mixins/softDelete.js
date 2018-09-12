@@ -193,7 +193,7 @@ module.exports = function (Model) {
           };
 
           // update the deletedAt property only if the action is not a sync or the property is missing from the instance
-          if(!hasOptions || !options._sync || !instance[deletedAt]) {
+          if (!hasOptions || !options._sync || !instance[deletedAt]) {
             props[deletedAt] = new Date();
           }
 
@@ -251,7 +251,7 @@ module.exports = function (Model) {
     };
 
     // update the deletedAt property only if the action is not a sync or the property is missing from the instance
-    if(!hasOptions || !options._sync || !this[deletedAt]) {
+    if (!hasOptions || !options._sync || !this[deletedAt]) {
       props[deletedAt] = new Date();
     }
 

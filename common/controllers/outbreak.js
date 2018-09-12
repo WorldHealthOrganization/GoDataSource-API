@@ -3770,6 +3770,10 @@ module.exports = function (Outbreak) {
                       id: labResult.personId
                     });
                   }
+
+                  // set outbreakId
+                  labResult.outbreakId = self.id;
+
                   // sync the record
                   return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.labResult, labResult, options)
                     .then(function (result) {

@@ -250,6 +250,7 @@ module.exports = function (Sync) {
 
           // remove temporary uploaded file
           fs.unlink(filePath, () => {
+            app.logger.debug(`Sync ${syncLogEntry.id}: Removed temporary files at ${filePath}`);
           });
 
           // The sync doesn't stop at an error but the entire action will return an error for failed collection/collection record

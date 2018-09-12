@@ -15,7 +15,7 @@ module.exports = function (app) {
       // 1. using accessToken
       // 2. using Authorization header
       // build context depending on the authentication type
-      if (context.req && context.req.accessToken) {
+      if (context.req && context.req.accessToken && context.req.accessToken.userId) {
         // access token authentication
         let accessToken = context.req.accessToken;
 

@@ -5,6 +5,7 @@ const formidable = require('formidable');
 const app = require('../../server/server');
 const dbSync = require('../../components/dbSync');
 const _ = require('lodash');
+const moment = require('moment');
 
 module.exports = function (Sync) {
   /**
@@ -472,7 +473,9 @@ module.exports = function (Sync) {
               app.logger.debug(`Sync ${syncLogEntry.id}: No successful sync was found for the upstream server with URL '${upstreamServerEntry.url}'. Syncing all data from the DB.`);
             } else {
               // get date from which we will sync the data
-              syncLogEntry.informationStartDate = lastSyncLogEntry.actionStartDate;
+              // in order to prevent data loss from the moment where the sync was started to the moment when the actionStartDate was set, get data from 1 minute earlier
+              let syncDate = moment(lastSyncLogEntry.actionStartDate).subtract(1, 'minutes');
+              syncLogEntry.informationStartDate = syncDate;
               app.logger.debug(`Sync ${syncLogEntry.id}: Latest successful sync with the upstream server (${upstreamServerEntry.url}) was done on '${new Date(syncLogEntry.informationStartDate).toISOString()}'. Syncing data from that date onwards`);
             }
 
@@ -551,6 +554,7 @@ module.exports = function (Sync) {
               .save(options)
               .then(function () {
                 // nothing to do; sync log entry was saved
+                app.logger.debug(`Sync ${syncLogEntry.id}: Updated sync log entry status.`);
               })
               .catch(function (err) {
                 app.logger.debug(`Sync ${syncLogEntry.id}: Error updating sync log entry status. ${err}`);
@@ -574,6 +578,7 @@ module.exports = function (Sync) {
             .save(options)
             .then(function () {
               // nothing to do; sync log entry was saved
+              app.logger.debug(`Sync ${syncLogEntry.id}: Updated sync log entry status.`);
             })
             .catch(function (err) {
               app.logger.debug(`Sync ${syncLogEntry.id}: Error updating sync log entry status. ${err}`);
