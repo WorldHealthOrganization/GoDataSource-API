@@ -96,7 +96,7 @@ module.exports = function (app) {
 
                 return next();
               })
-              .catch(next)
+              .catch(next);
           }
         }
       }

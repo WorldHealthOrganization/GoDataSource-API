@@ -115,7 +115,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
           resolve(Array.isArray(body.outbreakIDs) ? body.outbreakIDs : []);
         }
       });
-    })
+    });
   };
 
   /**
@@ -157,7 +157,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
           }
         }
       });
-    })
+    });
   };
 
   /**
@@ -185,7 +185,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
           resolve(body);
         }
       });
-    })
+    });
   };
 
   /**
@@ -213,7 +213,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
           resolve(body);
         }
       });
-    })
+    });
   };
 
   /**
@@ -292,7 +292,7 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
           resolve(body.databaseExportLogId);
         }
       });
-    })
+    });
   };
 
   /**

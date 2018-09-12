@@ -141,7 +141,6 @@ module.exports = function (app) {
   // it should not be used for general purpose
   if (Role.hasOwnProperty('clientApplicationPermission')) {
     Role.registerResolver(Role.clientApplicationPermission, function (permission, context, done) {
-      let buildError = app.utils.apiError.getError;
       let reqHeaders = context.remotingContext.req.headers;
       // client information and Authorization header information was already retrieved in when creating authentication context
       let clientInformation = _.get(context, 'remotingContext.req.authData.client', null);
@@ -150,12 +149,12 @@ module.exports = function (app) {
 
       // check authorization header and client credentials
       if (!reqHeaders.authorization) {
-        app.logger.debug(`No Authorization header found`);
+        app.logger.debug('No Authorization header found');
         return done(null, false);
       }
       let parts = reqHeaders.authorization.split(' ');
       if (parts.length !== 2) {
-        app.logger.debug(`Authorization header format is 'Authorization: Basic [token]'`);
+        app.logger.debug('Authorization header format is "Authorization: Basic [token]"');
         return done(null, false);
       }
       // check the used credentials against the ones found in system settings

@@ -263,7 +263,7 @@ module.exports = function (Sync) {
           let collectionsWithFailedRecords = Object.keys(failedIds);
           if (collectionsWithFailedRecords.length) {
             err = err || '';
-            err += `Failed records: `;
+            err += 'Failed records: ';
             collectionsWithFailedRecords.forEach(function (collectionName) {
               err += `Collection ${collectionName}. Records: ${failedIds[collectionName].join(', ')}. `;
             });
