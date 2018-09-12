@@ -265,11 +265,9 @@ const convertPropsToDate = function (obj) {
       if (typeof obj[prop] == 'object' && obj[prop] !== null) {
         convertPropsToDate(obj[prop]);
       } else {
-        // initialize date regexp
-        let dateRegexp = /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}\.\d{3}Z*)?$/;
 
         // we're only looking for strings properties that have a date format to convert
-        if (typeof obj[prop] === 'string' && dateRegexp.test(obj[prop])) {
+        if (typeof obj[prop] === 'string' && isValidDate(obj[prop])) {
           // try to convert the string value to date, if valid, replace the old value
           let convertedDate = moment(obj[prop]);
           if (convertedDate.isValid()) {
@@ -857,7 +855,7 @@ const formatUndefinedValues = function (model) {
       model[key].forEach((child) => {
         formatUndefinedValues(child);
       });
-    } else if (typeof(model[key]) === 'object') {
+    } else if (typeof(model[key]) === 'object' && model[key] !== null) {
       formatUndefinedValues(model[key]);
     } else if (model[key] === undefined) {
       _.set(model, key, ' ');
@@ -1013,6 +1011,12 @@ const getBuildInformation = function () {
   };
 };
 
+const isValidDate = function (date) {
+  const dateRegexp = /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}\.\d{3}Z*)?$/;
+
+  return dateRegexp.test(date);
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1021,6 +1025,7 @@ module.exports = {
   getAsciiString: getAsciiString,
   getChunksForInterval: getChunksForInterval,
   convertPropsToDate: convertPropsToDate,
+  isValidDate: isValidDate,
   extractImportableFields: extractImportableFields,
   exportListFile: exportListFile,
   getReferencedValue: getReferencedValue,

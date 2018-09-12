@@ -278,14 +278,23 @@ const createQuestionnaire = function (doc, questions, withData, title) {
 
       // answers type are written differently into the doc
       switch (item.answerType) {
-        case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT':
+        default:
           if (withData) {
-            doc.moveDown().text('Answer: ' + item.value, isNested ? initialXMargin + 60 : initialXMargin + 20);
+            if (item.value) {
+              doc.moveDown().text('Answer: ' + item.value, isNested ? initialXMargin + 60 : initialXMargin + 20);
+            } else {
+              // In case the user did not answer this questions, we prevent printing 'undefined'
+              doc.moveDown().text('Answer: ', isNested ? initialXMargin + 60 : initialXMargin + 20);
+            }
           } else {
             doc.moveDown().text(`Answer: ${'_'.repeat(25)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
           }
           break;
-        default:
+        // File uploads are not handled when printing a pdf
+        case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD':
+          break;
+        case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER':
+        case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS':
           // NOTE: only first nested level is handled for additional questions
           item.answers.forEach((answer) => {
             doc.moveDown().text(answer.label, isNested ? initialXMargin + 85 : initialXMargin + 45);
