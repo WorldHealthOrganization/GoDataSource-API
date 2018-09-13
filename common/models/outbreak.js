@@ -29,11 +29,15 @@ module.exports = function (Outbreak) {
     caseInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CASE_INVESTIGATION_TEMPLATE',
     contactFollowUpTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_FOLLOWUP_TEMPLATE',
     labResultsTemplate: 'LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE',
-    caseIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK'
+    caseIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK',
+    'arcGisServers': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVERS',
+    'arcGisServers[].name': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_NAME',
+    'arcGisServers[].url': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_URL'
   });
 
   Outbreak.referenceDataFieldsToCategoryMap = {
-    disease: 'LNG_REFERENCE_DATA_CATEGORY_DISEASE'
+    disease: 'LNG_REFERENCE_DATA_CATEGORY_DISEASE',
+    'countries[]': 'LNG_REFERENCE_DATA_CATEGORY_COUNTRY'
   };
 
   Outbreak.referenceDataFields = Object.keys(Outbreak.referenceDataFieldsToCategoryMap);
