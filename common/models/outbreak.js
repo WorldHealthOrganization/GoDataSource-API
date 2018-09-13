@@ -1074,4 +1074,34 @@ module.exports = function (Outbreak) {
       }
     });
   };
+
+  /**
+   * Find the list of people or count the people in a cluster
+   * @param clusterId
+   * @param filter
+   * @param countOnly
+   * @param callback
+   */
+  Outbreak.prototype.findOrCountPeopleInCluster = function (clusterId, filter, countOnly, callback) {
+    // find the requested cluster
+    app.models.cluster
+      .findOne({
+        where: {
+          id: clusterId,
+          outbreakId: this.id
+        }
+      })
+      .then(function (cluster) {
+        // if the cluster was not found
+        if (!cluster) {
+          // stop with error
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.cluster.modelName,
+            id: clusterId
+          }));
+        }
+        // otherwise find people in that cluster
+        cluster.findOrCountPeople(filter, countOnly, callback);
+      });
+  };
 };
