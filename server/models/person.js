@@ -158,12 +158,12 @@ module.exports = function (Person) {
           if (!mapsApi.isEnabled) {
             return done();
           } else {
-            mapsApi.getGeoLocation(str, (err, location) => {
+            mapsApi.getGeoLocation(str, function (err, location) {
               if (err) {
                 // error is logged inside the fn
                 return done();
               }
-              return done(null, { lat: location.lat, lng: location.lng });
+              return done(null, location);
             });
           }
         };
@@ -183,7 +183,7 @@ module.exports = function (Person) {
               return item;
             }
 
-            locations[idx] = locations[idx] || { lat: 0, lng: 0 };
+            locations[idx] = locations[idx] || null;
             item.geoLocation = locations[idx];
             return item;
           });
@@ -208,7 +208,7 @@ module.exports = function (Person) {
       // set address items that have geo location as undefined
       // to not be taken into consideration
       // i can't filter those out, because i'm losing the index of the address
-      let filteredAddresses = instance.addresses.map((addr) => addr.geoLocation ? null : addr);
+      let filteredAddresses = instance.addresses.map((addr) => addr.hasOwnProperty('geoLocation') ? null : addr);
 
       // if all the addresses have geo location generated just stop
       if (filteredAddresses.every((addr) => addr === null)) {

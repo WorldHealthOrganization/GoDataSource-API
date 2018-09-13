@@ -3,6 +3,7 @@
 // requires
 const app = require('../server/server');
 const googleMapsService = require('@google/maps');
+const _ = require('lodash');
 
 // external API client used to retrieve the geo locations
 let client = null;
@@ -26,7 +27,7 @@ const getGeoLocation = function (address, callback) {
       return callback(err);
     }
 
-    return callback(null, response.json.results.shift().geometry.location);
+    return callback(null, _.get(response.json.results.shift(), 'geometry.location'));
   });
 };
 
