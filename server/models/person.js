@@ -173,7 +173,7 @@ module.exports = function (Person) {
           let addressCopy = instance.addresses.map((item, idx) => {
             item = item.toObject();
 
-            // this should be left unchanged
+            // hack to know that it should be left unchanged
             // geo location was filled manually
             if (locations[idx] === true) {
               return item;
@@ -192,21 +192,6 @@ module.exports = function (Person) {
   };
 
   /**
-   * Used to cache the old addresses of an instance
-   * To know if the fields of interest required to generate geo location has been changed
-   */
-  Person.observe('before save', function (ctx, next) {
-    if (ctx.isNewInstance) {
-      return next();
-    }
-
-    // cache current instance addresses on ctx, needed on after save
-    ctx.options.oldAddresses = ctx.currentInstance.addresses;
-
-    return next();
-  });
-
-  /**
    * If address is present in the request, make sure we're getting its geo location from external API
    * We only do this if googleApi.apiKey is present in the config
    */
@@ -214,51 +199,23 @@ module.exports = function (Person) {
     // cache instance reference, used in many places below
     let instance = ctx.instance;
 
-    if (ctx.isNewInstance) {
-      // defensive checks
-      if (Array.isArray(instance.addresses)) {
-        // set address items that have geo location as undefined
-        // to not be taken into consideration
-        // i can't filter those out, because i'm losing the index of the address
-        let filteredAddresses = instance.addresses.map((addr) => addr.geoLocation ? null : addr);
+    // defensive checks
+    if (Array.isArray(instance.addresses)) {
+      // set address items that have geo location as undefined
+      // to not be taken into consideration
+      // i can't filter those out, because i'm losing the index of the address
+      let filteredAddresses = instance.addresses.map((addr) => addr.geoLocation ? null : addr);
 
-        // update geo locations, do not check anything
-        updateGeoLocations(instance.id, filteredAddresses);
+      // if all the addresses have geo location generated just stop
+      if (filteredAddresses.every((addr) => addr === null)) {
+        return next();
       }
 
-      // do not wait for the above operation to stop
-      return next();
+      // update geo locations, do not check anything
+      updateGeoLocations(instance.id, filteredAddresses);
     }
 
-    // check if the properties for interest has been modified
-    let propsOfInterest = ['addressLine1', 'addressLine2', 'city', 'country', 'postalCode', 'geoLocation'];
-    let oldAddresses = ctx.options.oldAddresses;
-    if (oldAddresses) {
-      if (!oldAddresses.length) {
-        updateGeoLocations(instance.id, instance.addresses.map((addr) => addr.geoLocation ? addr : null));
-      } else {
-        // find the elements that match all the desired properties
-        // if it is a match, do not generate geo location
-        let filteredAddresses = instance.addresses.map((addr) => {
-          let matchedAddresses = oldAddresses
-            .filter((oldAddr) => propsOfInterest.every((prop) => {
-              if (prop === 'geoLocation') {
-                return oldAddr.geoLocation[0] === addr.geoLocation.lat &&
-                  oldAddr.geoLocation[1] === addr.geoLocation.lng;
-              }
-              return oldAddr[prop] === addr[prop];
-            }));
-
-          if (matchedAddresses.length) {
-            return null;
-          }
-
-          return addr;
-        });
-        updateGeoLocations(instance.id, filteredAddresses);
-      }
-    }
-
+    // do not wait for the above operation to stop
     return next();
   });
 };

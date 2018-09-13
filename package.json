@@ -17,6 +17,7 @@
     "restore-backup": "node ./server/scripts/restoreBackup.js"
   },
   "dependencies": {
+    "@google/maps": "^0.5.5",
     "adm-zip": "^0.4.11",
     "alphanum-sort": "^1.0.2",
     "async": "^2.6.0",
