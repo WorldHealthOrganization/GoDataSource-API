@@ -39,6 +39,58 @@ module.exports = function (HelpCategory) {
       .catch(callback);
   };
 
+  HelpCategory.searchHelpCategory = function (text, filter, options, callback) {
+    app.models.languageToken.find({
+      where: {
+        $text: {
+          search: text
+        }
+      }
+    })
+      .then((result) => {
+        let helpCategoryIds = [];
+        result.forEach((languageToken) => {
+          helpCategoryIds.push(languageToken.token);
+        });
+        const _filter = app.utils.remote.mergeFilters({
+          where: {
+            _id: {
+              inq: helpCategoryIds
+            }
+          }
+        }, filter || {});
+        app.models.helpCategory.find(_filter)
+          .then((result) => callback(null, result))
+          .catch(callback);
+      });
+  };
+
+  HelpCategory.searchHelpItem = function (text, filter, options, callback) {
+    app.models.languageToken.find({
+      where: {
+        $text: {
+          search: text
+        }
+      }
+    })
+      .then((result) => {
+        let helpItemIds = [];
+        result.forEach((languageToken) => {
+          helpItemIds.push(languageToken.token);
+        });
+        const _filter = app.utils.remote.mergeFilters({
+          where: {
+            _id: {
+              inq: helpItemIds
+            }
+          }
+        }, filter || {});
+        app.models.helpItem.find(_filter)
+          .then((result) => callback(null, result))
+          .catch(callback);
+      });
+  };
+
   /**
    * Before Create Help Category Hook
    */
