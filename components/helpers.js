@@ -878,10 +878,8 @@ const formatUndefinedValues = function (model) {
  */
 const translateDataSetReferenceDataValues = function (dataSet, Model, dictionary) {
   if (Model.referenceDataFields) {
-    let dataSetIsObject = false;
     if (!Array.isArray(dataSet)) {
       dataSet = [dataSet];
-      dataSetIsObject = true;
     }
 
     dataSet.forEach((model) => {
@@ -896,10 +894,6 @@ const translateDataSetReferenceDataValues = function (dataSet, Model, dictionary
         }
       });
     });
-
-    if (dataSetIsObject) {
-      dataSet = dataSet[0];
-    }
   }
 };
 
