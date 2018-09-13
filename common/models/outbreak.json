@@ -1083,6 +1083,12 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "filteredCountFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "findTransmissionChainsForFilteredPeople"
     }
   ],
   "methods": {
@@ -4263,6 +4269,69 @@
       "http": {
         "verb": "get",
         "path": "/cases/:nk/events/filteredCount"
+      }
+    },
+    "prototype.findTransmissionChainsForFilteredPeople": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'active' boolean on the first level in 'where' and a (full) person filter on 'person' property of the filter"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "chains",
+          "type": {
+            "nodes": {
+              "type": {
+                "<personId>": {
+                  "type": "person"
+                }
+              }
+            },
+            "edges": {
+              "type": {
+                "<relationshipId>": {
+                  "type": "relationship"
+                }
+              }
+            },
+            "transmissionChains": {
+              "type": {
+                "chains": [
+                  {
+                    "type": {
+                      "chain": [
+                        "string"
+                      ],
+                      "period": {
+                        "type": {
+                          "startDate": "date",
+                          "endDate": "date",
+                          "duration": {
+                            "type": "number",
+                            "description": "Transmission chain duration in days"
+                          }
+                        }
+                      },
+                      "active": "boolean"
+                    }
+                  }
+                ],
+                "length": "number"
+              }
+            }
+          },
+          "description": "Transmission chains that include filtered people",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Transmission chains that include filtered people",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/transmission-chains-including-people"
       }
     }
   }

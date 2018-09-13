@@ -5432,4 +5432,12 @@ module.exports = function (Outbreak) {
       callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
     });
   };
+
+  Outbreak.prototype.findTransmissionChainsForFilteredPeople = function (filter, callback) {
+    app.models.relationship.findTransmissionChainsForFilteredPeople(this.id, this.periodOfFollowup, filter)
+      .then(function (chains) {
+        callback(null, chains);
+      })
+      .catch(callback);
+  }
 };

@@ -440,4 +440,63 @@ module.exports = function (Relationship) {
       callback();
     }
   });
+
+
+  Relationship.findRelationshipChainsForPeopleIds = function (outbreakId, peopleIds, foundRelationshipIds = []) {
+    let relationshipMap = {};
+    return Relationship
+      .find({
+        where: {
+          'persons.id': {
+            inq: peopleIds
+          },
+          outbreakId: outbreakId,
+          id: {
+            nin: foundRelationshipIds
+          }
+        }
+      })
+      .then(function (relationships) {
+        let _peopleIds = [...peopleIds];
+        if (relationships.length) {
+          relationships.forEach(function (relationship) {
+            relationshipMap[relationship.id] = true;
+            if (Array.isArray(relationship.persons)) {
+              relationship.persons.forEach(function (person) {
+                _peopleIds.push(person.id);
+              });
+            }
+          });
+          return Relationship
+            .findRelationshipChainsForPeopleIds(outbreakId, _peopleIds, Object.keys(relationshipMap))
+            .then(function (relMap) {
+              Object.keys(relMap).forEach(function (relationshipId) {
+                relationshipMap[relationshipId] = true;
+              });
+              return relationshipMap;
+            });
+        } else {
+          return relationshipMap;
+        }
+      });
+  };
+
+  Relationship.findTransmissionChainsForFilteredPeople = function (outbreakId, followUpPeriod, filter) {
+    return app.models.person
+      .find(filter)
+      .then(function (people) {
+        const peopleIds = people.map(person => person.id);
+        return Relationship.findRelationshipChainsForPeopleIds(outbreakId, peopleIds);
+      })
+      .then(function (relationshipMap) {
+        return new Promise(function (resolve, reject) {
+          Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, {where: {id: {inq: Object.keys(relationshipMap)}}}, false, function (error, chains) {
+            if (error) {
+              return reject(error);
+            }
+            return resolve(chains);
+          });
+        });
+      });
+  };
 };
