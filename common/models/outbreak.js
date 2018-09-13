@@ -41,7 +41,7 @@ module.exports = function (Outbreak) {
   // initialize model helpers
   Outbreak.helpers = {};
   // set a higher limit for event listeners to avoid warnings (we have quite a few listeners)
-  Outbreak.setMaxListeners(50);
+  Outbreak.setMaxListeners(60);
 
   // The permissions that influence an user's ability to see a person's data
   Outbreak.personReadPermissions = [
