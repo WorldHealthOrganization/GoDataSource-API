@@ -170,6 +170,10 @@ module.exports = function (Person) {
       }),
       (err, locations) => {
         Person.findById(personId, (err, instance) => {
+          if (!instance) {
+            return;
+          }
+
           let addressCopy = instance.addresses.map((item, idx) => {
             item = item.toObject();
 

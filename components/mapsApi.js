@@ -22,11 +22,11 @@ const getGeoLocation = function (address, callback) {
     address: address
   }, (err, response) => {
     if (err) {
-      app.logger.error(`Failed to retrieve geo location for address: ${address}`);
+      app.logger.error(`Failed to retrieve geo location for address: ${address}. API response: ${err}`);
       return callback(err);
     }
 
-    return callback(response.json.results.shift().geometry.location);
+    return callback(null, response.json.results.shift().geometry.location);
   });
 };
 
