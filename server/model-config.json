@@ -243,5 +243,9 @@
   "upstreamServerURL": {
     "dataSource": null,
     "public": false
+  },
+  "arcGisServer": {
+    "dataSource": null,
+    "public": false
   }
 }

@@ -106,7 +106,10 @@
       "required": true,
       "pattern": "^(?:(?!š).)*(?:9*0+|9+0*)[^š]*$",
       "default": "9999999999"
-    }
+    },
+    "arcGisServers": [
+      "arcGisServer"
+    ]
   },
   "indexes": {
     "name_index": {
@@ -3598,12 +3601,16 @@
       "accepts": [
         {
           "arg": "contacts",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "Array of contacts for which the dossiers will be generated"
         },
         {
           "arg": "data",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "Array of fields to be anonymized"
         },
         {
@@ -3644,12 +3651,16 @@
       "accepts": [
         {
           "arg": "cases",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "Array of cases for which the dossiers will be generated"
         },
         {
           "arg": "data",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "Array of fields to be anonymized"
         },
         {
@@ -4137,7 +4148,9 @@
       "returns": [
         {
           "arg": "people",
-          "type": ["person"],
+          "type": [
+            "person"
+          ],
           "description": "List of people in the cluster",
           "required": true,
           "root": true
