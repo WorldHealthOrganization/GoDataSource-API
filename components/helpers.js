@@ -287,13 +287,16 @@ const convertPropsToDate = function (obj) {
 const extractImportableFields = function (Model, data) {
   // store importable properties as part of a new object
   const importableFields = {};
-  // go through all importable top level properties
-  Model._importableTopLevelProperties.forEach(function (importableProperty) {
-    // add the importable data (if it exists)
-    if (data[importableProperty] !== undefined) {
-      importableFields[importableProperty] = data[importableProperty];
-    }
-  });
+  // nothing to do if there is no data
+  if (data) {
+    // go through all importable top level properties
+    Model._importableTopLevelProperties.forEach(function (importableProperty) {
+      // add the importable data (if it exists)
+      if (data[importableProperty] !== undefined) {
+        importableFields[importableProperty] = data[importableProperty];
+      }
+    });
+  }
   return importableFields;
 };
 

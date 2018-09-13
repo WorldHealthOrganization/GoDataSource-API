@@ -4049,7 +4049,7 @@ module.exports = function (Outbreak) {
                         .catch(function (error) {
                           // failed to create relationship, remove the contact if it was created during sync
                           if (syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED) {
-                            contactRecord.destroy();
+                            contactRecord.destroy(options);
                           }
                           reject(error);
                         });
@@ -4092,6 +4092,8 @@ module.exports = function (Outbreak) {
             callback(null, results);
           });
         } catch (error) {
+          // log error
+          options.remotingContext.req.logger.error(error);
           // handle parse error
           callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
             contentType: 'JSON',

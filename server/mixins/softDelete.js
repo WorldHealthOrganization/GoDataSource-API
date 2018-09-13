@@ -237,6 +237,8 @@ module.exports = function (Model) {
     if (cb === undefined && typeof options === 'function') {
       cb = options;
       hasOptions = false;
+    } else if (!options) {
+      hasOptions = false;
     }
 
     let nextStep = next.bind({callback: cb});
