@@ -23,6 +23,11 @@
         }
       ]
     },
+    "sync": {
+      "type": {
+        "triggerBackupBeforeSync": "boolean"
+      }
+    },
     "dataBackup": {
       "type": "dataBackup"
     },

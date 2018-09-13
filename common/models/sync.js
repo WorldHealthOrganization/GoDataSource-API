@@ -8,10 +8,16 @@ const fs = require('fs');
 const dbSync = require('../../components/dbSync');
 const AdmZip = require('adm-zip');
 const SyncClient = require('../../components/syncClient');
-const asyncActionsSettings = require('../../server/config.json').asyncActionsSettings;
+const asyncActionsSettings = require('../../server/config.json').sync.asyncActionsSettings;
 
 module.exports = function (Sync) {
   Sync.hasController = true;
+
+  // We won't allow a client to sync to the same server twice at the same time
+  // Keeping in progress sync maps for upstream servers
+  Sync.inProgress = {
+    servers: {}
+  };
 
   /**
    * Helper function used to export the database's collections

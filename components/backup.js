@@ -57,8 +57,9 @@ const createBackup = function (modules, location, done) {
       });
     });
   } catch (pathAccessError) {
-    app.logger.error(`Backup location: ${location} is not OK. ${pathAccessError}`);
-    return done(pathAccessError);
+    let pathErr = `Backup location: '${location}' is not OK. ${pathAccessError}`;
+    app.logger.error(pathErr);
+    return done(pathErr);
   }
 };
 

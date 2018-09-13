@@ -29,6 +29,9 @@
         "LNG_BACKUP_STATUS_PENDING"
       ],
       "description": "Backup status"
+    },
+    "failReason": {
+      "type": "string"
     }
   },
   "validations": [],

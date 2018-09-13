@@ -5,6 +5,9 @@ const SystemSettings = app.models.systemSettings;
 const defaultSettings = {
   'upstreamServers': [],
   'clientApplications': [],
+  'sync': {
+    'triggerBackupBeforeSync': false
+  },
   'dataBackup': {
     'modules': [
       'System Configuration',
@@ -30,7 +33,6 @@ const defaultSettings = {
   }
 };
 
-
 /**
  * Run initiation
  * @param callback
@@ -43,7 +45,7 @@ function run(callback) {
   SystemSettings
     .findOne()
     .then(function (systemSettings) {
-      if(systemSettings){
+      if (systemSettings) {
         return systemSettings.updateAttributes(defaultSettings);
       } else {
         return SystemSettings.create(defaultSettings);

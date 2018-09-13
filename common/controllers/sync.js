@@ -403,16 +403,22 @@ module.exports = function (Sync) {
     // initialize variable for caching the syncLogEntry
     let syncLogEntry;
 
+    // initialize variable for caching the system settings
+    let systemSettings;
+
     // check if the received upstream server URL matches one from the configured upstream servers
     app.models.systemSettings
       .findOne()
-      .then(function (systemSettings) {
+      .then(function (record) {
         // initialize error
-        if (!systemSettings) {
+        if (!record) {
           throw app.utils.apiError.getError('INTERNAL_ERROR', {
             error: 'System Settings were not found'
           });
         }
+
+        // cache system settings
+        systemSettings = record;
 
         // find the upstream server entry that matches the received url
         if (!Array.isArray(systemSettings.upstreamServers) || !(upstreamServerEntry = systemSettings.upstreamServers.find(serverEntry => serverEntry.url === data.upstreamServerURL))) {
@@ -429,6 +435,14 @@ module.exports = function (Sync) {
           });
         }
 
+        // check if there is a sync in progress to the same server
+        if (Sync.inProgress.servers[upstreamServerEntry.url]) {
+          throw app.utils.apiError.getError('UPSTREAM_SERVER_SYNC_IN_PROGRESS', {
+            upstreamServerName: upstreamServerEntry.name,
+            upstreamServerURL: upstreamServerEntry.url
+          });
+        }
+
         // start sync with upstream server
         // create syncLog entry in the DB
         return app.models.syncLog.create({
@@ -440,6 +454,9 @@ module.exports = function (Sync) {
       .then(function (syncLog) {
         // cache sync log entry as it will need to be updated with different statuses
         syncLogEntry = syncLog;
+
+        // update Sync.inProgress map; Sync action is in progress
+        Sync.inProgress.servers[upstreamServerEntry.url] = true;
 
         // send response with the syncLogEntry ID
         // the sync action continues after the response is sent with the syncLogEntry being updated when the sync fails/succeeds
@@ -486,10 +503,26 @@ module.exports = function (Sync) {
       .then(function () {
         // gathered all required data for starting the sync
         // Sync steps:
-        // 1: export local DB
-        // 2: send DB to be synced on the upstream server
-        // 3: get DB from the upstream server
-        // 4. import the received DB
+        // 1: backup if needed
+        // 2: export local DB
+        // 3: send DB to be synced on the upstream server
+        // 4: get DB from the upstream server
+        // 5. import the received DB
+
+        // 1: backup if needed
+        if (_.get(systemSettings, 'sync.triggerBackupBeforeSync')) {
+          let backupSettings = systemSettings.dataBackup;
+          app.logger.debug(`Sync ${syncLogEntry.id}: Backup before sync is enabled. Starting backup process`);
+          return app.models.backup.createBackup(backupSettings.location, backupSettings.modules, `Sync ${syncLogEntry.id}`);
+        } else {
+          app.logger.debug(`Sync ${syncLogEntry.id}: Backup before sync is disabled. Proceeding with sync process`);
+          return;
+        }
+      })
+      .then(function (backupEntry) {
+        if(backupEntry) {
+          app.logger.debug(`Sync ${syncLogEntry.id}: Backup process completed successfully. Backup ID: ${backupEntry.id}`);
+        }
 
         // export local DB
         // initialize filter and update it if needed
@@ -507,7 +540,7 @@ module.exports = function (Sync) {
           };
         }
 
-        // 1: export local DB
+        // 2: export local DB
         // export the sync collections
         let collections = dbSync.syncCollections;
 
@@ -528,15 +561,15 @@ module.exports = function (Sync) {
         });
       })
       .then(function (exportedDBFileName) {
-        // 2: send DB to be synced on the upstream server
+        // 3: send DB to be synced on the upstream server
         return Sync.sendDBSnapshotForImport(upstreamServerEntry, exportedDBFileName, true, syncLogEntry);
       })
       .then(function () {
-        // 3: get DB from the upstream server
+        // 4: get DB from the upstream server
         return Sync.getDBSnapshotFromUpstreamServer(upstreamServerEntry, true, syncLogEntry);
       })
       .then(function (upstreamServerDBSnapshotFileName) {
-        // 4. import the received DB
+        // 5. import the received DB
         return new Promise(function (resolve, reject) {
           Sync.syncDatabaseWithSnapshot(upstreamServerDBSnapshotFileName, syncLogEntry, syncLogEntry.outbreakIDs, options, function (err) {
             if (err) {
@@ -560,6 +593,8 @@ module.exports = function (Sync) {
                 app.logger.debug(`Sync ${syncLogEntry.id}: Error updating sync log entry status. ${err}`);
               });
 
+            // update Sync.inProgress map; Sync action just finished
+            Sync.inProgress.servers[upstreamServerEntry.url] = false;
             resolve();
           });
         });
@@ -583,6 +618,9 @@ module.exports = function (Sync) {
             .catch(function (err) {
               app.logger.debug(`Sync ${syncLogEntry.id}: Error updating sync log entry status. ${err}`);
             });
+
+          // update Sync.inProgress map; Sync action just finished
+          Sync.inProgress.servers[upstreamServerEntry.url] = false;
         }
       });
   };

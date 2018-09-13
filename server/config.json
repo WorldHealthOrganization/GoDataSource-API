@@ -39,11 +39,13 @@
     "protocol": "http",
     "port": 3001
   },
-  "asyncActionsSettings": {
-    "intervalTimeout": "10000",
-    "actionTimeout": "600000"
-  },
   "googleApi": {
     "apiKey": ""
+  },
+  "sync": {
+    "asyncActionsSettings": {
+      "intervalTimeout": "10000",
+      "actionTimeout": "600000"
+    }
   }
 }
