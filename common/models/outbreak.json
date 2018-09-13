@@ -1080,6 +1080,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countPeopleInCluster"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countPeopleInCluster"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "filteredCountFollowUps"
@@ -4160,6 +4172,33 @@
       "http": {
         "verb": "get",
         "path": "/clusters/:fk/people"
+      }
+    },
+    "prototype.countPeopleInCluster": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "ID of the cluster"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a (full) relationship filter on 'relationship' property of the filter."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of people in the cluster",
+          "required": true
+        }
+      ],
+      "description": "Number the people inside a cluster",
+      "http": {
+        "verb": "get",
+        "path": "/clusters/:fk/people/count"
       }
     },
     "prototype.filteredCountFollowUps": {
