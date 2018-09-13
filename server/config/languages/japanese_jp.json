@@ -484,7 +484,10 @@
       "LNG_OUTBREAK_FIELD_LABEL_FIELDS_TO_DISPLAY_NODE": "日本の Display Fields in Node",
       "LNG_OUTBREAK_FIELD_LABEL_CASE_INVESTIGATION_TEMPLATE": "日本の Case Investigation Template",
       "LNG_OUTBREAK_FIELD_LABEL_CONTACT_FOLLOWUP_TEMPLATE": "日本の Contact Follow-up Template",
-      "LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE": "日本の Lab Results Template"
+      "LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE": "日本の Lab Results Template",
+      "LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVERS": "日本の Arc Gis Servers",
+      "LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_NAME": "日本の Arc Gis Server Name",
+      "LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_URL": "日本の Arc Gis Server URL"
     },
     "uiEntityFields": {
       "LNG_ENTITY_FIELD_LABEL_FIRST_NAME": "日本の First Name",

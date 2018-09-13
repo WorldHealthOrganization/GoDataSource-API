@@ -423,6 +423,10 @@ const exportListFile = function (headers, dataSet, fileType) {
           // just copy empty element in the result
           result[headersMap[header]] = source[header];
         }
+        // array of simple elements
+      } else if (header.endsWith('[]')) {
+        // just copy them
+        result[headersMap[header]] = source[header.replace('[]', '')];
         // simple element that was not yet mapped in the result (this is important as we may have labels for properties
         // like "addresses" and "addresses[]" and we don't want simple types to overwrite complex types)
       } else if (result[headersMap[header]] === undefined) {
@@ -577,7 +581,7 @@ const getReferencedValue = function (data, path) {
 
       } else {
         // otherwise just push the result
-        result.push(result = {
+        result.push({
           value: dataItem,
           exactPath: `${arrayPath}[${index}]`
         });
@@ -874,10 +878,8 @@ const formatUndefinedValues = function (model) {
  */
 const translateDataSetReferenceDataValues = function (dataSet, Model, dictionary) {
   if (Model.referenceDataFields) {
-    let dataSetIsObject = false;
     if (!Array.isArray(dataSet)) {
       dataSet = [dataSet];
-      dataSetIsObject = true;
     }
 
     dataSet.forEach((model) => {
@@ -892,10 +894,6 @@ const translateDataSetReferenceDataValues = function (dataSet, Model, dictionary
         }
       });
     });
-
-    if (dataSetIsObject) {
-      dataSet = dataSet[0];
-    }
   }
 };
 
