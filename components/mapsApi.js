@@ -19,9 +19,9 @@ let isEnabled = false;
  * @param callback
  */
 const getGeoLocation = function (address, callback) {
-  return client.geocode({
+  client.geocode({
     address: address
-  }, (err, response) => {
+  }, function (err, response) {
     if (err) {
       app.logger.error(`Failed to retrieve geo location for address: ${address}. API response: ${err}`);
       return callback(err);

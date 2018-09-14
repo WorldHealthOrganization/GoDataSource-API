@@ -157,15 +157,14 @@ module.exports = function (Person) {
           }
           if (!mapsApi.isEnabled) {
             return done();
-          } else {
-            mapsApi.getGeoLocation(str, function (err, location) {
-              if (err) {
-                // error is logged inside the fn
-                return done();
-              }
-              return done(null, location);
-            });
           }
+          mapsApi.getGeoLocation(str, function (err, location) {
+            if (err) {
+              // error is logged inside the fn
+              return done();
+            }
+            return done(null, location);
+          });
         };
       }),
       (err, locations) => {
