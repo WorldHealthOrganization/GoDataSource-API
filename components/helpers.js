@@ -222,7 +222,8 @@ function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, pare
             if (
               value !== undefined &&
               typeof value !== 'object' &&
-              (replaceValueParent = valuesMap[`${parentPathPrefix}${sourcePath}`])
+              // strip indices for values map, we're only interested in the generic path not the exact one
+              (replaceValueParent = valuesMap[`${parentPathPrefix.replace(/\[\d+]/g, '[]')}${sourcePath.replace(/\[\d+]/g, '[]')}`])
               && replaceValueParent[value] !== undefined
             ) {
               // use that replacement value

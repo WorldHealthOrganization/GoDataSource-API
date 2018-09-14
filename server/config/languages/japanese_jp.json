@@ -467,6 +467,7 @@
       "LNG_OUTBREAK_FIELD_LABEL_NAME": "日本の Name",
       "LNG_OUTBREAK_FIELD_LABEL_DISEASE": "日本の Disease",
       "LNG_OUTBREAK_FIELD_LABEL_COUNTRIES": "日本の Countries",
+      "LNG_OUTBREAK_FIELD_LABEL_COUNTRY_ID": "日本の Country",
       "LNG_OUTBREAK_FIELD_LABEL_START_DATE": "日本の Start Date",
       "LNG_OUTBREAK_FIELD_LABEL_END_DATE": "日本の End Date",
       "LNG_OUTBREAK_FIELD_LABEL_ACTIVE": "日本の Active?",

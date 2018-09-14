@@ -1091,7 +1091,7 @@ module.exports = function (Outbreak) {
 
                     // last follow up day, based on the given period, starting from today
                     let lastToGenerateFollowUpDay = genericHelpers.getUTCDate()
-                      // doing this to not generate follow ups for today and next day in case period is 1
+                    // doing this to not generate follow ups for today and next day in case period is 1
                       .add(data.followUpPeriod <= 1 ? 0 : data.followUpPeriod, 'days');
 
                     // if given follow up period is higher than the last incubation day, just use it as a threshold for generation
@@ -5366,26 +5366,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.findPeopleInCluster = function (clusterId, filter, callback) {
-    // find the requested cluster
-    app.models.cluster
-      .findOne({
-        where: {
-          id: clusterId,
-          outbreakId: this.id
-        }
-      })
-      .then(function (cluster) {
-        // if the cluster was not found
-        if (!cluster) {
-          // stop with error
-          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
-            model: app.models.cluster.modelName,
-            id: clusterId
-          }));
-        }
-        // otherwise find people in that cluster
-        cluster.findPeople(filter, callback);
-      });
+    // find people in a cluster
+    Outbreak.prototype.findOrCountPeopleInCluster(clusterId, filter, false, callback);
+  };
+
+  /**
+   * Count the people in a cluster
+   * @param clusterId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countPeopleInCluster = function (clusterId, filter, callback) {
+    // count people in cluster
+    Outbreak.prototype.findOrCountPeopleInCluster(clusterId, filter, true, callback);
   };
 
   /**

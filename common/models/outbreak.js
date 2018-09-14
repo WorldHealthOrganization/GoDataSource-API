@@ -13,7 +13,8 @@ module.exports = function (Outbreak) {
     name: 'LNG_OUTBREAK_FIELD_LABEL_NAME',
     description: 'LNG_OUTBREAK_FIELD_LABEL_DESCRIPTION',
     disease: 'LNG_OUTBREAK_FIELD_LABEL_DISEASE',
-    'countries[]': 'LNG_OUTBREAK_FIELD_LABEL_COUNTRIES',
+    countries: 'LNG_OUTBREAK_FIELD_LABEL_COUNTRIES',
+    'countries[].id': 'LNG_OUTBREAK_FIELD_LABEL_COUNTRY_ID',
     startDate: 'LNG_OUTBREAK_FIELD_LABEL_START_DATE',
     endDate: 'LNG_OUTBREAK_FIELD_LABEL_END_DATE',
     longPeriodsBetweenCaseOnset: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_LONG_PERIODS',
@@ -37,7 +38,7 @@ module.exports = function (Outbreak) {
 
   Outbreak.referenceDataFieldsToCategoryMap = {
     disease: 'LNG_REFERENCE_DATA_CATEGORY_DISEASE',
-    'countries[]': 'LNG_REFERENCE_DATA_CATEGORY_COUNTRY'
+    'countries[].id': 'LNG_REFERENCE_DATA_CATEGORY_COUNTRY'
   };
 
   Outbreak.referenceDataFields = Object.keys(Outbreak.referenceDataFieldsToCategoryMap);
@@ -1073,5 +1074,35 @@ module.exports = function (Outbreak) {
         }
       }
     });
+  };
+
+  /**
+   * Find the list of people or count the people in a cluster
+   * @param clusterId
+   * @param filter
+   * @param countOnly
+   * @param callback
+   */
+  Outbreak.prototype.findOrCountPeopleInCluster = function (clusterId, filter, countOnly, callback) {
+    // find the requested cluster
+    app.models.cluster
+      .findOne({
+        where: {
+          id: clusterId,
+          outbreakId: this.id
+        }
+      })
+      .then(function (cluster) {
+        // if the cluster was not found
+        if (!cluster) {
+          // stop with error
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.cluster.modelName,
+            id: clusterId
+          }));
+        }
+        // otherwise find people in that cluster
+        cluster.findOrCountPeople(filter, countOnly, callback);
+      });
   };
 };
