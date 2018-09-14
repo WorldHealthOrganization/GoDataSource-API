@@ -18,9 +18,7 @@
       "required": true
     },
     "countries": {
-      "type": [
-        "string"
-      ],
+      "type": ["country"],
       "required": true
     },
     "startDate": {
@@ -84,21 +82,21 @@
       "type": [
         "templateQuestion"
       ],
-      "required": true,
+      "default": [],
       "importTopLevelOnly": true
     },
     "contactFollowUpTemplate": {
       "type": [
         "templateQuestion"
       ],
-      "required": true,
+      "default": [],
       "importTopLevelOnly": true
     },
     "labResultsTemplate": {
       "type": [
         "templateQuestion"
       ],
-      "required": true,
+      "default": [],
       "importTopLevelOnly": true
     },
     "caseIdMask": {

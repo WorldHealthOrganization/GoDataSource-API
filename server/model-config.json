@@ -247,5 +247,9 @@
   "arcGisServer": {
     "dataSource": null,
     "public": false
+  },
+  "country": {
+    "dataSource": null,
+    "public": false
   }
 }
