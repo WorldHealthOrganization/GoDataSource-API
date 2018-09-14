@@ -42,5 +42,8 @@
   "asyncActionsSettings": {
     "intervalTimeout": "10000",
     "actionTimeout": "600000"
+  },
+  "googleApi": {
+    "apiKey": ""
   }
 }
