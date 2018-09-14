@@ -13,7 +13,8 @@ module.exports = function (Outbreak) {
     name: 'LNG_OUTBREAK_FIELD_LABEL_NAME',
     description: 'LNG_OUTBREAK_FIELD_LABEL_DESCRIPTION',
     disease: 'LNG_OUTBREAK_FIELD_LABEL_DISEASE',
-    'countries[]': 'LNG_OUTBREAK_FIELD_LABEL_COUNTRIES',
+    countries: 'LNG_OUTBREAK_FIELD_LABEL_COUNTRIES',
+    'countries[].id': 'LNG_OUTBREAK_FIELD_LABEL_COUNTRY_ID',
     startDate: 'LNG_OUTBREAK_FIELD_LABEL_START_DATE',
     endDate: 'LNG_OUTBREAK_FIELD_LABEL_END_DATE',
     longPeriodsBetweenCaseOnset: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_LONG_PERIODS',
@@ -37,7 +38,7 @@ module.exports = function (Outbreak) {
 
   Outbreak.referenceDataFieldsToCategoryMap = {
     disease: 'LNG_REFERENCE_DATA_CATEGORY_DISEASE',
-    'countries[]': 'LNG_REFERENCE_DATA_CATEGORY_COUNTRY'
+    'countries[].id': 'LNG_REFERENCE_DATA_CATEGORY_COUNTRY'
   };
 
   Outbreak.referenceDataFields = Object.keys(Outbreak.referenceDataFieldsToCategoryMap);
