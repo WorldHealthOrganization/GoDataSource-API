@@ -1,6 +1,8 @@
 'use strict';
 
 const app = require('../../server/server');
+const dbSync = require('../../components/dbSync');
+const _ = require('lodash');
 
 module.exports = function (ExtendedPersistedModel) {
   // shortcut to Extended Persisted Model
@@ -125,4 +127,59 @@ module.exports = function (ExtendedPersistedModel) {
         }) > 0;
       });
   };
+
+  /**
+   * Add sync on every change if needed
+   */
+  ExtendedPersistedModel.observe('after save', function (context, callback) {
+    // check if the update is not already in a sync action
+    // we won't sync on changes done in a sync action
+    if (context.options._sync) {
+      return callback();
+    }
+
+    // check if the model is a model that can be synced
+    let modelName = context.Model.modelName;
+    if (dbSync.syncModels.indexOf(modelName) === -1) {
+      // model is not in the list of models that can be synced
+      return callback();
+    }
+
+    // continue check for sync on every change
+    // check if sync on every change is needed for any of the servers
+    // get system settings to do these checks
+    app.models.systemSettings
+      .getCache()
+      .then(function (systemSettings) {
+        let upstreamServers = systemSettings.upstreamServers;
+        // get servers which have sync enabled and syncOnEveryChange flag set as true
+        let serversToSync = upstreamServers.filter(function (server) {
+          return server.syncEnabled && server.syncOnEveryChange;
+        });
+
+        if (!serversToSync.length) {
+          // there are no servers to sync
+          return callback();
+        }
+
+        // get the sync maps to know if the sync needs to be triggered or will be added in the pending list
+        let syncModel = app.models.sync;
+        let syncInPendingMap = syncModel.pending.servers;
+
+        // go through the servers to sync and add the server in the pending sync list if there is another sync in progress for the same server
+        // the sync will be started if there is no other sync in progress for the same server
+        serversToSync.forEach(function (server) {
+          app.logger.debug(`Sync on every change is enabled for server '${server.name}'`);
+          // add the server on the pending sync list
+          syncInPendingMap[server.url] = true;
+          // trigger sync
+          syncModel.checkAndTriggerPendingSync(server, context.options);
+        });
+
+        return callback();
+      })
+      .catch(function (err) {
+        app.logger.debug(`Failed to get the system settings to check is any upstream server is configured for sync on every change. Error: ${err}`);
+      });
+  });
 };

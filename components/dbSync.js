@@ -35,6 +35,10 @@ let syncExcludeList = [
 ];
 let syncCollections = Object.keys(collectionsMap).filter((collection) => syncExcludeList.indexOf(collection) === -1);
 
+// create list of models that need to be synced starting from the syncCollections list
+// add the case, contact and event models besides the existing ones
+let syncModels = syncCollections.concat(['case', 'contact', 'event']);
+
 /**
  * Add outbreakId filter if found to a mongoDB filter;
  * Note: the base mongoDB filter is not affected
@@ -333,5 +337,6 @@ module.exports = {
   collectionsImportFilterMap: collectionsImportFilterMap,
   syncRecord: syncRecord,
   syncRecordFlags: syncRecordFlags,
-  syncCollections: syncCollections
+  syncCollections: syncCollections,
+  syncModels: syncModels
 };
