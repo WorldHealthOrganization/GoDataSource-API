@@ -10,6 +10,17 @@ module.exports = function (Person) {
       type: 'hasManyEmbedded',
       model: 'relationship',
       foreignKey: 'persons.id'
+    },
+    locations: {
+      type: 'belongsToManyComplex',
+      model: 'location',
+      foreignKeyContainer: 'addresses',
+      foreignKey: 'locationId'
+    },
+    location: {
+      type: 'belongsToEmbedded',
+      model: 'location',
+      foreignKey: 'address.locationId'
     }
   };
 
