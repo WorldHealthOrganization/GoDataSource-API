@@ -5433,11 +5433,16 @@ module.exports = function (Outbreak) {
     });
   };
 
+  /**
+   * Find transmission chains which include people that matched the filter
+   * @param filter
+   * @param callback
+   */
   Outbreak.prototype.findTransmissionChainsForFilteredPeople = function (filter, callback) {
     app.models.relationship.findTransmissionChainsForFilteredPeople(this.id, this.periodOfFollowup, filter)
       .then(function (chains) {
         callback(null, chains);
       })
       .catch(callback);
-  }
+  };
 };

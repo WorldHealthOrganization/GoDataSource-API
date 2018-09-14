@@ -442,10 +442,21 @@ module.exports = function (Relationship) {
   });
 
 
+  /**
+   * Find chains of relations that include the specified people ids. Chains of relations mean all relations of the
+   * people specified in the peopleIds, and the relations of their related people, and so on until no more relations found (chain is completed)
+   * @param outbreakId
+   * @param peopleIds
+   * @param foundRelationshipIds
+   * @return {*|PromiseLike<T | never>|Promise<T | never>}
+   */
   Relationship.findRelationshipChainsForPeopleIds = function (outbreakId, peopleIds, foundRelationshipIds = []) {
-    let relationshipMap = {};
+    // define a relationships map (indexed list of relationship ids)
+    const relationshipMap = {};
+    // find all relations that were not previously found that match the criteria
     return Relationship
       .find({
+        fields: ['id', 'persons'],
         where: {
           'persons.id': {
             inq: peopleIds
@@ -457,38 +468,57 @@ module.exports = function (Relationship) {
         }
       })
       .then(function (relationships) {
-        let _peopleIds = [...peopleIds];
+        // keep a list of new people
+        const newPeopleIds = [];
+        // if new relationships found
         if (relationships.length) {
+          // go through all relationships
           relationships.forEach(function (relationship) {
+            // map relationship as found
             relationshipMap[relationship.id] = true;
+            // get people ids
             if (Array.isArray(relationship.persons)) {
               relationship.persons.forEach(function (person) {
-                _peopleIds.push(person.id);
+                // don't include people already included in previous search
+                if (!peopleIds.includes(person.id)) {
+                  newPeopleIds.push(person.id);
+                }
               });
             }
           });
+          // find all relationships of the related people (that were not found previously)
           return Relationship
-            .findRelationshipChainsForPeopleIds(outbreakId, _peopleIds, Object.keys(relationshipMap))
-            .then(function (relMap) {
-              Object.keys(relMap).forEach(function (relationshipId) {
-                relationshipMap[relationshipId] = true;
-              });
+            .findRelationshipChainsForPeopleIds(outbreakId, newPeopleIds, [...foundRelationshipIds, ...Object.keys(relationshipMap)])
+            .then(function (foundRelationshipMap) {
+              Object.assign(relationshipMap, foundRelationshipMap);
+              // return the complete map of relationships
               return relationshipMap;
             });
+        // no more new relationships found
         } else {
+          // return the list
           return relationshipMap;
         }
       });
   };
 
+  /**
+   * Find transmission chains which include people that matched the filter
+   * @param outbreakId
+   * @param followUpPeriod
+   * @param filter
+   * @return {PromiseLike<T | never>}
+   */
   Relationship.findTransmissionChainsForFilteredPeople = function (outbreakId, followUpPeriod, filter) {
+    // find people that matched the filter
     return app.models.person
       .find(filter)
       .then(function (people) {
-        const peopleIds = people.map(person => person.id);
-        return Relationship.findRelationshipChainsForPeopleIds(outbreakId, peopleIds);
+        // find relationship chains for the matched people
+        return Relationship.findRelationshipChainsForPeopleIds(outbreakId, people.map(person => person.id));
       })
       .then(function (relationshipMap) {
+        // build transmission chains based on the relationship chains
         return new Promise(function (resolve, reject) {
           Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, {where: {id: {inq: Object.keys(relationshipMap)}}}, false, function (error, chains) {
             if (error) {
