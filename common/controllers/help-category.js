@@ -39,53 +39,65 @@ module.exports = function (HelpCategory) {
       .catch(callback);
   };
 
-  HelpCategory.searchHelpCategory = function (text, filter, options, callback) {
-    app.models.languageToken.find({
+  /**
+   * Search for all help categories that contain certain strings
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  HelpCategory.searchHelpCategory = function (filter, options, callback) {
+    // Get all language tokens that match the search criteria, and are either in the user's language or the default language (english)
+    app.models.languageToken.find(app.utils.remote.mergeFilters({where: filter ? filter.where : {}}, {
       where: {
-        $text: {
-          search: text
+        languageId: {
+          inq: ['english_us', options.remotingContext.req.authData.user.languageId]
         }
       }
-    })
-      .then((result) => {
-        let helpCategoryIds = [];
-        result.forEach((languageToken) => {
-          helpCategoryIds.push(languageToken.token);
-        });
-        const _filter = app.utils.remote.mergeFilters({
+    }))
+      .then((results) => {
+        // We delete the where block since we use it only for the language token search
+        delete filter.where;
+        // Get all Help Categories referenced by the language tokens that have passed the search criteria
+        let helpCategoryIds = results.map((languageToken) => languageToken.token);
+        app.models.helpCategory.find(app.utils.remote.mergeFilters({
           where: {
-            _id: {
+            id: {
               inq: helpCategoryIds
             }
           }
-        }, filter || {});
-        app.models.helpCategory.find(_filter)
+        }, filter || {}))
           .then((result) => callback(null, result))
           .catch(callback);
       });
   };
 
-  HelpCategory.searchHelpItem = function (text, filter, options, callback) {
-    app.models.languageToken.find({
+  /**
+   * Search for all help categories that contain certain strings
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  HelpCategory.searchHelpItem = function (filter, options, callback) {
+    // Get all language tokens that match the search criteria, and are either in the user's language or the default language (english)
+    app.models.languageToken.find(app.utils.remote.mergeFilters({where: filter ? filter.where : {}}, {
       where: {
-        $text: {
-          search: text
+        languageId: {
+          inq: ['english_us', options.remotingContext.req.authData.user.languageId]
         }
       }
-    })
-      .then((result) => {
-        let helpItemIds = [];
-        result.forEach((languageToken) => {
-          helpItemIds.push(languageToken.token);
-        });
-        const _filter = app.utils.remote.mergeFilters({
+    }))
+      .then((results) => {
+        // We delete the where block since we use it only for the language token search
+        delete filter.where;
+        // Get all Help Categories referenced by the language tokens that have passed the search criteria
+        let helpItemIds = results.map((languageToken) => languageToken.token);
+        app.models.helpItem.find(app.utils.remote.mergeFilters({
           where: {
-            _id: {
+            id: {
               inq: helpItemIds
             }
           }
-        }, filter || {});
-        app.models.helpItem.find(_filter)
+        }, filter || {}))
           .then((result) => callback(null, result))
           .catch(callback);
       });
