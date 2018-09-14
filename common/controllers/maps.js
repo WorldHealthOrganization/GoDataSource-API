@@ -7,6 +7,15 @@ const _ = require('lodash');
 
 module.exports = function (Maps) {
 
+  app.utils.remote.disableRemoteMethods(Maps, [
+    'create',
+    'prototype.patchAttributes',
+    'findById',
+    'deleteById',
+    'count',
+    'find'
+  ]);
+
   /**
    * Retrieve Google API js script and serve it as reponse
    * @param callback
