@@ -3,7 +3,7 @@
 // requires
 const _ = require('lodash');
 
-module.exports = function (app) {
+module.exports = function () {
   // retrieve app's config and try to find the google's api key
   const appConfig = require('../config.json');
 

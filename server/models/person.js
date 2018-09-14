@@ -211,9 +211,9 @@ module.exports = function (Person) {
         // if the geo location is filled manually or generated, leave it
         // plainly used for case when an update has been made and the hook executed one more time
         if ((_.get(instance, 'options.addressesMap') && instance.options.addressesMap[index]) ||
-            addr.geoLocation
+          addr.geoLocation
         ) {
-            return null;
+          return null;
         }
         return addr;
       });
