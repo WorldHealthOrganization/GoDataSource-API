@@ -144,7 +144,10 @@ module.exports = function (Person) {
       if (!addr) {
         return null;
       }
-      return `${addr.addressLine1}, ${addr.addressLine2}, ${addr.city}, ${addr.country}, ${addr.country}`;
+      return ['addressLine1', 'addressLine2', 'city', 'country', 'postalCode']
+        .filter((prop) => addr[prop])
+        .map((prop) => addr[prop])
+        .join();
     });
 
     // retrieve geo location for each address string
