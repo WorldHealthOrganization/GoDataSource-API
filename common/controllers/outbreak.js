@@ -5445,4 +5445,17 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Since this endpoint returns person data without checking if the user has the required read permissions,
+   * check the user's permissions and return only the fields he has access to
+   */
+  Outbreak.afterRemote('prototype.findTransmissionChainsForFilteredPeople', function (context, modelInstance, next) {
+    let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+
+    Object.keys(modelInstance.nodes).forEach((key) => {
+      Outbreak.helpers.limitPersonInformation(modelInstance.nodes[key], personTypesWithReadAccess);
+    });
+    next();
+  });
 };
