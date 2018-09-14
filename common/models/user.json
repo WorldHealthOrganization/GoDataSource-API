@@ -6,7 +6,7 @@
     "validateUpsert": true
   },
   "scope": {
-    "order": ["name ASC"]
+    "order": ["lastName ASC", "firstName ASC"]
   },
   "properties": {
     "id": {
