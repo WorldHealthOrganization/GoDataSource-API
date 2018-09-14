@@ -44,6 +44,6 @@
     "actionTimeout": "600000"
   },
   "googleApi": {
-    "apiKey": "aaaa"
+    "apiKey": ""
   }
 }
