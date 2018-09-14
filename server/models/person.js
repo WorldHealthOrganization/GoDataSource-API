@@ -11,12 +11,14 @@ module.exports = function (Person) {
       model: 'relationship',
       foreignKey: 'persons.id'
     },
+    // case/contacts have locations
     locations: {
       type: 'belongsToManyComplex',
       model: 'location',
       foreignKeyContainer: 'addresses',
       foreignKey: 'locationId'
     },
+    // event has location
     location: {
       type: 'belongsToEmbedded',
       model: 'location',
