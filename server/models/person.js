@@ -138,7 +138,7 @@ module.exports = function (Person) {
   // helper function used to update a person's address geo location based on city/coutnry/adress lines
   // it queries the maps service to get the actual locations on the map
   // then updates the record
-  const updateGeoLocations = function (personId, addresses) {
+  const updateGeoLocations = function (instance, addresses) {
     // index is important, for update operation
     let addressLines = addresses.map((addr) => {
       if (!addr) {
@@ -149,13 +149,10 @@ module.exports = function (Person) {
 
     // retrieve geo location for each address string
     // then populate the address geo location
-    async.parallel(
-      addressLines.map((str) => {
-        return (done) => {
-          if (!str) {
-            return done(null, true);
-          }
-          if (!mapsApi.isEnabled) {
+    async.series(
+      addressLines.map(function (str) {
+        return function (done) {
+          if (!str || !mapsApi.isEnabled) {
             return done();
           }
           mapsApi.getGeoLocation(str, function (err, location) {
@@ -167,23 +164,28 @@ module.exports = function (Person) {
           });
         };
       }),
-      (err, locations) => {
-        Person.findById(personId, (err, instance) => {
+      function (err, locations) {
+        Person.findById(instance.id, (err, instance) => {
           if (!instance) {
             return;
           }
 
+          // create an addresses map and set value to true for the ones
+          // that should not be taken into consideration during update hook
+          // this is done plainly for default geo location value (undefined)
+          instance.options = instance.options || {};
+          instance.options.addressesMap = [];
+
           let addressCopy = instance.addresses.map((item, idx) => {
             item = item.toObject();
 
-            // hack to know that it should be left unchanged
-            // geo location was filled manually
-            if (locations[idx] === true) {
-              return item;
+            // hack to know that this address index should be left unchanged on next update hook
+            instance.options.addressesMap[idx] = true;
+
+            if (locations[idx]) {
+              item.geoLocation = locations[idx];
             }
 
-            locations[idx] = locations[idx] || null;
-            item.geoLocation = locations[idx];
             return item;
           });
 
@@ -205,9 +207,16 @@ module.exports = function (Person) {
     // defensive checks
     if (Array.isArray(instance.addresses)) {
       // set address items that have geo location as undefined
-      // to not be taken into consideration
-      // i can't filter those out, because i'm losing the index of the address
-      let filteredAddresses = instance.addresses.map((addr) => addr.hasOwnProperty('geoLocation') ? null : addr);
+      let filteredAddresses = instance.addresses.map((addr, index) => {
+        // if the geo location is filled manually or generated, leave it
+        // plainly used for case when an update has been made and the hook executed one more time
+        if ((_.get(instance, 'options.addressesMap') && instance.options.addressesMap[index]) ||
+            addr.geoLocation
+        ) {
+            return null;
+        }
+        return addr;
+      });
 
       // if all the addresses have geo location generated just stop
       if (filteredAddresses.every((addr) => addr === null)) {
@@ -215,7 +224,7 @@ module.exports = function (Person) {
       }
 
       // update geo locations, do not check anything
-      updateGeoLocations(instance.id, filteredAddresses);
+      updateGeoLocations(ctx.instance, filteredAddresses);
     }
 
     // do not wait for the above operation to stop

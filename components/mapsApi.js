@@ -19,16 +19,21 @@ let isEnabled = false;
  * @param callback
  */
 const getGeoLocation = function (address, callback) {
-  client.geocode({
-    address: address
-  }, function (err, response) {
-    if (err) {
-      app.logger.error(`Failed to retrieve geo location for address: ${address}. API response: ${err}`);
-      return callback(err);
-    }
+  try {
+    client.geocode({
+      address: address
+    }, function (err, response) {
+      if (err) {
+        app.logger.error(`Failed to retrieve geo location for address: ${address}. API response: ${err}`);
+        return callback(err);
+      }
 
-    return callback(null, _.get(response.json.results.shift(), 'geometry.location'));
-  });
+      return callback(null, _.get(response.json.results.shift(), 'geometry.location'));
+    });
+  } catch (err) {
+    // when the API key is invalid, the library is throwing an error
+    return callback(err);
+  }
 };
 
 /**
