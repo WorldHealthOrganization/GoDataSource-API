@@ -186,5 +186,9 @@
   "INSTANCE_EXPORT_STILL_IN_PROGRESS": {
     "defaultStatusCode": 422,
     "messagePattern": "Instance export is still in progress`"
+  },
+  "MAPS_API_KEY_INVALID": {
+    "defaultStatusCode": 404,
+    "messagePattern": "Maps API key is invalid."
   }
 }
