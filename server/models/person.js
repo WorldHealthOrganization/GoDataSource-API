@@ -138,7 +138,7 @@ module.exports = function (Person) {
   // helper function used to update a person's address geo location based on city/coutnry/adress lines
   // it queries the maps service to get the actual locations on the map
   // then updates the record
-  const updateGeoLocations = function (instance, addresses) {
+  const updateGeoLocations = function (ctx, addresses) {
     // index is important, for update operation
     let addressLines = addresses.map((addr) => {
       if (!addr) {
@@ -152,7 +152,7 @@ module.exports = function (Person) {
     async.series(
       addressLines.map(function (str) {
         return function (done) {
-          if (!str || !mapsApi.isEnabled) {
+          if (!str || !mapsApi.isEnabled()) {
             return done();
           }
           mapsApi.getGeoLocation(str, function (err, location) {
@@ -165,7 +165,7 @@ module.exports = function (Person) {
         };
       }),
       function (err, locations) {
-        Person.findById(instance.id, (err, instance) => {
+        Person.findById(ctx.instance.id, (err, instance) => {
           if (!instance) {
             return;
           }
@@ -173,14 +173,14 @@ module.exports = function (Person) {
           // create an addresses map and set value to true for the ones
           // that should not be taken into consideration during update hook
           // this is done plainly for default geo location value (undefined)
-          instance.options = instance.options || {};
-          instance.options.addressesMap = [];
+          ctx.options = ctx.options || {};
+          ctx.options.addressesMap = [];
 
           let addressCopy = instance.addresses.map((item, idx) => {
             item = item.toObject();
 
             // hack to know that this address index should be left unchanged on next update hook
-            instance.options.addressesMap[idx] = true;
+            ctx.options.addressesMap[idx] = true;
 
             if (locations[idx]) {
               item.geoLocation = locations[idx];
@@ -190,7 +190,7 @@ module.exports = function (Person) {
           });
 
           // update addresses array
-          instance.updateAttribute('addresses', addressCopy);
+          instance.updateAttribute('addresses', addressCopy, ctx.options);
         });
       }
     );
@@ -210,9 +210,7 @@ module.exports = function (Person) {
       let filteredAddresses = instance.addresses.map((addr, index) => {
         // if the geo location is filled manually or generated, leave it
         // plainly used for case when an update has been made and the hook executed one more time
-        if ((_.get(instance, 'options.addressesMap') && instance.options.addressesMap[index]) ||
-          addr.geoLocation
-        ) {
+        if ((_.get(ctx, 'options.addressesMap') && ctx.options.addressesMap[index]) || addr.geoLocation) {
           return null;
         }
         return addr;
@@ -224,7 +222,7 @@ module.exports = function (Person) {
       }
 
       // update geo locations, do not check anything
-      updateGeoLocations(ctx.instance, filteredAddresses);
+      updateGeoLocations(ctx, filteredAddresses);
     }
 
     // do not wait for the above operation to stop

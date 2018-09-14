@@ -45,11 +45,10 @@ const initClient = function (apiKey) {
     client = googleMapsService.createClient({ key: apiKey });
     isEnabled = true;
   }
-
-  module.exports.isEnabled = isEnabled;
 };
 
 module.exports = {
   getGeoLocation: getGeoLocation,
-  initClient: initClient
+  initClient: initClient,
+  isEnabled: () => isEnabled
 };
