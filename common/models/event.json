@@ -18,7 +18,8 @@
   "scope": {
     "where": {
       "type": "event"
-    }
+    },
+    "order": ["name ASC"]
   },
   "properties": {
     "type": {

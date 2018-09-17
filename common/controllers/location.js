@@ -62,7 +62,7 @@ module.exports = function (Location) {
           updatedBy: false,
           deleted: false
         },
-        order: 'parentLocationId ASC, id ASC'
+        order: ['name ASC', 'parentLocationId ASC', 'id ASC']
       })
       .then(function (locations) {
         app.utils.remote.helpers
@@ -91,7 +91,7 @@ module.exports = function (Location) {
     Location
       .find(app.utils.remote
         .mergeFilters({
-          order: 'parentLocationId ASC, id ASC'
+          order: ['name ASC', 'parentLocationId ASC', 'id ASC']
         }, filter || {}))
       .then(function (locations) {
         // check for sent filters; if filters were sent we need to return hierarchical list for the found locations

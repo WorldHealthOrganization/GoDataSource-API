@@ -8,6 +8,9 @@
   "hidden": [
     "isGenerated"
   ],
+  "scope": {
+    "order": ["date ASC"]
+  },
   "properties": {
     "date": {
       "type": "date",
