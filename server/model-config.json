@@ -251,5 +251,9 @@
   "country": {
     "dataSource": null,
     "public": false
+  },
+  "maps": {
+    "dataSource": "memory",
+    "public": true
   }
 }
