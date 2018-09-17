@@ -35,6 +35,11 @@
   "acls": [
     {
       "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_sys_config",
       "permission": "ALLOW",
       "property": "createManualBackup"
