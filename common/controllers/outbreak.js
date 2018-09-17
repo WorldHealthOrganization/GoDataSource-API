@@ -5425,4 +5425,30 @@ module.exports = function (Outbreak) {
       callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
     });
   };
+
+  /**
+   * Find transmission chains which include people that matched the filter
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findTransmissionChainsForFilteredPeople = function (filter, callback) {
+    app.models.relationship.findTransmissionChainsForFilteredPeople(this.id, this.periodOfFollowup, filter)
+      .then(function (chains) {
+        callback(null, chains);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Since this endpoint returns person data without checking if the user has the required read permissions,
+   * check the user's permissions and return only the fields he has access to
+   */
+  Outbreak.afterRemote('prototype.findTransmissionChainsForFilteredPeople', function (context, modelInstance, next) {
+    let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+
+    Object.keys(modelInstance.nodes).forEach((key) => {
+      Outbreak.helpers.limitPersonInformation(modelInstance.nodes[key], personTypesWithReadAccess);
+    });
+    next();
+  });
 };
