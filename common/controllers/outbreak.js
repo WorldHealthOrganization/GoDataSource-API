@@ -4015,8 +4015,10 @@ module.exports = function (Outbreak) {
           const rawContactList = JSON.parse(file);
           // remap properties & values
           const contactsList = app.utils.helpers.convertBooleanProperties(
-            app.models.contact,
-            app.utils.helpers.remapProperties(rawContactList, body.map, body.valuesMap));
+            app.models.relationship,
+            app.utils.helpers.convertBooleanProperties(
+              app.models.contact,
+              app.utils.helpers.remapProperties(rawContactList, body.map, body.valuesMap)));
           // build a list of create operations
           const createContacts = [];
           // define a container for error results

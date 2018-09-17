@@ -1013,26 +1013,47 @@ const getBuildInformation = function () {
   };
 };
 
+/**
+ * Check if a (string) date is valid (correct ISO format)
+ * @param date
+ * @return {boolean}
+ */
 const isValidDate = function (date) {
-  const dateRegexp = /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}\.\d{3}Z*)?$/;
-
-  return dateRegexp.test(date);
+  return /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}\.\d{3}Z*)?$/.test(date);
 };
 
+/**
+ * Convert boolean model properties to correct boolean values from strings
+ * @param Model
+ * @param dataSet
+ */
 const convertBooleanProperties = function (Model, dataSet) {
+  // keep a list of boolean properties
   const booleanProperties = [];
+  // go through all model properties, from model definition
   Model.forEachProperty(function (propertyName) {
-    if (Model.definition.properties[propertyName].type && Model.definition.properties[propertyName].type.name === 'Boolean') {
+    // check if the property is supposed to be boolean
+    if (
+      Model.definition.properties[propertyName].type &&
+      Model.definition.properties[propertyName].type.name === 'Boolean'
+    ) {
+      // store property name
       booleanProperties.push(propertyName);
     }
   });
+  // go through the dataSet records
   dataSet.forEach(function (record) {
+    // check each property that is supposed to be boolean
     booleanProperties.forEach(function (booleanProperty) {
+      // if it has a value but the value is not boolean
       if (record[booleanProperty] !== undefined && typeof record[booleanProperty] !== 'boolean') {
+        // convert it to boolean value
         record[booleanProperty] = ['1', 'true'].includes(record[booleanProperty].toString().toLowerCase());
       }
     });
   });
+  // records are modified by reference, but also return the dataSet
+  return dataSet;
 };
 
 module.exports = {
