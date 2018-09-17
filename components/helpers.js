@@ -1026,33 +1026,53 @@ const isValidDate = function (date) {
 /**
  * Convert boolean model properties to correct boolean values from strings
  * @param Model
- * @param dataSet
+ * @param dataSet [object|array]
  */
 const convertBooleanProperties = function (Model, dataSet) {
-  // keep a list of boolean properties
-  const booleanProperties = [];
-  // go through all model properties, from model definition
-  Model.forEachProperty(function (propertyName) {
-    // check if the property is supposed to be boolean
-    if (
-      Model.definition.properties[propertyName].type &&
-      Model.definition.properties[propertyName].type.name === 'Boolean'
-    ) {
-      // store property name
-      booleanProperties.push(propertyName);
-    }
-  });
-  // go through the dataSet records
-  dataSet.forEach(function (record) {
+  // init model boolean properties, if not already done
+  if (!Model._booleanProperties) {
+    // keep a list of boolean properties
+    Model._booleanProperties = [];
+    // go through all model properties, from model definition
+    Model.forEachProperty(function (propertyName) {
+      // check if the property is supposed to be boolean
+      if (
+        Model.definition.properties[propertyName].type &&
+        Model.definition.properties[propertyName].type.name === 'Boolean'
+      ) {
+        // store property name
+        Model._booleanProperties.push(propertyName);
+      }
+    });
+  }
+
+  /**
+   * Convert boolean model properties for a single record instance
+   * @param record
+   */
+  function convertBooleanModelProperties(record) {
     // check each property that is supposed to be boolean
-    booleanProperties.forEach(function (booleanProperty) {
+    Model._booleanProperties.forEach(function (booleanProperty) {
       // if it has a value but the value is not boolean
       if (record[booleanProperty] !== undefined && typeof record[booleanProperty] !== 'boolean') {
         // convert it to boolean value
         record[booleanProperty] = ['1', 'true'].includes(record[booleanProperty].toString().toLowerCase());
       }
     });
-  });
+  }
+
+  // array of records
+  if (Array.isArray(dataSet)) {
+    // go through the dataSet records
+    dataSet.forEach(function (record) {
+      // convert each record
+      convertBooleanModelProperties(record);
+    });
+  // single record
+  } else {
+    // convert record
+    convertBooleanModelProperties(dataSet);
+  }
   // records are modified by reference, but also return the dataSet
   return dataSet;
 };

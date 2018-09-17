@@ -4014,11 +4014,7 @@ module.exports = function (Outbreak) {
           // parse file content
           const rawContactList = JSON.parse(file);
           // remap properties & values
-          const contactsList = app.utils.helpers.convertBooleanProperties(
-            app.models.relationship,
-            app.utils.helpers.convertBooleanProperties(
-              app.models.contact,
-              app.utils.helpers.remapProperties(rawContactList, body.map, body.valuesMap)));
+          const contactsList = app.utils.helpers.remapProperties(rawContactList, body.map, body.valuesMap);
           // build a list of create operations
           const createContacts = [];
           // define a container for error results
@@ -4031,9 +4027,13 @@ module.exports = function (Outbreak) {
           contactsList.forEach(function (recordData, index) {
             createContacts.push(function (callback) {
               // extract relationship data
-              const relationshipData = app.utils.helpers.extractImportableFields(app.models.relationship, recordData.relationship);
+              const relationshipData = app.utils.helpers.convertBooleanProperties(
+                app.models.relationship,
+                app.utils.helpers.extractImportableFields(app.models.relationship, recordData.relationship));
               // extract contact data
-              const contactData = app.utils.helpers.extractImportableFields(app.models.contact, recordData);
+              const contactData = app.utils.helpers.convertBooleanProperties(
+                app.models.contact,
+                app.utils.helpers.extractImportableFields(app.models.contact, recordData));
               // set outbreak ids
               contactData.outbreakId = self.id;
               relationshipData.outbreakId = self.id;
