@@ -161,7 +161,9 @@ module.exports = function (ReferenceData) {
           // parse file content
           const rawReferenceDataList = JSON.parse(file);
           // remap properties & values
-          const referenceDataList = app.utils.helpers.remapProperties(rawReferenceDataList, body.map, body.valuesMap);
+          const referenceDataList = app.utils.helpers.convertBooleanProperties(
+            ReferenceData,
+            app.utils.helpers.remapProperties(rawReferenceDataList, body.map, body.valuesMap));
           // build a list of sync operations
           const syncReferenceData = [];
           // define a container for error results

@@ -1019,6 +1019,22 @@ const isValidDate = function (date) {
   return dateRegexp.test(date);
 };
 
+const convertBooleanProperties = function (Model, dataSet) {
+  const booleanProperties = [];
+  Model.forEachProperty(function (propertyName) {
+    if (Model.definition.properties[propertyName].type && Model.definition.properties[propertyName].type.name === 'Boolean') {
+      booleanProperties.push(propertyName);
+    }
+  });
+  dataSet.forEach(function (record) {
+    booleanProperties.forEach(function (booleanProperty) {
+      if (record[booleanProperty] !== undefined && typeof record[booleanProperty] !== 'boolean') {
+        record[booleanProperty] = ['1', 'true'].includes(record[booleanProperty].toString().toLowerCase());
+      }
+    });
+  });
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1041,5 +1057,6 @@ module.exports = {
   translateDataSetReferenceDataValues: translateDataSetReferenceDataValues,
   translateFieldLabels: translateFieldLabels,
   includeSubLocationsInLocationFilter: includeSubLocationsInLocationFilter,
-  getBuildInformation: getBuildInformation
+  getBuildInformation: getBuildInformation,
+  convertBooleanProperties: convertBooleanProperties
 };

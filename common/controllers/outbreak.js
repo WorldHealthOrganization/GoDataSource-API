@@ -3821,7 +3821,9 @@ module.exports = function (Outbreak) {
           // parse file content
           const rawlabResultsList = JSON.parse(file);
           // remap properties & values
-          const labResultsList = app.utils.helpers.remapProperties(rawlabResultsList, body.map, body.valuesMap);
+          const labResultsList = app.utils.helpers.convertBooleanProperties(
+            app.models.labResult,
+            app.utils.helpers.remapProperties(rawlabResultsList, body.map, body.valuesMap));
           // build a list of create lab results operations
           const createLabResults = [];
           // define a container for error results
@@ -3925,7 +3927,9 @@ module.exports = function (Outbreak) {
           // parse file content
           const rawCasesList = JSON.parse(file);
           // remap properties & values
-          const casesList = app.utils.helpers.remapProperties(rawCasesList, body.map, body.valuesMap);
+          const casesList = app.utils.helpers.convertBooleanProperties(
+            app.models.case,
+            app.utils.helpers.remapProperties(rawCasesList, body.map, body.valuesMap));
           // build a list of create operations
           const createCases = [];
           // define a container for error results
@@ -4010,7 +4014,9 @@ module.exports = function (Outbreak) {
           // parse file content
           const rawContactList = JSON.parse(file);
           // remap properties & values
-          const contactsList = app.utils.helpers.remapProperties(rawContactList, body.map, body.valuesMap);
+          const contactsList = app.utils.helpers.convertBooleanProperties(
+            app.models.contact,
+            app.utils.helpers.remapProperties(rawContactList, body.map, body.valuesMap));
           // build a list of create operations
           const createContacts = [];
           // define a container for error results
@@ -4124,7 +4130,9 @@ module.exports = function (Outbreak) {
           // parse file content
           const rawOutbreakList = JSON.parse(file);
           // remap properties & values
-          const outbreaksList = app.utils.helpers.remapProperties(rawOutbreakList, body.map, body.valuesMap);
+          const outbreaksList = app.utils.helpers.convertBooleanProperties(
+            app.models.outbreak,
+            app.utils.helpers.remapProperties(rawOutbreakList, body.map, body.valuesMap));
           // build a list of create operations
           const createOutbreaks = [];
           // define a container for error results
@@ -5295,7 +5303,9 @@ module.exports = function (Outbreak) {
           // parse file content
           const rawReferenceDataList = JSON.parse(file);
           // remap properties & values
-          const referenceDataList = app.utils.helpers.remapProperties(rawReferenceDataList, body.map, body.valuesMap);
+          const referenceDataList = app.utils.helpers.convertBooleanProperties(
+            app.models.referenceData,
+            app.utils.helpers.remapProperties(rawReferenceDataList, body.map, body.valuesMap));
           // build a list of sync operations
           const syncReferenceData = [];
           // define a container for error results
