@@ -200,21 +200,38 @@ module.exports = function (Person) {
     );
   };
 
+
   /**
-   * If address is present in the request, make sure we're getting its geo location from external API
-   * We only do this if googleApi.apiKey is present in the config
+   * Before save hooks
+   */
+  Person.observe('before save', function (context, next) {
+    const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
+    // if case classification was changed
+    if (!context.isNewInstance && data.source.existing.classification !== data.source.updated.classification) {
+      // set a flag on context
+      context.options.caseClassificationChanged = true;
+    }
+    next();
+  });
+
+
+  /**
+   * After save hooks
    */
   Person.observe('after save', function (ctx, next) {
     // cache instance reference, used in many places below
     let instance = ctx.instance;
 
-    // if a case was updated
-    if (!ctx.isNewInstance && ctx.instance.type === 'case') {
+    /**
+     * When case classification changes, relations need to be notified because they have business logic associated with case classification
+     */
+    // if a case was updated with a different classification
+    if (!ctx.isNewInstance && instance.type === 'case' && ctx.options.caseClassificationChanged) {
       // find all of its relationships with a contact
       app.models.relationship
         .find({
           where: {
-            'persons.id': ctx.instance.id,
+            'persons.id': instance.id,
             and: [
               {'persons.type': 'case'},
               {'persons.type': 'contact'}
@@ -227,6 +244,7 @@ module.exports = function (Person) {
           relationships.forEach(function (relationship) {
             updateRelationships.push(relationship.updateAttributes({}, ctx.options));
           });
+          // the hook does not need to wait for the changes to propagate
           return Promise.all(updateRelationships);
         })
         .catch(function (err) {
@@ -235,6 +253,10 @@ module.exports = function (Person) {
         });
     }
 
+    /**
+     * If address is present in the request, make sure we're getting its geo location from external API
+     * We only do this if googleApi.apiKey is present in the config
+     */
     // defensive checks
     if (Array.isArray(instance.addresses)) {
       // set address items that have geo location as undefined
