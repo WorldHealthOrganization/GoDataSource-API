@@ -228,7 +228,29 @@ module.exports = function (Person) {
       updateGeoLocations(ctx, filteredAddresses);
     }
 
-    // do not wait for the above operation to stop
+    // if a case was updated
+    if (!ctx.isNewInstance && ctx.instance.type === 'case') {
+      // find all of its relationships with a contact
+      app.models.relationship
+        .find({
+          where: {
+            'persons.id': context.instance.id,
+            and: [
+              {'persons.type': 'case'},
+              {'persons.type': 'contact'}
+            ]
+          }
+        })
+        .then(function (relationships) {
+          const updateRelationships = [];
+          // trigger an update for them (to propagate eventual follow-up period changes)
+          relationships.forEach(function (relationship) {
+            updateRelationships.push(relationship.updateAttributes());
+          });
+          return Promise.all(updateRelationships);
+        });
+    }
+    // do not wait for the above operations to complete
     return next();
   });
 };

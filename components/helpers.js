@@ -1068,13 +1068,37 @@ const convertBooleanProperties = function (Model, dataSet) {
       // convert each record
       convertBooleanModelProperties(record);
     });
-  // single record
+    // single record
   } else {
     // convert record
     convertBooleanModelProperties(dataSet);
   }
   // records are modified by reference, but also return the dataSet
   return dataSet;
+};
+
+/**
+ * Extract data source and target from model hook context
+ * @param context
+ */
+const getSourceAndTargetFromModelHookContext = function (context) {
+  const result = {};
+  // data source & target can be on context instance
+  if (context.instance) {
+    // if this is an model instance
+    if (context.instance.toJSON === 'function') {
+      // get data
+      result.source = context.instance.toJSON();
+    } else {
+      result.source = context.instance;
+    }
+    result.target = context.instance;
+  } else {
+    // data source & target are on context data
+    result.source = context.data;
+    result.target = context.data;
+  }
+  return result;
 };
 
 module.exports = {
@@ -1100,5 +1124,6 @@ module.exports = {
   translateFieldLabels: translateFieldLabels,
   includeSubLocationsInLocationFilter: includeSubLocationsInLocationFilter,
   getBuildInformation: getBuildInformation,
-  convertBooleanProperties: convertBooleanProperties
+  convertBooleanProperties: convertBooleanProperties,
+  getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext
 };
