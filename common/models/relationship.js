@@ -437,7 +437,7 @@ module.exports = function (Relationship) {
             propsToUpdate.endDate = moment(relationship.contactDate).add(outbreak.periodOfFollowup, 'days');
           }
           // update contact
-          return contactInstance.updateAttribute('followUp', propsToUpdate);
+          return contactInstance.updateAttribute('followUp', propsToUpdate, context.options);
         })
         .then(function () {
           callback();

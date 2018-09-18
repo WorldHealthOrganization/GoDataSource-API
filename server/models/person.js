@@ -242,6 +242,7 @@ module.exports = function (Person) {
           const updateRelationships = [];
           // trigger an update for them (to propagate eventual follow-up period changes)
           relationships.forEach(function (relationship) {
+            // nothing to update, just trigger update method to activate the hooks
             updateRelationships.push(relationship.updateAttributes({}, ctx.options));
           });
           // the hook does not need to wait for the changes to propagate
