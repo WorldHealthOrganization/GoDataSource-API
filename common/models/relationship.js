@@ -345,7 +345,7 @@ module.exports = function (Relationship) {
     // relation is active, by default
     data.target.active = true;
     // get case IDs from from the relationship
-    let caseIds = data.source.persons.filter(person => person.type === 'case').map(caseRecord => caseRecord.id);
+    let caseIds = data.source.all.persons.filter(person => person.type === 'case').map(caseRecord => caseRecord.id);
     // if cases were found
     if (caseIds) {
       // find cases

@@ -1086,18 +1086,35 @@ const getSourceAndTargetFromModelHookContext = function (context) {
   // data source & target can be on context instance
   if (context.instance) {
     // if this is an model instance
-    if (context.instance.toJSON === 'function') {
+    if (typeof context.instance.toJSON === 'function') {
       // get data
-      result.source = context.instance.toJSON();
+      result.source = {
+        existing: context.instance.toJSON(),
+        updated: {}
+      };
     } else {
-      result.source = context.instance;
+      result.source = {
+        existing: context.instance,
+        updated: {}
+      };
     }
     result.target = context.instance;
   } else {
     // data source & target are on context data
-    result.source = context.data;
+    if (typeof context.currentInstance.toJSON === 'function') {
+      result.source = {
+        existing: context.currentInstance.toJSON(),
+        updated: {}
+      };
+    } else {
+      result.source = {
+        existing: context.currentInstance,
+        updated: {}
+      };
+    }
     result.target = context.data;
   }
+  result.source.all = Object.assign({}, result.source.existing, result.source.updated);
   return result;
 };
 

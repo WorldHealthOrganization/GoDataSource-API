@@ -4,6 +4,7 @@
 const _ = require('lodash');
 const async = require('async');
 const mapsApi = require('../../components/mapsApi');
+const app = require('../server');
 
 module.exports = function (Person) {
 
@@ -207,6 +208,33 @@ module.exports = function (Person) {
     // cache instance reference, used in many places below
     let instance = ctx.instance;
 
+    // if a case was updated
+    if (!ctx.isNewInstance && ctx.instance.type === 'case') {
+      // find all of its relationships with a contact
+      app.models.relationship
+        .find({
+          where: {
+            'persons.id': ctx.instance.id,
+            and: [
+              {'persons.type': 'case'},
+              {'persons.type': 'contact'}
+            ]
+          }
+        })
+        .then(function (relationships) {
+          const updateRelationships = [];
+          // trigger an update for them (to propagate eventual follow-up period changes)
+          relationships.forEach(function (relationship) {
+            updateRelationships.push(relationship.updateAttributes({}, ctx.options));
+          });
+          return Promise.all(updateRelationships);
+        })
+        .catch(function (err) {
+          // log error
+          app.logger.error(err);
+        });
+    }
+
     // defensive checks
     if (Array.isArray(instance.addresses)) {
       // set address items that have geo location as undefined
@@ -226,29 +254,6 @@ module.exports = function (Person) {
 
       // update geo locations, do not check anything
       updateGeoLocations(ctx, filteredAddresses);
-    }
-
-    // if a case was updated
-    if (!ctx.isNewInstance && ctx.instance.type === 'case') {
-      // find all of its relationships with a contact
-      app.models.relationship
-        .find({
-          where: {
-            'persons.id': context.instance.id,
-            and: [
-              {'persons.type': 'case'},
-              {'persons.type': 'contact'}
-            ]
-          }
-        })
-        .then(function (relationships) {
-          const updateRelationships = [];
-          // trigger an update for them (to propagate eventual follow-up period changes)
-          relationships.forEach(function (relationship) {
-            updateRelationships.push(relationship.updateAttributes());
-          });
-          return Promise.all(updateRelationships);
-        });
     }
     // do not wait for the above operations to complete
     return next();
