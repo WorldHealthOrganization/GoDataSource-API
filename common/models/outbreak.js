@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const _ = require('lodash');
+const genericHelpers = require('../../components/helpers');
 
 // used to manipulate dates
 const moment = require('moment');
@@ -12,7 +13,8 @@ module.exports = function (Outbreak) {
     name: 'LNG_OUTBREAK_FIELD_LABEL_NAME',
     description: 'LNG_OUTBREAK_FIELD_LABEL_DESCRIPTION',
     disease: 'LNG_OUTBREAK_FIELD_LABEL_DISEASE',
-    'countries[]': 'LNG_OUTBREAK_FIELD_LABEL_COUNTRIES',
+    countries: 'LNG_OUTBREAK_FIELD_LABEL_COUNTRIES',
+    'countries[].id': 'LNG_OUTBREAK_FIELD_LABEL_COUNTRY_ID',
     startDate: 'LNG_OUTBREAK_FIELD_LABEL_START_DATE',
     endDate: 'LNG_OUTBREAK_FIELD_LABEL_END_DATE',
     longPeriodsBetweenCaseOnset: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_LONG_PERIODS',
@@ -28,11 +30,15 @@ module.exports = function (Outbreak) {
     caseInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CASE_INVESTIGATION_TEMPLATE',
     contactFollowUpTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_FOLLOWUP_TEMPLATE',
     labResultsTemplate: 'LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE',
-    caseIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK'
+    caseIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK',
+    'arcGisServers': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVERS',
+    'arcGisServers[].name': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_NAME',
+    'arcGisServers[].url': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_URL'
   });
 
   Outbreak.referenceDataFieldsToCategoryMap = {
-    disease: 'LNG_REFERENCE_DATA_CATEGORY_DISEASE'
+    disease: 'LNG_REFERENCE_DATA_CATEGORY_DISEASE',
+    'countries[].id': 'LNG_REFERENCE_DATA_CATEGORY_COUNTRY'
   };
 
   Outbreak.referenceDataFields = Object.keys(Outbreak.referenceDataFieldsToCategoryMap);
@@ -40,7 +46,7 @@ module.exports = function (Outbreak) {
   // initialize model helpers
   Outbreak.helpers = {};
   // set a higher limit for event listeners to avoid warnings (we have quite a few listeners)
-  Outbreak.setMaxListeners(50);
+  Outbreak.setMaxListeners(60);
 
   // The permissions that influence an user's ability to see a person's data
   Outbreak.personReadPermissions = [
@@ -421,6 +427,32 @@ module.exports = function (Outbreak) {
         callback(null, relationships);
       })
       .catch(callback);
+  };
+
+  /**
+   * Count filtered relations for a person
+   * @param personId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.helpers.filteredCountPersonRelationships = function (personId, filter, callback) {
+    const _filter = app.utils.remote.mergeFilters(
+      {
+        where: {
+          'persons.id': personId
+        }
+      },
+      filter
+    );
+
+    app.models.relationship
+      .find(_filter)
+      .then((result) => {
+        callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, _filter).length);
+      })
+      .catch((error) => {
+        callback(error);
+      });
   };
 
   /**
@@ -960,7 +992,8 @@ module.exports = function (Outbreak) {
         };
 
         // do not try to translate answers that are free text
-        if (question.answerType !== 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT') {
+        if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER'
+          || question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
           questionResult.answers = question.answers.map((answer) => {
             return {
               label: translateToken(answer.label),
@@ -972,7 +1005,7 @@ module.exports = function (Outbreak) {
 
         return questionResult;
       });
-    })(questions);
+    })(_.filter(questions, question => question.answerType !== 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD'));
   };
 
   /**
@@ -1010,5 +1043,66 @@ module.exports = function (Outbreak) {
         }
       }
     }
+  };
+
+  /**
+   * Format the questions object for easier printing
+   * @param answers
+   * @param questions
+   */
+  Outbreak.helpers.prepareQuestionsForPrint = function (answers, questions) {
+    Object.keys(answers).forEach((key) => {
+      let question = _.find(questions, (question) => {
+        return question.variable === key;
+      });
+
+      if (question && question.answers) {
+        question.answers.forEach((answer) => {
+          if (answers[key].indexOf(answer.value) !== -1) {
+            answer.selected = true;
+          }
+
+          if (answer.additionalQuestions && answer.additionalQuestions.length) {
+            Outbreak.helpers.prepareQuestionsForPrint(answers, answer.additionalQuestions);
+          }
+        });
+      } else if (question && !question.answers) {
+        if (answers[key] instanceof Date || genericHelpers.isValidDate(answers[key])) {
+          question.value = genericHelpers.getDateDisplayValue(answers[key]);
+        } else {
+          question.value = answers[key];
+        }
+      }
+    });
+  };
+
+  /**
+   * Find the list of people or count the people in a cluster
+   * @param clusterId
+   * @param filter
+   * @param countOnly
+   * @param callback
+   */
+  Outbreak.prototype.findOrCountPeopleInCluster = function (clusterId, filter, countOnly, callback) {
+    // find the requested cluster
+    app.models.cluster
+      .findOne({
+        where: {
+          id: clusterId,
+          outbreakId: this.id
+        }
+      })
+      .then(function (cluster) {
+        // if the cluster was not found
+        if (!cluster) {
+          // stop with error
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.cluster.modelName,
+            id: clusterId
+          }));
+        }
+        // otherwise find people in that cluster
+        cluster.findOrCountPeople(filter, countOnly, callback);
+      });
   };
 };

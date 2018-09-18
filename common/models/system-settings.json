@@ -9,8 +9,12 @@
     "id"
   ],
   "properties": {
-    "upstreamServer": {
-      "type": "upstreamServer"
+    "upstreamServers": {
+      "type": [
+        {
+          "type": "upstreamServer"
+        }
+      ]
     },
     "clientApplications": {
       "type": [
@@ -23,20 +27,38 @@
       "type": "dataBackup"
     },
     "nodeFields": {
-      "type": ["string"]
+      "type": [
+        "string"
+      ]
     },
     "relationFields": {
-      "type": ["string"]
+      "type": [
+        "string"
+      ]
     },
     "anonymizeFields": {
       "type": {
         "case": {
-          "type": ["string"],
-          "default": ["firstName", "middleName", "lastName", "addresses[].addressLine1"]
+          "type": [
+            "string"
+          ],
+          "default": [
+            "firstName",
+            "middleName",
+            "lastName",
+            "addresses[].addressLine1"
+          ]
         },
         "contact": {
-          "type": ["string"],
-          "default": ["firstName", "middleName", "lastName", "addresses[].addressLine1"]
+          "type": [
+            "string"
+          ],
+          "default": [
+            "firstName",
+            "middleName",
+            "lastName",
+            "addresses[].addressLine1"
+          ]
         }
       }
     }
@@ -78,6 +100,18 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "getServerUTCDate"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "checkForUpdates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "getVersion"
     }
   ],
   "methods": {
@@ -218,6 +252,52 @@
       "http": {
         "verb": "get",
         "path": "/utc-date"
+      }
+    },
+    "checkForUpdates": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "application",
+          "type": {
+            "update": "boolean",
+            "name": "string",
+            "description": "string",
+            "version": "string",
+            "platform": "string",
+            "download": "string"
+          },
+          "description": "Application update",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Checks for application updates",
+      "http": {
+        "verb": "get",
+        "path": "/update"
+      }
+    },
+    "getVersion": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "version",
+          "type": {
+            "platform": "string",
+            "type": "string",
+            "build": "string",
+            "version": "string"
+          },
+          "description": "Version Information",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get application version information.",
+      "http": {
+        "verb": "get",
+        "path": "/version"
       }
     }
   }

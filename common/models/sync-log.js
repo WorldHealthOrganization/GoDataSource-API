@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function (Synclog) {
-  // set flag to not get controller
-  Synclog.hasController = false;
+module.exports = function (SyncLog) {
+  // set flag to get controller
+  SyncLog.hasController = true;
 };

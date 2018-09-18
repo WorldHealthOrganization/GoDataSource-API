@@ -8,11 +8,12 @@ module.exports = function (Cluster) {
   Cluster.hasController = false;
 
   /**
-   * Find people in a cluster
+   * Find or count people in a cluster
    * @param filter
+   * @param countOnly
    * @param callback
    */
-  Cluster.prototype.findPeople = function (filter, callback) {
+  Cluster.prototype.findOrCountPeople = function (filter, countOnly, callback) {
 
     // define default relationship filter
     let relationshipFilter = {
@@ -48,17 +49,24 @@ module.exports = function (Cluster) {
         return peopleIds;
       })
       .then(function (peopleIds) {
-        // find people that match the filter and belong to the relationships matched earlier
-        return app.models.person
-          .find(app.utils.remote.mergeFilters(
-            {
-              where: {
-                id: {
-                  inq: peopleIds
-                }
+        // build the filter
+        const _filter = app.utils.remote.mergeFilters(
+          {
+            where: {
+              id: {
+                inq: peopleIds
               }
-            },
-            filter || {}));
+            }
+          },
+          filter || {});
+
+        // check if this is only a count
+        if (countOnly) {
+          return app.models.person.count(_filter.where);
+        } else {
+          // find people that match the filter and belong to the relationships matched earlier
+          return app.models.person.find(_filter);
+        }
       })
       .then(function (people) {
         callback(null, people);

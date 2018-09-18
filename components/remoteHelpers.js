@@ -3,6 +3,7 @@
 const helpers = require('./helpers');
 const formidable = require('formidable');
 const apiError = require('./apiError');
+const path = require('path');
 
 /**
  * Offer a file to be downloaded
@@ -12,7 +13,7 @@ const apiError = require('./apiError');
  * @param remoteCallback
  */
 function offerFileToDownload(fileBuffer, mimeType, fileName, remoteCallback) {
-  remoteCallback(null, fileBuffer, mimeType, `attachment;filename=${helpers.getAsciiString(fileName)}`);
+  remoteCallback(null, fileBuffer, mimeType, `attachment;filename=${helpers.getAsciiString(path.basename(fileName))}`);
 }
 
 /**

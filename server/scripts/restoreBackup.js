@@ -9,7 +9,8 @@ let args = process.argv;
 // file argument is required
 let file = /file=(.+)(?:\s+|$)/.exec(args.toString());
 if (!file) {
-  return console.error('No valid file passed. Use --file=<filePath> to specify a backup file');
+  console.error('No valid file passed. Use --file=<filePath> to specify a backup file');
+  process.exit(1);
 }
 
 // restore using provided file

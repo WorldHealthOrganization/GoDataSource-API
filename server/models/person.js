@@ -1,5 +1,10 @@
 'use strict';
 
+// requires
+const _ = require('lodash');
+const async = require('async');
+const mapsApi = require('../../components/mapsApi');
+
 module.exports = function (Person) {
 
   Person.hasController = false;
@@ -10,10 +15,23 @@ module.exports = function (Person) {
       type: 'hasManyEmbedded',
       model: 'relationship',
       foreignKey: 'persons.id'
+    },
+    // case/contacts have locations
+    locations: {
+      type: 'belongsToManyComplex',
+      model: 'location',
+      foreignKeyContainer: 'addresses',
+      foreignKey: 'locationId'
+    },
+    // event has location
+    location: {
+      type: 'belongsToEmbedded',
+      model: 'location',
+      foreignKey: 'address.locationId'
     }
   };
 
-  Person.fieldLabelsMap = {
+  Person.fieldLabelsMap = Object.assign({}, Person.fieldLabelsMap, {
     'firstName': 'LNG_CASE_FIELD_LABEL_FIRST_NAME',
     'middleName': 'LNG_CASE_FIELD_LABEL_MIDDLE_NAME',
     'lastName': 'LNG_CASE_FIELD_LABEL_LAST_NAME',
@@ -38,7 +56,7 @@ module.exports = function (Person) {
     'incubationDates': 'LNG_CASE_FIELD_LABEL_INCUBATION_DATES',
     'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
-  };
+  });
 
   Person.referenceDataFields = [
     'gender',
@@ -81,6 +99,11 @@ module.exports = function (Person) {
     'address.geoLocation'
   ];
 
+  Person.locationFields = [
+    'addresses[].locationId',
+    'address.locationId'
+  ];
+
   /**
    * Construct and return the display name of the person
    */
@@ -111,4 +134,101 @@ module.exports = function (Person) {
       }, '');
     }
   };
+
+  // helper function used to update a person's address geo location based on city/coutnry/adress lines
+  // it queries the maps service to get the actual locations on the map
+  // then updates the record
+  const updateGeoLocations = function (ctx, addresses) {
+    // index is important, for update operation
+    let addressLines = addresses.map((addr) => {
+      if (!addr) {
+        return null;
+      }
+      return ['addressLine1', 'addressLine2', 'city', 'country', 'postalCode']
+        .filter((prop) => addr[prop])
+        .map((prop) => addr[prop])
+        .join();
+    });
+
+    // retrieve geo location for each address string
+    // then populate the address geo location
+    async.series(
+      addressLines.map(function (str) {
+        return function (done) {
+          if (!str || !mapsApi.isEnabled()) {
+            return done();
+          }
+          mapsApi.getGeoLocation(str, function (err, location) {
+            if (err) {
+              // error is logged inside the fn
+              return done();
+            }
+            return done(null, location);
+          });
+        };
+      }),
+      function (err, locations) {
+        Person.findById(ctx.instance.id, (err, instance) => {
+          if (!instance) {
+            return;
+          }
+
+          // create an addresses map and set value to true for the ones
+          // that should not be taken into consideration during update hook
+          // this is done plainly for default geo location value (undefined)
+          ctx.options = ctx.options || {};
+          ctx.options.addressesMap = [];
+
+          let addressCopy = instance.addresses.map((item, idx) => {
+            item = item.toObject();
+
+            // hack to know that this address index should be left unchanged on next update hook
+            ctx.options.addressesMap[idx] = true;
+
+            if (locations[idx]) {
+              item.geoLocation = locations[idx];
+            }
+
+            return item;
+          });
+
+          // update addresses array
+          instance.updateAttribute('addresses', addressCopy, ctx.options);
+        });
+      }
+    );
+  };
+
+  /**
+   * If address is present in the request, make sure we're getting its geo location from external API
+   * We only do this if googleApi.apiKey is present in the config
+   */
+  Person.observe('after save', function (ctx, next) {
+    // cache instance reference, used in many places below
+    let instance = ctx.instance;
+
+    // defensive checks
+    if (Array.isArray(instance.addresses)) {
+      // set address items that have geo location as undefined
+      let filteredAddresses = instance.addresses.map((addr, index) => {
+        // if the geo location is filled manually or generated, leave it
+        // plainly used for case when an update has been made and the hook executed one more time
+        if ((_.get(ctx, 'options.addressesMap') && ctx.options.addressesMap[index]) || addr.geoLocation) {
+          return null;
+        }
+        return addr;
+      });
+
+      // if all the addresses have geo location generated just stop
+      if (filteredAddresses.every((addr) => addr === null)) {
+        return next();
+      }
+
+      // update geo locations, do not check anything
+      updateGeoLocations(ctx, filteredAddresses);
+    }
+
+    // do not wait for the above operation to stop
+    return next();
+  });
 };

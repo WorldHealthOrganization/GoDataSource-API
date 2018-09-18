@@ -33,5 +33,17 @@
     "level": "debug",
     "maxSize": 1000000,
     "maxFiles": 10
+  },
+  "updatesServer": {
+    "host": "localhost",
+    "protocol": "http",
+    "port": 3001
+  },
+  "asyncActionsSettings": {
+    "intervalTimeout": "10000",
+    "actionTimeout": "600000"
+  },
+  "googleApi": {
+    "apiKey": ""
   }
 }

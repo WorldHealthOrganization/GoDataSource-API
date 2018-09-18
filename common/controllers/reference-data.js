@@ -54,7 +54,12 @@ module.exports = function (ReferenceData) {
    * @param callback
    */
   ReferenceData.prototype.getUsage = function (filter, callback) {
-    ReferenceData.findModelUsage(this.id, filter, false, callback);
+    ReferenceData
+      .findModelUsage(this.id, filter, false)
+      .then(function (usage) {
+        callback(null, usage);
+      })
+      .catch(callback);
   };
 
   /**
@@ -63,16 +68,16 @@ module.exports = function (ReferenceData) {
    * @param callback
    */
   ReferenceData.prototype.countUsage = function (where, callback) {
-    ReferenceData.findModelUsage(this.id, {where: where}, true, function (error, results) {
-      if (error) {
-        return callback(error);
-      }
-      callback(null,
-        // count all of the results
-        Object.values(results).reduce(function (a, b) {
-          return a + b;
-        }));
-    });
+    ReferenceData
+      .findModelUsage(this.id, {where: where}, true)
+      .then(function (results) {
+        callback(null,
+          // count all of the results
+          Object.values(results).reduce(function (a, b) {
+            return a + b;
+          }));
+      })
+      .catch(callback);
   };
 
   /**
@@ -156,7 +161,9 @@ module.exports = function (ReferenceData) {
           // parse file content
           const rawReferenceDataList = JSON.parse(file);
           // remap properties & values
-          const referenceDataList = app.utils.helpers.remapProperties(rawReferenceDataList, body.map, body.valuesMap);
+          const referenceDataList = app.utils.helpers.convertBooleanProperties(
+            ReferenceData,
+            app.utils.helpers.remapProperties(rawReferenceDataList, body.map, body.valuesMap));
           // build a list of sync operations
           const syncReferenceData = [];
           // define a container for error results

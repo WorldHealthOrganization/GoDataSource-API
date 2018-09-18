@@ -19,7 +19,8 @@
   "scope": {
     "where": {
       "type": "case"
-    }
+    },
+    "order": ["lastName ASC", "firstName ASC"]
   },
   "properties": {
     "type": {
@@ -27,6 +28,14 @@
       "required": true,
       "default": "case",
       "readOnly": true
+    },
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "gender": {
+      "type": "string",
+      "required": true
     },
     "dateOfInfection": {
       "type": "date"
