@@ -154,9 +154,9 @@ module.exports = function (Location) {
         where: {
           id: {
             in: locationsToRetrieve
-          },
-          order: 'name ASC'
-        }
+          }
+        },
+        order: 'name ASC'
       })
       .then(function (locations) {
         // if locations found
