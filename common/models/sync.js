@@ -448,7 +448,7 @@ module.exports = function (Sync) {
     // depending on the asynchronous flag we need to return directly the response or wait do checks to see if the export was successful
     if (asynchronous) {
       // export is async
-      app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export is being done in sync mode`);
+      app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export is being done in async mode`);
       return client.triggerUpstreamServerDatabaseExport(filter)
         .then(function (databaseExportLogId) {
           app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export: received upstream server DB export log id: ${databaseExportLogId}`);
