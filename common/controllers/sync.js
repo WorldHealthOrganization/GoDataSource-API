@@ -559,7 +559,7 @@ module.exports = function (Sync) {
         return new Promise(function (resolve, reject) {
           Sync.syncDatabaseWithSnapshot(upstreamServerDBSnapshotFileName, syncLogEntry, syncLogEntry.outbreakIDs, options, data.triggerBackupBeforeSync, function (err) {
             if (err) {
-              reject(err);
+              return reject(err);
             }
 
             // sync was successful

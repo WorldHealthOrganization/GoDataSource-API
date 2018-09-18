@@ -345,6 +345,10 @@ module.exports = function (Sync) {
       return client.sendDBSnapshotForImport(DBSnapshotFileName, asynchronous)
         .then(function (syncLogId) {
           app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import: received upstream server sync log id: ${syncLogId}`);
+          // initialize container for server sync log entry status check connection error
+          // will be updated only with connection errors
+          let statusCheckConnectionError = null;
+
           // import started and syncLog entry was created
           // need to check at defined intervals the syncLog entry status
           // checking until a defined period passes
@@ -362,7 +366,7 @@ module.exports = function (Sync) {
               // return error
               reject(app.utils.apiError.getError('UPSTREAM_SERVER_SYNC_FAILED', {
                 upstreamServerName: client.upstreamServerName,
-                failReason: `Upstream server sync status was not updated in time (${asyncActionsSettings.actionTimeout} milliseconds)`
+                failReason: `Upstream server sync status was not updated in time (${asyncActionsSettings.actionTimeout} milliseconds). ${statusCheckConnectionError ? `Latest status check error was a connection error: ${statusCheckConnectionError}` : ''}`
               }));
             }, asyncActionsSettings.actionTimeout);
 
@@ -370,6 +374,9 @@ module.exports = function (Sync) {
             function getSyncLogEntry() {
               client.getSyncLogEntry(syncLogId)
                 .then(function (serverSyncLogEntry) {
+                  // remove any saved status Check Connection Error
+                  statusCheckConnectionError = null;
+
                   // check sync status
                   if (serverSyncLogEntry.status === 'LNG_SYNC_STATUS_IN_PROGRESS') {
                     // upstream server import is in progress; nothing to do
@@ -398,6 +405,9 @@ module.exports = function (Sync) {
                 .catch(function (err) {
                   // syncLogEntry couldn't be retrieved; log error; will retry on the next interval
                   app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import: Couldn't check upstream server sync status. Retrying after the next interval. Error ${err}`);
+                  // save status check connection error
+                  statusCheckConnectionError = err;
+
                   // check again after the interval has passed
                   actionTimeout = setTimeout(getSyncLogEntry, asyncActionsSettings.intervalTimeout);
                 });
@@ -452,6 +462,10 @@ module.exports = function (Sync) {
       return client.triggerUpstreamServerDatabaseExport(filter)
         .then(function (databaseExportLogId) {
           app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export: received upstream server DB export log id: ${databaseExportLogId}`);
+          // initialize container for export log entry status check connection error
+          // will be updated only with connection errors
+          let statusCheckConnectionError = null;
+
           // export started and exportLog entry was created
           // need to check at defined intervals the exportLog entry status
           // checking until a defined period passes
@@ -469,7 +483,7 @@ module.exports = function (Sync) {
               // return error
               reject(app.utils.apiError.getError('UPSTREAM_SERVER_EXPORT_FAILED', {
                 upstreamServerName: client.upstreamServerName,
-                failReason: `Upstream server DB export status was not updated in time (${asyncActionsSettings.actionTimeout} milliseconds)`
+                failReason: `Upstream server DB export status was not updated in time (${asyncActionsSettings.actionTimeout} milliseconds). ${statusCheckConnectionError ? `Latest status check error was a connection error: ${statusCheckConnectionError}` : ''}`
               }));
             }, asyncActionsSettings.actionTimeout);
 
@@ -477,6 +491,9 @@ module.exports = function (Sync) {
             function getExportLogEntry() {
               client.getExportLogEntry(databaseExportLogId)
                 .then(function (exportLogEntry) {
+                  // remove any saved status Check Connection Error
+                  statusCheckConnectionError = null;
+
                   // check export status
                   if (exportLogEntry.status === 'LNG_SYNC_STATUS_IN_PROGRESS') {
                     // upstream server export is in progress; nothing to do
@@ -505,6 +522,9 @@ module.exports = function (Sync) {
                 .catch(function (err) {
                   // exportLogEntry couldn't be retrieved; log error; will retry on the next interval
                   app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export: Couldn't check upstream server DB export status. Retrying after the next interval. Error ${err}`);
+                  // save status check connection error
+                  statusCheckConnectionError = err;
+
                   // check again after the interval has passed
                   actionTimeout = setTimeout(getExportLogEntry, asyncActionsSettings.intervalTimeout);
                 });

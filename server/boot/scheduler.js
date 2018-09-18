@@ -19,7 +19,45 @@ const shouldExecute = function (startTime, interval, timeUnit) {
   return moment.duration(moment().diff(startTime))[unitsMap[timeUnit]]() >= interval;
 };
 
+// initialize ID to be set as createdBy for automatic sync
+const automaticSyncID = 'Scheduled automatic sync';
+
 module.exports = function (app) {
+  /**
+   * Trigger automatic sync
+   * @param server
+   */
+  function triggerAutomaticSync(server) {
+    // initialize sync params
+    let data = {
+      upstreamServerURL: server.url
+    };
+    // create options; Keeping only the details required for audit log
+    let options = {
+      remotingContext: {
+        req: {
+          authData: {
+            user: {
+              id: automaticSyncID
+            }
+          },
+          headers: {},
+          connection: {}
+        }
+      }
+    };
+
+    app.logger.debug(`Scheduled automatic sync: Started sync with server '${server.name}'`);
+    // start the sync process
+    app.models.sync.sync(data, options, function (err, syncLogId) {
+      if (err) {
+        app.logger.debug(`Scheduled automatic sync: Sync with server '${server.name}' failed with error: ${err}`);
+      } else {
+        app.logger.debug(`Scheduled automatic sync: Sync with server '${server.name}' is progressing having sync log ID ${syncLogId}`);
+      }
+    });
+  }
+
   // routines configuration file path
   let routinesConfigFilePath = path.resolve(__dirname, 'scheduler.json');
 
@@ -206,35 +244,7 @@ module.exports = function (app) {
                 // save the last execution time to now
                 routinesEntry.lastExecutedTime = moment();
 
-                // start sync
-                // initialize sync params
-                let data = {
-                  upstreamServerURL: server.url
-                };
-                // create options; Keeping only the details required for audit log
-                let options = {
-                  remotingContext: {
-                    req: {
-                      authData: {
-                        user: {
-                          id: 'Scheduled automatic sync'
-                        }
-                      },
-                      headers: {},
-                      connection: {}
-                    }
-                  }
-                };
-
-                app.logger.debug(`Scheduled automatic sync: Started sync with server '${server.name}'`);
-                // start the sync process
-                app.models.sync.sync(data, options, function (err, syncLogId) {
-                  if (err) {
-                    app.logger.debug(`Scheduled automatic sync: Sync with server '${server.name}' failed with error: ${err}`);
-                  } else {
-                    app.logger.debug(`Scheduled automatic sync: Sync with server '${server.name}' is progressing having sync log ID ${syncLogId}`);
-                  }
-                });
+                triggerAutomaticSync(server);
               }
             } else {
               // create entry for the server in the routinesConfig with
@@ -249,6 +259,55 @@ module.exports = function (app) {
         })
         .catch(function (err) {
           app.logger.debug(`Scheduler: Failed to schedule automatic sync. Error: ${err}`);
+        });
+
+      return done();
+    },
+    // start sync with upstream server if the latest automatic sync failed because of connection error
+    (done) => {
+      // get system settings
+      app.models.systemSettings
+        .getCache()
+        .then(function (systemSettings) {
+          // get upstream servers that have sync enabled and syncInterval configured (!==0)
+          let serversToSync = systemSettings.upstreamServers.filter(function (server) {
+            return server.syncEnabled && server.syncInterval > 0;
+          });
+
+          // initialize promises array
+          let promises = [];
+
+          // loop through the servers to sync and check if the latest automatic sync was failed
+          serversToSync.forEach(function (server) {
+            // get latest sync log entry
+            promises.push(app.models.syncLog
+              .findOne({
+                where: {
+                  syncServerUrl: server.url
+                },
+                order: 'actionStartDate DESC'
+              })
+              .then(function (syncLogEntry) {
+                // check if the sync was an automatic sync and it failed with connection error
+                if (syncLogEntry &&
+                  syncLogEntry.status === 'LNG_SYNC_STATUS_FAILED' &&
+                  syncLogEntry.createdBy === automaticSyncID &&
+                  syncLogEntry.failReason.indexOf('EXTERNAL_API_CONNECTION_ERROR') !== -1
+                ) {
+                  app.logger.debug(`Scheduler: Latest automatic sync failed with connection error. Triggering a new sync.`);
+                  // trigger a new sync
+                  triggerAutomaticSync(server);
+                } else {
+                  // nothing to do
+                }
+              })
+            );
+          });
+
+          return Promise.all(promises);
+        })
+        .catch(function (err) {
+          app.logger.debug(`Scheduler: Failed to check for failed automatic sync. Error: ${err}`);
         });
 
       return done();
