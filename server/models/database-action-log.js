@@ -19,7 +19,7 @@ module.exports = function (DatabaseActionLog) {
         failReason: 'Application was restarted before finalizing the sync/export action'
       })
       .then(function (info) {
-        app.logger.debug(`Startup: Failed ${info.count} sync/export actions that were 'in progress' after application restart`);
+        app.logger.debug(`Startup: ${info.count} sync/export actions that were 'in progress' after application restart. Changed status to failed`);
       })
       .catch(function (err) {
         app.logger.debug(`Startup: Update of 'in progress' sync/export actions status failed. Error: ${err}`);
