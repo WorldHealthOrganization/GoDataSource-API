@@ -33,6 +33,11 @@ const defaultSettings = {
   }
 };
 
+// initialize action options; set _init flag to prevent execution of some after save scripts
+let options = {
+  _init: true
+};
+
 /**
  * Run initiation
  * @param callback
@@ -46,9 +51,9 @@ function run(callback) {
     .findOne()
     .then(function (systemSettings) {
       if (systemSettings) {
-        return systemSettings.updateAttributes(defaultSettings);
+        return systemSettings.updateAttributes(defaultSettings, options);
       } else {
-        return SystemSettings.create(defaultSettings);
+        return SystemSettings.create(defaultSettings, options);
       }
     })
     .then(function () {

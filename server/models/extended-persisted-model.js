@@ -133,8 +133,8 @@ module.exports = function (ExtendedPersistedModel) {
    */
   ExtendedPersistedModel.observe('after save', function (context, callback) {
     // check if the update is not already in a sync action
-    // we won't sync on changes done in a sync action
-    if (context.options._sync) {
+    // we won't sync on changes done in a sync action or init action
+    if (context.options._sync || context.options._init) {
       return callback();
     }
 
@@ -179,7 +179,7 @@ module.exports = function (ExtendedPersistedModel) {
         return callback();
       })
       .catch(function (err) {
-        app.logger.debug(`Failed to get the system settings to check is any upstream server is configured for sync on every change. Error: ${err}`);
+        app.logger.debug(`Failed to get the system settings to check if any upstream server is configured for sync on every change. Error: ${err}`);
       });
   });
 };
