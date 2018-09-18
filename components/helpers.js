@@ -1054,7 +1054,7 @@ const convertBooleanProperties = function (Model, dataSet) {
     // check each property that is supposed to be boolean
     Model._booleanProperties.forEach(function (booleanProperty) {
       // if it has a value but the value is not boolean
-      if (record[booleanProperty] !== undefined && typeof record[booleanProperty] !== 'boolean') {
+      if (record[booleanProperty] != null && typeof record[booleanProperty] !== 'boolean') {
         // convert it to boolean value
         record[booleanProperty] = ['1', 'true'].includes(record[booleanProperty].toString().toLowerCase());
       }
