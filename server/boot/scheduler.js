@@ -16,7 +16,7 @@ const shouldExecute = function (startTime, interval, timeUnit) {
     m: 'minutes',
     d: 'days'
   };
-  return moment.duration(moment().diff(startTime))[unitsMap[timeUnit]]() > interval;
+  return moment.duration(moment().diff(startTime))[unitsMap[timeUnit]]() >= interval;
 };
 
 module.exports = function (app) {
@@ -170,7 +170,7 @@ module.exports = function (app) {
           failReason: `Sync/export action was 'in progress' for more than ${actionCleanupInterval} hours`
         })
         .then(function (info) {
-          app.logger.debug(`Scheduler: Failed ${info.count} sync/export actions that were 'in progress' for more than ${actionCleanupInterval} hours`);
+          app.logger.debug(`Scheduler: ${info.count} sync/export actions that were 'in progress' for more than ${actionCleanupInterval} hours. Changed status to failed`);
         })
         .catch(function (err) {
           app.logger.debug(`Scheduler: Update of 'in progress' sync/export actions status failed. Error: ${err}`);
