@@ -5,6 +5,7 @@ const moment = require('moment');
 const async = require('async');
 const fs = require('fs');
 const path = require('path');
+const syncActionsSettings = require('../../server/config.json').sync;
 
 // function used to check if a routine should be executed or not
 // if executed return an execution time, needed for further execution
@@ -150,6 +151,107 @@ module.exports = function (app) {
         }
         return done();
       });
+    },
+    // fail sync actions started more than a configured period ago
+    (done) => {
+      // get configuration param; action cleanup interval is in hours
+      let actionCleanupInterval = syncActionsSettings.actionCleanupInterval || 24;
+
+      // fail any in progress sync/export actions;
+      // the sync/export action might have been successful and the sync/export log update action failed
+      app.models.databaseActionLog
+        .updateAll({
+          status: 'LNG_SYNC_STATUS_IN_PROGRESS',
+          actionStartDate: {
+            lt: new Date(moment().subtract(actionCleanupInterval, 'hours'))
+          }
+        }, {
+          status: 'LNG_SYNC_STATUS_FAILED',
+          failReason: `Sync/export action was 'in progress' for more than ${actionCleanupInterval} hours`
+        })
+        .then(function (info) {
+          app.logger.debug(`Scheduler: Failed ${info.count} sync/export actions that were 'in progress' for more than ${actionCleanupInterval} hours`);
+        })
+        .catch(function (err) {
+          app.logger.debug(`Scheduler: Update of 'in progress' sync/export actions status failed. Error: ${err}`);
+        });
+
+      return done();
+    },
+    // run automatic sync after the configured period of time
+    (done) => {
+      // get system settings
+      app.models.systemSettings
+        .getCache()
+        .then(function (systemSettings) {
+          // initialize routinesConfig entry for sync if not already initialize
+          routinesConfig.sync = routinesConfig.sync || {};
+
+          // get upstream servers that have sync enabled and syncInterval configured (!==0)
+          let serversToSync = systemSettings.upstreamServers.filter(function (server) {
+            return server.syncEnabled && server.syncInterval > 0;
+          });
+
+          // loop through the servers to sync an start the sync if the required time has passed
+          // if no entry for the server is found in the routinesConfig then add an entry for the server
+          serversToSync.forEach(function (server) {
+            // check if there is an entry for the server in the routinesConfig
+            if (routinesConfig.sync[server.url]) {
+              // check schedule and start sync if needed
+              // update interval as the systemSettings might have changed
+              let routinesEntry = routinesConfig.sync[server.url];
+              routinesEntry.interval = server.syncInterval;
+
+              if (shouldExecute(routinesEntry.lastExecutedTime || routinesEntry.startTime, routinesEntry.interval, routinesEntry.timeUnit)) {
+                // save the last execution time to now
+                routinesEntry.lastExecutedTime = moment();
+
+                // start sync
+                // initialize sync params
+                let data = {
+                  upstreamServerURL: server.url
+                };
+                // create options; Keeping only the details required for audit log
+                let options = {
+                  remotingContext: {
+                    req: {
+                      authData: {
+                        user: {
+                          id: 'Scheduled automatic sync'
+                        }
+                      },
+                      headers: {},
+                      connection: {}
+                    }
+                  }
+                };
+
+                app.logger.debug(`Scheduled automatic sync: Started sync with server '${server.name}'`);
+                // start the sync process
+                app.models.sync.sync(data, options, function (err, syncLogId) {
+                  if (err) {
+                    app.logger.debug(`Scheduled automatic sync: Sync with server '${server.name}' failed with error: ${err}`);
+                  } else {
+                    app.logger.debug(`Scheduled automatic sync: Sync with server '${server.name}' is progressing having sync log ID ${syncLogId}`);
+                  }
+                });
+              }
+            } else {
+              // create entry for the server in the routinesConfig with
+              routinesConfig.sync[server.url] = {
+                startTime: moment(),
+                lastExecutedTime: null,
+                timeUnit: 'h',
+                interval: server.syncInterval
+              }
+            }
+          });
+        })
+        .catch(function (err) {
+          app.logger.debug(`Scheduler: Failed to schedule automatic sync. Error: ${err}`);
+        });
+
+      return done();
     }
   ];
 

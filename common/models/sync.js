@@ -591,5 +591,5 @@ module.exports = function (Sync) {
     } else {
       // no pending sync; nothing to do
     }
-  }
+  };
 };

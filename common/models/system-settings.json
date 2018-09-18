@@ -25,7 +25,10 @@
     },
     "sync": {
       "type": {
-        "triggerBackupBeforeSync": "boolean"
+        "triggerBackupBeforeSync": {
+          "type": "boolean",
+          "description": "Flag to specify if a DB backup is done before a sync action"
+        }
       }
     },
     "dataBackup": {

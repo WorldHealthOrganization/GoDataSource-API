@@ -44,8 +44,9 @@
   },
   "sync": {
     "asyncActionsSettings": {
-      "intervalTimeout": "10000",
-      "actionTimeout": "600000"
-    }
+      "intervalTimeout": 10000,
+      "actionTimeout": 600000
+    },
+    "actionCleanupInterval": 24
   }
 }

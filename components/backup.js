@@ -263,7 +263,7 @@ const removeBackups = function (currentDate) {
 const preRoutine = function (done) {
   // retrieve system settings and get backup timings
   app.models.systemSettings
-    .findOne()
+    .getCache()
     .then((systemSettings) => {
       // data backup configuration is not available, do nothing
       if (!systemSettings.dataBackup) {
