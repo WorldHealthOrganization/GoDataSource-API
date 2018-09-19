@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 /**
  * Check if a model is monitored for logging
  * @param model
@@ -85,12 +87,12 @@ module.exports = function (Model) {
         // single record update
         if (context.currentInstance) {
           if (context.data.deleted && context.data.deleted !== context.currentInstance.deleted) {
-            context.options.softDeleteEvent = true;
+            _.set(context, `options._instance[${context.currentInstance.id}].softDeleteEvent`, true);
             return Model.notifyObserversOf('before delete', context, callback);
           }
           // batch update
         } else if (context.data.deleted && context.where) {
-          context.options.softDeleteEvent = true;
+          _.set(context, `options._instance[batch_${model.modelName}].softDeleteEvent`, true);
           return Model.notifyObserversOf('before delete', context, callback);
         }
       }
@@ -103,7 +105,10 @@ module.exports = function (Model) {
    */
   Model.observe('after save', function (context, callback) {
     if (isMonitoredModel(Model)) {
-      if (context.options.softDeleteEvent) {
+      if (
+        _.get(context, `options._instance[${context.instance.id}].softDeleteEvent`) ||
+        _.get(context, `options._instance[batch_${model.modelName}].softDeleteEvent`)
+      ) {
         return Model.notifyObserversOf('after delete', context, callback);
       }
     }

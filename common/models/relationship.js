@@ -396,7 +396,9 @@ module.exports = function (Relationship) {
             scope: {
               limit: 1,
               order: 'contactDate DESC',
-              active: true
+              where: {
+                active: true
+              }
             }
           }
         })
@@ -416,6 +418,8 @@ module.exports = function (Relationship) {
             app.logger.error(`Error when updating contact follow-up dates. Contact ID: ${contactId}. Outbreak was not found.`);
             return;
           }
+          // keep a flag for updating contact
+          let shouldUpdate = false;
           // build a list of properties that need to be updated
           let propsToUpdate = {};
           // preserve original startDate, if any
@@ -430,14 +434,46 @@ module.exports = function (Relationship) {
             propsToUpdate.startDate = relationship.contactDate;
             // if follow-up original start date was not previously set
             if (!propsToUpdate.originalStartDate) {
+              // flag as an update
+              shouldUpdate = true;
               // set it as follow-up start date
               propsToUpdate.originalStartDate = propsToUpdate.startDate;
             }
             // set follow-up end date
             propsToUpdate.endDate = moment(relationship.contactDate).add(outbreak.periodOfFollowup, 'days');
           }
-          // update contact
-          return contactInstance.updateAttribute('followUp', propsToUpdate, context.options);
+          // check if contact instance should be updated (check if any property changed value)
+          !shouldUpdate && ['startDate', 'endDate']
+            .forEach(function (updatePropName) {
+              // if the property is missing (probably never, but lets be safe)
+              if (!contactInstance.followUp) {
+                // flag as an update
+                return shouldUpdate = true;
+              }
+              // if either original or new value was not set (when the other was persent)
+              if (
+                !contactInstance.followUp[updatePropName] && propsToUpdate[updatePropName] ||
+                contactInstance.followUp[updatePropName] && !propsToUpdate[updatePropName]
+              ) {
+                // flag as an update
+                return shouldUpdate = true;
+              }
+              // both original and new values are present, but the new values are different than the old ones
+              if (
+                contactInstance.followUp[updatePropName] &&
+                propsToUpdate[updatePropName] &&
+                ((new Date(contactInstance.followUp[updatePropName])).getTime() !== (new Date(propsToUpdate[updatePropName])).getTime())
+              ) {
+                // flag as an update
+                return shouldUpdate = true;
+              }
+            });
+
+          // if updates are required
+          if (shouldUpdate) {
+            // update contact
+            return contactInstance.updateAttribute('followUp', propsToUpdate, context.options);
+          }
         })
         .then(function () {
           callback();

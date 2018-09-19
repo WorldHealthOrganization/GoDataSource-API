@@ -207,9 +207,20 @@ module.exports = function (Person) {
   Person.observe('before save', function (context, next) {
     const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
     // if case classification was changed
-    if (!context.isNewInstance && data.source.existing.classification !== data.source.updated.classification) {
-      // set a flag on context
-      context.options.caseClassificationChanged = true;
+    if (
+      (
+        !context.isNewInstance &&
+        data.source.existingRaw.type === 'case'
+        && data.source.existing.classification !== data.source.updated.classification
+      ) &&
+      (
+        // classification changed to/from discarded
+        app.models.case.nonDiscardedCaseClassifications.includes(data.source.existing.classification) ||
+        app.models.case.nonDiscardedCaseClassifications.includes(data.source.updated.classification)
+      )
+    ) {
+      // set a flag on context to trigger relationship updated due to significant changes in case classification (from/to discarded case)
+      context.options.triggerRelationshipUpdates = true;
     }
     next();
   });
@@ -225,8 +236,8 @@ module.exports = function (Person) {
     /**
      * When case classification changes, relations need to be notified because they have business logic associated with case classification
      */
-    // if a case was updated with a different classification
-    if (!ctx.isNewInstance && instance.type === 'case' && ctx.options.caseClassificationChanged) {
+    // if a case was updated and relationship updates need to be triggered
+    if (!ctx.isNewInstance && instance.type === 'case' && ctx.options.triggerRelationshipUpdates) {
       // find all of its relationships with a contact
       app.models.relationship
         .find({

@@ -1090,11 +1090,13 @@ const getSourceAndTargetFromModelHookContext = function (context) {
       // get data
       result.source = {
         existing: context.instance.toJSON(),
+        existingRaw: context.instance,
         updated: {}
       };
     } else {
       result.source = {
         existing: context.instance,
+        existingRaw: context.instance,
         updated: {}
       };
     }
@@ -1104,12 +1106,14 @@ const getSourceAndTargetFromModelHookContext = function (context) {
     if (typeof context.currentInstance.toJSON === 'function') {
       result.source = {
         existing: context.currentInstance.toJSON(),
-        updated: {}
+        existingRaw: context.currentInstance,
+        updated: context.data
       };
     } else {
       result.source = {
         existing: context.currentInstance,
-        updated: {}
+        existingRaw: context.currentInstance,
+        updated: context.data
       };
     }
     result.target = context.data;
