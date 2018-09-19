@@ -254,7 +254,7 @@ module.exports = function (app) {
                 lastExecutedTime: null,
                 timeUnit: 'h',
                 interval: server.syncInterval
-              }
+              };
             }
           });
         })

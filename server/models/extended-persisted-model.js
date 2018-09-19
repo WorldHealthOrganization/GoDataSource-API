@@ -2,7 +2,6 @@
 
 const app = require('../../server/server');
 const dbSync = require('../../components/dbSync');
-const _ = require('lodash');
 
 module.exports = function (ExtendedPersistedModel) {
   // shortcut to Extended Persisted Model
