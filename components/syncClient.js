@@ -336,6 +336,35 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
         });
     });
   };
+
+  /**
+   * Get server version
+   * @returns {Promise}
+   */
+  this.getServerVersion = function () {
+    let requestOptions = Object.assign({}, this.options, {
+      method: 'GET',
+      uri: 'system-settings/version',
+      json: true
+    });
+
+    let that = this;
+
+    return new Promise(function (resolve, reject) {
+      // get system version
+      that.sendRequest(requestOptions, function (error, response, body) {
+        // get error response depending on error and response status code
+        error = that.getErrorResponse(error, response);
+
+        if (error) {
+          return reject(error);
+        } else {
+          // return response
+          resolve(body);
+        }
+      });
+    });
+  };
 };
 
 module.exports = SyncClient;

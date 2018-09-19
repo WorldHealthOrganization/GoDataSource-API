@@ -1,5 +1,5 @@
 {
-  "name": "upstreamServerURL",
+  "name": "syncParameters",
   "base": "Model",
   "idInjection": false,
   "options": {
@@ -12,6 +12,10 @@
     "upstreamServerURL": {
       "type": "string",
       "required": true
+    },
+    "triggerBackupBeforeSync": {
+      "type": "boolean",
+      "description": "Flag to specify whether before the sync import action a backup should be triggered. If the flag is not sent the System settings triggerBackupBeforeSync flag will be used"
     }
   },
   "validations": [],

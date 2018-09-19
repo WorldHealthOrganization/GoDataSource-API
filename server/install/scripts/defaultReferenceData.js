@@ -4,6 +4,12 @@ const app = require('../../server');
 const referenceData = app.models.referenceData;
 const defaultReferenceData = require('./defaultReferenceData.json');
 
+// initialize action options; set _init, _sync flags to prevent execution of some after save scripts
+let options = {
+  _init: true,
+  _sync: true
+};
+
 /**
  * Run initiation
  * @param callback
@@ -29,9 +35,7 @@ function run(callback) {
                 description: `${referenceDataItemKey}_DESCRIPTION`,
                 categoryId: referenceDataCategory,
                 readOnly: true
-              }, {
-                _sync: true
-              });
+              }, options);
             }
             return foundReferenceData;
           })
