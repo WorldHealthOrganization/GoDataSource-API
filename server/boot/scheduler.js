@@ -6,6 +6,7 @@ const async = require('async');
 const fs = require('fs');
 const path = require('path');
 const syncActionsSettings = require('../../server/config.json').sync;
+const SyncClient = require('../../components/syncClient');
 
 // function used to check if a routine should be executed or not
 // if executed return an execution time, needed for further execution
@@ -294,9 +295,21 @@ module.exports = function (app) {
                   syncLogEntry.createdBy === automaticSyncID &&
                   syncLogEntry.failReason.indexOf('EXTERNAL_API_CONNECTION_ERROR') !== -1
                 ) {
-                  app.logger.debug(`Scheduler: Latest automatic sync failed with connection error. Triggering a new sync.`);
-                  // trigger a new sync
-                  triggerAutomaticSync(server);
+                  app.logger.debug(`Scheduler: Latest automatic sync with server '${server.name}' failed with connection error. Checking if connection was re-established.`);
+
+                  let client = new SyncClient(server, {
+                    id: automaticSyncID
+                  });
+                  client
+                    .getServerVersion()
+                    .then(function () {
+                      app.logger.debug(`Scheduler: Connection with server '${server.name}' was re-established. Triggering automatic sync`);
+                      // trigger a new sync
+                      triggerAutomaticSync(server);
+                    })
+                    .catch(function (err) {
+                      app.logger.debug(`Scheduler: Connection with server '${server.name}' couldn't be re-established. Error: ${err}`);
+                    });
                 } else {
                   // nothing to do
                 }
