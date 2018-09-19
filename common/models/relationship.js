@@ -450,7 +450,7 @@ module.exports = function (Relationship) {
                 // flag as an update
                 return shouldUpdate = true;
               }
-              // if either original or new value was not set (when the other was persent)
+              // if either original or new value was not set (when the other was present)
               if (
                 !contactInstance.followUp[updatePropName] && propsToUpdate[updatePropName] ||
                 contactInstance.followUp[updatePropName] && !propsToUpdate[updatePropName]
@@ -472,7 +472,10 @@ module.exports = function (Relationship) {
           // if updates are required
           if (shouldUpdate) {
             // update contact
-            return contactInstance.updateAttribute('followUp', propsToUpdate, context.options);
+            return contactInstance.updateAttributes({
+              followUp: propsToUpdate,
+              active: !!shouldUpdate.startDate
+            }, context.options);
           }
         })
         .then(function () {

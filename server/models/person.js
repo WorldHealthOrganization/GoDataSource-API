@@ -215,7 +215,7 @@ module.exports = function (Person) {
       ) &&
       (
         // classification changed to/from discarded
-        app.models.case.nonDiscardedCaseClassifications.includes(data.source.existing.classification) ||
+        app.models.case.nonDiscardedCaseClassifications.includes(data.source.existing.classification) !==
         app.models.case.nonDiscardedCaseClassifications.includes(data.source.updated.classification)
       )
     ) {
