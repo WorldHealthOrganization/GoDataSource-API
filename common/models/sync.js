@@ -355,8 +355,13 @@ module.exports = function (Sync) {
           return new Promise(function (resolve, reject) {
             app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import: Checking upstream server sync status for ${asyncActionsSettings.actionTimeout} milliseconds at an interval of ${asyncActionsSettings.intervalTimeout} milliseconds`);
             let totalActionsTimeout, actionTimeout;
+            // initialize flag to know when the totalActionsTimeout was reached
+            let totalActionsTimeoutReached = false;
             // create timeout until to check for sync log entry status
             totalActionsTimeout = setTimeout(function () {
+              // set totalActionsTimeoutReached to true
+              totalActionsTimeoutReached = true;
+
               // timeout is reached and the import action was not finished
               app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import failed. Upstream server sync status was not updated in time (${asyncActionsSettings.actionTimeout} milliseconds)`);
 
@@ -374,6 +379,13 @@ module.exports = function (Sync) {
             function getSyncLogEntry() {
               client.getSyncLogEntry(syncLogId)
                 .then(function (serverSyncLogEntry) {
+                  // check if the totalActionsTimeout was reached; there is a possibility that the totalActionsTimeout was reached but this function was already in execution
+                  // in that case nothing should happen in this function
+                  if(totalActionsTimeoutReached) {
+                    app.logger.debug(`Sync ${syncLogEntry.id}: Total action timeout was reached when the sync log check was in execution. Stopping sync log check response handling`);
+                    return;
+                  }
+
                   // remove any saved status Check Connection Error
                   statusCheckConnectionError = null;
 
@@ -403,6 +415,13 @@ module.exports = function (Sync) {
                   clearTimeout(totalActionsTimeout);
                 })
                 .catch(function (err) {
+                  // check if the totalActionsTimeout was reached; there is a possibility that the totalActionsTimeout was reached but this function was already in execution
+                  // in that case nothing should happen in this function
+                  if(totalActionsTimeoutReached) {
+                    app.logger.debug(`Sync ${syncLogEntry.id}: Total action timeout was reached when the sync log check was in execution. Stopping sync log check response handling`);
+                    return;
+                  }
+
                   // syncLogEntry couldn't be retrieved; log error; will retry on the next interval
                   app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import: Couldn't check upstream server sync status. Retrying after the next interval. Error ${err}`);
                   // save status check connection error
