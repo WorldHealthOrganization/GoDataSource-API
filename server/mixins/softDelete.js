@@ -92,7 +92,7 @@ module.exports = function (Model) {
           }
           // batch update
         } else if (context.data.deleted && context.where) {
-          _.set(context, `options._instance[batch_${model.modelName}].softDeleteEvent`, true);
+          _.set(context, `options._instance[batch_${Model.modelName}].softDeleteEvent`, true);
           return Model.notifyObserversOf('before delete', context, callback);
         }
       }
@@ -107,7 +107,7 @@ module.exports = function (Model) {
     if (isMonitoredModel(Model)) {
       if (
         _.get(context, `options._instance[${context.instance.id}].softDeleteEvent`) ||
-        _.get(context, `options._instance[batch_${model.modelName}].softDeleteEvent`)
+        _.get(context, `options._instance[batch_${Model.modelName}].softDeleteEvent`)
       ) {
         return Model.notifyObserversOf('after delete', context, callback);
       }
