@@ -19,7 +19,8 @@
   "scope": {
     "where": {
       "type": "contact"
-    }
+    },
+    "order": ["lastName ASC", "firstName ASC"]
   },
   "properties": {
     "type": {

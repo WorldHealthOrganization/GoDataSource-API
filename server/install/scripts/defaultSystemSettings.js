@@ -15,7 +15,7 @@ const defaultSettings = {
     ],
     'backupInterval': 24,
     'dataRetentionInterval': 90,
-    'location': 'backups'
+    'location': `${__dirname}/../../../backups`
   },
   'anonymizeFields': {
     'case': [

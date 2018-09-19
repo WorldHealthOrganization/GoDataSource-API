@@ -262,10 +262,10 @@ const syncRecord = function (logger, model, record, options, done) {
         convertGeoPointToLoopbackFormat(record, model);
 
         log('debug', `Record found (id: ${record.id}), updating record`);
-        if (dbRecord.deleted) {
-          record.deleted = true;
-          // record was just deleted
-        } else if (
+
+        // record was just deleted
+        if (
+          !dbRecord.deleted &&
           record.deleted !== undefined &&
           (
             record.deleted === true ||
