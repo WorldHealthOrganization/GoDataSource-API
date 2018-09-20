@@ -1,138 +1,142 @@
 'use strict';
 
 const escapeRegExp = require('./escapeRegExp');
-const maskPattern = '(9*)(0+)|(9+)(0*)';
 
 /**
- * Check if a mask is valid. We only support numeric mask placeholders (9, 0). The string must not contain š (it's a special symbol used in the code).
- * 9 - optional digit placeholder
- * 0 - digit placeholder
+ * Check if a mask is valid. Supported chars (in addition to any other literal)
+ * 0 - digit
+ * 9 - sequence number
+ * Y - year
+ * @ - letter
+ * & - any character
+ * Note: just one sequence number is accepted in a mask. E.g. Y99@ is supported while Y99@99& is not supported because
+ * it contains two sequence numbers (99 appears twice)
  * @param mask
  * @return {boolean}
  */
 function maskIsValid(mask) {
-  const maskRegExp = /^(?:(?!š).)*(?:9*0+|9+0*)[^š]*$/;
+  const maskRegExp = /^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$/;
   return maskRegExp.test(mask);
 }
 
 /**
- * Get mask placeholders
+ * Bulid mask regex string (not regular expression) to be used for searching next sequence
  * @param mask
- * @return {Array}
+ * @param maskToResolve
+ * @return {string|boolean}
  */
-function getMaskPlaceholders(mask) {
-  const placeholders = [];
-  const maskRegExp = new RegExp(maskPattern, 'g');
-  let match = maskRegExp.exec(mask);
-  while (match) {
-    // look for all group matches
-    [1, 2, 3, 4].forEach(function (groupMatch) {
-      if (match[groupMatch]) {
-        placeholders.push(match[groupMatch]);
-      }
-    });
-    match = maskRegExp.exec(mask);
+function getMaskRegExpStringForSearch(mask, maskToResolve) {
+  // escape regex input
+  mask = escapeRegExp(mask);
+  maskToResolve = escapeRegExp(maskToResolve);
+
+  // check if the mask is valid
+  if (!maskIsValid(mask)) {
+    return false;
   }
-  return placeholders;
+  // with special meaning
+  const replaceMap = {
+    // year
+    'YYYY': '\\d{4,4}',
+    // digit
+    0: '\\d',
+    // sequence digit (capture group)
+    9: '(\\d)',
+    // letter
+    '@': '[a-zA-Z]',
+    // any char
+    '&': '.'
+  };
+  // build regex string from mask by replacing chars with special meaning
+  Object.keys(replaceMap).forEach(function (supportedPlaceholder) {
+    mask = mask.replace(new RegExp(supportedPlaceholder, 'g'), replaceMap[supportedPlaceholder]);
+  });
+  // in order to correctly extract sequence placeholders, we need to isolate placeholder groups from the rest of the mask
+  const leftIndex = mask.indexOf('(');
+  const rightIndex = mask.lastIndexOf(')');
+  // isolate the placeholder groups from the rest of the mask by using wrapping them in RegExp groups
+  const groupedMask = new RegExp(`^(${mask.substring(0, leftIndex)})${mask.substring(leftIndex, rightIndex + 1)}(${mask.substring(rightIndex + 1)})$`);
+  // test if the mask that needs to be resolved matches the original mask
+  if (!groupedMask.test(maskToResolve)) {
+    return false;
+  }
+  // mask search string should contain all chars as literals except the ones used as sequence placeholders
+  return maskToResolve.replace(groupedMask, function () {
+    let placeholder = '';
+    // placeholder groups are in the middle (from 1 to last -1). Last two arguments are offset and string
+    for (let i = 1; i < (arguments.length - 4); i++) {
+      placeholder += '(\\d)';
+    }
+    // keep first and last group, replace the rest with placeholders
+    return `${arguments[1]}${placeholder}${arguments[arguments.length - 3]}`;
+  });
 }
 
 /**
  * Convert a mask to a regular expression
  * @param mask
+ * @param maskToResolve
  * @return {RegExp|boolean} Either RegExp or false
  */
-function convertMaskToSearchRegExp(mask) {
-  if (!maskIsValid(mask)) {
-    return false;
+function convertMaskToSearchRegExp(mask, maskToResolve) {
+  const maskString = getMaskRegExpStringForSearch(mask, maskToResolve);
+  if (maskString) {
+    return new RegExp(`^${maskString}$`);
   }
-  mask = `^${escapeRegExp(mask)}$`;
-  let maskPlaceholders = getMaskPlaceholders(mask);
-  maskPlaceholders.forEach(function (placeholder) {
-    // assume the digits are required
-    let replacer = '(\\d+)';
-    // if the digits are optional, update replacer
-    if (/9+/.test(placeholder)) {
-      replacer = '(\\d*)';
-    }
-    mask = mask.replace(placeholder, replacer);
-  });
-  return new RegExp(mask);
+  return false;
 }
 
 /**
- * Resolve mask. We only support numeric mask placeholders (9, 0). The string must not contain š (it's a special symbol used in the code).
- * 9 - optional digit placeholder
- * 0 - digit placeholder
+ * Resolve mask. Supported chars (in addition to any other literal)
+ * 0 - digit
+ * 9 - sequence number
+ * Y - year
+ * @ - letter
+ * & - any character
+ * Note: just one sequence number is accepted in a mask. E.g. Y99@ is supported while Y99@99& is not supported because
+ * it contains two sequence numbers (99 appears twice)
  * @param mask
+ * @param maskToResolve
  * @param numericValue
  * @param callback
  * @return {*}
  */
-function resolveMask(mask, numericValue, callback) {
+function resolveMask(mask, maskToResolve, numericValue, callback) {
   if (!maskIsValid(mask)) {
     return callback({
       code: 'INVALID_MASK',
-      message: 'Invalid mask. The mask does not match the following pattern: /^(?:(?!š).)*(?:9*0+|9+0*)[^š]*$/.'
+      message: 'Invalid mask. The mask does not match the following pattern: /^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$/.'
     });
   }
-  let maskPlaceholders = getMaskPlaceholders(mask);
-  // keep a copy of the placeholders, they will be used for resolving the mask
-  let _maskPlaceholdersClone = maskPlaceholders.slice();
+  let maxSequenceLength = 0;
+  const matches = mask.match('9+');
+  if (matches) {
+    maxSequenceLength = matches[0].length;
+  }
+
   let stringValue = numericValue.toString();
-  // check if the mask can be resolved (the numeric value length must not exceed total length of the placeholders)
-  let maxMaskLength = 0;
-  maskPlaceholders.forEach(function (placeholder) {
-    maxMaskLength += placeholder.length;
-  });
-  if (stringValue.length > maxMaskLength) {
+  if (numericValue && stringValue.length > maxSequenceLength) {
     return callback({
       code: 'MASK_TOO_SHORT',
       message: 'Cannot resolve mask. The numeric value is too big for current mask.'
     });
   }
-  // resolve the placeholders
-  let resolved = false;
-  const resolvedParts = [];
-  while (!resolved) {
-    // go through placeholders, starting with the last one
-    const placeholder = maskPlaceholders.pop();
-    // if the placeholder length is smaller then the value, the value needs to be split between current and next placeholder
-    if (placeholder.length <= stringValue.length) {
-      let resValue = stringValue.substr(-placeholder.length);
-      stringValue = stringValue.substring(0, stringValue.length - resValue.length);
-      resolvedParts.unshift(resValue);
-    } else {
-      // the placeholder length is bigger then the value, the placeholder will have a prefix
-      let prefix = placeholder.substring(0, placeholder.length - stringValue.length);
-      // 9 represents optional chars, remove the unresolved 9s
-      prefix = prefix.replace(/9*/, '');
-      let resValue = prefix + stringValue;
-      stringValue = '';
-      resolvedParts.unshift(resValue);
-    }
-    // when there is nothing left to resolve
-    if (stringValue.length === 0) {
-      while (maskPlaceholders.length) {
-        let placeholder = maskPlaceholders.pop();
-        // use a marker (safe symbol) for unchanged placeholders, it will help later to correctly resolve the mask (it prevents resolving same placeholder twice)
-        placeholder = placeholder.replace(/0/g, 'š');
-        // remove all the unresolved 9s
-        placeholder = placeholder.replace(/9*/, '');
-        resolvedParts.unshift(placeholder);
-      }
-      resolved = true;
-    }
-  }
-  // resolve the mask (replace placeholders with actual resolved values)
-  while (_maskPlaceholdersClone.length) {
-    let placeholder = _maskPlaceholdersClone.shift();
-    mask = mask.replace(placeholder, function () {
-      return resolvedParts.shift();
+  let maskString = getMaskRegExpStringForSearch(mask, maskToResolve);
+
+  if (!maskString) {
+    return callback({
+      code: 'MASK_MISS_MATCH',
+      message: 'Cannot resolve mask. Mask to resolve does not match mask pattern'
     });
   }
-  // replace marker with initial value
-  mask = mask.replace(/š/g, '0');
-  callback(null, mask);
+
+  while (numericValue) {
+    let endPosition = maskString.lastIndexOf('(\\d)');
+    maskString = maskString.substring(0, endPosition) + numericValue % 10 + maskString.substring(endPosition + 4);
+    numericValue = parseInt(numericValue / 10);
+  }
+  maskString = maskString.replace(/\(\\d\)/g, '0');
+  callback(null, maskString);
 }
 
 /**
@@ -142,25 +146,26 @@ function resolveMask(mask, numericValue, callback) {
  * @return {number}
  */
 function extractValueFromMaskedField(mask, value) {
-  let extractedValue = '';
-  let maskRegExp = convertMaskToSearchRegExp(mask);
-  let matches = maskRegExp.exec(value);
-  if (matches) {
-    matches.forEach(function (match, index) {
-      // 0 is full match, we're only interested in group matches (1+)
-      if (index) {
-        extractedValue += match;
-      }
-    });
-  } else {
-    extractedValue = 0;
+  let extractedValue = '0';
+  let maskRegExp = convertMaskToSearchRegExp(mask, value);
+  if (maskRegExp) {
+    let matches = maskRegExp.exec(value);
+    if (matches) {
+      matches.forEach(function (match, index) {
+        // 0 is full match, we're only interested in group matches (1+)
+        if (index) {
+          extractedValue += match;
+        }
+      });
+    } else {
+      extractedValue = 0;
+    }
   }
   return parseInt(extractedValue);
 }
 
 module.exports = {
   maskIsValid: maskIsValid,
-  getMaskPlaceholders: getMaskPlaceholders,
   convertMaskToSearchRegExp: convertMaskToSearchRegExp,
   resolveMask: resolveMask,
   extractValueFromMaskedField: extractValueFromMaskedField
