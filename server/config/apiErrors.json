@@ -194,5 +194,9 @@
   "MAPS_API_KEY_INVALID": {
     "defaultStatusCode": 404,
     "messagePattern": "Maps API key is invalid."
+  },
+  "INVALID_RELATIONSHIP_WITH_DISCARDED_CASE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Cannot create/modify relationships with discarded cases (case id: `<%= id %>` )"
   }
 }

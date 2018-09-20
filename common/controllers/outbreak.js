@@ -388,10 +388,15 @@ module.exports = function (Outbreak) {
       .findById(caseId)
       .then((caseModel) => {
         if (!caseModel) {
-          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
             model: app.models.case.modelName,
             id: caseId
-          }));
+          });
+        }
+        if (!app.models.case.nonDiscardedCaseClassifications.includes(caseModel.classification)) {
+          throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
+            id: caseId
+          });
         }
         helpers.createPersonRelationship(this.id, caseId, 'case', data, options, callback);
       })
@@ -486,7 +491,25 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.updateCaseRelationship = function (caseId, relationshipId, data, options, callback) {
-    helpers.updatePersonRelationship(caseId, relationshipId, 'case', data, options, callback);
+    // make sure case is valid, before trying to update any relations
+    app.models.case
+      .findById(caseId)
+      .then((caseModel) => {
+        if (!caseModel) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.case.modelName,
+            id: caseId
+          });
+        }
+        // do not allow relationships with discarded cases
+        if (!app.models.case.nonDiscardedCaseClassifications.includes(caseModel.classification)) {
+          throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
+            id: caseId
+          });
+        }
+        helpers.updatePersonRelationship(caseId, relationshipId, 'case', data, options, callback);
+      })
+      .catch(callback);
   };
 
   /**

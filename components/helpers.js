@@ -1068,13 +1068,58 @@ const convertBooleanProperties = function (Model, dataSet) {
       // convert each record
       convertBooleanModelProperties(record);
     });
-  // single record
+    // single record
   } else {
     // convert record
     convertBooleanModelProperties(dataSet);
   }
   // records are modified by reference, but also return the dataSet
   return dataSet;
+};
+
+/**
+ * Extract data source and target from model hook context
+ * @param context
+ */
+const getSourceAndTargetFromModelHookContext = function (context) {
+  const result = {};
+  // data source & target can be on context instance
+  if (context.instance) {
+    // if this is an model instance
+    if (typeof context.instance.toJSON === 'function') {
+      // get data
+      result.source = {
+        existing: context.instance.toJSON(),
+        existingRaw: context.instance,
+        updated: {}
+      };
+    } else {
+      result.source = {
+        existing: context.instance,
+        existingRaw: context.instance,
+        updated: {}
+      };
+    }
+    result.target = context.instance;
+  } else {
+    // data source & target are on context data
+    if (typeof context.currentInstance.toJSON === 'function') {
+      result.source = {
+        existing: context.currentInstance.toJSON(),
+        existingRaw: context.currentInstance,
+        updated: context.data
+      };
+    } else {
+      result.source = {
+        existing: context.currentInstance,
+        existingRaw: context.currentInstance,
+        updated: context.data
+      };
+    }
+    result.target = context.data;
+  }
+  result.source.all = Object.assign({}, result.source.existing, result.source.updated);
+  return result;
 };
 
 module.exports = {
@@ -1100,5 +1145,6 @@ module.exports = {
   translateFieldLabels: translateFieldLabels,
   includeSubLocationsInLocationFilter: includeSubLocationsInLocationFilter,
   getBuildInformation: getBuildInformation,
-  convertBooleanProperties: convertBooleanProperties
+  convertBooleanProperties: convertBooleanProperties,
+  getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext
 };
