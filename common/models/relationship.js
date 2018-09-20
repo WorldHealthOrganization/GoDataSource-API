@@ -474,7 +474,8 @@ module.exports = function (Relationship) {
             // update contact
             return contactInstance.updateAttributes({
               followUp: propsToUpdate,
-              active: !!shouldUpdate.startDate
+              // contact is active if it has valid follow-up interval
+              active: !!propsToUpdate.startDate
             }, context.options);
           }
         })
