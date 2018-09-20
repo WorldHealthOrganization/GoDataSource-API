@@ -1162,7 +1162,12 @@ const translateQuestionnaire = function (outbreak, Model, modelInstance, diction
       if (question.answers) {
         answer = translateQuestionAnswers(question, modelInstance.questionnaireAnswers[variable], dictionary);
       } else {
-        answer = modelInstance.questionnaireAnswers[variable];
+        // Parse date type answers since xml cannot print them
+        if(modelInstance.questionnaireAnswers[variable] instanceof Date) {
+          answer = getDateDisplayValue(modelInstance.questionnaireAnswers[variable]);
+        } else {
+          answer = modelInstance.questionnaireAnswers[variable];
+        }
       }
       newQuestionnaire[questionText] = answer;
     }

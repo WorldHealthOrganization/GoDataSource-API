@@ -27,10 +27,10 @@ module.exports = function (Followup) {
     'fillGeolocation': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION',
     'fillGeolocation.lat': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LAT',
     'fillGeolocation.lng': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG',
-    'questionnaireAnswers': 'LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE',
     'index': 'LNG_FOLLOW_UP_FIELD_LABEL_INDEX',
     'teamId': 'LNG_FOLLOW_UP_FIELD_LABEL_TEAM',
-    'isGenerated': 'LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED'
+    'isGenerated': 'LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED',
+    'questionnaireAnswers': 'LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE'
   };
 
   Followup.referenceDataFieldsToCategoryMap = {

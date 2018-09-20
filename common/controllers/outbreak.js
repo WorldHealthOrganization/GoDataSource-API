@@ -106,6 +106,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    const self = this;
     const _filters = app.utils.remote.mergeFilters(
       {
         where: {
@@ -138,7 +139,13 @@ module.exports = function (Outbreak) {
       }
     }
 
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, headerRestrictions, callback);
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, headerRestrictions, function(results, dictionary) {
+      // Prepare questionnaire answers for printing
+      results.forEach((followUp) => {
+        followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+      });
+      return Promise.resolve(results);
+    }, callback);
   };
 
   /**

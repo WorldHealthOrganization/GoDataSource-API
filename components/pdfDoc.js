@@ -117,6 +117,10 @@ function createPDFList(headers, data, callback) {
 
   const document = createPdfDoc(documentConfig);
 
+  // add the questionnaire headers
+  // since they depend on the translated data, we have to add them separately
+  addQuestionnaireHeadersForPrint(data, headers);
+
   // create table in document
   createTableInPDFDocument(headers, data, document, documentConfig);
 
@@ -532,6 +536,25 @@ function createTableInPDFDocument(headers, data, document, documentConfig) {
   document.moveDown();
   document.x = document.options.margin;
 }
+
+/**
+ * Create questionnaire headers for flat file export. Added here since we cannot require helpers in this file because of
+ * circular dependency
+ * @param data
+ * @param headers
+ */
+const addQuestionnaireHeadersForPrint = function (data, headers) {
+  Object.keys(data[0]).forEach((key) => {
+    if (key.indexOf('questionnaireAnswers') !== -1) {
+      let indexOfSeparator = key.indexOf(' ');
+      let questionText = key.substring(indexOfSeparator + 1);
+      headers.push({
+        id: key,
+        header: questionText
+      });
+    }
+  });
+};
 
 module.exports = {
   createPDFList: createPDFList,
