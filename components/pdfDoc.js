@@ -515,6 +515,17 @@ function createTableInPDFDocument(headers, data, document, documentConfig) {
     });
   });
 
+  // Transform boolean values into string, otherwise false does not get printed
+  data.forEach((model, index) => {
+    data[index] = _.mapValues(model, (value) => {
+      if (typeof(value) === 'boolean') {
+        return value.toString();
+      } else {
+        return value;
+      }
+    });
+  });
+
   // add table data
   pdfTable.addBody(data);
   // move cursor to next line and set margin

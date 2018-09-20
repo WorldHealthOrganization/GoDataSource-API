@@ -123,7 +123,7 @@ function exportFilteredModelsList(app, Model, filter, exportType, fileName, encr
           headersWhitelist.includes(propertyName)
         ) {
           // if a flat file is exported, data needs to be flattened, include 3 elements for each array
-          if (!['json', 'xml'].includes(exportType) && /\[]/.test(propertyName)) {
+          if (!['json', 'xml'].includes(exportType) && /(\[]|\.)/.test(propertyName)) {
             let maxElements = 3;
             // pdf has a limited width, include only one element
             if (exportType === 'pdf') {
@@ -133,7 +133,7 @@ function exportFilteredModelsList(app, Model, filter, exportType, fileName, encr
               headers.push({
                 id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
                 // use correct label translation for user language
-                header: `${dictionary.getTranslation(Model.fieldLabelsMap[propertyName])} [${i}]`
+                header: `${dictionary.getTranslation(Model.fieldLabelsMap[propertyName])}${/\[]/.test(propertyName) ? ' ['+i+']' : ''}`
               });
             }
           } else {

@@ -13,7 +13,20 @@ module.exports = function (Followup) {
     'performed': 'LNG_FOLLOW_UP_FIELD_LABEL_PERFORMED',
     'lostToFollowUp': 'LNG_FOLLOW_UP_FIELD_LABEL_LOST_TO_FOLLOW_UP',
     'address': 'LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS',
-    'fillGeolocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
+    'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
+    'address.country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
+    'address.city': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY',
+    'address.addressLine1': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1',
+    'address.addressLine2': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_2',
+    'address.postalCode': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE',
+    'address.locationId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID',
+    'address.geoLocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
+    'address.geoLocation.lat': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LAT',
+    'address.geoLocation.lng': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LNG',
+    'address.date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
+    'fillGeolocation': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION',
+    'fillGeolocation.lat': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LAT',
+    'fillGeolocation.lng': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG',
     'questionnaireAnswers': 'LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE',
     'index': 'LNG_FOLLOW_UP_FIELD_LABEL_INDEX',
     'teamId': 'LNG_FOLLOW_UP_FIELD_LABEL_TEAM',
@@ -43,6 +56,22 @@ module.exports = function (Followup) {
   Followup.locationFields = [
     'address.locationId'
   ];
+
+  Followup.foreignKeyResolverMap = {
+    'address.locationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'teamId': {
+      modelName: 'team',
+      useProperty: 'name'
+    }
+  };
+
+  Followup.extendedForm = {
+    template: 'contactFollowUpTemplate',
+    containerProperty: 'questionnaireAnswers'
+  };
 
   /**
    * Enhance follow up save to include index of the created follow up

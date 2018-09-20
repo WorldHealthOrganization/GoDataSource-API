@@ -142,6 +142,52 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Export a list of follow-ups for a contact
+   * @param contactId
+   * @param filter
+   * @param exportType
+   * @param encryptPassword
+   * @param anonymizeFields
+   * @param options
+   * @param callback
+   * @returns {*}
+   */
+  Outbreak.prototype.exportFilteredFollowups = function (contactId, filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    let self = this;
+    const _filters = app.utils.remote.mergeFilters(
+      {
+        where: {
+          outbreakId: this.id,
+          personId: contactId
+        }
+      },
+      filter || {});
+
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+
+      // file must be either encrypted or anonymized
+      if (!encryptPassword) {
+        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
+      }
+    }
+
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, [], function(results, dictionary) {
+      // Prepare questionnaire answers for printing
+      results.forEach((followUp) => {
+        followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+      });
+      return Promise.resolve(results);
+    }, callback);
+  };
+
+  /**
    * Do not allow deletion of a active Outbreak
    */
   Outbreak.beforeRemote('deleteById', function (context, modelInstance, next) {
@@ -5099,7 +5145,7 @@ module.exports = function (Outbreak) {
               }
 
               // translate labels
-              contact.toPrint = helpers.translateFieldLabels(contact.toPrint, 'contact', dictionary);
+              contact.toPrint = genericHelpers.translateFieldLabels(app, contact.toPrint, 'contact', dictionary);
 
               // check if the results need to be grouped
               if (groupResultsBy) {
@@ -5187,7 +5233,7 @@ module.exports = function (Outbreak) {
               // print contacts
               contactsList.forEach(function (contact, index) {
                 // print profile
-                pdfUtils.createPersonProfile(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
+                pdfUtils.displayModelDetails(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
 
                 // print follow-ups table
                 pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE'), 16);
