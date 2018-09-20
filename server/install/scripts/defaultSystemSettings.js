@@ -3,18 +3,11 @@
 const app = require('../../server');
 const SystemSettings = app.models.systemSettings;
 const defaultSettings = {
-  'upstreamServer': {
-    'name': '',
-    'description': '',
-    'url': '',
-    'credentials': {
-      'clientId': '',
-      'clientSecret': ''
-    },
-    'syncInterval': 0,
-    'syncOnEveryChange': false
-  },
+  'upstreamServers': [],
   'clientApplications': [],
+  'sync': {
+    'triggerBackupBeforeSync': false
+  },
   'dataBackup': {
     'modules': [
       'System Configuration',
@@ -22,7 +15,7 @@ const defaultSettings = {
     ],
     'backupInterval': 24,
     'dataRetentionInterval': 90,
-    'location': 'backups'
+    'location': `${__dirname}/../../../backups`
   },
   'anonymizeFields': {
     'case': [
@@ -40,6 +33,10 @@ const defaultSettings = {
   }
 };
 
+// initialize action options; set _init flag to prevent execution of some after save scripts
+let options = {
+  _init: true
+};
 
 /**
  * Run initiation
@@ -53,10 +50,10 @@ function run(callback) {
   SystemSettings
     .findOne()
     .then(function (systemSettings) {
-      if(systemSettings){
-        return systemSettings.updateAttributes(defaultSettings);
+      if (systemSettings) {
+        return systemSettings.updateAttributes(defaultSettings, options);
       } else {
-        return SystemSettings.create(defaultSettings);
+        return SystemSettings.create(defaultSettings, options);
       }
     })
     .then(function () {

@@ -29,10 +29,18 @@
         "LNG_BACKUP_STATUS_PENDING"
       ],
       "description": "Backup status"
+    },
+    "failReason": {
+      "type": "string"
     }
   },
   "validations": [],
   "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
     {
       "principalType": "ROLE",
       "principalId": "write_sys_config",

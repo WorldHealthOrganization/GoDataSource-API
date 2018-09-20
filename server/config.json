@@ -38,5 +38,15 @@
     "host": "localhost",
     "protocol": "http",
     "port": 3001
+  },
+  "googleApi": {
+    "apiKey": ""
+  },
+  "sync": {
+    "asyncActionsSettings": {
+      "intervalTimeout": 10000,
+      "actionTimeout": 3600000
+    },
+    "actionCleanupInterval": 24
   }
 }

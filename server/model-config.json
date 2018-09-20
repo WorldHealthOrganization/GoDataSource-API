@@ -64,6 +64,14 @@
     "dataSource": "mongoDb",
     "public": true
   },
+  "databaseActionLog": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "databaseExportLog": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
   "template": {
     "dataSource": "mongoDb",
     "public": true
@@ -231,5 +239,21 @@
   "backupParams": {
     "dataSource": null,
     "public": false
+  },
+  "syncParameters": {
+    "dataSource": null,
+    "public": false
+  },
+  "arcGisServer": {
+    "dataSource": null,
+    "public": false
+  },
+  "country": {
+    "dataSource": null,
+    "public": false
+  },
+  "maps": {
+    "dataSource": "memory",
+    "public": true
   }
 }

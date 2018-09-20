@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 module.exports = function (app) {
 
   const Role = app.models.role;
@@ -31,6 +33,18 @@ module.exports = function (app) {
     } else {
       context.remotingContext.req.accessErrors.push(accessError);
     }
+  }
+
+  /**
+   * Store Authorization Required error in context
+   * @param authorizationError
+   * @param context
+   */
+  function storeAuthorizationErrorsInContext(authorizationError, context) {
+    if (!context.remotingContext.req.authorizationErrors) {
+      context.remotingContext.req.authorizationErrors = [];
+    }
+    context.remotingContext.req.authorizationErrors.push(authorizationError);
   }
 
   /**
@@ -127,67 +141,34 @@ module.exports = function (app) {
   // it should not be used for general purpose
   if (Role.hasOwnProperty('clientApplicationPermission')) {
     Role.registerResolver(Role.clientApplicationPermission, function (permission, context, done) {
-      let buildError = app.utils.apiError.getError;
       let reqHeaders = context.remotingContext.req.headers;
+      // client information and Authorization header information was already retrieved in when creating authentication context
+      let clientInformation = _.get(context, 'remotingContext.req.authData.client', null);
+      let clientCredentials = _.get(clientInformation, 'credentials', {});
+      let usedCredentials = _.get(context, 'remotingContext.req.authData.credentials', null);
 
-      // retrieve authorization header and decode client credentials
-      let clientId, clientSecret;
-      if (reqHeaders.authorization) {
-        let parts = reqHeaders.authorization.split(' ');
-        if (parts.length === 2) {
-          let [scheme, credentials] = parts;
-
-          // check if authorization header contains the required format
-          if (/^Basic$/i.test(scheme)) {
-            let decodedCredentialsStr = Buffer.from(credentials, 'base64').toString();
-
-            // check if credentials have the correct format
-            [clientId, clientSecret] = decodedCredentialsStr.split(':');
-
-            // cache client id on the context, it might be needed later in the handlers
-            context.remotingContext.req.clientId = clientId;
-            if (!clientId || !clientSecret) {
-              return done(buildError('ACCESS_DENIED', {accessErrors: 'Invalid credentials'}, 403));
-            }
-          }
-        } else {
-          return done(buildError('ACCESS_DENIED', {accessErrors: 'Format is Authorization: Basic [token]'}, 403));
-        }
-      } else {
-        return done(buildError('ACCESS_DENIED', {accessErrors: 'No Authorization header found'}, 403));
+      // check authorization header and client credentials
+      if (!reqHeaders.authorization) {
+        app.logger.debug('No Authorization header found');
+        return done(null, false);
+      }
+      let parts = reqHeaders.authorization.split(' ');
+      if (parts.length !== 2) {
+        app.logger.debug('Authorization header format is "Authorization: Basic [token]"');
+        return done(null, false);
+      }
+      // check the used credentials against the ones found in system settings
+      if (!clientInformation || !usedCredentials || clientCredentials.clientSecret !== usedCredentials.clientSecret) {
+        storeAuthorizationErrorsInContext('Invalid credentials', context);
+        return done(null, false);
+      }
+      // check if client is active
+      if (!clientInformation.active) {
+        storeAccessErrorsInContext('Client is not active', context);
+        return done(null, false);
       }
 
-      // flag that indicates whether the client is ok
-      // initially is assumed that is not
-      let hasAccess = false;
-
-      // check the client credentials against any set in system settings
-      app.models.systemSettings
-        .findOne()
-        .then((systemSettings) => {
-          let clients = systemSettings.clientApplications;
-
-          // try to find a match by client identifier
-          let clientIndex = clients.findIndex((client) => {
-            return client.credentials && client.credentials.clientId === clientId;
-          });
-
-          // if no client was found with the given id, or the client is inactive, stop with error
-          if (clientIndex !== -1) {
-            if (clients[clientIndex].active) {
-              // check password
-              hasAccess = clients[clientIndex].credentials.clientSecret === clientSecret;
-            } else {
-              return done(buildError('ACCESS_DENIED', {accessErrors: 'Client is not active'}, 403));
-            }
-          }
-
-          if (hasAccess) {
-            return done(null, hasAccess);
-          }
-
-          return done(buildError('ACCESS_DENIED', {accessErrors: 'Client credentials are wrong'}, 403));
-        });
+      return done(null, true);
     });
   }
 };

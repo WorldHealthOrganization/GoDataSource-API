@@ -35,46 +35,16 @@ module.exports = function (Backup) {
     // get the id of the authenticated user from request options
     let userId = requestOptions.accessToken.userId;
 
-    /**
-     * Helper function used to create backup
-     * Needed to not write the functionality multiple times in case of if condition
-     */
-    const createBackup = function (location, modules) {
-      // create new backup record with pending status
-      backupModel
-        .create({
-          date: Date.now(),
-          modules: modules,
-          location: null,
-          userId: userId,
-          status: backupModel.status.PENDING
-        })
-        .then((record) => {
-          // start the backup process
-          // when done update backup status and file location
-          backup.create(modules, location, (err, backupFilePath) => {
-            let newStatus = backupModel.status.SUCCESS;
-            if (err) {
-              newStatus = backupModel.status.FAILED;
-            }
-            record.updateAttributes({status: newStatus, location: backupFilePath});
-          });
-          // send the response back to the user, do not wait for the backup to finish
-          return done(null, record.id);
-        })
-        .catch((createError) => done(createError));
-    };
-
     // retrieve system settings, fallback on default data backup settings, if not available in the request
     if (params.location && params.modules) {
-      createBackup(params.location, params.modules);
+      backupModel.createBackup(params.location, params.modules, userId, done);
     } else {
       app.models.systemSettings
         .findOne()
         .then((systemSettings) => {
           let location = params.location || systemSettings.dataBackup.location;
           let modules = params.modules || systemSettings.dataBackup.modules;
-          createBackup(location, modules);
+          backupModel.createBackup(location, modules, userId, done);
         });
     }
   };

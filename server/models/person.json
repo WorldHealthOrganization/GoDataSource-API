@@ -8,6 +8,9 @@
   "mongodb": {
     "collection": "person"
   },
+  "scope": {
+    "order": ["name ASC", "lastName ASC", "firstName ASC"]
+  },
   "properties": {
     "outbreakId": {
       "type": "string",
@@ -18,8 +21,7 @@
       "type": "string"
     },
     "firstName": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "middleName": {
       "type": "string"
@@ -42,8 +44,7 @@
       "type": "number"
     },
     "gender": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "phoneNumber": {
       "type": "string"

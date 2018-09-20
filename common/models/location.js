@@ -87,7 +87,8 @@ module.exports = function (Location) {
           id: {
             nin: allLocationsIds
           }
-        }
+        },
+        order: 'name ASC'
       })
       .then(function (locations) {
         // if children locations found
@@ -154,7 +155,8 @@ module.exports = function (Location) {
           id: {
             in: locationsToRetrieve
           }
-        }
+        },
+        order: 'name ASC'
       })
       .then(function (locations) {
         // if locations found
@@ -447,6 +449,10 @@ module.exports = function (Location) {
     });
     // remove empty items (items that were processed later) and unprocessed items (orphaned items whose parents are not found)
     hierarchicalLocationsList = hierarchicalLocationsList.filter(item => item && item.location);
+    // sort first level alphabetically (sub-levels are already sorted)
+    hierarchicalLocationsList.sort(function (a, b) {
+      return ((a.location.name === b.location.name) ? 0 : ((a.location.name > b.location.name) ? 1 : -1));
+    });
     // return built list
     return hierarchicalLocationsList;
   };

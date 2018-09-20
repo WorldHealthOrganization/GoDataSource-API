@@ -5,6 +5,9 @@
   "options": {
     "validateUpsert": true
   },
+  "scope": {
+    "order": ["lastName ASC", "firstName ASC"]
+  },
   "properties": {
     "id": {
       "type": "string",
