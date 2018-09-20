@@ -3497,6 +3497,9 @@ module.exports = function (Outbreak) {
         order: 'date ASC'
       }, filter || {}))
       .then(function (followups) {
+        // add support for filter parent
+        followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
+
         // initialize contacts map as the request needs to return the latest follow-up for the contact if not performed
         let contactsMap = {};
 
