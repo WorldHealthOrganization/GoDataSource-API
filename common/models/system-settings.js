@@ -9,6 +9,9 @@ module.exports = function (SystemSettings) {
     PNG: 'PNG'
   };
 
+  // initialize system settings cache
+  SystemSettings.cache;
+
   /**
    * Validate client credentials.clientId uniqueness
    * Validate upstream servers url uniqueness
@@ -74,5 +77,53 @@ module.exports = function (SystemSettings) {
     }
 
     return callback();
+  });
+
+  /**
+   * Get system settings from cache;
+   * if the cache is not set get them from DB
+   * @returns {*}
+   */
+  SystemSettings.getCache = function () {
+    if (SystemSettings.cache) {
+      return Promise.resolve(SystemSettings.cache);
+    }
+
+    // cache is not set; get system settings
+    return new Promise(function (resolve, reject) {
+      SystemSettings.getSystemSettings(function (err, settings) {
+        if (err) {
+          // we tried to get the system settings and we got an error
+          app.logger.debug(`Failed to cache the system settings: ${err}`);
+          reject(err);
+        } else {
+          SystemSettings.cache = settings;
+          app.logger.debug('Successfully cached the system settings');
+          resolve(settings);
+        }
+      });
+    });
+  };
+
+  // after the application started (all models finished loading)
+  // get the system settings and cache them
+  app.on('started', function () {
+    // not handling then as we don't need the setting here
+    // not doing anything on catch since the error was already logged
+    SystemSettings
+      .getCache()
+      .catch(function (err) {
+        // nothing to do; See above comments
+        app.logger.debug(`Failed to cache the system settings at startup: ${err}`);
+      });
+  });
+
+  /**
+   * Cache the system settings after each change
+   */
+  SystemSettings.observe('after save', function (context, callback) {
+    SystemSettings.cache = context.instance;
+    app.logger.debug('Successfully cached the system settings');
+    callback();
   });
 };

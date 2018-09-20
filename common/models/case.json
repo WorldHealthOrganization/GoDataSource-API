@@ -19,7 +19,8 @@
   "scope": {
     "where": {
       "type": "case"
-    }
+    },
+    "order": ["lastName ASC", "firstName ASC"]
   },
   "properties": {
     "type": {

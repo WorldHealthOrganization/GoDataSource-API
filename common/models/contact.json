@@ -19,7 +19,8 @@
   "scope": {
     "where": {
       "type": "contact"
-    }
+    },
+    "order": ["lastName ASC", "firstName ASC"]
   },
   "properties": {
     "type": {
@@ -65,6 +66,11 @@
           "type": "date"
         }
       }
+    },
+    "active": {
+      "type": "boolean",
+      "description": "A contact is active if at least one of the cases related to it has non-discarded classification",
+      "default": true
     }
   },
   "excludeBaseProperties": [

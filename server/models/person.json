@@ -8,6 +8,9 @@
   "mongodb": {
     "collection": "person"
   },
+  "scope": {
+    "order": ["name ASC", "lastName ASC", "firstName ASC"]
+  },
   "properties": {
     "outbreakId": {
       "type": "string",

@@ -11,6 +11,11 @@ fs.readdirSync(`${__dirname}/../../config/languages`).forEach(function (language
   languageList.push(require(`${__dirname}/../../config/languages/${language}`));
 });
 
+// initialize action options; set _init flag to prevent execution of some after save scripts
+let options = {
+  _init: true
+};
+
 // keep a list of languages to be created (for async lib)
 const createLanguages = [];
 languageList.forEach(function (language) {
@@ -31,7 +36,7 @@ languageList.forEach(function (language) {
               id: language.id,
               name: language.name,
               readOnly: language.readOnly
-            });
+            }, options);
         }
         return foundLanguage;
       })
@@ -48,7 +53,7 @@ languageList.forEach(function (language) {
           });
         });
         // move to the next language after all tokens for current language have been created
-        return createdLanguage.updateLanguageTranslations(languageTokens)
+        return createdLanguage.updateLanguageTranslations(languageTokens, options)
           .then(function (languageTokens) {
             callback(null, languageTokens);
           });
