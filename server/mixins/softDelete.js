@@ -106,7 +106,10 @@ module.exports = function (Model) {
   Model.observe('after save', function (context, callback) {
     if (isMonitoredModel(Model)) {
       if (
-        _.get(context, `options._instance[${context.instance.id}].softDeleteEvent`) ||
+        (
+          context.instance &&
+          _.get(context, `options._instance[${context.instance.id}].softDeleteEvent`)
+        ) ||
         _.get(context, `options._instance[batch_${Model.modelName}].softDeleteEvent`)
       ) {
         return Model.notifyObserversOf('after delete', context, callback);
