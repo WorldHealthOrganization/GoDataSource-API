@@ -264,9 +264,10 @@ module.exports = function (Sync) {
    * @param req
    * @param snapshot Database snapshot .tar.gz archive
    * @param asynchronous Flag to specify whether the import is sync or async. Default: sync (false)
+   * @param triggerBackupBeforeSync Flag to specify whether before the import a backup should be triggered. If the flag is not sent the System settings triggerBackupBeforeSync flag will be used
    * @param done
    */
-  Sync.importDatabaseSnapshot = function (req, snapshot, asynchronous, done) {
+  Sync.importDatabaseSnapshot = function (req, snapshot, asynchronous, triggerBackupBeforeSync, done) {
     const buildError = app.utils.apiError.getError;
 
     /**
@@ -350,7 +351,7 @@ module.exports = function (Sync) {
         .then(function (syncLogEntry) {
           if (!asynchronous) {
             // extract the archive to the temporary directory
-            Sync.syncDatabaseWithSnapshot(files.snapshot.path, syncLogEntry, outbreakIDs, requestOptions, function (err) {
+            Sync.syncDatabaseWithSnapshot(files.snapshot.path, syncLogEntry, outbreakIDs, requestOptions, triggerBackupBeforeSync, function (err) {
               // send done function to return the response
               importCallback(err, syncLogEntry, requestOptions, done);
             });
@@ -360,7 +361,7 @@ module.exports = function (Sync) {
             done(null, syncLogEntry.id);
 
             // extract the archive to the temporary directory
-            Sync.syncDatabaseWithSnapshot(files.snapshot.path, syncLogEntry, outbreakIDs, requestOptions, function (err) {
+            Sync.syncDatabaseWithSnapshot(files.snapshot.path, syncLogEntry, outbreakIDs, requestOptions, triggerBackupBeforeSync, function (err) {
               // don't send the done function as the response was already sent
               importCallback(err, syncLogEntry, requestOptions);
             });
@@ -403,16 +404,22 @@ module.exports = function (Sync) {
     // initialize variable for caching the syncLogEntry
     let syncLogEntry;
 
+    // initialize variable for caching the system settings
+    let systemSettings;
+
     // check if the received upstream server URL matches one from the configured upstream servers
     app.models.systemSettings
-      .findOne()
-      .then(function (systemSettings) {
+      .getCache()
+      .then(function (record) {
         // initialize error
-        if (!systemSettings) {
+        if (!record) {
           throw app.utils.apiError.getError('INTERNAL_ERROR', {
             error: 'System Settings were not found'
           });
         }
+
+        // cache system settings
+        systemSettings = record;
 
         // find the upstream server entry that matches the received url
         if (!Array.isArray(systemSettings.upstreamServers) || !(upstreamServerEntry = systemSettings.upstreamServers.find(serverEntry => serverEntry.url === data.upstreamServerURL))) {
@@ -429,6 +436,15 @@ module.exports = function (Sync) {
           });
         }
 
+        // check if there is a sync in progress to the same server and the sync is not forced
+        // sync is forced by the sync on every change functionality
+        if (Sync.inProgress.servers[upstreamServerEntry.url] && !data.forceSync) {
+          throw app.utils.apiError.getError('UPSTREAM_SERVER_SYNC_IN_PROGRESS', {
+            upstreamServerName: upstreamServerEntry.name,
+            upstreamServerURL: upstreamServerEntry.url
+          });
+        }
+
         // start sync with upstream server
         // create syncLog entry in the DB
         return app.models.syncLog.create({
@@ -440,6 +456,9 @@ module.exports = function (Sync) {
       .then(function (syncLog) {
         // cache sync log entry as it will need to be updated with different statuses
         syncLogEntry = syncLog;
+
+        // update Sync.inProgress map; Sync action is in progress
+        Sync.inProgress.servers[upstreamServerEntry.url] = true;
 
         // send response with the syncLogEntry ID
         // the sync action continues after the response is sent with the syncLogEntry being updated when the sync fails/succeeds
@@ -538,9 +557,9 @@ module.exports = function (Sync) {
       .then(function (upstreamServerDBSnapshotFileName) {
         // 4. import the received DB
         return new Promise(function (resolve, reject) {
-          Sync.syncDatabaseWithSnapshot(upstreamServerDBSnapshotFileName, syncLogEntry, syncLogEntry.outbreakIDs, options, function (err) {
+          Sync.syncDatabaseWithSnapshot(upstreamServerDBSnapshotFileName, syncLogEntry, syncLogEntry.outbreakIDs, options, data.triggerBackupBeforeSync, function (err) {
             if (err) {
-              reject(err);
+              return reject(err);
             }
 
             // sync was successful
@@ -560,12 +579,17 @@ module.exports = function (Sync) {
                 app.logger.debug(`Sync ${syncLogEntry.id}: Error updating sync log entry status. ${err}`);
               });
 
+            // update Sync.inProgress map; Sync action just finished
+            Sync.inProgress.servers[upstreamServerEntry.url] = false;
+            // check for pending sync for the server and trigger it
+            Sync.checkAndTriggerPendingSync(upstreamServerEntry, options);
             resolve();
           });
         });
       })
       .catch(function (err) {
         if (!callbackCalled) {
+          // sync wasn't started; the error response is sent directly in the response
           callback(err);
           callbackCalled = true;
         } else {
@@ -583,6 +607,11 @@ module.exports = function (Sync) {
             .catch(function (err) {
               app.logger.debug(`Sync ${syncLogEntry.id}: Error updating sync log entry status. ${err}`);
             });
+
+          // update Sync.inProgress map; Sync action just finished
+          Sync.inProgress.servers[upstreamServerEntry.url] = false;
+          // check for pending sync for the server and trigger it
+          Sync.checkAndTriggerPendingSync(upstreamServerEntry, options);
         }
       });
   };

@@ -240,7 +240,7 @@
     "dataSource": null,
     "public": false
   },
-  "upstreamServerURL": {
+  "syncParameters": {
     "dataSource": null,
     "public": false
   },
