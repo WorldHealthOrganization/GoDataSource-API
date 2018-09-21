@@ -1868,6 +1868,11 @@
           "arg": "visualIdMask",
           "type": "string",
           "description": "Visual ID mask partially resolved (except for the sequence no.)"
+        },
+        {
+          "arg": "personId",
+          "type": "string",
+          "description": "Case/Contact/Event ID for validating existing visual ID (optional)"
         }
       ],
       "returns": [

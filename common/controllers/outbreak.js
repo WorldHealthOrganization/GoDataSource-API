@@ -1131,10 +1131,15 @@ module.exports = function (Outbreak) {
   /**
    * Generate (next available) visual id
    * @param visualIdMask
+   * @param personId
    * @param callback
    */
-  Outbreak.prototype.generateVisualId = function (visualIdMask, callback) {
-    Outbreak.helpers.getAvailableVisualId(this, visualIdMask, callback);
+  Outbreak.prototype.generateVisualId = function (visualIdMask, personId, callback) {
+    Outbreak.helpers.getAvailableVisualId(this, visualIdMask, personId)
+      .then(function (visualId) {
+        callback(null, visualId);
+      })
+      .catch(callback);
   };
 
   /**

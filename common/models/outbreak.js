@@ -1183,7 +1183,7 @@ module.exports = function (Outbreak) {
     if (typeof visualId === 'string' && visualId.length) {
       // get the next available visual id for the visual id template
       return Outbreak.helpers
-        .getAvailableVisualId(outbreak, visualId)
+        .getAvailableVisualId(outbreak, visualId, personId)
         .then(function (visualId) {
           // validate its uniqueness
           return Outbreak.helpers.validateVisualIdUniqueness(outbreak.id, visualId, personId);
