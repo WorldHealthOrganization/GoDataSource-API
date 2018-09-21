@@ -148,7 +148,7 @@ module.exports = function (HelpCategory) {
   /**
    * Before Update Help Item Hook
    */
-  HelpCategory.beforeRemote('prototype.__updateById__helpItems', function(context, modelInstance, next) {
+  HelpCategory.beforeRemote('prototype.__updateById__helpItems', function (context, modelInstance, next) {
     HelpCategory.beforeUpdateHook(app.models.helpItem.modelName, 'title', context, modelInstance, next);
   });
 
