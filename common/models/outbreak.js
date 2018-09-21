@@ -516,17 +516,17 @@ module.exports = function (Outbreak) {
    * Get the next available visual id
    * @param outbreak
    * @param visualId
-   * @param callback
+   * @return {*}
    */
-  Outbreak.helpers.getAvailableVisualId = function (outbreak, visualId, callback) {
+  Outbreak.helpers.getAvailableVisualId = function (outbreak, visualId) {
     let maskRegExp = app.utils.maskField.convertMaskToSearchRegExp(outbreak.caseIdMask, visualId);
     if (!maskRegExp) {
-      return callback(app.utils.apiError.getError('INVALID_VISUAL_ID_MASK', {
+      return Promise.reject(app.utils.apiError.getError('INVALID_VISUAL_ID_MASK', {
         visualIdMask: visualId,
         outbreakVisualIdMask: outbreak.caseIdMask
       }));
     }
-    app.models.person
+    return app.models.person
       .findOne({
         where: {
           outbreakId: outbreak.id,
@@ -540,11 +540,11 @@ module.exports = function (Outbreak) {
       .then(function (person) {
         let index = 0;
         if (person) {
-          index = app.utils.maskField.extractValueFromMaskedField(outbreak.caseIdMask, visualId, person.visualId);
+          index = app.utils.maskField.extractValueFromMaskedField(outbreak.caseIdMask, person.visualId);
         }
         index++;
-        app.utils.maskField.resolveMask(outbreak.caseIdMask, visualId, index, callback);
-      }).catch(callback);
+        return app.utils.maskField.resolveMask(outbreak.caseIdMask, visualId, index);
+      });
   };
 
   /**
@@ -1127,5 +1127,28 @@ module.exports = function (Outbreak) {
         // otherwise find people in that cluster
         cluster.findOrCountPeople(filter, countOnly, callback);
       });
+  };
+
+  /**
+   * Resolve person visual id template, if visualId field present
+   * @param outbreak
+   * @param visualId
+   * @param [personId]
+   * @return {*}
+   */
+  Outbreak.helpers.resolvePersonVisualIdTemplate = function (outbreak, visualId, personId) {
+    // if the field is present
+    if (typeof visualId === 'string' && visualId.length) {
+      // get the next available visual id for the visual id template
+      return Outbreak.helpers
+        .getAvailableVisualId(outbreak, visualId)
+        .then(function (visualId) {
+          // validate its uniqueness
+          return Outbreak.helpers.validateVisualIdUniqueness(outbreak.id, visualId, personId);
+        });
+    } else {
+      // nothing to resolve
+      return Promise.resolve();
+    }
   };
 };

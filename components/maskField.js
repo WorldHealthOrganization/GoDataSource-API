@@ -98,59 +98,60 @@ function convertMaskToSearchRegExp(mask, propertyTemplate) {
  * @param mask
  * @param propertyTemplate
  * @param numericValue
- * @param callback
- * @return {*}
+ * @return {Promise<any>}
  */
-function resolveMask(mask, propertyTemplate, numericValue, callback) {
-  if (!maskIsValid(mask)) {
-    return callback({
-      code: 'INVALID_MASK',
-      message: 'Invalid mask. The mask does not match the following pattern: /^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$/.'
-    });
-  }
-  // start with max sequence length of 0
-  let maxSequenceLength = 0;
-  // match sequence placeholders
-  const matches = mask.match('9+');
-  // if matches found
-  if (matches) {
-    // get the length (no. of placeholder chars)
-    maxSequenceLength = matches[0].length;
-  }
-  // if there's a sequence number that needs to be inserted and it exceeds the maximum length
-  if (numericValue > 1 && numericValue.toString().length > maxSequenceLength) {
-    // stop with error
-    return callback({
-      code: 'MASK_TOO_SHORT',
-      message: 'Cannot resolve mask. The numeric value is too big for current mask.'
-    });
-  }
-  // get mask string
-  let maskString = getMaskRegExpStringForSearch(mask, propertyTemplate);
-  // if no mask string returned
-  if (!maskString) {
-    // stop with error
-    return callback({
-      code: 'MASK_MISS_MATCH',
-      message: 'Cannot resolve mask. Property template does not match mask pattern'
-    });
-  }
-  // insert the numeric value into the mask
-  while (numericValue) {
-    // search the last digit placeholder
-    const endPosition = maskString.lastIndexOf('(\\d)');
-    // validate position
-    if (endPosition !== -1) {
-      // insert the last digit of the number on the last digit placeholder position
-      maskString = `${maskString.substring(0, endPosition)}${numericValue % 10}${maskString.substring(endPosition + 4)}`;
+function resolveMask(mask, propertyTemplate, numericValue) {
+  return new Promise(function (resolve, reject) {
+    if (!maskIsValid(mask)) {
+      return reject({
+        code: 'INVALID_MASK',
+        message: 'Invalid mask. The mask does not match the following pattern: /^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$/.'
+      });
     }
-    // do it until all the digits were processed
-    numericValue = parseInt(numericValue / 10);
-  }
-  // replace remaining digit placeholders with 0
-  maskString = maskString.replace(/\(\\d\)/g, '0');
-  // send back the result
-  callback(null, maskString);
+    // start with max sequence length of 0
+    let maxSequenceLength = 0;
+    // match sequence placeholders
+    const matches = mask.match('9+');
+    // if matches found
+    if (matches) {
+      // get the length (no. of placeholder chars)
+      maxSequenceLength = matches[0].length;
+    }
+    // if there's a sequence number that needs to be inserted and it exceeds the maximum length
+    if (numericValue > 1 && numericValue.toString().length > maxSequenceLength) {
+      // stop with error
+      return reject({
+        code: 'MASK_TOO_SHORT',
+        message: 'Cannot resolve mask. The numeric value is too big for current mask.'
+      });
+    }
+    // get mask string
+    let maskString = getMaskRegExpStringForSearch(mask, propertyTemplate);
+    // if no mask string returned
+    if (!maskString) {
+      // stop with error
+      return reject({
+        code: 'MASK_MISS_MATCH',
+        message: 'Cannot resolve mask. Property template does not match mask pattern'
+      });
+    }
+    // insert the numeric value into the mask
+    while (numericValue) {
+      // search the last digit placeholder
+      const endPosition = maskString.lastIndexOf('(\\d)');
+      // validate position
+      if (endPosition !== -1) {
+        // insert the last digit of the number on the last digit placeholder position
+        maskString = `${maskString.substring(0, endPosition)}${numericValue % 10}${maskString.substring(endPosition + 4)}`;
+      }
+      // do it until all the digits were processed
+      numericValue = parseInt(numericValue / 10);
+    }
+    // replace remaining digit placeholders with 0
+    maskString = maskString.replace(/\(\\d\)/g, '0');
+    // send back the result
+    resolve(maskString);
+  });
 }
 
 /**
