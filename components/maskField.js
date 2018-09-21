@@ -108,34 +108,45 @@ function resolveMask(mask, maskToResolve, numericValue, callback) {
       message: 'Invalid mask. The mask does not match the following pattern: /^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$/.'
     });
   }
+  // start with max sequence length of 0
   let maxSequenceLength = 0;
+  // match sequence placeholders
   const matches = mask.match('9+');
+  // if matches found
   if (matches) {
+    // get the length (no. of placeholder chars)
     maxSequenceLength = matches[0].length;
   }
-
-  let stringValue = numericValue.toString();
-  if (numericValue && stringValue.length > maxSequenceLength) {
+  // if there's a sequence number that needs to be inserted and it exceeds the maximum length
+  if (numericValue > 1 && numericValue.toString().length > maxSequenceLength) {
+    // stop with error
     return callback({
       code: 'MASK_TOO_SHORT',
       message: 'Cannot resolve mask. The numeric value is too big for current mask.'
     });
   }
+  // get mask string
   let maskString = getMaskRegExpStringForSearch(mask, maskToResolve);
-
+  // if no mask string returned
   if (!maskString) {
+    // stop with error
     return callback({
       code: 'MASK_MISS_MATCH',
       message: 'Cannot resolve mask. Mask to resolve does not match mask pattern'
     });
   }
-
+  // insert the numeric value into the mask
   while (numericValue) {
-    let endPosition = maskString.lastIndexOf('(\\d)');
-    maskString = maskString.substring(0, endPosition) + numericValue % 10 + maskString.substring(endPosition + 4);
+    // search the last digit placeholder
+    const endPosition = maskString.lastIndexOf('(\\d)');
+    // insert the last digit of the number on the last digit placeholder position
+    maskString = `${maskString.substring(0, endPosition)}${numericValue % 10}${maskString.substring(endPosition + 4)}`;
+    // do it until all the digits were processed
     numericValue = parseInt(numericValue / 10);
   }
+  // replace remaining digit placeholders with 0
   maskString = maskString.replace(/\(\\d\)/g, '0');
+  // send back the result
   callback(null, maskString);
 }
 

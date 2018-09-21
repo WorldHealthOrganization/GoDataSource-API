@@ -212,19 +212,20 @@ module.exports = function (Outbreak) {
    * Also set visual id
    */
   Outbreak.beforeRemote('prototype.__create__cases', function (context, modelInstance, next) {
-    // if the visual id was not passed
-    if (context.args.data.visualId === undefined) {
-      // set it automatically
-      Outbreak.helpers.getAvailableVisualId(context.instance, function (error, visualId) {
+    // if the visual id (mask) was passed
+    if (context.args.data.visualId !== undefined) {
+      // resolve sequence (if any)
+      Outbreak.helpers.getAvailableVisualId(context.instance, context.args.data.visualId, function (error, visualId) {
         context.args.data.visualId = visualId;
         return next(error);
       });
-    } else {
       // make sure the visual id is unique in the given outbreak, otherwise stop with error
       Outbreak.helpers
         .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
         .then(next)
         .catch(next);
+    } else {
+      next();
     }
   });
 
@@ -232,19 +233,20 @@ module.exports = function (Outbreak) {
    * Handle visual identifier (uniqueness and generation)
    */
   Outbreak.beforeRemote('prototype.__create__contacts', function (context, modelInstance, next) {
-    // if the visual id was not passed
-    if (context.args.data.visualId === undefined) {
-      // set it automatically
-      Outbreak.helpers.getAvailableVisualId(context.instance, function (error, visualId) {
+    // if the visual id (mask) was passed
+    if (context.args.data.visualId !== undefined) {
+      // resolve sequence (if any)
+      Outbreak.helpers.getAvailableVisualId(context.instance, context.args.data.visualId, function (error, visualId) {
         context.args.data.visualId = visualId;
         return next(error);
       });
-    } else {
       // make sure the visual id is unique in the given outbreak, otherwise stop with error
       Outbreak.helpers
         .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
         .then(next)
         .catch(next);
+    } else {
+      next();
     }
   });
 
@@ -269,7 +271,7 @@ module.exports = function (Outbreak) {
           }
           // make sure the visual id is unique in the given outbreak, otherwise stop with error
           return Outbreak.helpers
-            .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
+            .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId, context.args.fk)
             .then(next);
         })
         .catch(next);
@@ -298,7 +300,7 @@ module.exports = function (Outbreak) {
           }
           // make sure the visual id is unique in the given outbreak, otherwise stop with error
           return Outbreak.helpers
-            .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
+            .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId, context.args.fk)
             .then(next);
         })
         .catch(next);
@@ -1182,10 +1184,11 @@ module.exports = function (Outbreak) {
 
   /**
    * Generate (next available) visual id
+   * @param visualIdMask
    * @param callback
    */
-  Outbreak.prototype.generateVisualId = function (callback) {
-    Outbreak.helpers.getAvailableVisualId(this, callback);
+  Outbreak.prototype.generateVisualId = function (visualIdMask, callback) {
+    Outbreak.helpers.getAvailableVisualId(this, visualIdMask, callback);
   };
 
   /**
@@ -2551,19 +2554,20 @@ module.exports = function (Outbreak) {
    * Handle visual identifier (uniqueness and generation)
    */
   Outbreak.beforeRemote('prototype.__create__events', function (context, modelInstance, next) {
-    // if the visual id was not passed
-    if (context.args.data.visualId === undefined) {
-      // set it automatically
-      Outbreak.helpers.getAvailableVisualId(context.instance, function (error, visualId) {
+    // if the visual id (mask) was passed
+    if (context.args.data.visualId !== undefined) {
+      // resolve sequence (if any)
+      Outbreak.helpers.getAvailableVisualId(context.instance, context.args.data.visualId, function (error, visualId) {
         context.args.data.visualId = visualId;
         return next(error);
       });
-    } else {
       // make sure the visual id is unique in the given outbreak, otherwise stop with error
       Outbreak.helpers
         .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
         .then(next)
         .catch(next);
+    } else {
+      next();
     }
   });
 
@@ -2587,7 +2591,7 @@ module.exports = function (Outbreak) {
           }
           // make sure the visual id is unique in the given outbreak, otherwise stop with error
           return Outbreak.helpers
-            .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
+            .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId, context.args.fk)
             .then(next);
         })
         .catch(next);

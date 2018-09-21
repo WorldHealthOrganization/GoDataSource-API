@@ -515,10 +515,17 @@ module.exports = function (Outbreak) {
   /**
    * Get the next available visual id
    * @param outbreak
+   * @param visualId
    * @param callback
    */
-  Outbreak.helpers.getAvailableVisualId = function (outbreak, callback) {
-    let maskRegExp = app.utils.maskField.convertMaskToSearchRegExp(outbreak.caseIdMask);
+  Outbreak.helpers.getAvailableVisualId = function (outbreak, visualId, callback) {
+    let maskRegExp = app.utils.maskField.convertMaskToSearchRegExp(outbreak.caseIdMask, visualId);
+    if (!maskRegExp) {
+      return callback(app.utils.apiError.getError('INVALID_VISUAL_ID_MASK', {
+        visualIdMask: visualId,
+        outbreakVisualIdMask: outbreak.caseIdMask
+      }));
+    }
     app.models.person
       .findOne({
         where: {
@@ -533,10 +540,10 @@ module.exports = function (Outbreak) {
       .then(function (person) {
         let index = 0;
         if (person) {
-          index = app.utils.maskField.extractValueFromMaskedField(outbreak.caseIdMask, person.visualId);
+          index = app.utils.maskField.extractValueFromMaskedField(outbreak.caseIdMask, visualId, person.visualId);
         }
         index++;
-        app.utils.maskField.resolveMask(outbreak.caseIdMask, index, callback);
+        app.utils.maskField.resolveMask(outbreak.caseIdMask, visualId, index, callback);
       }).catch(callback);
   };
 
@@ -854,14 +861,18 @@ module.exports = function (Outbreak) {
    * If not, then a DUPLICATE_VISUAL_ID error is built and returned
    * @param outbreakId Outbreaks identifier
    * @param visualId Visual identifier (string)
+   * @param [instanceId] Current instance id
    * @returns Promise { false (if unique), error }
    */
-  Outbreak.helpers.validateVisualIdUniqueness = function (outbreakId, visualId) {
+  Outbreak.helpers.validateVisualIdUniqueness = function (outbreakId, visualId, instanceId) {
     return app.models.person
       .findOne({
         where: {
           outbreakId: outbreakId,
-          visualId: visualId
+          visualId: visualId,
+          id: {
+            neq: instanceId
+          }
         },
         deleted: true
       })
@@ -1024,7 +1035,7 @@ module.exports = function (Outbreak) {
    * @param context
    * @returns {*}
    */
-  Outbreak.helpers.getUsersPersonReadPermissions= function (context) {
+  Outbreak.helpers.getUsersPersonReadPermissions = function (context) {
     let userPermissions = context.req.authData.user.permissionsList;
 
     // Keep only the read person permissions that the user has
@@ -1039,6 +1050,7 @@ module.exports = function (Outbreak) {
   /**
    * Hide fields that the user does not have permission to see on a person model (case/contact/event)
    * @param model
+   * @param permissions
    */
   Outbreak.helpers.limitPersonInformation = function (model, permissions) {
     const personReadPermissionMap = {
