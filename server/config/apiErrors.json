@@ -63,6 +63,10 @@
   "ACCESS_DENIED": {
     "messagePattern": "Logged in user doesn't have access this endpoint: <%= accessErrors %>."
   },
+  "AUTHORIZATION_REQUIRED": {
+    "defaultStatusCode": 401,
+    "messagePattern": "Authorization Required"
+  },
   "INVALID_CASE_RELATIONSHIP": {
     "defaultStatusCode": 422,
     "messagePattern": "The case `<%= id %>` needs to be related to another case in order to be able to convert it to a contact"
@@ -154,5 +158,45 @@
   "INVALID_FOLLOW_UP_DATE": {
     "defaultStatusCode": 400,
     "messagePattern": "Invalid follow up date, it exceeds the configured period."
+  },
+  "UPSTREAM_SERVER_NOT_CONFIGURED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Upstream server with url `<%= upstreamServerURL %>` is not configured in system settings"
+  },
+  "UPSTREAM_SERVER_SYNC_DISABLED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Sync with upstream server `<%= upstreamServerName %>` is disabled"
+  },
+  "UPSTREAM_SERVER_SYNC_FAILED": {
+    "defaultStatusCode": 424,
+    "messagePattern": "Sync with upstream server `<%= upstreamServerName %>` failed"
+  },
+  "UPSTREAM_SERVER_SYNC_IN_PROGRESS": {
+    "defaultStatusCode": 424,
+    "messagePattern": "There is already a sync with upstream server `<%= upstreamServerName %>` in progress. Only a sync action can be in progress at a time."
+  },
+  "UPSTREAM_SERVER_EXPORT_FAILED": {
+    "defaultStatusCode": 424,
+    "messagePattern": "Database export of the upstream server `<%= upstreamServerName %>` failed"
+  },
+  "INSTANCE_SYNC_FAILED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Instance sync failed: `<%= syncError %>`"
+  },
+  "INSTANCE_EXPORT_FAILED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Instance export failed: `<%= failReason %>`"
+  },
+  "INSTANCE_EXPORT_STILL_IN_PROGRESS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Instance export is still in progress`"
+  },
+  "MAPS_API_KEY_INVALID": {
+    "defaultStatusCode": 404,
+    "messagePattern": "Maps API key is invalid."
+  },
+  "INVALID_RELATIONSHIP_WITH_DISCARDED_CASE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Cannot create/modify relationships with discarded cases (case id: `<%= id %>` )"
   }
 }

@@ -85,6 +85,16 @@ module.exports = function (Model) {
             }
           };
           break;
+        // belongs to with nested foreign key
+        case 'belongsToEmbedded':
+          query = {
+            where: {
+              id: {
+                inq: [_.get(modelInstance, customRelation.definition.foreignKey)]
+              }
+            }
+          };
+          break;
         // base model contains a list of references to related model
         case 'belongsToManyComplex':
           foreignKeyContainer = modelInstance[customRelation.definition.foreignKeyContainer];
@@ -132,6 +142,10 @@ module.exports = function (Model) {
           app.models[customRelation.definition.model]
             .find(query)
             .then(function (results) {
+              // belongsToEmbedded should return one element, not array
+              if (customRelation.definition.type === 'belongsToEmbedded') {
+                results = results.shift();
+              }
               modelInstance[customRelation.relation] = results;
             }));
       } else {

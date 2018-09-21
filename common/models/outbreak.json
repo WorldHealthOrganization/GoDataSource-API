@@ -5,6 +5,9 @@
   "options": {
     "validateUpsert": true
   },
+  "scope": {
+    "order": ["name ASC"]
+  },
   "properties": {
     "name": {
       "type": "string",
@@ -18,9 +21,7 @@
       "required": true
     },
     "countries": {
-      "type": [
-        "string"
-      ],
+      "type": ["country"],
       "required": true
     },
     "startDate": {
@@ -84,21 +85,21 @@
       "type": [
         "templateQuestion"
       ],
-      "required": true,
+      "default": [],
       "importTopLevelOnly": true
     },
     "contactFollowUpTemplate": {
       "type": [
         "templateQuestion"
       ],
-      "required": true,
+      "default": [],
       "importTopLevelOnly": true
     },
     "labResultsTemplate": {
       "type": [
         "templateQuestion"
       ],
-      "required": true,
+      "default": [],
       "importTopLevelOnly": true
     },
     "caseIdMask": {
@@ -106,7 +107,10 @@
       "required": true,
       "pattern": "^(?:(?!š).)*(?:9*0+|9+0*)[^š]*$",
       "default": "9999999999"
-    }
+    },
+    "arcGisServers": [
+      "arcGisServer"
+    ]
   },
   "indexes": {
     "name_index": {
@@ -459,15 +463,33 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "filteredCountCaseRelationships"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "countContactRelationships"
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "filteredCountContactRelationships"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "countEventRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "filteredCountEventRelationships"
     },
     {
       "principalType": "ROLE",
@@ -684,6 +706,18 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "filteredCountCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "filteredCountContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "filteredCountContacts"
     },
     {
       "principalType": "ROLE",
@@ -1044,6 +1078,30 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "findPeopleInCluster"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countPeopleInCluster"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countPeopleInCluster"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "filteredCountFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "findTransmissionChainsForFilteredPeople"
     }
   ],
   "methods": {
@@ -1988,6 +2046,28 @@
       "http": {
         "verb": "get",
         "path": "/cases/filtered-count"
+      }
+    },
+    "prototype.filteredCountContacts": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of contacts that pass the filter",
+          "required": true
+        }
+      ],
+      "description": "Counts the contacts that pass a filter (which now can accept relations)",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/filtered-count"
       }
     },
     "prototype.filteredCountEvents": {
@@ -3540,12 +3620,16 @@
       "accepts": [
         {
           "arg": "contacts",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "Array of contacts for which the dossiers will be generated"
         },
         {
           "arg": "data",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "Array of fields to be anonymized"
         },
         {
@@ -3586,12 +3670,16 @@
       "accepts": [
         {
           "arg": "cases",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "Array of cases for which the dossiers will be generated"
         },
         {
           "arg": "data",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "Array of fields to be anonymized"
         },
         {
@@ -4079,7 +4167,9 @@
       "returns": [
         {
           "arg": "people",
-          "type": ["person"],
+          "type": [
+            "person"
+          ],
           "description": "List of people in the cluster",
           "required": true,
           "root": true
@@ -4089,6 +4179,199 @@
       "http": {
         "verb": "get",
         "path": "/clusters/:fk/people"
+      }
+    },
+    "prototype.countPeopleInCluster": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "ID of the cluster"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a (full) relationship filter on 'relationship' property of the filter."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of people in the cluster",
+          "required": true
+        }
+      ],
+      "description": "Number the people inside a cluster",
+      "http": {
+        "verb": "get",
+        "path": "/clusters/:fk/people/count"
+      }
+    },
+    "prototype.filteredCountFollowUps": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of follow-ups that pass the filter",
+          "required": true
+        }
+      ],
+      "description": "Counts the follow-ups that pass a filter (which now can accept relations)",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/filtered-count"
+      }
+    },
+    "prototype.filteredCountCaseRelationships": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationships (that pass the filter) of a case",
+          "required": true
+        }
+      ],
+      "description": "Counts the relationships that pass a filter (which now can accept relations) of a case",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/relationships/filteredCount"
+      }
+    },
+    "prototype.filteredCountContactRelationships": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationships (that pass the filter) of a contact",
+          "required": true
+        }
+      ],
+      "description": "Counts the relationships that pass a filter (which now can accept relations) of a case",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/relationships/filteredCount"
+      }
+    },
+    "prototype.filteredCountEventRelationships": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationships (that pass the filter) of an event",
+          "required": true
+        }
+      ],
+      "description": "Counts the relationships that pass a filter (which now can accept relations) of a case",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/events/filteredCount"
+      }
+    },
+    "prototype.findTransmissionChainsForFilteredPeople": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this filter applies on person (case/contact/event) entity"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "chains",
+          "type": {
+            "nodes": {
+              "type": {
+                "<personId>": {
+                  "type": "person"
+                }
+              }
+            },
+            "edges": {
+              "type": {
+                "<relationshipId>": {
+                  "type": "relationship"
+                }
+              }
+            },
+            "transmissionChains": {
+              "type": {
+                "chains": [
+                  {
+                    "type": {
+                      "chain": [
+                        "string"
+                      ],
+                      "period": {
+                        "type": {
+                          "startDate": "date",
+                          "endDate": "date",
+                          "duration": {
+                            "type": "number",
+                            "description": "Transmission chain duration in days"
+                          }
+                        }
+                      },
+                      "active": "boolean"
+                    }
+                  }
+                ],
+                "length": "number"
+              }
+            }
+          },
+          "description": "Transmission chains that include filtered people",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Transmission chains that include filtered people",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/transmission-chains-including-people"
       }
     }
   }

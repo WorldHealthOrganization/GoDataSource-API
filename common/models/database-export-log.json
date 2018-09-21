@@ -1,0 +1,73 @@
+{
+  "name": "databaseExportLog",
+  "base": "databaseActionLog",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "type"
+  ],
+  "scope": {
+    "where": {
+      "type": "export"
+    }
+  },
+  "properties": {
+    "type": {
+      "type": "string",
+      "required": true,
+      "default": "export",
+      "readOnly": true
+    },
+    "syncClientId": {
+      "type": "string",
+      "description": "Client ID which triggered the export",
+      "required": true
+    },
+    "location": {
+      "type": "string",
+      "description": "Export file location"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "count"
+    }
+  ],
+  "methods": {}
+}

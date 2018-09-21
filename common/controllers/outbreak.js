@@ -87,6 +87,19 @@ module.exports = function (Outbreak) {
 
   /**
    * Allows count requests with advanced filters (like the ones we can use on GET requests)
+   * to be made on outbreak/{id}/contacts.
+   */
+  Outbreak.prototype.filteredCountContacts = function (filter, callback) {
+    this.__get__contacts(filter, function (err, res) {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
+    });
+  };
+
+  /**
+   * Allows count requests with advanced filters (like the ones we can use on GET requests)
    * to be mode on outbreak/{id}/events.
    * @param filter
    * @param callback
@@ -456,10 +469,15 @@ module.exports = function (Outbreak) {
       .findById(caseId)
       .then((caseModel) => {
         if (!caseModel) {
-          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
             model: app.models.case.modelName,
             id: caseId
-          }));
+          });
+        }
+        if (!app.models.case.nonDiscardedCaseClassifications.includes(caseModel.classification)) {
+          throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
+            id: caseId
+          });
         }
         helpers.createPersonRelationship(this.id, caseId, 'case', data, options, callback);
       })
@@ -554,7 +572,25 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.updateCaseRelationship = function (caseId, relationshipId, data, options, callback) {
-    helpers.updatePersonRelationship(caseId, relationshipId, 'case', data, options, callback);
+    // make sure case is valid, before trying to update any relations
+    app.models.case
+      .findById(caseId)
+      .then((caseModel) => {
+        if (!caseModel) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.case.modelName,
+            id: caseId
+          });
+        }
+        // do not allow relationships with discarded cases
+        if (!app.models.case.nonDiscardedCaseClassifications.includes(caseModel.classification)) {
+          throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
+            id: caseId
+          });
+        }
+        helpers.updatePersonRelationship(caseId, relationshipId, 'case', data, options, callback);
+      })
+      .catch(callback);
   };
 
   /**
@@ -637,6 +673,28 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Count filtered relations for a case
+   * @param caseId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountCaseRelationships = function (caseId, filter, callback) {
+    // make sure case is valid
+    app.models.case
+      .findById(caseId)
+      .then((caseModel) => {
+        if (!caseModel) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.case.modelName,
+            id: caseId
+          }));
+        }
+        helpers.filteredCountPersonRelationships(caseId, filter, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
    * Count relations for a contact
    * @param contactId
    * @param where
@@ -659,7 +717,29 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Count relations for a event
+   * Count filtered relations for a contact
+   * @param contactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountContactRelationships = function (contactId, filter, callback) {
+    // make sure case is valid
+    app.models.contact
+      .findById(contactId)
+      .then((contact) => {
+        if (!contact) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.contact.modelName,
+            id: contactId
+          }));
+        }
+        helpers.filteredCountPersonRelationships(contactId, filter, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count relations for an event
    * @param eventId
    * @param where
    * @param callback
@@ -676,6 +756,28 @@ module.exports = function (Outbreak) {
           }));
         }
         helpers.countPersonRelationships(eventId, where, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count filtered relations for an event
+   * @param eventId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountEventRelationships = function (eventId, filter, callback) {
+    // make sure case is valid
+    app.models.event
+      .findById(eventId)
+      .then((event) => {
+        if (!event) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.event.modelName,
+            id: eventId
+          }));
+        }
+        helpers.filteredCountPersonRelationships(eventId, filter, callback);
       })
       .catch(callback);
   };
@@ -1093,7 +1195,7 @@ module.exports = function (Outbreak) {
 
                     // last follow up day, based on the given period, starting from today
                     let lastToGenerateFollowUpDay = genericHelpers.getUTCDate()
-                      // doing this to not generate follow ups for today and next day in case period is 1
+                    // doing this to not generate follow ups for today and next day in case period is 1
                       .add(data.followUpPeriod <= 1 ? 0 : data.followUpPeriod, 'days');
 
                     // if given follow up period is higher than the last incubation day, just use it as a threshold for generation
@@ -1663,6 +1765,15 @@ module.exports = function (Outbreak) {
    * Set outbreakId for created follow-ups
    */
   Outbreak.beforeRemote('prototype.__create__contacts__followUps', function (context, modelInstance, next) {
+    // set outbreakId
+    context.args.data.outbreakId = context.instance.id;
+    next();
+  });
+
+  /**
+   * Set outbreakId for created lab results
+   */
+  Outbreak.beforeRemote('prototype.__create__cases__labResults', function (context, modelInstance, next) {
     // set outbreakId
     context.args.data.outbreakId = context.instance.id;
     next();
@@ -3414,6 +3525,9 @@ module.exports = function (Outbreak) {
         order: 'date ASC'
       }, filter || {}))
       .then(function (followups) {
+        // add support for filter parent
+        followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
+
         // initialize contacts map as the request needs to return the latest follow-up for the contact if not performed
         let contactsMap = {};
 
@@ -3814,7 +3928,9 @@ module.exports = function (Outbreak) {
           // parse file content
           const rawlabResultsList = JSON.parse(file);
           // remap properties & values
-          const labResultsList = app.utils.helpers.remapProperties(rawlabResultsList, body.map, body.valuesMap);
+          const labResultsList = app.utils.helpers.convertBooleanProperties(
+            app.models.labResult,
+            app.utils.helpers.remapProperties(rawlabResultsList, body.map, body.valuesMap));
           // build a list of create lab results operations
           const createLabResults = [];
           // define a container for error results
@@ -3842,6 +3958,10 @@ module.exports = function (Outbreak) {
                       id: labResult.personId
                     });
                   }
+
+                  // set outbreakId
+                  labResult.outbreakId = self.id;
+
                   // sync the record
                   return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.labResult, labResult, options)
                     .then(function (result) {
@@ -3914,7 +4034,9 @@ module.exports = function (Outbreak) {
           // parse file content
           const rawCasesList = JSON.parse(file);
           // remap properties & values
-          const casesList = app.utils.helpers.remapProperties(rawCasesList, body.map, body.valuesMap);
+          const casesList = app.utils.helpers.convertBooleanProperties(
+            app.models.case,
+            app.utils.helpers.remapProperties(rawCasesList, body.map, body.valuesMap));
           // build a list of create operations
           const createCases = [];
           // define a container for error results
@@ -4012,9 +4134,13 @@ module.exports = function (Outbreak) {
           contactsList.forEach(function (recordData, index) {
             createContacts.push(function (callback) {
               // extract relationship data
-              const relationshipData = app.utils.helpers.extractImportableFields(app.models.relationship, recordData.relationship);
+              const relationshipData = app.utils.helpers.convertBooleanProperties(
+                app.models.relationship,
+                app.utils.helpers.extractImportableFields(app.models.relationship, recordData.relationship));
               // extract contact data
-              const contactData = app.utils.helpers.extractImportableFields(app.models.contact, recordData);
+              const contactData = app.utils.helpers.convertBooleanProperties(
+                app.models.contact,
+                app.utils.helpers.extractImportableFields(app.models.contact, recordData));
               // set outbreak ids
               contactData.outbreakId = self.id;
               relationshipData.outbreakId = self.id;
@@ -4038,7 +4164,7 @@ module.exports = function (Outbreak) {
                         .catch(function (error) {
                           // failed to create relationship, remove the contact if it was created during sync
                           if (syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED) {
-                            contactRecord.destroy();
+                            contactRecord.destroy(options);
                           }
                           reject(error);
                         });
@@ -4081,6 +4207,8 @@ module.exports = function (Outbreak) {
             callback(null, results);
           });
         } catch (error) {
+          // log error
+          options.remotingContext.req.logger.error(error);
           // handle parse error
           callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
             contentType: 'JSON',
@@ -4111,7 +4239,9 @@ module.exports = function (Outbreak) {
           // parse file content
           const rawOutbreakList = JSON.parse(file);
           // remap properties & values
-          const outbreaksList = app.utils.helpers.remapProperties(rawOutbreakList, body.map, body.valuesMap);
+          const outbreaksList = app.utils.helpers.convertBooleanProperties(
+            app.models.outbreak,
+            app.utils.helpers.remapProperties(rawOutbreakList, body.map, body.valuesMap));
           // build a list of create operations
           const createOutbreaks = [];
           // define a container for error results
@@ -4387,21 +4517,7 @@ module.exports = function (Outbreak) {
                 questions = Outbreak.helpers.parseTemplateQuestions(labResultsQuestionnaire, dictionary);
 
                 // Since we are presenting all the answers, mark the one that was selected, for each question
-                Object.keys(labResult.questionnaireAnswers).forEach((key) => {
-                  let question = _.find(questions, (question) => {
-                    return question.variable === key;
-                  });
-
-                  if (question.answers) {
-                    question.answers.forEach((answer) => {
-                      if (labResult.questionnaireAnswers[key].indexOf(answer.value) !== -1) {
-                        answer.selected = true;
-                      }
-                    });
-                  } else {
-                    question.value = labResult.questionnaireAnswers[key];
-                  }
-                });
+                Outbreak.helpers.prepareQuestionsForPrint(labResult.questionnaireAnswers, questions);
 
                 // Translate the remaining fields on the lab result model
                 labResult = app.utils.helpers.translateFieldLabels(app, labResult, app.models.labResult.modelName, dictionary);
@@ -4581,21 +4697,7 @@ module.exports = function (Outbreak) {
                 questions = Outbreak.helpers.parseTemplateQuestions(followUpQuestionnaire, dictionary);
 
                 // Since we are presenting all the answers, mark the one that was selected, for each question
-                Object.keys(followUp.questionnaireAnswers).forEach((key) => {
-                  let question = _.find(questions, (question) => {
-                    return question.variable === key;
-                  });
-
-                  if (question.answers) {
-                    question.answers.forEach((answer) => {
-                      if (followUp.questionnaireAnswers[key].indexOf(answer.value) !== -1) {
-                        answer.selected = true;
-                      }
-                    });
-                  } else {
-                    question.value = followUp.questionnaireAnswers[key];
-                  }
-                });
+                Outbreak.helpers.prepareQuestionsForPrint(followUp.questionnaireAnswers, questions);
 
                 // Translate the remaining fields on the follow up model
                 followUp = app.utils.helpers.translateFieldLabels(app, followUp, app.models.followUp.modelName, dictionary);
@@ -5310,7 +5412,9 @@ module.exports = function (Outbreak) {
           // parse file content
           const rawReferenceDataList = JSON.parse(file);
           // remap properties & values
-          const referenceDataList = app.utils.helpers.remapProperties(rawReferenceDataList, body.map, body.valuesMap);
+          const referenceDataList = app.utils.helpers.convertBooleanProperties(
+            app.models.referenceData,
+            app.utils.helpers.remapProperties(rawReferenceDataList, body.map, body.valuesMap));
           // build a list of sync operations
           const syncReferenceData = [];
           // define a container for error results
@@ -5381,26 +5485,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.findPeopleInCluster = function (clusterId, filter, callback) {
-    // find the requested cluster
-    app.models.cluster
-      .findOne({
-        where: {
-          id: clusterId,
-          outbreakId: this.id
-        }
-      })
-      .then(function (cluster) {
-        // if the cluster was not found
-        if (!cluster) {
-          // stop with error
-          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
-            model: app.models.cluster.modelName,
-            id: clusterId
-          }));
-        }
-        // otherwise find people in that cluster
-        cluster.findPeople(filter, callback);
-      });
+    // find people in a cluster
+    Outbreak.prototype.findOrCountPeopleInCluster(clusterId, filter, false, callback);
+  };
+
+  /**
+   * Count the people in a cluster
+   * @param clusterId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countPeopleInCluster = function (clusterId, filter, callback) {
+    // count people in cluster
+    Outbreak.prototype.findOrCountPeopleInCluster(clusterId, filter, true, callback);
   };
 
   /**
@@ -5429,6 +5526,47 @@ module.exports = function (Outbreak) {
       person = person.toJSON();
       Outbreak.helpers.limitPersonInformation(person, personTypesWithReadAccess);
       people[index] = person;
+    });
+    next();
+  });
+
+  /**
+   * Allows count requests with advanced filters (like the ones we can use on GET requests)
+   * to be mode on outbreak/{id}/follow-ups.
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountFollowUps = function (filter, callback) {
+    this.__get__followUps(filter, function (err, res) {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
+    });
+  };
+
+  /**
+   * Find transmission chains which include people that matched the filter
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findTransmissionChainsForFilteredPeople = function (filter, callback) {
+    app.models.relationship.findTransmissionChainsForFilteredPeople(this.id, this.periodOfFollowup, filter)
+      .then(function (chains) {
+        callback(null, chains);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Since this endpoint returns person data without checking if the user has the required read permissions,
+   * check the user's permissions and return only the fields he has access to
+   */
+  Outbreak.afterRemote('prototype.findTransmissionChainsForFilteredPeople', function (context, modelInstance, next) {
+    let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+
+    Object.keys(modelInstance.nodes).forEach((key) => {
+      Outbreak.helpers.limitPersonInformation(modelInstance.nodes[key], personTypesWithReadAccess);
     });
     next();
   });

@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 /**
  * Check if a model is monitored for logging
  * @param model
@@ -85,12 +87,12 @@ module.exports = function (Model) {
         // single record update
         if (context.currentInstance) {
           if (context.data.deleted && context.data.deleted !== context.currentInstance.deleted) {
-            context.options.softDeleteEvent = true;
+            _.set(context, `options._instance[${context.currentInstance.id}].softDeleteEvent`, true);
             return Model.notifyObserversOf('before delete', context, callback);
           }
           // batch update
         } else if (context.data.deleted && context.where) {
-          context.options.softDeleteEvent = true;
+          _.set(context, `options._instance[batch_${Model.modelName}].softDeleteEvent`, true);
           return Model.notifyObserversOf('before delete', context, callback);
         }
       }
@@ -103,7 +105,13 @@ module.exports = function (Model) {
    */
   Model.observe('after save', function (context, callback) {
     if (isMonitoredModel(Model)) {
-      if (context.options.softDeleteEvent) {
+      if (
+        (
+          context.instance &&
+          _.get(context, `options._instance[${context.instance.id}].softDeleteEvent`)
+        ) ||
+        _.get(context, `options._instance[batch_${Model.modelName}].softDeleteEvent`)
+      ) {
         return Model.notifyObserversOf('after delete', context, callback);
       }
     }
@@ -186,9 +194,20 @@ module.exports = function (Model) {
           instance.isValid = function (callback) {
             callback(true);
           };
+
+          // initialize props to be updated
+          let props = {
+            [deletedFlag]: true,
+          };
+
+          // update the deletedAt property only if the action is not a sync or the property is missing from the instance
+          if (!hasOptions || !options._sync || !instance[deletedAt]) {
+            props[deletedAt] = new Date();
+          }
+
           return instance
           // sending additional options in order to have access to the remoting context in the next hooks
-            .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()}, hasOptions ? options : {})
+            .updateAttributes(props, hasOptions ? options : {})
             .then(function () {
               return {count: 1};
             });
@@ -226,6 +245,8 @@ module.exports = function (Model) {
     if (cb === undefined && typeof options === 'function') {
       cb = options;
       hasOptions = false;
+    } else if (!options) {
+      hasOptions = false;
     }
 
     let nextStep = next.bind({callback: cb});
@@ -233,9 +254,20 @@ module.exports = function (Model) {
     this.isValid = function (callback) {
       callback(true);
     };
+
+    // initialize properties that need to be updated on delete
+    let props = {
+      [deletedFlag]: true
+    };
+
+    // update the deletedAt property only if the action is not a sync or the property is missing from the instance
+    if (!hasOptions || !options._sync || !this[deletedAt]) {
+      props[deletedAt] = new Date();
+    }
+
     const promise = this
     // sending additional options in order to have access to the remoting context in the next hooks
-      .updateAttributes({[deletedFlag]: true, [deletedAt]: new Date()}, hasOptions ? options : {})
+      .updateAttributes(props, hasOptions ? options : {})
       .then(function () {
         return {count: 1};
       })

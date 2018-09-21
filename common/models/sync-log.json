@@ -1,26 +1,72 @@
 {
   "name": "syncLog",
-  "base": "extendedPersistedModel",
+  "base": "databaseActionLog",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
+  "hidden": [
+    "type"
+  ],
+  "scope": {
+    "where": {
+      "type": "sync"
+    }
+  },
   "properties": {
+    "type": {
+      "type": "string",
+      "required": true,
+      "default": "sync",
+      "readOnly": true
+    },
     "syncServerUrl": {
       "type": "string",
-      "required": true
+      "description": "URL of the server with which the client is synced. Present in the entries for Client instances"
     },
-    "syncProcessStartData": {
-      "type": "date",
-      "required": true
-    },
-    "syncProcessCompletionDate": {
-      "type": "date",
-      "required": true
+    "syncClientId": {
+      "type": "string",
+      "description": "Client ID which is synced with the server. Present in the entries for Server instances"
     }
   },
   "validations": [],
   "relations": {},
-  "acls": [],
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "count"
+    }
+  ],
   "methods": {}
 }
