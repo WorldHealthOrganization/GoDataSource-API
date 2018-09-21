@@ -25,6 +25,9 @@
     },
     "languageId_index": {
       "languageId": 1
+    },
+    "translation_index": {
+      "translation": "text"
     }
   },
   "validations": [],
