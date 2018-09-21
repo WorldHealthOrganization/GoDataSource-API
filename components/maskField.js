@@ -139,8 +139,11 @@ function resolveMask(mask, maskToResolve, numericValue, callback) {
   while (numericValue) {
     // search the last digit placeholder
     const endPosition = maskString.lastIndexOf('(\\d)');
-    // insert the last digit of the number on the last digit placeholder position
-    maskString = `${maskString.substring(0, endPosition)}${numericValue % 10}${maskString.substring(endPosition + 4)}`;
+    // validate position
+    if (endPosition !== -1) {
+      // insert the last digit of the number on the last digit placeholder position
+      maskString = `${maskString.substring(0, endPosition)}${numericValue % 10}${maskString.substring(endPosition + 4)}`;
+    }
     // do it until all the digits were processed
     numericValue = parseInt(numericValue / 10);
   }
