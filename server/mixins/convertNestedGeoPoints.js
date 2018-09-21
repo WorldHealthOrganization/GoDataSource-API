@@ -12,7 +12,7 @@ function getSourceAndTargetFromContext(context) {
   // data source & target can be on context instance
   if (context.instance) {
     // if this is an model instance
-    if (context.instance.toJSON === 'function') {
+    if (typeof context.instance.toJSON === 'function') {
       // get data
       result.source = context.instance.toJSON();
     } else {

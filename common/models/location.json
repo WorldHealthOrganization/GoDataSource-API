@@ -29,6 +29,14 @@
     "parentLocationId": {
       "type": "string",
       "default": null
+    },
+    "geoLocation": {
+      "type": "geopoint"
+    }
+  },
+  "indexes": {
+    "geoLocation_index": {
+      "geoLocation": "2dsphere"
     }
   },
   "validations": [],

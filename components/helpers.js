@@ -222,6 +222,7 @@ function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, pare
             if (
               value !== undefined &&
               typeof value !== 'object' &&
+              valuesMap &&
               // strip indices for values map, we're only interested in the generic path not the exact one
               (replaceValueParent = valuesMap[`${parentPathPrefix.replace(/\[\d+]/g, '[]')}${sourcePath.replace(/\[\d+]/g, '[]')}`])
               && replaceValueParent[value] !== undefined
@@ -1013,10 +1014,112 @@ const getBuildInformation = function () {
   };
 };
 
+/**
+ * Check if a (string) date is valid (correct ISO format)
+ * @param date
+ * @return {boolean}
+ */
 const isValidDate = function (date) {
-  const dateRegexp = /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}\.\d{3}Z*)?$/;
+  return /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}\.\d{3}Z*)?$/.test(date);
+};
 
-  return dateRegexp.test(date);
+/**
+ * Convert boolean model properties to correct boolean values from strings
+ * @param Model
+ * @param dataSet [object|array]
+ */
+const convertBooleanProperties = function (Model, dataSet) {
+  // init model boolean properties, if not already done
+  if (!Model._booleanProperties) {
+    // keep a list of boolean properties
+    Model._booleanProperties = [];
+    // go through all model properties, from model definition
+    Model.forEachProperty(function (propertyName) {
+      // check if the property is supposed to be boolean
+      if (
+        Model.definition.properties[propertyName].type &&
+        Model.definition.properties[propertyName].type.name === 'Boolean'
+      ) {
+        // store property name
+        Model._booleanProperties.push(propertyName);
+      }
+    });
+  }
+
+  /**
+   * Convert boolean model properties for a single record instance
+   * @param record
+   */
+  function convertBooleanModelProperties(record) {
+    // check each property that is supposed to be boolean
+    Model._booleanProperties.forEach(function (booleanProperty) {
+      // if it has a value but the value is not boolean
+      if (record[booleanProperty] != null && typeof record[booleanProperty] !== 'boolean') {
+        // convert it to boolean value
+        record[booleanProperty] = ['1', 'true'].includes(record[booleanProperty].toString().toLowerCase());
+      }
+    });
+  }
+
+  // array of records
+  if (Array.isArray(dataSet)) {
+    // go through the dataSet records
+    dataSet.forEach(function (record) {
+      // convert each record
+      convertBooleanModelProperties(record);
+    });
+    // single record
+  } else {
+    // convert record
+    convertBooleanModelProperties(dataSet);
+  }
+  // records are modified by reference, but also return the dataSet
+  return dataSet;
+};
+
+/**
+ * Extract data source and target from model hook context
+ * @param context
+ */
+const getSourceAndTargetFromModelHookContext = function (context) {
+  const result = {};
+  // data source & target can be on context instance
+  if (context.instance) {
+    // if this is an model instance
+    if (typeof context.instance.toJSON === 'function') {
+      // get data
+      result.source = {
+        existing: context.instance.toJSON(),
+        existingRaw: context.instance,
+        updated: {}
+      };
+    } else {
+      result.source = {
+        existing: context.instance,
+        existingRaw: context.instance,
+        updated: {}
+      };
+    }
+    result.target = context.instance;
+  } else {
+    // data source & target are on context data
+    if (typeof context.currentInstance.toJSON === 'function') {
+      result.source = {
+        existing: context.currentInstance.toJSON(),
+        existingRaw: context.currentInstance,
+        updated: context.data
+      };
+    } else {
+      result.source = {
+        existing: context.currentInstance,
+        existingRaw: context.currentInstance,
+        updated: context.data
+      };
+    }
+    result.target = context.data;
+  }
+  result.source.all = Object.assign({}, result.source.existing, result.source.updated);
+  return result;
 };
 
 module.exports = {
@@ -1041,5 +1144,7 @@ module.exports = {
   translateDataSetReferenceDataValues: translateDataSetReferenceDataValues,
   translateFieldLabels: translateFieldLabels,
   includeSubLocationsInLocationFilter: includeSubLocationsInLocationFilter,
-  getBuildInformation: getBuildInformation
+  getBuildInformation: getBuildInformation,
+  convertBooleanProperties: convertBooleanProperties,
+  getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext
 };

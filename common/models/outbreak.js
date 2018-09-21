@@ -169,17 +169,28 @@ module.exports = function (Outbreak) {
 
                 // do not allow event-event relationships
                 if (type === 'event' && foundPerson.type === 'event') {
-                  throw callback(app.utils.apiError.getError('INVALID_EVENT_EVENT_RELATIONSHIP', {
+                  throw app.utils.apiError.getError('INVALID_EVENT_EVENT_RELATIONSHIP', {
                     id: person.id
-                  }));
+                  });
                 }
 
                 // do not allow contact-contact relationships
                 if (type === 'contact' && foundPerson.type === 'contact') {
-                  throw callback(app.utils.apiError.getError('INVALID_CONTACT_CONTACT_RELATIONSHIP', {
+                  throw app.utils.apiError.getError('INVALID_CONTACT_CONTACT_RELATIONSHIP', {
                     id: person.id
-                  }));
+                  });
                 }
+
+                // do not allow relationships with discarded cases
+                if (
+                  foundPerson.type === 'case' &&
+                  !app.models.case.nonDiscardedCaseClassifications.includes(foundPerson.classification)
+                ) {
+                  throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
+                    id: foundPerson.id
+                  });
+                }
+
                 // set its type
                 data.persons[index].type = foundPerson.type;
 

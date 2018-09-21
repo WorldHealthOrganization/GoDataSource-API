@@ -4,6 +4,7 @@
 const _ = require('lodash');
 const async = require('async');
 const mapsApi = require('../../components/mapsApi');
+const app = require('../server');
 
 module.exports = function (Person) {
 
@@ -199,14 +200,75 @@ module.exports = function (Person) {
     );
   };
 
+
   /**
-   * If address is present in the request, make sure we're getting its geo location from external API
-   * We only do this if googleApi.apiKey is present in the config
+   * Before save hooks
+   */
+  Person.observe('before save', function (context, next) {
+    const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
+    // if case classification was changed
+    if (
+      (
+        !context.isNewInstance &&
+        data.source.existingRaw.type === 'case'
+        && data.source.existing.classification !== data.source.updated.classification
+      ) &&
+      (
+        // classification changed to/from discarded
+        app.models.case.nonDiscardedCaseClassifications.includes(data.source.existing.classification) !==
+        app.models.case.nonDiscardedCaseClassifications.includes(data.source.updated.classification)
+      )
+    ) {
+      // set a flag on context to trigger relationship updated due to significant changes in case classification (from/to discarded case)
+      context.options.triggerRelationshipUpdates = true;
+    }
+    next();
+  });
+
+
+  /**
+   * After save hooks
    */
   Person.observe('after save', function (ctx, next) {
     // cache instance reference, used in many places below
     let instance = ctx.instance;
 
+    /**
+     * When case classification changes, relations need to be notified because they have business logic associated with case classification
+     */
+    // if a case was updated and relationship updates need to be triggered
+    if (!ctx.isNewInstance && instance.type === 'case' && ctx.options.triggerRelationshipUpdates) {
+      // find all of its relationships with a contact
+      app.models.relationship
+        .find({
+          where: {
+            'persons.id': instance.id,
+            and: [
+              {'persons.type': 'case'},
+              {'persons.type': 'contact'}
+            ]
+          }
+        })
+        .then(function (relationships) {
+          const updateRelationships = [];
+          // trigger an update for them (to propagate eventual follow-up period changes)
+          relationships.forEach(function (relationship) {
+            // nothing to update, just trigger update method to activate the hooks
+            updateRelationships.push(relationship.updateAttributes({}, ctx.options));
+          });
+          // the hook does not need to wait for the changes to propagate
+          return Promise.all(updateRelationships);
+        })
+        .catch(function (err) {
+          // log error
+          app.logger.error(err);
+        });
+    }
+
+    /**
+     * If address is present in the request, make sure we're getting its geo location from external API
+     * We only do this if googleApi.apiKey is present in the config
+     */
     // defensive checks
     if (Array.isArray(instance.addresses)) {
       // set address items that have geo location as undefined
@@ -227,8 +289,7 @@ module.exports = function (Person) {
       // update geo locations, do not check anything
       updateGeoLocations(ctx, filteredAddresses);
     }
-
-    // do not wait for the above operation to stop
+    // do not wait for the above operations to complete
     return next();
   });
 };

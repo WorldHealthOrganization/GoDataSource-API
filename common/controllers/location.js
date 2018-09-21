@@ -168,7 +168,9 @@ module.exports = function (Location) {
           // parse file content
           const rawLocationsList = JSON.parse(file);
           // remap properties
-          const locationsList = app.utils.helpers.remapProperties(rawLocationsList, body.map);
+          const locationsList = app.utils.helpers.convertBooleanProperties(
+            Location,
+            app.utils.helpers.remapProperties(rawLocationsList, body.map));
           // build hierarchical list
           const hierarchicalList = Location.buildHierarchicalLocationsList(locationsList, true);
           // import locations
