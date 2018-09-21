@@ -3488,14 +3488,16 @@ module.exports = function (Outbreak) {
     let outbreakId = this.id;
 
     // get all the followups for the filtered period
-    app.models.followUp.find(app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: outbreakId
-        },
-        // order by date as we need to check the follow-ups from the oldest to the most new
-        order: 'date ASC'
-      }, filter || {}))
+    app.models.followUp
+      .find(app.utils.remote
+        .mergeFilters({
+          where: {
+            outbreakId: outbreakId
+          },
+          fields: ['id', 'personId', 'performed'],
+          // order by date as we need to check the follow-ups from the oldest to the most recent
+          order: 'date ASC'
+        }, filter || {}))
       .then(function (followups) {
         // add support for filter parent
         followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
@@ -3507,20 +3509,32 @@ module.exports = function (Outbreak) {
           // get contactId
           let contactId = followup.personId;
 
-          // add in the contacts map the entire follow-up if it was not perfomed
+          // add in the contacts map the follow-up ID if it was not performed
           if (!followup.performed) {
-            contactsMap[contactId] = followup;
+            contactsMap[contactId] = followup.id;
           } else {
             // reset the contactId entry in the map to null if the newer follow-up was performed
             contactsMap[contactId] = null;
           }
         });
 
-        // get the follow-ups from the contact map
-        let result = Object.values(contactsMap).filter(followUp => followUp);
-
-        // send response
-        callback(null, result);
+        // do a second search in order to preserve requested order in the filters
+        return app.models.followUp
+          .find(app.utils.remote
+            .mergeFilters({
+              where: {
+                id: {
+                  // look only for the follow-ups found above
+                  inq: Object.values(contactsMap)
+                    .filter(followUp => followUp)
+                },
+                outbreakId: outbreakId,
+              },
+            }, filter || {}))
+          .then(function (followUps) {
+            // send response
+            callback(null, followUps);
+          });
       })
       .catch(callback);
   };
