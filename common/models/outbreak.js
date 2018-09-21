@@ -516,34 +516,76 @@ module.exports = function (Outbreak) {
    * Get the next available visual id
    * @param outbreak
    * @param visualId
+   * @param [personId]
    * @return {*}
    */
-  Outbreak.helpers.getAvailableVisualId = function (outbreak, visualId) {
+  Outbreak.helpers.getAvailableVisualId = function (outbreak, visualId, personId) {
+    // get search regex for visual id template
     let maskRegExp = app.utils.maskField.convertMaskToSearchRegExp(outbreak.caseIdMask, visualId);
+    // if no search regex returned
     if (!maskRegExp) {
+      // invalid mask error
       return Promise.reject(app.utils.apiError.getError('INVALID_VISUAL_ID_MASK', {
-        visualIdMask: visualId,
+        visualIdTemplate: visualId,
         outbreakVisualIdMask: outbreak.caseIdMask
       }));
     }
-    return app.models.person
-      .findOne({
-        where: {
-          outbreakId: outbreak.id,
-          visualId: {
-            regexp: maskRegExp
+    // if a personId was provided, check if current visualId is owned by that person (visual ID did not change value)
+    let validateExistingId;
+    if (personId !== undefined) {
+      // try and find the person that owns the ID
+      validateExistingId = app.models.person
+        .findOne({
+          where: {
+            id: personId,
+            outbreakId: outbreak.id,
+            visualId: visualId,
           }
-        },
-        deleted: true,
-        order: 'visualId DESC'
-      })
-      .then(function (person) {
-        let index = 0;
-        if (person) {
-          index = app.utils.maskField.extractValueFromMaskedField(outbreak.caseIdMask, person.visualId);
+        })
+        .then(function (person) {
+          // if the person was found
+          if (person) {
+            // return its visual ID
+            return person.visualId;
+          }
+        });
+    } else {
+      // no person ID, nothing to check
+      validateExistingId = Promise.resolve();
+    }
+
+    return validateExistingId
+      .then(function (validVisualId) {
+        // visual id owned by current person
+        if (validVisualId) {
+          // leave it as is
+          return validVisualId;
         }
-        index++;
-        return app.utils.maskField.resolveMask(outbreak.caseIdMask, visualId, index);
+        // find the the ID that matches the same pattern with the biggest index value
+        return app.models.person
+          .findOne({
+            where: {
+              outbreakId: outbreak.id,
+              visualId: {
+                regexp: maskRegExp
+              }
+            },
+            deleted: true,
+            order: 'visualId DESC'
+          })
+          .then(function (person) {
+            // assume no record found, index 0
+            let index = 0;
+            // person found
+            if (person) {
+              // get it's numeric index
+              index = app.utils.maskField.extractValueFromMaskedField(outbreak.caseIdMask, person.visualId);
+            }
+            // get next index
+            index++;
+            // resolve the mask using the computed index
+            return app.utils.maskField.resolveMask(outbreak.caseIdMask, visualId, index);
+          });
       });
   };
 
