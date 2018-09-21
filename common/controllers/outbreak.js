@@ -5465,5 +5465,4 @@ module.exports = function (Outbreak) {
     });
     next();
   });
-}
-;
+};
