@@ -3430,7 +3430,7 @@ module.exports = function (Outbreak) {
           // get contactId
           let contactId = followup.personId;
 
-          // add in the contacts map the follow-up ID
+          // add in the contacts map the follow-up ID if it was not performed
           if (!followup.performed) {
             contactsMap[contactId] = followup.id;
           } else {
