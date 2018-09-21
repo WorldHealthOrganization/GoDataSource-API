@@ -62,7 +62,7 @@ module.exports = function (Location) {
           updatedBy: false,
           deleted: false
         },
-        order: 'parentLocationId ASC, id ASC'
+        order: ['name ASC', 'parentLocationId ASC', 'id ASC']
       })
       .then(function (locations) {
         app.utils.remote.helpers
@@ -91,7 +91,7 @@ module.exports = function (Location) {
     Location
       .find(app.utils.remote
         .mergeFilters({
-          order: 'parentLocationId ASC, id ASC'
+          order: ['name ASC', 'parentLocationId ASC', 'id ASC']
         }, filter || {}))
       .then(function (locations) {
         // check for sent filters; if filters were sent we need to return hierarchical list for the found locations
@@ -168,7 +168,9 @@ module.exports = function (Location) {
           // parse file content
           const rawLocationsList = JSON.parse(file);
           // remap properties
-          const locationsList = app.utils.helpers.remapProperties(rawLocationsList, body.map);
+          const locationsList = app.utils.helpers.convertBooleanProperties(
+            Location,
+            app.utils.helpers.remapProperties(rawLocationsList, body.map));
           // build hierarchical list
           const hierarchicalList = Location.buildHierarchicalLocationsList(locationsList, true);
           // import locations

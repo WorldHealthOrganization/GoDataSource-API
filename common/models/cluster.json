@@ -8,6 +8,9 @@
   "hidden": [
     "outbreakId"
   ],
+  "scope": {
+    "order": ["name ASC"]
+  },
   "properties": {
     "name": {
       "type": "string",

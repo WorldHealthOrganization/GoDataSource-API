@@ -388,10 +388,15 @@ module.exports = function (Outbreak) {
       .findById(caseId)
       .then((caseModel) => {
         if (!caseModel) {
-          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
             model: app.models.case.modelName,
             id: caseId
-          }));
+          });
+        }
+        if (!app.models.case.nonDiscardedCaseClassifications.includes(caseModel.classification)) {
+          throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
+            id: caseId
+          });
         }
         helpers.createPersonRelationship(this.id, caseId, 'case', data, options, callback);
       })
@@ -486,7 +491,25 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.updateCaseRelationship = function (caseId, relationshipId, data, options, callback) {
-    helpers.updatePersonRelationship(caseId, relationshipId, 'case', data, options, callback);
+    // make sure case is valid, before trying to update any relations
+    app.models.case
+      .findById(caseId)
+      .then((caseModel) => {
+        if (!caseModel) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.case.modelName,
+            id: caseId
+          });
+        }
+        // do not allow relationships with discarded cases
+        if (!app.models.case.nonDiscardedCaseClassifications.includes(caseModel.classification)) {
+          throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
+            id: caseId
+          });
+        }
+        helpers.updatePersonRelationship(caseId, relationshipId, 'case', data, options, callback);
+      })
+      .catch(callback);
   };
 
   /**
@@ -3421,6 +3444,9 @@ module.exports = function (Outbreak) {
         order: 'date ASC'
       }, filter || {}))
       .then(function (followups) {
+        // add support for filter parent
+        followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
+
         // initialize contacts map as the request needs to return the latest follow-up for the contact if not performed
         let contactsMap = {};
 
@@ -3821,7 +3847,9 @@ module.exports = function (Outbreak) {
           // parse file content
           const rawlabResultsList = JSON.parse(file);
           // remap properties & values
-          const labResultsList = app.utils.helpers.remapProperties(rawlabResultsList, body.map, body.valuesMap);
+          const labResultsList = app.utils.helpers.convertBooleanProperties(
+            app.models.labResult,
+            app.utils.helpers.remapProperties(rawlabResultsList, body.map, body.valuesMap));
           // build a list of create lab results operations
           const createLabResults = [];
           // define a container for error results
@@ -3925,7 +3953,9 @@ module.exports = function (Outbreak) {
           // parse file content
           const rawCasesList = JSON.parse(file);
           // remap properties & values
-          const casesList = app.utils.helpers.remapProperties(rawCasesList, body.map, body.valuesMap);
+          const casesList = app.utils.helpers.convertBooleanProperties(
+            app.models.case,
+            app.utils.helpers.remapProperties(rawCasesList, body.map, body.valuesMap));
           // build a list of create operations
           const createCases = [];
           // define a container for error results
@@ -4023,9 +4053,13 @@ module.exports = function (Outbreak) {
           contactsList.forEach(function (recordData, index) {
             createContacts.push(function (callback) {
               // extract relationship data
-              const relationshipData = app.utils.helpers.extractImportableFields(app.models.relationship, recordData.relationship);
+              const relationshipData = app.utils.helpers.convertBooleanProperties(
+                app.models.relationship,
+                app.utils.helpers.extractImportableFields(app.models.relationship, recordData.relationship));
               // extract contact data
-              const contactData = app.utils.helpers.extractImportableFields(app.models.contact, recordData);
+              const contactData = app.utils.helpers.convertBooleanProperties(
+                app.models.contact,
+                app.utils.helpers.extractImportableFields(app.models.contact, recordData));
               // set outbreak ids
               contactData.outbreakId = self.id;
               relationshipData.outbreakId = self.id;
@@ -4124,7 +4158,9 @@ module.exports = function (Outbreak) {
           // parse file content
           const rawOutbreakList = JSON.parse(file);
           // remap properties & values
-          const outbreaksList = app.utils.helpers.remapProperties(rawOutbreakList, body.map, body.valuesMap);
+          const outbreaksList = app.utils.helpers.convertBooleanProperties(
+            app.models.outbreak,
+            app.utils.helpers.remapProperties(rawOutbreakList, body.map, body.valuesMap));
           // build a list of create operations
           const createOutbreaks = [];
           // define a container for error results
@@ -5295,7 +5331,9 @@ module.exports = function (Outbreak) {
           // parse file content
           const rawReferenceDataList = JSON.parse(file);
           // remap properties & values
-          const referenceDataList = app.utils.helpers.remapProperties(rawReferenceDataList, body.map, body.valuesMap);
+          const referenceDataList = app.utils.helpers.convertBooleanProperties(
+            app.models.referenceData,
+            app.utils.helpers.remapProperties(rawReferenceDataList, body.map, body.valuesMap));
           // build a list of sync operations
           const syncReferenceData = [];
           // define a container for error results
@@ -5425,4 +5463,30 @@ module.exports = function (Outbreak) {
       callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
     });
   };
+
+  /**
+   * Find transmission chains which include people that matched the filter
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findTransmissionChainsForFilteredPeople = function (filter, callback) {
+    app.models.relationship.findTransmissionChainsForFilteredPeople(this.id, this.periodOfFollowup, filter)
+      .then(function (chains) {
+        callback(null, chains);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Since this endpoint returns person data without checking if the user has the required read permissions,
+   * check the user's permissions and return only the fields he has access to
+   */
+  Outbreak.afterRemote('prototype.findTransmissionChainsForFilteredPeople', function (context, modelInstance, next) {
+    let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+
+    Object.keys(modelInstance.nodes).forEach((key) => {
+      Outbreak.helpers.limitPersonInformation(modelInstance.nodes[key], personTypesWithReadAccess);
+    });
+    next();
+  });
 };

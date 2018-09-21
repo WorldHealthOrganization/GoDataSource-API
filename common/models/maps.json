@@ -1,0 +1,36 @@
+{
+  "name": "maps",
+  "base": "extendedPersistedModel",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {},
+  "validations": [],
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getAPIScript"
+    }
+  ],
+  "methods": {
+    "getAPIScript": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "script",
+          "type": "file",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Download API script",
+      "http": {
+        "verb": "get",
+        "path": "/js-script"
+      }
+    }
+  }
+}

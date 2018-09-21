@@ -171,6 +171,10 @@
     "defaultStatusCode": 424,
     "messagePattern": "Sync with upstream server `<%= upstreamServerName %>` failed"
   },
+  "UPSTREAM_SERVER_SYNC_IN_PROGRESS": {
+    "defaultStatusCode": 424,
+    "messagePattern": "There is already a sync with upstream server `<%= upstreamServerName %>` in progress. Only a sync action can be in progress at a time."
+  },
   "UPSTREAM_SERVER_EXPORT_FAILED": {
     "defaultStatusCode": 424,
     "messagePattern": "Database export of the upstream server `<%= upstreamServerName %>` failed"
@@ -186,5 +190,13 @@
   "INSTANCE_EXPORT_STILL_IN_PROGRESS": {
     "defaultStatusCode": 422,
     "messagePattern": "Instance export is still in progress`"
+  },
+  "MAPS_API_KEY_INVALID": {
+    "defaultStatusCode": 404,
+    "messagePattern": "Maps API key is invalid."
+  },
+  "INVALID_RELATIONSHIP_WITH_DISCARDED_CASE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Cannot create/modify relationships with discarded cases (case id: `<%= id %>` )"
   }
 }

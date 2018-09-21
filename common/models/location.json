@@ -5,6 +5,9 @@
   "options": {
     "validateUpsert": true
   },
+  "scope": {
+    "order": ["name ASC"]
+  },
   "properties": {
     "name": {
       "type": "string",
@@ -26,6 +29,14 @@
     "parentLocationId": {
       "type": "string",
       "default": null
+    },
+    "geoLocation": {
+      "type": "geopoint"
+    }
+  },
+  "indexes": {
+    "geoLocation_index": {
+      "geoLocation": "2dsphere"
     }
   },
   "validations": [],

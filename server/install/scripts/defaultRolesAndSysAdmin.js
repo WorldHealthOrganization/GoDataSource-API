@@ -90,6 +90,11 @@ const rolesMap = {
 
 const createRoles = [];
 
+// initialize action options; set _init flag to prevent execution of some after save scripts
+let options = {
+  _init: true
+};
+
 /**
  * Create default roles
  */
@@ -110,7 +115,7 @@ function initRolesCreation() {
                 name: roleName,
                 description: rolesMap[roleName].description,
                 permissionIds: rolesMap[roleName].permissionIds
-              })
+              }, options)
               .then(function (role) {
                 if (roleName === 'System Administrator') {
                   defaultAdmin.roleIds = [role.id];
@@ -125,7 +130,7 @@ function initRolesCreation() {
               .updateAttributes({
                 description: rolesMap[roleName].description,
                 permissionIds: rolesMap[roleName].permissionIds
-              })
+              }, options)
               .then(function () {
                 return 'updated.';
               });
@@ -166,13 +171,13 @@ function run(callback) {
         .then(function (user) {
           if (!user) {
             return User
-              .create(defaultAdmin)
+              .create(defaultAdmin, options)
               .then(function () {
                 return 'created.';
               });
           } else if (rewrite) {
             return user
-              .updateAttributes(defaultAdmin)
+              .updateAttributes(defaultAdmin, options)
               .then(function () {
                 return 'updated.';
               });

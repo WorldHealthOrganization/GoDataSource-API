@@ -57,8 +57,9 @@ const createBackup = function (modules, location, done) {
       });
     });
   } catch (pathAccessError) {
-    app.logger.error(`Backup location: ${location} is not OK. ${pathAccessError}`);
-    return done(pathAccessError);
+    let pathErr = `Backup location: '${location}' is not OK. ${pathAccessError}`;
+    app.logger.error(pathErr);
+    return done(pathErr);
   }
 };
 
@@ -262,7 +263,7 @@ const removeBackups = function (currentDate) {
 const preRoutine = function (done) {
   // retrieve system settings and get backup timings
   app.models.systemSettings
-    .findOne()
+    .getCache()
     .then((systemSettings) => {
       // data backup configuration is not available, do nothing
       if (!systemSettings.dataBackup) {

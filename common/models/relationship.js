@@ -336,16 +336,50 @@ module.exports = function (Relationship) {
   };
 
   /**
+   * Check if a relation should be active or not
+   * A relation is inactive if (at least) one case from the relation is discarded
+   */
+  Relationship.observe('before save', function (context, next) {
+    // get instance data
+    const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
+    // relation is active, by default
+    data.target.active = true;
+    // get case IDs from from the relationship
+    let caseIds = data.source.all.persons.filter(person => person.type === 'case').map(caseRecord => caseRecord.id);
+    // if cases were found
+    if (caseIds) {
+      // find cases
+      app.models.case
+        .find({
+          where: {
+            id: {
+              inq: caseIds
+            }
+          }
+        })
+        .then(function (cases) {
+          // if one of the cases is discarded
+          cases.forEach(function (caseRecord) {
+            if (!app.models.case.nonDiscardedCaseClassifications.includes(caseRecord.classification)) {
+              // set the relation as inactive
+              data.target.active = false;
+            }
+          });
+          next();
+        });
+    } else {
+      next();
+    }
+  });
+
+  /**
    * Update follow-up dates on the contact if the relationship includes a contact
-   * Also do updates on delete relationship if required
    */
   Relationship.observe('after save', function (context, callback) {
     // get created/modified relationship
     let relationship = context.instance;
     // get contact representation in the relationship
     let contactInPersons = relationship.persons.find(person => person.type === 'contact');
-    // get flag for deleted relationship
-    let relationshipDeleted = context.options.softDeleteEvent;
 
     // check if the relationship created included a contact
     if (contactInPersons) {
@@ -354,21 +388,17 @@ module.exports = function (Relationship) {
       // initialize contactInstance container
       let contactInstance;
 
-      // properties that need to be updated on the contact are:
-      // followUp.originalStartDate - updated only if the created relationship is the contact's first relationship
-      // followUp.startDate and followUp.endDate - updated only if the created relationship is the contact's first relationship or the created/updated/deleted relationship has the latest contactDate
-      // get contact with latest 2 contact relationships; if only one is returned we are in the case where the just created/updated relationship is the contact's first
-      // Note: on delete the relationship cannot be the last contact relationship (this is validated on delete)
-      // if there are 2 relationships returned check the latest one contactDate against the contactDate of the just created/updated/deleted relationship
+      // update contact follow-up dates, based on the latest active relationship
       app.models.contact
         .findById(contactId, {
           include: {
             relation: 'relationships',
             scope: {
-              limit: 2,
+              limit: 1,
               order: 'contactDate DESC',
-              // include the deleted relationships if the operation was a delete
-              deleted: !!relationshipDeleted
+              where: {
+                active: true
+              }
             }
           }
         })
@@ -377,54 +407,77 @@ module.exports = function (Relationship) {
             app.logger.error(`Error when updating contact follow-up dates. Contact ID: ${contactId}. Contact was not found.`);
             return;
           }
-
-          // check if the contact will need to be updated
-          // check if the contact has a single relationship or the one which was just created/updated/deleted has the latest contactDate
-          if (contact.relationships.length === 1 || contact.relationships[0].id === relationship.id) {
-            // contact needs to be updated; cache its info
-            contactInstance = contact;
-            // get the outbreak as we need the followUpPeriod
-            return app.models.outbreak.findById(relationship.outbreakId);
-          } else {
-            return;
-          }
+          // update contact instance with found contact record
+          contactInstance = contact;
+          // get the outbreak as we need the followUpPeriod
+          return app.models.outbreak.findById(relationship.outbreakId);
         })
         .then(function (outbreak) {
-          // check for contact instance; if isn't set means that it doesn't need to be updated
-          if (!contactInstance) {
-            return;
-          }
-
           // check for found outbreak
           if (!outbreak) {
             app.logger.error(`Error when updating contact follow-up dates. Contact ID: ${contactId}. Outbreak was not found.`);
             return;
           }
-
-          // initialize object containing properties to be updated; start from existing contact follow-up dates
-          let propsToUpdate = contactInstance.followUp || {};
-
-          // check contact relationships to update follow-up dates
-          if (contactInstance.relationships.length === 1) {
-            // created/updated relationship is the first relationship; update all dates
-            propsToUpdate.originalStartDate = propsToUpdate.startDate = relationship.contactDate;
-            propsToUpdate.endDate = moment(relationship.contactDate).add(outbreak.periodOfFollowup, 'days');
+          // keep a flag for updating contact
+          let shouldUpdate = false;
+          // build a list of properties that need to be updated
+          let propsToUpdate = {};
+          // preserve original startDate, if any
+          if (contactInstance.followUp && contactInstance.followUp.originalStartDate) {
+            propsToUpdate.originalStartDate = contactInstance.followUp.originalStartDate;
           }
-          // check if the first returned relationship is the created/updated/deleted relationship
-          // since the relationships are ordered by contactDate DESC this means that the created/updated/deleted relationship has the latest contactDate
-          else if (contactInstance.relationships[0].id === relationship.id) {
-            // check if the operation was a delete; In this case need to use the dates from the next relationship
-            if (relationshipDeleted) {
-              relationship = contactInstance.relationships[1];
-            }
-
-            // update only the startDate and endDate
+          // if active relationships found
+          if (contactInstance.relationships.length) {
+            // get the latest one
+            relationship = contactInstance.relationships.shift();
+            // set follow-up start date to be the same as relationship contact date
             propsToUpdate.startDate = relationship.contactDate;
+            // if follow-up original start date was not previously set
+            if (!propsToUpdate.originalStartDate) {
+              // flag as an update
+              shouldUpdate = true;
+              // set it as follow-up start date
+              propsToUpdate.originalStartDate = propsToUpdate.startDate;
+            }
+            // set follow-up end date
             propsToUpdate.endDate = moment(relationship.contactDate).add(outbreak.periodOfFollowup, 'days');
           }
+          // check if contact instance should be updated (check if any property changed value)
+          !shouldUpdate && ['startDate', 'endDate']
+            .forEach(function (updatePropName) {
+              // if the property is missing (probably never, but lets be safe)
+              if (!contactInstance.followUp) {
+                // flag as an update
+                return shouldUpdate = true;
+              }
+              // if either original or new value was not set (when the other was present)
+              if (
+                !contactInstance.followUp[updatePropName] && propsToUpdate[updatePropName] ||
+                contactInstance.followUp[updatePropName] && !propsToUpdate[updatePropName]
+              ) {
+                // flag as an update
+                return shouldUpdate = true;
+              }
+              // both original and new values are present, but the new values are different than the old ones
+              if (
+                contactInstance.followUp[updatePropName] &&
+                propsToUpdate[updatePropName] &&
+                ((new Date(contactInstance.followUp[updatePropName])).getTime() !== (new Date(propsToUpdate[updatePropName])).getTime())
+              ) {
+                // flag as an update
+                return shouldUpdate = true;
+              }
+            });
 
-          // update contact
-          return contactInstance.updateAttribute('followUp', propsToUpdate);
+          // if updates are required
+          if (shouldUpdate) {
+            // update contact
+            return contactInstance.updateAttributes({
+              followUp: propsToUpdate,
+              // contact is active if it has valid follow-up interval
+              active: !!propsToUpdate.startDate
+            }, context.options);
+          }
         })
         .then(function () {
           callback();
@@ -440,4 +493,93 @@ module.exports = function (Relationship) {
       callback();
     }
   });
+
+
+  /**
+   * Find chains of relations that include the specified people ids. Chains of relations mean all relations of the
+   * people specified in the peopleIds, and the relations of their related people, and so on until no more relations found (chain is completed)
+   * @param outbreakId
+   * @param peopleIds
+   * @param foundRelationshipIds
+   * @return {*|PromiseLike<T | never>|Promise<T | never>}
+   */
+  Relationship.findRelationshipChainsForPeopleIds = function (outbreakId, peopleIds, foundRelationshipIds = []) {
+    // define a relationships map (indexed list of relationship ids)
+    const relationshipMap = {};
+    // find all relations that were not previously found that match the criteria
+    return Relationship
+      .find({
+        fields: ['id', 'persons'],
+        where: {
+          'persons.id': {
+            inq: peopleIds
+          },
+          outbreakId: outbreakId,
+          id: {
+            nin: foundRelationshipIds
+          }
+        }
+      })
+      .then(function (relationships) {
+        // keep a list of new people
+        const newPeopleIds = [];
+        // if new relationships found
+        if (relationships.length) {
+          // go through all relationships
+          relationships.forEach(function (relationship) {
+            // map relationship as found
+            relationshipMap[relationship.id] = true;
+            // get people ids
+            if (Array.isArray(relationship.persons)) {
+              relationship.persons.forEach(function (person) {
+                // don't include people already included in previous search
+                if (!peopleIds.includes(person.id)) {
+                  newPeopleIds.push(person.id);
+                }
+              });
+            }
+          });
+          // find all relationships of the related people (that were not found previously)
+          return Relationship
+            .findRelationshipChainsForPeopleIds(outbreakId, newPeopleIds, [...foundRelationshipIds, ...Object.keys(relationshipMap)])
+            .then(function (foundRelationshipMap) {
+              Object.assign(relationshipMap, foundRelationshipMap);
+              // return the complete map of relationships
+              return relationshipMap;
+            });
+          // no more new relationships found
+        } else {
+          // return the list
+          return relationshipMap;
+        }
+      });
+  };
+
+  /**
+   * Find transmission chains which include people that matched the filter
+   * @param outbreakId
+   * @param followUpPeriod
+   * @param filter
+   * @return {PromiseLike<T | never>}
+   */
+  Relationship.findTransmissionChainsForFilteredPeople = function (outbreakId, followUpPeriod, filter) {
+    // find people that matched the filter
+    return app.models.person
+      .find(filter)
+      .then(function (people) {
+        // find relationship chains for the matched people
+        return Relationship.findRelationshipChainsForPeopleIds(outbreakId, people.map(person => person.id));
+      })
+      .then(function (relationshipMap) {
+        // build transmission chains based on the relationship chains
+        return new Promise(function (resolve, reject) {
+          Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, {where: {id: {inq: Object.keys(relationshipMap)}}}, false, function (error, chains) {
+            if (error) {
+              return reject(error);
+            }
+            return resolve(chains);
+          });
+        });
+      });
+  };
 };

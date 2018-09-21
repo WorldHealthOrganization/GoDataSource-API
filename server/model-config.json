@@ -240,7 +240,7 @@
     "dataSource": null,
     "public": false
   },
-  "upstreamServerURL": {
+  "syncParameters": {
     "dataSource": null,
     "public": false
   },
@@ -251,5 +251,9 @@
   "country": {
     "dataSource": null,
     "public": false
+  },
+  "maps": {
+    "dataSource": "memory",
+    "public": true
   }
 }
