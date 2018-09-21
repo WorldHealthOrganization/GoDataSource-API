@@ -25,7 +25,7 @@ function buildSpreadSheet(headers, data) {
       // add formatted entry to the list
       formattedData.push(formattedEntry);
     });
-  // otherwise use it as is
+    // otherwise use it as is
   } else {
     formattedData = data;
   }
@@ -45,7 +45,6 @@ function createCsvFile(headers, data, callback) {
   // add the questionnaire headers
   // since they depend on the translated data, we have to add them separately
   addQuestionnaireHeadersForPrint(data, headers);
-
   const sheet = buildSpreadSheet(headers, data);
   // send back the sheet as CSV file
   callback(null, xlsx.utils.sheet_to_csv(sheet));
@@ -62,7 +61,6 @@ function createExcelFile(headers, data, type, callback) {
   // add the questionnaire headers
   // since they depend on the translated data, we have to add them separately
   addQuestionnaireHeadersForPrint(data, headers);
-
   const sheet = buildSpreadSheet(headers, data);
   const workBook = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(workBook, sheet);
@@ -79,7 +77,6 @@ function createXlsFile(headers, data, callback) {
   // add the questionnaire headers
   // since they depend on the translated data, we have to add them separately
   addQuestionnaireHeadersForPrint(data, headers);
-
   createExcelFile(headers, data, 'biff8', callback);
 }
 
@@ -93,7 +90,6 @@ function createXlsxFile(headers, data, callback) {
   // add the questionnaire headers
   // since they depend on the translated data, we have to add them separately
   addQuestionnaireHeadersForPrint(data, headers);
-
   createExcelFile(headers, data, 'xlsx', callback);
 }
 
@@ -107,7 +103,6 @@ function createOdsFile(headers, data, callback) {
   // add the questionnaire headers
   // since they depend on the translated data, we have to add them separately
   addQuestionnaireHeadersForPrint(data, headers);
-
   createExcelFile(headers, data, 'ods', callback);
 }
 
@@ -134,5 +129,6 @@ module.exports = {
   createCsvFile: createCsvFile,
   createXlsFile: createXlsFile,
   createXlsxFile: createXlsxFile,
-  createOdsFile: createOdsFile
+  createOdsFile: createOdsFile,
+  addQuestionnaireHeadersForPrint: addQuestionnaireHeadersForPrint
 };

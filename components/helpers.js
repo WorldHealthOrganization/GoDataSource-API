@@ -419,7 +419,7 @@ const exportListFile = function (headers, dataSet, fileType) {
           // just copy empty element
           result[headersMap[_header]] = source[_header];
         }
-      // if the map is an object with mapped properties
+        // if the map is an object with mapped properties
       } else if (header.endsWith('.') && typeof headersMap[header] === 'object') {
         // remove array marker
         const _header = header.replace('.', '');
@@ -1156,14 +1156,14 @@ const translateQuestionnaire = function (outbreak, Model, modelInstance, diction
   Object.keys(modelInstance.questionnaireAnswers).forEach((variable) => {
     let question = findQuestionByVariable(outbreak[Model.extendedForm.template], variable);
 
-    if(question) {
+    if (question) {
       let questionText = dictionary.getTranslation(question.text);
       let answer = '';
       if (question.answers) {
         answer = translateQuestionAnswers(question, modelInstance.questionnaireAnswers[variable], dictionary);
       } else {
         // Parse date type answers since xml cannot print them
-        if(modelInstance.questionnaireAnswers[variable] instanceof Date) {
+        if (modelInstance.questionnaireAnswers[variable] instanceof Date) {
           answer = getDateDisplayValue(modelInstance.questionnaireAnswers[variable]);
         } else {
           answer = modelInstance.questionnaireAnswers[variable];
@@ -1246,5 +1246,6 @@ module.exports = {
   translateQuestionnaire: translateQuestionnaire,
   getBuildInformation: getBuildInformation,
   convertBooleanProperties: convertBooleanProperties,
-  getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext
+  getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext,
+  addQuestionnaireHeadersForPrint: spreadSheetFile.addQuestionnaireHeadersForPrint
 };

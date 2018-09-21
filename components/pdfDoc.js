@@ -544,16 +544,7 @@ function createTableInPDFDocument(headers, data, document, documentConfig) {
  * @param headers
  */
 const addQuestionnaireHeadersForPrint = function (data, headers) {
-  Object.keys(data[0]).forEach((key) => {
-    if (key.indexOf('questionnaireAnswers') !== -1) {
-      let indexOfSeparator = key.indexOf(' ');
-      let questionText = key.substring(indexOfSeparator + 1);
-      headers.push({
-        id: key,
-        header: questionText
-      });
-    }
-  });
+  return require('./helpers').addQuestionnaireHeadersForPrint(data, headers);
 };
 
 module.exports = {

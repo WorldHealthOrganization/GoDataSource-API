@@ -139,7 +139,7 @@ module.exports = function (Outbreak) {
       }
     }
 
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, headerRestrictions, function(results, dictionary) {
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, headerRestrictions, function (results, dictionary) {
       // Prepare questionnaire answers for printing
       results.forEach((followUp) => {
         followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
@@ -185,7 +185,7 @@ module.exports = function (Outbreak) {
       }
     }
 
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, [], function(results, dictionary) {
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, [], function (results, dictionary) {
       // Prepare questionnaire answers for printing
       results.forEach((followUp) => {
         followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
@@ -4311,8 +4311,8 @@ module.exports = function (Outbreak) {
       contactModel.addresses = [models.address.fieldLabelsMap];
       contactModel.documents = [models.document.fieldLabelsMap];
 
-      let caseFields = helpers.translateFieldLabels(caseModel, 'case', dictionary);
-      let contactFields = helpers.translateFieldLabels(contactModel, 'contact', dictionary);
+      let caseFields = genericHelpers.translateFieldLabels(caseModel, 'case', dictionary);
+      let contactFields = genericHelpers.translateFieldLabels(contactModel, 'contact', dictionary);
 
       // remove not needed properties from lab result/relationship field maps
       let relationFieldsMap = Object.assign({}, models.relationship.fieldLabelsMap);
@@ -4320,8 +4320,8 @@ module.exports = function (Outbreak) {
       delete labResultFieldsMap.personId;
       delete relationFieldsMap.persons;
 
-      let labResultsFields = helpers.translateFieldLabels(labResultFieldsMap, 'labResult', dictionary);
-      let relationFields = helpers.translateFieldLabels(relationFieldsMap, 'relationship', dictionary);
+      let labResultsFields = genericHelpers.translateFieldLabels(labResultFieldsMap, 'labResult', dictionary);
+      let relationFields = genericHelpers.translateFieldLabels(relationFieldsMap, 'relationship', dictionary);
 
       // translate template questions
       let questions = Outbreak.helpers.parseTemplateQuestions(template, dictionary);
@@ -5265,7 +5265,7 @@ module.exports = function (Outbreak) {
                 // print contacts
                 groupedResults[groupIdentifier].forEach(function (contact, index) {
                   // print profile
-                  pdfUtils.createPersonProfile(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
+                  pdfUtils.displayModelDetails(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
 
                   // print follow-ups table
                   pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE'), 16);

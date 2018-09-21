@@ -133,7 +133,7 @@ function exportFilteredModelsList(app, Model, filter, exportType, fileName, encr
               headers.push({
                 id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
                 // use correct label translation for user language
-                header: `${dictionary.getTranslation(Model.fieldLabelsMap[propertyName])}${/\[]/.test(propertyName) ? ' ['+i+']' : ''}`
+                header: `${dictionary.getTranslation(Model.fieldLabelsMap[propertyName])}${/\[]/.test(propertyName) ? ' [' + i + ']' : ''}`
               });
             }
           } else {
