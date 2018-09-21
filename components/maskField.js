@@ -22,13 +22,13 @@ function maskIsValid(mask) {
 /**
  * Bulid mask regex string (not regular expression) to be used for searching next sequence
  * @param mask
- * @param maskToResolve
+ * @param propertyTemplate
  * @return {string|boolean}
  */
-function getMaskRegExpStringForSearch(mask, maskToResolve) {
+function getMaskRegExpStringForSearch(mask, propertyTemplate) {
   // escape regex input
   mask = escapeRegExp(mask);
-  maskToResolve = escapeRegExp(maskToResolve);
+  propertyTemplate = escapeRegExp(propertyTemplate);
 
   // check if the mask is valid
   if (!maskIsValid(mask)) {
@@ -57,11 +57,11 @@ function getMaskRegExpStringForSearch(mask, maskToResolve) {
   // isolate the placeholder groups from the rest of the mask by using wrapping them in RegExp groups
   const groupedMask = new RegExp(`^(${mask.substring(0, leftIndex)})${mask.substring(leftIndex, rightIndex + 1)}(${mask.substring(rightIndex + 1)})$`);
   // test if the mask that needs to be resolved matches the original mask
-  if (!groupedMask.test(maskToResolve)) {
+  if (!groupedMask.test(propertyTemplate)) {
     return false;
   }
   // mask search string should contain all chars as literals except the ones used as sequence placeholders
-  return maskToResolve.replace(groupedMask, function () {
+  return propertyTemplate.replace(groupedMask, function () {
     let placeholder = '';
     // placeholder groups are in the middle (from 1 to last -1). Last two arguments are offset and string
     for (let i = 1; i < (arguments.length - 4); i++) {
@@ -75,11 +75,11 @@ function getMaskRegExpStringForSearch(mask, maskToResolve) {
 /**
  * Convert a mask to a regular expression
  * @param mask
- * @param maskToResolve
+ * @param propertyTemplate
  * @return {RegExp|boolean} Either RegExp or false
  */
-function convertMaskToSearchRegExp(mask, maskToResolve) {
-  const maskString = getMaskRegExpStringForSearch(mask, maskToResolve);
+function convertMaskToSearchRegExp(mask, propertyTemplate) {
+  const maskString = getMaskRegExpStringForSearch(mask, propertyTemplate);
   if (maskString) {
     return new RegExp(`^${maskString}$`);
   }
@@ -96,12 +96,12 @@ function convertMaskToSearchRegExp(mask, maskToResolve) {
  * Note: just one sequence number is accepted in a mask. E.g. Y99@ is supported while Y99@99& is not supported because
  * it contains two sequence numbers (99 appears twice)
  * @param mask
- * @param maskToResolve
+ * @param propertyTemplate
  * @param numericValue
  * @param callback
  * @return {*}
  */
-function resolveMask(mask, maskToResolve, numericValue, callback) {
+function resolveMask(mask, propertyTemplate, numericValue, callback) {
   if (!maskIsValid(mask)) {
     return callback({
       code: 'INVALID_MASK',
@@ -126,13 +126,13 @@ function resolveMask(mask, maskToResolve, numericValue, callback) {
     });
   }
   // get mask string
-  let maskString = getMaskRegExpStringForSearch(mask, maskToResolve);
+  let maskString = getMaskRegExpStringForSearch(mask, propertyTemplate);
   // if no mask string returned
   if (!maskString) {
     // stop with error
     return callback({
       code: 'MASK_MISS_MATCH',
-      message: 'Cannot resolve mask. Mask to resolve does not match mask pattern'
+      message: 'Cannot resolve mask. Property template does not match mask pattern'
     });
   }
   // insert the numeric value into the mask
