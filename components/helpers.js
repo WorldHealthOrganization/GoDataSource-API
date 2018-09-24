@@ -357,9 +357,7 @@ const exportListFile = function (headers, dataSet, fileType) {
    * Build headers map in a way compatible with files that support hierarchical structures (XML, JSON)
    * @param headers
    */
-  function buildHeadersMap(headers) {
-    // define a container for headers map
-    const jsonHeadersMap = {};
+  function buildHeadersMap(headers, jsonHeadersMap = {}) {
     // go trough the headers
     headers.forEach(function (header) {
       // get property level separator
@@ -367,7 +365,13 @@ const exportListFile = function (headers, dataSet, fileType) {
       // if the separator is found
       if (separatorIndex !== -1) {
         // get the property
-        const property = header.id.substring(0, separatorIndex);
+        let property = '';
+        // Different approaches for either objects or collections
+        if (/\[]/.test(header.id)) {
+          property = header.id.substring(0, separatorIndex);
+        } else {
+          property = header.id.substring(0, separatorIndex + 1);
+        }
         // get the rest of the path
         const leftPath = header.id.substring(separatorIndex + 1);
         // if the property was not defined before
@@ -376,10 +380,10 @@ const exportListFile = function (headers, dataSet, fileType) {
           jsonHeadersMap[property] = {};
         }
         // remap sub-levels
-        jsonHeadersMap[property] = Object.assign({}, jsonHeadersMap[property], buildHeadersMap([{
+        jsonHeadersMap[property] = Object.assign({}, typeof(jsonHeadersMap[property]) === 'object' ? jsonHeadersMap[property] : {}, buildHeadersMap([{
           id: leftPath,
           header: header.header
-        }]));
+        }], jsonHeadersMap[property]));
       } else {
         // simple property (one level) map it directly
         jsonHeadersMap[header.id] = header.header;
@@ -415,15 +419,27 @@ const exportListFile = function (headers, dataSet, fileType) {
           // just copy empty element
           result[headersMap[_header]] = source[_header];
         }
+        // if the map is an object with mapped properties
+      } else if (header.endsWith('.') && typeof headersMap[header] === 'object') {
+        // remove array marker
+        const _header = header.replace('.', '');
+        // if there is data in the source object
+        if (source[_header]) {
+          // result should be an object
+          result[headersMap[_header]] = objectRemap(source[_header], headersMap[header]);
+        } else {
+          // just copy empty element
+          result[headersMap[_header]] = source[_header];
+        }
         // type is an object
       } else if (typeof headersMap[header] === 'object') {
         // if the element is present in the source
         if (source[header]) {
           // remap it and add it in the result
-          result[headersMap[header]] = objectRemap(source[header], headersMap[header]);
+          result[header] = objectRemap(source[header], headersMap[header]);
         } else {
           // just copy empty element in the result
-          result[headersMap[header]] = source[header];
+          result[header] = source[header];
         }
         // array of simple elements
       } else if (header.endsWith('[]')) {
@@ -486,6 +502,10 @@ const exportListFile = function (headers, dataSet, fileType) {
             entry: objectRemap(item, headersMap)
           };
         });
+        // Make sure the response looks the same for single element arrays (native library behaviour is weird in this case)
+        if (remappedDataSet.length === 1) {
+          remappedDataSet = {root: remappedDataSet[0]};
+        }
         file.data = builder.buildObject(getXmlFriendlyJson(remappedDataSet));
         resolve(file);
         break;
@@ -1122,6 +1142,107 @@ const getSourceAndTargetFromModelHookContext = function (context) {
   return result;
 };
 
+/**
+ * Translates a questionnaireAnswers property (from case, labResult and followUp documents) into an object that looks like
+ *  this {question1Text: answerLabel, question2Text: answerLabel, ...}
+ * @param outbreak
+ * @param Model
+ * @param modelInstance
+ * @param dictionary
+ * @returns {{}}
+ */
+const translateQuestionnaire = function (outbreak, Model, modelInstance, dictionary) {
+  let newQuestionnaire = {};
+  Object.keys(modelInstance.questionnaireAnswers).forEach((variable) => {
+    let question = findQuestionByVariable(outbreak[Model.extendedForm.template], variable);
+
+    if (question) {
+      let questionText = dictionary.getTranslation(question.text);
+      let answer = '';
+      if (question.answers) {
+        answer = translateQuestionAnswers(question, modelInstance.questionnaireAnswers[variable], dictionary);
+      } else {
+        // Parse date type answers since xml cannot print them
+        if (modelInstance.questionnaireAnswers[variable] instanceof Date) {
+          answer = getDateDisplayValue(modelInstance.questionnaireAnswers[variable]);
+        } else {
+          answer = modelInstance.questionnaireAnswers[variable];
+        }
+      }
+      newQuestionnaire[questionText] = answer;
+    }
+  });
+
+  return newQuestionnaire;
+};
+
+/**
+ * Replaces answer values with their translate labels
+ * @param question
+ * @param answers
+ * @param dictionary
+ * @returns {*}
+ */
+const translateQuestionAnswers = function (question, answers, dictionary) {
+  if (!Array.isArray(answers)) {
+    return dictionary.getTranslation(_.find(question.answers, ['value', answers]).label);
+  } else {
+    let translatedAnswers = [];
+    answers.forEach((answer) => {
+      translatedAnswers.push(dictionary.getTranslation(_.find(question.answers, ['value', answer]).label));
+    });
+    return translatedAnswers;
+  }
+};
+
+/**
+ * Return an outbreak's question, after searching for it using the "variable" field
+ * @param questions
+ * @param variable
+ */
+const findQuestionByVariable = function (questions, variable) {
+  let result = _.find(questions, {'variable': variable,});
+  if (!result) {
+    questions.forEach((question) => {
+      if (question.answers) {
+        question.answers.forEach((answer) => {
+          if (answer.additionalQuestions) {
+            result = findQuestionByVariable(answer.additionalQuestions, variable);
+          }
+        });
+      }
+    });
+  }
+
+  if (result && result.answerType !== 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD') {
+    return result;
+  } else {
+    return;
+  }
+};
+
+/**
+ * Set original value in context options;
+ * Creating options.${context.Model.modelName}._instance[${context.instance.id}]._original object in context and store the 'value' at the 'key' position
+ * @param context
+ * @param key
+ * @param value
+ */
+const setOriginalValueInContextOptions = function (context, key, value) {
+  _.set(context, `options.${context.Model.modelName}._instance[${context.instance ? context.instance.id : context.currentInstance.id}]._original[${key}]`, value);
+};
+
+/**
+ * Get original value from context options for the key
+ * Retrieving options.${context.Model.modelName}._instance[${context.instance.id}]._original[${key}] from context
+ * Returning null if not found
+ * @param context
+ * @param key
+ */
+const getOriginalValueFromContextOptions = function (context, key) {
+  return _.get(context, `options.${context.Model.modelName}._instance[${context.instance ? context.instance.id : context.currentInstance.id}]._original[${key}]`, null);
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1144,7 +1265,11 @@ module.exports = {
   translateDataSetReferenceDataValues: translateDataSetReferenceDataValues,
   translateFieldLabels: translateFieldLabels,
   includeSubLocationsInLocationFilter: includeSubLocationsInLocationFilter,
+  translateQuestionnaire: translateQuestionnaire,
   getBuildInformation: getBuildInformation,
   convertBooleanProperties: convertBooleanProperties,
-  getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext
+  getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext,
+  addQuestionnaireHeadersForPrint: spreadSheetFile.addQuestionnaireHeadersForPrint,
+  setOriginalValueInContextOptions: setOriginalValueInContextOptions,
+  getOriginalValueFromContextOptions: getOriginalValueFromContextOptions
 };

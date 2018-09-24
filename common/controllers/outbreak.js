@@ -4,7 +4,6 @@ const moment = require('moment');
 const app = require('../../server/server');
 const _ = require('lodash');
 const rr = require('rr');
-const templateParser = require('./../../components/templateParser');
 const genericHelpers = require('../../components/helpers');
 const async = require('async');
 const pdfUtils = app.utils.pdfDoc;
@@ -106,6 +105,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    const self = this;
     const _filters = app.utils.remote.mergeFilters(
       {
         where: {
@@ -138,7 +138,59 @@ module.exports = function (Outbreak) {
       }
     }
 
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, headerRestrictions, callback);
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, headerRestrictions, function (results, dictionary) {
+      // Prepare questionnaire answers for printing
+      results.forEach((followUp) => {
+        followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+      });
+      return Promise.resolve(results);
+    }, callback);
+  };
+
+  /**
+   * Export a list of follow-ups for a contact
+   * @param contactId
+   * @param filter
+   * @param exportType
+   * @param encryptPassword
+   * @param anonymizeFields
+   * @param options
+   * @param callback
+   * @returns {*}
+   */
+  Outbreak.prototype.exportFilteredFollowups = function (contactId, filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    let self = this;
+    const _filters = app.utils.remote.mergeFilters(
+      {
+        where: {
+          outbreakId: this.id,
+          personId: contactId
+        }
+      },
+      filter || {});
+
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+
+      // file must be either encrypted or anonymized
+      if (!encryptPassword) {
+        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
+      }
+    }
+
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, [], function (results, dictionary) {
+      // Prepare questionnaire answers for printing
+      results.forEach((followUp) => {
+        followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+      });
+      return Promise.resolve(results);
+    }, callback);
   };
 
   /**
@@ -1178,40 +1230,6 @@ module.exports = function (Outbreak) {
       callback(null, qrCode, 'image/png', `attachment;filename=event-${eventId}.png`);
     });
   };
-
-  /**
-   * Before create hook
-   */
-  Outbreak.beforeRemote('create', function (context, modelInstance, next) {
-    // in order to translate dynamic data, don't store values in the database, but translatable language tokens
-    // parse outbreak
-    templateParser.beforeHook(context, modelInstance, next);
-  });
-
-  /**
-   * After create hook
-   */
-  Outbreak.afterRemote('create', function (context, modelInstance, next) {
-    // after successfully creating outbreak, also create translations for it.
-    templateParser.afterHook(context, modelInstance, next);
-  });
-
-  /**
-   * Before update hook
-   */
-  Outbreak.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    // in order to translate dynamic data, don't store values in the database, but translatable language tokens
-    // parse outbreak
-    templateParser.beforeHook(context, modelInstance, next);
-  });
-
-  /**
-   * After update hook
-   */
-  Outbreak.afterRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    // after successfully creating outbreak, also create translations for it.
-    templateParser.afterHook(context, modelInstance, next);
-  });
 
   /**
    * Count the new contacts and groups them by exposure type
@@ -3370,14 +3388,16 @@ module.exports = function (Outbreak) {
     let outbreakId = this.id;
 
     // get all the followups for the filtered period
-    app.models.followUp.find(app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: outbreakId
-        },
-        // order by date as we need to check the follow-ups from the oldest to the most new
-        order: 'date ASC'
-      }, filter || {}))
+    app.models.followUp
+      .find(app.utils.remote
+        .mergeFilters({
+          where: {
+            outbreakId: outbreakId
+          },
+          fields: ['id', 'personId', 'performed'],
+          // order by date as we need to check the follow-ups from the oldest to the most recent
+          order: 'date ASC'
+        }, filter || {}))
       .then(function (followups) {
         // add support for filter parent
         followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
@@ -3389,20 +3409,32 @@ module.exports = function (Outbreak) {
           // get contactId
           let contactId = followup.personId;
 
-          // add in the contacts map the entire follow-up if it was not perfomed
+          // add in the contacts map the follow-up ID if it was not performed
           if (!followup.performed) {
-            contactsMap[contactId] = followup;
+            contactsMap[contactId] = followup.id;
           } else {
             // reset the contactId entry in the map to null if the newer follow-up was performed
             contactsMap[contactId] = null;
           }
         });
 
-        // get the follow-ups from the contact map
-        let result = Object.values(contactsMap).filter(followUp => followUp);
-
-        // send response
-        callback(null, result);
+        // do a second search in order to preserve requested order in the filters
+        return app.models.followUp
+          .find(app.utils.remote
+            .mergeFilters({
+              where: {
+                id: {
+                  // look only for the follow-ups found above
+                  inq: Object.values(contactsMap)
+                    .filter(followUp => followUp)
+                },
+                outbreakId: outbreakId,
+              },
+            }, filter || {}))
+          .then(function (followUps) {
+            // send response
+            callback(null, followUps);
+          });
       })
       .catch(callback);
   };
@@ -4193,8 +4225,8 @@ module.exports = function (Outbreak) {
       contactModel.addresses = [models.address.fieldLabelsMap];
       contactModel.documents = [models.document.fieldLabelsMap];
 
-      let caseFields = helpers.translateFieldLabels(caseModel, 'case', dictionary);
-      let contactFields = helpers.translateFieldLabels(contactModel, 'contact', dictionary);
+      let caseFields = genericHelpers.translateFieldLabels(caseModel, 'case', dictionary);
+      let contactFields = genericHelpers.translateFieldLabels(contactModel, 'contact', dictionary);
 
       // remove not needed properties from lab result/relationship field maps
       let relationFieldsMap = Object.assign({}, models.relationship.fieldLabelsMap);
@@ -4202,8 +4234,8 @@ module.exports = function (Outbreak) {
       delete labResultFieldsMap.personId;
       delete relationFieldsMap.persons;
 
-      let labResultsFields = helpers.translateFieldLabels(labResultFieldsMap, 'labResult', dictionary);
-      let relationFields = helpers.translateFieldLabels(relationFieldsMap, 'relationship', dictionary);
+      let labResultsFields = genericHelpers.translateFieldLabels(labResultFieldsMap, 'labResult', dictionary);
+      let relationFields = genericHelpers.translateFieldLabels(relationFieldsMap, 'relationship', dictionary);
 
       // translate template questions
       let questions = Outbreak.helpers.parseTemplateQuestions(template, dictionary);
@@ -5070,7 +5102,7 @@ module.exports = function (Outbreak) {
               }
 
               // translate labels
-              contact.toPrint = helpers.translateFieldLabels(contact.toPrint, 'contact', dictionary);
+              contact.toPrint = genericHelpers.translateFieldLabels(app, contact.toPrint, 'contact', dictionary);
 
               // check if the results need to be grouped
               if (groupResultsBy) {
@@ -5147,7 +5179,7 @@ module.exports = function (Outbreak) {
                 // print contacts
                 groupedResults[groupIdentifier].forEach(function (contact, index) {
                   // print profile
-                  pdfUtils.createPersonProfile(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
+                  pdfUtils.displayModelDetails(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
 
                   // print follow-ups table
                   pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE'), 16);
@@ -5158,7 +5190,7 @@ module.exports = function (Outbreak) {
               // print contacts
               contactsList.forEach(function (contact, index) {
                 // print profile
-                pdfUtils.createPersonProfile(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
+                pdfUtils.displayModelDetails(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
 
                 // print follow-ups table
                 pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE'), 16);
