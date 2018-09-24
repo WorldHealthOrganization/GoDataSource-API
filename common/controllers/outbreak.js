@@ -150,7 +150,6 @@ module.exports = function (Outbreak) {
 
   /**
    * Export a list of follow-ups for a contact
-   * @param contactId
    * @param filter
    * @param exportType
    * @param encryptPassword
@@ -159,13 +158,12 @@ module.exports = function (Outbreak) {
    * @param callback
    * @returns {*}
    */
-  Outbreak.prototype.exportFilteredFollowups = function (contactId, filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+  Outbreak.prototype.exportFilteredFollowups = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
     let self = this;
     const _filters = app.utils.remote.mergeFilters(
       {
         where: {
           outbreakId: this.id,
-          personId: contactId
         }
       },
       filter || {});
