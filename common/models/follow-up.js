@@ -77,8 +77,8 @@ module.exports = function (Followup) {
    * Enhance follow up save to include index of the created follow up
    */
   Followup.observe('before save', function (ctx, next) {
-    // we are interested only on new instances
-    if (!ctx.isNewInstance) {
+    // we are interested only on new instances and on actions different than sync
+    if (!ctx.isNewInstance || (ctx.options && ctx.options._sync)) {
       return next();
     }
 

@@ -230,6 +230,11 @@ module.exports = function (Person) {
    * After save hooks
    */
   Person.observe('after save', function (ctx, next) {
+    // do not execute hook on sync
+    if (ctx.options && ctx.options._sync) {
+      return next();
+    }
+
     // cache instance reference, used in many places below
     let instance = ctx.instance;
 
