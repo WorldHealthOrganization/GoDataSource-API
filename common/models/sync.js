@@ -239,7 +239,7 @@ module.exports = function (Sync) {
                   try {
                     let collectionRecords = JSON.parse(data);
 
-                    return async.parallel(
+                    return async.parallelLimit(
                       collectionRecords.map((collectionRecord) => (doneRecord) => {
                         // convert mongodb id notation to Loopback notation
                         // to be consistent with external function calls
@@ -261,7 +261,7 @@ module.exports = function (Sync) {
                           }
                           return doneRecord();
                         });
-                      }),
+                      }), 10,
                       () => {
                         if (!failedIds[collectionName].length) {
                           delete failedIds[collectionName];

@@ -6,7 +6,9 @@
     "validateUpsert": true
   },
   "scope": {
-    "order": ["name ASC"]
+    "order": [
+      "name ASC"
+    ]
   },
   "properties": {
     "name": {
@@ -21,7 +23,9 @@
       "required": true
     },
     "countries": {
-      "type": ["country"],
+      "type": [
+        "country"
+      ],
       "required": true
     },
     "startDate": {
@@ -1865,7 +1869,18 @@
       }
     },
     "prototype.generateVisualId": {
-      "accepts": [],
+      "accepts": [
+        {
+          "arg": "visualIdMask",
+          "type": "string",
+          "description": "Visual ID mask partially resolved (except for the sequence no.)"
+        },
+        {
+          "arg": "personId",
+          "type": "string",
+          "description": "Case/Contact/Event ID for validating existing visual ID (optional)"
+        }
+      ],
       "returns": [
         {
           "arg": "visualId",

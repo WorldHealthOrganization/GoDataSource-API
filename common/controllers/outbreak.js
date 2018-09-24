@@ -4,7 +4,6 @@ const moment = require('moment');
 const app = require('../../server/server');
 const _ = require('lodash');
 const rr = require('rr');
-const templateParser = require('./../../components/templateParser');
 const genericHelpers = require('../../components/helpers');
 const async = require('async');
 const pdfUtils = app.utils.pdfDoc;
@@ -259,103 +258,55 @@ module.exports = function (Outbreak) {
   });
 
   /**
-   * Parsing the properties that are of type '['date']' as Loopback doesn't save them correctly
-   * Also set visual id
+   * Handle visual identifier (uniqueness and generation)
    */
   Outbreak.beforeRemote('prototype.__create__cases', function (context, modelInstance, next) {
-    // if the visual id was not passed
-    if (context.args.data.visualId === undefined) {
-      // set it automatically
-      Outbreak.helpers.getAvailableVisualId(context.instance, function (error, visualId) {
-        context.args.data.visualId = visualId;
-        return next(error);
-      });
-    } else {
-      // make sure the visual id is unique in the given outbreak, otherwise stop with error
-      Outbreak.helpers
-        .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
-        .then(next)
-        .catch(next);
-    }
+    Outbreak.helpers
+      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId)
+      .then(function (resolvedVisualId) {
+        context.args.data.visualId = resolvedVisualId;
+        next();
+      })
+      .catch(next);
   });
 
   /**
    * Handle visual identifier (uniqueness and generation)
    */
   Outbreak.beforeRemote('prototype.__create__contacts', function (context, modelInstance, next) {
-    // if the visual id was not passed
-    if (context.args.data.visualId === undefined) {
-      // set it automatically
-      Outbreak.helpers.getAvailableVisualId(context.instance, function (error, visualId) {
-        context.args.data.visualId = visualId;
-        return next(error);
-      });
-    } else {
-      // make sure the visual id is unique in the given outbreak, otherwise stop with error
-      Outbreak.helpers
-        .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
-        .then(next)
-        .catch(next);
-    }
+    Outbreak.helpers
+      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId)
+      .then(function (resolvedVisualId) {
+        context.args.data.visualId = resolvedVisualId;
+        next();
+      })
+      .catch(next);
   });
 
   /**
-   * Parsing the properties that are of type '['date']' as Loopback doesn't save them correctly
-   * Validate visual identifier (optional)
+   * Handle visual identifier (uniqueness and generation)
    */
   Outbreak.beforeRemote('prototype.__updateById__cases', function (context, modelInstance, next) {
-    // if visual id was sent in request, check for uniqueness
-    if (context.args.data.visualId !== undefined) {
-      // retrieve the instance that will be updated
-      // if visual id's are the same, no need to check for uniqueness
-      app.models.case
-        .findOne({
-          where: {
-            id: context.args.fk
-          }
-        })
-        .then((caseModel) => {
-          if (caseModel.visualId === context.args.data.visualId) {
-            return next();
-          }
-          // make sure the visual id is unique in the given outbreak, otherwise stop with error
-          return Outbreak.helpers
-            .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
-            .then(next);
-        })
-        .catch(next);
-    } else {
-      return next();
-    }
+    Outbreak.helpers
+      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId, context.args.fk)
+      .then(function (resolvedVisualId) {
+        context.args.data.visualId = resolvedVisualId;
+        next();
+      })
+      .catch(next);
   });
 
   /**
    * Make sure visual identifier is unique, if its sent in request
    */
   Outbreak.beforeRemote('prototype.__updateById__contacts', function (context, modelInstance, next) {
-    // if visual id was sent in request, check for uniqueness
-    if (context.args.data.visualId !== undefined) {
-      // retrieve the instance that will be updated
-      // if visual id's are the same, no need to check for uniqueness
-      app.models.contact
-        .findOne({
-          where: {
-            id: context.args.fk
-          }
-        })
-        .then((contact) => {
-          if (contact.visualId === context.args.data.visualId) {
-            return next();
-          }
-          // make sure the visual id is unique in the given outbreak, otherwise stop with error
-          return Outbreak.helpers
-            .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
-            .then(next);
-        })
-        .catch(next);
-    } else {
-      return next();
-    }
+    Outbreak.helpers
+      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId, context.args.fk)
+      .then(function (resolvedVisualId) {
+        context.args.data.visualId = resolvedVisualId;
+        next();
+      })
+      .catch(next);
   });
 
   /**
@@ -1233,10 +1184,16 @@ module.exports = function (Outbreak) {
 
   /**
    * Generate (next available) visual id
+   * @param visualIdMask
+   * @param personId
    * @param callback
    */
-  Outbreak.prototype.generateVisualId = function (callback) {
-    Outbreak.helpers.getAvailableVisualId(this, callback);
+  Outbreak.prototype.generateVisualId = function (visualIdMask, personId, callback) {
+    Outbreak.helpers.getAvailableVisualId(this, visualIdMask, personId)
+      .then(function (visualId) {
+        callback(null, visualId);
+      })
+      .catch(callback);
   };
 
   /**
@@ -1271,40 +1228,6 @@ module.exports = function (Outbreak) {
       callback(null, qrCode, 'image/png', `attachment;filename=event-${eventId}.png`);
     });
   };
-
-  /**
-   * Before create hook
-   */
-  Outbreak.beforeRemote('create', function (context, modelInstance, next) {
-    // in order to translate dynamic data, don't store values in the database, but translatable language tokens
-    // parse outbreak
-    templateParser.beforeHook(context, modelInstance, next);
-  });
-
-  /**
-   * After create hook
-   */
-  Outbreak.afterRemote('create', function (context, modelInstance, next) {
-    // after successfully creating outbreak, also create translations for it.
-    templateParser.afterHook(context, modelInstance, next);
-  });
-
-  /**
-   * Before update hook
-   */
-  Outbreak.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    // in order to translate dynamic data, don't store values in the database, but translatable language tokens
-    // parse outbreak
-    templateParser.beforeHook(context, modelInstance, next);
-  });
-
-  /**
-   * After update hook
-   */
-  Outbreak.afterRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    // after successfully creating outbreak, also create translations for it.
-    templateParser.afterHook(context, modelInstance, next);
-  });
 
   /**
    * Count the new contacts and groups them by exposure type
@@ -2602,49 +2525,26 @@ module.exports = function (Outbreak) {
    * Handle visual identifier (uniqueness and generation)
    */
   Outbreak.beforeRemote('prototype.__create__events', function (context, modelInstance, next) {
-    // if the visual id was not passed
-    if (context.args.data.visualId === undefined) {
-      // set it automatically
-      Outbreak.helpers.getAvailableVisualId(context.instance, function (error, visualId) {
-        context.args.data.visualId = visualId;
-        return next(error);
-      });
-    } else {
-      // make sure the visual id is unique in the given outbreak, otherwise stop with error
-      Outbreak.helpers
-        .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
-        .then(next)
-        .catch(next);
-    }
+    Outbreak.helpers
+      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId)
+      .then(function (resolvedVisualId) {
+        context.args.data.visualId = resolvedVisualId;
+        next();
+      })
+      .catch(next);
   });
 
   /**
    * Validate visual identifier (optional)
    */
   Outbreak.beforeRemote('prototype.__updateById__events', function (context, modelInstance, next) {
-    // if visual id was sent in request, check for uniqueness
-    if (context.args.data.visualId !== undefined) {
-      // retrieve the instance that will be updated
-      // if visual id's are the same, skip validation
-      app.models.event
-        .findOne({
-          where: {
-            id: context.args.fk
-          }
-        })
-        .then((event) => {
-          if (event.visualId === context.args.data.visualId) {
-            return next();
-          }
-          // make sure the visual id is unique in the given outbreak, otherwise stop with error
-          return Outbreak.helpers
-            .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
-            .then(next);
-        })
-        .catch(next);
-    } else {
-      return next();
-    }
+    Outbreak.helpers
+      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId, context.args.fk)
+      .then(function (resolvedVisualId) {
+        context.args.data.visualId = resolvedVisualId;
+        next();
+      })
+      .catch(next);
   });
 
   /**

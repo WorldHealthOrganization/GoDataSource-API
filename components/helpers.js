@@ -1221,6 +1221,28 @@ const findQuestionByVariable = function (questions, variable) {
   }
 };
 
+/**
+ * Set original value in context options;
+ * Creating options.${context.Model.modelName}._instance[${context.instance.id}]._original object in context and store the 'value' at the 'key' position
+ * @param context
+ * @param key
+ * @param value
+ */
+const setOriginalValueInContextOptions = function (context, key, value) {
+  _.set(context, `options.${context.Model.modelName}._instance[${context.instance ? context.instance.id : context.currentInstance.id}]._original[${key}]`, value);
+};
+
+/**
+ * Get original value from context options for the key
+ * Retrieving options.${context.Model.modelName}._instance[${context.instance.id}]._original[${key}] from context
+ * Returning null if not found
+ * @param context
+ * @param key
+ */
+const getOriginalValueFromContextOptions = function (context, key) {
+  return _.get(context, `options.${context.Model.modelName}._instance[${context.instance ? context.instance.id : context.currentInstance.id}]._original[${key}]`, null);
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1247,5 +1269,7 @@ module.exports = {
   getBuildInformation: getBuildInformation,
   convertBooleanProperties: convertBooleanProperties,
   getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext,
-  addQuestionnaireHeadersForPrint: spreadSheetFile.addQuestionnaireHeadersForPrint
+  addQuestionnaireHeadersForPrint: spreadSheetFile.addQuestionnaireHeadersForPrint,
+  setOriginalValueInContextOptions: setOriginalValueInContextOptions,
+  getOriginalValueFromContextOptions: getOriginalValueFromContextOptions
 };
