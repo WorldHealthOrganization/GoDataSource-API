@@ -476,7 +476,7 @@
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY": "日本の Follow-up frequency",
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY_PER_DAY": "日本の Follow-up frequency per day",
       "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK": "日本の Case Id Mask",
-      "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK_TOOLTIP": "日本の Example of mask: RX-0000. It will generate Ids in the range: RX-0001 and RX-9999",
+      "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK_TOOLTIP": "日本の Example of mask: RX-YYYY@@@000999&&&. It will generate Ids in the range: RX-YYYY@@@000001&&& and RX-YYYY@@@000999&&&, where YYYY represents reporting year, @@@ a combination of 3 letters and 000 a combination of 3 digits and &&& a combination of (RegExp safe) symbols",
       "LNG_OUTBREAK_FIELD_LABEL_DAYS_AMONG_KNOWN_CONTACTS": "日本の Days among known contacts",
       "LNG_OUTBREAK_FIELD_LABEL_DAYS_IN_KNOWN_TRANSMISSION_CHAINS": "日本の Days in known transmission chains",
       "LNG_OUTBREAK_FIELD_LABEL_DAYS_NOT_SEEN": "日本の Days not seen",

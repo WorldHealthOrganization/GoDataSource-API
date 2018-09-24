@@ -516,29 +516,78 @@ module.exports = function (Outbreak) {
   /**
    * Get the next available visual id
    * @param outbreak
-   * @param callback
+   * @param visualId
+   * @param [personId]
+   * @return {*}
    */
-  Outbreak.helpers.getAvailableVisualId = function (outbreak, callback) {
-    let maskRegExp = app.utils.maskField.convertMaskToSearchRegExp(outbreak.caseIdMask);
-    app.models.person
-      .findOne({
-        where: {
-          outbreakId: outbreak.id,
-          visualId: {
-            regexp: maskRegExp
+  Outbreak.helpers.getAvailableVisualId = function (outbreak, visualId, personId) {
+    // get search regex for visual id template
+    let maskRegExp = app.utils.maskField.convertMaskToSearchRegExp(outbreak.caseIdMask, visualId);
+    // if no search regex returned
+    if (!maskRegExp) {
+      // invalid mask error
+      return Promise.reject(app.utils.apiError.getError('INVALID_VISUAL_ID_MASK', {
+        visualIdTemplate: visualId,
+        outbreakVisualIdMask: outbreak.caseIdMask
+      }));
+    }
+    // if a personId was provided, check if current visualId is owned by that person (visual ID did not change value)
+    let validateExistingId;
+    if (personId !== undefined) {
+      // try and find the person that owns the ID
+      validateExistingId = app.models.person
+        .findOne({
+          where: {
+            id: personId,
+            outbreakId: outbreak.id,
+            visualId: visualId,
           }
-        },
-        deleted: true,
-        order: 'visualId DESC'
-      })
-      .then(function (person) {
-        let index = 0;
-        if (person) {
-          index = app.utils.maskField.extractValueFromMaskedField(outbreak.caseIdMask, person.visualId);
+        })
+        .then(function (person) {
+          // if the person was found
+          if (person) {
+            // return its visual ID
+            return person.visualId;
+          }
+        });
+    } else {
+      // no person ID, nothing to check
+      validateExistingId = Promise.resolve();
+    }
+
+    return validateExistingId
+      .then(function (validVisualId) {
+        // visual id owned by current person
+        if (validVisualId) {
+          // leave it as is
+          return validVisualId;
         }
-        index++;
-        app.utils.maskField.resolveMask(outbreak.caseIdMask, index, callback);
-      }).catch(callback);
+        // find the the ID that matches the same pattern with the biggest index value
+        return app.models.person
+          .findOne({
+            where: {
+              outbreakId: outbreak.id,
+              visualId: {
+                regexp: maskRegExp
+              }
+            },
+            deleted: true,
+            order: 'visualId DESC'
+          })
+          .then(function (person) {
+            // assume no record found, index 0
+            let index = 0;
+            // person found
+            if (person) {
+              // get it's numeric index
+              index = app.utils.maskField.extractValueFromMaskedField(outbreak.caseIdMask, person.visualId);
+            }
+            // get next index
+            index++;
+            // resolve the mask using the computed index
+            return app.utils.maskField.resolveMask(outbreak.caseIdMask, visualId, index);
+          });
+      });
   };
 
   /**
@@ -855,24 +904,28 @@ module.exports = function (Outbreak) {
    * If not, then a DUPLICATE_VISUAL_ID error is built and returned
    * @param outbreakId Outbreaks identifier
    * @param visualId Visual identifier (string)
+   * @param [instanceId] Current instance id
    * @returns Promise { false (if unique), error }
    */
-  Outbreak.helpers.validateVisualIdUniqueness = function (outbreakId, visualId) {
+  Outbreak.helpers.validateVisualIdUniqueness = function (outbreakId, visualId, instanceId) {
     return app.models.person
       .findOne({
         where: {
           outbreakId: outbreakId,
-          visualId: visualId
+          visualId: visualId,
+          id: {
+            neq: instanceId
+          }
         },
         deleted: true
       })
       .then((instance) => {
         if (!instance) {
-          // is unique, returning undefined, to be consistent with callback usage
-          return;
+          // is unique, returning sent id
+          return visualId;
         }
         // not unique, return crafted error
-        return app.utils.apiError.getError('DUPLICATE_VISUAL_ID', {
+        throw app.utils.apiError.getError('DUPLICATE_VISUAL_ID', {
           id: visualId
         });
       });
@@ -1025,7 +1078,7 @@ module.exports = function (Outbreak) {
    * @param context
    * @returns {*}
    */
-  Outbreak.helpers.getUsersPersonReadPermissions= function (context) {
+  Outbreak.helpers.getUsersPersonReadPermissions = function (context) {
     let userPermissions = context.req.authData.user.permissionsList;
 
     // Keep only the read person permissions that the user has
@@ -1040,6 +1093,7 @@ module.exports = function (Outbreak) {
   /**
    * Hide fields that the user does not have permission to see on a person model (case/contact/event)
    * @param model
+   * @param permissions
    */
   Outbreak.helpers.limitPersonInformation = function (model, permissions) {
     const personReadPermissionMap = {
@@ -1134,4 +1188,27 @@ module.exports = function (Outbreak) {
     // after successfully creating template, also create translations for it.
     templateParser.afterHook(context, next);
   });
+
+  /**
+   * Resolve person visual id template, if visualId field present
+   * @param outbreak
+   * @param visualId
+   * @param [personId]
+   * @return {*}
+   */
+  Outbreak.helpers.resolvePersonVisualIdTemplate = function (outbreak, visualId, personId) {
+    // if the field is present
+    if (typeof visualId === 'string' && visualId.length) {
+      // get the next available visual id for the visual id template
+      return Outbreak.helpers
+        .getAvailableVisualId(outbreak, visualId, personId)
+        .then(function (visualId) {
+          // validate its uniqueness
+          return Outbreak.helpers.validateVisualIdUniqueness(outbreak.id, visualId, personId);
+        });
+    } else {
+      // nothing to resolve
+      return Promise.resolve();
+    }
+  };
 };
