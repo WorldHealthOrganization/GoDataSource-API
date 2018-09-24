@@ -1,0 +1,25 @@
+{
+  "name": "age",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "years": {
+      "type": "number",
+      "required": true
+    },
+    "months": {
+      "type": "number",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

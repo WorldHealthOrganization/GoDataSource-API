@@ -267,5 +267,9 @@
   "exposureOrContact": {
     "dataSource": null,
     "public": false
+  },
+  "age": {
+    "dataSource": null,
+    "public": false
   }
 }
