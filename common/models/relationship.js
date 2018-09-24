@@ -340,6 +340,11 @@ module.exports = function (Relationship) {
    * A relation is inactive if (at least) one case from the relation is discarded
    */
   Relationship.observe('before save', function (context, next) {
+    // on sync don't check relationship status
+    if (context.options && context.options._sync) {
+      return next();
+    }
+
     // get instance data
     const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
     // relation is active, by default
@@ -376,6 +381,11 @@ module.exports = function (Relationship) {
    * Update follow-up dates on the contact if the relationship includes a contact
    */
   Relationship.observe('after save', function (context, callback) {
+    // do not execute hook on sync
+    if (context.options && context.options._sync) {
+      return callback();
+    }
+
     // get created/modified relationship
     let relationship = context.instance;
     // get contact representation in the relationship

@@ -77,8 +77,8 @@ module.exports = function (Followup) {
    * Enhance follow up save to include index of the created follow up
    */
   Followup.observe('before save', function (ctx, next) {
-    // we are interested only on new instances
-    if (!ctx.isNewInstance) {
+    // we are interested only on new instances and on actions different than sync
+    if (!ctx.isNewInstance || (ctx.options && ctx.options._sync)) {
       return next();
     }
 
@@ -90,7 +90,10 @@ module.exports = function (Followup) {
         let startDate = moment(person.followUp.originalStartDate);
         let endDate = moment(person.followUp.endDate);
         if (!moment(ctx.instance.date).startOf('day').isBetween(startDate, endDate, 'day', '[]')) {
-          return next(app.utils.apiError.getError('INVALID_FOLLOW_UP_DATE'));
+          return next(app.utils.apiError.getError('INVALID_FOLLOW_UP_DATE', {
+            startDate: startDate,
+            endDate: endDate
+          }));
         }
 
         // set index based on the difference in days from start date until the follow up set date

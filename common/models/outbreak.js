@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const _ = require('lodash');
 const genericHelpers = require('../../components/helpers');
+const templateParser = require('./../../components/templateParser');
 
 // used to manipulate dates
 const moment = require('moment');
@@ -1116,4 +1117,21 @@ module.exports = function (Outbreak) {
         cluster.findOrCountPeople(filter, countOnly, callback);
       });
   };
+
+  /**
+   * On create/update parse questions/answers
+   */
+  Outbreak.observe('before save', function (context, next) {
+    // in order to translate dynamic data, don't store values in the database, but translatable language tokens
+    // parse template
+    templateParser.beforeHook(context, next);
+  });
+
+  /**
+   * On create/update save questions/answers tokens
+   */
+  Outbreak.observe('after save', function (context, next) {
+    // after successfully creating template, also create translations for it.
+    templateParser.afterHook(context, next);
+  });
 };

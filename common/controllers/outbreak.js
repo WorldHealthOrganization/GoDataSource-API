@@ -4,7 +4,6 @@ const moment = require('moment');
 const app = require('../../server/server');
 const _ = require('lodash');
 const rr = require('rr');
-const templateParser = require('./../../components/templateParser');
 const genericHelpers = require('../../components/helpers');
 const async = require('async');
 const pdfUtils = app.utils.pdfDoc;
@@ -1273,40 +1272,6 @@ module.exports = function (Outbreak) {
       callback(null, qrCode, 'image/png', `attachment;filename=event-${eventId}.png`);
     });
   };
-
-  /**
-   * Before create hook
-   */
-  Outbreak.beforeRemote('create', function (context, modelInstance, next) {
-    // in order to translate dynamic data, don't store values in the database, but translatable language tokens
-    // parse outbreak
-    templateParser.beforeHook(context, modelInstance, next);
-  });
-
-  /**
-   * After create hook
-   */
-  Outbreak.afterRemote('create', function (context, modelInstance, next) {
-    // after successfully creating outbreak, also create translations for it.
-    templateParser.afterHook(context, modelInstance, next);
-  });
-
-  /**
-   * Before update hook
-   */
-  Outbreak.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    // in order to translate dynamic data, don't store values in the database, but translatable language tokens
-    // parse outbreak
-    templateParser.beforeHook(context, modelInstance, next);
-  });
-
-  /**
-   * After update hook
-   */
-  Outbreak.afterRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    // after successfully creating outbreak, also create translations for it.
-    templateParser.afterHook(context, modelInstance, next);
-  });
 
   /**
    * Count the new contacts and groups them by exposure type
