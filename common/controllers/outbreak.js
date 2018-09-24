@@ -215,6 +215,7 @@ module.exports = function (Outbreak) {
       .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId)
       .then(function (resolvedVisualId) {
         context.args.data.visualId = resolvedVisualId;
+        next();
       })
       .catch(next);
   });
@@ -227,6 +228,7 @@ module.exports = function (Outbreak) {
       .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId)
       .then(function (resolvedVisualId) {
         context.args.data.visualId = resolvedVisualId;
+        next();
       })
       .catch(next);
   });
@@ -239,6 +241,7 @@ module.exports = function (Outbreak) {
       .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId, context.args.fk)
       .then(function (resolvedVisualId) {
         context.args.data.visualId = resolvedVisualId;
+        next();
       })
       .catch(next);
   });
@@ -251,6 +254,7 @@ module.exports = function (Outbreak) {
       .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId, context.args.fk)
       .then(function (resolvedVisualId) {
         context.args.data.visualId = resolvedVisualId;
+        next();
       })
       .catch(next);
   });
@@ -2509,6 +2513,7 @@ module.exports = function (Outbreak) {
       .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId)
       .then(function (resolvedVisualId) {
         context.args.data.visualId = resolvedVisualId;
+        next();
       })
       .catch(next);
   });
@@ -2521,6 +2526,7 @@ module.exports = function (Outbreak) {
       .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId, context.args.fk)
       .then(function (resolvedVisualId) {
         context.args.data.visualId = resolvedVisualId;
+        next();
       })
       .catch(next);
   });

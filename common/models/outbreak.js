@@ -920,11 +920,11 @@ module.exports = function (Outbreak) {
       })
       .then((instance) => {
         if (!instance) {
-          // is unique, returning undefined, to be consistent with callback usage
-          return;
+          // is unique, returning sent id
+          return visualId;
         }
         // not unique, return crafted error
-        return app.utils.apiError.getError('DUPLICATE_VISUAL_ID', {
+        throw app.utils.apiError.getError('DUPLICATE_VISUAL_ID', {
           id: visualId
         });
       });
