@@ -1202,7 +1202,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getCaseQRResourceLink = function (caseId, callback) {
-    Outbreak.helpers.getPersonQRResourceLink(this, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', caseId, function (error, qrCode) {
+    Outbreak.helpers.getPersonQRResourceLink(this, app.models.case.modelName, caseId, function (error, qrCode) {
       callback(null, qrCode, 'image/png', `attachment;filename=case-${caseId}.png`);
     });
   };
@@ -1213,7 +1213,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getContactQRResourceLink = function (contactId, callback) {
-    Outbreak.helpers.getPersonQRResourceLink(this, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', contactId, function (error, qrCode) {
+    Outbreak.helpers.getPersonQRResourceLink(this, app.models.contact.modelName, contactId, function (error, qrCode) {
       callback(null, qrCode, 'image/png', `attachment;filename=contact-${contactId}.png`);
     });
   };
@@ -1224,7 +1224,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getEventQRResourceLink = function (eventId, callback) {
-    Outbreak.helpers.getPersonQRResourceLink(this, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', eventId, function (error, qrCode) {
+    Outbreak.helpers.getPersonQRResourceLink(this, app.models.event.modelName, eventId, function (error, qrCode) {
       callback(null, qrCode, 'image/png', `attachment;filename=event-${eventId}.png`);
     });
   };
@@ -3239,7 +3239,7 @@ module.exports = function (Outbreak) {
 
           // make sure we're not doing anything related to contact merging, if no contact id was given
           if (baseContact) {
-            baseContact = helpers.mergePersonModels(baseContact, contacts, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT');
+            baseContact = helpers.mergePersonModels(baseContact, contacts, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
 
             // store ref to base contact props
             let baseContactProps = baseContact.__data;
@@ -4238,8 +4238,8 @@ module.exports = function (Outbreak) {
       contactModel.addresses = [models.address.fieldLabelsMap];
       contactModel.documents = [models.document.fieldLabelsMap];
 
-      let caseFields = genericHelpers.translateFieldLabels(caseModel, models.case.modelName, dictionary);
-      let contactFields = genericHelpers.translateFieldLabels(contactModel, models.contact.modelName, dictionary);
+      let caseFields = genericHelpers.translateFieldLabels(app, caseModel, models.case.modelName, dictionary);
+      let contactFields = genericHelpers.translateFieldLabels(app, contactModel, models.contact.modelName, dictionary);
 
       // remove not needed properties from lab result/relationship field maps
       let relationFieldsMap = Object.assign({}, models.relationship.fieldLabelsMap);
@@ -4247,8 +4247,8 @@ module.exports = function (Outbreak) {
       delete labResultFieldsMap.personId;
       delete relationFieldsMap.persons;
 
-      let labResultsFields = genericHelpers.translateFieldLabels(labResultFieldsMap, models.labResult.modelName, dictionary);
-      let relationFields = genericHelpers.translateFieldLabels(relationFieldsMap, models.relationship.modelName, dictionary);
+      let labResultsFields = genericHelpers.translateFieldLabels(app, labResultFieldsMap, models.labResult.modelName, dictionary);
+      let relationFields = genericHelpers.translateFieldLabels(app, relationFieldsMap, models.relationship.modelName, dictionary);
 
       // translate template questions
       let questions = Outbreak.helpers.parseTemplateQuestions(template, dictionary);
