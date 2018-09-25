@@ -521,6 +521,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "restoreContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "restoreEvent"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__get__events"
@@ -1835,9 +1847,7 @@
       "returns": [
         {
           "arg": "case",
-          "type": [
-            "case"
-          ],
+          "type": "case",
           "description": "Case",
           "root": true,
           "required": true
@@ -1847,6 +1857,62 @@
       "http": {
         "verb": "post",
         "path": "/cases/:nk/restore"
+      }
+    },
+    "prototype.restoreContact": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "contact",
+          "type": "contact",
+          "description": "Contact",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted contact.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/:nk/restore"
+      }
+    },
+    "prototype.restoreEvent": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "event",
+          "type": "event",
+          "description": "Event",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted event.",
+      "http": {
+        "verb": "post",
+        "path": "/events/:nk/restore"
       }
     },
     "prototype.getReferenceData": {
