@@ -906,6 +906,58 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Restore a deleted contact
+   * @param contactId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.restoreContact = function (contactId, options, callback) {
+    app.models.contact
+      .findOne({
+        deleted: true,
+        where: {
+          id: contactId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: contactId});
+        }
+
+        // undo case delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Restore a deleted event
+   * @param eventId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.restoreEvent = function (eventId, options, callback) {
+    app.models.event
+      .findOne({
+        deleted: true,
+        where: {
+          id: eventId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.event.modelName, id: eventId});
+        }
+
+        // undo case delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
    * Retrieve system and own reference data
    * @param filter
    * @param callback
