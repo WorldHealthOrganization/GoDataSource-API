@@ -3438,6 +3438,21 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Count the latest follow-ups for contacts if were not performed
+   * The request doesn't count a missed follow-up if there is a new one for the same contact that was performed
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountLatestFollowUpsForContactsIfNotPerformed = function (filter, callback) {
+    this.listLatestFollowUpsForContactsIfNotPerformed(filter, function (err, res) {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, res.length);
+    });
+  };
+
+  /**
    * Convert any date attribute that is string to 'Date' instance
    * Needed because mongodb doesn't always filter as expected when date is string
    */
