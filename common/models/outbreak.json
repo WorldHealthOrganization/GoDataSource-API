@@ -929,6 +929,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "filteredCountLatestFollowUpsForContactsIfNotPerformed"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__get__people"
@@ -3401,6 +3407,28 @@
       "http": {
         "verb": "get",
         "path": "/follow-ups/latest-by-contacts-if-not-performed"
+      }
+    },
+    "prototype.filteredCountLatestFollowUpsForContactsIfNotPerformed": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of latest follow-ups for contacts if were not performed",
+          "required": true
+        }
+      ],
+      "description": "Count the latest follow-ups for contacts if were not performed. Doesn't count a missed follow-up if there is a new one for the same contact that was performed",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/latest-by-contacts-if-not-performed/filtered-count"
       }
     },
     "prototype.listInconsistenciesInKeyDates": {
