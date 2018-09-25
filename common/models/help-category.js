@@ -8,43 +8,42 @@ module.exports = function (HelpCategory) {
   HelpCategory.hasController = true;
 
   /**
-   * Replace the translatable fields with language tokens before saving. Save translatable fields values.
-   * to create translations later
-   * @param modelName
-   * @param titleField
-   * @param context
-   * @param modelInstance
-   * @param next
+   * Replace the translatable fields with language tokens before saving
+   * Save translatable fields values, to create translations later
    */
-  HelpCategory.beforeCreateHook = function (modelName, titleField, context, modelInstance, next) {
-    let identifier = '';
+  HelpCategory.observe('before save', function (context, next) {
+    if (context.isNewInstance) {
+      let identifier = `LNG_${_.snakeCase(HelpCategory.name).toUpperCase()}_${_.snakeCase(context.args.data.name).toUpperCase()}`;
 
-    //Build the identifier for either a Help Category or a Help Item.
-    if(context.instance) {
-      identifier = context.instance.name + `_${_.snakeCase(modelName).toUpperCase()}_`;
-    } else {
-      identifier = 'LNG_' + `${_.snakeCase(modelName).toUpperCase()}_`;
-    }
-    identifier += `${_.snakeCase(context.args.data[titleField]).toUpperCase()}`;
+      context.req._original = {
+        name: context.args.data.name,
+        description: context.args.data.description
+      };
 
-    context.req._original = {
-      [titleField]: context.args.data[titleField]
-    };
-    context.args.data.id = identifier;
-    context.args.data[titleField] = identifier;
-
-    if(modelName === 'helpCategory') {
-      context.req._original.description = context.args.data.description;
+      context.args.data.id = identifier;
+      context.args.data.name = identifier;
       context.args.data.description = identifier + '_DESCRIPTION';
+    } else {
+      if (context.args.data && (context.args.data.name || context.args.data.description)) {
+        let originalValues = {};
+        let data = context.args.data;
+
+        if (data.name) {
+          originalValues.name = data.name;
+          delete data.name;
+        }
+
+        if (data.description) {
+          originalValues.description = data.description;
+          delete data.description;
+        }
+
+        context.req._original = originalValues;
+      }
     }
 
-    if(modelName === 'helpItem') {
-      context.req._original.content = context.args.data.content;
-      context.args.data.content = identifier + '_DESCRIPTION';
-    }
-
-    next();
-  };
+    return next();
+  });
 
   /**
    * Create language token translations for each available language. Defaults to user language at the time of creation.
