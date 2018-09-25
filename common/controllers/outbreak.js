@@ -7,6 +7,7 @@ const rr = require('rr');
 const genericHelpers = require('../../components/helpers');
 const async = require('async');
 const pdfUtils = app.utils.pdfDoc;
+const searchByRelationProperty = require('../../components/searchByRelationProperty');
 
 module.exports = function (Outbreak) {
 
@@ -3430,13 +3431,21 @@ module.exports = function (Outbreak) {
   /**
    * List the latest follow-ups for contacts if were not performed
    * The request doesn't return a missed follow-up if there is a new one for the same contact that was performed
+   * @param context
    * @param filter
    * @param callback
    */
-  Outbreak.prototype.listLatestFollowUpsForContactsIfNotPerformed = function (filter, callback) {
+  Outbreak.prototype.listLatestFollowUpsForContactsIfNotPerformed = function (context, filter, callback) {
     // get outbreakId
     let outbreakId = this.id;
 
+    // cache remoting context, used in many places
+    let ctx = context.remotingContext;
+
+    // remove native pagination params, doing it manually
+    searchByRelationProperty.deletePaginationFilterFromContext(ctx);
+    filter = ctx.args.filter;
+    
     // get all the followups for the filtered period
     app.models.followUp
       .find(app.utils.remote
@@ -3482,6 +3491,11 @@ module.exports = function (Outbreak) {
               },
             }, filter || {}))
           .then(function (followUps) {
+            // paginate the follow ups
+            const skip = _.get(ctx, 'args.filter._deep.skip', 0);
+            let limit = _.get(ctx, 'args.filter._deep.limit');
+            followUps = searchByRelationProperty.doPagination(skip, limit, followUps);
+
             // send response
             callback(null, followUps);
           });
