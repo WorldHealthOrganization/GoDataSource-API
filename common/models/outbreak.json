@@ -4363,11 +4363,6 @@
     "prototype.exportFilteredFollowups" : {
       "accepts": [
         {
-          "arg": "nk",
-          "type": "string",
-          "description": "Foreign key for contacts"
-        },
-        {
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
@@ -4429,7 +4424,7 @@
       "description": "Export filtered list of follow ups",
       "http": {
         "verb": "get",
-        "path": "/contacts/:nk/follow-ups/export"
+        "path": "/follow-ups/export"
       }
     },
     "prototype.findTransmissionChainsForFilteredPeople": {
