@@ -18,14 +18,14 @@
   ],
   "scope": {
     "where": {
-      "type": "contact"
+      "type": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT"
     },
     "order": ["lastName ASC", "firstName ASC"]
   },
   "properties": {
     "type": {
       "type": "string",
-      "default": "contact",
+      "default": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT",
       "required": true,
       "readOnly": true
     },

@@ -210,7 +210,7 @@ module.exports = function (Person) {
     if (
       (
         !context.isNewInstance &&
-        data.source.existingRaw.type === 'case'
+        data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
         && data.source.existing.classification !== data.source.updated.classification
       ) &&
       (
@@ -242,15 +242,15 @@ module.exports = function (Person) {
      * When case classification changes, relations need to be notified because they have business logic associated with case classification
      */
     // if a case was updated and relationship updates need to be triggered
-    if (!ctx.isNewInstance && instance.type === 'case' && ctx.options.triggerRelationshipUpdates) {
+    if (!ctx.isNewInstance && instance.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' && ctx.options.triggerRelationshipUpdates) {
       // find all of its relationships with a contact
       app.models.relationship
         .find({
           where: {
             'persons.id': instance.id,
             and: [
-              {'persons.type': 'case'},
-              {'persons.type': 'contact'}
+              {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'},
+              {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'}
             ]
           }
         })
