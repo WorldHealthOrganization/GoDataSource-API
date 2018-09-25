@@ -169,14 +169,14 @@ module.exports = function (Outbreak) {
                 }
 
                 // do not allow event-event relationships
-                if (type === 'event' && foundPerson.type === 'event') {
+                if (type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT' && foundPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT') {
                   throw app.utils.apiError.getError('INVALID_EVENT_EVENT_RELATIONSHIP', {
                     id: person.id
                   });
                 }
 
                 // do not allow contact-contact relationships
-                if (type === 'contact' && foundPerson.type === 'contact') {
+                if (type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' && foundPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
                   throw app.utils.apiError.getError('INVALID_CONTACT_CONTACT_RELATIONSHIP', {
                     id: person.id
                   });
@@ -184,7 +184,7 @@ module.exports = function (Outbreak) {
 
                 // do not allow relationships with discarded cases
                 if (
-                  foundPerson.type === 'case' &&
+                  foundPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' &&
                   !app.models.case.nonDiscardedCaseClassifications.includes(foundPerson.classification)
                 ) {
                   throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
@@ -197,12 +197,12 @@ module.exports = function (Outbreak) {
 
                 // Set the person assignments (source/target)
                 // If the trying to link to an event or a case, set it as the source.
-                if (['event', 'case'].includes(data.persons[1].type)) {
+                if (['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'].includes(data.persons[1].type)) {
                   data.persons[0].target = true;
                   data.persons[1].source = true;
                 } else {
                   // If we are trying to link two contacts, keep the contact we are linking to as the source
-                  if (data.persons[0].type === 'contact') {
+                  if (data.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
                     data.persons[0].target = true;
                     data.persons[1].source = true;
                     // If we are linking a case/event to a contact, set the contact as the target
@@ -351,7 +351,7 @@ module.exports = function (Outbreak) {
         relationshipInstance = relationship;
 
         // check if the relationship includes a contact; if so the last relationship of a contact with a case/event cannot be deleted
-        let relationshipContacts = relationship.persons.filter(person => person.type === 'contact');
+        let relationshipContacts = relationship.persons.filter(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
         if (relationshipContacts.length) {
           // there are contacts in the relationship; check their other relationships;
           // creating array of promises as the relation might be contact - contact
@@ -366,7 +366,7 @@ module.exports = function (Outbreak) {
                   },
                   'persons.id': contactEntry.id,
                   'persons.type': {
-                    in: ['case', 'event']
+                    in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
                   }
                 })
                 .then(function (relNo) {
@@ -1097,8 +1097,8 @@ module.exports = function (Outbreak) {
    */
   Outbreak.helpers.limitPersonInformation = function (model, permissions) {
     const personReadPermissionMap = {
-      'contact': 'read_contact',
-      'case': 'read_case',
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'read_contact',
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'read_case',
       'event': 'read_case'
     };
 
