@@ -27,7 +27,7 @@ function getModelNamesFor(modelName) {
     modelNames.push(modelName);
   }
   // when importing contact model, relationships are also imported
-  if (modelName === 'contact') {
+  if (modelName === app.models.contact.modelName) {
     modelNames.push('relationship');
   }
   return modelNames;

@@ -219,7 +219,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.beforeRemote('prototype.__get__cases', function (context, modelInstance, next) {
     // filter information based on available permissions
-    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('case', context);
+    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context);
     // Enhance events list request to support optional filtering of events that don't have any relations
     Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
   });
@@ -1202,7 +1202,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getCaseQRResourceLink = function (caseId, callback) {
-    Outbreak.helpers.getPersonQRResourceLink(this, 'case', caseId, function (error, qrCode) {
+    Outbreak.helpers.getPersonQRResourceLink(this, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', caseId, function (error, qrCode) {
       callback(null, qrCode, 'image/png', `attachment;filename=case-${caseId}.png`);
     });
   };
@@ -1213,7 +1213,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getContactQRResourceLink = function (contactId, callback) {
-    Outbreak.helpers.getPersonQRResourceLink(this, 'contact', contactId, function (error, qrCode) {
+    Outbreak.helpers.getPersonQRResourceLink(this, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', contactId, function (error, qrCode) {
       callback(null, qrCode, 'image/png', `attachment;filename=contact-${contactId}.png`);
     });
   };
@@ -1224,7 +1224,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getEventQRResourceLink = function (eventId, callback) {
-    Outbreak.helpers.getPersonQRResourceLink(this, 'event', eventId, function (error, qrCode) {
+    Outbreak.helpers.getPersonQRResourceLink(this, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', eventId, function (error, qrCode) {
       callback(null, qrCode, 'image/png', `attachment;filename=event-${eventId}.png`);
     });
   };
@@ -3233,13 +3233,13 @@ module.exports = function (Outbreak) {
         // in case, a base case was not found we consider it being a contact to contact merge
         // hence ignoring case merge feature whatsoever
         if (!isCase) {
-          resultModel = helpers.mergePersonModels(baseContact, contacts, 'contact');
+          resultModel = helpers.mergePersonModels(baseContact, contacts, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
         } else {
-          resultModel = helpers.mergePersonModels(resultModel, cases, 'case');
+          resultModel = helpers.mergePersonModels(resultModel, cases, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE');
 
           // make sure we're not doing anything related to contact merging, if no contact id was given
           if (baseContact) {
-            baseContact = helpers.mergePersonModels(baseContact, contacts, 'contact');
+            baseContact = helpers.mergePersonModels(baseContact, contacts, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT');
 
             // store ref to base contact props
             let baseContactProps = baseContact.__data;
@@ -4238,8 +4238,8 @@ module.exports = function (Outbreak) {
       contactModel.addresses = [models.address.fieldLabelsMap];
       contactModel.documents = [models.document.fieldLabelsMap];
 
-      let caseFields = genericHelpers.translateFieldLabels(caseModel, 'case', dictionary);
-      let contactFields = genericHelpers.translateFieldLabels(contactModel, 'contact', dictionary);
+      let caseFields = genericHelpers.translateFieldLabels(caseModel, models.case.modelName, dictionary);
+      let contactFields = genericHelpers.translateFieldLabels(contactModel, models.contact.modelName, dictionary);
 
       // remove not needed properties from lab result/relationship field maps
       let relationFieldsMap = Object.assign({}, models.relationship.fieldLabelsMap);
@@ -4247,8 +4247,8 @@ module.exports = function (Outbreak) {
       delete labResultFieldsMap.personId;
       delete relationFieldsMap.persons;
 
-      let labResultsFields = genericHelpers.translateFieldLabels(labResultFieldsMap, 'labResult', dictionary);
-      let relationFields = genericHelpers.translateFieldLabels(relationFieldsMap, 'relationship', dictionary);
+      let labResultsFields = genericHelpers.translateFieldLabels(labResultFieldsMap, models.labResult.modelName, dictionary);
+      let relationFields = genericHelpers.translateFieldLabels(relationFieldsMap, models.relationship.modelName, dictionary);
 
       // translate template questions
       let questions = Outbreak.helpers.parseTemplateQuestions(template, dictionary);
@@ -5115,7 +5115,7 @@ module.exports = function (Outbreak) {
               }
 
               // translate labels
-              contact.toPrint = genericHelpers.translateFieldLabels(app, contact.toPrint, 'contact', dictionary);
+              contact.toPrint = genericHelpers.translateFieldLabels(app, contact.toPrint, app.models.contact.modelName, dictionary);
 
               // check if the results need to be grouped
               if (groupResultsBy) {

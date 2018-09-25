@@ -697,9 +697,9 @@ module.exports = function (Outbreak) {
     let filter = _.get(context, 'args.filter', {});
     // create a map of required permissions for each type
     let requiredPermissionMap = {
-      'case': 'read_case',
-      'event': 'read_case',
-      'contact': 'read_contact'
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'read_case',
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'read_case',
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'read_contact'
     };
     // if the required permission is missing
     if (permissions.indexOf(requiredPermissionMap[type]) === -1) {
@@ -966,7 +966,7 @@ module.exports = function (Outbreak) {
     ];
 
     // decide which type of properties map to use, based on given type
-    let propsMap = type === 'case' ? caseProps : contactProps;
+    let propsMap = type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ? caseProps : contactProps;
 
     // get reference to properties of the base model
     let baseProps = base.__data;
@@ -996,7 +996,7 @@ module.exports = function (Outbreak) {
     });
 
     // merge all case array props
-    if (type === 'case') {
+    if (type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
       caseArrayProps.forEach((arrayProp) => {
         baseProps[arrayProp] = baseProps[arrayProp] || [];
         baseProps[arrayProp] = baseProps[arrayProp].concat(...
@@ -1099,7 +1099,7 @@ module.exports = function (Outbreak) {
     const personReadPermissionMap = {
       'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'read_contact',
       'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'read_case',
-      'event': 'read_case'
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'read_case'
     };
 
     if (permissions.indexOf(personReadPermissionMap[model.type]) === -1) {
