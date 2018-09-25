@@ -119,7 +119,7 @@ module.exports = function (Outbreak) {
       // validate the person item
       if (person.id === undefined) {
         errors.push('"persons[0]" must contain "id"');
-      // add only other people
+        // add only other people
       } else if (person.id === personId) {
         errors.push('You cannot link a person to itself');
       } else {
