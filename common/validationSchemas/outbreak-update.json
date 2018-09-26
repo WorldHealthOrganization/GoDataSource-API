@@ -20,7 +20,7 @@
     "countries": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "object"
       },
       "description": "The countries in which the outbreak has occurred"
     },
@@ -102,6 +102,12 @@
       "type": "string",
       "pattern": "^(?:(?!š).)*(?:9*0+|9+0*)[^š]*$",
       "description": "The mask for an outbreak's visual IDs"
+    },
+    "arcGisServers": {
+      "type": "array",
+      "items": {
+        "$ref": "arc-gis-server"
+      }
     },
     "id": {
       "type": "string",

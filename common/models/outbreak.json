@@ -8,6 +8,13 @@
   "scope": {
     "order": ["name ASC"]
   },
+  "mixins": {
+    "SchemaValidation": true
+  },
+  "validationSchemas": {
+    "create": "outbreak-create",
+    "prototype.patchAttributes": "outbreak-update"
+  },
   "properties": {
     "name": {
       "type": "string",

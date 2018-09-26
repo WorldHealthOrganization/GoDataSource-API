@@ -8,23 +8,6 @@ const templateParser = require('./../../components/templateParser');
 const genericHelpers = require('../../components/helpers');
 const async = require('async');
 const pdfUtils = app.utils.pdfDoc;
-const Ajv = require('ajv');
-
-// JSON schemas for advanced outbreak validation
-const outbreakSchema = require('./schemas/outbreak-update.json');
-const outbreakUpdate = require('./schemas/outbreak-create.json');
-const templateQuestionSchema = require('./schemas/template-question.json');
-const templateAnswerSchema = require('./schemas/template-answer.json');
-
-//Initiate and populate the JSON schema validator
-const ajv = new Ajv({
-  allErrors: true
-});
-ajv.addSchema(templateAnswerSchema);
-ajv.addSchema(templateQuestionSchema);
-ajv.addSchema(outbreakSchema);
-ajv.addSchema(outbreakUpdate);
-
 
 module.exports = function (Outbreak) {
 
@@ -360,70 +343,6 @@ module.exports = function (Outbreak) {
       context.args.where = filter.where;
     }
     next();
-  });
-
-  /**
-   * Make sure that the data for an outbreak create is valid
-   */
-  Outbreak.beforeRemote('create', function (context, modelInstance, next) {
-    // The validate function will return either true or false after the validation
-    let valid = ajv.validate('outbreak-create', context.req.body);
-
-    if (!valid) {
-      // We create an error similar to that of loopback's invalid model error
-      let errors = {details: [], codes: {}, messages: {}};
-      ajv.errors.forEach((error) => {
-        // ajv offers the path to the invalid property (in case it is an embeded property) but it does not contain the final key so we add it.
-        let pathToProperty = (error.dataPath ? error.dataPath.substring(1) + '.' : '') + `${error.params.missingProperty}`;
-
-        // We build a string with all the error messages, as per loopbacks error log system
-        errors.details.push(`${app.models.outbreak.modelName}.${error.dataPath} ${error.message}`);
-        // We create a codes property, that logs what rule each property was failing
-        errors.codes[pathToProperty] = [error.keyword];
-        // We create a messages property, that shows the error message per property. In case the rule that was failing
-        // was required, we use a non-default message so that the statement makes more sense
-        errors.messages[pathToProperty] = error.keyword === 'required' ? ['can\'t be blank'] : [error.message];
-      });
-
-      next(app.utils.apiError.getError('VALIDATION_ERROR', {
-        model: app.models.outbreak.modelName,
-        details: Object.assign({toString: function() {return errors.details.join(', ');}}, {codes: errors.codes, messages: errors.messages})
-      }));
-    } else {
-      next();
-    }
-  });
-
-  /**
-   * Make sure that the data for an outbreak update is valid
-   */
-  Outbreak.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    // The validate function will return either true or false after the validation
-    let valid = ajv.validate('outbreak-update', context.req.body);
-
-    if (!valid) {
-      // We create an error similar to that of loopback's invalid model error
-      let errors = {details: [], codes: {}, messages: {}};
-      ajv.errors.forEach((error) => {
-        // ajv offers the path to the invalid property (in case it is an embeded property) but it does not contain the final key so we add it.
-        let pathToProperty = (error.dataPath ? error.dataPath.substring(1) + '.' : '') + `${error.params.missingProperty}`;
-
-        // We build a string with all the error messages, as per loopbacks error log system
-        errors.details.push(`${app.models.outbreak.modelName}.${error.dataPath} ${error.message}`);
-        // We create a codes property, that logs what rule each property was failing
-        errors.codes[pathToProperty] = [error.keyword];
-        // We create a messages property, that shows the error message per property. In case the rule that was failing
-        // was required, we use a non-default message so that the statement makes more sense
-        errors.messages[pathToProperty] = error.keyword === 'required' ? ['can\'t be blank'] : [error.message];
-      });
-
-      next(app.utils.apiError.getError('VALIDATION_ERROR', {
-        model: app.models.outbreak.modelName,
-        details: Object.assign({toString: function() {return errors.details.join(', ');}}, {codes: errors.codes, messages: errors.messages})
-      }));
-    } else {
-      next();
-    }
   });
 
   /**
