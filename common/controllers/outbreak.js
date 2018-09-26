@@ -142,7 +142,7 @@ module.exports = function (Outbreak) {
     app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, headerRestrictions, function (results, dictionary) {
       // Prepare questionnaire answers for printing
       results.forEach((caseModel) => {
-        if(caseModel.questionnaireAnswers) {
+        if (caseModel.questionnaireAnswers) {
           caseModel.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.case, caseModel, dictionary);
         }
       });
