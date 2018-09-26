@@ -7,6 +7,7 @@ const rr = require('rr');
 const genericHelpers = require('../../components/helpers');
 const async = require('async');
 const pdfUtils = app.utils.pdfDoc;
+const searchByRelationProperty = require('../../components/searchByRelationProperty');
 
 module.exports = function (Outbreak) {
 
@@ -3430,12 +3431,16 @@ module.exports = function (Outbreak) {
   /**
    * List the latest follow-ups for contacts if were not performed
    * The request doesn't return a missed follow-up if there is a new one for the same contact that was performed
+   * @param context
    * @param filter
    * @param callback
    */
-  Outbreak.prototype.listLatestFollowUpsForContactsIfNotPerformed = function (filter, callback) {
+  Outbreak.prototype.listLatestFollowUpsForContactsIfNotPerformed = function (filter, context, callback) {
     // get outbreakId
     let outbreakId = this.id;
+
+    // remove native pagination params, doing it manually
+    searchByRelationProperty.deletePaginationFilterFromContext(context.remotingContext);
 
     // get all the followups for the filtered period
     app.models.followUp
@@ -3468,6 +3473,11 @@ module.exports = function (Outbreak) {
           }
         });
 
+        // add any manual pagination filter, if required
+        filter = filter || {};
+        filter.skip = _.get(filter, '_deep.skip', 0);
+        filter.limit = _.get(filter, '_deep.limit');
+
         // do a second search in order to preserve requested order in the filters
         return app.models.followUp
           .find(app.utils.remote
@@ -3480,7 +3490,7 @@ module.exports = function (Outbreak) {
                 },
                 outbreakId: outbreakId,
               },
-            }, filter || {}))
+            }, filter))
           .then(function (followUps) {
             // send response
             callback(null, followUps);
@@ -3496,7 +3506,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.filteredCountLatestFollowUpsForContactsIfNotPerformed = function (filter, callback) {
-    this.listLatestFollowUpsForContactsIfNotPerformed(filter, function (err, res) {
+    this.listLatestFollowUpsForContactsIfNotPerformed(filter, {}, function (err, res) {
       if (err) {
         return callback(err);
       }
