@@ -141,8 +141,10 @@ module.exports = function (Outbreak) {
 
     app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, headerRestrictions, function (results, dictionary) {
       // Prepare questionnaire answers for printing
-      results.forEach((followUp) => {
-        followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+      results.forEach((caseModel) => {
+        if (caseModel.questionnaireAnswers) {
+          caseModel.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.case, caseModel, dictionary);
+        }
       });
       return Promise.resolve(results);
     }, callback);
@@ -186,7 +188,9 @@ module.exports = function (Outbreak) {
     app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, [], function (results, dictionary) {
       // Prepare questionnaire answers for printing
       results.forEach((followUp) => {
-        followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+        if (followUp.questionnaireAnswers) {
+          followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+        }
       });
       return Promise.resolve(results);
     }, callback);
