@@ -182,19 +182,6 @@ const deletePaginationFilterFromContext = function (context) {
   }
 };
 
-/**
- * Execute manual pagination over a list of items
- * @param skip
- * @param limit
- * @param list
- */
-const doPagination = function (skip, limit, list) {
-  if (limit !== undefined) {
-    limit = limit + skip;
-  }
-  return list.slice(skip, limit);
-};
-
 module.exports = {
   /**
    * Attach the behavior on a list of remotes that belong to a Model
@@ -210,6 +197,5 @@ module.exports = {
     });
   },
   deepSearchByRelationProperty: deepSearchByRelationProperty,
-  deletePaginationFilterFromContext: deletePaginationFilterFromContext,
-  doPagination: doPagination
+  deletePaginationFilterFromContext: deletePaginationFilterFromContext
 };
