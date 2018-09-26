@@ -81,14 +81,14 @@ module.exports = function (Relationship) {
             where: {
               or: [
                 {
-                  type: 'case',
+                  type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
                   classification: {
                     inq: app.models.case.nonDiscardedCaseClassifications
                   }
                 },
                 {
                   type: {
-                    inq: ['contact', 'event']
+                    inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
                   }
                 }
               ]
@@ -151,10 +151,10 @@ module.exports = function (Relationship) {
         where: {
           outbreakId: outbreakId,
           'persons.0.type': {
-            inq: ['case', 'event']
+            inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
           },
           'persons.1.type': {
-            inq: ['case', 'event']
+            inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
           }
         },
         include: {
@@ -228,8 +228,8 @@ module.exports = function (Relationship) {
         where: {
           outbreakId: outbreakId,
           and: [
-            {'persons.type': 'contact'},
-            {'persons.type': 'case'}
+            {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'},
+            {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'}
           ]
         }
       }, filter || {})
@@ -246,7 +246,7 @@ module.exports = function (Relationship) {
         // Note: This loop will only add the cases that have relationships. Will need to do another query to get the cases without relationships
         relationships.forEach(function (relationship) {
           // get case index from persons
-          let caseIndex = relationship.persons.findIndex(elem => elem.type === 'case');
+          let caseIndex = relationship.persons.findIndex(elem => elem.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE');
           // get caseId, contactId
           // there are only 2 persons so the indexes are 0 or 1
           let caseId = relationship.persons[caseIndex].id;
@@ -340,12 +340,17 @@ module.exports = function (Relationship) {
    * A relation is inactive if (at least) one case from the relation is discarded
    */
   Relationship.observe('before save', function (context, next) {
+    // on sync don't check relationship status
+    if (context.options && context.options._sync) {
+      return next();
+    }
+
     // get instance data
     const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
     // relation is active, by default
     data.target.active = true;
     // get case IDs from from the relationship
-    let caseIds = data.source.all.persons.filter(person => person.type === 'case').map(caseRecord => caseRecord.id);
+    let caseIds = data.source.all.persons.filter(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE').map(caseRecord => caseRecord.id);
     // if cases were found
     if (caseIds) {
       // find cases
@@ -376,10 +381,15 @@ module.exports = function (Relationship) {
    * Update follow-up dates on the contact if the relationship includes a contact
    */
   Relationship.observe('after save', function (context, callback) {
+    // do not execute hook on sync
+    if (context.options && context.options._sync) {
+      return callback();
+    }
+
     // get created/modified relationship
     let relationship = context.instance;
     // get contact representation in the relationship
-    let contactInPersons = relationship.persons.find(person => person.type === 'contact');
+    let contactInPersons = relationship.persons.find(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
 
     // check if the relationship created included a contact
     if (contactInPersons) {

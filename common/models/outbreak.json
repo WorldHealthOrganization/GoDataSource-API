@@ -6,7 +6,9 @@
     "validateUpsert": true
   },
   "scope": {
-    "order": ["name ASC"]
+    "order": [
+      "name ASC"
+    ]
   },
   "mixins": {
     "SchemaValidation": true
@@ -28,7 +30,9 @@
       "required": true
     },
     "countries": {
-      "type": ["country"],
+      "type": [
+        "country"
+      ],
       "required": true
     },
     "startDate": {
@@ -524,6 +528,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "restoreContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "restoreEvent"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__get__events"
@@ -932,6 +948,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "filteredCountLatestFollowUpsForContactsIfNotPerformed"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__get__people"
@@ -1103,6 +1125,12 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "filteredCountFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "exportFilteredFollowups"
     },
     {
       "principalType": "ROLE",
@@ -1826,9 +1854,7 @@
       "returns": [
         {
           "arg": "case",
-          "type": [
-            "case"
-          ],
+          "type": "case",
           "description": "Case",
           "root": true,
           "required": true
@@ -1838,6 +1864,62 @@
       "http": {
         "verb": "post",
         "path": "/cases/:nk/restore"
+      }
+    },
+    "prototype.restoreContact": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "contact",
+          "type": "contact",
+          "description": "Contact",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted contact.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/:nk/restore"
+      }
+    },
+    "prototype.restoreEvent": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "event",
+          "type": "event",
+          "description": "Event",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted event.",
+      "http": {
+        "verb": "post",
+        "path": "/events/:nk/restore"
       }
     },
     "prototype.getReferenceData": {
@@ -1866,7 +1948,18 @@
       }
     },
     "prototype.generateVisualId": {
-      "accepts": [],
+      "accepts": [
+        {
+          "arg": "visualIdMask",
+          "type": "string",
+          "description": "Visual ID mask partially resolved (except for the sequence no.)"
+        },
+        {
+          "arg": "personId",
+          "type": "string",
+          "description": "Case/Contact/Event ID for validating existing visual ID (optional)"
+        }
+      ],
       "returns": [
         {
           "arg": "visualId",
@@ -3370,6 +3463,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -3387,6 +3485,28 @@
       "http": {
         "verb": "get",
         "path": "/follow-ups/latest-by-contacts-if-not-performed"
+      }
+    },
+    "prototype.filteredCountLatestFollowUpsForContactsIfNotPerformed": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of latest follow-ups for contacts if were not performed",
+          "required": true
+        }
+      ],
+      "description": "Count the latest follow-ups for contacts if were not performed. Doesn't count a missed follow-up if there is a new one for the same contact that was performed",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/latest-by-contacts-if-not-performed/filtered-count"
       }
     },
     "prototype.listInconsistenciesInKeyDates": {
@@ -4316,6 +4436,73 @@
       "http": {
         "verb": "get",
         "path": "/cases/:nk/events/filteredCount"
+      }
+    },
+    "prototype.exportFilteredFollowups" : {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "type",
+          "type": "string",
+          "enum": [
+            "json",
+            "xml",
+            "csv",
+            "xls",
+            "xlsx",
+            "ods",
+            "pdf"
+          ],
+          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+        },
+        {
+          "arg": "encryptPassword",
+          "type": "string",
+          "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
+        },
+        {
+          "arg": "anonymizeFields",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export filtered list of follow ups",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/export"
       }
     },
     "prototype.findTransmissionChainsForFilteredPeople": {

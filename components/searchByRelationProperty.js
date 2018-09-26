@@ -160,6 +160,28 @@ function attachOnRemote(Model, remote) {
   });
 }
 
+/**
+ * Remove native pagination filter from context
+ * @param context
+ */
+const deletePaginationFilterFromContext = function (context) {
+  // native pagination is incompatible with filter search by relation property
+  const skip = _.get(context, 'args.filter.skip');
+  const limit = _.get(context, 'args.filter.limit');
+  // store skip for custom pagination
+  if (skip !== undefined) {
+    // remove skip from native pagination
+    delete context.args.filter.skip;
+    _.set(context, 'args.filter._deep.skip', skip);
+  }
+  // store limit for custom pagination
+  if (limit !== undefined) {
+    // remove limit from native pagination
+    delete context.args.filter.limit;
+    _.set(context, 'args.filter._deep.limit', limit);
+  }
+};
+
 module.exports = {
   /**
    * Attach the behavior on a list of remotes that belong to a Model
@@ -174,5 +196,6 @@ module.exports = {
       attachOnRemote(model, remote);
     });
   },
-  deepSearchByRelationProperty: deepSearchByRelationProperty
+  deepSearchByRelationProperty: deepSearchByRelationProperty,
+  deletePaginationFilterFromContext: deletePaginationFilterFromContext
 };

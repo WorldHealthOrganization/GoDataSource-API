@@ -4,10 +4,10 @@ const moment = require('moment');
 const app = require('../../server/server');
 const _ = require('lodash');
 const rr = require('rr');
-const templateParser = require('./../../components/templateParser');
 const genericHelpers = require('../../components/helpers');
 const async = require('async');
 const pdfUtils = app.utils.pdfDoc;
+const searchByRelationProperty = require('../../components/searchByRelationProperty');
 
 module.exports = function (Outbreak) {
 
@@ -106,6 +106,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    const self = this;
     const _filters = app.utils.remote.mergeFilters(
       {
         where: {
@@ -138,7 +139,57 @@ module.exports = function (Outbreak) {
       }
     }
 
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, headerRestrictions, callback);
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, headerRestrictions, function (results, dictionary) {
+      // Prepare questionnaire answers for printing
+      results.forEach((followUp) => {
+        followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+      });
+      return Promise.resolve(results);
+    }, callback);
+  };
+
+  /**
+   * Export a list of follow-ups for a contact
+   * @param filter
+   * @param exportType
+   * @param encryptPassword
+   * @param anonymizeFields
+   * @param options
+   * @param callback
+   * @returns {*}
+   */
+  Outbreak.prototype.exportFilteredFollowups = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    let self = this;
+    const _filters = app.utils.remote.mergeFilters(
+      {
+        where: {
+          outbreakId: this.id,
+        }
+      },
+      filter || {});
+
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+
+      // file must be either encrypted or anonymized
+      if (!encryptPassword) {
+        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
+      }
+    }
+
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, [], function (results, dictionary) {
+      // Prepare questionnaire answers for printing
+      results.forEach((followUp) => {
+        followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+      });
+      return Promise.resolve(results);
+    }, callback);
   };
 
   /**
@@ -169,9 +220,9 @@ module.exports = function (Outbreak) {
    */
   Outbreak.beforeRemote('prototype.__get__cases', function (context, modelInstance, next) {
     // filter information based on available permissions
-    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('case', context);
+    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context);
     // Enhance events list request to support optional filtering of events that don't have any relations
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('case', context, modelInstance, next);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
   });
 
   /**
@@ -179,9 +230,9 @@ module.exports = function (Outbreak) {
    */
   Outbreak.beforeRemote('prototype.__get__events', function (context, modelInstance, next) {
     // filter information based on available permissions
-    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('event', context);
+    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', context);
     // Enhance events list request to support optional filtering of events that don't have any relations
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('event', context, modelInstance, next);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', context, modelInstance, next);
   });
 
   /**
@@ -189,7 +240,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.beforeRemote('prototype.__get__contacts', function (context, modelInstance, next) {
     // filter information based on available permissions
-    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('contact', context);
+    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', context);
     next();
   });
 
@@ -197,114 +248,66 @@ module.exports = function (Outbreak) {
    * Attach before remote (GET outbreaks/{id}/cases/filtered-count) hooks
    */
   Outbreak.beforeRemote('prototype.filteredCountCases', function (context, modelInstance, next) {
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('case', context, modelInstance, next);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
   });
 
   /**
    * Attach before remote (GET outbreaks/{id}/events/filtered-count) hooks
    */
   Outbreak.beforeRemote('prototype.filteredCountEvents', function (context, modelInstance, next) {
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('event', context, modelInstance, next);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', context, modelInstance, next);
   });
 
   /**
-   * Parsing the properties that are of type '['date']' as Loopback doesn't save them correctly
-   * Also set visual id
+   * Handle visual identifier (uniqueness and generation)
    */
   Outbreak.beforeRemote('prototype.__create__cases', function (context, modelInstance, next) {
-    // if the visual id was not passed
-    if (context.args.data.visualId === undefined) {
-      // set it automatically
-      Outbreak.helpers.getAvailableVisualId(context.instance, function (error, visualId) {
-        context.args.data.visualId = visualId;
-        return next(error);
-      });
-    } else {
-      // make sure the visual id is unique in the given outbreak, otherwise stop with error
-      Outbreak.helpers
-        .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
-        .then(next)
-        .catch(next);
-    }
+    Outbreak.helpers
+      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId)
+      .then(function (resolvedVisualId) {
+        context.args.data.visualId = resolvedVisualId;
+        next();
+      })
+      .catch(next);
   });
 
   /**
    * Handle visual identifier (uniqueness and generation)
    */
   Outbreak.beforeRemote('prototype.__create__contacts', function (context, modelInstance, next) {
-    // if the visual id was not passed
-    if (context.args.data.visualId === undefined) {
-      // set it automatically
-      Outbreak.helpers.getAvailableVisualId(context.instance, function (error, visualId) {
-        context.args.data.visualId = visualId;
-        return next(error);
-      });
-    } else {
-      // make sure the visual id is unique in the given outbreak, otherwise stop with error
-      Outbreak.helpers
-        .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
-        .then(next)
-        .catch(next);
-    }
+    Outbreak.helpers
+      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId)
+      .then(function (resolvedVisualId) {
+        context.args.data.visualId = resolvedVisualId;
+        next();
+      })
+      .catch(next);
   });
 
   /**
-   * Parsing the properties that are of type '['date']' as Loopback doesn't save them correctly
-   * Validate visual identifier (optional)
+   * Handle visual identifier (uniqueness and generation)
    */
   Outbreak.beforeRemote('prototype.__updateById__cases', function (context, modelInstance, next) {
-    // if visual id was sent in request, check for uniqueness
-    if (context.args.data.visualId !== undefined) {
-      // retrieve the instance that will be updated
-      // if visual id's are the same, no need to check for uniqueness
-      app.models.case
-        .findOne({
-          where: {
-            id: context.args.fk
-          }
-        })
-        .then((caseModel) => {
-          if (caseModel.visualId === context.args.data.visualId) {
-            return next();
-          }
-          // make sure the visual id is unique in the given outbreak, otherwise stop with error
-          return Outbreak.helpers
-            .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
-            .then(next);
-        })
-        .catch(next);
-    } else {
-      return next();
-    }
+    Outbreak.helpers
+      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId, context.args.fk)
+      .then(function (resolvedVisualId) {
+        context.args.data.visualId = resolvedVisualId;
+        next();
+      })
+      .catch(next);
   });
 
   /**
    * Make sure visual identifier is unique, if its sent in request
    */
   Outbreak.beforeRemote('prototype.__updateById__contacts', function (context, modelInstance, next) {
-    // if visual id was sent in request, check for uniqueness
-    if (context.args.data.visualId !== undefined) {
-      // retrieve the instance that will be updated
-      // if visual id's are the same, no need to check for uniqueness
-      app.models.contact
-        .findOne({
-          where: {
-            id: context.args.fk
-          }
-        })
-        .then((contact) => {
-          if (contact.visualId === context.args.data.visualId) {
-            return next();
-          }
-          // make sure the visual id is unique in the given outbreak, otherwise stop with error
-          return Outbreak.helpers
-            .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
-            .then(next);
-        })
-        .catch(next);
-    } else {
-      return next();
-    }
+    Outbreak.helpers
+      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId, context.args.fk)
+      .then(function (resolvedVisualId) {
+        context.args.data.visualId = resolvedVisualId;
+        next();
+      })
+      .catch(next);
   });
 
   /**
@@ -398,7 +401,7 @@ module.exports = function (Outbreak) {
             id: caseId
           });
         }
-        helpers.createPersonRelationship(this.id, caseId, 'case', data, options, callback);
+        helpers.createPersonRelationship(this.id, caseId, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', data, options, callback);
       })
       .catch(callback);
   };
@@ -421,7 +424,7 @@ module.exports = function (Outbreak) {
             id: contactId
           }));
         }
-        helpers.createPersonRelationship(this.id, contactId, 'contact', data, options, callback);
+        helpers.createPersonRelationship(this.id, contactId, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', data, options, callback);
       })
       .catch(callback);
   };
@@ -444,7 +447,7 @@ module.exports = function (Outbreak) {
             id: eventId
           }));
         }
-        helpers.createPersonRelationship(this.id, eventId, 'event', data, options, callback);
+        helpers.createPersonRelationship(this.id, eventId, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', data, options, callback);
       })
       .catch(callback);
   };
@@ -457,7 +460,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getCaseRelationship = function (caseId, relationshipId, filter, callback) {
-    helpers.getPersonRelationship(caseId, relationshipId, 'case', filter, callback);
+    helpers.getPersonRelationship(caseId, relationshipId, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', filter, callback);
   };
 
   /**
@@ -468,7 +471,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getContactRelationship = function (contactId, relationshipId, filter, callback) {
-    helpers.getPersonRelationship(contactId, relationshipId, 'contact', filter, callback);
+    helpers.getPersonRelationship(contactId, relationshipId, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', filter, callback);
   };
 
   /**
@@ -479,7 +482,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getEventRelationship = function (eventId, relationshipId, filter, callback) {
-    helpers.getPersonRelationship(eventId, relationshipId, 'event', filter, callback);
+    helpers.getPersonRelationship(eventId, relationshipId, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', filter, callback);
   };
 
   /**
@@ -507,7 +510,7 @@ module.exports = function (Outbreak) {
             id: caseId
           });
         }
-        helpers.updatePersonRelationship(caseId, relationshipId, 'case', data, options, callback);
+        helpers.updatePersonRelationship(caseId, relationshipId, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', data, options, callback);
       })
       .catch(callback);
   };
@@ -521,7 +524,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.updateContactRelationship = function (contactId, relationshipId, data, options, callback) {
-    helpers.updatePersonRelationship(contactId, relationshipId, 'contact', data, options, callback);
+    helpers.updatePersonRelationship(contactId, relationshipId, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', data, options, callback);
   };
 
   /**
@@ -533,7 +536,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.updateEventRelationship = function (eventId, relationshipId, data, options, callback) {
-    helpers.updatePersonRelationship(eventId, relationshipId, 'event', data, options, callback);
+    helpers.updatePersonRelationship(eventId, relationshipId, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', data, options, callback);
   };
 
   /**
@@ -714,7 +717,7 @@ module.exports = function (Outbreak) {
 
     // parse case specific params, if not available fallback on default values
     params = params || {};
-    params.type = 'case';
+    params.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
     params.dateBecomeCase = params.dateBecomeCase || new Date();
     params.classification = params.classification || 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT';
 
@@ -726,7 +729,7 @@ module.exports = function (Outbreak) {
     app.models.contact
       .findOne({
         where: {
-          type: 'contact',
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
           id: contactId
         }
       })
@@ -754,7 +757,7 @@ module.exports = function (Outbreak) {
             // for every occurrence of current contact
             if (person.id === contactId) {
               // update type to match the new one
-              person.type = 'case';
+              person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
             }
             persons.push(person);
           });
@@ -791,7 +794,7 @@ module.exports = function (Outbreak) {
     app.models.case
       .findOne({
         where: {
-          type: 'case',
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
           id: caseId
         }
       })
@@ -814,7 +817,7 @@ module.exports = function (Outbreak) {
               {
                 'persons': {
                   'elemMatch': {
-                    'type': 'case',
+                    'type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
                     'id': {
                       '$ne': caseId
                     }
@@ -831,7 +834,7 @@ module.exports = function (Outbreak) {
         }
 
         // the case has relations with other cases; proceed with the conversion
-        return caseInstance.updateAttribute('type', 'contact', options);
+        return caseInstance.updateAttribute('type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', options);
       })
       .then(function (contact) {
         convertedContact = contact;
@@ -851,7 +854,7 @@ module.exports = function (Outbreak) {
             // for every occurrence of current contact
             if (person.id === caseId) {
               // update type to match the new one
-              person.type = 'contact';
+              person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
             }
             persons.push(person);
           });
@@ -895,6 +898,58 @@ module.exports = function (Outbreak) {
       .then(function (instance) {
         if (!instance) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.case.modelName, id: caseId});
+        }
+
+        // undo case delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Restore a deleted contact
+   * @param contactId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.restoreContact = function (contactId, options, callback) {
+    app.models.contact
+      .findOne({
+        deleted: true,
+        where: {
+          id: contactId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: contactId});
+        }
+
+        // undo case delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Restore a deleted event
+   * @param eventId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.restoreEvent = function (eventId, options, callback) {
+    app.models.event
+      .findOne({
+        deleted: true,
+        where: {
+          id: eventId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.event.modelName, id: eventId});
         }
 
         // undo case delete
@@ -1182,10 +1237,16 @@ module.exports = function (Outbreak) {
 
   /**
    * Generate (next available) visual id
+   * @param visualIdMask
+   * @param personId
    * @param callback
    */
-  Outbreak.prototype.generateVisualId = function (callback) {
-    Outbreak.helpers.getAvailableVisualId(this, callback);
+  Outbreak.prototype.generateVisualId = function (visualIdMask, personId, callback) {
+    Outbreak.helpers.getAvailableVisualId(this, visualIdMask, personId)
+      .then(function (visualId) {
+        callback(null, visualId);
+      })
+      .catch(callback);
   };
 
   /**
@@ -1194,7 +1255,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getCaseQRResourceLink = function (caseId, callback) {
-    Outbreak.helpers.getPersonQRResourceLink(this, 'case', caseId, function (error, qrCode) {
+    Outbreak.helpers.getPersonQRResourceLink(this, app.models.case.modelName, caseId, function (error, qrCode) {
       callback(null, qrCode, 'image/png', `attachment;filename=case-${caseId}.png`);
     });
   };
@@ -1205,7 +1266,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getContactQRResourceLink = function (contactId, callback) {
-    Outbreak.helpers.getPersonQRResourceLink(this, 'contact', contactId, function (error, qrCode) {
+    Outbreak.helpers.getPersonQRResourceLink(this, app.models.contact.modelName, contactId, function (error, qrCode) {
       callback(null, qrCode, 'image/png', `attachment;filename=contact-${contactId}.png`);
     });
   };
@@ -1216,44 +1277,10 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getEventQRResourceLink = function (eventId, callback) {
-    Outbreak.helpers.getPersonQRResourceLink(this, 'event', eventId, function (error, qrCode) {
+    Outbreak.helpers.getPersonQRResourceLink(this, app.models.event.modelName, eventId, function (error, qrCode) {
       callback(null, qrCode, 'image/png', `attachment;filename=event-${eventId}.png`);
     });
   };
-
-  /**
-   * Before create hook
-   */
-  Outbreak.beforeRemote('create', function (context, modelInstance, next) {
-    // in order to translate dynamic data, don't store values in the database, but translatable language tokens
-    // parse outbreak
-    templateParser.beforeHook(context, modelInstance, next);
-  });
-
-  /**
-   * After create hook
-   */
-  Outbreak.afterRemote('create', function (context, modelInstance, next) {
-    // after successfully creating outbreak, also create translations for it.
-    templateParser.afterHook(context, modelInstance, next);
-  });
-
-  /**
-   * Before update hook
-   */
-  Outbreak.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    // in order to translate dynamic data, don't store values in the database, but translatable language tokens
-    // parse outbreak
-    templateParser.beforeHook(context, modelInstance, next);
-  });
-
-  /**
-   * After update hook
-   */
-  Outbreak.afterRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    // after successfully creating outbreak, also create translations for it.
-    templateParser.afterHook(context, modelInstance, next);
-  });
 
   /**
    * Count the new contacts and groups them by exposure type
@@ -1414,13 +1441,13 @@ module.exports = function (Outbreak) {
               outbreakId: self.id,
               or: [
                 {
-                  type: 'case',
+                  type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
                   classification: {
                     inq: app.models.case.nonDiscardedCaseClassifications
                   }
                 },
                 {
-                  type: 'event'
+                  type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
                 }
               ],
               id: {
@@ -1536,13 +1563,13 @@ module.exports = function (Outbreak) {
                 outbreakId: self.id,
                 or: [
                   {
-                    type: 'case',
+                    type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
                     classification: {
                       inq: app.models.case.nonDiscardedCaseClassifications
                     }
                   },
                   {
-                    type: 'event'
+                    type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
                   }
                 ]
               }
@@ -1861,15 +1888,15 @@ module.exports = function (Outbreak) {
         where: {
           outbreakId: outbreakId,
           and: [
-            {'persons.type': 'contact'},
-            {'persons.type': 'event'}
+            {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'},
+            {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'}
           ]
         },
         include: [{
           relation: 'people',
           scope: {
             where: {
-              type: 'contact',
+              type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
               dateOfReporting: {
                 gte: now.setDate(now.getDate() - noDaysNewContacts)
               }
@@ -1894,7 +1921,7 @@ module.exports = function (Outbreak) {
         // Note: This loop will only add the events that have relationships. Will need to do another query to get the events without relationships
         relationships.forEach(function (relationship) {
           // get event index from persons
-          let eventIndex = relationship.persons.findIndex(elem => elem.type === 'event');
+          let eventIndex = relationship.persons.findIndex(elem => elem.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT');
           // get eventId, contactId
           // there are only 2 persons so the indexes are 0 or 1
           let eventId = relationship.persons[eventIndex].id;
@@ -1982,10 +2009,10 @@ module.exports = function (Outbreak) {
         .mergeFilters({
           where: {
             'persons.0.type': {
-              inq: ['case']
+              inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
             },
             'persons.1.type': {
-              inq: ['case']
+              inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
             }
           },
           // we're only interested in the cases that have dateOfOnset set
@@ -2189,10 +2216,10 @@ module.exports = function (Outbreak) {
         .mergeFilters({
           where: {
             'persons.0.type': {
-              inq: ['case']
+              inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
             },
             'persons.1.type': {
-              inq: ['case']
+              inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
             }
           },
           // we're only interested in the cases that have dateOfOnset set
@@ -2551,49 +2578,26 @@ module.exports = function (Outbreak) {
    * Handle visual identifier (uniqueness and generation)
    */
   Outbreak.beforeRemote('prototype.__create__events', function (context, modelInstance, next) {
-    // if the visual id was not passed
-    if (context.args.data.visualId === undefined) {
-      // set it automatically
-      Outbreak.helpers.getAvailableVisualId(context.instance, function (error, visualId) {
-        context.args.data.visualId = visualId;
-        return next(error);
-      });
-    } else {
-      // make sure the visual id is unique in the given outbreak, otherwise stop with error
-      Outbreak.helpers
-        .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
-        .then(next)
-        .catch(next);
-    }
+    Outbreak.helpers
+      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId)
+      .then(function (resolvedVisualId) {
+        context.args.data.visualId = resolvedVisualId;
+        next();
+      })
+      .catch(next);
   });
 
   /**
    * Validate visual identifier (optional)
    */
   Outbreak.beforeRemote('prototype.__updateById__events', function (context, modelInstance, next) {
-    // if visual id was sent in request, check for uniqueness
-    if (context.args.data.visualId !== undefined) {
-      // retrieve the instance that will be updated
-      // if visual id's are the same, skip validation
-      app.models.event
-        .findOne({
-          where: {
-            id: context.args.fk
-          }
-        })
-        .then((event) => {
-          if (event.visualId === context.args.data.visualId) {
-            return next();
-          }
-          // make sure the visual id is unique in the given outbreak, otherwise stop with error
-          return Outbreak.helpers
-            .validateVisualIdUniqueness(context.instance.id, context.args.data.visualId)
-            .then(next);
-        })
-        .catch(next);
-    } else {
-      return next();
-    }
+    Outbreak.helpers
+      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId, context.args.fk)
+      .then(function (resolvedVisualId) {
+        context.args.data.visualId = resolvedVisualId;
+        next();
+      })
+      .catch(next);
   });
 
   /**
@@ -3282,13 +3286,13 @@ module.exports = function (Outbreak) {
         // in case, a base case was not found we consider it being a contact to contact merge
         // hence ignoring case merge feature whatsoever
         if (!isCase) {
-          resultModel = helpers.mergePersonModels(baseContact, contacts, 'contact');
+          resultModel = helpers.mergePersonModels(baseContact, contacts, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
         } else {
-          resultModel = helpers.mergePersonModels(resultModel, cases, 'case');
+          resultModel = helpers.mergePersonModels(resultModel, cases, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE');
 
           // make sure we're not doing anything related to contact merging, if no contact id was given
           if (baseContact) {
-            baseContact = helpers.mergePersonModels(baseContact, contacts, 'contact');
+            baseContact = helpers.mergePersonModels(baseContact, contacts, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
 
             // store ref to base contact props
             let baseContactProps = baseContact.__data;
@@ -3387,7 +3391,7 @@ module.exports = function (Outbreak) {
         });
 
         // type of model that updates the record
-        let updateBaseRecord = resultModel.type === 'case' ? app.models.case : app.models.contact;
+        let updateBaseRecord = resultModel.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ? app.models.case : app.models.contact;
 
         // make changes into database
         return Promise
@@ -3427,22 +3431,28 @@ module.exports = function (Outbreak) {
   /**
    * List the latest follow-ups for contacts if were not performed
    * The request doesn't return a missed follow-up if there is a new one for the same contact that was performed
+   * @param context
    * @param filter
    * @param callback
    */
-  Outbreak.prototype.listLatestFollowUpsForContactsIfNotPerformed = function (filter, callback) {
+  Outbreak.prototype.listLatestFollowUpsForContactsIfNotPerformed = function (filter, context, callback) {
     // get outbreakId
     let outbreakId = this.id;
 
+    // remove native pagination params, doing it manually
+    searchByRelationProperty.deletePaginationFilterFromContext(context.remotingContext);
+
     // get all the followups for the filtered period
-    app.models.followUp.find(app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: outbreakId
-        },
-        // order by date as we need to check the follow-ups from the oldest to the most new
-        order: 'date ASC'
-      }, filter || {}))
+    app.models.followUp
+      .find(app.utils.remote
+        .mergeFilters({
+          where: {
+            outbreakId: outbreakId
+          },
+          fields: ['id', 'personId', 'performed'],
+          // order by date as we need to check the follow-ups from the oldest to the most recent
+          order: 'date ASC'
+        }, filter || {}))
       .then(function (followups) {
         // add support for filter parent
         followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
@@ -3454,22 +3464,54 @@ module.exports = function (Outbreak) {
           // get contactId
           let contactId = followup.personId;
 
-          // add in the contacts map the entire follow-up if it was not perfomed
+          // add in the contacts map the follow-up ID if it was not performed
           if (!followup.performed) {
-            contactsMap[contactId] = followup;
+            contactsMap[contactId] = followup.id;
           } else {
             // reset the contactId entry in the map to null if the newer follow-up was performed
             contactsMap[contactId] = null;
           }
         });
 
-        // get the follow-ups from the contact map
-        let result = Object.values(contactsMap).filter(followUp => followUp);
+        // add any manual pagination filter, if required
+        filter = filter || {};
+        filter.skip = _.get(filter, '_deep.skip', 0);
+        filter.limit = _.get(filter, '_deep.limit');
 
-        // send response
-        callback(null, result);
+        // do a second search in order to preserve requested order in the filters
+        return app.models.followUp
+          .find(app.utils.remote
+            .mergeFilters({
+              where: {
+                id: {
+                  // look only for the follow-ups found above
+                  inq: Object.values(contactsMap)
+                    .filter(followUp => followUp)
+                },
+                outbreakId: outbreakId,
+              },
+            }, filter))
+          .then(function (followUps) {
+            // send response
+            callback(null, followUps);
+          });
       })
       .catch(callback);
+  };
+
+  /**
+   * Count the latest follow-ups for contacts if were not performed
+   * The request doesn't count a missed follow-up if there is a new one for the same contact that was performed
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountLatestFollowUpsForContactsIfNotPerformed = function (filter, callback) {
+    this.listLatestFollowUpsForContactsIfNotPerformed(filter, {}, function (err, res) {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, res.length);
+    });
   };
 
   /**
@@ -3505,11 +3547,11 @@ module.exports = function (Outbreak) {
             // for contacts only get the ones where dateDeceased < date of birth; this check also applies for cases
             $where: 'this.dateDeceased < this.dob',
             type: {
-              in: ['contact', 'case']
+              in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
             }
           }, {
             // for case: compare against dob
-            type: 'case',
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
             // first check for is dob exists to not make the other checks
             dob: {
               neq: null
@@ -3529,7 +3571,7 @@ module.exports = function (Outbreak) {
             }]
           }, {
             // for case: compare against dateDeceased
-            type: 'case',
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
             // first check for is dob exists to not make the other checks
             dateDeceased: {
               neq: null
@@ -3549,7 +3591,7 @@ module.exports = function (Outbreak) {
             }]
           }, {
             // for case: compare dateOfInfection, dateOfOnset, dateBecomeCase, dateOfOutcome
-            type: 'case',
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
             or: [{
               // dateOfInfection > dateOfOnset
               $where: 'this.dateOfInfection > this.dateOfOnset',
@@ -3571,7 +3613,7 @@ module.exports = function (Outbreak) {
             }]
           }, {
             // for case: compare isolationDates, hospitalizationDates, incubationDates startDate/endDate for each item in them and against the date of birth and dateDeceased
-            type: 'case',
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
             $where: `function () {
               // initialize check result
               var inconsistencyInKeyDates = false;
@@ -3644,7 +3686,7 @@ module.exports = function (Outbreak) {
           }
 
           // for case:
-          if (person.type === 'case') {
+          if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
             // compare against dob
             if (dob) {
               // dateOfInfection < date of birth
@@ -4070,7 +4112,7 @@ module.exports = function (Outbreak) {
                   // promisify next step
                   return new Promise(function (resolve, reject) {
                     // normalize people
-                    Outbreak.helpers.validateAndNormalizePeople(contactRecord.id, 'contact', relationshipData, function (error) {
+                    Outbreak.helpers.validateAndNormalizePeople(contactRecord.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', relationshipData, function (error) {
                       if (error) {
                         return reject(error);
                       }
@@ -4258,8 +4300,8 @@ module.exports = function (Outbreak) {
       contactModel.addresses = [models.address.fieldLabelsMap];
       contactModel.documents = [models.document.fieldLabelsMap];
 
-      let caseFields = helpers.translateFieldLabels(caseModel, 'case', dictionary);
-      let contactFields = helpers.translateFieldLabels(contactModel, 'contact', dictionary);
+      let caseFields = genericHelpers.translateFieldLabels(app, caseModel, models.case.modelName, dictionary);
+      let contactFields = genericHelpers.translateFieldLabels(app, contactModel, models.contact.modelName, dictionary);
 
       // remove not needed properties from lab result/relationship field maps
       let relationFieldsMap = Object.assign({}, models.relationship.fieldLabelsMap);
@@ -4267,8 +4309,8 @@ module.exports = function (Outbreak) {
       delete labResultFieldsMap.personId;
       delete relationFieldsMap.persons;
 
-      let labResultsFields = helpers.translateFieldLabels(labResultFieldsMap, 'labResult', dictionary);
-      let relationFields = helpers.translateFieldLabels(relationFieldsMap, 'relationship', dictionary);
+      let labResultsFields = genericHelpers.translateFieldLabels(app, labResultFieldsMap, models.labResult.modelName, dictionary);
+      let relationFields = genericHelpers.translateFieldLabels(app, relationFieldsMap, models.relationship.modelName, dictionary);
 
       // translate template questions
       let questions = Outbreak.helpers.parseTemplateQuestions(template, dictionary);
@@ -5049,7 +5091,7 @@ module.exports = function (Outbreak) {
             relation: 'relationships',
             scope: {
               where: {
-                'persons.type': 'case'
+                'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
               },
               order: 'contactDate DESC',
               limit: 1,
@@ -5060,7 +5102,7 @@ module.exports = function (Outbreak) {
                 relation: 'people',
                 scope: {
                   where: {
-                    type: 'case'
+                    type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
                   }
                 }
               }]
@@ -5135,7 +5177,7 @@ module.exports = function (Outbreak) {
               }
 
               // translate labels
-              contact.toPrint = helpers.translateFieldLabels(contact.toPrint, 'contact', dictionary);
+              contact.toPrint = genericHelpers.translateFieldLabels(app, contact.toPrint, app.models.contact.modelName, dictionary);
 
               // check if the results need to be grouped
               if (groupResultsBy) {
@@ -5144,7 +5186,7 @@ module.exports = function (Outbreak) {
                 switch (groupResultsBy) {
                   case groupByOptions.case:
                     // get case entry in the contact relationship
-                    caseItem = contact.relationships[0].persons.find(person => person.type === 'case');
+                    caseItem = contact.relationships[0].persons.find(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE');
                     groupIdentifier = caseItem.id;
 
                     // get identifier value only if the value was not previously calculated for another contact
@@ -5212,7 +5254,7 @@ module.exports = function (Outbreak) {
                 // print contacts
                 groupedResults[groupIdentifier].forEach(function (contact, index) {
                   // print profile
-                  pdfUtils.createPersonProfile(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
+                  pdfUtils.displayModelDetails(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
 
                   // print follow-ups table
                   pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE'), 16);
@@ -5223,7 +5265,7 @@ module.exports = function (Outbreak) {
               // print contacts
               contactsList.forEach(function (contact, index) {
                 // print profile
-                pdfUtils.createPersonProfile(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
+                pdfUtils.displayModelDetails(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
 
                 // print follow-ups table
                 pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE'), 16);

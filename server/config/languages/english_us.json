@@ -477,7 +477,7 @@
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY": "Follow-up frequency",
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY_PER_DAY": "Follow-up frequency per day",
       "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK": "Case Id Mask",
-      "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK_TOOLTIP": "Example of mask: RX-0000. It will generate Ids in the range: RX-0001 and RX-9999",
+      "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK_TOOLTIP": "Example of mask: RX-YYYY@@@000999&&&. It will generate Ids in the range: RX-YYYY@@@000001&&& and RX-YYYY@@@000999&&&, where YYYY represents reporting year, @@@ a combination of 3 letters and 000 a combination of 3 digits and &&& a combination of (RegExp safe) symbols",
       "LNG_OUTBREAK_FIELD_LABEL_DAYS_AMONG_KNOWN_CONTACTS": "Days among known contacts",
       "LNG_OUTBREAK_FIELD_LABEL_DAYS_IN_KNOWN_TRANSMISSION_CHAINS": "Days in known transmission chains",
       "LNG_OUTBREAK_FIELD_LABEL_DAYS_NOT_SEEN": "Days not seen",
@@ -511,6 +511,8 @@
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE": "Postal Code",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID": "Location",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION": "Geo-Location",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LAT": "Lat",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LNG": "Lng",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE": "Date"
     },
     "uiCaseFields": {
@@ -683,7 +685,7 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT": "Contact",
       "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FIRST_NAME": "First Name",
       "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_LAST_NAME": "Last Name",
-      "LNG_FOLLOW_UP_FIELD_LABEL_DATE": "Date",
+      "LNG_FOLLOW_UP_FIELD_LABEL_DATE": "Follow up Date",
       "LNG_FOLLOW_UP_FIELD_LABEL_AREA": "Area",
       "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS": "Address",
       "LNG_FOLLOW_UP_FIELD_LABEL_PERFORMED": "Performed",
@@ -691,7 +693,10 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_DELETED": "Deleted",
       "LNG_FOLLOW_UP_FIELD_LABEL_TEAM": "Team",
       "LNG_FOLLOW_UP_FIELD_LABEL_INDEX": "Index",
-      "LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED": "Is Generated"
+      "LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED": "Is Generated",
+      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION": "Fill Geo-Location",
+      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "Fill Geo-Location Latitude",
+      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "Fill Geo-Location Longitude"
     },
     "uiFollowUpsListPage": {
       "LNG_PAGE_LIST_FOLLOW_UPS_TITLE": "Upcoming Follow-ups",

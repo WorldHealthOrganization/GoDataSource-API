@@ -117,6 +117,10 @@ function createPDFList(headers, data, callback) {
 
   const document = createPdfDoc(documentConfig);
 
+  // add the questionnaire headers
+  // since they depend on the translated data, we have to add them separately
+  addQuestionnaireHeadersForPrint(data, headers);
+
   // create table in document
   createTableInPDFDocument(headers, data, document, documentConfig);
 
@@ -515,12 +519,33 @@ function createTableInPDFDocument(headers, data, document, documentConfig) {
     });
   });
 
+  // Transform boolean values into string, otherwise false does not get printed
+  data.forEach((model, index) => {
+    data[index] = _.mapValues(model, (value) => {
+      if (typeof(value) === 'boolean') {
+        return value.toString();
+      } else {
+        return value;
+      }
+    });
+  });
+
   // add table data
   pdfTable.addBody(data);
   // move cursor to next line and set margin
   document.moveDown();
   document.x = document.options.margin;
 }
+
+/**
+ * Create questionnaire headers for flat file export. Added here since we cannot require helpers in this file because of
+ * circular dependency
+ * @param data
+ * @param headers
+ */
+const addQuestionnaireHeadersForPrint = function (data, headers) {
+  return require('./helpers').addQuestionnaireHeadersForPrint(data, headers);
+};
 
 module.exports = {
   createPDFList: createPDFList,
