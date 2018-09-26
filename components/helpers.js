@@ -1159,7 +1159,7 @@ const translateQuestionnaire = function (outbreak, Model, modelInstance, diction
     if (question) {
       let questionText = dictionary.getTranslation(question.text);
       let answer = '';
-      if (question.answers) {
+      if (['LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS', 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER'].includes(question.answerType)) {
         answer = translateQuestionAnswers(question, modelInstance.questionnaireAnswers[variable], dictionary);
       } else {
         // Parse date type answers since xml cannot print them
@@ -1185,13 +1185,45 @@ const translateQuestionnaire = function (outbreak, Model, modelInstance, diction
  */
 const translateQuestionAnswers = function (question, answers, dictionary) {
   if (!Array.isArray(answers)) {
-    return dictionary.getTranslation(_.find(question.answers, ['value', answers]).label);
+    let answer = _.find(question.answers, ['value', answers]);
+    if (answer && answer.label) {
+      return dictionary.getTranslation(answer.label);
+    } else {
+      // If the question no longer contains this answer, build the answer label and look for it's translation
+      // in the dictionary. This case can appear when we remove a possible answer from a questionnaire, but there
+      // are still models that contain this (now invalid) answer.
+      return buildAndTranslateAnswerLabel(question.text, answers, dictionary);
+    }
   } else {
     let translatedAnswers = [];
     answers.forEach((answer) => {
-      translatedAnswers.push(dictionary.getTranslation(_.find(question.answers, ['value', answer]).label));
+      if (answer && answer.label) {
+        translatedAnswers.push(dictionary.getTranslation(_.find(question.answers, ['value', answer]).label));
+      } else {
+        // If the question no longer contains this answer, build the answer label and look for it's translation
+        // in the dictionary. This case can appear when we remove a possible answer from a questionnaire, but there
+        // are still models that contain this (now invalid) answer.
+        translatedAnswers.push(buildAndTranslateAnswerLabel(question.text, answer, dictionary));
+      }
     });
     return translatedAnswers;
+  }
+};
+
+/**
+ * Build an answer's label based on the question text and answer value and translate that label.
+ * @param questionText
+ * @param answerValue
+ * @param dictionary
+ * @returns {*}
+ */
+const buildAndTranslateAnswerLabel = function (questionText, answerValue, dictionary) {
+  let token = questionText.slice(0, -4) + 'ANSWER_' + _.upperCase(answerValue) + '_LABEL';
+  let tokenTranslation = dictionary.getTranslation(token);
+  if (token !== tokenTranslation) {
+    return tokenTranslation;
+  } else {
+    return answerValue;
   }
 };
 
