@@ -49,7 +49,7 @@
   },
   "indexes": {
     "address_geoLocation_index": {
-      "addresses.geoLocation": "2dsphere"
+      "address.geoLocation": "2dsphere"
     },
     "fillGeoLocation_index": {
       "fillGeoLocation": "2dsphere"
