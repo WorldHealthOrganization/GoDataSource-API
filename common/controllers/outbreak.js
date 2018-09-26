@@ -3435,17 +3435,13 @@ module.exports = function (Outbreak) {
    * @param filter
    * @param callback
    */
-  Outbreak.prototype.listLatestFollowUpsForContactsIfNotPerformed = function (context, filter, callback) {
+  Outbreak.prototype.listLatestFollowUpsForContactsIfNotPerformed = function (filter, context, callback) {
     // get outbreakId
     let outbreakId = this.id;
 
-    // cache remoting context, used in many places
-    let ctx = context.remotingContext;
-
     // remove native pagination params, doing it manually
-    searchByRelationProperty.deletePaginationFilterFromContext(ctx);
-    filter = ctx.args.filter;
-    
+    searchByRelationProperty.deletePaginationFilterFromContext(context.remotingContext);
+
     // get all the followups for the filtered period
     app.models.followUp
       .find(app.utils.remote
@@ -3477,6 +3473,11 @@ module.exports = function (Outbreak) {
           }
         });
 
+        // add any manual pagination filter, if required
+        filter = filter || {};
+        filter.skip = _.get(filter, '_deep.skip', 0);
+        filter.limit = _.get(filter, '_deep.limit');
+
         // do a second search in order to preserve requested order in the filters
         return app.models.followUp
           .find(app.utils.remote
@@ -3489,13 +3490,8 @@ module.exports = function (Outbreak) {
                 },
                 outbreakId: outbreakId,
               },
-            }, filter || {}))
+            }, filter))
           .then(function (followUps) {
-            // paginate the follow ups
-            const skip = _.get(ctx, 'args.filter._deep.skip', 0);
-            let limit = _.get(ctx, 'args.filter._deep.limit');
-            followUps = searchByRelationProperty.doPagination(skip, limit, followUps);
-
             // send response
             callback(null, followUps);
           });
@@ -3510,7 +3506,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.filteredCountLatestFollowUpsForContactsIfNotPerformed = function (filter, callback) {
-    this.listLatestFollowUpsForContactsIfNotPerformed(filter, function (err, res) {
+    this.listLatestFollowUpsForContactsIfNotPerformed(filter, {}, function (err, res) {
       if (err) {
         return callback(err);
       }
