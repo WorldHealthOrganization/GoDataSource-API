@@ -1184,10 +1184,11 @@ const translateQuestionnaire = function (outbreak, Model, modelInstance, diction
  * @returns {*}
  */
 const translateQuestionAnswers = function (question, answers, dictionary) {
+  let foundAnswer = {};
   if (!Array.isArray(answers)) {
-    let answer = _.find(question.answers, ['value', answers]);
-    if (answer && answer.label) {
-      return dictionary.getTranslation(answer.label);
+    foundAnswer = _.find(question.answers, ['value', answers]);
+    if (foundAnswer && foundAnswer.label) {
+      return dictionary.getTranslation(foundAnswer.label);
     } else {
       // If the question no longer contains this answer, build the answer label and look for it's translation
       // in the dictionary. This case can appear when we remove a possible answer from a questionnaire, but there
@@ -1197,8 +1198,9 @@ const translateQuestionAnswers = function (question, answers, dictionary) {
   } else {
     let translatedAnswers = [];
     answers.forEach((answer) => {
-      if (answer && answer.label) {
-        translatedAnswers.push(dictionary.getTranslation(_.find(question.answers, ['value', answer]).label));
+      foundAnswer = _.find(question.answers, ['value', answer]);
+      if (foundAnswer && foundAnswer.label) {
+        translatedAnswers.push(dictionary.getTranslation(foundAnswer.label));
       } else {
         // If the question no longer contains this answer, build the answer label and look for it's translation
         // in the dictionary. This case can appear when we remove a possible answer from a questionnaire, but there
@@ -1218,13 +1220,15 @@ const translateQuestionAnswers = function (question, answers, dictionary) {
  * @returns {*}
  */
 const buildAndTranslateAnswerLabel = function (questionText, answerValue, dictionary) {
-  let token = questionText.slice(0, -4) + 'ANSWER_' + _.upperCase(answerValue) + '_LABEL';
-  let tokenTranslation = dictionary.getTranslation(token);
-  if (token !== tokenTranslation) {
-    return tokenTranslation;
-  } else {
-    return answerValue;
+  let result = answerValue;
+  if(/_TEXT$/.test(questionText)) {
+    let token = questionText.replace(/_TEXT$/, `_ANSWER_${_.upperCase(answerValue)}_LABEL`);
+    let tokenTranslation = dictionary.getTranslation(token);
+    if (token !== tokenTranslation) {
+      result = tokenTranslation;
+    }
   }
+  return result;
 };
 
 /**
