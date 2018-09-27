@@ -100,9 +100,9 @@ const worker = {
       // if the person has documents
       if (Array.isArray(person.documents)) {
         // go trough the documents
-        person.documents.forEach(function (document, index) {
+        person.documents.forEach(function (document, idx) {
           // index them by document type and number
-          addEntryToIndex(index.documents, person, [`document.${index}.type`, `document.${index}.number`]);
+          addEntryToIndex(index.documents, person, [`documents.${idx}.type`, `documents.${idx}.number`]);
         });
       }
     });
