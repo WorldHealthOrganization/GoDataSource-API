@@ -21,6 +21,7 @@
       "enum": [
         "LNG_SYNC_STATUS_IN_PROGRESS",
         "LNG_SYNC_STATUS_SUCCESS",
+        "LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS",
         "LNG_SYNC_STATUS_FAILED"
       ],
       "required": true
@@ -35,7 +36,7 @@
       "type": "date",
       "description": "Start date from which the created/modified/deleted entries are synced. Information is synced until the 'actionStartDate'"
     },
-    "failReason": {
+    "error": {
       "type": "string"
     }
   },
