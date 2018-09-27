@@ -4578,7 +4578,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note that filter.where needs to be a valid MongoDB where condition, not loopback, because the query is ran directly on MongoDB for performance reasons."
         }
       ],
       "returns": [
@@ -4601,7 +4601,7 @@
         {
           "arg": "where",
           "type": "object",
-          "description": "Criteria to match model instances"
+          "description": "Criteria to match model instances. Note that this needs to be a valid MongoDB where condition, not loopback, because the query is ran directly on MongoDB for performance reasons."
         }
       ],
       "returns": [
