@@ -15,7 +15,7 @@ module.exports = function (HelpItem) {
   HelpItem.observe('before save', function (context, next) {
     if (context.isNewInstance) {
       let instance = context.instance;
-      let identifier = `LNG_${_.snakeCase(HelpItem.name).toUpperCase()}_${_.snakeCase(instance.title).toUpperCase()}`;
+      let identifier = `${context.instance.categoryId}_${_.snakeCase(HelpItem.name).toUpperCase()}_${_.snakeCase(instance.title).toUpperCase()}`;
 
       // set instance id, before setting the original context
       // because the setter takes in account the current instance id
