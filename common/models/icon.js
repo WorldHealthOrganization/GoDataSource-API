@@ -62,19 +62,21 @@ module.exports = function (Icon) {
    * @param next
    */
   Icon.observe('before delete', function (ctx, next) {
+    let iconId = ctx.currentInstance.id;
+
     app.models.referenceData
       .count({
-        iconId: context.instance.id
+        iconId: iconId
       })
       .then(function (count) {
         if (count) {
-          return next(app.utils.apiError.getError('MODEL_IN_USE', { model: Icon.name, id: context.instance.id }));
+          return next(app.utils.apiError.getError('MODEL_IN_USE', { model: Icon.name, id: iconId }));
         }
         // store the instance that's about to be deleted to remove the resource from the disk later
-        return Icon.findById(context.instance.id)
+        return Icon.findById(iconId)
           .then(function (icon) {
             if (icon) {
-              helpers.setOriginalValueInContextOptions(context, 'deletedIcon', icon.toJSON());
+              helpers.setOriginalValueInContextOptions(ctx, 'deletedIcon', icon.toJSON());
             }
             next();
           });
@@ -89,12 +91,12 @@ module.exports = function (Icon) {
    */
   Icon.observe('after delete', function (ctx, next) {
     // try to get the deleted icon from context
-    let deletedIcon = helpers.getOriginalValueFromContextOptions(context, 'deletedIcon');
+    let deletedIcon = helpers.getOriginalValueFromContextOptions(ctx, 'deletedIcon');
     if (deletedIcon) {
       Icon.removeFromDisk(deletedIcon.path)
         .catch(function (error) {
           // only log the error, fail silently as the DB entry was removed
-          context.remotingContext.req.logger.error(error);
+          ctx.options.remotingContext.req.logger.error(error);
         });
     }
     // do not wait for disk resource removal to complete, it's irrelevant for this operation

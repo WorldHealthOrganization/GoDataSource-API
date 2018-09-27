@@ -1034,7 +1034,6 @@ module.exports = function (Outbreak) {
    * Parse a outbreak template's questions by translating any tokens based on given dictionary reference
    * Function works recursive by translating any additional questions of the answers
    * @param questions
-   * @param languageId
    * @param dictionary
    */
   Outbreak.helpers.parseTemplateQuestions = function (questions, dictionary) {
@@ -1212,12 +1211,6 @@ module.exports = function (Outbreak) {
     }
   };
 
-  /**
-   *
-   * @param caseId
-   * @param options
-   * @param callback
-   */
   Outbreak.helpers.printCaseInvestigation = function (outbreakInstance, pdfUtils, foundCase, options, callback) {
     const models = app.models;
     let caseInvestigationTemplate = outbreakInstance.caseInvestigationTemplate;
@@ -1323,4 +1316,29 @@ module.exports = function (Outbreak) {
       });
     });
   };
+
+  /**
+   * Do not allow deletion of a active Outbreak
+   * @param ctx
+   * @param next
+   */
+  Outbreak.observe('before delete', function (ctx, next) {
+    Outbreak.findById(ctx.currentInstance.id)
+      .then(function (outbreak) {
+        if (outbreak) {
+          return app.models.User.count({
+            activeOutbreakId: outbreak.id
+          });
+        } else {
+          return 0;
+        }
+      })
+      .then(function (userCount) {
+        if (userCount) {
+          return next(app.utils.apiError.getError('DELETE_ACTIVE_OUTBREAK', { id: ctx.currentInstance.id }, 422));
+        }
+        return next();
+      })
+      .catch(next);
+  });
 };
