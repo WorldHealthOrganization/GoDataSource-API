@@ -568,10 +568,12 @@ module.exports = function (Sync) {
             syncLogEntry.actionCompletionDate = new Date();
 
             // check for partial success
-            if(err && err.errorType === Sync.errorType.partial) {
-              app.logger.debug(`Sync ${syncLogEntry.id}: Success with warnings: ${err.errorMessage}`);
+            // also check if there are errors set on the syncLogEntry (there might be from the upstream server sync); If so, the status will be success with warnings
+            if(err && err.errorType === Sync.errorType.partial || syncLogEntry.error) {
+              app.logger.debug(`Sync ${syncLogEntry.id}: Success with warnings: ${err ? err.errorMessage : syncLogEntry.error}`);
               syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS';
             } else {
+              // success
               app.logger.debug(`Sync ${syncLogEntry.id}: Success`);
               syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS';
             }
