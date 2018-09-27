@@ -548,16 +548,14 @@ module.exports = function (Location) {
    */
   Location.observe('before save', function (ctx, next) {
     if (ctx.isNewInstance) {
-      // TODO: convert this into a JavaScript object or use hidden prop _data
-      Location.validateModelIdentifiers(ctx.instance)
+      Location.validateModelIdentifiers(ctx.instance.toJSON())
         .then(() => next())
         .catch(next);
     } else {
-      // TODO: context.instance or context.currentInstance (check)
-      Location.validateModelIdentifiers(ctx.data, ctx.instance.id)
+      Location.validateModelIdentifiers(ctx.data, ctx.currentInstance.id)
         .then(() => {
           if (ctx.data.active === false) {
-            return Location.checkIfCanDeactivate(ctx.data, ctx.instance.id);
+            return Location.checkIfCanDeactivate(ctx.data, ctx.currentInstance.id);
           }
         })
         .then(() => next())
@@ -571,7 +569,7 @@ module.exports = function (Location) {
    * @param next
    */
   Location.observe('before delete', function (ctx, next) {
-    Location.checkIfCanDelete(ctx.instance.id)
+    Location.checkIfCanDelete(ctx.currentInstance.id)
       .then(() => next())
       .catch(next);
   });
