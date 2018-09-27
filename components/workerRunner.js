@@ -57,10 +57,10 @@ module.exports = {
   },
   personDuplicate: {
     find: function (people, callback) {
-      invokeWorkerMethod('personDuplicate', 'find', [people], callback)
+      invokeWorkerMethod('personDuplicate', 'find', [people], callback);
     },
     count: function (people, callback) {
-      invokeWorkerMethod('personDuplicate', 'count', [people], callback)
+      invokeWorkerMethod('personDuplicate', 'count', [people], callback);
     }
   }
 };
