@@ -1211,4 +1211,116 @@ module.exports = function (Outbreak) {
       return Promise.resolve();
     }
   };
+
+  /**
+   *
+   * @param caseId
+   * @param options
+   * @param callback
+   */
+  Outbreak.helpers.printCaseInvestigation = function (outbreakInstance, pdfUtils, foundCase, options, callback) {
+    const models = app.models;
+    let caseInvestigationTemplate = outbreakInstance.caseInvestigationTemplate;
+    let labResultsTemplate = outbreakInstance.labResultsTemplate;
+
+    // authenticated user's language, used to know in which language to translate
+    let languageId = options.remotingContext.req.authData.userInstance.languageId;
+
+    // load user language dictionary
+    app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
+      // handle errors
+      if (error) {
+        return callback(error);
+      }
+
+      // translate case, lab results, contact fields
+      let caseModel = Object.assign({}, models.case.fieldLabelsMap);
+      let contactModel = Object.assign({}, models.contact.fieldLabelsMap);
+
+      // remove array properties from model definition (they are handled separately)
+      Object.keys(caseModel).forEach(function (property) {
+        if (property.indexOf('[]') !== -1) {
+          delete caseModel[property];
+        }
+      });
+
+      caseModel.addresses = [models.address.fieldLabelsMap];
+      caseModel.documents = [models.document.fieldLabelsMap];
+
+      contactModel.addresses = [models.address.fieldLabelsMap];
+      contactModel.documents = [models.document.fieldLabelsMap];
+
+      let caseFields = genericHelpers.translateFieldLabels(app, caseModel, models.case.modelName, dictionary);
+      let contactFields = genericHelpers.translateFieldLabels(app, contactModel, models.contact.modelName, dictionary);
+
+      // remove not needed properties from lab result/relationship field maps
+      let relationFieldsMap = Object.assign({}, models.relationship.fieldLabelsMap);
+      let labResultFieldsMap = Object.assign({}, models.labResult.fieldLabelsMap);
+      delete labResultFieldsMap.personId;
+      delete relationFieldsMap.persons;
+
+      let labResultsFields = genericHelpers.translateFieldLabels(app, labResultFieldsMap, models.labResult.modelName, dictionary);
+      let relationFields = genericHelpers.translateFieldLabels(app, relationFieldsMap, models.relationship.modelName, dictionary);
+
+      // translate template questions
+      let caseQuestions = Outbreak.helpers.parseTemplateQuestions(caseInvestigationTemplate, dictionary);
+      let labQuestions = Outbreak.helpers.parseTemplateQuestions(labResultsTemplate, dictionary);
+
+      // generate pdf document
+      let doc = pdfUtils.createPdfDoc({
+        fontSize: 11,
+        layout: 'portrait'
+      });
+
+      // add a top margin of 2 lines for each page
+      doc.on('pageAdded', () => {
+        doc.moveDown(2);
+      });
+
+      // set margin top for first page here, to not change the entire createPdfDoc functionality
+      doc.moveDown(2);
+
+      if(foundCase) {
+        let qrCode = app.utils.qrCode.createResourceLink('case', {
+          outbreakId: outbreakInstance.id,
+          caseId: 'caseId'
+        });
+        doc.image(qrCode, 480, 15, {width: 100, height: 100});
+
+        // add case profile fields (empty)
+        pdfUtils.displayModelDetails(doc, caseFields, false, `${foundCase.firstName} ${foundCase.middleName} ${foundCase.lastName}`);
+      } else {
+        // add case profile fields (empty)
+        pdfUtils.displayModelDetails(doc, caseFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
+      }
+
+      // add case investigation questionnaire into the pdf in a separate page
+      doc.addPage();
+      pdfUtils.createQuestionnaire(doc, caseQuestions, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE'));
+
+      // add lab results information into a separate page
+      doc.addPage();
+      pdfUtils.displayModelDetails(doc, labResultsFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_DETAILS'));
+      doc.addPage();
+      pdfUtils.createQuestionnaire(doc, labQuestions, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE'));
+
+      // add contact relation template
+      doc.addPage();
+      pdfUtils.displayModelDetails(doc, contactFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
+      pdfUtils.displayModelDetails(doc, relationFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_RELATIONSHIP'));
+
+      // end the document stream
+      // to convert it into a buffer
+      doc.end();
+
+      // convert pdf stream to buffer and send it as response
+      genericHelpers.streamToBuffer(doc, (err, buffer) => {
+        if (err) {
+          callback(err);
+        } else {
+          app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'case_investigation.pdf', callback);
+        }
+      });
+    });
+  };
 };
