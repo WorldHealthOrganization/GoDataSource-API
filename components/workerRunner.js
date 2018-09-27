@@ -54,5 +54,13 @@ module.exports = {
     count: function (relationships, followUpPeriod, callback) {
       invokeWorkerMethod('transmissionChain', 'count', [relationships, followUpPeriod], callback);
     }
+  },
+  personDuplicate: {
+    find: function (people, callback) {
+      invokeWorkerMethod('personDuplicate', 'find', [people], callback)
+    },
+    count: function (people, callback) {
+      invokeWorkerMethod('personDuplicate', 'count', [people], callback)
+    }
   }
 };

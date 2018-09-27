@@ -5535,4 +5535,51 @@ module.exports = function (Outbreak) {
     });
     next();
   });
+
+  /**
+   * Find possible person duplicates
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findPossiblePersonDuplicates = function (filter, callback) {
+    // get where filter (this needs to be mongoDB compliant where, not loopback, because we're using raw queries)
+    let where = filter && filter.where ? filter.where : {};
+    // merge-in outbreakId
+    where = {
+      $and: [{
+        outbreakId: this.id
+      }, where]
+    };
+    // find possible person duplicates groups
+    app.models.person
+      .findOrCountPossibleDuplicates(where)
+      .then(function (duplicates) {
+        // send back paginated result set
+        callback(null, app.utils.helpers.paginateResultSet(filter, duplicates));
+      })
+      .catch(callback);
+  };
+
+  /**
+   *
+   * @param where
+   * @param callback
+   */
+  Outbreak.prototype.countPossiblePersonDuplicates = function (where, callback) {
+    // get where filter (this needs to be mongoDB compliant where, not loopback, because we're using raw queries)
+    where = where || {};
+    // merge-in outbreakId
+    where = {
+      $and: [{
+        outbreakId: this.id
+      }, where]
+    };
+    // find possible person duplicates groups
+    app.models.person
+      .findOrCountPossibleDuplicates(where, true)
+      .then(function (duplicatesNo) {
+        callback(null, duplicatesNo);
+      })
+      .catch(callback);
+  };
 };

@@ -1130,6 +1130,18 @@
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "findTransmissionChainsForFilteredPeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "findPossiblePersonDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countPossiblePersonDuplicates"
     }
   ],
   "methods": {
@@ -4559,6 +4571,51 @@
       "http": {
         "verb": "get",
         "path": "/relationships/transmission-chains-including-people"
+      }
+    },
+    "prototype.findPossiblePersonDuplicates": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "duplicates",
+          "type": "any",
+          "description": "Possible duplicate people groups",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Find the possible duplicate people groups",
+      "http": {
+        "verb": "get",
+        "path": "/people/possible-duplicates"
+      }
+    },
+    "prototype.countPossiblePersonDuplicates": {
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of possible duplicate people groups",
+          "required": true
+        }
+      ],
+      "description": "Count the number of possible duplicate people groups",
+      "http": {
+        "verb": "get",
+        "path": "/people/possible-duplicates/count"
       }
     }
   }

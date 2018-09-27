@@ -5,6 +5,7 @@ const _ = require('lodash');
 const async = require('async');
 const mapsApi = require('../../components/mapsApi');
 const app = require('../server');
+const personDuplicate = require('../../components/workerRunner').personDuplicate;
 
 module.exports = function (Person) {
 
@@ -297,4 +298,46 @@ module.exports = function (Person) {
     // do not wait for the above operations to complete
     return next();
   });
+
+
+  /**
+   * Find or count possible person duplicates
+   * @param where
+   * @param [countOnly]
+   * @return {Promise<any>}
+   */
+  Person.findOrCountPossibleDuplicates = function (where, countOnly) {
+    // promisify the response
+    return new Promise(function (resolve, reject) {
+      // query non deleted records only
+      where = {
+        $and: [
+          {
+            deleted: {
+              $ne: null
+            },
+          },
+          where || {}
+        ]
+      };
+      // use connector directly to bring big number of (raw) results
+      app.dataSources.mongoDb.connector.collection('person')
+        .find(where)
+        .toArray(function (error, people) {
+          // handle eventual errors
+          if (error) {
+            return reject(error);
+          }
+          // find or count duplicate groups
+          personDuplicate[countOnly ? 'count' : 'find'](people, function (error, duplicates) {
+            // handle eventual errors
+            if (error) {
+              return reject(error);
+            }
+            // send back the result
+            return resolve(duplicates);
+          });
+        });
+    });
+  };
 };
