@@ -111,22 +111,22 @@ module.exports = function (HelpCategory) {
         }
 
         updateFields.forEach((updateField) => {
-            updateActions.push(
-              languageTokenModel
-                .findOne({
-                  where: {
-                    token: updateField === 'description' ? languageToken + '_DESCRIPTION' : languageToken,
-                    languageId: languageId
-                  }
-                })
-                .then((languageToken) => {
-                  return languageToken.updateAttribute(
-                    'translation',
-                    helpers.getOriginalValueFromContextOptions(context, updateField),
-                    context.options
-                  );
-                })
-            );
+          updateActions.push(
+            languageTokenModel
+              .findOne({
+                where: {
+                  token: updateField === 'description' ? languageToken + '_DESCRIPTION' : languageToken,
+                  languageId: languageId
+                }
+              })
+              .then((languageToken) => {
+                return languageToken.updateAttribute(
+                  'translation',
+                  helpers.getOriginalValueFromContextOptions(context, updateField),
+                  context.options
+                );
+              })
+          );
         });
 
         Promise.all(updateActions)
