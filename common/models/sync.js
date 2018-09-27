@@ -362,11 +362,11 @@ module.exports = function (Sync) {
                 err = err || '';
                 err += 'Failed records: ';
                 collectionsWithFailedRecords.forEach(function (collectionName) {
-                  err += `Collection ${collectionName}. Records: ${failedIds[collectionName].join('; ')}. `;
+                  err += `Collection ${collectionName}. Records: ${failedIds[collectionName].join('; ')} `;
                 });
               }
 
-              return callback(Sync.getPartialError(err));
+              return callback(err ? Sync.getPartialError(err) : null);
             }
           );
         });
