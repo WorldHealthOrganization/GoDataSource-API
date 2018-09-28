@@ -5542,8 +5542,12 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.findPossiblePersonDuplicates = function (filter, callback) {
+    // define default filter
+    if (filter == null) {
+      filter = {};
+    }
     // get where filter (this needs to be mongoDB compliant where, not loopback, because we're using raw queries)
-    let where = filter && filter.where ? filter.where : {};
+    let where = filter.where || {};
     // merge-in outbreakId
     where = {
       $and: [{
@@ -5552,10 +5556,10 @@ module.exports = function (Outbreak) {
     };
     // find possible person duplicates groups
     app.models.person
-      .findOrCountPossibleDuplicates(where)
+      .findOrCountPossibleDuplicates(Object.assign({where: where}, filter))
       .then(function (duplicates) {
-        // send back paginated result set
-        callback(null, app.utils.helpers.paginateResultSet(filter, duplicates));
+        // send back result set
+        callback(null, duplicates);
       })
       .catch(callback);
   };

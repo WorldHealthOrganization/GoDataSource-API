@@ -302,13 +302,18 @@ module.exports = function (Person) {
 
   /**
    * Find or count possible person duplicates
-   * @param where
+   * @param filter
    * @param [countOnly]
    * @return {Promise<any>}
    */
-  Person.findOrCountPossibleDuplicates = function (where, countOnly) {
+  Person.findOrCountPossibleDuplicates = function (filter, countOnly) {
+    // define default filter
+    if (filter == null) {
+      filter = {};
+    }
     // promisify the response
     return new Promise(function (resolve, reject) {
+      let where = filter.where || {};
       // query non deleted records only
       where = {
         $and: [
@@ -328,8 +333,14 @@ module.exports = function (Person) {
           if (error) {
             return reject(error);
           }
+          let findOrCount;
+          if (countOnly) {
+            findOrCount = personDuplicate.count.bind(null, people);
+          } else {
+            findOrCount = personDuplicate.find.bind(null, people, Object.assign({where: where}, filter));
+          }
           // find or count duplicate groups
-          personDuplicate[countOnly ? 'count' : 'find'](people, function (error, duplicates) {
+          findOrCount(function (error, duplicates) {
             // handle eventual errors
             if (error) {
               return reject(error);

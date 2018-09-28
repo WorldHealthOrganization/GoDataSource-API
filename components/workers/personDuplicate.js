@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const helpers = require('../helpers');
 
 /**
  * Add an entry to an index on a position (id)
@@ -78,7 +79,7 @@ function addEntryToIndex(index, entry, keys, searchReverse) {
 
 
 const worker = {
-  findOrCount: function (people, countOnly) {
+  findOrCount: function (people, filter, countOnly) {
     // keep a list of indices
     const index = {
       name: {},
@@ -130,14 +131,43 @@ const worker = {
       // return the number of results
       return results.length;
     }
-    // return results
-    return results;
+
+    // build result set
+    const resultSet = {
+      peopleMap: {},
+      groups: []
+    };
+    // paginate result set, if needed
+    helpers.paginateResultSet(filter, results)
+      .forEach(function (group) {
+        // build groups containing only people IDs (less data to transfer down the wire), store person data only once for each person
+        const _group = {
+          duplicateKey: group.duplicateKey,
+          indexKey: group.indexKey,
+          peopleIds: []
+        };
+        // go through the people in the group
+        group.people
+          .forEach(function (person) {
+            // store person id
+            _group.peopleIds.push(person._id);
+            // store the person in the peopleMap if not already stored
+            if (!resultSet.peopleMap[person._id]) {
+              resultSet.peopleMap[person._id] = person;
+              // use friendlier IDs
+              person.id = person._id;
+            }
+          });
+        resultSet.groups.push(_group);
+      });
+    // return (paginated) result set
+    return resultSet;
   },
-  find: function (people) {
-    return this.findOrCount(people);
+  find: function (people, filter) {
+    return this.findOrCount(people, filter);
   },
   count: function (people) {
-    return this.findOrCount(people, true);
+    return this.findOrCount(people, {}, true);
   }
 };
 
