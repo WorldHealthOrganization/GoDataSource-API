@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const dateParser = app.utils.helpers.getDateDisplayValue;
+const moment = require('moment');
 
 module.exports = function (Contact) {
   // set flag to not get controller

@@ -2,7 +2,6 @@
 
 const transmissionChain = require('../../components/workerRunner').transmissionChain;
 const app = require('../../server/server');
-const moment = require('moment');
 
 module.exports = function (Relationship) {
   // set flag to not get controller
