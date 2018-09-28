@@ -78,7 +78,7 @@ module.exports = function (Backup) {
               app.logger.debug(`Backup ${record.id}: Successfully created backup file at ${backupFilePath}`);
             }
 
-            record.updateAttributes({status: newStatus, location: backupFilePath, failReason: failReason})
+            record.updateAttributes({status: newStatus, location: backupFilePath, error: failReason})
               .then(function (record) {
                 app.logger.debug(`Backup ${record.id}: Successfully updated backup entry status`);
                 // resolve/reject promise

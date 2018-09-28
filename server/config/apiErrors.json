@@ -185,7 +185,7 @@
   },
   "INSTANCE_EXPORT_FAILED": {
     "defaultStatusCode": 422,
-    "messagePattern": "Instance export failed: `<%= failReason %>`"
+    "messagePattern": "Instance export failed: `<%= error %>`"
   },
   "INSTANCE_EXPORT_STILL_IN_PROGRESS": {
     "defaultStatusCode": 422,

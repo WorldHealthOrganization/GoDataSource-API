@@ -31,7 +31,7 @@ module.exports = function (Sync) {
       if (err) {
         app.logger.debug(`Export ${exportLogEntry.id}: Error ${err}`);
         exportLogEntry.status = 'LNG_SYNC_STATUS_FAILED';
-        exportLogEntry.failReason = err.toString ? err.toString() : err;
+        exportLogEntry.error = err.toString ? err.toString() : err;
       } else {
         app.logger.debug(`Export ${exportLogEntry.id}: Success`);
         exportLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS';
@@ -228,7 +228,7 @@ module.exports = function (Sync) {
           return done(app.utils.apiError.getError('INSTANCE_EXPORT_STILL_IN_PROGRESS'));
         } else if (exportLogEntry.status === 'LNG_SYNC_STATUS_FAILED') {
           return done(app.utils.apiError.getError('INSTANCE_EXPORT_FAILED', {
-            failReason: exportLogEntry.failReason
+            error: exportLogEntry.error
           }));
         }
 
@@ -238,7 +238,7 @@ module.exports = function (Sync) {
           exportLogEntry
             .updateAttributes({
               status: 'LNG_SYNC_STATUS_FAILED',
-              failReason: 'Export location is missing or file cannot be found'
+              error: 'Export location is missing or file cannot be found'
             })
             .then(() => {
               // nothing to do
@@ -249,7 +249,7 @@ module.exports = function (Sync) {
             });
 
           return done(app.utils.apiError.getError('INSTANCE_EXPORT_FAILED', {
-            failReason: exportLogEntry.failReason
+            error: exportLogEntry.error
           }));
         }
 
@@ -284,8 +284,9 @@ module.exports = function (Sync) {
 
       if (err) {
         app.logger.debug(`Sync ${syncLogEntry.id}: Error ${err}`);
-        syncLogEntry.status = 'LNG_SYNC_STATUS_FAILED';
-        syncLogEntry.failReason = err.toString ? err.toString() : err;
+        syncLogEntry.status = err.errorType === Sync.errorType.fatal ? 'LNG_SYNC_STATUS_FAILED' : 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS';
+        let errorMessage = err.errorMessage;
+        syncLogEntry.error = errorMessage.toString ? errorMessage.toString() : errorMessage;
       } else {
         app.logger.debug(`Sync ${syncLogEntry.id}: Success`);
         syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS';
@@ -558,15 +559,30 @@ module.exports = function (Sync) {
         // 4. import the received DB
         return new Promise(function (resolve, reject) {
           Sync.syncDatabaseWithSnapshot(upstreamServerDBSnapshotFileName, syncLogEntry, syncLogEntry.outbreakIDs, options, data.triggerBackupBeforeSync, function (err) {
-            if (err) {
+            if (err && err.errorType === Sync.errorType.fatal) {
               return reject(err);
             }
 
             // sync was successful
             // update syncLogEntry
-            app.logger.debug(`Sync ${syncLogEntry.id}: Success`);
             syncLogEntry.actionCompletionDate = new Date();
-            syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS';
+
+            // check for partial success
+            if (err && err.errorType === Sync.errorType.partial) {
+              app.logger.debug(`Sync ${syncLogEntry.id}: Success with warnings; Instance import succeeded with some errors: ${err.errorMessage}`);
+              syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS';
+              syncLogEntry.addError(`Instance import errors: ${err.errorMessage}`);
+            }
+            // check if there are errors set on the syncLogEntry (there might be from the upstream server sync); If so, the status will be success with warnings
+            else if (syncLogEntry.error) {
+              app.logger.debug(`Sync ${syncLogEntry.id}: Success with warnings; ${syncLogEntry.error}`);
+              syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS';
+            }
+            else {
+              // success
+              app.logger.debug(`Sync ${syncLogEntry.id}: Success`);
+              syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS';
+            }
 
             // save sync log entry
             syncLogEntry
@@ -597,7 +613,7 @@ module.exports = function (Sync) {
           // update sync log status
           syncLogEntry.actionCompletionDate = new Date();
           syncLogEntry.status = 'LNG_SYNC_STATUS_FAILED';
-          syncLogEntry.failReason = err.toString ? err.toString() : err;
+          syncLogEntry.addError(err.toString ? err.toString() : err);
           syncLogEntry
             .save(options)
             .then(function () {
