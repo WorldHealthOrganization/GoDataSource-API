@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "template-question",
+  "title": "Template Question",
+  "description": "Template for an outbreak's questionnaires",
+  "type": "object",
+  "properties": {
+    "text": {
+      "type": "string",
+      "description": "The question's text"
+    },
+    "variable": {
+      "type": "string",
+      "description": "Question identifier"
+    },
+    "category": {
+      "type": "string",
+      "description": "The category of the question"
+    },
+    "required": {
+      "type": "boolean",
+      "description": "Flag to specify whether the question is required or not"
+    },
+    "order": {
+      "type": "number",
+      "description": "The question's position in the questionnaire"
+    },
+    "answerType": {
+      "type": "string",
+      "enum": [
+        "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT",
+        "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_NUMERIC",
+        "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME",
+        "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+        "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWER",
+        "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD"
+      ],
+      "description": "The type of answer the question has"
+    },
+    "answers": {
+      "type": "array",
+      "items": {
+        "$ref": "template-answer"
+      },
+      "description": "An array of possible answers for the question"
+    }
+  },
+  "required": [
+    "text",
+    "variable",
+    "category",
+    "order",
+    "answerType"
+  ],
+  "additionalProperties": false
+}
