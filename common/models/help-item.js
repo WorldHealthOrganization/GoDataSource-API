@@ -15,7 +15,7 @@ module.exports = function (HelpItem) {
   HelpItem.observe('before save', function (context, next) {
     if (context.isNewInstance) {
       let instance = context.instance;
-      let identifier = `${context.instance.categoryId}_${_.snakeCase(HelpItem.name).toUpperCase()}_${_.snakeCase(instance.title).toUpperCase()}`;
+      let identifier = `${context.instance.categoryId}_${_.snakeCase(HelpItem.modelName).toUpperCase()}_${_.snakeCase(instance.title).toUpperCase()}`;
 
       // set instance id, before setting the original context
       // because the setter takes in account the current instance id
@@ -62,7 +62,7 @@ module.exports = function (HelpItem) {
 
     // retrieve original values
     let originalTitle = helpers.getOriginalValueFromContextOptions(context, 'title');
-    let originalContent = helpers.getOriginalValueFromContextOptions(context, 'content') || '';
+    let originalContent = helpers.getOriginalValueFromContextOptions(context, 'content') || ' ';
 
     if (context.isNewInstance) {
       // content is optional

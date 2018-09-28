@@ -15,7 +15,7 @@ module.exports = function (HelpCategory) {
   HelpCategory.observe('before save', function (context, next) {
     if (context.isNewInstance) {
       let instance = context.instance;
-      let identifier = `LNG_${_.snakeCase(HelpCategory.name).toUpperCase()}_${_.snakeCase(instance.name).toUpperCase()}`;
+      let identifier = `LNG_${_.snakeCase(HelpCategory.modelName).toUpperCase()}_${_.snakeCase(instance.name).toUpperCase()}`;
 
       // set instance id, before setting the original context
       // because the setter takes in account the current instance id
@@ -62,7 +62,7 @@ module.exports = function (HelpCategory) {
 
     // retrieve original values
     let originalName = helpers.getOriginalValueFromContextOptions(context, 'name');
-    let originalDescription = helpers.getOriginalValueFromContextOptions(context, 'description') || '';
+    let originalDescription = helpers.getOriginalValueFromContextOptions(context, 'description') || ' ';
 
     if (context.isNewInstance) {
       // description is optional

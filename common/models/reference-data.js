@@ -271,7 +271,7 @@ module.exports = function (ReferenceData) {
       // start building identifier
       let identifier = '';
       // if this belongs to an outbreak
-      if (context.instance.outbreakId !== null) {
+      if (context.instance.outbreakId != null) {
         // include outbreak marker and outbreak id in the identifier
         identifier = `LNG_${app.models.outbreak.modelName.toUpperCase()}_${context.instance.outbreakId.toUpperCase()}_`;
       }
