@@ -1135,7 +1135,7 @@
       "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
-      "property": "exportExistingCaseInvestigation"
+      "property": "exportExistingEmptyCaseInvestigation"
     }
   ],
   "methods": {
@@ -4567,7 +4567,7 @@
         "path": "/relationships/transmission-chains-including-people"
       }
     },
-    "prototype.exportExistingCaseInvestigation": {
+    "prototype.exportExistingEmptyCaseInvestigation": {
       "accepts": [
         {
           "arg": "nk",
@@ -4592,8 +4592,7 @@
           "type": "string",
           "http": {
             "target": "header"
-          }
-        },
+          }        },
         {
           "arg": "Content-Disposition",
           "type": "string",
@@ -4602,10 +4601,10 @@
           }
         }
       ],
-      "description": "Export and empty case investigation for an existing case",
+      "description": "Export an empty case investigation for an existing case",
       "http": {
         "verb": "get",
-        "path": "/cases/:nk/export-existing-case-investigation"
+        "path": "/cases/:nk/export-empty-case-investigation"
       }
     }
   }

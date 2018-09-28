@@ -4353,7 +4353,7 @@ module.exports = function (Outbreak) {
 
               // Anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
               // and formatting date type fields
-              if(anonymousFields) {
+              if (anonymousFields) {
                 app.utils.anonymizeDatasetFields.anonymize(person, anonymousFields);
               }
               app.utils.helpers.formatDateFields(person, caseDossierDateFields);
@@ -4535,7 +4535,7 @@ module.exports = function (Outbreak) {
 
               // Anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
               // and format date type fields
-              if(anonymousFields) {
+              if (anonymousFields) {
                 app.utils.anonymizeDatasetFields.anonymize(contact, anonymousFields);
               }
               app.utils.helpers.formatDateFields(contact, contactDossierDateFields);
@@ -5451,10 +5451,17 @@ module.exports = function (Outbreak) {
     next();
   });
 
-  Outbreak.prototype.exportExistingCaseInvestigation = function (caseId, options, callback) {
+
+  /**
+   * Export an empty case investigation for an existing case (has qrCode)
+   * @param caseId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportExistingEmptyCaseInvestigation = function (caseId, options, callback) {
     let self = this;
 
-    this.__findById__cases(caseId, function(error, foundCase) {
+    this.__findById__cases(caseId, function (error, foundCase) {
       helpers.printCaseInvestigation(self, pdfUtils, foundCase, options, callback);
     });
   };
