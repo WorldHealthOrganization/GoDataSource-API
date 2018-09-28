@@ -230,10 +230,6 @@ module.exports = function (Person) {
    * After save hooks
    */
   Person.observe('after save', function (ctx, next) {
-    // do not execute hook on sync
-    if (ctx.options && ctx.options._sync) {
-      return next();
-    }
 
     // cache instance reference, used in many places below
     let instance = ctx.instance;
@@ -297,4 +293,55 @@ module.exports = function (Person) {
     // do not wait for the above operations to complete
     return next();
   });
+
+  /**
+   * Update dateOfLastContact if needed (if conditions are met)
+   * @param id
+   * @param options
+   * @return {*|PromiseLike<T | never>|Promise<T | never>}
+   */
+  Person.updateDateOfLastContactIfNeeded = function (id, options) {
+    // find the person (load it's relationships)
+    return Person
+      .findById(id, {
+        include: {
+          relation: 'relationships',
+          scope: {
+            limit: 1,
+            order: 'contactDate DESC',
+            where: {
+              active: true
+            }
+          }
+        }
+      })
+      .then(function (personRecord) {
+        // if the person was not found
+        if (!personRecord) {
+          // stop with error
+          throw app.logger.error(`Error when updating person dateOfLastContact. Person (id: ${id}) not found.`);
+        }
+        // get last contact date from relationships (if any)
+        let lastContactDate = _.get(personRecord, 'relationships.0.contactDate', null);
+        // make sure lastContactDate is a Date
+        if (lastContactDate && !(lastContactDate instanceof Date)) {
+          lastContactDate = new Date(lastContactDate);
+        }
+        // make sure dateOfLastContact is a Date
+        if (personRecord.dateOfLastContact && !(personRecord.dateOfLastContact instanceof Date)) {
+          personRecord.dateOfLastContact = new Date(personRecord.dateOfLastContact);
+        }
+        // check if there are any differences between date of last contact and last contact date
+        if (
+          (!personRecord.dateOfLastContact && lastContactDate) ||
+          (personRecord.dateOfLastContact && !lastContactDate) ||
+          (personRecord.dateOfLastContact.getTime() !== lastContactDate.getTime())
+        ) {
+          // if there are differences, update dateOfLastContact based on lastContactDate
+          return personRecord.updateAttributes({
+            dateOfLastContact: lastContactDate
+          }, options);
+        }
+      });
+  };
 };

@@ -68,6 +68,9 @@
     "isDateOfReportingApproximate": {
       "type": "boolean",
       "default": false
+    },
+    "dateOfLastContact": {
+      "type": "date"
     }
   },
   "indexes": {
@@ -94,6 +97,12 @@
     },
     "fillGeoLocation_index": {
       "fillGeoLocation": "2dsphere"
+    },
+    "dateOfReporting_index": {
+      "dateOfReporting": 1
+    },
+    "dateOfLastContact_index": {
+      "dateOfLastContact": 1
     }
   },
   "validations": [],

@@ -100,4 +100,105 @@ module.exports = function (Contact) {
   Contact.nestedGeoPoints = [
     'addresses[].geoLocation'
   ];
+
+
+  /**
+   * Update Follow-Up dates if needed (if conditions are met)
+   * @param id
+   * @param options
+   * @return {*|void|Promise<T | never>}
+   */
+  Contact.updateFollowUpDatesIfNeeded = function (id, options) {
+    // initialize contactInstance container
+    let contactInstance;
+    // update contact follow-up dates, based on the latest active relationship
+    return Contact
+      .findById(id, {
+        include: {
+          relation: 'relationships',
+          scope: {
+            limit: 1,
+            order: 'contactDate DESC',
+            where: {
+              active: true
+            }
+          }
+        }
+      })
+      .then(function (contact) {
+        if (!contact) {
+          throw app.logger.error(`Error when updating contact (id: ${id}) follow-up dates. Contact was not found.`);
+        }
+        // update contact instance with found contact record
+        contactInstance = contact;
+        // get the outbreak as we need the followUpPeriod
+        return app.models.outbreak.findById(contact.outbreakId);
+      })
+      .then(function (outbreak) {
+        // check for found outbreak
+        if (!outbreak) {
+          throw app.logger.error(`Error when updating contact (id: ${id}) follow-up dates. Outbreak (id: ${contactInstance.outbreakId}) was not found.`);
+        }
+        // keep a flag for updating contact
+        let shouldUpdate = false;
+        // build a list of properties that need to be updated
+        let propsToUpdate = {};
+        // preserve original startDate, if any
+        if (contactInstance.followUp && contactInstance.followUp.originalStartDate) {
+          propsToUpdate.originalStartDate = contactInstance.followUp.originalStartDate;
+        }
+        // if active relationships found
+        if (contactInstance.relationships.length) {
+          // get the latest one
+          let relationship = contactInstance.relationships.shift();
+          // set follow-up start date to be the same as relationship contact date
+          propsToUpdate.startDate = relationship.contactDate;
+          // if follow-up original start date was not previously set
+          if (!propsToUpdate.originalStartDate) {
+            // flag as an update
+            shouldUpdate = true;
+            // set it as follow-up start date
+            propsToUpdate.originalStartDate = propsToUpdate.startDate;
+          }
+          // set follow-up end date
+          propsToUpdate.endDate = moment(relationship.contactDate).add(outbreak.periodOfFollowup, 'days');
+        }
+        // check if contact instance should be updated (check if any property changed value)
+        !shouldUpdate && ['startDate', 'endDate']
+          .forEach(function (updatePropName) {
+            // if the property is missing (probably never, but lets be safe)
+            if (!contactInstance.followUp) {
+              // flag as an update
+              return shouldUpdate = true;
+            }
+            // if either original or new value was not set (when the other was present)
+            if (
+              !contactInstance.followUp[updatePropName] && propsToUpdate[updatePropName] ||
+              contactInstance.followUp[updatePropName] && !propsToUpdate[updatePropName]
+            ) {
+              // flag as an update
+              return shouldUpdate = true;
+            }
+            // both original and new values are present, but the new values are different than the old ones
+            if (
+              contactInstance.followUp[updatePropName] &&
+              propsToUpdate[updatePropName] &&
+              ((new Date(contactInstance.followUp[updatePropName])).getTime() !== (new Date(propsToUpdate[updatePropName])).getTime())
+            ) {
+              // flag as an update
+              return shouldUpdate = true;
+            }
+          });
+
+        // if updates are required
+        if (shouldUpdate) {
+          // update contact
+          return contactInstance.updateAttributes({
+            followUp: propsToUpdate,
+            // contact is active if it has valid follow-up interval
+            active: !!propsToUpdate.startDate
+          }, options);
+        }
+      });
+  };
 };

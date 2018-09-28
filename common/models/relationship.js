@@ -223,17 +223,18 @@ module.exports = function (Relationship) {
     };
 
     // get all relationships between cases and contacts
-    return app.models.relationship.find(app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: outbreakId,
-          and: [
-            {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'},
-            {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'}
-          ]
-        }
-      }, filter || {})
-    )
+    return app.models.relationship
+      .find(app.utils.remote
+        .mergeFilters({
+          where: {
+            outbreakId: outbreakId,
+            and: [
+              {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'},
+              {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'}
+            ]
+          }
+        }, filter || {})
+      )
       .then(function (relationships) {
         relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
 
@@ -340,11 +341,6 @@ module.exports = function (Relationship) {
    * A relation is inactive if (at least) one case from the relation is discarded
    */
   Relationship.observe('before save', function (context, next) {
-    // on sync don't check relationship status
-    if (context.options && context.options._sync) {
-      return next();
-    }
-
     // get instance data
     const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
     // relation is active, by default
@@ -381,127 +377,48 @@ module.exports = function (Relationship) {
    * Update follow-up dates on the contact if the relationship includes a contact
    */
   Relationship.observe('after save', function (context, callback) {
-    // do not execute hook on sync
-    if (context.options && context.options._sync) {
-      return callback();
-    }
-
     // get created/modified relationship
     let relationship = context.instance;
-    // get contact representation in the relationship
-    let contactInPersons = relationship.persons.find(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
 
-    // check if the relationship created included a contact
-    if (contactInPersons) {
-      // get contactId
-      let contactId = contactInPersons.id;
-      // initialize contactInstance container
-      let contactInstance;
+    // keep a list of update actions
+    const updateDatesOfLastContact = [];
 
-      // update contact follow-up dates, based on the latest active relationship
-      app.models.contact
-        .findById(contactId, {
-          include: {
-            relation: 'relationships',
-            scope: {
-              limit: 1,
-              order: 'contactDate DESC',
-              where: {
-                active: true
-              }
-            }
-          }
-        })
-        .then(function (contact) {
-          if (!contact) {
-            app.logger.error(`Error when updating contact follow-up dates. Contact ID: ${contactId}. Contact was not found.`);
-            return;
-          }
-          // update contact instance with found contact record
-          contactInstance = contact;
-          // get the outbreak as we need the followUpPeriod
-          return app.models.outbreak.findById(relationship.outbreakId);
-        })
-        .then(function (outbreak) {
-          // check for found outbreak
-          if (!outbreak) {
-            app.logger.error(`Error when updating contact follow-up dates. Contact ID: ${contactId}. Outbreak was not found.`);
-            return;
-          }
-          // keep a flag for updating contact
-          let shouldUpdate = false;
-          // build a list of properties that need to be updated
-          let propsToUpdate = {};
-          // preserve original startDate, if any
-          if (contactInstance.followUp && contactInstance.followUp.originalStartDate) {
-            propsToUpdate.originalStartDate = contactInstance.followUp.originalStartDate;
-          }
-          // if active relationships found
-          if (contactInstance.relationships.length) {
-            // get the latest one
-            relationship = contactInstance.relationships.shift();
-            // set follow-up start date to be the same as relationship contact date
-            propsToUpdate.startDate = relationship.contactDate;
-            // if follow-up original start date was not previously set
-            if (!propsToUpdate.originalStartDate) {
-              // flag as an update
-              shouldUpdate = true;
-              // set it as follow-up start date
-              propsToUpdate.originalStartDate = propsToUpdate.startDate;
-            }
-            // set follow-up end date
-            propsToUpdate.endDate = moment(relationship.contactDate).add(outbreak.periodOfFollowup, 'days');
-          }
-          // check if contact instance should be updated (check if any property changed value)
-          !shouldUpdate && ['startDate', 'endDate']
-            .forEach(function (updatePropName) {
-              // if the property is missing (probably never, but lets be safe)
-              if (!contactInstance.followUp) {
-                // flag as an update
-                return shouldUpdate = true;
-              }
-              // if either original or new value was not set (when the other was present)
-              if (
-                !contactInstance.followUp[updatePropName] && propsToUpdate[updatePropName] ||
-                contactInstance.followUp[updatePropName] && !propsToUpdate[updatePropName]
-              ) {
-                // flag as an update
-                return shouldUpdate = true;
-              }
-              // both original and new values are present, but the new values are different than the old ones
-              if (
-                contactInstance.followUp[updatePropName] &&
-                propsToUpdate[updatePropName] &&
-                ((new Date(contactInstance.followUp[updatePropName])).getTime() !== (new Date(propsToUpdate[updatePropName])).getTime())
-              ) {
-                // flag as an update
-                return shouldUpdate = true;
-              }
+    // go through the people that are part of the relationship
+    relationship.persons.forEach(function (person) {
+      // update date of last contact, if needed
+      updateDatesOfLastContact.push(
+        app.models.person
+          .updateDateOfLastContactIfNeeded(person.id, context.options)
+          // don't stop on error, nothing meaningful to do on after save
+          .catch(function (error) {
+            app.logger.error(`Error when updating person (id: ${person.id}) dateOfLastContact: ${JSON.stringify(error)}`);
+          }));
+    });
+
+    // after finishing updating dates of last contact
+    Promise.all(updateDatesOfLastContact)
+      .then(function () {
+        // get contact representation in the relationship
+        let contactInPersons = relationship.persons.find(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
+
+        // check if the relationship created included a contact
+        if (contactInPersons) {
+          // update contact follow-up dates, if needed
+          app.models.contact
+            .updateFollowUpDatesIfNeeded(contactInPersons.id, context.options)
+            // don't stop on error, nothing meaningful to do on after save
+            .catch(function (error) {
+              // log error
+              app.logger.error(`Error when updating contact (id: ${contactInPersons.id}) follow-up dates: ${JSON.stringify(error)}`);
+            })
+            .then(function () {
+              callback();
             });
-
-          // if updates are required
-          if (shouldUpdate) {
-            // update contact
-            return contactInstance.updateAttributes({
-              followUp: propsToUpdate,
-              // contact is active if it has valid follow-up interval
-              active: !!propsToUpdate.startDate
-            }, context.options);
-          }
-        })
-        .then(function () {
+        } else {
+          // nothing to do
           callback();
-        })
-        .catch(function (err) {
-          // log error
-          app.logger.error(`Error when updating contact follow-up dates. Contact ID: ${contactId}. ${err}`);
-          // continue with success as the relationship was saved; returning error is incorrect
-          callback();
-        });
-    } else {
-      // nothing to do
-      callback();
-    }
+        }
+      });
   });
 
 
