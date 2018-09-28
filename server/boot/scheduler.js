@@ -206,7 +206,7 @@ module.exports = function (app) {
           }
         }, {
           status: 'LNG_SYNC_STATUS_FAILED',
-          failReason: `Sync/export action was 'in progress' for more than ${actionCleanupInterval} hours`
+          error: `Sync/export action was 'in progress' for more than ${actionCleanupInterval} hours`
         })
         .then(function (info) {
           app.logger.debug(`Scheduler: ${info.count} sync/export actions that were 'in progress' for more than ${actionCleanupInterval} hours. Changed status to failed`);
@@ -293,7 +293,7 @@ module.exports = function (app) {
                 if (syncLogEntry &&
                   syncLogEntry.status === 'LNG_SYNC_STATUS_FAILED' &&
                   syncLogEntry.createdBy === automaticSyncID &&
-                  syncLogEntry.failReason.indexOf('EXTERNAL_API_CONNECTION_ERROR') !== -1
+                  syncLogEntry.error.indexOf('EXTERNAL_API_CONNECTION_ERROR') !== -1
                 ) {
                   app.logger.debug(`Scheduler: Latest automatic sync with server '${server.name}' failed with connection error. Checking if connection was re-established.`);
 
