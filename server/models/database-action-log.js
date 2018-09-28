@@ -31,7 +31,7 @@ module.exports = function (DatabaseActionLog) {
    * @param error
    */
   DatabaseActionLog.prototype.addError = function (error) {
-    if(!this.error) {
+    if (!this.error) {
       this.error = '';
     }
 
