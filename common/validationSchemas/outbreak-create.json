@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "outbreak-create",
+  "title": "Outbreak Create",
+  "description": "A disease outbreak create schema",
+  "type": "object",
+  "allOf": [
+    { "$ref": "outbreak-update"},
+    { "required": [ "name", "disease", "countries", "startDate", "longPeriodsBetweenCaseOnset", "periodOfFollowup", "frequencyOfFollowUp",
+      "frequencyOfFollowUpPerDay", "noDaysAmongContacts", "noDaysInChains", "noDaysNotSeen", "noLessContacts", "caseInvestigationTemplate",
+      "contactFollowUpTemplate", "labResultsTemplate", "caseIdMask"
+    ]}
+  ]
+}
