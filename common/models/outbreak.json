@@ -4443,7 +4443,7 @@
         "path": "/cases/:nk/events/filteredCount"
       }
     },
-    "prototype.exportFilteredFollowups" : {
+    "prototype.exportFilteredFollowups": {
       "accepts": [
         {
           "arg": "filter",
@@ -4584,7 +4584,24 @@
       "returns": [
         {
           "arg": "duplicates",
-          "type": "any",
+          "type": {
+            "peopleMap": {
+              "type": {
+                "<personId>": "person"
+              }
+            },
+            "groups": [
+              {
+                "type": {
+                  "duplicateKey": "string",
+                  "indexKey": "string",
+                  "peopleIds": [
+                    "string"
+                  ]
+                }
+              }
+            ]
+          },
           "description": "Possible duplicate people groups",
           "root": true,
           "required": true
