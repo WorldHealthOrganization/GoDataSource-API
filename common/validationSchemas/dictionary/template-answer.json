@@ -5,10 +5,6 @@
   "description": "Template for an outbreak's questionnaires",
   "type": "object",
   "properties": {
-    "new": {
-      "type": "boolean",
-      "description": "Flag to specify whether the answer is new in the template"
-    },
     "label": {
       "type": "string",
       "description": "What gets displayed instead of the answer value. Translatable"
@@ -30,6 +26,9 @@
       "description": "Array of possible followup questions to this answer"
     }
   },
-  "required": ["new", "label", "value"],
+  "required": [
+    "label",
+    "value"
+  ],
   "additionalProperties": false
 }

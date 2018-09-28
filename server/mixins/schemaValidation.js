@@ -3,6 +3,17 @@
 const schemaFolder = '/../../common/validationSchemas/';
 const app = require('../../server/server');
 const fs = require('fs');
+const existingSchemas = [];
+
+(function loadExistingSchemas(pathToFolder) {
+  fs.readdirSync(pathToFolder).forEach((name) => {
+    if (name.endsWith('.json')) {
+      existingSchemas.push(require(pathToFolder + name));
+    } else if (fs.lstatSync(pathToFolder + name).isDirectory()) {
+      loadExistingSchemas(pathToFolder + name + '/');
+    }
+  });
+})(__dirname + schemaFolder);
 
 const prepareValidator = function () {
   const Ajv = require('ajv');
@@ -10,18 +21,14 @@ const prepareValidator = function () {
     allErrors: true
   });
 
-  loadSchemas(ajv, __dirname + schemaFolder);
+  registerSchemas(ajv);
 
   return ajv;
 };
 
-const loadSchemas = function(ajv, pathToFolder) {
-  fs.readdirSync(pathToFolder).forEach((name) => {
-    if (name.endsWith('.json')) {
-      ajv.addSchema(require(pathToFolder + name));
-    } else {
-      loadSchemas(ajv, pathToFolder + name + '/');
-    }
+const registerSchemas = function (ajv) {
+  existingSchemas.forEach((schema) => {
+    ajv.addSchema(schema);
   });
 };
 
@@ -52,7 +59,7 @@ module.exports = function (Model) {
           }
 
           // We build a string with all the error messages, as per loopbacks error log system
-          errors.details.push(`${modelName}.${error.dataPath} ${error.message}`);
+          errors.details.push(`${modelName}${error.dataPath} ${error.message}`);
           // We create a codes property, that logs what rule each property was failing
           errors.codes[pathToProperty] = [error.keyword];
           // We create a messages property, that shows the error message per property. In case the rule that was failing
@@ -62,7 +69,11 @@ module.exports = function (Model) {
 
         next(app.utils.apiError.getError('VALIDATION_ERROR', {
           model: modelName,
-          details: Object.assign({toString: function() {return errors.details.join(', ');}}, {codes: errors.codes, messages: errors.messages})
+          details: Object.assign({
+            toString: function () {
+              return errors.details.join(', ');
+            }
+          }, {codes: errors.codes, messages: errors.messages})
         }));
       } else {
         next();

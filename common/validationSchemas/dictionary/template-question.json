@@ -5,10 +5,6 @@
   "description": "Template for an outbreak's questionnaires",
   "type": "object",
   "properties": {
-    "new": {
-      "type": "boolean",
-      "description": "Flag to specify whether the question is new in the template"
-    },
     "text": {
       "type": "string",
       "description": "The question's text"
@@ -49,6 +45,12 @@
       "description": "An array of possible answers for the question"
     }
   },
-  "required": ["new", "text", "variable", "category", "order", "answerType"],
+  "required": [
+    "text",
+    "variable",
+    "category",
+    "order",
+    "answerType"
+  ],
   "additionalProperties": false
 }
