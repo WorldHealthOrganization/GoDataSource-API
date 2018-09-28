@@ -26,6 +26,44 @@ module.exports = function (Sync) {
     servers: {}
   };
 
+  // Initialize sync error type map;
+  Sync.errorType = {
+    fatal: 'Fatal', // sync action could not be started
+    partial: 'Partial' // sync action completed but some records failed
+  };
+
+  // Create functions for getting error depending on type
+  /**
+   * Get sync error
+   * @param errorType
+   * @param error
+   * @returns {{errorType: *, errorMessage: *}}
+   */
+  function getSyncError(errorType, error) {
+    return {
+      errorType: errorType,
+      errorMessage: error
+    };
+  }
+
+  /**
+   * Get a fatal error
+   * @param error
+   * @returns {{errorType, errorMessage}}
+   */
+  Sync.getFatalError = function (error) {
+    return getSyncError(Sync.errorType.fatal, error);
+  };
+
+  /**
+   * Get a partial error
+   * @param error
+   * @returns {{errorType, errorMessage}}
+   */
+  Sync.getPartialError = function (error) {
+    return getSyncError(Sync.errorType.partial, error);
+  };
+
   /**
    * Helper function used to export the database's collections
    * The following extra features are available:
@@ -146,6 +184,14 @@ module.exports = function (Sync) {
    * And sync with the current database
    * Note: The sync doesn't stop at an error but the entire action will return an error for failed collection/collection record
    * Note: Before the sync a backup can be triggered if the triggerBackupBeforeSync flag is true or if it is not sent and the systemSettings.sync.triggerBackupBeforeSync is true
+   * Note: In case of error the function will return 2 types
+   * fatal - sync was not started due to corrupt archive/JSON files or equivalent
+   * partial - sync was finished but some records sync failed
+   * Error format:
+   * {
+   *  errorType: Sync.errorType.fatal/partial
+   *  errorMessage: error
+   * }
    * @param filePath
    * @param syncLogEntry Sync log entry for the current sync
    * @param outbreakIDs List of outbreak IDs for the outbreaks that can be synced
@@ -178,12 +224,6 @@ module.exports = function (Sync) {
         let tmpDir = tmp.dirSync({unsafeCleanup: true});
         let tmpDirName = tmpDir.name;
 
-        // create a list that will contain list of collection with failed records
-        let failedIds = {};
-
-        // create a list that will contain list of collections that failed entirely
-        let failedCollections = [];
-
         app.logger.debug(`Sync ${syncLogEntry.id}: Importing the DB at ${filePath}`);
 
         // extract the compressed database snapshot into the newly created temporary directory
@@ -191,14 +231,14 @@ module.exports = function (Sync) {
           let archive = new AdmZip(filePath);
           archive.extractAllTo(tmpDirName);
         } catch (zipError) {
-          app.logger.error(`Failed to extract zip archive: ${filePath}. ${zipError}`);
-          return callback(zipError);
+          app.logger.error(`Sync ${syncLogEntry.id}: Failed to extract zip archive: ${filePath}. ${zipError}`);
+          return callback(Sync.getFatalError(zipError));
         }
 
         // read all files in the temp dir
         return fs.readdir(tmpDirName, (err, filenames) => {
           if (err) {
-            return callback(err);
+            return callback(Sync.getFatalError(err));
           }
 
           // filter files that match a collection name
@@ -208,6 +248,12 @@ module.exports = function (Sync) {
             return filename[0] && dbSync.collectionsMap.hasOwnProperty(filename[0]);
           });
 
+          // create a list that will contain list of collection with failed records
+          let failedIds = {};
+          // initialize array containing collections that need to be imported and map of collections that entirely fail on import
+          let collectionsToImport = [];
+          let failedCollections = {};
+
           // read each file's contents and sync with database
           // not syncing in parallel to not load all collections in memory at once
           return async.series(
@@ -216,6 +262,8 @@ module.exports = function (Sync) {
 
               // split filename into 'collection name' and 'extension'
               let collectionName = fileName.split('.')[0];
+              // add collection to the list of collections to import
+              collectionsToImport.push(collectionName);
 
               // cache reference to Loopback's model
               let model = app.models[dbSync.collectionsMap[collectionName]];
@@ -231,7 +279,8 @@ module.exports = function (Sync) {
 
                   if (err) {
                     app.logger.error(`Sync ${syncLogEntry.id}: Failed to read collection file ${filePath}. ${err}`);
-                    failedIds[collectionName].push('Entire collection');
+                    // keep failed collection with error
+                    failedCollections[collectionName] = `Failed to read collection file ${filePath}. ${err}`;
                     return doneCollection();
                   }
 
@@ -257,7 +306,7 @@ module.exports = function (Sync) {
                         dbSync.syncRecord(app.logger, model, collectionRecord, reqOptions, (err) => {
                           if (err) {
                             app.logger.debug(`Sync ${syncLogEntry.id}: Failed syncing record (collection: ${collectionName}, id: ${collectionRecord.id}). Error: ${err.message}`);
-                            failedIds[collectionName].push(collectionRecord.id);
+                            failedIds[collectionName].push(`ID: "${collectionRecord.id}". Error: ${err.message}`);
                           }
                           return doneRecord();
                         });
@@ -272,8 +321,8 @@ module.exports = function (Sync) {
                     );
                   } catch (parseError) {
                     app.logger.error(`Sync ${syncLogEntry.id}: Failed to parse collection file ${filePath}. ${parseError}`);
-                    // keep failed collections
-                    failedCollections.push(collectionName);
+                    // keep failed collection with error
+                    failedCollections[collectionName] = `Failed to parse collection file ${filePath}. ${parseError}`;
                     return doneCollection();
                   }
                 });
@@ -291,24 +340,40 @@ module.exports = function (Sync) {
               // check for failed collections/collection records
               // initialize error
               let err = null;
-              if (failedCollections.length) {
-                err = `Failed collections: ${failedCollections.join(', ')}`;
+
+              // check entirely failed collections
+              let entirelyFailedCollections = Object.keys(failedCollections);
+              if (entirelyFailedCollections.length) {
+                err = 'Failed collections: ';
+                entirelyFailedCollections.forEach(function (collectionName) {
+                  err += `Collection ${collectionName}. Error: ${failedCollections[collectionName]}`;
+                });
               }
+
+              // check if all the collections that needed to be imported failed entirely
+              if (collectionsToImport.length === entirelyFailedCollections.length) {
+                // fatal sync error
+                return callback(Sync.getFatalError(err));
+              }
+
+              // some/all collections could be imported check for failed records
               let collectionsWithFailedRecords = Object.keys(failedIds);
               if (collectionsWithFailedRecords.length) {
                 err = err || '';
                 err += 'Failed records: ';
                 collectionsWithFailedRecords.forEach(function (collectionName) {
-                  err += `Collection ${collectionName}. Records: ${failedIds[collectionName].join(', ')}. `;
+                  err += `Collection ${collectionName}. Records: ${failedIds[collectionName].join('; ')} `;
                 });
               }
 
-              return callback(err);
+              return callback(err ? Sync.getPartialError(err) : null);
             }
           );
         });
       })
-      .catch(callback);
+      .catch(function (backupError) {
+        return callback(Sync.getFatalError(backupError));
+      });
   };
 
   /**
@@ -326,7 +391,7 @@ module.exports = function (Sync) {
    * @param upstreamServer
    * @param DBSnapshotFileName
    * @param asynchronous Flag to specify to the server whether the import should be done sync/async
-   * @param syncLogEntry
+   * @param syncLogEntry Note: Errors will be added to the syncLogEntry for the case where the server import succeeded with warnings
    */
   Sync.sendDBSnapshotForImport = function (upstreamServer, DBSnapshotFileName, asynchronous, syncLogEntry) {
     // asynchronous flag needs to be parsed to string as this is how it is needed for the request
@@ -371,7 +436,7 @@ module.exports = function (Sync) {
               // return error
               reject(app.utils.apiError.getError('UPSTREAM_SERVER_SYNC_FAILED', {
                 upstreamServerName: client.upstreamServerName,
-                failReason: `Upstream server sync status was not updated in time (${asyncActionsSettings.actionTimeout} milliseconds). ${statusCheckConnectionError ? `Latest status check error was a connection error: ${statusCheckConnectionError}` : ''}`
+                error: `Upstream server sync status was not updated in time (${asyncActionsSettings.actionTimeout} milliseconds). ${statusCheckConnectionError ? `Latest status check error was a connection error: ${statusCheckConnectionError}` : ''}`
               }));
             }, asyncActionsSettings.actionTimeout);
 
@@ -381,7 +446,7 @@ module.exports = function (Sync) {
                 .then(function (serverSyncLogEntry) {
                   // check if the totalActionsTimeout was reached; there is a possibility that the totalActionsTimeout was reached but this function was already in execution
                   // in that case nothing should happen in this function
-                  if(totalActionsTimeoutReached) {
+                  if (totalActionsTimeoutReached) {
                     app.logger.debug(`Sync ${syncLogEntry.id}: Total action timeout was reached when the sync log check was in execution. Stopping sync log check response handling`);
                     return;
                   }
@@ -400,14 +465,21 @@ module.exports = function (Sync) {
 
                   if (serverSyncLogEntry.status === 'LNG_SYNC_STATUS_FAILED') {
                     // upstream server import failed
-                    app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import failed: upstream server sync status is 'failed'. Fail reason ${serverSyncLogEntry.failReason}`);
+                    app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import failed: upstream server sync status is 'failed'. Fail reason ${serverSyncLogEntry.error}`);
                     reject(app.utils.apiError.getError('UPSTREAM_SERVER_SYNC_FAILED', {
                       upstreamServerName: client.upstreamServerName,
-                      failReason: serverSyncLogEntry.failReason
+                      error: serverSyncLogEntry.error
                     }));
                   } else {
                     // upstream server import success
-                    app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import success`);
+                    // there may be warnings
+                    if (serverSyncLogEntry.status === 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS') {
+                      app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import succeeded with some errors: ${serverSyncLogEntry.error}`);
+                      // add the server error to the syncLog
+                      syncLogEntry.addError(`Upstream server import errors: ${serverSyncLogEntry.error}`);
+                    } else {
+                      app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import success`);
+                    }
                     resolve(syncLogId);
                   }
 
@@ -417,7 +489,7 @@ module.exports = function (Sync) {
                 .catch(function (err) {
                   // check if the totalActionsTimeout was reached; there is a possibility that the totalActionsTimeout was reached but this function was already in execution
                   // in that case nothing should happen in this function
-                  if(totalActionsTimeoutReached) {
+                  if (totalActionsTimeoutReached) {
                     app.logger.debug(`Sync ${syncLogEntry.id}: Total action timeout was reached when the sync log check was in execution. Stopping sync log check response handling`);
                     return;
                   }
@@ -502,7 +574,7 @@ module.exports = function (Sync) {
               // return error
               reject(app.utils.apiError.getError('UPSTREAM_SERVER_EXPORT_FAILED', {
                 upstreamServerName: client.upstreamServerName,
-                failReason: `Upstream server DB export status was not updated in time (${asyncActionsSettings.actionTimeout} milliseconds). ${statusCheckConnectionError ? `Latest status check error was a connection error: ${statusCheckConnectionError}` : ''}`
+                error: `Upstream server DB export status was not updated in time (${asyncActionsSettings.actionTimeout} milliseconds). ${statusCheckConnectionError ? `Latest status check error was a connection error: ${statusCheckConnectionError}` : ''}`
               }));
             }, asyncActionsSettings.actionTimeout);
 
@@ -524,10 +596,10 @@ module.exports = function (Sync) {
 
                   if (exportLogEntry.status === 'LNG_SYNC_STATUS_FAILED') {
                     // upstream server export failed
-                    app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export failed: upstream server DB export status is 'failed'. Fail reason ${exportLogEntry.failReason}`);
+                    app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server DB export failed: upstream server DB export status is 'failed'. Fail reason ${exportLogEntry.error}`);
                     reject(app.utils.apiError.getError('UPSTREAM_SERVER_EXPORT_FAILED', {
                       upstreamServerName: client.upstreamServerName,
-                      failReason: exportLogEntry.failReason
+                      error: exportLogEntry.error
                     }));
                   } else {
                     // upstream server export success

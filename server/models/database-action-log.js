@@ -16,7 +16,7 @@ module.exports = function (DatabaseActionLog) {
         status: 'LNG_SYNC_STATUS_IN_PROGRESS'
       }, {
         status: 'LNG_SYNC_STATUS_FAILED',
-        failReason: 'Application was restarted before finalizing the sync/export action'
+        error: 'Application was restarted before finalizing the sync/export action'
       })
       .then(function (info) {
         app.logger.debug(`Startup: ${info.count} sync/export actions that were 'in progress' after application restart. Changed status to failed`);
@@ -25,4 +25,16 @@ module.exports = function (DatabaseActionLog) {
         app.logger.debug(`Startup: Update of 'in progress' sync/export actions status failed. Error: ${err}`);
       });
   });
+
+  /**
+   * Add additional error to the already set error
+   * @param error
+   */
+  DatabaseActionLog.prototype.addError = function (error) {
+    if (!this.error) {
+      this.error = '';
+    }
+
+    this.error += `${error}; `;
+  };
 };
