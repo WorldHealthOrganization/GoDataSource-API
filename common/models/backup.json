@@ -30,7 +30,7 @@
       ],
       "description": "Backup status"
     },
-    "failReason": {
+    "error": {
       "type": "string"
     }
   },
