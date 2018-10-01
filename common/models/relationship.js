@@ -380,8 +380,8 @@ module.exports = function (Relationship) {
     if (app.utils.helpers.getValueFromContextOptions(context, 'triggerPeopleUpdates')) {
       return Promise.resolve();
     }
-
-    app.utils.helpers.setValueInContextOptions(context, 'triggerPeopleUpdates', 1);
+    // set triggerPeopleUpdates flag to avoid triggering this again on same relationship
+    app.utils.helpers.setValueInContextOptions(context, 'triggerPeopleUpdates', true);
     // get created/modified relationship
     let relationship = context.instance;
 
