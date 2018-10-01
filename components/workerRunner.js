@@ -48,11 +48,42 @@ function invokeWorkerMethod(workerName, method, args, callback) {
 
 module.exports = {
   transmissionChain: {
+    /**
+     * Build transmission chains
+     * @param relationships
+     * @param followUpPeriod
+     * @param callback
+     */
     build: function (relationships, followUpPeriod, callback) {
       invokeWorkerMethod('transmissionChain', 'build', [relationships, followUpPeriod], callback);
     },
+    /**
+     * Count transmission chains
+     * @param relationships
+     * @param followUpPeriod
+     * @param callback
+     */
     count: function (relationships, followUpPeriod, callback) {
       invokeWorkerMethod('transmissionChain', 'count', [relationships, followUpPeriod], callback);
+    }
+  },
+  personDuplicate: {
+    /**
+     * Find groups of duplicate people
+     * @param people
+     * @param filter only used for paginating data (skip, limit)
+     * @param callback
+     */
+    find: function (people, filter, callback) {
+      invokeWorkerMethod('personDuplicate', 'find', [people, filter], callback);
+    },
+    /**
+     * Count the groups of duplicate people
+     * @param people
+     * @param callback
+     */
+    count: function (people, callback) {
+      invokeWorkerMethod('personDuplicate', 'count', [people], callback);
     }
   }
 };

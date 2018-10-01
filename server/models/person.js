@@ -5,6 +5,7 @@ const _ = require('lodash');
 const async = require('async');
 const mapsApi = require('../../components/mapsApi');
 const app = require('../server');
+const personDuplicate = require('../../components/workerRunner').personDuplicate;
 
 module.exports = function (Person) {
 
@@ -303,4 +304,66 @@ module.exports = function (Person) {
     // do not wait for the above operations to complete
     return next();
   });
+
+
+  /**
+   * Find or count possible person duplicates
+   * @param filter
+   * @param [countOnly]
+   * @return {Promise<any>}
+   */
+  Person.findOrCountPossibleDuplicates = function (filter, countOnly) {
+    // define default filter
+    if (filter == null) {
+      filter = {};
+    }
+    // promisify the response
+    return new Promise(function (resolve, reject) {
+      let where = filter.where || {};
+      // query non deleted records only
+      where = {
+        $and: [
+          {
+            $or: [
+              {
+                deleted: {
+                  $ne: true
+                }
+              },
+              {
+                deleted: {
+                  $exists: false
+                }
+              }
+            ],
+          },
+          where || {}
+        ]
+      };
+      // use connector directly to bring big number of (raw) results
+      app.dataSources.mongoDb.connector.collection('person')
+        .find(where)
+        .toArray(function (error, people) {
+          // handle eventual errors
+          if (error) {
+            return reject(error);
+          }
+          let findOrCount;
+          if (countOnly) {
+            findOrCount = personDuplicate.count.bind(null, people);
+          } else {
+            findOrCount = personDuplicate.find.bind(null, people, Object.assign({where: where}, filter));
+          }
+          // find or count duplicate groups
+          findOrCount(function (error, duplicates) {
+            // handle eventual errors
+            if (error) {
+              return reject(error);
+            }
+            // send back the result
+            return resolve(duplicates);
+          });
+        });
+    });
+  };
 };
