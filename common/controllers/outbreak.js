@@ -5493,4 +5493,16 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Export an empty case investigation for an existing case (has qrCode)
+   * @param caseId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.createCaseMultipleContacts = function (caseId, data, options, callback) {
+    let self = this;
+
+    callback();
+  };
 };
