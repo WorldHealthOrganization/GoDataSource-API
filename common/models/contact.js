@@ -133,7 +133,7 @@ module.exports = function (Contact) {
       .then(function (outbreak) {
         // check for found outbreak
         if (!outbreak) {
-          throw app.logger.error(`Error when updating contact (id: ${id}) follow-up dates. Outbreak (id: ${contactInstance.outbreakId}) was not found.`);
+          throw app.logger.error(`Error when updating contact (id: ${contactInstance.id}) follow-up dates. Outbreak (id: ${contactInstance.outbreakId}) was not found.`);
         }
         // keep a flag for updating contact
         let shouldUpdate = false;
