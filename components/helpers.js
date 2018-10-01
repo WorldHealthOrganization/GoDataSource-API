@@ -1258,6 +1258,30 @@ const findQuestionByVariable = function (questions, variable) {
 };
 
 /**
+ * Set value in context options;
+ * Creating options.${context.Model.modelName}._instance[${context.instance.id}][${container}] object in context and store the 'value' at the 'key' position
+ * @param context
+ * @param key
+ * @param value
+ * @param [container]
+ */
+const setValueInContextOptions = function (context, key, value, container = '_data') {
+  _.set(context, `options.${context.Model.modelName}._instance[${context.instance ? context.instance.id : context.currentInstance.id}][${container}][${key}]`, value);
+};
+
+/**
+ * Get value from context options for the key
+ * Retrieving options.${context.Model.modelName}._instance[${context.instance.id}][$contaner][${key}] from context
+ * Returning null if not found
+ * @param context
+ * @param key
+ * @param [container]
+ */
+const getValueFromContextOptions = function (context, key, container = '_data') {
+  return _.get(context, `options.${context.Model.modelName}._instance[${context.instance ? context.instance.id : context.currentInstance.id}][${container}][${key}]`, null);
+};
+
+/**
  * Set original value in context options;
  * Creating options.${context.Model.modelName}._instance[${context.instance.id}]._original object in context and store the 'value' at the 'key' position
  * @param context
@@ -1265,7 +1289,7 @@ const findQuestionByVariable = function (questions, variable) {
  * @param value
  */
 const setOriginalValueInContextOptions = function (context, key, value) {
-  _.set(context, `options.${context.Model.modelName}._instance[${context.instance ? context.instance.id : context.currentInstance.id}]._original[${key}]`, value);
+  setValueInContextOptions(context, key, value, '_original');
 };
 
 /**
@@ -1276,7 +1300,7 @@ const setOriginalValueInContextOptions = function (context, key, value) {
  * @param key
  */
 const getOriginalValueFromContextOptions = function (context, key) {
-  return _.get(context, `options.${context.Model.modelName}._instance[${context.instance ? context.instance.id : context.currentInstance.id}]._original[${key}]`, null);
+  return getValueFromContextOptions(context, key, '_original');
 };
 
 module.exports = {
@@ -1307,5 +1331,7 @@ module.exports = {
   getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext,
   addQuestionnaireHeadersForPrint: spreadSheetFile.addQuestionnaireHeadersForPrint,
   setOriginalValueInContextOptions: setOriginalValueInContextOptions,
-  getOriginalValueFromContextOptions: getOriginalValueFromContextOptions
+  getOriginalValueFromContextOptions: getOriginalValueFromContextOptions,
+  setValueInContextOptions: setValueInContextOptions,
+  getValueFromContextOptions: getValueFromContextOptions
 };

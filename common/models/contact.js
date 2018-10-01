@@ -102,38 +102,33 @@ module.exports = function (Contact) {
     'addresses[].geoLocation'
   ];
 
-
   /**
    * Update Follow-Up dates if needed (if conditions are met)
-   * @param id
-   * @param options
+   * @param context
    * @return {*|void|Promise<T | never>}
    */
-  Contact.updateFollowUpDatesIfNeeded = function (id, options) {
-    // initialize contactInstance container
-    let contactInstance;
-    // update contact follow-up dates, based on the latest active relationship
-    return Contact
-      .findById(id, {
-        include: {
-          relation: 'relationships',
-          scope: {
-            limit: 1,
-            order: 'contactDate DESC',
-            where: {
-              active: true
-            }
-          }
+  Contact.updateFollowUpDatesIfNeeded = function (context) {
+    // prevent infinite loops
+    if (app.utils.helpers.getValueFromContextOptions(context, 'updateFollowUpDatesIfNeeded')) {
+      return Promise.resolve();
+    }
+    let relationshipInstance;
+    // get contact instance
+    let contactInstance = context.instance;
+    // get newest relationship, if any
+    return app.models.relationship
+      .findOne({
+        order: 'contactDate DESC',
+        where: {
+          "persons.id": contactInstance.id,
+          active: true
         }
       })
-      .then(function (contact) {
-        if (!contact) {
-          throw app.logger.error(`Error when updating contact (id: ${id}) follow-up dates. Contact was not found.`);
-        }
-        // update contact instance with found contact record
-        contactInstance = contact;
+      .then(function (relationshipRecord) {
+        // get relationship instance, if any
+        relationshipInstance = relationshipRecord;
         // get the outbreak as we need the followUpPeriod
-        return app.models.outbreak.findById(contact.outbreakId);
+        return app.models.outbreak.findById(contactInstance.outbreakId);
       })
       .then(function (outbreak) {
         // check for found outbreak
@@ -149,11 +144,9 @@ module.exports = function (Contact) {
           propsToUpdate.originalStartDate = contactInstance.followUp.originalStartDate;
         }
         // if active relationships found
-        if (contactInstance.relationships.length) {
-          // get the latest one
-          let relationship = contactInstance.relationships.shift();
+        if (relationshipInstance) {
           // set follow-up start date to be the same as relationship contact date
-          propsToUpdate.startDate = relationship.contactDate;
+          propsToUpdate.startDate = relationshipInstance.contactDate;
           // if follow-up original start date was not previously set
           if (!propsToUpdate.originalStartDate) {
             // flag as an update
@@ -162,7 +155,7 @@ module.exports = function (Contact) {
             propsToUpdate.originalStartDate = propsToUpdate.startDate;
           }
           // set follow-up end date
-          propsToUpdate.endDate = moment(relationship.contactDate).add(outbreak.periodOfFollowup, 'days');
+          propsToUpdate.endDate = moment(relationshipInstance.contactDate).add(outbreak.periodOfFollowup, 'days');
         }
         // check if contact instance should be updated (check if any property changed value)
         !shouldUpdate && ['startDate', 'endDate']
@@ -193,13 +186,32 @@ module.exports = function (Contact) {
 
         // if updates are required
         if (shouldUpdate) {
+          // set a flag for this operation so we prevent infinite loops
+          app.utils.helpers.setValueInContextOptions(context, 'updateFollowUpDatesIfNeeded', true);
           // update contact
           return contactInstance.updateAttributes({
             followUp: propsToUpdate,
             // contact is active if it has valid follow-up interval
             active: !!propsToUpdate.startDate
-          }, options);
+          }, context.options);
         }
       });
   };
+
+  /**
+   * After save hooks
+   */
+  Contact.observe('after save', function (context, next) {
+    // if this is an exiting record
+    if (!context.isNewInstance) {
+      // update follow-up dates, if needed
+      Contact.updateFollowUpDatesIfNeeded(context)
+        .then(function () {
+          next();
+        })
+        .catch(next);
+    } else {
+      next();
+    }
+  });
 };

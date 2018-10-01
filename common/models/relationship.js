@@ -376,39 +376,53 @@ module.exports = function (Relationship) {
    * Update follow-up dates on the contact if the relationship includes a contact
    */
   Relationship.observe('after save', function (context, callback) {
+    // prevent infinite loops
+    if (app.utils.helpers.getValueFromContextOptions(context, 'triggerPeopleUpdates')) {
+      return Promise.resolve();
+    }
+
+    app.utils.helpers.setValueInContextOptions(context, 'triggerPeopleUpdates', 1);
     // get created/modified relationship
     let relationship = context.instance;
 
     // keep a list of update actions
-    const updateDatesOfLastContact = [];
-
+    const updatePersonRecords = [];
     // go through the people that are part of the relationship
     relationship.persons.forEach(function (person) {
-      // update date of last contact, if needed
-      updateDatesOfLastContact.push(
+      // trigger update operations on them (they might have before/after save listeners that need to be triggered on relationship updates)
+      updatePersonRecords.push(
+        // load the record
         app.models.person
-          .updateDateOfLastContactIfNeeded(person.id, context.options)
-          // don't stop on error, nothing meaningful to do on after save
-          .catch(function (error) {
-            app.logger.error(`Error when updating person (id: ${person.id}) dateOfLastContact: ${JSON.stringify(error)}`);
-          }));
+          .findById(person.id)
+          .then(function (personRecord) {
+            // if the record is not found, stop with err
+            if (!personRecord) {
+              throw app.logger.error(`Filed to trigger person record updates. Person (id: ${person.id}) not found.`);
+            }
+            // trigger record update
+            return personRecord.updateAttributes({}, context.options);
+          })
+      );
     });
 
     // after finishing updating dates of last contact
-    Promise.all(updateDatesOfLastContact)
+    Promise.all(updatePersonRecords)
       .then(function () {
         // get contact representation in the relationship
         let contactInPersons = relationship.persons.find(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
 
         // check if the relationship created included a contact
         if (contactInPersons) {
-          // update contact follow-up dates, if needed
-          app.models.contact
-            .updateFollowUpDatesIfNeeded(contactInPersons.id, context.options)
-            // don't stop on error, nothing meaningful to do on after save
-            .catch(function (error) {
-              // log error
-              app.logger.error(`Error when updating contact (id: ${contactInPersons.id}) follow-up dates: ${JSON.stringify(error)}`);
+          // trigger update operations on it (might have before/after save listeners that need to be triggered on relationship updates)
+          return app.models.contact
+            .findById(contactInPersons.id)
+            .then(function (contactRecord) {
+              // if the record is not found, stop with err
+              if (!contactRecord) {
+                throw app.logger.error(`Filed to trigger contact record updates. Contact (id: ${contactInPersons.id}) not found.`);
+              }
+              // trigger record update
+              return contactRecord.updateAttributes({}, context.options);
             })
             .then(function () {
               callback();
@@ -417,7 +431,8 @@ module.exports = function (Relationship) {
           // nothing to do
           callback();
         }
-      });
+      })
+      .catch(callback)
   });
 
 
