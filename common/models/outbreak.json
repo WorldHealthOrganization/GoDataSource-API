@@ -1142,6 +1142,12 @@
       "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
+      "property": "exportExistingEmptyCaseInvestigation"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
       "property": "findPossiblePersonDuplicates"
     },
     {
@@ -4578,6 +4584,46 @@
       "http": {
         "verb": "get",
         "path": "/relationships/transmission-chains-including-people"
+      }
+    },
+    "prototype.exportExistingEmptyCaseInvestigation": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export an empty case investigation for an existing case",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/export-empty-case-investigation"
       }
     },
     "prototype.findPossiblePersonDuplicates": {
