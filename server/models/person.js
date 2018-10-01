@@ -105,6 +105,12 @@ module.exports = function (Person) {
     'address.locationId'
   ];
 
+  Person.typeToModelMap = {
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'case',
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'contact',
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event'
+  };
+
   /**
    * Construct and return the display name of the person
    */
