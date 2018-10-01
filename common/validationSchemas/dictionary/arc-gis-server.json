@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "arc-gis-server",
+  "title": "ArcGIS Server",
+  "description": "Make geographic information available to others",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    }
+  },
+  "required": ["url"],
+  "additionalProperties": false
+}
