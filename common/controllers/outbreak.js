@@ -197,29 +197,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Do not allow deletion of a active Outbreak
-   */
-  Outbreak.beforeRemote('deleteById', function (context, modelInstance, next) {
-    Outbreak.findById(context.args.id)
-      .then(function (outbreak) {
-        if (outbreak) {
-          return app.models.User.count({
-            activeOutbreakId: outbreak.id
-          });
-        } else {
-          return 0;
-        }
-      })
-      .then(function (userCount) {
-        if (userCount) {
-          throw app.utils.apiError.getError('DELETE_ACTIVE_OUTBREAK', {id: context.args.id}, 422);
-        }
-        return next();
-      })
-      .catch(next);
-  });
-
-  /**
    * Attach before remote (GET outbreaks/{id}/cases) hooks
    */
   Outbreak.beforeRemote('prototype.__get__cases', function (context, modelInstance, next) {

@@ -12,45 +12,6 @@ module.exports = function (Icon) {
   ]);
 
   /**
-   * Do not allow removal of items that are in use
-   */
-  Icon.beforeRemote('deleteById', function (context, modelInstance, next) {
-    app.models.referenceData
-      .count({
-        iconId: context.args.id
-      })
-      .then(function (count) {
-        if (count) {
-          throw app.utils.apiError.getError('MODEL_IN_USE', {model: Icon.modelName, id: context.args.id});
-        }
-        // store the instance that's about to be deleted to remove the resource from the disk later
-        return Icon.findById(context.args.id)
-          .then(function (icon) {
-            if (icon) {
-              context._deletedIcon = icon.toJSON();
-            }
-            next();
-          });
-      })
-      .catch(next);
-  });
-
-  /**
-   * After an icon is deleted, also remove the resource from disk
-   */
-  Icon.afterRemote('deleteById', function (context, modelInstance, next) {
-    if (context._deletedIcon) {
-      Icon.removeFromDisk(context._deletedIcon.path)
-        .catch(function (error) {
-          // only log the error, fail silently as the DB entry was removed
-          context.req.logger.error(error);
-        });
-    }
-    // do not wait for disk resource removal to complete, it's irrelevant for this operation
-    next();
-  });
-
-  /**
    * Create (upload) a new icon
    * @param req
    * @param name
