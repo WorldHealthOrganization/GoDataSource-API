@@ -318,9 +318,18 @@ module.exports = function (Person) {
       where = {
         $and: [
           {
-            deleted: {
-              $ne: null
-            },
+            $or: [
+              {
+                deleted: {
+                  $ne: true
+                }
+              },
+              {
+                deleted: {
+                  $exists: false
+                }
+              }
+            ],
           },
           where || {}
         ]

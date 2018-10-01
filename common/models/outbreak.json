@@ -4600,8 +4600,14 @@
             "groups": [
               {
                 "type": {
-                  "duplicateKey": "string",
-                  "indexKey": "string",
+                  "duplicateKey": {
+                    "type":"string",
+                    "description": "The key/rule (name, phoneNumber, documents) that was matched by all the records in the group"
+                  },
+                  "indexKey": {
+                    "type":"string",
+                    "description": "They (constructed) key that was matched by all the records in the group"
+                  },
                   "peopleIds": [
                     "string"
                   ]

@@ -68,7 +68,8 @@ function addEntryToIndex(index, entry, keys, searchReverse) {
     if (searchReverse) {
       // get reversed id (id built from the keys in reverse order)
       const revId = getEntryId(entry, keys.reverse());
-      // if this is a different id than the original one and there's a matching entry present
+      // if this is a different id than the original one and there's a matching entry present (we're only adding reverse matches
+      // if direct matches are present for reverse index, otherwise skip them - adding reverse matches for all records, means duplicating direct results)
       if (id !== revId && index[revId]) {
         // add the entry as a possible duplicate
         addEntryToIndexWithId(index, revId, entry);
