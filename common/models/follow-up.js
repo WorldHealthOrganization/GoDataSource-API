@@ -224,4 +224,32 @@ module.exports = function (FollowUp) {
         return result;
       });
   };
+
+  // Get contact's whose last follow up was not performed or missing
+  // Used mainly for handling a specific case during follow up generation
+  FollowUp.getContactsWithLostLastFollowUp = function () {
+    return app.models.contact
+      .find({
+        include: [
+          {
+            relation: 'followUps',
+            scope: {
+              order: ['createdAt DESC'],
+              limit: 1
+            }
+          }
+        ],
+        where: {
+          followUp: {
+            neq: null
+          }
+        }
+      })
+      // filter out contacts whose last follow up is not performed or is missing
+      .then((contacts) => {
+        return contacts.filter((contact) =>
+          contact.followUps.length ? (!contact.followUps()[0].performed || contact.followUps()[0].lostToFollowUp) : false
+        );
+      });
+  };
 };
