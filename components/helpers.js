@@ -1221,7 +1221,7 @@ const translateQuestionAnswers = function (question, answers, dictionary) {
  */
 const buildAndTranslateAnswerLabel = function (questionText, answerValue, dictionary) {
   let result = answerValue;
-  if(/_TEXT$/.test(questionText)) {
+  if (/_TEXT$/.test(questionText)) {
     let token = questionText.replace(/_TEXT$/, `_ANSWER_${_.upperCase(answerValue)}_LABEL`);
     let tokenTranslation = dictionary.getTranslation(token);
     if (token !== tokenTranslation) {
@@ -1303,6 +1303,30 @@ const getOriginalValueFromContextOptions = function (context, key) {
   return getValueFromContextOptions(context, key, '_original');
 };
 
+/**
+ * Paginate a result set that does not support native pagination
+ * @param filter
+ * @param resultSet
+ * @return {*}
+ */
+const paginateResultSet = function (filter, resultSet) {
+  // get offset
+  const skip = _.get(filter, 'skip', 0);
+  // get limit
+  let limit = _.get(filter, 'limit');
+  // if there's a limit
+  if (limit != null) {
+    // add the offset to the limit (Array.slice uses start + end position)
+    limit = skip + limit;
+  }
+  // if any of the filters are defined
+  if (skip || limit) {
+    // paginate result set
+    resultSet = resultSet.slice(skip, limit);
+  }
+  return resultSet;
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1332,6 +1356,7 @@ module.exports = {
   addQuestionnaireHeadersForPrint: spreadSheetFile.addQuestionnaireHeadersForPrint,
   setOriginalValueInContextOptions: setOriginalValueInContextOptions,
   getOriginalValueFromContextOptions: getOriginalValueFromContextOptions,
+  paginateResultSet: paginateResultSet,
   setValueInContextOptions: setValueInContextOptions,
   getValueFromContextOptions: getValueFromContextOptions
 };

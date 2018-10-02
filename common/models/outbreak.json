@@ -1143,6 +1143,18 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "exportExistingEmptyCaseInvestigation"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "findPossiblePersonDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countPossiblePersonDuplicates"
     }
   ],
   "methods": {
@@ -4444,7 +4456,7 @@
         "path": "/cases/:nk/events/filteredCount"
       }
     },
-    "prototype.exportFilteredFollowups" : {
+    "prototype.exportFilteredFollowups": {
       "accepts": [
         {
           "arg": "filter",
@@ -4612,6 +4624,74 @@
       "http": {
         "verb": "get",
         "path": "/cases/:nk/export-empty-case-investigation"
+      }
+    },
+    "prototype.findPossiblePersonDuplicates": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note that filter.where needs to be a valid MongoDB where condition, not loopback, because the query is ran directly on MongoDB for performance reasons."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "duplicates",
+          "type": {
+            "peopleMap": {
+              "type": {
+                "<personId>": "person"
+              }
+            },
+            "groups": [
+              {
+                "type": {
+                  "duplicateKey": {
+                    "type":"string",
+                    "description": "The key/rule (name, phoneNumber, documents) that was matched by all the records in the group"
+                  },
+                  "indexKey": {
+                    "type":"string",
+                    "description": "They (constructed) key that was matched by all the records in the group"
+                  },
+                  "peopleIds": [
+                    "string"
+                  ]
+                }
+              }
+            ]
+          },
+          "description": "Possible duplicate people groups",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Find the possible duplicate people groups",
+      "http": {
+        "verb": "get",
+        "path": "/people/possible-duplicates"
+      }
+    },
+    "prototype.countPossiblePersonDuplicates": {
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances. Note that this needs to be a valid MongoDB where condition, not loopback, because the query is ran directly on MongoDB for performance reasons."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of possible duplicate people groups",
+          "required": true
+        }
+      ],
+      "description": "Count the number of possible duplicate people groups",
+      "http": {
+        "verb": "get",
+        "path": "/people/possible-duplicates/count"
       }
     }
   }

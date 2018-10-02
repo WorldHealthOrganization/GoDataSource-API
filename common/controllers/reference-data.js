@@ -6,41 +6,6 @@ const async = require('async');
 module.exports = function (ReferenceData) {
 
   /**
-   * Before update reference data hook
-   */
-  ReferenceData.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
-    // if its not editable, it will send an error to the callback
-    ReferenceData.isEntryEditable(context.instance, function (error) {
-      // if the error says the instance is not editable
-      if (error && ['MODEL_NOT_EDITABLE', 'MODEL_IN_USE'].indexOf(error.code) !== -1) {
-        // and if data was sent
-        if (context.args.data) {
-          // allow customizing some safe properties
-          const customizableProperties = ['iconId', 'colorCode'];
-
-          // if model is editable but in use, also let it change the 'active' field
-          if (error.code === 'MODEL_IN_USE') {
-            customizableProperties.push('active');
-          }
-
-          const data = {};
-          // exclude all unsafe properties from request
-          Object.keys(context.args.data).forEach(function (property) {
-            if (customizableProperties.indexOf(property) !== -1) {
-              data[property] = context.args.data[property];
-            }
-          });
-          context.args.data = data;
-        }
-      } else if (error) {
-        // unhandled error
-        return next(error);
-      }
-      next();
-    });
-  });
-
-  /**
    * Expose available categories via API
    * @param callback
    */
