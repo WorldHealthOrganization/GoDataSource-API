@@ -393,7 +393,7 @@ const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, 
               filePath,
               path.join(tmpDir, collectionOpts.targetDir, path.basename(record[collectionOpts.prop])),
               doneRecord
-            )
+            );
           });
         };
       }),
