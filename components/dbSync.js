@@ -414,7 +414,7 @@ const importCollectionRelatedFiles = function (collectionName, tmpDir, done) {
 
   return ncp(
     path.join(tmpDir, collectionOpts.targetDir),
-    path.join(process.cwd(), collectionOpts.dirPath),
+    path.join(process.cwd(), collectionOpts.srcDir),
     done
   );
 };
