@@ -69,4 +69,12 @@ module.exports = function (Storage) {
       });
     });
   };
+
+  /**
+   * Resolves a relative path to a storage file
+   * @param relativePath
+   */
+  Storage.resolvePath = function (relativePath) {
+    return path.resolve(`${__dirname}/${relativePath}`);
+  };
 };
