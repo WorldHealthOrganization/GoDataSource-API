@@ -432,7 +432,7 @@ module.exports = function (Relationship) {
           callback();
         }
       })
-      .catch(callback)
+      .catch(callback);
   });
 
 

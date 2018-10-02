@@ -381,7 +381,7 @@ module.exports = function (Person) {
       .findOne({
         order: 'contactDate DESC',
         where: {
-          "persons.id": personRecord.id,
+          'persons.id': personRecord.id,
           active: true
         }
       })

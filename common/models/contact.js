@@ -120,7 +120,7 @@ module.exports = function (Contact) {
       .findOne({
         order: 'contactDate DESC',
         where: {
-          "persons.id": contactInstance.id,
+          'persons.id': contactInstance.id,
           active: true
         }
       })
