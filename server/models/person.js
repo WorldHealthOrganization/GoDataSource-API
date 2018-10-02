@@ -237,10 +237,6 @@ module.exports = function (Person) {
    * After save hooks
    */
   Person.observe('after save', function (ctx, next) {
-    // do not execute hook on sync
-    if (ctx.options && ctx.options._sync) {
-      return next();
-    }
 
     // cache instance reference, used in many places below
     let instance = ctx.instance;
@@ -366,4 +362,74 @@ module.exports = function (Person) {
         });
     });
   };
+
+
+  /**
+   * Update dateOfLastContact if needed (if conditions are met)
+   * @param context
+   * @return {*|PromiseLike<T | never>|Promise<T | never>}
+   */
+  Person.updateDateOfLastContactIfNeeded = function (context) {
+    // prevent infinite loops
+    if (app.utils.helpers.getValueFromContextOptions(context, 'updateDateOfLastContactIfNeeded')) {
+      return Promise.resolve();
+    }
+    // get person record
+    let personRecord = context.instance;
+    // find newest person relationship
+    return app.models.relationship
+      .findOne({
+        order: 'contactDate DESC',
+        where: {
+          'persons.id': personRecord.id,
+          active: true
+        }
+      })
+      .then(function (relationshipRecord) {
+        let lastContactDate;
+        // get last contact date from relationship (if any)
+        if (relationshipRecord) {
+          lastContactDate = relationshipRecord.contactDate;
+        }
+        // make sure lastContactDate is a Date
+        if (lastContactDate && !(lastContactDate instanceof Date)) {
+          lastContactDate = new Date(lastContactDate);
+        }
+        // make sure dateOfLastContact is a Date
+        if (personRecord.dateOfLastContact && !(personRecord.dateOfLastContact instanceof Date)) {
+          personRecord.dateOfLastContact = new Date(personRecord.dateOfLastContact);
+        }
+        // check if there are any differences between date of last contact and last contact date
+        if (
+          (!personRecord.dateOfLastContact && lastContactDate) ||
+          (personRecord.dateOfLastContact && !lastContactDate) ||
+          (personRecord.dateOfLastContact.getTime() !== lastContactDate.getTime())
+        ) {
+          // set a flag for this operation so we prevent infinite loops
+          app.utils.helpers.setValueInContextOptions(context, 'updateDateOfLastContactIfNeeded', true);
+          // if there are differences, update dateOfLastContact based on lastContactDate
+          return personRecord.updateAttributes({
+            dateOfLastContact: lastContactDate
+          }, context.options);
+        }
+      });
+  };
+
+
+  /**
+   * After save hooks
+   */
+  Person.observe('after save', function (context, next) {
+    // if this is an exiting record
+    if (!context.isNewInstance) {
+      // update date of last contact, if needed
+      Person.updateDateOfLastContactIfNeeded(context)
+        .then(function () {
+          next();
+        })
+        .catch(next);
+    } else {
+      next();
+    }
+  });
 };

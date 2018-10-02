@@ -309,7 +309,7 @@ module.exports = function (Outbreak) {
             throw app.utils.apiError.getError('MODEL_NOT_FOUND_IN_CONTEXT', {
               model: app.models.relationship.modelName,
               id: relationshipId,
-              contextModel: app.models[type].modelName,
+              contextModel: app.models[app.models.person.typeToModelMap[type]].modelName,
               contextId: personId
             });
           }
