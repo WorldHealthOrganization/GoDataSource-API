@@ -20,6 +20,12 @@
       "type": "boolean",
       "required": true
     },
+    "missedToFollowUp": {
+      "type": "boolean"
+    },
+    "completed": {
+      "type": "boolean"
+    },
     "lostToFollowUp": {
       "type": "boolean"
     },
@@ -37,10 +43,6 @@
     },
     "teamId": {
       "type": "string"
-    },
-    "isGenerated": {
-      "description": "Hidden flag that indicates whether the follow up is generated or not",
-      "type": "boolean"
     },
     "outbreakId": {
       "type": "string",

@@ -1,6 +1,7 @@
 'use strict';
 
 const app = require('../../server/server');
+const followupGeneration = require('../../components/followupGeneration');
 const moment = require('moment');
 const _ = require('lodash');
 
@@ -87,21 +88,37 @@ module.exports = function (FollowUp) {
     app.models.person
       .findById(ctx.instance.personId)
       .then((person) => {
-        // if follow up is not within configured start/end dates throw error
-        let startDate = moment(person.followUp.originalStartDate);
-        let endDate = moment(person.followUp.endDate);
-        if (!moment(ctx.instance.date).startOf('day').isBetween(startDate, endDate, 'day', '[]')) {
-          return next(app.utils.apiError.getError('INVALID_FOLLOW_UP_DATE', {
-            startDate: startDate,
-            endDate: endDate
-          }));
-        }
+        // retrieve the contact's last follow up
+        // to check if it was inconclusive
+        app.models.followUp
+          .find({
+            where: {
+              personId: ctx.instance.personId
+            },
+            order: ['createdAt DESC'],
+            limit: 1
+          })
+          .then((followUps) => {
+            if (followUps.length && (!followUps[0].completed || followUps[0].lostToFollowUp)) {
+              ctx.instance.index = followUps[0].index + 1;
+            } else {
+              // if follow up is not within configured start/end dates throw error
+              let startDate = moment(person.followUp.originalStartDate);
+              let endDate = moment(person.followUp.endDate);
+              if (!moment(ctx.instance.date).startOf('day').isBetween(startDate, endDate, 'day', '[]')) {
+                return next(app.utils.apiError.getError('INVALID_FOLLOW_UP_DATE', {
+                  startDate: startDate,
+                  endDate: endDate
+                }));
+              }
 
-        // set index based on the difference in days from start date until the follow up set date
-        // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
-        ctx.instance.index = daysSince(person.followUp.originalStartDate, ctx.instance.date) + 1;
+              // set index based on the difference in days from start date until the follow up set date
+              // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
+              ctx.instance.index = daysSince(person.followUp.originalStartDate, ctx.instance.date) + 1;
+            }
 
-        return next();
+            next();
+          });
       })
       .catch(next);
   });
