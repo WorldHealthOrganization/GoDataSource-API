@@ -175,5 +175,5 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     followUpsToAdd.push(...generatedFollowUps);
   }
 
-  return Promise.all(followUpsToDelete).then(() => Promise.all(followUpsToAdd));
+  return Promise.all(followUpsToAdd).then(() => Promise.all(followUpsToDelete));
 };

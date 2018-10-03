@@ -88,37 +88,72 @@ module.exports = function (FollowUp) {
     app.models.person
       .findById(ctx.instance.personId)
       .then((person) => {
-        // retrieve the contact's last follow up
-        // to check if it was inconclusive
-        app.models.followUp
-          .find({
-            where: {
-              personId: ctx.instance.personId
-            },
-            order: ['createdAt DESC'],
-            limit: 1
-          })
-          .then((followUps) => {
-            if (followUps.length && (!followUps[0].completed || followUps[0].lostToFollowUp)) {
-              ctx.instance.index = followUps[0].index + 1;
-            } else {
-              // if follow up is not within configured start/end dates throw error
-              let startDate = moment(person.followUp.originalStartDate);
-              let endDate = moment(person.followUp.endDate);
-              if (!moment(ctx.instance.date).startOf('day').isBetween(startDate, endDate, 'day', '[]')) {
-                return next(app.utils.apiError.getError('INVALID_FOLLOW_UP_DATE', {
-                  startDate: startDate,
-                  endDate: endDate
-                }));
+        // calculate follow up day, based on the contact's follow up period and the follow up date
+        let calculateFollowUpDay = function () {
+          // if follow up is not within configured start/end dates throw error
+          let startDate = moment(person.followUp.originalStartDate);
+          let endDate = moment(person.followUp.endDate);
+          if (!moment(ctx.instance.date).startOf('day').isBetween(startDate, endDate, 'day', '[]')) {
+            return next(app.utils.apiError.getError('INVALID_FOLLOW_UP_DATE', {
+              startDate: startDate,
+              endDate: endDate
+            }));
+          }
+
+          // set index based on the difference in days from start date until the follow up set date
+          // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
+          ctx.instance.index = daysSince(person.followUp.originalStartDate, ctx.instance.date) + 1;
+        };
+
+        // if follow up period is before today
+        // this might be a follow up hook on a contact with inconclusive follow up period
+        if (moment(person.followUp.endDate).startOf('day').isBefore(moment(ctx.instance.date).startOf('day'))) {
+          // TODO: what to do for the action below for consequent calls ?
+          // TODO: consequent calls will return follow ups that are withing the follow up period
+          // TODO: it will not return the first follow up, before the generation began
+          // TODO: follow up date should be checked to be before this follow up date
+          // check if it's really inconclusive
+          app.models.followUp
+            .find({
+              where: {
+                personId: ctx.instance.personId,
+                date: {
+                  lt: moment(ctx.instance.date).startOf('day').toDate()
+                }
+              },
+              order: ['createdAt DESC'],
+              limit: 1
+            })
+            .then((followUps) => {
+              if (followUps.length && (!followUps[0].completed || followUps[0].lostToFollowUp)) {
+                // TODO: how to calculate index for consequent calls ?
+                // TODO: maybe try to retrieve the follow up with the highest index and increment from there
+                app.models.followUp
+                  .find({
+                    where: {
+                      index: {
+                        gt: followUps[0].index
+                      }
+                    },
+                    order: ['index DESC'],
+                    limit: 1
+                  })
+                  .then((higherIndexFollowUps) => {
+                    if (higherIndexFollowUps.length) {
+                      ctx.instance.index = higherIndexFollowUps[0].index + 1;
+                    } else {
+                      ctx.instance.index = followUps[0].index + 1;
+                    }
+                  });
+              } else {
+                calculateFollowUpDay();
               }
+            });
+        } else {
+          calculateFollowUpDay();
+        }
 
-              // set index based on the difference in days from start date until the follow up set date
-              // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
-              ctx.instance.index = daysSince(person.followUp.originalStartDate, ctx.instance.date) + 1;
-            }
-
-            next();
-          });
+        next();
       })
       .catch(next);
   });
