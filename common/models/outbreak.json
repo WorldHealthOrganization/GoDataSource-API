@@ -10,13 +10,6 @@
       "name ASC"
     ]
   },
-  "mixins": {
-    "SchemaValidation": true
-  },
-  "validationSchemas": {
-    "create": "outbreak-create",
-    "prototype.patchAttributes": "outbreak-update"
-  },
   "properties": {
     "name": {
       "type": "string",
@@ -4611,7 +4604,8 @@
           "type": "string",
           "http": {
             "target": "header"
-          }        },
+          }
+        },
         {
           "arg": "Content-Disposition",
           "type": "string",
@@ -4647,11 +4641,11 @@
               {
                 "type": {
                   "duplicateKey": {
-                    "type":"string",
+                    "type": "string",
                     "description": "The key/rule (name, phoneNumber, documents) that was matched by all the records in the group"
                   },
                   "indexKey": {
-                    "type":"string",
+                    "type": "string",
                     "description": "They (constructed) key that was matched by all the records in the group"
                   },
                   "peopleIds": [
