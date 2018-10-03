@@ -202,5 +202,9 @@
   "INVALID_VISUAL_ID_MASK": {
     "defaultStatusCode": 422,
     "messagePattern": "Provided Visual ID template `<%= visualIdTemplate %>` does not match Visual ID mask set on outbreak level `<%= outbreakVisualIdMask %>`"
+  },
+  "CONTACT_AND_RELATIONSHIP_REQUIRED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Both contact and relationship are required when creating a contact"
   }
 }

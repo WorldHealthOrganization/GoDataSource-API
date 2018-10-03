@@ -240,58 +240,6 @@ module.exports = function (Outbreak) {
   });
 
   /**
-   * Handle visual identifier (uniqueness and generation)
-   */
-  Outbreak.beforeRemote('prototype.__create__cases', function (context, modelInstance, next) {
-    Outbreak.helpers
-      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId)
-      .then(function (resolvedVisualId) {
-        context.args.data.visualId = resolvedVisualId;
-        next();
-      })
-      .catch(next);
-  });
-
-  /**
-   * Handle visual identifier (uniqueness and generation)
-   */
-  Outbreak.beforeRemote('prototype.__create__contacts', function (context, modelInstance, next) {
-    Outbreak.helpers
-      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId)
-      .then(function (resolvedVisualId) {
-        context.args.data.visualId = resolvedVisualId;
-        next();
-      })
-      .catch(next);
-  });
-
-  /**
-   * Handle visual identifier (uniqueness and generation)
-   */
-  Outbreak.beforeRemote('prototype.__updateById__cases', function (context, modelInstance, next) {
-    Outbreak.helpers
-      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId, context.args.fk)
-      .then(function (resolvedVisualId) {
-        context.args.data.visualId = resolvedVisualId;
-        next();
-      })
-      .catch(next);
-  });
-
-  /**
-   * Make sure visual identifier is unique, if its sent in request
-   */
-  Outbreak.beforeRemote('prototype.__updateById__contacts', function (context, modelInstance, next) {
-    Outbreak.helpers
-      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId, context.args.fk)
-      .then(function (resolvedVisualId) {
-        context.args.data.visualId = resolvedVisualId;
-        next();
-      })
-      .catch(next);
-  });
-
-  /**
    * Restrict the list of outbreaks only to what's accessible to current logged in user
    */
   Outbreak.beforeRemote('find', function (context, modelInstance, next) {
@@ -2554,32 +2502,6 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
-
-  /**
-   * Handle visual identifier (uniqueness and generation)
-   */
-  Outbreak.beforeRemote('prototype.__create__events', function (context, modelInstance, next) {
-    Outbreak.helpers
-      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId)
-      .then(function (resolvedVisualId) {
-        context.args.data.visualId = resolvedVisualId;
-        next();
-      })
-      .catch(next);
-  });
-
-  /**
-   * Validate visual identifier (optional)
-   */
-  Outbreak.beforeRemote('prototype.__updateById__events', function (context, modelInstance, next) {
-    Outbreak.helpers
-      .resolvePersonVisualIdTemplate(context.instance, context.args.data.visualId, context.args.fk)
-      .then(function (resolvedVisualId) {
-        context.args.data.visualId = resolvedVisualId;
-        next();
-      })
-      .catch(next);
-  });
 
   /**
    * Count the followups per team per day
@@ -5495,14 +5417,91 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Export an empty case investigation for an existing case (has qrCode)
+   * Create multiple contacts for cases
    * @param caseId
+   * @param data
    * @param options
    * @param callback
    */
   Outbreak.prototype.createCaseMultipleContacts = function (caseId, data, options, callback) {
-    let self = this;
+    // check if pairs of contacts + relationship were sent
+    if (!data.length) {
+      return callback(app.utils.apiError.getError('CONTACT_AND_RELATIONSHIP_REQUIRED'));
+    }
 
-    callback();
+    // keep context
+    const that = this;
+
+    // initialize array of actions that will be executed in async mode
+    let actions = [];
+
+    // loop through the pairs and create contact + relationship; relationship needs to be created after the contact is created
+    data.forEach(function (entry) {
+      actions.push(function (asyncCallback) {
+        // check for contact + relationship presence
+        if (!entry.contact || !entry.relationship) {
+          // don't try to create the contact or relationship
+          // will not error the entire request if an entry fails; will return error for each failed entry
+          return asyncCallback(null, {
+            contact: entry.contact || app.utils.apiError.getError('CONTACT_AND_RELATIONSHIP_REQUIRED'),
+            relationship: entry.relationship || app.utils.apiError.getError('CONTACT_AND_RELATIONSHIP_REQUIRED')
+          });
+        }
+
+        // initialize pair result
+        let result = {};
+
+        // create contact through loopback model functionality
+        app.models.contact
+          .create(entry.contact, options)
+          .then(function (contact) {
+            // add contact to result
+            result.contact = contact;
+
+            // add contact information into relationship data
+            entry.relationship.persons = {
+              id: contact.id,
+              type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+              target: true
+            };
+
+            // create relationship; using the action and not the loopback model functionality as there are actions to be done before the actual create
+            return new Promise(function (resolve, reject) {
+              that.createCaseRelationship(caseId, entry.relationship, options, function (err, relationship) {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(relationship);
+                }
+              });
+            });
+          })
+          .then(function (relationship) {
+            // add relationship to the result
+            result.relationship = relationship;
+
+            asyncCallback(null, result);
+          })
+          .catch(function (err) {
+            // will not error the entire request if an entry fails; will return error for each failed entry
+            // check for what model the error was returned; if contact exists in result then the error is for relationship
+            // else the error is for contact and we will return the entire relationship entry
+            if (result.contact) {
+              result.relationship = err;
+            } else {
+              result = {
+                contact: err,
+                relationship: entry.relationship
+              };
+            }
+
+            asyncCallback(null, result);
+          });
+      });
+    });
+
+    async.parallelLimit(actions, 10, function (error, results) {
+      callback(error, results);
+    });
   };
 };
