@@ -1034,12 +1034,16 @@ module.exports = function (Outbreak) {
     // grouped per contact
     let generatedResponse = [];
 
+    // used for retrieving contacts that are within the configured follow up period
+    // and contacts that had inconclusive follow up period in the past
+    let now = genericHelpers.getUTCDate().toDate();
+
     // retrieve list of contacts that are eligible for follow up generation
     // and those that have last follow up inconclusive
     Promise
       .all([
-        FollowupGeneration.getContactsEligibleForFollowup(genericHelpers.getUTCDate().toDate()),
-        FollowupGeneration.getContactsWithInconclusiveLastFollowUp()
+        FollowupGeneration.getContactsEligibleForFollowup(now),
+        FollowupGeneration.getContactsWithInconclusiveLastFollowUp(now)
       ])
       .then((contactLists) => {
         // merge the lists of contacts
