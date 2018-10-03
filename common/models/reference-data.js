@@ -266,12 +266,6 @@ module.exports = function (ReferenceData) {
    * @return {*}
    */
   function prepareLanguageTokens(context, next) {
-
-    // do not execute hooks on sync
-    if (context.options && context.options._sync) {
-      return next();
-    }
-
     // new record
     if (!context.currentInstance && context.instance.categoryId && context.instance.value) {
       // start building identifier
@@ -430,8 +424,47 @@ module.exports = function (ReferenceData) {
 
   // add before save hooks
   ReferenceData.observe('before save', function (context, next) {
-    // prepare language tokens for translation
-    prepareLanguageTokens(context, next);
+    // do not execute hooks on sync
+    if (context.options && context.options._sync) {
+      return next();
+    }
+
+    // check if the reference data is editable
+    if (!context.isNewInstance) {
+      // if its not editable, it will send an error to the callback
+      ReferenceData.isEntryEditable(context.currentInstance, function (error) {
+        // if the error says the instance is not editable
+        if (error && ['MODEL_NOT_EDITABLE', 'MODEL_IN_USE'].indexOf(error.code) !== -1) {
+          // and if data was sent
+          if (context.data) {
+            // allow customizing some safe properties
+            const customizableProperties = ['iconId', 'colorCode'];
+
+            // if model is editable but in use, also let it change the 'active' field
+            if (error.code === 'MODEL_IN_USE') {
+              customizableProperties.push('active');
+            }
+
+            const data = {};
+            // exclude all unsafe properties from request
+            Object.keys(context.data).forEach(function (property) {
+              if (customizableProperties.indexOf(property) !== -1) {
+                data[property] = context.data[property];
+              }
+            });
+            context.data = data;
+          }
+        } else if (error) {
+          // unhandled error
+          return next(error);
+        }
+        // prepare language tokens for translation
+        prepareLanguageTokens(context, next);
+      });
+    } else {
+      // prepare language tokens for translation
+      prepareLanguageTokens(context, next);
+    }
   });
 
   // add after save hooks

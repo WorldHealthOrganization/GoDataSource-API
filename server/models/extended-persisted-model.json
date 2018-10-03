@@ -28,6 +28,11 @@
       "safeForImport": true
     }
   },
+  "indexes": {
+    "deleted_index": {
+      "deleted": 1
+    }
+  },
   "validations": [],
   "relations": {},
   "acls": [],

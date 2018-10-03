@@ -5,6 +5,7 @@ const _ = require('lodash');
 const async = require('async');
 const mapsApi = require('../../components/mapsApi');
 const app = require('../server');
+const personDuplicate = require('../../components/workerRunner').personDuplicate;
 
 module.exports = function (Person) {
 
@@ -104,6 +105,12 @@ module.exports = function (Person) {
     'addresses[].locationId',
     'address.locationId'
   ];
+
+  Person.typeToModelMap = {
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'case',
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'contact',
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event'
+  };
 
   /**
    * Construct and return the display name of the person
@@ -230,10 +237,6 @@ module.exports = function (Person) {
    * After save hooks
    */
   Person.observe('after save', function (ctx, next) {
-    // do not execute hook on sync
-    if (ctx.options && ctx.options._sync) {
-      return next();
-    }
 
     // cache instance reference, used in many places below
     let instance = ctx.instance;
@@ -296,5 +299,137 @@ module.exports = function (Person) {
     }
     // do not wait for the above operations to complete
     return next();
+  });
+
+
+  /**
+   * Find or count possible person duplicates
+   * @param filter
+   * @param [countOnly]
+   * @return {Promise<any>}
+   */
+  Person.findOrCountPossibleDuplicates = function (filter, countOnly) {
+    // define default filter
+    if (filter == null) {
+      filter = {};
+    }
+    // promisify the response
+    return new Promise(function (resolve, reject) {
+      let where = filter.where || {};
+      // query non deleted records only
+      where = {
+        $and: [
+          {
+            $or: [
+              {
+                deleted: {
+                  $ne: true
+                }
+              },
+              {
+                deleted: {
+                  $exists: false
+                }
+              }
+            ],
+          },
+          where || {}
+        ]
+      };
+      // use connector directly to bring big number of (raw) results
+      app.dataSources.mongoDb.connector.collection('person')
+        .find(where)
+        .toArray(function (error, people) {
+          // handle eventual errors
+          if (error) {
+            return reject(error);
+          }
+          let findOrCount;
+          if (countOnly) {
+            findOrCount = personDuplicate.count.bind(null, people);
+          } else {
+            findOrCount = personDuplicate.find.bind(null, people, Object.assign({where: where}, filter));
+          }
+          // find or count duplicate groups
+          findOrCount(function (error, duplicates) {
+            // handle eventual errors
+            if (error) {
+              return reject(error);
+            }
+            // send back the result
+            return resolve(duplicates);
+          });
+        });
+    });
+  };
+
+
+  /**
+   * Update dateOfLastContact if needed (if conditions are met)
+   * @param context
+   * @return {*|PromiseLike<T | never>|Promise<T | never>}
+   */
+  Person.updateDateOfLastContactIfNeeded = function (context) {
+    // prevent infinite loops
+    if (app.utils.helpers.getValueFromContextOptions(context, 'updateDateOfLastContactIfNeeded')) {
+      return Promise.resolve();
+    }
+    // get person record
+    let personRecord = context.instance;
+    // find newest person relationship
+    return app.models.relationship
+      .findOne({
+        order: 'contactDate DESC',
+        where: {
+          'persons.id': personRecord.id,
+          active: true
+        }
+      })
+      .then(function (relationshipRecord) {
+        let lastContactDate;
+        // get last contact date from relationship (if any)
+        if (relationshipRecord) {
+          lastContactDate = relationshipRecord.contactDate;
+        }
+        // make sure lastContactDate is a Date
+        if (lastContactDate && !(lastContactDate instanceof Date)) {
+          lastContactDate = new Date(lastContactDate);
+        }
+        // make sure dateOfLastContact is a Date
+        if (personRecord.dateOfLastContact && !(personRecord.dateOfLastContact instanceof Date)) {
+          personRecord.dateOfLastContact = new Date(personRecord.dateOfLastContact);
+        }
+        // check if there are any differences between date of last contact and last contact date
+        if (
+          (!personRecord.dateOfLastContact && lastContactDate) ||
+          (personRecord.dateOfLastContact && !lastContactDate) ||
+          (personRecord.dateOfLastContact && lastContactDate && personRecord.dateOfLastContact.getTime() !== lastContactDate.getTime())
+        ) {
+          // set a flag for this operation so we prevent infinite loops
+          app.utils.helpers.setValueInContextOptions(context, 'updateDateOfLastContactIfNeeded', true);
+          // if there are differences, update dateOfLastContact based on lastContactDate
+          return personRecord.updateAttributes({
+            dateOfLastContact: lastContactDate
+          }, context.options);
+        }
+      });
+  };
+
+
+  /**
+   * After save hooks
+   */
+  Person.observe('after save', function (context, next) {
+    // if this is an exiting record
+    if (!context.isNewInstance) {
+      // update date of last contact, if needed
+      Person.updateDateOfLastContactIfNeeded(context)
+        .then(function () {
+          next();
+        })
+        .catch(next);
+    } else {
+      next();
+    }
   });
 };

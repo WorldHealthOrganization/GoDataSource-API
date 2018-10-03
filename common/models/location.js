@@ -540,4 +540,37 @@ module.exports = function (Location) {
       }));
     }
   };
+
+  /**
+   * Do not allow the creation of a location with a name/synonyms that is not unique in the same context
+   * @param ctx
+   * @param next
+   */
+  Location.observe('before save', function (ctx, next) {
+    if (ctx.isNewInstance) {
+      Location.validateModelIdentifiers(ctx.instance.toJSON())
+        .then(() => next())
+        .catch(next);
+    } else {
+      Location.validateModelIdentifiers(ctx.data, ctx.currentInstance.id)
+        .then(() => {
+          if (ctx.data.active === false) {
+            return Location.checkIfCanDeactivate(ctx.data, ctx.currentInstance.id);
+          }
+        })
+        .then(() => next())
+        .catch((error) => next(error));
+    }
+  });
+
+  /**
+   * Do not allow the deletion of a location if it still has sub-locations
+   * @param ctx
+   * @param next
+   */
+  Location.observe('before delete', function (ctx, next) {
+    Location.checkIfCanDelete(ctx.currentInstance.id)
+      .then(() => next())
+      .catch(next);
+  });
 };

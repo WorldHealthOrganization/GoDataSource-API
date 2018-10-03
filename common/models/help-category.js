@@ -2,183 +2,139 @@
 
 const app = require('../../server/server');
 const _ = require('lodash');
+const helpers = require('../../components/helpers');
 
 module.exports = function (HelpCategory) {
   // set flag to not get controller
   HelpCategory.hasController = true;
 
   /**
-   * Replace the translatable fields with language tokens before saving. Save translatable fields values.
-   * to create translations later
-   * @param modelName
-   * @param titleField
-   * @param context
-   * @param modelInstance
-   * @param next
+   * Replace the translatable fields with language tokens before saving
+   * Save translatable fields values, to create translations later
    */
-  HelpCategory.beforeCreateHook = function (modelName, titleField, context, modelInstance, next) {
-    let identifier = '';
+  HelpCategory.observe('before save', function (context, next) {
+    if (context.isNewInstance) {
+      let instance = context.instance;
+      let identifier = `LNG_${_.snakeCase(HelpCategory.modelName).toUpperCase()}_${_.snakeCase(instance.name).toUpperCase()}`;
 
-    //Build the identifier for either a Help Category or a Help Item.
-    if(context.instance) {
-      identifier = context.instance.name + `_${_.snakeCase(modelName).toUpperCase()}_`;
+      // set instance id, before setting the original context
+      // because the setter takes in account the current instance id
+      instance.id = identifier;
+
+      // cache original values used to generate the identifier
+      helpers.setOriginalValueInContextOptions(context, 'name', instance.name);
+      helpers.setOriginalValueInContextOptions(context, 'description', instance.description);
+
+      // update instance with generated identifier
+      instance.name = identifier;
+      instance.description = identifier + '_DESCRIPTION';
     } else {
-      identifier = 'LNG_' + `${_.snakeCase(modelName).toUpperCase()}_`;
-    }
-    identifier += `${_.snakeCase(context.args.data[titleField]).toUpperCase()}`;
+      if (context.data && (context.data.name || context.data.description)) {
+        let originalValues = {};
+        let data = context.data;
 
-    context.req._original = {
-      [titleField]: context.args.data[titleField]
-    };
-    context.args.data.id = identifier;
-    context.args.data[titleField] = identifier;
+        if (data.name) {
+          originalValues.name = data.name;
+          delete data.name;
+        }
 
-    if(modelName === 'helpCategory') {
-      context.req._original.description = context.args.data.description;
-      context.args.data.description = identifier + '_DESCRIPTION';
-    }
+        if (data.description) {
+          originalValues.description = data.description;
+          delete data.description;
+        }
 
-    if(modelName === 'helpItem') {
-      context.req._original.content = context.args.data.content;
-      context.args.data.content = identifier + '_DESCRIPTION';
+        // cache original values used to generate the identifier
+        helpers.setOriginalValueInContextOptions(context, 'name', originalValues.name);
+        helpers.setOriginalValueInContextOptions(context, 'description', originalValues.description);
+      }
     }
 
     next();
-  };
+  });
 
   /**
-   * Create language token translations for each available language. Defaults to user language at the time of creation.
-   * @param modelName
-   * @param titleField
-   * @param context
-   * @param modelInstance
-   * @param next
+   * Create language token translations for each available language
+   * Defaults to user language at the time of creation
    */
-  HelpCategory.afterCreateHook = function (modelName, titleField, context, modelInstance, next) {
-    if (context.req._original) {
-      let tokenPromises = [];
-      app.models.language
-        .find()
-        .then(function (languages) {
-          return languages.forEach((language) => {
-            tokenPromises.push(app.models.languageToken
-              .create({
-                token: modelInstance[titleField],
-                languageId: language.id,
-                translation: context.req._original[titleField]
-              }, context.args.options)
-            );
-            if(modelName === 'helpCategory') {
-              tokenPromises.push(app.models.languageToken
-                .create({
-                  token: modelInstance.description,
-                  languageId: language.id,
-                  translation: context.req._original.description ? context.req._original.description : ' '
-                }, context.args.options)
+  HelpCategory.observe('after save', function (context, next) {
+    const models = app.models;
+    const languageTokenModel = models.languageToken;
+
+    // retrieve original values
+    let originalName = helpers.getOriginalValueFromContextOptions(context, 'name');
+    let originalDescription = helpers.getOriginalValueFromContextOptions(context, 'description') || ' ';
+
+    if (context.isNewInstance) {
+      // description is optional
+      if (originalName) {
+        let tokenPromises = [];
+        models.language
+          .find()
+          .then(function (languages) {
+            return languages.forEach((language) => {
+              tokenPromises.push(
+                languageTokenModel
+                  .create({
+                    token: context.instance.name,
+                    languageId: language.id,
+                    translation: originalName
+                  }, context.options),
+                languageTokenModel
+                  .create({
+                    token: context.instance.description,
+                    languageId: language.id,
+                    translation: originalDescription
+                  }, context.options)
               );
-            }
-            if(modelName === 'helpItem') {
-              tokenPromises.push(app.models.languageToken
-                .create({
-                  token: modelInstance.content,
-                  languageId: language.id,
-                  translation: context.req._original.content
-                }, context.args.options));
-            }
-          });
-        })
-        .then(function () {
-          // resolve promises
-          return Promise.all(tokenPromises);
-        })
-        .then(function () {
-          next();
-        })
-        .catch(next);
-    }
-  };
-
-  /**
-   * Do not update translatable fields. Instead, save the values to be passed to the language token translation
-   * @param modelName
-   * @param titleField
-   * @param context
-   * @param modelInstance
-   * @param next
-   */
-  HelpCategory.beforeUpdateHook = function (modelName, titleField, context, modelInstance, next) {
-    if (context.args.data && (context.args.data[titleField] || context.args.data.description || context.args.data.content)) {
-      let originalValues = {};
-      let data = context.args.data;
-
-      if(data[titleField]) {
-        originalValues[titleField] = data[titleField];
-        delete data[titleField];
+            });
+          })
+          .then(() => Promise.all(tokenPromises))
+          .then(() => next())
+          .catch((err) => next(err));
+      } else {
+        next();
       }
+    } else {
+      if (originalName || originalDescription) {
+        let languageId = context.options.remotingContext.req.authData.user.languageId;
+        let languageToken = context.instance.id;
+        let updateActions = [];
 
-      if(data.description) {
-        originalValues.description = data.description;
-        delete data.description;
-      }
+        let updateFields = [];
 
-      if (modelName === 'helpItem' && data.content) {
-        originalValues.content = data.content;
-        delete data.content;
-      }
+        if (originalName) {
+          updateFields.push('name');
+        }
 
-      context.req._original = originalValues;
-    }
-    next();
-  };
+        if (originalDescription) {
+          updateFields.push('description');
+        }
 
-  /**
-   * Update language token translation for the user's current selected language
-   * @param modelName
-   * @param titleField
-   * @param context
-   * @param modelInstance
-   * @param next
-   */
-  HelpCategory.afterUpdateHook = function (modelName, titleField, context, modelInstance, next) {
-    if (context.req._original) {
-      let languageId = context.req.authData.user.languageId;
-      let languageToken = modelInstance.id;
-      let updateActions = [];
-
-      let updateFields = [titleField];
-
-      if (modelName === 'helpCategory' && context.req._original.description) {
-        updateFields.push('description');
-      }
-
-      if (modelName === 'helpItem' && context.req._original.content) {
-        updateFields.push('content');
-      }
-
-      updateFields.forEach((updateField) => {
-        if(context.req._original[updateField]) {
+        updateFields.forEach((updateField) => {
           updateActions.push(
-            app.models.languageToken
+            languageTokenModel
               .findOne({
                 where: {
-                  token: ['content', 'description'].indexOf(updateField) !== -1 ? languageToken + '_DESCRIPTION' : languageToken,
+                  token: updateField === 'description' ? languageToken + '_DESCRIPTION' : languageToken,
                   languageId: languageId
                 }
               })
               .then((languageToken) => {
-                return languageToken.updateAttribute('translation', context.req._original[updateField], context.args.options);
+                return languageToken.updateAttribute(
+                  'translation',
+                  helpers.getOriginalValueFromContextOptions(context, updateField),
+                  context.options
+                );
               })
           );
-        }
-      });
+        });
 
-      Promise.all(updateActions)
-        .then(() => {
-          next();
-        })
-        .catch(next);
-    } else {
-      next();
+        Promise.all(updateActions)
+          .then(() => next())
+          .catch(next);
+      } else {
+        next();
+      }
     }
-  };
+  });
 };
