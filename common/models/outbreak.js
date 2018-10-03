@@ -1211,4 +1211,98 @@ module.exports = function (Outbreak) {
       return Promise.resolve();
     }
   };
+
+  /**
+   * Query contacts using a series of custom filters and return their ids as an array
+   * @param filter
+   * @param outbreakId
+   * @returns {Promise.<TResult>}
+   */
+  Outbreak.helpers.getContactIdsFromCustomFilters = function (filter, outbreakId) {
+    let caseFilter, relationshipFilter, contactFilter, timeFilter = {};
+
+    if (filter.caseFilter) {
+      // Build the case filter
+      caseFilter = app.utils.remote.mergeFilters({
+        where: {
+          'type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+        },
+        filterParent: true
+      }, filter.caseFilter || {});
+
+
+      // Build the relationship filter
+      relationshipFilter = app.utils.remote.mergeFilters({
+        where: {
+          'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+        },
+        include: {
+          relation: 'people',
+          scope: caseFilter || {}
+        },
+        filterParent: true
+      }, filter.relationshipFilter || {});
+    }
+
+    // Start building the contact filter
+    let additionalContactFilter = {
+      where: {
+        outbreakId: outbreakId
+      }
+    };
+
+    // If there is a time filter, get the contact's latest performed follow-up
+    if (filter.timeFilter) {
+      additionalContactFilter.include = {
+        relation: 'followUps',
+        scope: {
+          where: {
+            performed: true
+          },
+          order: 'date DESC',
+          limit: 1
+        }
+      };
+    }
+
+    // Build the contact filter
+    contactFilter = app.utils.remote.mergeFilters(additionalContactFilter, filter.contactFilter || {});
+
+    // Cache the time filter
+    timeFilter = filter.timeFilter;
+
+    // Clear all custom filters
+    delete (filter.caseFilter, filter.relationshipsFilter, filter.contactFilter, filter.timeFilter);
+
+    // Build the final filter that will be used to query contacts
+    let _filter = {};
+
+    // Include relationships only if necessary
+    if (caseFilter) {
+      _filter = app.utils.remote.mergeFilters({
+        include: {
+          relation: 'relationships',
+          scope: relationshipFilter,
+        }
+      }, contactFilter);
+    } else {
+      _filter = contactFilter;
+    }
+
+    return app.models.contact.find(_filter)
+      .then((contacts) => {
+        // Remove any contacts that have empty relations
+        contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, _filter);
+
+        // If necessary, get only contacts that have last been seen before the specified date.
+        if (timeFilter && moment(timeFilter).isValid()) {
+          contacts = _.filter(contacts, function (contact) {
+            return moment(contact.followUps[0].date).isBefore(timeFilter, 'day');
+          });
+        }
+
+        // Return an array of the remaining contacts ids
+        return contacts.map(contact => contact.id);
+      });
+  };
 };

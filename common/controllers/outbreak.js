@@ -5535,4 +5535,56 @@ module.exports = function (Outbreak) {
     });
     next();
   });
+
+  Outbreak.beforeRemote('prototype.__get__followUps', function (context, modelInstance, next) {
+    if (context.args.filter) {
+      let weekNumber = 0;
+      let timeFilter = '';
+      if (context.args.filter.weekNumber) {
+        weekNumber = context.args.filter.weekNumber;
+        delete context.args.filter.weekNumber;
+      }
+      if (context.args.filter.timeFilter) {
+        timeFilter = context.args.filter.timeFilter;
+      }
+      helpers.getContactIdsFromCustomFilters(context.args.filter, context.ctorArgs.id)
+        .then((contactIds) => {
+          if (contactIds) {
+            // Include the contact ids that we obtain in the existing filter
+            let additionalFilter = {
+              where: {
+                personId: {
+                  inq: contactIds
+                }
+              }
+            };
+
+            // If there was a week filter, make sure to request only follow-ups that are happening in
+            // the requested week of the follow-up period
+            if (weekNumber > 0) {
+              additionalFilter.where.index = {
+                between: [(weekNumber - 1) * 7 + 1, weekNumber * 7]
+              };
+            }
+
+            // If we have a time filter, make sure to request follow-ups that are scheduled after the requested
+            // date. The other requirements of the filter (having a last seen date before the one in the filter)
+            // has been handled in the getContactIdsFromCustomFilters function
+            if (timeFilter) {
+              additionalFilter.where.date = {
+                gt: timeFilter
+              };
+            }
+
+            // Merge submitted filter with custom filters
+            context.args.filter = app.utils.remote.mergeFilters(
+              additionalFilter,
+              context.args.filter || {});
+          }
+          next();
+        });
+    } else {
+      next();
+    }
+  });
 };
