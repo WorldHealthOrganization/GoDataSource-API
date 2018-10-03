@@ -403,7 +403,7 @@ module.exports = function (Person) {
         if (
           (!personRecord.dateOfLastContact && lastContactDate) ||
           (personRecord.dateOfLastContact && !lastContactDate) ||
-          (personRecord.dateOfLastContact.getTime() !== lastContactDate.getTime())
+          (personRecord.dateOfLastContact && lastContactDate && personRecord.dateOfLastContact.getTime() !== lastContactDate.getTime())
         ) {
           // set a flag for this operation so we prevent infinite loops
           app.utils.helpers.setValueInContextOptions(context, 'updateDateOfLastContactIfNeeded', true);
