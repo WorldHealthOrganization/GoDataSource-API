@@ -5494,6 +5494,9 @@ module.exports = function (Outbreak) {
       .catch(callback);
   };
 
+  /**
+   * Execute additional custom filter before generic GET LIST filter
+   */
   Outbreak.beforeRemote('prototype.__get__followUps', function (context, modelInstance, next) {
     if (context.args.filter) {
       let weekNumber = 0;

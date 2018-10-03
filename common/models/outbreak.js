@@ -1211,6 +1211,14 @@ module.exports = function (Outbreak) {
     }
   };
 
+  /**
+   * Print an empty case investigation, for either a new or an existing case
+   * @param outbreakInstance
+   * @param pdfUtils
+   * @param foundCase
+   * @param options
+   * @param callback
+   */
   Outbreak.helpers.printCaseInvestigation = function (outbreakInstance, pdfUtils, foundCase, options, callback) {
     const models = app.models;
     let caseInvestigationTemplate = outbreakInstance.caseInvestigationTemplate;
@@ -1273,7 +1281,7 @@ module.exports = function (Outbreak) {
       // set margin top for first page here, to not change the entire createPdfDoc functionality
       doc.moveDown(2);
 
-      if(foundCase) {
+      if (foundCase) {
         let qrCode = app.utils.qrCode.createResourceLink('case', {
           outbreakId: outbreakInstance.id,
           caseId: 'caseId'
@@ -1335,7 +1343,7 @@ module.exports = function (Outbreak) {
       })
       .then(function (userCount) {
         if (userCount) {
-          return next(app.utils.apiError.getError('DELETE_ACTIVE_OUTBREAK', { id: ctx.currentInstance.id }, 422));
+          return next(app.utils.apiError.getError('DELETE_ACTIVE_OUTBREAK', {id: ctx.currentInstance.id}, 422));
         }
         return next();
       })
