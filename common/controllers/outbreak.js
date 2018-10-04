@@ -992,39 +992,56 @@ module.exports = function (Outbreak) {
 
   /**
    * Generate list of follow ups
-   * @param data Contains number of days used to perform the generation
+   * @param data
    * @param options
    * @param callback
    */
   Outbreak.prototype.generateFollowups = function (data, options, callback) {
-    // sanity checks
-    let invalidParams = {};
-    if (this.periodOfFollowup <= 0) {
-      invalidParams.periodOfFollowup = this.periodOfFollowup;
-    }
+    let errorMessage = '';
+
+    // outbreak follow up generate params sanity checks
+    let invalidOutbreakParams = [];
     if (this.frequencyOfFollowUp <= 0) {
-      invalidParams.frequencyOfFollowUp = this.frequencyOfFollowUp;
+      invalidOutbreakParams.push('frequencyOfFollowUp');
     }
     if (this.frequencyOfFollowUpPerDay <= 0) {
-      invalidParams.frequencyOfFollowUpPerDay = this.frequencyOfFollowUpPerDay;
+      invalidOutbreakParams.push('frequencyOfFollowUpPerDay');
+    }
+    if (invalidOutbreakParams.length) {
+      errorMessage += `Following outbreak params: [${Object.keys(invalidOutbreakParams).join(',')}] should be greater than 0`;
     }
 
-    // stop follow up generation, if sanity checks failed
-    let invalidParamsNames = Object.keys(invalidParams);
-    if (invalidParamsNames.length) {
+    // parse start/end dates from request
+    let followupStartDate = genericHelpers.getUTCDate(data.startDate);
+    let followupEndDate = genericHelpers.getUTCDate(data.endDate);
+
+    // sanity checks for dates
+    let invalidFollowUpDates = [];
+    if (!followupStartDate.isValid()) {
+      invalidFollowUpDates.push('startDate');
+    }
+    if (!followupEndDate.isValid()) {
+      invalidFollowUpDates.push('endDate');
+    }
+    if (invalidFollowUpDates.length) {
+      errorMessage += `Follow up: [${Object.keys(invalidOutbreakParams).join(',')}] are not valid dates`;
+    }
+
+    // if the error message is not empty, stop the request
+    if (errorMessage) {
       return callback(
         app.utils.apiError.getError(
           'INVALID_GENERATE_FOLLOWUP_PARAMS',
           {
-            details: `Following outbreak params: [${invalidParamsNames.join(',')}] should be greater than 0`
+            details: errorMessage
           }
         )
       );
     }
 
-    // if no followup period was sent in request, assume its just for one day
-    data = data || {};
-    data.followUpPeriod = data.followUpPeriod || 1;
+    // check if 'targeted' flag exists in the request, if not default to true
+    // this flag will be set upon all generated follow ups
+    data.targeted = data.targeted || true;
 
     // cache outbreak's follow up options
     let outbreakFollowUpFreq = this.frequencyOfFollowUp;
@@ -1034,16 +1051,12 @@ module.exports = function (Outbreak) {
     // grouped per contact
     let generatedResponse = [];
 
-    // used for retrieving contacts that are within the configured follow up period
-    // and contacts that had inconclusive follow up period in the past
-    let now = genericHelpers.getUTCDate().toDate();
-
     // retrieve list of contacts that are eligible for follow up generation
     // and those that have last follow up inconclusive
     Promise
       .all([
-        FollowupGeneration.getContactsEligibleForFollowup(now),
-        FollowupGeneration.getContactsWithInconclusiveLastFollowUp(now)
+        FollowupGeneration.getContactsEligibleForFollowup(followupStartDate, followupEndDate),
+        FollowupGeneration.getContactsWithInconclusiveLastFollowUp(followupEndDate)
       ])
       .then((contactLists) => {
         // merge the lists of contacts
@@ -1089,11 +1102,14 @@ module.exports = function (Outbreak) {
                         .generateFollowupsForContact(
                           contact,
                           contact.eligibleTeams,
-                          data.followUpPeriod,
+                          {
+                            startDate: followupStartDate,
+                            endDate: followupEndDate
+                          },
                           outbreakFollowUpFreq,
                           outbreakFollowUpPerDay,
                           options,
-                          contact.inconclusive
+                          data.targeted
                         )
                         .then((followUps) => {
                           generatedResponse[index].followUps = followUps;

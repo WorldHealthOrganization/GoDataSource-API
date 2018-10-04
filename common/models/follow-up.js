@@ -91,7 +91,7 @@ module.exports = function (FollowUp) {
         // calculate follow up day, based on the contact's follow up period and the follow up date
         let calculateFollowUpDay = function () {
           // if follow up is not within configured start/end dates throw error
-          let startDate = moment(person.followUp.originalStartDate);
+          let startDate = moment(person.followUp.startDate);
           let endDate = moment(person.followUp.endDate);
           if (!moment(ctx.instance.date).startOf('day').isBetween(startDate, endDate, 'day', '[]')) {
             return next(app.utils.apiError.getError('INVALID_FOLLOW_UP_DATE', {
@@ -102,7 +102,7 @@ module.exports = function (FollowUp) {
 
           // set index based on the difference in days from start date until the follow up set date
           // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
-          ctx.instance.index = daysSince(person.followUp.originalStartDate, ctx.instance.date) + 1;
+          ctx.instance.index = daysSince(person.followUp.startDate, ctx.instance.date) + 1;
         };
 
         // if follow up period is before today

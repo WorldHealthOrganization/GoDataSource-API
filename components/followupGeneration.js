@@ -24,7 +24,7 @@ module.exports.getContactsWithInconclusiveLastFollowUp = function (date) {
         followUp: {
           neq: null
         },
-        'followUp.endDate': {
+        'followUp.startDate': {
           lt: date
         }
       }
@@ -43,17 +43,19 @@ module.exports.getContactsWithInconclusiveLastFollowUp = function (date) {
     });
 };
 
-// get contacts that are eligible for follow up generation
-// this means their follow up period is greater than passed date
-module.exports.getContactsEligibleForFollowup = function (date) {
+// get contacts that have follow up period between the passed start/end dates
+module.exports.getContactsEligibleForFollowup = function (startDate, endDate) {
   return App.models.contact
     .find({
       where: {
         followUp: {
           neq: null
         },
+        'followUp.startDate': {
+          gte: startDate
+        },
         'followUp.endDate': {
-          gte: date
+          lte: endDate
         }
       }
     });
@@ -121,29 +123,14 @@ module.exports.getContactFollowupEligibleTeams = function (contact, teams) {
 };
 
 // generate follow ups for a given passed period
-// if ignore period flag is set, then contact's follow up period is no longer checked
-// and follow ups are generated for the passed period no matter what
-// this flag is used for generating follow ups for contacts whose last follow up was inconclusive
-module.exports.generateFollowupsForContact = function (contact, teams, period, freq, freqPerDay, reqOpts, ignorePeriod) {
+module.exports.generateFollowupsForContact = function (contact, teams, period, freq, freqPerDay, reqOpts, targeted) {
   // list of follow up create promise functions that should be executed
   let followUpsToAdd = [];
   // list of follow ups that are in the future and should be deleted, as the newly generated will take their place
   let followUpsToDelete = [];
 
-  // last follow up day, based on the given period, starting from today
-  // doing this to not generate follow ups for today and next day in case period is 1
-  let lastToGenerateFollowUpDay = Helpers.getUTCDate().add(period <= 1 ? 0 : period, 'days');
-
-  if (!ignorePeriod) {
-    // if given follow up period is higher than the last incubation day, just use it as a threshold for generation
-    let lastIncubationDay = Helpers.getUTCDate(contact.followUp.endDate);
-    if (lastToGenerateFollowUpDay.diff(lastIncubationDay, 'days') > 0) {
-      lastToGenerateFollowUpDay = lastIncubationDay;
-    }
-  }
-
   // generate follow up, starting from today
-  for (let now = Helpers.getUTCDate(); now <= lastToGenerateFollowUpDay; now.add(freq, 'day')) {
+  for (let followUpDate = period.startDate; followUpDate <= period.endDate; followUpDate.add(freq, 'day')) {
     let generatedFollowUps = [];
     for (let i = 0; i < freqPerDay; i++) {
       generatedFollowUps.push(
@@ -152,24 +139,28 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
             // used to easily trace all follow ups for a given outbreak
             outbreakId: contact.outbreakId,
             personId: contact.id,
-            date: now.toDate(),
+            date: followUpDate.toDate(),
             performed: false,
+            targeted: targeted,
             // split the follow ups work equally across teams
             teamId: RoundRobin(teams),
           }, reqOpts)
       );
     }
 
-    // if there is generated follow ups on that day, delete it and re-create
-    let existingFollowups = contact.followUpsLists.filter((followUp) => Moment(followUp.date).isSame(now, 'd'));
-    if (existingFollowups.length) {
-      followUpsToDelete.push(
-        App.models.followUp.destroyAll({
-          id: {
-            inq: existingFollowups.map((f) => f.id)
-          }
-        })
-      );
+    // if there are follow ups on the same day and day is in the future
+    // delete them and then insert the newly generated
+    if (!followUpDate.isBefore(Helpers.getUTCDate())) {
+      let existingFollowups = contact.followUpsLists.filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
+      if (existingFollowups.length) {
+        followUpsToDelete.push(
+          App.models.followUp.destroyAll({
+            id: {
+              inq: existingFollowups.map((f) => f.id)
+            }
+          })
+        );
+      }
     }
 
     followUpsToAdd.push(...generatedFollowUps);

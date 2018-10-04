@@ -47,6 +47,10 @@
     "outbreakId": {
       "type": "string",
       "required": true
+    },
+    "targeted": {
+      "type": "boolean",
+      "required": true
     }
   },
   "indexes": {

@@ -2544,8 +2544,20 @@
       "accepts": [
         {
           "arg": "body",
-          "type": "object",
-          "description": "Follow up period in days. Property: followUpPeriod [number]",
+          "type": {
+            "startDate": {
+              "type": "date",
+              "required": true
+            },
+            "endDate": {
+              "type": "date",
+              "required": true
+            },
+            "targeted": {
+              "type": "boolean"
+            }
+          },
+          "description": "Follow up required period start/end dates and targeted optional flag.",
           "http": {
             "source": "body"
           },
