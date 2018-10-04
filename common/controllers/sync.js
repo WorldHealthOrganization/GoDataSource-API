@@ -119,7 +119,6 @@ module.exports = function (Sync) {
     let excludeList = [
       'systemSettings',
       'template',
-      'icon',
       'helpCategory',
       'auditLog'
     ];

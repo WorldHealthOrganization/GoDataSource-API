@@ -69,4 +69,13 @@ module.exports = function (Storage) {
       });
     });
   };
+
+  /**
+   * Resolves a relative path to a storage file
+   * This is needed because file paths that are stored using this model, are relative to this file
+   * @param relativePath
+   */
+  Storage.resolvePath = function (relativePath) {
+    return path.resolve(`${__dirname}/${relativePath}`);
+  };
 };
