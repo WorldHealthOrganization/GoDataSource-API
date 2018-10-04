@@ -10,6 +10,7 @@ const AdmZip = require('adm-zip');
 const SyncClient = require('../../components/syncClient');
 const asyncActionsSettings = require('../../server/config.json').sync.asyncActionsSettings;
 const _ = require('lodash');
+const Moment = require('moment');
 
 module.exports = function (Sync) {
   Sync.hasController = true;
@@ -169,7 +170,7 @@ module.exports = function (Sync) {
           }
 
           // archive file name
-          let archiveName = `${tmpDirName}/db_snapshot_${Date.now()}.zip`;
+          let archiveName = `${tmpDirName}/snapshot_${Moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
 
           // compress all collection files from the tmp dir into .zip file
           try {
