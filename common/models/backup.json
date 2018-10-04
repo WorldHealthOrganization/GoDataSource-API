@@ -65,7 +65,6 @@
       "permission": "ALLOW",
       "property": "restoreBackup"
     },
-
     {
       "principalType": "ROLE",
       "principalId": "write_sys_config",

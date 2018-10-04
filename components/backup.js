@@ -240,6 +240,16 @@ const restoreBackupFromFile = function (filePath, done) {
 const removeBackup = function (backup, callback) {
   return async.series([
     (done) => {
+      // remove the backup record
+      app.models.backup.deleteById(backup.id, (err) => {
+        if (err) {
+          app.logger.warn(`Failed to remove backup record: ${backup.id} from database. ${err}`);
+          return done(err);
+        }
+        return done();
+      });
+    },
+    (done) => {
       if (backup.location) {
         return fs.unlink(backup.location, (err) => {
           if (err) {
@@ -250,16 +260,6 @@ const removeBackup = function (backup, callback) {
         });
       }
       return done();
-    },
-    (done) => {
-      // remove the backup record
-      app.models.backup.deleteById(backup.id, (err) => {
-        if (err) {
-          app.logger.warn(`Failed to remove backup record: ${backup.id} from database. ${err}`);
-          return done(err);
-        }
-        return done();
-      });
     }
   ], (err) => callback(err));
 };
