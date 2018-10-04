@@ -151,42 +151,57 @@ const restoreBackupFromFile = function (filePath, done) {
                 // split filename into 'collection name' and 'extension'
                 let collectionName = fileName.split('.')[0];
 
-                // get collection reference of the mongodb driver
-                let collectionRef = connection.collection(dbSync.collectionsMap[collectionName]);
+                // restore a collection's record using raw mongodb connector
+                const restoreCollection = function () {
+                  // get collection reference of the mongodb driver
+                  let collectionRef = connection.collection(dbSync.collectionsMap[collectionName]);
 
-                // remove all the documents from the collection, then bulk insert the ones from the file
-                collectionRef.deleteMany({}, (err) => {
-                  // if delete fails, don't continue
-                  if (err) {
-                    app.logger.error(`Failed to delete database records of collection: ${collectionName}. ${err}`);
-                    return doneCollection(err);
-                  }
-
-                  // if there are no records in the files just
-                  // skip it
-                  if (!collectionRecords.length) {
-                    app.logger.debug(`Collection ${collectionName} has no records in the file. Skipping it.`);
-                    return doneCollection();
-                  }
-
-                  // create a bulk operation
-                  const bulk = collectionRef.initializeOrderedBulkOp();
-
-                  // insert all entries from the file in the collection
-                  collectionRecords.forEach((record) => {
-                    bulk.insert(record);
-                  });
-
-                  // execute the bulk operations
-                  bulk.execute((err) => {
+                  // remove all the documents from the collection, then bulk insert the ones from the file
+                  collectionRef.deleteMany({}, (err) => {
+                    // if delete fails, don't continue
                     if (err) {
-                      app.logger.error(`Failed to insert records for collection ${collectionName}. ${err}`);
-                      // stop at once, if any error has occurred
+                      app.logger.error(`Failed to delete database records of collection: ${collectionName}. ${err}`);
                       return doneCollection(err);
                     }
-                    return doneCollection();
+
+                    // if there are no records in the files just
+                    // skip it
+                    if (!collectionRecords.length) {
+                      app.logger.debug(`Collection ${collectionName} has no records in the file. Skipping it.`);
+                      return doneCollection();
+                    }
+
+                    // create a bulk operation
+                    const bulk = collectionRef.initializeOrderedBulkOp();
+
+                    // insert all entries from the file in the collection
+                    collectionRecords.forEach((record) => {
+                      bulk.insert(record);
+                    });
+
+                    // execute the bulk operations
+                    bulk.execute((err) => {
+                      if (err) {
+                        app.logger.error(`Failed to insert records for collection ${collectionName}. ${err}`);
+                        // stop at once, if any error has occurred
+                        return doneCollection(err);
+                      }
+                      return doneCollection();
+                    });
                   });
-                });
+                };
+
+                // copy collection linked files
+                if (dbSync.collectionsWithFiles.hasOwnProperty(collectionName)) {
+                  dbSync.importCollectionRelatedFiles(collectionName, tmpDirName, (err) => {
+                    if (err) {
+                      return doneCollection();
+                    }
+                    return restoreCollection();
+                  });
+                } else {
+                  return restoreCollection();
+                }
               } catch (parseError) {
                 app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
                 return doneCollection();

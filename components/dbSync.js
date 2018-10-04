@@ -2,6 +2,21 @@
 
 const _ = require('lodash');
 const helpers = require('./helpers');
+const mkdirp = require('mkdirp');
+const fs = require('fs');
+const path = require('path');
+const async = require('async');
+const ncp = require('ncp');
+
+// map of collection names and property name that matches a file on the disk
+// also directory path (relative to the project) that holds the files should be left unchanged
+const collectionsWithFiles = {
+  icon: {
+    prop: 'path',
+    srcDir: 'server/storage/icons',
+    targetDir: 'icons'
+  }
+};
 
 // map of collections and their given corresponding collection name in database
 const collectionsMap = {
@@ -331,6 +346,81 @@ const syncRecord = function (logger, model, record, options, done) {
   }
 };
 
+/**
+ * Include files that are related to records in the target collection into the temporary directory
+ * @param collectionName
+ * @param records
+ * @param tmpDir
+ * @param done
+ */
+const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, done) {
+  let app = require('../server/server');
+  let storageModel = app.models.storage;
+
+  // if there are no records, do not run anything
+  if (!records.length) {
+    return done();
+  }
+
+  // if collection has no related files configuration set up, stop
+  if (!collectionsWithFiles.hasOwnProperty(collectionName)) {
+    return done();
+  }
+
+  // get the configuration options
+  const collectionOpts = collectionsWithFiles[collectionName];
+
+  // create the temporary directory matching the configured path
+  return mkdirp(path.join(tmpDir, collectionOpts.targetDir), (err) => {
+    if (err) {
+      return done(err);
+    }
+
+    return async.parallelLimit(
+      records.map((record) => {
+        return function (doneRecord) {
+          let filePath = storageModel.resolvePath(record[collectionOpts.prop]);
+
+          // make sure the source file is okay
+          return fs.lstat(filePath, function (err) {
+            if (err) {
+              app.logger.warn(`Failed to export file: ${filePath}. Related record: ${record}.`, err);
+              return doneRecord();
+            }
+
+            // copy file in temporary directory
+            return fs.copyFile(
+              filePath,
+              path.join(tmpDir, collectionOpts.targetDir, path.basename(record[collectionOpts.prop])),
+              doneRecord
+            );
+          });
+        };
+      }),
+      // restrict maximum parallel runs, to be consistent with other usages
+      10,
+      done
+    );
+  });
+};
+
+// import related files from temporary directory to local storage
+const importCollectionRelatedFiles = function (collectionName, tmpDir, done) {
+  // if collection has no related files, stop
+  if (!collectionsWithFiles.hasOwnProperty(collectionName)) {
+    return done();
+  }
+
+  // get the property, directory names from the mapping
+  const collectionOpts = collectionsWithFiles[collectionName];
+
+  return ncp(
+    path.join(tmpDir, collectionOpts.targetDir),
+    path.join(process.cwd(), collectionOpts.srcDir),
+    done
+  );
+};
+
 module.exports = {
   collectionsMap: collectionsMap,
   collectionsFilterMap: collectionsFilterMap,
@@ -338,5 +428,8 @@ module.exports = {
   syncRecord: syncRecord,
   syncRecordFlags: syncRecordFlags,
   syncCollections: syncCollections,
-  syncModels: syncModels
+  syncModels: syncModels,
+  collectionsWithFiles: collectionsWithFiles,
+  exportCollectionRelatedFiles: exportCollectionRelatedFiles,
+  importCollectionRelatedFiles: importCollectionRelatedFiles
 };
