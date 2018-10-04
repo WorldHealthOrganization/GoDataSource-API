@@ -98,109 +98,138 @@ const restoreBackupFromFile = function (filePath, done) {
   // cache reference to mongodb connection
   let connection = app.dataSources.mongoDb.connector;
 
-  try {
-    // make sure the location path of the backups exists and is accessible
-    helpers.isPathOK(filePath);
-
-    // create a temporary directory to store the backup files
-    let tmpDir = tmp.dirSync({ unsafeCleanup: true });
-    let tmpDirName = tmpDir.name;
-
-    // extract backup archive
-    try {
-      let archive = new AdmZip(filePath);
-      archive.extractAllTo(tmpDirName);
-    } catch (zipError) {
-      app.logger.error(`Failed to extract zip archive: ${filePath}. ${zipError}`);
-      return done(zipError);
+  // establish database connection before anything
+  connection.connect((mongoDbConnError) => {
+    if (mongoDbConnError) {
+      app.logger.error('Failed to establish database connection');
+      return done(mongoDbConnError);
     }
 
-    // read backup files in the temporary dir
-    return fs.readdir(tmpDirName, (err, filenames) => {
-      if (err) {
-        return done(err);
+    try {
+      // make sure the location path of the backups exists and is accessible
+      helpers.isPathOK(filePath);
+
+      // create a temporary directory to store the backup files
+      let tmpDir = tmp.dirSync({ unsafeCleanup: true });
+      let tmpDirName = tmpDir.name;
+
+      // extract backup archive
+      try {
+        let archive = new AdmZip(filePath);
+        archive.extractAllTo(tmpDirName);
+      } catch (zipError) {
+        app.logger.error(`Failed to extract zip archive: ${filePath}`);
+        return done(zipError);
       }
 
-      // filter files that match a collection name
-      let collectionsFiles = filenames.filter((filename) => {
-        // split filename into 'collection name' and 'extension'
-        filename = filename.split('.');
-        return filename[0] && dbSync.collectionsMap.hasOwnProperty(filename[0]);
-      });
+      // read backup files in the temporary dir
+      return fs.readdir(tmpDirName, (err, filenames) => {
+        if (err) {
+          return done(err);
+        }
 
-      // start restoring the database using provided collection files
-      return async.series(
-        collectionsFiles.map((fileName) => (doneCollection) => {
-          let filePath = `${tmpDirName}/${fileName}`;
+        // filter files that match a collection name
+        let collectionsFiles = filenames.filter((filename) => {
+          // split filename into 'collection name' and 'extension'
+          filename = filename.split('.');
+          return filename[0] && dbSync.collectionsMap.hasOwnProperty(filename[0]);
+        });
 
-          return fs.readFile(
-            filePath,
-            {
-              encoding: 'utf8'
-            },
-            (err, data) => {
-              if (err) {
-                app.logger.error(`Failed to read collection file ${filePath}. ${err}`);
-                return doneCollection();
-              }
+        // start restoring the database using provided collection files
+        return async.series(
+          collectionsFiles.map((fileName) => (doneCollection) => {
+            let filePath = `${tmpDirName}/${fileName}`;
 
-              // parse file contents to JavaScript object
-              try {
-                let collectionRecords = JSON.parse(data);
+            return fs.readFile(
+              filePath,
+              {
+                encoding: 'utf8'
+              },
+              (err, data) => {
+                if (err) {
+                  app.logger.error(`Failed to read collection file ${filePath}`);
+                  return doneCollection(err);
+                }
 
                 // split filename into 'collection name' and 'extension'
                 let collectionName = fileName.split('.')[0];
 
-                // get collection reference of the mongodb driver
-                let collectionRef = connection.collection(dbSync.collectionsMap[collectionName]);
+                let collectionRef = null;
 
-                // remove all the documents from the collection, then bulk insert the ones from the file
-                collectionRef.deleteMany({}, (err) => {
-                  // if delete fails, don't continue
-                  if (err) {
-                    app.logger.error(`Failed to delete database records of collection: ${collectionName}. ${err}`);
-                    return doneCollection(err);
+                try {
+                  // get collection reference of the mongodb driver
+                  collectionRef = connection.collection(dbSync.collectionsMap[collectionName]);
+                } catch (mongoDbError) {
+                  app.logger.error(`Failed to establish connection to ${collectionName} collection`);
+                  return doneCollection(mongoDbError);
+                }
+
+                // parse file contents to JavaScript object
+                try {
+                  let collectionRecords = JSON.parse(data);
+
+                  // restore a collection's record using raw mongodb connector
+                  const restoreCollection = function () {
+                    // remove all the documents from the collection, then bulk insert the ones from the file
+                    collectionRef.deleteMany({}, (err) => {
+                      // if delete fails, don't continue
+                      if (err) {
+                        app.logger.error(`Failed to delete database records of collection: ${collectionName}`);
+                        return doneCollection(err);
+                      }
+
+                      // if there are no records in the files just
+                      // skip it
+                      if (!collectionRecords.length) {
+                        app.logger.debug(`Collection ${collectionName} has no records in the file. Skipping it`);
+                        return doneCollection();
+                      }
+
+                      // create a bulk operation
+                      const bulk = collectionRef.initializeOrderedBulkOp();
+
+                      // insert all entries from the file in the collection
+                      collectionRecords.forEach((record) => {
+                        bulk.insert(record);
+                      });
+
+                      // execute the bulk operations
+                      bulk.execute((err) => {
+                        if (err) {
+                          app.logger.error(`Failed to insert records for collection ${collectionName}`);
+                          // stop at once, if any error has occurred
+                          return doneCollection(err);
+                        }
+                        return doneCollection();
+                      });
+                    });
+                  };
+
+                  // copy collection linked files
+                  if (dbSync.collectionsWithFiles.hasOwnProperty(collectionName)) {
+                    dbSync.importCollectionRelatedFiles(collectionName, tmpDirName, (err) => {
+                      if (err) {
+                        return doneCollection();
+                      }
+                      return restoreCollection();
+                    });
+                  } else {
+                    return restoreCollection();
                   }
-
-                  // if there are no records in the files just
-                  // skip it
-                  if (!collectionRecords.length) {
-                    app.logger.debug(`Collection ${collectionName} has no records in the file. Skipping it.`);
-                    return doneCollection();
-                  }
-
-                  // create a bulk operation
-                  const bulk = collectionRef.initializeOrderedBulkOp();
-
-                  // insert all entries from the file in the collection
-                  collectionRecords.forEach((record) => {
-                    bulk.insert(record);
-                  });
-
-                  // execute the bulk operations
-                  bulk.execute((err) => {
-                    if (err) {
-                      app.logger.error(`Failed to insert records for collection ${collectionName}. ${err}`);
-                      // stop at once, if any error has occurred
-                      return doneCollection(err);
-                    }
-                    return doneCollection();
-                  });
-                });
-              } catch (parseError) {
-                app.logger.error(`Failed to parse collection file ${filePath}. ${parseError}`);
-                return doneCollection();
-              }
-            });
-        }),
-        (err) => done(err)
-      );
-    });
-
-  } catch (pathAccessError) {
-    app.logger.error(`Backup location: ${filePath} is not OK. ${pathAccessError}`);
-    return done(pathAccessError);
-  }
+                } catch (parseError) {
+                  app.logger.error(`Failed to parse collection file ${filePath}`);
+                  return doneCollection(parseError);
+                }
+              });
+          }),
+          (err) => done(err)
+        );
+      });
+    } catch (pathAccessError) {
+      app.logger.error(`Backup location: ${filePath} is not OK. ${pathAccessError}`);
+      return done(pathAccessError);
+    }
+  });
 };
 
 /**
@@ -211,17 +240,6 @@ const restoreBackupFromFile = function (filePath, done) {
 const removeBackup = function (backup, callback) {
   return async.series([
     (done) => {
-      if (backup.location) {
-        fs.unlink(backup.location, (err) => {
-          if (err) {
-            app.logger.warn(`Failed to remove ${backup.location} for ${backup.id}. ${err}`);
-            return done(err);
-          }
-          return done();
-        });
-      }
-    },
-    (done) => {
       // remove the backup record
       app.models.backup.deleteById(backup.id, (err) => {
         if (err) {
@@ -230,6 +248,18 @@ const removeBackup = function (backup, callback) {
         }
         return done();
       });
+    },
+    (done) => {
+      if (backup.location) {
+        return fs.unlink(backup.location, (err) => {
+          if (err) {
+            app.logger.warn(`Failed to remove ${backup.location} for ${backup.id}. ${err}`);
+            return done(err);
+          }
+          return done();
+        });
+      }
+      return done();
     }
   ], (err) => callback(err));
 };

@@ -10,6 +10,7 @@ const AdmZip = require('adm-zip');
 const SyncClient = require('../../components/syncClient');
 const asyncActionsSettings = require('../../server/config.json').sync.asyncActionsSettings;
 const _ = require('lodash');
+const Moment = require('moment');
 
 module.exports = function (Sync) {
   Sync.hasController = true;
@@ -149,9 +150,16 @@ module.exports = function (Sync) {
                     return callback(err);
                   }
 
-                  // Note: Encryption is not supported yet
-                  // create a file with collection name as file name, containing results
-                  fs.writeFile(`${tmpDirName}/${collectionName}.json`, JSON.stringify(records), callback);
+                  // export related files
+                  // if collection is not supported, it will be skipped
+                  dbSync.exportCollectionRelatedFiles(collectionName, records, tmpDirName, (err) => {
+                    if (err) {
+                      return callback(err);
+                    }
+                    // Note: Encryption is not supported yet
+                    // create a file with collection name as file name, containing results
+                    fs.writeFile(`${tmpDirName}/${collectionName}.json`, JSON.stringify(records), callback);
+                  });
                 });
               });
           };
@@ -162,7 +170,7 @@ module.exports = function (Sync) {
           }
 
           // archive file name
-          let archiveName = `${tmpDirName}/db_snapshot_${Date.now()}.zip`;
+          let archiveName = `${tmpDirName}/snapshot_${Moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
 
           // compress all collection files from the tmp dir into .zip file
           try {
@@ -253,6 +261,7 @@ module.exports = function (Sync) {
           // initialize array containing collections that need to be imported and map of collections that entirely fail on import
           let collectionsToImport = [];
           let failedCollections = {};
+          let failedCollectionsRelatedFiles = {};
 
           // read each file's contents and sync with database
           // not syncing in parallel to not load all collections in memory at once
@@ -284,46 +293,61 @@ module.exports = function (Sync) {
                     return doneCollection();
                   }
 
-                  // parse file contents to JavaScript object
-                  try {
-                    let collectionRecords = JSON.parse(data);
+                  // sync collection records in parallel
+                  const syncRecords = function (done) {
+                    // parse file contents to JavaScript object
+                    try {
+                      let collectionRecords = JSON.parse(data);
 
-                    return async.parallelLimit(
-                      collectionRecords.map((collectionRecord) => (doneRecord) => {
-                        // convert mongodb id notation to Loopback notation
-                        // to be consistent with external function calls
-                        collectionRecord.id = collectionRecord._id;
+                      return async.parallelLimit(
+                        collectionRecords.map((collectionRecord) => (doneRecord) => {
+                          // convert mongodb id notation to Loopback notation
+                          // to be consistent with external function calls
+                          collectionRecord.id = collectionRecord._id;
 
-                        // if needed for the collection, check for collectionRecord outbreakId
-                        if (outbreakIDs.length &&
-                          dbSync.collectionsImportFilterMap[collectionName] &&
-                          !dbSync.collectionsImportFilterMap[collectionName](collectionName, collectionRecord, outbreakIDs)) {
-                          app.logger.debug(`Sync ${syncLogEntry.id}: Skipped syncing record (collection: ${collectionName}, id: ${collectionRecord.id}) as it's outbreak ID is not accepted`);
-                          return doneRecord();
-                        }
-
-                        // sync the record with the main database
-                        dbSync.syncRecord(app.logger, model, collectionRecord, reqOptions, (err) => {
-                          if (err) {
-                            app.logger.debug(`Sync ${syncLogEntry.id}: Failed syncing record (collection: ${collectionName}, id: ${collectionRecord.id}). Error: ${err.message}`);
-                            failedIds[collectionName].push(`ID: "${collectionRecord.id}". Error: ${err.message}`);
+                          // if needed for the collection, check for collectionRecord outbreakId
+                          if (outbreakIDs.length &&
+                            dbSync.collectionsImportFilterMap[collectionName] &&
+                            !dbSync.collectionsImportFilterMap[collectionName](collectionName, collectionRecord, outbreakIDs)) {
+                            app.logger.debug(`Sync ${syncLogEntry.id}: Skipped syncing record (collection: ${collectionName}, id: ${collectionRecord.id}) as it's outbreak ID is not accepted`);
+                            return doneRecord();
                           }
-                          return doneRecord();
-                        });
-                      }), 10,
-                      () => {
-                        if (!failedIds[collectionName].length) {
-                          delete failedIds[collectionName];
-                        }
 
-                        return doneCollection();
+                          // sync the record with the main database
+                          dbSync.syncRecord(app.logger, model, collectionRecord, reqOptions, (err) => {
+                            if (err) {
+                              app.logger.debug(`Sync ${syncLogEntry.id}: Failed syncing record (collection: ${collectionName}, id: ${collectionRecord.id}). Error: ${err.message}`);
+                              failedIds[collectionName].push(`ID: "${collectionRecord.id}". Error: ${err.message}`);
+                            }
+                            return doneRecord();
+                          });
+                        }), 10,
+                        () => {
+                          if (!failedIds[collectionName].length) {
+                            delete failedIds[collectionName];
+                          }
+
+                          return done();
+                        }
+                      );
+                    } catch (parseError) {
+                      app.logger.error(`Sync ${syncLogEntry.id}: Failed to parse collection file ${filePath}. ${parseError}`);
+                      // keep failed collection with error
+                      failedCollections[collectionName] = `Failed to parse collection file ${filePath}. ${parseError}`;
+                      return done();
+                    }
+                  };
+
+                  // sync collection related files, if necessary
+                  if (dbSync.collectionsWithFiles.hasOwnProperty(collectionName)) {
+                    dbSync.importCollectionRelatedFiles(collectionName, tmpDirName, (err) => {
+                      if (err) {
+                        failedCollectionsRelatedFiles[collectionName] = `Failed to copy related files. ${err}`;
                       }
-                    );
-                  } catch (parseError) {
-                    app.logger.error(`Sync ${syncLogEntry.id}: Failed to parse collection file ${filePath}. ${parseError}`);
-                    // keep failed collection with error
-                    failedCollections[collectionName] = `Failed to parse collection file ${filePath}. ${parseError}`;
-                    return doneCollection();
+                      return syncRecords(doneCollection);
+                    });
+                  } else {
+                    return syncRecords(doneCollection);
                   }
                 });
             }),
@@ -364,6 +388,15 @@ module.exports = function (Sync) {
                 collectionsWithFailedRecords.forEach(function (collectionName) {
                   err += `Collection ${collectionName}. Records: ${failedIds[collectionName].join('; ')} `;
                 });
+              }
+
+              // some/all collections could fail when copying related files
+              if (failedCollectionsRelatedFiles.length) {
+                err = err || '';
+                err += 'Failed collections with related files: ';
+                for (let collectionName in failedCollectionsRelatedFiles) {
+                  err += `Collection ${collectionName}. Error: ${failedCollectionsRelatedFiles[collectionName]} `;
+                }
               }
 
               return callback(err ? Sync.getPartialError(err) : null);

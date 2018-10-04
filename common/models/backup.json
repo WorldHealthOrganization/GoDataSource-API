@@ -43,6 +43,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_sys_config",
       "permission": "ALLOW",
       "property": "createManualBackup"
@@ -55,9 +67,9 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_sys_config",
+      "principalId": "write_sys_config",
       "permission": "ALLOW",
-      "property": "find"
+      "property": "removeBackup"
     }
   ],
   "methods": {
@@ -84,10 +96,10 @@
           "type": "string"
         }
       ],
-      "description": "Manual backup",
+      "description": "Create backups",
       "http": {
         "verb": "post",
-        "path": "/create-backup"
+        "path": "/"
       }
     },
     "prototype.restoreBackup": {
@@ -110,8 +122,8 @@
       ],
       "description": "Remove backup",
       "http": {
-        "verb": "post",
-        "path": "/remove"
+        "verb": "del",
+        "path": "/"
       }
     }
   }
