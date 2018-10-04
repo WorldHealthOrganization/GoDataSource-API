@@ -393,9 +393,9 @@ module.exports = function (Sync) {
               if (failedCollectionsRelatedFiles.length) {
                 err = err || '';
                 err += 'Failed collections with related files: ';
-                collectionsWithFailedRecords.forEach(function (collectionName) {
-                  err += `Collection ${collectionName}. Error: ${collectionsWithFailedRecords[collectionName]} `;
-                });
+                for (let collectionName in failedCollectionsRelatedFiles) {
+                  err += `Collection ${collectionName}. Error: ${failedCollectionsRelatedFiles[collectionName]} `;
+                }
               }
 
               return callback(err ? Sync.getPartialError(err) : null);

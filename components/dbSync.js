@@ -376,7 +376,7 @@ const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, 
       return done(err);
     }
 
-    return async.parallel(
+    return async.parallelLimit(
       records.map((record) => {
         return function (doneRecord) {
           let filePath = storageModel.resolvePath(record[collectionOpts.prop]);
@@ -397,6 +397,8 @@ const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, 
           });
         };
       }),
+      // restrict maximum parallel runs, to be consistent with other usages
+      10,
       done
     );
   });
