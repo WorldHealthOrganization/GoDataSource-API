@@ -170,7 +170,7 @@ module.exports = function (Sync) {
           }
 
           // archive file name
-          let archiveName = `${tmpDirName}/backup_${Moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+          let archiveName = `${tmpDirName}/snapshot_${Moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
 
           // compress all collection files from the tmp dir into .zip file
           try {
