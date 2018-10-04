@@ -101,7 +101,7 @@ const restoreBackupFromFile = function (filePath, done) {
   // establish database connection before anything
   connection.connect((mongoDbConnError) => {
     if (mongoDbConnError) {
-      app.logger.error(`Failed to establish database connection`);
+      app.logger.error('Failed to establish database connection');
       return done(mongoDbConnError);
     }
 
