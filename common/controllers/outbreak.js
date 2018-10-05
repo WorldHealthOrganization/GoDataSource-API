@@ -41,7 +41,13 @@ module.exports = function (Outbreak) {
     'prototype.__delete__people',
     'prototype.__findById__people',
     'prototype.__updateById__people',
-    'prototype.__destroyById__people'
+    'prototype.__destroyById__people',
+    'prototype.__create__labResults',
+    'prototype.__delete__labResults',
+    'prototype.__findById__labResults',
+    'prototype.__updateById__labResults',
+    'prototype.__destroyById__labResults',
+
   ]);
 
   // attach search by relation property behavior on get contacts
@@ -52,7 +58,8 @@ module.exports = function (Outbreak) {
     'prototype.__get__followUps',
     'prototype.findCaseRelationships',
     'prototype.findContactRelationships',
-    'prototype.findEventRelationships'
+    'prototype.findEventRelationships',
+    'prototype.__get__labResults',
   ]);
 
   /**
@@ -5492,5 +5499,18 @@ module.exports = function (Outbreak) {
         callback(null, duplicatesNo);
       })
       .catch(callback);
+  };
+
+  /**
+   * Allows count requests with advanced filters (like the ones we can use on GET requests)
+   * to be made on outbreak/{id}/lab-results.
+   */
+  Outbreak.prototype.filteredCountLabResults = function (filter, callback) {
+    this.__get__labResults(filter, function (err, res) {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
+    });
   };
 };
