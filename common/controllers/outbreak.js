@@ -5511,7 +5511,7 @@ module.exports = function (Outbreak) {
               result.contact
                 .destroy()
                 .then(function () {
-                  app.logger.debug(`Contact successfully rolled back`);
+                  app.logger.debug('Contact successfully rolled back');
                 })
                 .catch(function (rollbackError) {
                   app.logger.debug(`Failed to rollback contact. Error: ${rollbackError}`);
@@ -5527,6 +5527,10 @@ module.exports = function (Outbreak) {
 
     // execute actions in parallel
     async.parallelLimit(actions, 10, function (error) {
+      if (error) {
+        return callback(error);
+      }
+
       if (!failedEntries.length) {
         // all entries added successfully
         callback(null, successfulEntries);
