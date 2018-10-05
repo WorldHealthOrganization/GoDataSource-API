@@ -234,9 +234,9 @@ module.exports = function (Person) {
     // get outbreak
     app.models.outbreak
       .findById(data.source.existing.outbreakId)
-      .then(function(outbreak) {
+      .then(function (outbreak) {
         // check for outbreak; should always exist
-        if(!outbreak) {
+        if (!outbreak) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
             model: app.models.outbreak.modelName,
             id: data.source.existing.outbreakId

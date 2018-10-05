@@ -5509,7 +5509,7 @@ module.exports = function (Outbreak) {
             if (result.contact) {
               // rollback contact
               result.contact
-                .destroy()
+                .destroy(options)
                 .then(function () {
                   app.logger.debug('Contact successfully rolled back');
                 })
