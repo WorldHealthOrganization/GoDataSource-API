@@ -61,7 +61,13 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "case": {
+      "type": "belongsTo",
+      "model": "case",
+      "foreignKey": "personId"
+    }
+  },
   "acls": [],
   "methods": {}
 }

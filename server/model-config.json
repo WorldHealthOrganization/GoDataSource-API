@@ -255,5 +255,9 @@
   "maps": {
     "dataSource": "memory",
     "public": true
+  },
+  "contactAndRelationship": {
+    "dataSource": null,
+    "public": false
   }
 }

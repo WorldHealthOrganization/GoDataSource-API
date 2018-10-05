@@ -397,7 +397,7 @@ module.exports = function (Relationship) {
           .then(function (personRecord) {
             // if the record is not found, stop with err
             if (!personRecord) {
-              throw app.logger.error(`Filed to trigger person record updates. Person (id: ${person.id}) not found.`);
+              throw app.logger.error(`Failed to trigger person record updates. Person (id: ${person.id}) not found.`);
             }
             // trigger record update
             return personRecord.updateAttributes({}, context.options);
@@ -419,7 +419,7 @@ module.exports = function (Relationship) {
             .then(function (contactRecord) {
               // if the record is not found, stop with err
               if (!contactRecord) {
-                throw app.logger.error(`Filed to trigger contact record updates. Contact (id: ${contactInPersons.id}) not found.`);
+                throw app.logger.error(`Failed to trigger contact record updates. Contact (id: ${contactInPersons.id}) not found.`);
               }
               // trigger record update
               return contactRecord.updateAttributes({}, context.options);
