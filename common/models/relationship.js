@@ -523,4 +523,91 @@ module.exports = function (Relationship) {
         });
       });
   };
+
+  /**
+   * Find or count relationship exposures or contacts for a relationship
+   * @param personId
+   * @param [filter]
+   * @param [isSource]
+   * @param [onlyCount]
+   */
+  Relationship.findOrCountPersonRelationshipExposuresOrContacts = function (personId, filter = {}, isSource = true, onlyCount = false) {
+    // find all relationships of the specified person where the person is source/target
+    return app.models.relationship
+      .find(app.utils.remote
+        .mergeFilters({
+          where: {
+            $elemMatch: {
+              'persons.id': personId,
+              [`persons.${isSource ? 'source' : 'target'}`]: true
+            }
+          },
+        }, filter.relationships || {})
+      )
+      .then(function (relationships) {
+        // keep a map of people and their relationships
+        const personRelationshipMap = {};
+        // build a list of other people (in the relationship) IDs
+        const otherPeopleIds = [];
+        // go through all relationships
+        relationships.forEach(function (relationship) {
+          // go trough all the people in the relationships
+          Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
+            // store other person's ID
+            if (person.id !== personId) {
+              otherPeopleIds.push(person.id);
+              // init the map for current person, if not already inited
+              if (!personRelationshipMap[person.id]) {
+                personRelationshipMap[person.id] = [];
+              }
+              // map relationship to current person
+              personRelationshipMap[person.id].push(relationship);
+            }
+          });
+        });
+        // build a filer for the other people
+        const peopleFilter = app.utils.remote
+          .mergeFilters({
+            where: {
+              id: {
+                inq: otherPeopleIds
+              }
+            },
+          }, filter || {});
+
+        // check if only need to count
+        if (onlyCount) {
+          return app.models.person
+            .count(peopleFilter.where);
+        }
+
+        // find other people
+        return app.models.person
+          .find(peopleFilter)
+          .then(function (people) {
+            // go through all the people
+            people.forEach(function (person) {
+              // attach relationships information to every person
+              person.relationships = personRelationshipMap[person.id];
+            });
+            return people;
+          });
+      });
+  };
+
+  Relationship.findPersonRelationshipExposures = function (personId, filter) {
+    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter, false);
+  };
+
+  Relationship.countPersonRelationshipExposures = function (personId, filter) {
+    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter, false, true);
+  };
+
+  Relationship.findPersonRelationshipContacts = function (personId, filter) {
+    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter);
+  };
+
+  Relationship.countPersonRelationshipContacts = function (personId, filter) {
+    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter, true, true);
+  };
 };
