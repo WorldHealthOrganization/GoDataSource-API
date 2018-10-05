@@ -3644,9 +3644,7 @@ module.exports = function (Outbreak) {
             }`
           }]
         }
-      }, filter || {}), {
-      disableSanitization: true
-    })
+      }, filter || {}), {disableSanitization: true})
       .then(function (people) {
         // loop through the people to add the inconsistencies array
         people.forEach(function (person, index) {
