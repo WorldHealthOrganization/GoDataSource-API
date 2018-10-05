@@ -20,7 +20,10 @@
     "where": {
       "type": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE"
     },
-    "order": ["lastName ASC", "firstName ASC"]
+    "order": [
+      "lastName ASC",
+      "firstName ASC"
+    ]
   },
   "properties": {
     "type": {
@@ -55,9 +58,15 @@
     "dateOfOutcome": {
       "type": "date"
     },
-    "isolationDates": ["dateRange"],
-    "hospitalizationDates": ["dateRange"],
-    "incubationDates": ["dateRange"],
+    "isolationDates": [
+      "dateRange"
+    ],
+    "hospitalizationDates": [
+      "dateRange"
+    ],
+    "incubationDates": [
+      "dateRange"
+    ],
     "deceased": {
       "type": "boolean",
       "default": false
