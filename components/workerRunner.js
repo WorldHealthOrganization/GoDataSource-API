@@ -23,8 +23,10 @@ function invokeWorkerMethod(workerName, method, args, callback) {
     // execute callback
     cb(error, result);
     // replace callback with no-op to prevent calling it multiple times
-    cb = function noOp(){};
+    cb = function noOp() {
+    };
   }
+
   // fork the worker
   const worker = fork(`${workersPath}/${workerName}`, [], {execArgv: []});
   // invoke it

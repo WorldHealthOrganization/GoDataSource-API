@@ -229,9 +229,30 @@ module.exports = function (Person) {
       // set a flag on context to trigger relationship updated due to significant changes in case classification (from/to discarded case)
       context.options.triggerRelationshipUpdates = true;
     }
-    next();
-  });
 
+    // validate visual ID template
+    // get outbreak
+    app.models.outbreak
+      .findById(data.source.existing.outbreakId)
+      .then(function (outbreak) {
+        // check for outbreak; should always exist
+        if (!outbreak) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.outbreak.modelName,
+            id: data.source.existing.outbreakId
+          });
+        }
+
+        // resolve visual ID
+        return app.models.outbreak.helpers
+          .resolvePersonVisualIdTemplate(outbreak, data.target.visualId, context.isNewInstance ? null : data.source.existing.id);
+      })
+      .then(function (resolvedVisualId) {
+        data.target.visualId = resolvedVisualId;
+        next();
+      })
+      .catch(next);
+  });
 
   /**
    * After save hooks

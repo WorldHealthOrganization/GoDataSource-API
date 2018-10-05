@@ -146,7 +146,7 @@ module.exports = function (Contact) {
         // if active relationships found
         if (relationshipInstance) {
           // set follow-up start date to be the same as relationship contact date
-          propsToUpdate.startDate = relationshipInstance.contactDate;
+          propsToUpdate.startDate = moment(relationshipInstance.contactDate).add(1, 'days');
           // if follow-up original start date was not previously set
           if (!propsToUpdate.originalStartDate) {
             // flag as an update
@@ -155,7 +155,7 @@ module.exports = function (Contact) {
             propsToUpdate.originalStartDate = propsToUpdate.startDate;
           }
           // set follow-up end date
-          propsToUpdate.endDate = moment(relationshipInstance.contactDate).add(outbreak.periodOfFollowup, 'days');
+          propsToUpdate.endDate = moment(propsToUpdate.startDate).add(outbreak.periodOfFollowup, 'days');
         }
         // check if contact instance should be updated (check if any property changed value)
         !shouldUpdate && ['startDate', 'endDate']

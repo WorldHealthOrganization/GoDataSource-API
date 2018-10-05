@@ -1156,6 +1156,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "createCaseMultipleContacts"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__get__labResults"
@@ -4709,6 +4715,48 @@
       "http": {
         "verb": "get",
         "path": "/people/possible-duplicates/count"
+      }
+    },
+    "prototype.createCaseMultipleContacts": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "data",
+          "type": [
+            "contactAndRelationship"
+          ],
+          "description": "Array containing pairs for contact + relationship",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "createResponse",
+          "type": [
+            "contactAndRelationship"
+          ],
+          "description": "Array of responses for the create actions",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Creates multiple contacts for a case.",
+      "http": {
+        "verb": "post",
+        "path": "/cases/:nk/contacts"
       }
     },
     "prototype.filteredCountLabResults": {
