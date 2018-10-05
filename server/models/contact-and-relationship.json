@@ -1,0 +1,23 @@
+{
+  "name": "contactAndRelationship",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "contact": {
+      "type": "contact"
+    },
+    "relationship": {
+      "type": "relationship"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
