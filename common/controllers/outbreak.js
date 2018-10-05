@@ -162,38 +162,44 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.exportFilteredFollowups = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
     let self = this;
-    const _filters = app.utils.remote.mergeFilters(
-      {
-        where: {
-          outbreakId: this.id,
-        }
-      },
-      filter || {});
-
-    // if encrypt password is not valid, remove it
-    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-      encryptPassword = null;
-    }
-
-    // make sure anonymizeFields is valid
-    if (!Array.isArray(anonymizeFields)) {
-      anonymizeFields = [];
-
-      // file must be either encrypted or anonymized
-      if (!encryptPassword) {
-        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
+    let _filters = {
+      where: {
+        outbreakId: this.id
       }
-    }
+    };
 
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, [], function (results, dictionary) {
-      // Prepare questionnaire answers for printing
-      results.forEach((followUp) => {
-        if (followUp.questionnaireAnswers) {
-          followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+    helpers.buildFollowUpCustomFilter(filter, this.id)
+      .then((customFilter) => {
+        if (customFilter && Object.keys(customFilter).length !== 0) {
+          // Merge submitted filter with custom filter
+          _filters = app.utils.remote.mergeFilters(customFilter, _filters);
         }
+
+        // if encrypt password is not valid, remove it
+        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+          encryptPassword = null;
+        }
+
+        // make sure anonymizeFields is valid
+        if (!Array.isArray(anonymizeFields)) {
+          anonymizeFields = [];
+
+          // file must be either encrypted or anonymized
+          if (!encryptPassword) {
+            return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
+          }
+        }
+
+        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, [], function (results, dictionary) {
+          // Prepare questionnaire answers for printing
+          results.forEach((followUp) => {
+            if (followUp.questionnaireAnswers) {
+              followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+            }
+          });
+          return Promise.resolve(results);
+        }, callback);
       });
-      return Promise.resolve(results);
-    }, callback);
   };
 
   /**
@@ -5496,56 +5502,20 @@ module.exports = function (Outbreak) {
 
   /**
    * Execute additional custom filter before generic GET LIST filter
+   * The additional accepted where clauses are whereCase, whereRelationship and whereContact
+   * The base filter's where property also accepts two additional properties: weekNumber and timeLastSeen
    */
   Outbreak.beforeRemote('prototype.__get__followUps', function (context, modelInstance, next) {
-    if (context.args.filter) {
-      let weekNumber = 0;
-      let timeFilter = '';
-      if (context.args.filter.weekNumber) {
-        weekNumber = context.args.filter.weekNumber;
-        delete context.args.filter.weekNumber;
-      }
-      if (context.args.filter.timeFilter) {
-        timeFilter = context.args.filter.timeFilter;
-      }
-      helpers.getContactIdsFromCustomFilters(context.args.filter, context.ctorArgs.id)
-        .then((contactIds) => {
-          if (contactIds) {
-            // Include the contact ids that we obtain in the existing filter
-            let additionalFilter = {
-              where: {
-                personId: {
-                  inq: contactIds
-                }
-              }
-            };
+    helpers.buildFollowUpCustomFilter(context.args.filter, context.ctorArgs.id)
+      .then((customFilter) => {
+        if (customFilter && Object.keys(customFilter).length !== 0) {
 
-            // If there was a week filter, make sure to request only follow-ups that are happening in
-            // the requested week of the follow-up period
-            if (weekNumber > 0) {
-              additionalFilter.where.index = {
-                between: [(weekNumber - 1) * 7 + 1, weekNumber * 7]
-              };
-            }
-
-            // If we have a time filter, make sure to request follow-ups that are scheduled after the requested
-            // date. The other requirements of the filter (having a last seen date before the one in the filter)
-            // has been handled in the getContactIdsFromCustomFilters function
-            if (timeFilter) {
-              additionalFilter.where.date = {
-                gt: timeFilter
-              };
-            }
-
-            // Merge submitted filter with custom filters
-            context.args.filter = app.utils.remote.mergeFilters(
-              additionalFilter,
-              context.args.filter || {});
-          }
-          next();
-        });
-    } else {
-      next();
-    }
+          // Merge submitted filter with custom filter
+          context.args.filter = app.utils.remote.mergeFilters(
+            customFilter,
+            context.args.filter || {});
+        }
+        next();
+      });
   });
 };

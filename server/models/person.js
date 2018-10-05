@@ -218,6 +218,9 @@ module.exports = function (Person) {
       (
         !context.isNewInstance &&
         data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+        && data.source.update
+        && data.source.update.classification
+        && data.source.existing.classification
         && data.source.existing.classification !== data.source.updated.classification
       ) &&
       (
