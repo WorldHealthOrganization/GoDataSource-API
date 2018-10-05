@@ -163,6 +163,11 @@
       "type": "hasMany",
       "model": "person",
       "foreignKey": "outbreakId"
+    },
+    "labResults": {
+      "type": "hasMany",
+      "model": "labResult",
+      "foreignKey": "outbreakId"
     }
   },
   "acls": [
@@ -1154,6 +1159,24 @@
       "principalId": "write_contact",
       "permission": "ALLOW",
       "property": "createCaseMultipleContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__get__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__count__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "filteredCountLabResults"
     }
   ],
   "methods": {
@@ -4734,6 +4757,28 @@
       "http": {
         "verb": "post",
         "path": "/cases/:nk/contacts"
+      }
+    },
+    "prototype.filteredCountLabResults": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of lab results that pass the filter",
+          "required": true
+        }
+      ],
+      "description": "Counts the lab results that pass a filter (which now can accept relations)",
+      "http": {
+        "verb": "get",
+        "path": "/lab-results/filtered-count"
       }
     }
   }
