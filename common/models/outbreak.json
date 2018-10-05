@@ -4703,12 +4703,9 @@
         },
         {
           "arg": "data",
-          "type": [{
-            "type": {
-              "contact": "contact",
-              "relationship": "relationship"
-            }
-          }],
+          "type": [
+            "contactAndRelationship"
+          ],
           "description": "Array containing pairs for contact + relationship",
           "http": {
             "source": "body"
@@ -4725,16 +4722,9 @@
       "returns": [
         {
           "arg": "createResponse",
-          "type": [{
-            "type": {
-              "contact": {
-                "type": "contact"
-              },
-              "relationship": {
-                "type": "relationship"
-              }
-            }
-          }],
+          "type": [
+            "contactAndRelationship"
+          ],
           "description": "Array of responses for the create actions",
           "root": true,
           "required": true

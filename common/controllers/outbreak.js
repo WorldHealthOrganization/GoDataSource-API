@@ -5435,21 +5435,30 @@ module.exports = function (Outbreak) {
     // initialize array of actions that will be executed in async mode
     let actions = [];
 
+    // initialize array of failed/successful entries
+    let failedEntries = [];
+    let successfulEntries = [];
+
     // loop through the pairs and create contact + relationship; relationship needs to be created after the contact is created
-    data.forEach(function (entry) {
+    data.forEach(function (entry, index) {
       actions.push(function (asyncCallback) {
         // check for contact + relationship presence
         if (!entry.contact || !entry.relationship) {
           // don't try to create the contact or relationship
           // will not error the entire request if an entry fails; will return error for each failed entry
-          return asyncCallback(null, {
-            contact: entry.contact || app.utils.apiError.getError('CONTACT_AND_RELATIONSHIP_REQUIRED'),
-            relationship: entry.relationship || app.utils.apiError.getError('CONTACT_AND_RELATIONSHIP_REQUIRED')
+          // add entry in the failed list
+          failedEntries.push({
+            recordNo: index,
+            error: app.utils.apiError.getError('CONTACT_AND_RELATIONSHIP_REQUIRED')
           });
+          return asyncCallback();
         }
 
         // initialize pair result
         let result = {};
+
+        // add outbreakId to contact and relationship
+        entry.contact.outbreakId = that.id;
 
         // create contact through loopback model functionality
         app.models.contact
@@ -5459,11 +5468,11 @@ module.exports = function (Outbreak) {
             result.contact = contact;
 
             // add contact information into relationship data
-            entry.relationship.persons = {
+            entry.relationship.persons = [{
               id: contact.id,
               type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
               target: true
-            };
+            }];
 
             // create relationship; using the action and not the loopback model functionality as there are actions to be done before the actual create
             return new Promise(function (resolve, reject) {
@@ -5480,28 +5489,53 @@ module.exports = function (Outbreak) {
             // add relationship to the result
             result.relationship = relationship;
 
-            asyncCallback(null, result);
+            // add pair to the success list
+            successfulEntries.push(Object.assign({
+              recordNo: index,
+            }, result));
+
+            asyncCallback();
           })
           .catch(function (err) {
+            // pair add failed; add entry to the failed list
+            failedEntries.push({
+              recordNo: index,
+              error: err
+            });
+
             // will not error the entire request if an entry fails; will return error for each failed entry
-            // check for what model the error was returned; if contact exists in result then the error is for relationship
-            // else the error is for contact and we will return the entire relationship entry
+            // check for what model the error was returned; if contact exists in result then the error is for relationship and we need to rollback contact
+            // else the error is for contact and nothing else needs to be done
             if (result.contact) {
-              result.relationship = err;
+              // rollback contact
+              result.contact
+                .destroy()
+                .then(function () {
+                  app.logger.debug(`Contact successfully rolled back`);
+                })
+                .catch(function (rollbackError) {
+                  app.logger.debug(`Failed to rollback contact. Error: ${rollbackError}`);
+                });
             } else {
-              result = {
-                contact: err,
-                relationship: entry.relationship
-              };
+              // nothing to do
             }
 
-            asyncCallback(null, result);
+            asyncCallback();
           });
       });
     });
 
-    async.parallelLimit(actions, 10, function (error, results) {
-      callback(error, results);
+    // execute actions in parallel
+    async.parallelLimit(actions, 10, function (error) {
+      if (!failedEntries.length) {
+        // all entries added successfully
+        callback(null, successfulEntries);
+      } else {
+        callback(app.utils.apiError.getError('MULTIPLE_CONTACTS_CREATION_PARTIAL_SUCCESS', {
+          failed: failedEntries,
+          success: successfulEntries
+        }));
+      }
     });
   };
 };
