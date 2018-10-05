@@ -3566,7 +3566,7 @@ module.exports = function (Outbreak) {
             }`
           }]
         }
-      }, filter || {}))
+      }, filter || {}), {disableSanitization: true})
       .then(function (people) {
         // loop through the people to add the inconsistencies array
         people.forEach(function (person, index) {
