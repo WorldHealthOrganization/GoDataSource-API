@@ -89,7 +89,7 @@ module.exports = function (FollowUp) {
       .findById(ctx.instance.personId)
       .then((person) => {
         // calculate follow up day, based on the contact's follow up period and the follow up date
-        let calculateFollowUpDay = function () {
+        let calculateFollowUpDay = function (next) {
           // if follow up is not within configured start/end dates throw error
           let startDate = moment(person.followUp.startDate);
           let endDate = moment(person.followUp.endDate);
@@ -103,22 +103,22 @@ module.exports = function (FollowUp) {
           // set index based on the difference in days from start date until the follow up set date
           // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
           ctx.instance.index = daysSince(person.followUp.startDate, ctx.instance.date) + 1;
+
+          return next();
         };
 
-        // if follow up period is before today
-        // this might be a follow up hook on a contact with inconclusive follow up period
-        if (moment(person.followUp.endDate).startOf('day').isBefore(moment(ctx.instance.date).startOf('day'))) {
-          // TODO: what to do for the action below for consequent calls ?
-          // TODO: consequent calls will return follow ups that are withing the follow up period
-          // TODO: it will not return the first follow up, before the generation began
-          // TODO: follow up date should be checked to be before this follow up date
-          // check if it's really inconclusive
+        // if contact's follow up period is over but a follow up has been added after that
+        // check if the contact's follow up period was inconclusive
+        // if so, find the follow up with the highest index and increment from there
+        // as if the period continues where it was left of
+        let contactFollowUpEndDate = moment(person.followUp.endDate).startOf('day');
+        if (contactFollowUpEndDate.isBefore(moment(ctx.instance.date).startOf('day'))) {
           app.models.followUp
             .find({
               where: {
                 personId: ctx.instance.personId,
                 date: {
-                  lt: moment(ctx.instance.date).startOf('day').toDate()
+                  lte: person.followUp.endDate
                 }
               },
               order: ['createdAt DESC'],
@@ -126,11 +126,10 @@ module.exports = function (FollowUp) {
             })
             .then((followUps) => {
               if (followUps.length && (!followUps[0].completed || followUps[0].lostToFollowUp)) {
-                // TODO: how to calculate index for consequent calls ?
-                // TODO: maybe try to retrieve the follow up with the highest index and increment from there
                 app.models.followUp
                   .find({
                     where: {
+                      personId: ctx.instance.personId,
                       index: {
                         gt: followUps[0].index
                       }
@@ -144,16 +143,15 @@ module.exports = function (FollowUp) {
                     } else {
                       ctx.instance.index = followUps[0].index + 1;
                     }
+                    return next();
                   });
               } else {
-                calculateFollowUpDay();
+                calculateFollowUpDay(next);
               }
             });
         } else {
-          calculateFollowUpDay();
+          calculateFollowUpDay(next);
         }
-
-        next();
       })
       .catch(next);
   });

@@ -8,7 +8,7 @@ const Moment = require('moment');
 
 // get contacts that has inconclusive follow up period (IN THE PAST)
 // this means the last follow up has one of the following flags set (completed, lost)
-module.exports.getContactsWithInconclusiveLastFollowUp = function (date) {
+module.exports.getContactsWithInconclusiveLastFollowUp = function (startDate) {
   return App.models.contact
     .find({
       include: [
@@ -24,8 +24,8 @@ module.exports.getContactsWithInconclusiveLastFollowUp = function (date) {
         followUp: {
           neq: null
         },
-        'followUp.startDate': {
-          lt: date
+        'followUp.endDate': {
+          lt: startDate
         }
       }
     })
@@ -44,7 +44,7 @@ module.exports.getContactsWithInconclusiveLastFollowUp = function (date) {
 };
 
 // get contacts that have follow up period between the passed start/end dates
-module.exports.getContactsEligibleForFollowup = function (startDate, endDate) {
+module.exports.getContactsEligibleForFollowup = function (startDate) {
   return App.models.contact
     .find({
       where: {
@@ -53,9 +53,6 @@ module.exports.getContactsEligibleForFollowup = function (startDate, endDate) {
         },
         'followUp.startDate': {
           gte: startDate
-        },
-        'followUp.endDate': {
-          lte: endDate
         }
       }
     });
@@ -123,14 +120,29 @@ module.exports.getContactFollowupEligibleTeams = function (contact, teams) {
 };
 
 // generate follow ups for a given passed period
-module.exports.generateFollowupsForContact = function (contact, teams, period, freq, freqPerDay, reqOpts, targeted) {
+// if ignore period flag is set, then contact's follow up period is no longer checked
+// and follow ups are generated for the passed period no matter what
+// this flag is used for generating follow ups for contacts whose last follow up was inconclusive
+module.exports.generateFollowupsForContact = function (contact, teams, period, freq, freqPerDay, reqOpts, targeted, ignorePeriod) {
   // list of follow up create promise functions that should be executed
   let followUpsToAdd = [];
   // list of follow ups that are in the future and should be deleted, as the newly generated will take their place
   let followUpsToDelete = [];
 
+  if (!ignorePeriod) {
+    // restrict follow up start/date to a maximum of contact's follow up period
+    let lastIncubationDay = Helpers.getUTCDate(contact.followUp.endDate);
+    let firstIncubationDay = Helpers.getUTCDate(contact.followUp.startDate);
+    if (period.endDate.isAfter(lastIncubationDay)) {
+      period.endDate = lastIncubationDay.clone();
+    }
+    if (period.startDate.isBefore(firstIncubationDay)) {
+      period.startDate = firstIncubationDay.clone();
+    }
+  }
+
   // generate follow up, starting from today
-  for (let followUpDate = period.startDate; followUpDate <= period.endDate; followUpDate.add(freq, 'day')) {
+  for (let followUpDate = period.startDate.clone(); followUpDate <= period.endDate; followUpDate.add(freq, 'day')) {
     let generatedFollowUps = [];
     for (let i = 0; i < freqPerDay; i++) {
       generatedFollowUps.push(
@@ -139,9 +151,10 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
             // used to easily trace all follow ups for a given outbreak
             outbreakId: contact.outbreakId,
             personId: contact.id,
-            date: followUpDate.toDate(),
+            date: followUpDate.toDate().toISOString(),
             performed: false,
             targeted: targeted,
+            inconclusive: ignorePeriod,
             // split the follow ups work equally across teams
             teamId: RoundRobin(teams),
           }, reqOpts)
@@ -166,5 +179,6 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     followUpsToAdd.push(...generatedFollowUps);
   }
 
-  return Promise.all(followUpsToAdd).then(() => Promise.all(followUpsToDelete));
+  return Promise.all(followUpsToAdd)
+    .then((createdFollowups) => Promise.all(followUpsToDelete).then(() => createdFollowups));
 };

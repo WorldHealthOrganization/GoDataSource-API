@@ -2544,19 +2544,8 @@
       "accepts": [
         {
           "arg": "body",
-          "type": {
-            "startDate": {
-              "type": "date",
-              "required": true
-            },
-            "endDate": {
-              "type": "date",
-              "required": true
-            },
-            "targeted": {
-              "type": "boolean"
-            }
-          },
+          "type": "object",
+          "model": "generateFollowup",
           "description": "Follow up required period start/end dates and targeted optional flag.",
           "http": {
             "source": "body"
