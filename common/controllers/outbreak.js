@@ -809,11 +809,71 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Retrieve the list of location + sublocations for the Outbreak
+   * Get hierarchical locations list for an outbreak
+   * @param filter Besides the default filter properties this request also accepts 'includeChildren' boolean on the first level in 'where'; this flag is taken into consideration only if other filters are applied
    * @param callback
    */
-  Outbreak.prototype.getLocations = function (callback) {
-    app.models.location.getSubLocationsWithDetails([this.locationId], [], callback);
+  Outbreak.prototype.getLocationsHierarchicalList = function (filter, callback) {
+    // define a list of location IDs used at outbreak level
+    let outbreakLocationIds;
+    // if the outbreak has a list of locations defined
+    if (Array.isArray(this.locations)) {
+      // get their IDs
+      outbreakLocationIds = this.locations.map(location => location.id);
+    }
+    // if there are no location IDs defined
+    if (!outbreakLocationIds) {
+      // use global (unrestricted) locations hierarchical list
+      return app.controllers.location.getHierarchicalList(filter, callback);
+    }
+    // otherwise get a list of all allowed location IDs (all locations and sub-locations for the configured locations)
+    app.models.location.getSubLocations(outbreakLocationIds, [], function (error, allowedLocationIds) {
+      // handle eventual errors
+      if (error) {
+        return callback(error);
+      }
+      // build an index for allowed locations (to find them faster)
+      const allowedLocationsIndex = {};
+      allowedLocationIds.forEach(function (locationId) {
+        allowedLocationsIndex[locationId] = true;
+      });
+      // build hierarchical list of locations, restricting locations to the list of allowed ones
+      return app.controllers.location.getHierarchicalList(
+        app.utils.remote.mergeFilters({
+          where: {
+            id: {
+              inq: allowedLocationIds
+            }
+          }
+        }, filter || {}),
+        function (error, hierarchicalList) {
+          // handle eventual errors
+          if (error) {
+            return callback(error);
+          }
+          // starting from the top, disable locations that are above the allowed locations
+          // hierarchical list will show all parent locations, even the ones above the selected level, mark those as disabled
+          (function disableDisallowedLocations(locationsList) {
+            // if there are locations to process
+            if (locationsList.length) {
+              // go through all of them
+              locationsList.forEach(function (location) {
+                // the location is not one of the allowed ones
+                if (!allowedLocationsIndex[location.location.id]) {
+                  // mark it as disabled
+                  location.location.disabled = true;
+                  // continue checking children
+                  if (Array.isArray(location.children)) {
+                    disableDisallowedLocations(location.children);
+                  }
+                }
+              });
+            }
+          })(hierarchicalList);
+          // return processed hierarchical location list
+          callback(null, hierarchicalList);
+        });
+    });
   };
 
   /**
@@ -5561,6 +5621,32 @@ module.exports = function (Outbreak) {
       }
       callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
     });
+  };
+
+  /**
+   * Restore a deleted outbreak
+   * @param outbreakId
+   * @param options
+   * @param callback
+   */
+  Outbreak.restoreOutbreak = function (outbreakId, options, callback) {
+    Outbreak
+      .findOne({
+        deleted: true,
+        where: {
+          id: outbreakId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: Outbreak.modelName, id: outbreakId});
+        }
+
+        // undo outbreak delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
   };
 
   /**

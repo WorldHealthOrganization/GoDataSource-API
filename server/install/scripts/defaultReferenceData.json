@@ -329,5 +329,18 @@
     "Yemen",
     "Zambia",
     "Zimbabwe"
+  ],
+  "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL": [
+    "Admin Level 0",
+    "Admin Level 1",
+    "Admin Level 2",
+    "Admin Level 3",
+    "Admin Level 4",
+    "Admin Level 5",
+    "Admin Level 6",
+    "Admin Level 7",
+    "Admin Level 8",
+    "Admin Level 9",
+    "Admin Level 10"
   ]
 }

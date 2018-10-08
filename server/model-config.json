@@ -260,6 +260,10 @@
     "dataSource": null,
     "public": false
   },
+  "linkedLocation": {
+    "dataSource": null,
+    "public": false
+  },
   "exposureOrContact": {
     "dataSource": null,
     "public": false
