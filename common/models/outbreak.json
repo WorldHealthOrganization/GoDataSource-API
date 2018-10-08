@@ -1177,6 +1177,78 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "filteredCountLabResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "findCaseRelationshipExposures"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCaseRelationshipExposures"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "findCaseRelationshipContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCaseRelationshipContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "findContactRelationshipExposures"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactRelationshipExposures"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "findContactRelationshipContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactRelationshipContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "findEventRelationshipExposures"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countEventRelationshipExposures"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "findEventRelationshipContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countEventRelationshipContacts"
     }
   ],
   "methods": {
@@ -4779,6 +4851,348 @@
       "http": {
         "verb": "get",
         "path": "/lab-results/filtered-count"
+      }
+    },
+    "prototype.findCaseRelationshipExposures": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "exposures",
+          "type": [
+            "exposureOrContact"
+          ],
+          "description": "Relationship exposures of a case",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries relationship exposures of case.",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/relationships/exposures"
+      }
+    },
+    "prototype.countCaseRelationshipExposures": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationship exposures (that pass the filter) of a case",
+          "required": true
+        }
+      ],
+      "description": "Counts the relationship exposures that pass a filter of a case",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/relationships/exposures/filtered-count"
+      }
+    },
+    "prototype.findCaseRelationshipContacts": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "contacts",
+          "type": [
+            "exposureOrContact"
+          ],
+          "description": "Relationship contacts of a case",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries relationship contacts of case.",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/relationships/contacts"
+      }
+    },
+    "prototype.countCaseRelationshipContacts": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationship contacts (that pass the filter) of a case",
+          "required": true
+        }
+      ],
+      "description": "Counts the relationship contacts that pass a filter of a case",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/relationships/contacts/filtered-count"
+      }
+    },
+    "prototype.findContactRelationshipExposures": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "exposures",
+          "type": [
+            "exposureOrContact"
+          ],
+          "description": "Relationship exposures of a contact",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries relationship exposures of contact.",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/relationships/exposures"
+      }
+    },
+    "prototype.countContactRelationshipExposures": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationship exposures (that pass the filter) of a contact",
+          "required": true
+        }
+      ],
+      "description": "Counts the relationship exposures that pass a filter of a contact",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/relationships/exposures/filtered-count"
+      }
+    },
+    "prototype.findContactRelationshipContacts": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "contacts",
+          "type": [
+            "exposureOrContact"
+          ],
+          "description": "Relationship contacts of a contact",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries relationship contacts of contacts.",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/relationships/contacts"
+      }
+    },
+    "prototype.countContactRelationshipContacts": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationship contacts (that pass the filter) of a contact",
+          "required": true
+        }
+      ],
+      "description": "Counts the relationship contacts that pass a filter of a contact",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/relationships/contacts/filtered-count"
+      }
+    },
+    "prototype.findEventRelationshipExposures": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "exposures",
+          "type": [
+            "exposureOrContact"
+          ],
+          "description": "Relationship exposures of a event",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries relationship exposures of event.",
+      "http": {
+        "verb": "get",
+        "path": "/events/:nk/relationships/exposures"
+      }
+    },
+    "prototype.countEventRelationshipExposures": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationship exposures (that pass the filter) of a event",
+          "required": true
+        }
+      ],
+      "description": "Counts the relationship exposures that pass a filter of a event",
+      "http": {
+        "verb": "get",
+        "path": "/events/:nk/relationships/exposures/filtered-count"
+      }
+    },
+    "prototype.findEventRelationshipContacts": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "contacts",
+          "type": [
+            "exposureOrContact"
+          ],
+          "description": "Relationship contacts of a event",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries relationship contacts of event.",
+      "http": {
+        "verb": "get",
+        "path": "/events/:nk/relationships/contacts"
+      }
+    },
+    "prototype.countEventRelationshipContacts": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationship contacts (that pass the filter) of a event",
+          "required": true
+        }
+      ],
+      "description": "Counts the relationship contacts that pass a filter of a event",
+      "http": {
+        "verb": "get",
+        "path": "/events/:nk/relationships/contacts/filtered-count"
       }
     }
   }

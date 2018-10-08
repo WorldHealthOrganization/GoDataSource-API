@@ -5614,7 +5614,7 @@ module.exports = function (Outbreak) {
    * @param filter
    * @param callback
    */
-  Outbreak.prototype.findCaseRelationshipContacts = function (caseId, filter, callback) {
+  Outbreak.prototype.countCaseRelationshipContacts = function (caseId, filter, callback) {
     app.models.relationship
       .countPersonRelationshipContacts(caseId, filter)
       .then(function (contacts) {
@@ -5704,7 +5704,7 @@ module.exports = function (Outbreak) {
    * @param filter
    * @param callback
    */
-  Outbreak.prototype.findEventRelationshipExposures = function (eventId, filter, callback) {
+  Outbreak.prototype.countEventRelationshipExposures = function (eventId, filter, callback) {
     app.models.relationship
       .countPersonRelationshipExposures(eventId, filter)
       .then(function (exposures) {

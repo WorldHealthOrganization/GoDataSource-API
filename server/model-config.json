@@ -259,5 +259,9 @@
   "contactAndRelationship": {
     "dataSource": null,
     "public": false
+  },
+  "exposureOrContact": {
+    "dataSource": null,
+    "public": false
   }
 }

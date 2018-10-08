@@ -537,9 +537,11 @@ module.exports = function (Relationship) {
       .find(app.utils.remote
         .mergeFilters({
           where: {
-            $elemMatch: {
-              'persons.id': personId,
-              [`persons.${isSource ? 'source' : 'target'}`]: true
+            persons: {
+              elemMatch: {
+                id: personId,
+                [isSource ? 'source' : 'target']: true
+              }
             }
           },
         }, filter.relationships || {})
@@ -595,18 +597,42 @@ module.exports = function (Relationship) {
       });
   };
 
+  /**
+   * Find relationship exposures for a person
+   * @param personId
+   * @param filter
+   * @return {*}
+   */
   Relationship.findPersonRelationshipExposures = function (personId, filter) {
     return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter, false);
   };
 
+  /**
+   * Count relationship exposures for a person
+   * @param personId
+   * @param filter
+   * @return {*}
+   */
   Relationship.countPersonRelationshipExposures = function (personId, filter) {
     return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter, false, true);
   };
 
+  /**
+   * Find relationship contacts for a person
+   * @param personId
+   * @param filter
+   * @return {*}
+   */
   Relationship.findPersonRelationshipContacts = function (personId, filter) {
     return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter);
   };
 
+  /**
+   * Count relationship contacts for a person
+   * @param personId
+   * @param filter
+   * @return {*}
+   */
   Relationship.countPersonRelationshipContacts = function (personId, filter) {
     return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter, true, true);
   };
