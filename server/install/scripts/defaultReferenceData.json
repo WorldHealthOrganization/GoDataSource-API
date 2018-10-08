@@ -125,6 +125,11 @@
     "Usual Place of Residence",
     "Other"
   ],
+  "LNG_REFERENCE_DATA_CONTACT_FOLLOW_UP_STATUS_TYPE": [
+    "Under Follow Up",
+    "Follow Up Completed",
+    "Lost To Follow Up"
+  ],
   "LNG_REFERENCE_DATA_CATEGORY_COUNTRY": [
     "Afghanistan",
     "Albania",

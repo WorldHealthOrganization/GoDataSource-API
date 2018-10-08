@@ -88,70 +88,11 @@ module.exports = function (FollowUp) {
     app.models.person
       .findById(ctx.instance.personId)
       .then((person) => {
-        // calculate follow up day, based on the contact's follow up period and the follow up date
-        let calculateFollowUpDay = function (next) {
-          // if follow up is not within configured start/end dates throw error
-          let startDate = moment(person.followUp.startDate);
-          let endDate = moment(person.followUp.endDate);
-          if (!moment(ctx.instance.date).startOf('day').isBetween(startDate, endDate, 'day', '[]')) {
-            return next(app.utils.apiError.getError('INVALID_FOLLOW_UP_DATE', {
-              startDate: startDate,
-              endDate: endDate
-            }));
-          }
+        // set index based on the difference in days from start date until the follow up set date
+        // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
+        ctx.instance.index = daysSince(moment(person.followUp.startDate), ctx.instance.date) + 1;
 
-          // set index based on the difference in days from start date until the follow up set date
-          // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
-          ctx.instance.index = daysSince(person.followUp.startDate, ctx.instance.date) + 1;
-
-          return next();
-        };
-
-        // if contact's follow up period is over but a follow up has been added after that
-        // check if the contact's follow up period was inconclusive
-        // if so, find the follow up with the highest index and increment from there
-        // as if the period continues where it was left of
-        let contactFollowUpEndDate = moment(person.followUp.endDate).startOf('day');
-        if (contactFollowUpEndDate.isBefore(moment(ctx.instance.date).startOf('day'))) {
-          app.models.followUp
-            .find({
-              where: {
-                personId: ctx.instance.personId,
-                date: {
-                  lte: person.followUp.endDate
-                }
-              },
-              order: ['createdAt DESC'],
-              limit: 1
-            })
-            .then((followUps) => {
-              if (followUps.length && (!followUps[0].completed || followUps[0].lostToFollowUp)) {
-                app.models.followUp
-                  .find({
-                    where: {
-                      personId: ctx.instance.personId,
-                      index: {
-                        gt: followUps[0].index
-                      }
-                    },
-                    order: ['index DESC'],
-                    limit: 1
-                  })
-                  .then((higherIndexFollowUps) => {
-                    if (higherIndexFollowUps.length) {
-                      ctx.instance.index = higherIndexFollowUps[0].index + 1;
-                    } else {
-                      ctx.instance.index = followUps[0].index + 1;
-                    }
-                    return next();
-                  });
-              } else {
-                calculateFollowUpDay(next);
-              }
-            });
-        } else {
-          calculateFollowUpDay(next);
-        }
+        return next();
       })
       .catch(next);
   });

@@ -44,16 +44,97 @@ module.exports.getContactsWithInconclusiveLastFollowUp = function (startDate) {
 };
 
 // get contacts that have follow up period between the passed start/end dates
-module.exports.getContactsEligibleForFollowup = function (startDate) {
+module.exports.getContactsEligibleForFollowup = function (startDate, endDate) {
   return App.models.contact
     .find({
       where: {
-        followUp: {
-          neq: null
-        },
-        'followUp.startDate': {
-          gte: startDate
-        }
+        and: [
+          {
+            followUp: {
+              neq: null
+            }
+          },
+          {
+            or: [
+              {
+                // follow up period is inside contact's follow up period
+                and: [
+                  {
+                    'followUp.startDate': {
+                      lte: startDate
+                    }
+                  },
+                  {
+                    'followUp.endDate': {
+                      gte: endDate
+                    }
+                  }
+                ]
+              },
+              {
+                // period starts before contact's start date but ends before contact's end date
+                and: [
+                  {
+                    'followUp.startDate': {
+                      gte: startDate
+                    }
+                  },
+                  {
+                    'followUp.startDate': {
+                      lte: endDate
+                    }
+                  },
+                  {
+                    'followUp.endDate': {
+                      gte: endDate
+                    }
+                  }
+                ]
+              },
+              {
+                // period starts before contact's end date and after contact's start date
+                // but stops after contact's end date
+                and: [
+                  {
+                    'followUp.startDate': {
+                      lte: startDate
+                    }
+                  },
+                  {
+                    'followUp.endDate': {
+                      gte: startDate
+                    }
+                  },
+                  {
+                    'followUp.endDate': {
+                      lte: endDate
+                    }
+                  }
+                ]
+              },
+              {
+                // contact's period is inside follow up period
+                and: [
+                  {
+                    'followUp.startDate': {
+                      lte: startDate
+                    }
+                  },
+                  {
+                    'followUp.endDate': {
+                      gte: startDate
+                    }
+                  },
+                  {
+                    'followUp.endDate': {
+                      lte: endDate
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     });
 };
@@ -130,9 +211,10 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
   let followUpsToDelete = [];
 
   if (!ignorePeriod) {
+    // if passed period is higher than contact's follow up period
     // restrict follow up start/date to a maximum of contact's follow up period
-    let lastIncubationDay = Helpers.getUTCDate(contact.followUp.endDate);
     let firstIncubationDay = Helpers.getUTCDate(contact.followUp.startDate);
+    let lastIncubationDay = Helpers.getUTCDate(contact.followUp.endDate);
     if (period.endDate.isAfter(lastIncubationDay)) {
       period.endDate = lastIncubationDay.clone();
     }
@@ -144,7 +226,20 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
   // generate follow up, starting from today
   for (let followUpDate = period.startDate.clone(); followUpDate <= period.endDate; followUpDate.add(freq, 'day')) {
     let generatedFollowUps = [];
-    for (let i = 0; i < freqPerDay; i++) {
+
+    // number of follow ups to be generated per day
+    let numberOfFollowUpsPerDay = freqPerDay;
+
+    // check if the follow up date is in the past
+    // if so, check if the number of existing follow ups is the same as the generate frequency per day
+    // if so, do not generate any follow ups
+    if (followUpDate.isBefore(Helpers.getUTCDate())) {
+      let followUpsInThisDay = contact.followUpsLists
+        .filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
+      numberOfFollowUpsPerDay = numberOfFollowUpsPerDay - followUpsInThisDay.length;
+    }
+
+    for (let i = 0; i < numberOfFollowUpsPerDay; i++) {
       generatedFollowUps.push(
         App.models.followUp
           .create({
@@ -154,7 +249,6 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
             date: followUpDate.toDate().toISOString(),
             performed: false,
             targeted: targeted,
-            inconclusive: ignorePeriod,
             // split the follow ups work equally across teams
             teamId: RoundRobin(teams),
           }, reqOpts)

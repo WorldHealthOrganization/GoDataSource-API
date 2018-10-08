@@ -1055,8 +1055,8 @@ module.exports = function (Outbreak) {
     // and those that have last follow up inconclusive
     Promise
       .all([
-        FollowupGeneration.getContactsEligibleForFollowup(data.startDate),
-        FollowupGeneration.getContactsWithInconclusiveLastFollowUp(data.startDate)
+        FollowupGeneration.getContactsEligibleForFollowup(followupStartDate.toDate(), followupEndDate.toDate()),
+        FollowupGeneration.getContactsWithInconclusiveLastFollowUp(followupStartDate.toDate())
       ])
       .then((contactLists) => {
         // merge the lists of contacts
