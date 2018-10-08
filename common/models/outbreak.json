@@ -25,8 +25,12 @@
     "countries": {
       "type": [
         "country"
-      ],
-      "required": true
+      ]
+    },
+    "locations": {
+      "type": [
+        "linkedLocation"
+      ]
     },
     "startDate": {
       "type": "date",
@@ -48,6 +52,7 @@
     "frequencyOfFollowUp": {
       "type": "number",
       "required": true,
+      "default": 1,
       "description": "Frequency of follow ups in days (once every X days/daily)"
     },
     "frequencyOfFollowUpPerDay": {
@@ -516,7 +521,7 @@
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
-      "property": "getLocations"
+      "property": "getLocationsHierarchicalList"
     },
     {
       "principalType": "ROLE",
@@ -1177,6 +1182,12 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "filteredCountLabResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "restoreOutbreak"
     }
   ],
   "methods": {
@@ -1859,23 +1870,40 @@
         "path": "/cases/:nk/convert-to-contact"
       }
     },
-    "prototype.getLocations": {
-      "accepts": [],
+    "prototype.getLocationsHierarchicalList": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'includeChildren' boolean on the first level in 'where'; this flag is taken into consideration only if other filters are applied"
+        }
+      ],
       "returns": [
         {
           "arg": "locations",
           "type": [
-            "location"
+            {
+              "type": {
+                "location": "location",
+                "children": [
+                  {
+                    "type": {
+                      "location": "location",
+                      "children": []
+                    }
+                  }
+                ]
+              }
+            }
           ],
-          "description": "Locations for the Outbreak",
           "root": true,
           "required": true
         }
       ],
-      "description": "Retrieve the list of location + sublocations for the Outbreak",
+      "description": "Get hierarchical list of locations for an outbreak.",
       "http": {
         "verb": "get",
-        "path": "/locations"
+        "path": "/locations/hierarchical"
       }
     },
     "prototype.restoreCase": {
@@ -4779,6 +4807,34 @@
       "http": {
         "verb": "get",
         "path": "/lab-results/filtered-count"
+      }
+    },
+    "restoreOutbreak": {
+      "accepts": [
+        {
+          "arg": "id",
+          "type": "string",
+          "description": "Outbreak ID"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "outbreak",
+          "type": "outbreak",
+          "description": "Outbreak",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted outbreak.",
+      "http": {
+        "verb": "post",
+        "path": "/:id/restore"
       }
     }
   }

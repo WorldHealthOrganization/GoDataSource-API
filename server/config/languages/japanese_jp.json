@@ -464,7 +464,7 @@
     },
     "uiOutbreakFields": {
       "LNG_OUTBREAK_FIELD_LABEL_DAYS_NEW_CONTACT": "日本の Number of days new contact",
-      "LNG_OUTBREAK_FIELD_LABEL_NAME": "日本の Name",
+      "LNG_OUTBREAK_FIELD_LABEL_NAME": "日本の Outbreak Name",
       "LNG_OUTBREAK_FIELD_LABEL_DISEASE": "日本の Disease",
       "LNG_OUTBREAK_FIELD_LABEL_COUNTRIES": "日本の Countries",
       "LNG_OUTBREAK_FIELD_LABEL_COUNTRY_ID": "日本の Country",
@@ -473,7 +473,7 @@
       "LNG_OUTBREAK_FIELD_LABEL_ACTIVE": "日本の Active?",
       "LNG_OUTBREAK_FIELD_LABEL_DESCRIPTION": "日本の Description",
       "LNG_OUTBREAK_FIELD_LABEL_DURATION_FOLLOWUP_DAYS": "日本の Duration for the follow-up ( days )",
-      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY": "日本の Follow-up frequency",
+      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY": "日本の Interval between Follow Ups (days)",
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY_PER_DAY": "日本の Follow-up frequency per day",
       "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK": "日本の Case Id Mask",
       "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK_TOOLTIP": "日本の Example of mask: RX-YYYY@@@000999&&&. It will generate Ids in the range: RX-YYYY@@@000001&&& and RX-YYYY@@@000999&&&, where YYYY represents reporting year, @@@ a combination of 3 letters and 000 a combination of 3 digits and &&& a combination of (RegExp safe) symbols",
@@ -772,7 +772,8 @@
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION": "日本の Occupation",
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE": "日本の Document Type",
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE": "日本の Exposure Type",
-      "LNG_REFERENCE_DATA_CATEGORY_DISEASE": "日本の Disease"
+      "LNG_REFERENCE_DATA_CATEGORY_DISEASE": "日本の Disease",
+      "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL": "日本の Location Geographical Level"
     },
     "uiReferenceDataCategoryFields": {
       "LNG_REFERENCE_DATA_CATEGORY_FIELD_LABEL_CATEGORY_NAME": "日本の Category Name",
@@ -1113,6 +1114,30 @@
       "LNG_SYNC_STATUS_SUCCESS": "日本の Success",
       "LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS": "日本の Success with warnings",
       "LNG_SYNC_STATUS_FAILED": "日本の Failed"
+    },
+    "locationGeographicalLevel": {
+      "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_0": "日本の Admin Level 0",
+      "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_1": "日本の Admin Level 1",
+      "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_2": "日本の Admin Level 2",
+      "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_3": "日本の Admin Level 3",
+      "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_4": "日本の Admin Level 4",
+      "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_5": "日本の Admin Level 5",
+      "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_6": "日本の Admin Level 6",
+      "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_7": "日本の Admin Level 7",
+      "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_8": "日本の Admin Level 8",
+      "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_9": "日本の Admin Level 9",
+      "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_10": "日本の Admin Level 10"
+    },
+    "locationFields": {
+      "LNG_LOCATION_FIELD_LABEL_NAME": "日本の Name",
+      "LNG_LOCATION_FIELD_LABEL_SYNONYMS": "日本の Synonyms",
+      "LNG_LOCATION_FIELD_LABEL_ACTIVE": "日本の Active",
+      "LNG_LOCATION_FIELD_LABEL_POPULATION_DENSITY": "日本の Population Density",
+      "LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION_ID": "日本の Parent Location",
+      "LNG_LOCATION_FIELD_LABEL_GEO_LOCATION": "日本の Geo-Location",
+      "LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT": "日本の Lat",
+      "LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG": "日本の Lng",
+      "LNG_LOCATION_FIELD_LABEL_GEOGRAPHICAL_LEVEL_ID": "日本の Geographical Level"
     }
   }
 }

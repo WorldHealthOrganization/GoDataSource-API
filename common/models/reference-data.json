@@ -41,7 +41,8 @@
         "LNG_REFERENCE_DATA_CATEGORY_SOCIAL_RELATIONSHIP_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE",
-        "LNG_REFERENCE_DATA_CATEGORY_COUNTRY"
+        "LNG_REFERENCE_DATA_CATEGORY_COUNTRY",
+        "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL"
       ]
     },
     "value": {
@@ -193,6 +194,7 @@
         "description": "Record usage locations",
         "arg": "data",
         "type": {
+          "location": [],
           "template": [],
           "outbreak": [],
           "followUp": [],

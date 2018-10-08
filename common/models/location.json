@@ -32,6 +32,9 @@
     },
     "geoLocation": {
       "type": "geopoint"
+    },
+    "geographicalLevelId": {
+      "type": "string"
     }
   },
   "indexes": {
