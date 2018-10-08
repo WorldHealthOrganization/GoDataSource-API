@@ -21,25 +21,26 @@
     },
     "contactDateEstimated": {
       "type": "boolean",
-      "required": true
+      "required": true,
+      "default": false
     },
     "certaintyLevelId": {
       "type": "string",
       "required": true
     },
     "exposureTypeId": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "exposureFrequencyId": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "exposureDurationId": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "socialRelationshipTypeId": {
+      "type": "string"
+    },
+    "socialRelationshipDetail": {
       "type": "string"
     },
     "clusterId": {
