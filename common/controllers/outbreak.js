@@ -846,7 +846,8 @@ module.exports = function (Outbreak) {
               inq: allowedLocationIds
             }
           }
-        }, filter || {}), function (error, hierarchicalList) {
+        }, filter || {}),
+        function (error, hierarchicalList) {
           // handle eventual errors
           if (error) {
             return callback(error);

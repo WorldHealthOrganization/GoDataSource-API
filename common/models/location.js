@@ -11,15 +11,15 @@ module.exports = function (Location) {
 
   // map language token labels for model properties
   Location.fieldLabelsMap = Object.assign({}, Location.fieldLabelsMap, {
-    name: "LNG_LOCATION_FIELD_LABEL_NAME",
-    synonyms: "LNG_LOCATION_FIELD_LABEL_SYNONYMS",
-    active: "LNG_LOCATION_FIELD_LABEL_ACTIVE",
-    populationDensity: "LNG_LOCATION_FIELD_LABEL_POPULATION_DENSITY",
-    parentLocationId: "LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION_ID",
-    geoLocation: "LNG_LOCATION_FIELD_LABEL_GEO_LOCATION",
+    name: 'LNG_LOCATION_FIELD_LABEL_NAME',
+    synonyms: 'LNG_LOCATION_FIELD_LABEL_SYNONYMS',
+    active: 'LNG_LOCATION_FIELD_LABEL_ACTIVE',
+    populationDensity: 'LNG_LOCATION_FIELD_LABEL_POPULATION_DENSITY',
+    parentLocationId: 'LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION_ID',
+    geoLocation: 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION',
     'geoLocation.lat': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT',
     'geoLocation.lng': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG',
-    geographicalLevelId: "LNG_LOCATION_FIELD_LABEL_GEOGRAPHICAL_LEVEL_ID"
+    geographicalLevelId: 'LNG_LOCATION_FIELD_LABEL_GEOGRAPHICAL_LEVEL_ID'
   });
 
   Location.referenceDataFieldsToCategoryMap = {
