@@ -194,6 +194,7 @@
         "description": "Record usage locations",
         "arg": "data",
         "type": {
+          "location": [],
           "template": [],
           "outbreak": [],
           "followUp": [],
