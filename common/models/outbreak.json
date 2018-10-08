@@ -25,14 +25,12 @@
     "countries": {
       "type": [
         "country"
-      ],
-      "required": true
+      ]
     },
     "locations": {
       "type": [
         "linkedLocation"
-      ],
-      "required": true
+      ]
     },
     "startDate": {
       "type": "date",

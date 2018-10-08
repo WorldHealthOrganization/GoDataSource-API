@@ -811,7 +811,6 @@ module.exports = function (Outbreak) {
   /**
    * Get hierarchical locations list for an outbreak
    * @param filter Besides the default filter properties this request also accepts 'includeChildren' boolean on the first level in 'where'; this flag is taken into consideration only if other filters are applied
-   * @param filter
    * @param callback
    */
   Outbreak.prototype.getLocationsHierarchicalList = function (filter, callback) {
@@ -833,7 +832,7 @@ module.exports = function (Outbreak) {
       if (error) {
         return callback(error);
       }
-      // build and index for allowed locations (to find them faster)
+      // build an index for allowed locations (to find them faster)
       const allowedLocationsIndex = {};
       allowedLocationIds.forEach(function (locationId) {
         allowedLocationsIndex[locationId] = true;
