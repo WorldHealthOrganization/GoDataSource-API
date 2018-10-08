@@ -530,10 +530,10 @@ module.exports = function (Relationship) {
    * Find or count relationship exposures or contacts for a relationship
    * @param personId
    * @param [filter]
-   * @param [isSource]
+   * @param [findContacts]
    * @param [onlyCount]
    */
-  Relationship.findOrCountPersonRelationshipExposuresOrContacts = function (personId, filter = {}, isSource = true, onlyCount = false) {
+  Relationship.findOrCountPersonRelationshipExposuresOrContacts = function (personId, filter = {}, findContacts = true, onlyCount = false) {
     // find all relationships of the specified person where the person is source/target
     return app.models.relationship
       .find(app.utils.remote
@@ -542,7 +542,7 @@ module.exports = function (Relationship) {
             persons: {
               elemMatch: {
                 id: personId,
-                [isSource ? 'source' : 'target']: true
+                [findContacts ? 'source' : 'target']: true
               }
             }
           },

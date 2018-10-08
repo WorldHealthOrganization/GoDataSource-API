@@ -6,7 +6,7 @@
     "validateUpsert": true
   },
   "properties": {
-    "relationships": ["relationshipParticipant"]
+    "relationships": ["relationship"]
   },
   "validations": [],
   "relations": {},
