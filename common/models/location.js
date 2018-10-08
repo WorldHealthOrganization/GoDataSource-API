@@ -9,6 +9,12 @@ module.exports = function (Location) {
   // set flag to not get controller
   Location.hasController = true;
 
+  Location.referenceDataFieldsToCategoryMap = {
+    geographicalLevelId: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION',
+  };
+
+  Location.referenceDataFields = Object.keys(Location.referenceDataFieldsToCategoryMap);
+
   /**
    * Get sub-locations for a list of locations. Result is an array of location IDs
    * @param parentLocations Array of location Ids for which to get the sublocations

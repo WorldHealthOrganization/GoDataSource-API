@@ -5562,4 +5562,30 @@ module.exports = function (Outbreak) {
       callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
     });
   };
+
+  /**
+   * Restore a deleted outbreak
+   * @param outbreakId
+   * @param options
+   * @param callback
+   */
+  Outbreak.restoreOutbreak = function (outbreakId, options, callback) {
+    Outbreak
+      .findOne({
+        deleted: true,
+        where: {
+          id: outbreakId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: Outbreak.modelName, id: outbreakId});
+        }
+
+        // undo outbreak delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
+  };
 };

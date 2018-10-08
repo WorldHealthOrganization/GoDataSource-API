@@ -259,5 +259,9 @@
   "contactAndRelationship": {
     "dataSource": null,
     "public": false
+  },
+  "linkedLocation": {
+    "dataSource": null,
+    "public": false
   }
 }

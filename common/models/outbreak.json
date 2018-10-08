@@ -28,6 +28,12 @@
       ],
       "required": true
     },
+    "locations": {
+      "type": [
+        "linkedLocation"
+      ],
+      "required": true
+    },
     "startDate": {
       "type": "date",
       "required": true
@@ -48,6 +54,7 @@
     "frequencyOfFollowUp": {
       "type": "number",
       "required": true,
+      "default": 1,
       "description": "Frequency of follow ups in days (once every X days/daily)"
     },
     "frequencyOfFollowUpPerDay": {
@@ -1177,6 +1184,12 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "filteredCountLabResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_outbreak",
+      "permission": "ALLOW",
+      "property": "restoreOutbreak"
     }
   ],
   "methods": {
@@ -4779,6 +4792,34 @@
       "http": {
         "verb": "get",
         "path": "/lab-results/filtered-count"
+      }
+    },
+    "restoreOutbreak": {
+      "accepts": [
+        {
+          "arg": "id",
+          "type": "string",
+          "description": "Outbreak ID"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "outbreak",
+          "type": "outbreak",
+          "description": "Outbreak",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted outbreak.",
+      "http": {
+        "verb": "post",
+        "path": "/:id/restore"
       }
     }
   }
