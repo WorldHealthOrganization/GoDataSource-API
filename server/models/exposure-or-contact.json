@@ -1,0 +1,15 @@
+{
+  "name": "exposureOrContact",
+  "base": "person",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "relationships": ["relationship"]
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

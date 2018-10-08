@@ -5648,4 +5648,185 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Find relationship exposures for a case
+   * @param caseId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findCaseRelationshipExposures = function (caseId, filter, callback) {
+    app.models.relationship
+      .findPersonRelationshipExposures(caseId, filter)
+      .then(function (exposures) {
+        callback(null, exposures);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count relationship exposures for a case
+   * @param caseId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countCaseRelationshipExposures = function (caseId, filter, callback) {
+    app.models.relationship
+      .countPersonRelationshipExposures(caseId, filter)
+      .then(function (exposures) {
+        callback(null, exposures);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find relationship contacts for a case. Relationship contacts are the relationships where the case is a source (it has nothing to do with person type contact)
+   * @param caseId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findCaseRelationshipContacts = function (caseId, filter, callback) {
+    app.models.relationship
+      .findPersonRelationshipContacts(caseId, filter)
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count relationship contacts for a case. Relationship contacts are the relationships where the case is a source (it has nothing to do with person type contact)
+   * @param caseId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countCaseRelationshipContacts = function (caseId, filter, callback) {
+    app.models.relationship
+      .countPersonRelationshipContacts(caseId, filter)
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find relationship exposures for a contact
+   * @param contactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findContactRelationshipExposures = function (contactId, filter, callback) {
+    app.models.relationship
+      .findPersonRelationshipExposures(contactId, filter)
+      .then(function (exposures) {
+        callback(null, exposures);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count relationship exposures for a contact
+   * @param caseId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countContactRelationshipExposures = function (caseId, filter, callback) {
+    app.models.relationship
+      .countPersonRelationshipExposures(caseId, filter)
+      .then(function (exposures) {
+        callback(null, exposures);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find relationship contacts for a contact. Relationship contacts are the relationships where the contact is a source (it has nothing to do with person type contact)
+   * @param contactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findContactRelationshipContacts = function (contactId, filter, callback) {
+    app.models.relationship
+      .findPersonRelationshipContacts(contactId, filter)
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count relationship contacts for a contact. Relationship contacts are the relationships where the contact is a source (it has nothing to do with person type contact)
+   * @param contactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countContactRelationshipContacts = function (contactId, filter, callback) {
+    app.models.relationship
+      .countPersonRelationshipContacts(contactId, filter)
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find relationship exposures for a contact
+   * @param eventId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findEventRelationshipExposures = function (eventId, filter, callback) {
+    app.models.relationship
+      .findPersonRelationshipExposures(eventId, filter)
+      .then(function (exposures) {
+        callback(null, exposures);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count relationship exposures for a contact
+   * @param eventId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countEventRelationshipExposures = function (eventId, filter, callback) {
+    app.models.relationship
+      .countPersonRelationshipExposures(eventId, filter)
+      .then(function (exposures) {
+        callback(null, exposures);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find relationship contacts for a event. Relationship contacts are the relationships where the event is a source (it has nothing to do with person type contact)
+   * @param eventId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findEventRelationshipContacts = function (eventId, filter, callback) {
+    app.models.relationship
+      .findPersonRelationshipContacts(eventId, filter)
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
+
+
+  /**
+   * Count relationship contacts for a event. Relationship contacts are the relationships where the event is a source (it has nothing to do with person type contact)
+   * @param eventId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countEventRelationshipContacts = function (eventId, filter, callback) {
+    app.models.relationship
+      .countPersonRelationshipContacts(eventId, filter)
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
 };
