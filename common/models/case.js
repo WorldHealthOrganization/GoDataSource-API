@@ -4,7 +4,7 @@ module.exports = function (Case) {
   // set flag to not get controller
   Case.hasController = false;
 
-  // list of case classifications that are not discarded
+  // list of case classifications that are discarded
   Case.discardedCaseClassifications = [
     'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_NOT_A_CASE_DISCARDED'
   ];
