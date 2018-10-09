@@ -16,18 +16,14 @@
       "type": "date",
       "required": true
     },
-    "performed": {
-      "type": "boolean",
-      "required": true
-    },
-    "missedToFollowUp": {
-      "type": "boolean"
-    },
-    "completed": {
-      "type": "boolean"
-    },
-    "lostToFollowUp": {
-      "type": "boolean"
+    "statusId": {
+      "type": "string",
+      "enum": [
+        null,
+        "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK",
+        "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK",
+        "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED"
+      ]
     },
     "address": {
       "type": "address"

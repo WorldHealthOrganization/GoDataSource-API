@@ -125,11 +125,6 @@
     "Usual Place of Residence",
     "Other"
   ],
-  "LNG_REFERENCE_DATA_CONTACT_FOLLOW_UP_STATUS_TYPE": [
-    "Under Follow Up",
-    "Follow Up Completed",
-    "Lost To Follow Up"
-  ],
   "LNG_REFERENCE_DATA_CATEGORY_COUNTRY": [
     "Afghanistan",
     "Albania",
@@ -340,5 +335,15 @@
     "Admin Level 8",
     "Admin Level 9",
     "Admin Level 10"
+  ],
+  "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE": [
+    "Under Follow-up",
+    "Follow-up Completed",
+    "Lost To Follow-up"
+  ],
+  "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE": [
+    "Seen Ok",
+    "Seen Not Ok",
+    "Missed"
   ]
 }

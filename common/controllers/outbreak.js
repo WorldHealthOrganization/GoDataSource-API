@@ -1072,52 +1072,52 @@ module.exports = function (Outbreak) {
         return FollowupGeneration
           .getAllTeamsWithLocationsIncluded()
           .then((teams) => {
-            return Promise.all(contacts.map((contact) => {
-              // retrieve contact's follow up and eligible teams
-              return Promise
-                .all([
-                  FollowupGeneration
-                    .getContactFollowups(contact.id)
-                    .then((followUps) => {
-                      contact.followUpsLists = followUps;
-                      return contact;
-                    }),
-                  FollowupGeneration
-                    .getContactFollowupEligibleTeams(contact, teams)
-                    .then((eligibleTeams) => {
-                      contact.eligibleTeams = eligibleTeams;
-                      return contact;
-                    })
-                ])
-                .then(() => {
-                  return Promise
-                    .all(contacts.map((contact) => {
-                      // generate response entry for the given contact
-                      let index = generatedResponse.push({
-                        contactId: contact.id,
-                        followUps: []
-                      }) - 1;
+            return Promise
+              .all(contacts.map((contact) => {
+                // retrieve contact's follow up and eligible teams
+                return Promise
+                  .all([
+                    FollowupGeneration
+                      .getContactFollowups(contact.id)
+                      .then((followUps) => {
+                        contact.followUpsLists = followUps;
+                        return contact;
+                      }),
+                    FollowupGeneration
+                      .getContactFollowupEligibleTeams(contact, teams)
+                      .then((eligibleTeams) => {
+                        contact.eligibleTeams = eligibleTeams;
+                        return contact;
+                      })
+                  ])
+                  .then(() => contact);
+              }))
+              .then(() => Promise.all(contacts.map((contact) => {
+                  // generate response entry for the given contact
+                  let index = generatedResponse.push({
+                    contactId: contact.id,
+                    followUps: []
+                  }) - 1;
 
-                      return FollowupGeneration
-                        .generateFollowupsForContact(
-                          contact,
-                          contact.eligibleTeams,
-                          {
-                            startDate: followupStartDate,
-                            endDate: followupEndDate
-                          },
-                          outbreakFollowUpFreq,
-                          outbreakFollowUpPerDay,
-                          options,
-                          data.targeted,
-                          contact.inconclusive
-                        )
-                        .then((followUps) => {
-                          generatedResponse[index].followUps = followUps;
-                        });
-                    }));
-                });
-            }));
+                  return FollowupGeneration
+                    .generateFollowupsForContact(
+                      contact,
+                      contact.eligibleTeams,
+                      {
+                        startDate: followupStartDate,
+                        endDate: followupEndDate
+                      },
+                      outbreakFollowUpFreq,
+                      outbreakFollowUpPerDay,
+                      options,
+                      data.targeted,
+                      contact.inconclusive
+                    )
+                    .then((followUps) => {
+                      generatedResponse[index].followUps = followUps;
+                    });
+                }))
+              );
           });
       })
       .then(() => callback(null, generatedResponse))

@@ -11,35 +11,41 @@ const Moment = require('moment');
 module.exports.getContactsWithInconclusiveLastFollowUp = function (startDate) {
   return App.models.contact
     .find({
-      include: [
-        {
-          relation: 'followUps',
-          scope: {
-            order: ['createdAt DESC'],
-            limit: 1
-          }
-        }
-      ],
       where: {
-        followUp: {
-          neq: null
-        },
-        'followUp.endDate': {
-          lt: startDate
-        }
+        and: [
+          {
+            followUp: {
+              neq: null
+            }
+          },
+          {
+            'followUp.endDate': {
+              lt: startDate
+            }
+          },
+          {
+            or: [
+              {
+                'followUp.status': {
+                  neq: 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED'
+                }
+              },
+              {
+                'followUp.status': {
+                  eq: 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP'
+                }
+              }
+            ]
+          }
+        ]
       }
     })
     // filter out contacts whose last follow up is not completed or lost
     .then((contacts) => {
-      return contacts
-        .filter((contact) =>
-          contact.followUps().length ?
-            (!contact.followUps()[0].completed || contact.followUps()[0].lostToFollowUp) : false
-        )
-        .map((contact) => {
-          contact.inconclusive = true;
-          return contact;
-        });
+      return contacts.map((contact) => {
+        contact.inconclusive = true;
+        return contact;
+      });
     });
 };
 
@@ -233,10 +239,11 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     // check if the follow up date is in the past
     // if so, check if the number of existing follow ups is the same as the generate frequency per day
     // if so, do not generate any follow ups
-    if (followUpDate.isBefore(Helpers.getUTCDate())) {
-      let followUpsInThisDay = contact.followUpsLists
-        .filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
-      numberOfFollowUpsPerDay = numberOfFollowUpsPerDay - followUpsInThisDay.length;
+    if (!ignorePeriod) {
+      if (followUpDate.isBefore(Helpers.getUTCDate())) {
+        let followUpsInThisDay = contact.followUpsLists.filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
+        numberOfFollowUpsPerDay = numberOfFollowUpsPerDay - followUpsInThisDay.length;
+      }
     }
 
     for (let i = 0; i < numberOfFollowUpsPerDay; i++) {
@@ -247,10 +254,10 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
             outbreakId: contact.outbreakId,
             personId: contact.id,
             date: followUpDate.toDate().toISOString(),
-            performed: false,
             targeted: targeted,
             // split the follow ups work equally across teams
             teamId: RoundRobin(teams),
+            statusId: null
           }, reqOpts)
       );
     }
@@ -266,6 +273,9 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
               inq: existingFollowups.map((f) => f.id)
             }
           })
+            .catch((err) => {
+              let a = 1;
+            })
         );
       }
     }
