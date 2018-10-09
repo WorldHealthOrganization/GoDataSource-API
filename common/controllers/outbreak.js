@@ -5864,7 +5864,7 @@ module.exports = function (Outbreak) {
         }
         // classify records by their classification
         result.caseClassification[caseRecord.classification].count++;
-        result.caseClassification[caseRecord.classification].caseIDs.push(caseRecord.id)
+        result.caseClassification[caseRecord.classification].caseIDs.push(caseRecord.id);
       });
       // send back the result
       callback(null, result);
