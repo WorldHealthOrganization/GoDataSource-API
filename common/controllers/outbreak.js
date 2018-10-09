@@ -3635,6 +3635,15 @@ module.exports = function (Outbreak) {
         }
       }, filter || {}), {disableSanitization: true})
       .then(function (people) {
+        // get case fields label map
+        let caseFieldsLabelMap = app.models.case.fieldLabelsMap;
+
+        // initialize map of possible inconsistencies operators
+        let inconsistenciesOperators = {
+          greaterThan: '>',
+          lessThan: '<'
+        };
+
         // loop through the people to add the inconsistencies array
         people.forEach(function (person, index) {
           // initialize inconsistencies
@@ -3652,7 +3661,16 @@ module.exports = function (Outbreak) {
           // for contacts only get the ones where dateDeceased < date of birth; this check also applies for cases
           // no need to check for person type as the query was done only for contacts/cases
           if (dob && dateDeceased && dob.isAfter(dateDeceased)) {
-            inconsistencies.push(['dob', 'dateDeceased']);
+            inconsistencies.push({
+              dates: [{
+                field: 'dob',
+                label: caseFieldsLabelMap.dob
+              }, {
+                field: 'dateDeceased',
+                label: caseFieldsLabelMap.dateDeceased
+              }],
+              issue: inconsistenciesOperators.greaterThan
+            });
           }
 
           // for case:
@@ -3661,22 +3679,58 @@ module.exports = function (Outbreak) {
             if (dob) {
               // dateOfInfection < date of birth
               if (dateOfInfection && dob.isAfter(dateOfInfection)) {
-                inconsistencies.push(['dob', 'dateOfInfection']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dob',
+                    label: caseFieldsLabelMap.dob
+                  }, {
+                    field: 'dateOfInfection',
+                    label: caseFieldsLabelMap.dateOfInfection
+                  }],
+                  issue: inconsistenciesOperators.greaterThan
+                });
               }
 
               // dateOfOnset < date of birth
               if (dateOfOnset && dob.isAfter(dateOfOnset)) {
-                inconsistencies.push(['dob', 'dateOfOnset']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dob',
+                    label: caseFieldsLabelMap.dob
+                  }, {
+                    field: 'dateOfOnset',
+                    label: caseFieldsLabelMap.dateOfOnset
+                  }],
+                  issue: inconsistenciesOperators.greaterThan
+                });
               }
 
               // dateBecomeCase < date of birth
               if (dateBecomeCase && dob.isAfter(dateBecomeCase)) {
-                inconsistencies.push(['dob', 'dateBecomeCase']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dob',
+                    label: caseFieldsLabelMap.dob
+                  }, {
+                    field: 'dateBecomeCase',
+                    label: caseFieldsLabelMap.dateBecomeCase
+                  }],
+                  issue: inconsistenciesOperators.greaterThan
+                });
               }
 
               // dateOfOutcome < date of birth
               if (dateOfOutcome && dob.isAfter(dateOfOutcome)) {
-                inconsistencies.push(['dob', 'dateOfOutcome']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dob',
+                    label: caseFieldsLabelMap.dob
+                  }, {
+                    field: 'dateOfOutcome',
+                    label: caseFieldsLabelMap.dateOfOutcome
+                  }],
+                  issue: inconsistenciesOperators.greaterThan
+                });
               }
             }
 
@@ -3684,54 +3738,144 @@ module.exports = function (Outbreak) {
             if (dateDeceased) {
               // dateOfInfection > dateDeceased
               if (dateOfInfection && dateOfInfection.isAfter(dateDeceased)) {
-                inconsistencies.push(['dateDeceased', 'dateOfInfection']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dateDeceased',
+                    label: caseFieldsLabelMap.dateDeceased
+                  }, {
+                    field: 'dateOfInfection',
+                    label: caseFieldsLabelMap.dateOfInfection
+                  }],
+                  issue: inconsistenciesOperators.lessThan
+                });
               }
 
               // dateOfOnset > dateDeceased
               if (dateOfOnset && dateOfOnset.isAfter(dateDeceased)) {
-                inconsistencies.push(['dateDeceased', 'dateOfOnset']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dateDeceased',
+                    label: caseFieldsLabelMap.dateDeceased
+                  }, {
+                    field: 'dateOfOnset',
+                    label: caseFieldsLabelMap.dateOfOnset
+                  }],
+                  issue: inconsistenciesOperators.lessThan
+                });
               }
 
               // dateBecomeCase > dateDeceased
               if (dateBecomeCase && dateBecomeCase.isAfter(dateDeceased)) {
-                inconsistencies.push(['dateDeceased', 'dateBecomeCase']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dateDeceased',
+                    label: caseFieldsLabelMap.dateDeceased
+                  }, {
+                    field: 'dateBecomeCase',
+                    label: caseFieldsLabelMap.dateBecomeCase
+                  }],
+                  issue: inconsistenciesOperators.lessThan
+                });
               }
 
               // dateOfOutcome > dateDeceased
               if (dateOfOutcome && dateOfOutcome.isAfter(dateDeceased)) {
-                inconsistencies.push(['dateDeceased', 'dateOfOutcome']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dateDeceased',
+                    label: caseFieldsLabelMap.dateDeceased
+                  }, {
+                    field: 'dateOfOutcome',
+                    label: caseFieldsLabelMap.dateOfOutcome
+                  }],
+                  issue: inconsistenciesOperators.lessThan
+                });
               }
             }
 
             // compare dateOfInfection, dateOfOnset, dateBecomeCase, dateOfOutcome
             // dateOfInfection > dateOfOnset
             if (dateOfInfection && dateOfOnset && dateOfInfection.isAfter(dateOfOnset)) {
-              inconsistencies.push(['dateOfInfection', 'dateOfOnset']);
+              inconsistencies.push({
+                dates: [{
+                  field: 'dateOfInfection',
+                  label: caseFieldsLabelMap.dateOfInfection
+                }, {
+                  field: 'dateOfOnset',
+                  label: caseFieldsLabelMap.dateOfOnset
+                }],
+                issue: inconsistenciesOperators.greaterThan
+              });
             }
 
             // dateOfInfection > dateBecomeCase
             if (dateOfInfection && dateBecomeCase && dateOfInfection.isAfter(dateBecomeCase)) {
-              inconsistencies.push(['dateOfInfection', 'dateBecomeCase']);
+              inconsistencies.push({
+                dates: [{
+                  field: 'dateOfInfection',
+                  label: caseFieldsLabelMap.dateOfInfection
+                }, {
+                  field: 'dateBecomeCase',
+                  label: caseFieldsLabelMap.dateBecomeCase
+                }],
+                issue: inconsistenciesOperators.greaterThan
+              });
             }
 
             // dateOfInfection > dateOfOutcome
             if (dateOfInfection && dateOfOutcome && dateOfInfection.isAfter(dateOfOutcome)) {
-              inconsistencies.push(['dateOfInfection', 'dateOfOutcome']);
+              inconsistencies.push({
+                dates: [{
+                  field: 'dateOfInfection',
+                  label: caseFieldsLabelMap.dateOfInfection
+                }, {
+                  field: 'dateOfOutcome',
+                  label: caseFieldsLabelMap.dateOfOutcome
+                }],
+                issue: inconsistenciesOperators.greaterThan
+              });
             }
 
             // dateOfOnset > dateBecomeCase
             if (dateOfOnset && dateBecomeCase && dateOfOnset.isAfter(dateBecomeCase)) {
-              inconsistencies.push(['dateOfOnset', 'dateBecomeCase']);
+              inconsistencies.push({
+                dates: [{
+                  field: 'dateOfOnset',
+                  label: caseFieldsLabelMap.dateOfOnset
+                }, {
+                  field: 'dateBecomeCase',
+                  label: caseFieldsLabelMap.dateBecomeCase
+                }],
+                issue: inconsistenciesOperators.greaterThan
+              });
             }
 
             // dateOfOnset > dateOfOutcome
             if (dateOfOnset && dateOfOutcome && dateOfOnset.isAfter(dateOfOutcome)) {
-              inconsistencies.push(['dateOfOnset', 'dateOfOutcome']);
+              inconsistencies.push({
+                dates: [{
+                  field: 'dateOfOnset',
+                  label: caseFieldsLabelMap.dateOfOnset
+                }, {
+                  field: 'dateOfOutcome',
+                  label: caseFieldsLabelMap.dateOfOutcome
+                }],
+                issue: inconsistenciesOperators.greaterThan
+              });
             }
 
             // dateBecomeCase > dateOfOutcome
             if (dateBecomeCase && dateOfOutcome && dateBecomeCase.isAfter(dateOfOutcome)) {
-              inconsistencies.push(['dateBecomeCase', 'dateOfOutcome']);
+              inconsistencies.push({
+                dates: [{
+                  field: 'dateBecomeCase',
+                  label: caseFieldsLabelMap.dateBecomeCase
+                }, {
+                  field: 'dateOfOutcome',
+                  label: caseFieldsLabelMap.dateOfOutcome
+                }],
+                issue: inconsistenciesOperators.greaterThan
+              });
             }
 
             // compare isolationDates, hospitalizationDates, incubationDates startDate/endDate for each item in them and against the date of birth and dateDeceased
@@ -3739,7 +3883,7 @@ module.exports = function (Outbreak) {
             var datesContainers = ['isolationDates', 'hospitalizationDates', 'incubationDates'];
             datesContainers.forEach(function (datesContainer) {
               if (person[datesContainer] && person[datesContainer].length) {
-                // loop through the datesto find inconsistencies
+                // loop through the dates to find inconsistencies
                 person[datesContainer].forEach(function (dateEntry, dateEntryIndex) {
                   // get startDate and endDate
                   let startDate = moment(dateEntry.startDate);
@@ -3747,28 +3891,73 @@ module.exports = function (Outbreak) {
 
                   // compare startDate with endDate
                   if (startDate.isAfter(endDate)) {
-                    inconsistencies.push([`${datesContainer}.${dateEntryIndex}.startDate`, `${datesContainer}.${dateEntryIndex}.endDate`]);
+                    inconsistencies.push({
+                      dates: [{
+                        field: `${datesContainer}.${dateEntryIndex}.startDate`,
+                        label: caseFieldsLabelMap[`${datesContainer}[].startDate`]
+                      }, {
+                        field: `${datesContainer}.${dateEntryIndex}.endDate`,
+                        label: caseFieldsLabelMap[`${datesContainer}[].endDate`]
+                      }],
+                      issue: inconsistenciesOperators.greaterThan
+                    });
                   }
 
                   // check for dob; both startDate and endDate must be after dob
                   if (dob) {
                     if (dob.isAfter(startDate)) {
-                      inconsistencies.push(['dob', `${datesContainer}.${dateEntryIndex}.startDate`]);
+                      inconsistencies.push({
+                        dates: [{
+                          field: 'dob',
+                          label: caseFieldsLabelMap.dob
+                        }, {
+                          field: `${datesContainer}.${dateEntryIndex}.startDate`,
+                          label: caseFieldsLabelMap[`${datesContainer}[].startDate`]
+                        }],
+                        issue: inconsistenciesOperators.greaterThan
+                      });
                     }
 
                     if (dob.isAfter(endDate)) {
-                      inconsistencies.push(['dob', `${datesContainer}.${dateEntryIndex}.endDate`]);
+                      inconsistencies.push({
+                        dates: [{
+                          field: 'dob',
+                          label: caseFieldsLabelMap.dob
+                        }, {
+                          field: `${datesContainer}.${dateEntryIndex}.endDate`,
+                          label: caseFieldsLabelMap[`${datesContainer}[].endDate`]
+                        }],
+                        issue: inconsistenciesOperators.greaterThan
+                      });
                     }
                   }
 
                   // check for dateDeceased; both startDate and endDate must be before dob
                   if (dateDeceased) {
                     if (startDate.isAfter(dateDeceased)) {
-                      inconsistencies.push(['dateDeceased', `${datesContainer}.${dateEntryIndex}.startDate`]);
+                      inconsistencies.push({
+                        dates: [{
+                          field: 'dateDeceased',
+                          label: caseFieldsLabelMap.dateDeceased
+                        }, {
+                          field: `${datesContainer}.${dateEntryIndex}.startDate`,
+                          label: caseFieldsLabelMap[`${datesContainer}[].startDate`]
+                        }],
+                        issue: inconsistenciesOperators.lessThan
+                      });
                     }
 
                     if (endDate.isAfter(dateDeceased)) {
-                      inconsistencies.push(['dateDeceased', `${datesContainer}.${dateEntryIndex}.endDate`]);
+                      inconsistencies.push({
+                        dates: [{
+                          field: 'dateDeceased',
+                          label: caseFieldsLabelMap.dateDeceased
+                        }, {
+                          field: `${datesContainer}.${dateEntryIndex}.endDate`,
+                          label: caseFieldsLabelMap[`${datesContainer}[].endDate`]
+                        }],
+                        issue: inconsistenciesOperators.lessThan
+                      });
                     }
                   }
                 });
