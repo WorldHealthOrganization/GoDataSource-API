@@ -1742,9 +1742,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactsSeen = function (filter, callback) {
-    helpers.countContactsByFollowUpFlag({
+    helpers.countContactsByFollowUpFilter({
       outbreakId: this.id,
-      followUpFlag: 'performed',
+      followUpFilter: app.models.followup.seenFilter,
       resultProperty: 'contactsSeenCount'
     }, filter, callback);
   };
@@ -1753,14 +1753,32 @@ module.exports = function (Outbreak) {
    * Count the contacts that are lost to follow-up
    * Note: The contacts are counted in total and per team. If a contact is lost to follow-up by 2 teams it will be counted once in total and once per each team.
    * @param filter
-   * @param callback
    */
-  Outbreak.prototype.countContactsLostToFollowup = function (filter, callback) {
-    helpers.countContactsByFollowUpFlag({
-      outbreakId: this.id,
-      followUpFlag: 'lostToFollowUp',
-      resultProperty: 'contactsLostToFollowupCount'
-    }, filter, callback);
+  Outbreak.prototype.countContactsLostToFollowup = function (filter) {
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // create filter as we need to use it also after the relationships are found
+    let _filter = app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId,
+          followUp: {
+            neq: null
+          },
+          'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP'
+        }
+      }, filter || {});
+
+    // get all relationships between events and contacts, where the contacts were created sooner than 'noDaysNewContacts' ago
+    return app.models.contact
+      .find(_filter)
+      .then(function (contacts) {
+        return {
+          contactsLostToFollowupCount: contacts.length,
+          contactIDs: contacts.map((contact) => contact.id)
+        };
+      });
   };
 
   /**
@@ -3414,7 +3432,7 @@ module.exports = function (Outbreak) {
           let contactId = followup.personId;
 
           // add in the contacts map the follow-up ID if it was not performed
-          if (!followup.performed) {
+          if (!followup.statusId) {
             contactsMap[contactId] = followup.id;
           } else {
             // reset the contactId entry in the map to null if the newer follow-up was performed

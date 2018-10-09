@@ -9,6 +9,30 @@ module.exports = function (FollowUp) {
   // set flag to not get controller
   FollowUp.hasController = false;
 
+  // filter for seen follow ups
+  Followup.seenFilter = {
+    or: [
+      {
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK'
+      },
+      {
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK'
+      }
+    ]
+  };
+
+  // filter for not seen follow ups
+  Followup.notSeenFilter = {
+    or: [
+      {
+        statusId: null
+      },
+      {
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED'
+      }
+    ]
+  };
+
   // map language token labels for model properties
   FollowUp.fieldLabelsMap = {
     'date': 'LNG_FOLLOW_UP_FIELD_LABEL_DATE',
