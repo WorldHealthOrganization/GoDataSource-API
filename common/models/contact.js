@@ -21,7 +21,6 @@ module.exports = function (Contact) {
     'documents[].number': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER',
     'dateDeceased': 'LNG_CONTACT_FIELD_LABEL_DATE_DECEASED',
     'dateOfReporting': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING',
-    'phoneNumber': 'LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER',
     'riskLevel': 'LNG_CONTACT_FIELD_LABEL_RISK_LEVEL',
     'riskReason': 'LNG_CONTACT_FIELD_LABEL_RISK_REASON',
     'dateOfOutcome': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME',
@@ -37,6 +36,7 @@ module.exports = function (Contact) {
     'addresses[].locationId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID',
     'addresses[].geoLocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
     'addresses[].date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
+    'addresses[].phoneNumber': 'LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER',
     'fillGeoLocation': 'LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION',
     'isDateOfReportingApproximate': 'LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE'
   });
@@ -69,7 +69,6 @@ module.exports = function (Contact) {
     'dob',
     'age',
     'occupation',
-    'phoneNumber',
     'addresses',
     'documents',
     'riskLevel',

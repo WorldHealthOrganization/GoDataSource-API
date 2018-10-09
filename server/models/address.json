@@ -48,6 +48,9 @@
         }
       }
     },
+    "phoneNumber": {
+      "type": "string"
+    },
     "date": {
       "type": "date",
       "defaultFn": "now"
