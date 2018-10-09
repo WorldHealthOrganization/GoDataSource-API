@@ -42,7 +42,10 @@ module.exports = function (Person) {
     'age': 'LNG_CASE_FIELD_LABEL_AGE',
     'dob': 'LNG_CASE_FIELD_LABEL_DOB',
     'classification': 'LNG_CASE_FIELD_LABEL_CLASSIFICATION',
+    'wasContact': 'LNG_CASE_FIELD_LABEL_WAS_CONTACT',
     'dateBecomeCase': 'LNG_CASE_FIELD_LABEL_DATE_BECOME_CASE',
+    'wasCase': 'LNG_CONTACT_FIELD_LABEL_WAS_CASE',
+    'dateBecomeContact': 'LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT',
     'dateDeceased': 'LNG_CASE_FIELD_LABEL_DATE_DECEASED',
     'dateOfInfection': 'LNG_CASE_FIELD_LABEL_DATE_OF_INFECTION',
     'dateOfOnset': 'LNG_CASE_FIELD_LABEL_DATE_OF_ONSET',
@@ -57,6 +60,7 @@ module.exports = function (Person) {
     'incubationDates': 'LNG_CASE_FIELD_LABEL_INCUBATION_DATES',
     'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
+    'safeBurial': 'LNG_CASE_FIELD_LABEL_SAFE_BURIAL'
   });
 
   Person.referenceDataFields = [
@@ -76,7 +80,10 @@ module.exports = function (Person) {
     'age',
     'dob',
     'classification',
+    'wasContact',
     'dateBecomeCase',
+    'wasCase',
+    'dateBecomeContact',
     'dateDeceased',
     'dateOfInfection',
     'dateOfOnset',
@@ -84,6 +91,7 @@ module.exports = function (Person) {
     'riskReason',
     'dateOfOutcome',
     'deceased',
+    'safeBurial',
     'documents',
     'type',
     'isolationDates',

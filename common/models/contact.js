@@ -20,6 +20,8 @@ module.exports = function (Contact) {
     'documents[].type': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE',
     'documents[].number': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER',
     'dateDeceased': 'LNG_CONTACT_FIELD_LABEL_DATE_DECEASED',
+    'wasCase': 'LNG_CONTACT_FIELD_LABEL_WAS_CASE',
+    'dateBecomeContact': 'LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT',
     'dateOfReporting': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING',
     'riskLevel': 'LNG_CONTACT_FIELD_LABEL_RISK_LEVEL',
     'riskReason': 'LNG_CONTACT_FIELD_LABEL_RISK_REASON',
@@ -35,10 +37,11 @@ module.exports = function (Contact) {
     'addresses[].postalCode': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE',
     'addresses[].locationId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID',
     'addresses[].geoLocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
-    'addresses[].date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
+    'addresses[].validTill': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_VALID_TILL',
     'addresses[].phoneNumber': 'LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER',
     'fillGeoLocation': 'LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION',
-    'isDateOfReportingApproximate': 'LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE'
+    'isDateOfReportingApproximate': 'LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
+    'safeBurial': 'LNG_CONTACT_FIELD_LABEL_SAFE_BURIAL'
   });
 
   Contact.referenceDataFieldsToCategoryMap = {
@@ -55,7 +58,7 @@ module.exports = function (Contact) {
   Contact.fieldToValueParsersMap = {
     dob: dateParser,
     dateDeceased: dateParser,
-    'addresses[].date': dateParser,
+    'addresses[].validTill': dateParser,
     'followUps[].date': dateParser
   };
   Contact.fieldsToParse = Object.keys(Contact.fieldToValueParsersMap);
@@ -73,8 +76,11 @@ module.exports = function (Contact) {
     'documents',
     'riskLevel',
     'riskReason',
+    'wasCase',
+    'dateBecomeContact',
     'dateDeceased',
-    'deceased'
+    'deceased',
+    'safeBurial'
   ];
 
   Contact.foreignKeyResolverMap = {

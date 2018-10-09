@@ -510,7 +510,7 @@
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE": "日本の Postal Code",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID": "日本の Location ID",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION": "日本の Geo-Location",
-      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE": "日本の Date",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_VALID_TILL": "日本の Valid Till",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_PHONE_NUMBER": "日本の Phone Number"
     },
     "uiCaseFields": {
@@ -535,6 +535,7 @@
       "LNG_CASE_FIELD_LABEL_OUTBREAK_ID": "日本の Outbreak ID",
       "LNG_CASE_FIELD_LABEL_DOB": "日本の Date of Birth",
       "LNG_CASE_FIELD_LABEL_CREATED_BY": "日本の Created By",
+      "LNG_CASE_FIELD_LABEL_WAS_CONTACT": "日本の Was Contact",
       "LNG_CASE_FIELD_LABEL_DATE_BECOME_CASE": "日本の Date of Becoming case",
       "LNG_CASE_FIELD_LABEL_MIDDLE_NAME": "日本の Middle Name",
       "LNG_CASE_FIELD_LABEL_INCUBATION_DATES": "日本の Incubation Dates",
@@ -561,7 +562,8 @@
       "LNG_CASE_FIELD_LABEL_DATE_DECEASED": "日本の Date of Decease",
       "LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER": "日本の Document Number",
       "LNG_CASE_FIELD_LABEL_VISUAL_ID": "日本の Visual ID",
-      "LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED": "日本の Transfer Refused"
+      "LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED": "日本の Transfer Refused",
+      "LNG_CASE_FIELD_LABEL_SAFE_BURIAL": "日本の Performed Safe Burial"
     },
     "uiCasesListPage": {
       "LNG_PAGE_LIST_CASES_TITLE": "日本の Cases",
@@ -644,7 +646,10 @@
       "LNG_CONTACT_FIELD_LABEL_LAST_NAME": "日本の Last Name",
       "LNG_CONTACT_FIELD_LABEL_DATE_DECEASED": "日本の Date of Decease",
       "LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER": "日本の Document Number",
-      "LNG_CONTACT_FIELD_LABEL_VISUAL_ID": "日本の Visual ID"
+      "LNG_CONTACT_FIELD_LABEL_VISUAL_ID": "日本の Visual ID",
+      "LNG_CONTACT_FIELD_LABEL_WAS_CASE": "日本の Was Case",
+      "LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT": "日本の Date of Becoming contact",
+      "LNG_CONTACT_FIELD_LABEL_SAFE_BURIAL": "日本の Performed Safe Burial"
     },
     "uiContactsListPage": {
       "LNG_PAGE_LIST_CONTACTS_TITLE": "日本の Contacts"

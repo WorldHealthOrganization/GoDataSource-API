@@ -22,6 +22,7 @@ module.exports = function (Case) {
     'documents[].type': 'LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE',
     'documents[].number': 'LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER',
     'dateBecomeCase': 'LNG_CASE_FIELD_LABEL_DATE_BECOME_CASE',
+    'wasContact': 'LNG_CASE_FIELD_LABEL_WAS_CONTACT',
     'dateDeceased': 'LNG_CASE_FIELD_LABEL_DATE_DECEASED',
     'dateOfInfection': 'LNG_CASE_FIELD_LABEL_DATE_OF_INFECTION',
     'dateOfOnset': 'LNG_CASE_FIELD_LABEL_DATE_OF_ONSET',
@@ -53,12 +54,13 @@ module.exports = function (Case) {
     'addresses[].postalCode': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE',
     'addresses[].locationId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID',
     'addresses[].geoLocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
-    'addresses[].date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
+    'addresses[].validTill': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_VALID_TILL',
     'addresses[].phoneNumber': 'LNG_CASE_FIELD_LABEL_PHONE_NUMBER',
     'visualId': 'LNG_CASE_FIELD_LABEL_VISUAL_ID',
     'fillGeoLocation': 'LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION',
     'isDateOfReportingApproximate': 'LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
-    'questionnaireAnswers': 'LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE'
+    'questionnaireAnswers': 'LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE',
+    'safeBurial': 'LNG_CASE_FIELD_LABEL_SAFE_BURIAL'
   });
 
   Case.referenceDataFieldsToCategoryMap = {
@@ -92,6 +94,7 @@ module.exports = function (Case) {
     'classification',
     'riskLevel',
     'riskReason',
+    'wasContact',
     'dateBecomeCase',
     'dateDeceased',
     'dateOfInfection',
@@ -101,7 +104,8 @@ module.exports = function (Case) {
     'incubationDates',
     'isolationDates',
     'transferRefused',
-    'deceased'
+    'deceased',
+    'safeBurial'
   ];
 
   Case.foreignKeyResolverMap = {

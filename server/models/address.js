@@ -13,7 +13,7 @@ module.exports = function (Address) {
     'locationId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID',
     'geoLocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
     'phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_PHONE_NUMBER',
-    'date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE'
+    'validTill': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_VALID_TILL'
   };
 
   Address.referenceDataFields = [
@@ -29,7 +29,7 @@ module.exports = function (Address) {
     'postalCode',
     'locationId',
     'geoLocation',
-    'date'
+    'validTill'
   ];
 
 

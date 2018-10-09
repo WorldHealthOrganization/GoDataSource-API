@@ -51,6 +51,10 @@
     "dateBecomeCase": {
       "type": "date"
     },
+    "wasContact": {
+      "type": "boolean",
+      "default": false
+    },
     "outcomeId": {
       "type": "string"
     },
@@ -72,6 +76,10 @@
     },
     "dateDeceased": {
       "type": "date"
+    },
+    "safeBurial": {
+      "type": "boolean",
+      "default": false
     },
     "classification": {
       "type": "string",

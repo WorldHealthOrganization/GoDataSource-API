@@ -655,6 +655,7 @@ module.exports = function (Outbreak) {
     params = params || {};
     params.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
     params.dateBecomeCase = params.dateBecomeCase || new Date();
+    params.wasContact = true;
     params.classification = params.classification || 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT';
 
     // override default scope to allow switching the type
@@ -770,7 +771,11 @@ module.exports = function (Outbreak) {
         }
 
         // the case has relations with other cases; proceed with the conversion
-        return caseInstance.updateAttribute('type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', options);
+        return caseInstance.updateAttributes({
+          dateBecomeContact: new Date(),
+          wasCase: true,
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+        }, options);
       })
       .then(function (contact) {
         convertedContact = contact;
@@ -4473,8 +4478,8 @@ module.exports = function (Outbreak) {
 
       // An array with all the expected date type fields found in an extended case model (including relationships and labResults)
       const caseDossierDateFields = ['dob', 'isolationDates[].startDate', 'isolationDates[].endDate', 'hospitalizationDates[].startDate', 'hospitalizationDates[].endDate',
-        'incubationDates[].startDate', 'incubationDates[].endDate', 'addresses[].date', 'dateBecomeCase', 'dateDeceased', 'dateOfInfection', 'dateOfOnset',
-        'dateOfOutcome', 'relationships[].contactDate', 'relationships[].people[].dob', 'relationships[].people[].addresses[].date', 'labResults[].dateSampleTaken',
+        'incubationDates[].startDate', 'incubationDates[].endDate', 'addresses[].validTill', 'dateBecomeCase', 'dateDeceased', 'dateOfInfection', 'dateOfOnset',
+        'dateOfOutcome', 'relationships[].contactDate', 'relationships[].people[].dob', 'relationships[].people[].addresses[].validTill', 'labResults[].dateSampleTaken',
         'labResults[].dateSampleDelivered', 'labResults[].dateTesting', 'labResults[].dateOfResult'
       ];
 
@@ -4654,12 +4659,12 @@ module.exports = function (Outbreak) {
       let sanitizedContacts = [];
 
       // An array with all the expected date type fields found in an extended contact model (including relationships and followUps)
-      const contactDossierDateFields = ['dob', 'addresses[].date', 'relationships[].contactDate', 'relationships[].people[].dob',
+      const contactDossierDateFields = ['dob', 'addresses[].validTill', 'relationships[].contactDate', 'relationships[].people[].dob',
         'relationships[].people[].dateBecomeCase', 'relationships[].people[].dateOfInfection', 'relationships[].people[].dateOfOnset',
         'relationships[].people[].dateOfOutcome', 'relationships[].people[].isolationDates[].startDate', 'relationships[].people[].isolationDates[].endDate',
         'relationships[].people[].hospitalizationDates[].startDate', 'relationships[].people[].hospitalizationDates[].endDate',
-        'relationships[].people[].incubationDates[].startDate', 'relationships[].people[].incubationDates[].endDate', 'relationships[].people[].addresses[].date',
-        'followUps[].date', 'followUps[].address.date'
+        'relationships[].people[].incubationDates[].startDate', 'relationships[].people[].incubationDates[].endDate', 'relationships[].people[].addresses[].validTill',
+        'followUps[].date', 'followUps[].address.validTill'
       ];
 
       // Get the language dictionary

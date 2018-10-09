@@ -33,7 +33,8 @@
       "type": "string"
     },
     "locationId": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "geoLocation": {
       "required": false,
@@ -51,7 +52,7 @@
     "phoneNumber": {
       "type": "string"
     },
-    "date": {
+    "validTill": {
       "type": "date",
       "defaultFn": "now"
     }

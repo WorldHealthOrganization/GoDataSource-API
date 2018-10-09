@@ -947,6 +947,7 @@ module.exports = function (Outbreak) {
       'dateOfInfection',
       'dateOfOnset',
       'isDateOfOnsetApproximate',
+      'wasContact',
       'dateBecomeCase',
       'dateOfOutcome',
       'deceased',
