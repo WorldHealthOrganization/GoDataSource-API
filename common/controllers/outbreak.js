@@ -6018,4 +6018,45 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Count cases by case classification
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countCasesPerClassification = function (filter, callback) {
+    // this is a report, don't allow limit & skip
+    if (filter) {
+      delete filter.limit;
+      delete filter.skip;
+    }
+    // get the list of cases
+    this.__get__cases(filter, function (error, cases) {
+      if (error) {
+        return callback(error);
+      }
+      // add filter parent functionality
+      cases = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(cases, filter);
+      // build a result
+      const result = {
+        classification: {},
+        count: cases.length
+      };
+      // go through all case records
+      cases.forEach(function (caseRecord) {
+        // init case classification group if needed
+        if (!result.classification[caseRecord.classification]) {
+          result.classification[caseRecord.classification] = {
+            count: 0,
+            caseIDs: []
+          };
+        }
+        // classify records by their classification
+        result.classification[caseRecord.classification].count++;
+        result.classification[caseRecord.classification].caseIDs.push(caseRecord.id);
+      });
+      // send back the result
+      callback(null, result);
+    });
+  };
 };

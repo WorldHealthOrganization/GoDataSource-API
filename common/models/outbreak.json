@@ -1260,6 +1260,12 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "countEventRelationshipContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCasesPerClassification"
     }
   ],
   "methods": {
@@ -5249,6 +5255,43 @@
       "http": {
         "verb": "get",
         "path": "/events/:nk/relationships/contacts/filtered-count"
+      }
+    },
+    "prototype.countCasesPerClassification": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: it supports same filters as GET /outbreak/:id/cases"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": {
+            "classification": {
+              "type": {
+                "<caseClassification>": {
+                  "type": {
+                    "count": "number",
+                    "caseIDs": [
+                      "string"
+                    ]
+                  }
+                }
+              }
+            },
+            "count": "number"
+          },
+          "description": "Number of cases grouped by case classification",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Counts the number of cases grouped by case classification",
+      "http": {
+        "verb": "get",
+        "path": "/cases/per-classification/count"
       }
     }
   }
