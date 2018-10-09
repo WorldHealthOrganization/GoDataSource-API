@@ -41,7 +41,7 @@
       "type": "date"
     },
     "age": {
-      "type": "number"
+      "type": "age"
     },
     "gender": {
       "type": "string"
