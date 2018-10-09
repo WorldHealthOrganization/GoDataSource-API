@@ -332,7 +332,7 @@ module.exports = function (Outbreak) {
             id: caseId
           });
         }
-        if (!app.models.case.nonDiscardedCaseClassifications.includes(caseModel.classification)) {
+        if (app.models.case.discardedCaseClassifications.includes(caseModel.classification)) {
           throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
             id: caseId
           });
@@ -441,7 +441,7 @@ module.exports = function (Outbreak) {
           });
         }
         // do not allow relationships with discarded cases
-        if (!app.models.case.nonDiscardedCaseClassifications.includes(caseModel.classification)) {
+        if (app.models.case.discardedCaseClassifications.includes(caseModel.classification)) {
           throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
             id: caseId
           });
@@ -1439,7 +1439,7 @@ module.exports = function (Outbreak) {
                 {
                   type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
                   classification: {
-                    inq: app.models.case.nonDiscardedCaseClassifications
+                    nin: app.models.case.discardedCaseClassifications
                   }
                 },
                 {
@@ -1561,7 +1561,7 @@ module.exports = function (Outbreak) {
                   {
                     type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
                     classification: {
-                      inq: app.models.case.nonDiscardedCaseClassifications
+                      nin: app.models.case.discardedCaseClassifications
                     }
                   },
                   {

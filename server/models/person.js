@@ -222,8 +222,8 @@ module.exports = function (Person) {
       ) &&
       (
         // classification changed to/from discarded
-        app.models.case.nonDiscardedCaseClassifications.includes(data.source.existing.classification) !==
-        app.models.case.nonDiscardedCaseClassifications.includes(data.source.updated.classification)
+        app.models.case.discardedCaseClassifications.includes(data.source.existing.classification) !==
+        app.models.case.discardedCaseClassifications.includes(data.source.updated.classification)
       )
     ) {
       // set a flag on context to trigger relationship updated due to significant changes in case classification (from/to discarded case)

@@ -5,10 +5,8 @@ module.exports = function (Case) {
   Case.hasController = false;
 
   // list of case classifications that are not discarded
-  Case.nonDiscardedCaseClassifications = [
-    'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_CONFIRMED',
-    'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_PROBABLE',
-    'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT'
+  Case.discardedCaseClassifications = [
+    'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_NOT_A_CASE_DISCARDED'
   ];
 
   // map language token labels for model properties

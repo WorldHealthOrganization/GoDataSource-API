@@ -84,7 +84,7 @@ module.exports = function (Relationship) {
                 {
                   type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
                   classification: {
-                    inq: app.models.case.nonDiscardedCaseClassifications
+                    nin: app.models.case.discardedCaseClassifications
                   }
                 },
                 {
@@ -163,7 +163,7 @@ module.exports = function (Relationship) {
           scope: {
             where: {
               classification: {
-                inq: app.models.case.nonDiscardedCaseClassifications
+                nin: app.models.case.discardedCaseClassifications
               }
             },
             filterParent: true
@@ -362,7 +362,7 @@ module.exports = function (Relationship) {
         .then(function (cases) {
           // if one of the cases is discarded
           cases.forEach(function (caseRecord) {
-            if (!app.models.case.nonDiscardedCaseClassifications.includes(caseRecord.classification)) {
+            if (app.models.case.discardedCaseClassifications.includes(caseRecord.classification)) {
               // set the relation as inactive
               data.target.active = false;
             }
