@@ -5283,7 +5283,7 @@
             },
             "count": "number"
           },
-          "description": "Number of cases group by case classification",
+          "description": "Number of cases grouped by case classification",
           "required": true,
           "root": true
         }

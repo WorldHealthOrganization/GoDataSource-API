@@ -6039,21 +6039,21 @@ module.exports = function (Outbreak) {
       cases = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(cases, filter);
       // build a result
       const result = {
-        caseClassification: {},
+        classification: {},
         count: cases.length
       };
       // go through all case records
       cases.forEach(function (caseRecord) {
         // init case classification group if needed
-        if (!result.caseClassification[caseRecord.classification]) {
-          result.caseClassification[caseRecord.classification] = {
+        if (!result.classification[caseRecord.classification]) {
+          result.classification[caseRecord.classification] = {
             count: 0,
             caseIDs: []
           };
         }
         // classify records by their classification
-        result.caseClassification[caseRecord.classification].count++;
-        result.caseClassification[caseRecord.classification].caseIDs.push(caseRecord.id);
+        result.classification[caseRecord.classification].count++;
+        result.classification[caseRecord.classification].caseIDs.push(caseRecord.id);
       });
       // send back the result
       callback(null, result);
