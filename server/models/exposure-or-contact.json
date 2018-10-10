@@ -1,12 +1,74 @@
 {
   "name": "exposureOrContact",
-  "base": "person",
+  "base": "Model",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "relationships": ["relationship"]
+    "outbreakId": {
+      "type": "string",
+      "required": true,
+      "readOnly": true
+    },
+    "visualId": {
+      "type": "string"
+    },
+    "firstName": {
+      "type": "string"
+    },
+    "middleName": {
+      "type": "string"
+    },
+    "lastName": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "description": "Event name; Defining it here as Loopback fails on querying with regexp on properties that are not defined in the model; Needed for querying person directly"
+    },
+    "description": {
+      "type": "string",
+      "description": "Event description; Defining it here as Loopback fails on querying with regexp on properties that are not defined in the model; Needed for querying person directly"
+    },
+    "dob": {
+      "type": "date"
+    },
+    "age": {
+      "type": "age"
+    },
+    "gender": {
+      "type": "string"
+    },
+    "phoneNumber": {
+      "type": "string"
+    },
+    "occupation": {
+      "type": "string"
+    },
+    "documents": [
+      "document"
+    ],
+    "addresses": [
+      "address"
+    ],
+    "fillGeoLocation": {
+      "type": "geopoint"
+    },
+    "dateOfReporting": {
+      "type": "date",
+      "required": true
+    },
+    "isDateOfReportingApproximate": {
+      "type": "boolean",
+      "default": false
+    },
+    "dateOfLastContact": {
+      "type": "date"
+    },
+    "relationships": [
+      "relationship"
+    ]
   },
   "validations": [],
   "relations": {},
