@@ -85,6 +85,13 @@
       "type": "string",
       "required": true
     },
+    "classificationHistory": {
+      "type": [
+        "classificationHistoryItem"
+      ],
+      "required": true,
+      "readOnly": true
+    },
     "riskLevel": {
       "type": "string"
     },

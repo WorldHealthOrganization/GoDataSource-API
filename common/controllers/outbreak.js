@@ -6109,4 +6109,17 @@ module.exports = function (Outbreak) {
       callback(null, result);
     });
   };
+
+  /**
+   * Count cases stratified by classification over time
+   * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
+   * @param callback
+   */
+  Outbreak.prototype.countCasesStratifiedByClassificationOverTime = function (filter, callback) {
+    app.models.case.countStratifiedByClassificationOverTime(this, filter)
+      .then(function(result){
+        callback(null, result);
+      })
+      .catch(callback);
+  };
 };

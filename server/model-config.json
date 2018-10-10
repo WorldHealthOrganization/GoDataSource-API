@@ -271,5 +271,9 @@
   "age": {
     "dataSource": null,
     "public": false
+  },
+  "classificationHistoryItem": {
+    "dataSource": null,
+    "public": false
   }
 }

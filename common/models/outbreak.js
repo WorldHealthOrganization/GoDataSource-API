@@ -941,7 +941,9 @@ module.exports = function (Outbreak) {
     // declare list of properties specific for case/contacts
     const contactProps = [
       'riskLevel',
-      'riskReason'
+      'riskReason',
+      'wasCase',
+      'dateBecomeContact'
     ];
     const caseProps = [
       'dateOfInfection',
