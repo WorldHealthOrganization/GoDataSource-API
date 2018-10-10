@@ -1,5 +1,7 @@
 'use strict';
 
+const app = require('../../server/server');
+
 module.exports = function (Case) {
   // set flag to not get controller
   Case.hasController = false;
@@ -124,4 +126,59 @@ module.exports = function (Case) {
   Case.nestedGeoPoints = [
     'addresses[].geoLocation'
   ];
+
+  /**
+   * Archive case classification changes, when detected
+   * @param context
+   */
+  function archiveClassificationChanges(context) {
+    // get data from context
+    const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
+    // get data source
+    const dataSource = data.source.all;
+    // start with unknown last classification
+    let lastKnownClassification;
+    // if there is a non-empty classification history
+    if (Array.isArray(dataSource.classificationHistory) && dataSource.classificationHistory.length) {
+      // find the last known case classification
+      lastKnownClassification = dataSource.classificationHistory.find(classification => classification.endDate == null);
+    }
+    // if the last known classification was found
+    if (lastKnownClassification) {
+      // if it's different than current classification
+      if (dataSource.classification !== lastKnownClassification.classification) {
+        // end last known classification entry
+        lastKnownClassification.endDate = new Date();
+        // add the new classification in the history
+        dataSource.classificationHistory.push({
+          classification: dataSource.classification,
+          startDate: lastKnownClassification.endDate
+        });
+      }
+      // update classification history
+      data.target.classificationHistory = dataSource.classificationHistory;
+
+    } else {
+      // no last known classification, get existing classification history (if any)
+      data.target.classificationHistory = dataSource.classificationHistory;
+      // if there is no classification history
+      if (!Array.isArray(data.target.classificationHistory)) {
+        // start it now
+        data.target.classificationHistory = [];
+      }
+      // add current classification to history
+      data.target.classificationHistory.push({
+        classification: dataSource.classification,
+        startDate: new Date()
+      });
+    }
+  }
+
+  /**
+   * Before save hooks
+   */
+  Case.observe('before save', function (context, next) {
+    archiveClassificationChanges(context);
+    next();
+  });
 };
