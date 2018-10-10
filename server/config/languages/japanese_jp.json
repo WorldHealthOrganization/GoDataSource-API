@@ -292,7 +292,9 @@
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_2_MEDIUM": "日本の 2 - Medium",
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_2_MEDIUM_DESCRIPTION": "日本の description_placeholder",
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_3_HIGH": "日本の 3 - High",
-      "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_3_HIGH_DESCRIPTION": "日本の description_placeholder"
+      "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_3_HIGH_DESCRIPTION": "日本の description_placeholder",
+      "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED": "日本の No Classification",
+      "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED_DESCRIPTION": "日本の description_placeholder"
     },
     "referenceDataCategoryContextOfTransmission": {
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION": "日本の Context of Transmission",

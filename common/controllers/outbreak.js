@@ -6064,4 +6064,49 @@ module.exports = function (Outbreak) {
       callback(null, result);
     });
   };
+
+  /**
+   * Count contacts by case risk level
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countContactsPerRiskLevel = function (filter, callback) {
+    // this is a report, don't allow limit & skip
+    if (filter) {
+      delete filter.limit;
+      delete filter.skip;
+    }
+    // get the list of contacts
+    this.__get__contacts(filter, function (error, contacts) {
+      if (error) {
+        return callback(error);
+      }
+      // add filter parent functionality
+      contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
+      // build a result
+      const result = {
+        riskLevel: {},
+        count: contacts.length
+      };
+      // go through all contact records
+      contacts.forEach(function (contactRecord) {
+        // risk level is optional
+        if (contactRecord.riskLevel == null) {
+          contactRecord.riskLevel = 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED';
+        }
+        // init contact riskLevel group if needed
+        if (!result.riskLevel[contactRecord.riskLevel]) {
+          result.riskLevel[contactRecord.riskLevel] = {
+            count: 0,
+            contactIDs: []
+          };
+        }
+        // classify records by their risk level
+        result.riskLevel[contactRecord.riskLevel].count++;
+        result.riskLevel[contactRecord.riskLevel].contactIDs.push(contactRecord.id);
+      });
+      // send back the result
+      callback(null, result);
+    });
+  };
 };
