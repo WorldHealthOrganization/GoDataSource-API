@@ -342,6 +342,7 @@
     "Lost To Follow-up"
   ],
   "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE": [
+    "Not Performed",
     "Seen Ok",
     "Seen Not Ok",
     "Missed"

@@ -1744,7 +1744,7 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.countContactsSeen = function (filter, callback) {
     helpers.countContactsByFollowUpFilter({
       outbreakId: this.id,
-      followUpFilter: app.models.followup.seenFilter,
+      followUpFilter: app.models.followUp.seenFilter,
       resultProperty: 'contactsSeenCount'
     }, filter, callback);
   };
@@ -2368,42 +2368,31 @@ module.exports = function (Outbreak) {
     app.models.followUp.find(app.utils.remote
       .mergeFilters({
         where: {
-          outbreakId: outbreakId,
-          // get follow-ups that were scheduled in the past noDaysNotSeen days
-          date: {
-            between: [xDaysAgo, now]
-          }
+          and: [
+            {
+              outbreakId: outbreakId
+            },
+            {
+              // get follow-ups that were scheduled in the past noDaysNotSeen days
+              date: {
+                between: [xDaysAgo, now]
+              }
+            },
+            app.models.followUp.notSeenFilter
+          ]
         },
         // order by date as we need to check the follow-ups from the oldest to the most new
         order: 'date ASC'
       }, filter || {}))
       .then(function (followUps) {
-        // filter by relation properties
-        followUps = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followUps, filter);
-        // initialize contacts map; helper to not count contacts twice and keep the seen value;
-        // once a contact is seen the newer follow-ups for the same contact don't matter
-        let contactsMap = {};
-
-        // loop through the followups to get unique contacts
-        followUps.forEach(function (followUp) {
-          // check if there is an entry for the personId or if it is false; In this case, override with current seen flag
-          if (!contactsMap[followUp.personId]) {
-            // set value in the contacts map as the performed flag
-            contactsMap[followUp.personId] = followUp.performed;
-          }
-        });
-
-        // get the contacts not seen from the contacts map
-        let notSeenContactsIDs = Object.keys(contactsMap).filter(contactId => !contactsMap[contactId]);
-
-        // create result
-        let result = {
-          contactsCount: notSeenContactsIDs.length,
-          contactIDs: notSeenContactsIDs
-        };
+        // get contact ids (duplicates are removed) from all follow ups
+        let contactIDs = [...new Set(followUps.map((followUp) => followUp.personId))];
 
         // send response
-        callback(null, result);
+        callback(null, {
+          contactsCount: contactIDs.length,
+          contactIDs: contactIDs
+        });
       })
       .catch(callback);
   };
@@ -2414,6 +2403,8 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactsWithSuccessfulFollowups = function (filter, callback) {
+    const FollowUp = app.models.followUp;
+
     // initialize result
     let result = {
       totalContactsWithFollowupsCount: 0,
@@ -2426,7 +2417,7 @@ module.exports = function (Outbreak) {
     let outbreakId = this.id;
 
     // get all the followups for the filtered period
-    app.models.followUp.find(app.utils.remote
+    FollowUp.find(app.utils.remote
       .mergeFilters({
         where: {
           outbreakId: outbreakId
@@ -2455,8 +2446,8 @@ module.exports = function (Outbreak) {
             // if the previous followup was performed there is no need to update any team contacts counter;
             // total and successful counters were already updated
             if (contactsTeamMap[contactId].teams[teamId]) {
-              // new follow-up for the contact from the same team is performed; update flag and increase succcessful counter
-              if (!contactsTeamMap[contactId].teams[teamId].performed && followup.performed === true) {
+              // new follow-up for the contact from the same team is performed; update flag and increase successful counter
+              if (!contactsTeamMap[contactId].teams[teamId].performed && FollowUp.isPerformed(followup) === true) {
                 // update performed flag
                 contactsTeamMap[contactId].teams[teamId].performed = true;
                 // increase successful counter for team
@@ -2469,7 +2460,7 @@ module.exports = function (Outbreak) {
               // new teamId
               // cache followup performed information for contact in team
               contactsTeamMap[contactId].teams[teamId] = {
-                performed: followup.performed
+                performed: FollowUp.isPerformed(followup)
               };
 
               // initialize team entry if doesn't already exist
@@ -2485,7 +2476,7 @@ module.exports = function (Outbreak) {
 
               // increase team counters
               teamsMap[teamId].totalContactsWithFollowupsCount++;
-              if (followup.performed) {
+              if (FollowUp.isPerformed(followup)) {
                 teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
                 // keep contactId in the followedUpContactsIDs list
                 teamsMap[teamId].followedUpContactsIDs.push(contactId);
@@ -2506,10 +2497,10 @@ module.exports = function (Outbreak) {
             contactsTeamMap[contactId] = {
               teams: {
                 [teamId]: {
-                  performed: followup.performed
+                  performed: FollowUp.isPerformed(followup)
                 }
               },
-              performed: followup.performed,
+              performed: FollowUp.isPerformed(followup),
             };
 
             // increase overall counters
@@ -2528,7 +2519,7 @@ module.exports = function (Outbreak) {
 
             // increase team counters
             teamsMap[teamId].totalContactsWithFollowupsCount++;
-            if (followup.performed) {
+            if (FollowUp.isPerformed(followup)) {
               teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
               // keep contactId in the followedUpContactsIDs list
               teamsMap[teamId].followedUpContactsIDs.push(contactId);
@@ -2542,7 +2533,7 @@ module.exports = function (Outbreak) {
 
           // update total follow-ups counter for contact
           contactsMap[contactId].totalFollowupsCount++;
-          if (followup.performed) {
+          if (FollowUp.isPerformed(followup)) {
             // update counter for contact successful follow-ups
             contactsMap[contactId].successfulFollowupsCount++;
 
@@ -2655,7 +2646,7 @@ module.exports = function (Outbreak) {
           teamsMap[teamId].dates[dateIndexInTeam].totalFollowupsCount++;
           teamsMap[teamId].totalFollowupsCount++;
 
-          if (followup.performed) {
+          if (app.models.followUp.isPerformed(followup)) {
             teamsMap[teamId].dates[dateIndexInTeam].successfulFollowupsCount++;
             teamsMap[teamId].successfulFollowupsCount++;
             result.successfulFollowupsCount++;
@@ -3416,7 +3407,7 @@ module.exports = function (Outbreak) {
           where: {
             outbreakId: outbreakId
           },
-          fields: ['id', 'personId', 'performed'],
+          fields: ['id', 'personId', 'statusId'],
           // order by date as we need to check the follow-ups from the oldest to the most recent
           order: 'date ASC'
         }, filter || {}))
@@ -3432,11 +3423,9 @@ module.exports = function (Outbreak) {
           let contactId = followup.personId;
 
           // add in the contacts map the follow-up ID if it was not performed
-          if (!followup.statusId) {
+          if (followup.statusId === 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED' &&
+            !contactsMap[followup.personId]) {
             contactsMap[contactId] = followup.id;
-          } else {
-            // reset the contactId entry in the map to null if the newer follow-up was performed
-            contactsMap[contactId] = null;
           }
         });
 
@@ -3451,9 +3440,7 @@ module.exports = function (Outbreak) {
             .mergeFilters({
               where: {
                 id: {
-                  // look only for the follow-ups found above
                   inq: Object.values(contactsMap)
-                    .filter(followUp => followUp)
                 },
                 outbreakId: outbreakId,
               },
@@ -4936,7 +4923,7 @@ module.exports = function (Outbreak) {
             // get retrieved follow-up; is the latest that should have been performed
             let followUp = contact.toJSON().followUps[0];
             // check if the follow-up was performed
-            if (followUp && followUp.performed) {
+            if (followUp && app.models.followUp.isPerformed(followup)) {
               // update contactsSeenOnDateCount
               locationMap[contactLocationId].contactsSeenOnDateCount++;
               result.contactsSeenOnDateCount++;

@@ -257,7 +257,7 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
             targeted: targeted,
             // split the follow ups work equally across teams
             teamId: RoundRobin(teams),
-            statusId: null
+            statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
           }, reqOpts)
       );
     }

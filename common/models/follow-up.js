@@ -25,12 +25,21 @@ module.exports = function (FollowUp) {
   Followup.notSeenFilter = {
     or: [
       {
-        statusId: null
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
       },
       {
         statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED'
       }
     ]
+  };
+
+  // helper functions that indicates if a follow up is performed
+  Followup.isPerformed = function (obj) {
+    return [
+        'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK',
+        'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK',
+        'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED'
+      ].indexOf(obj.statusId) >= 0;
   };
 
   // map language token labels for model properties

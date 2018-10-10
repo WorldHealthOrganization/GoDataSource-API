@@ -719,7 +719,6 @@ module.exports = function (Outbreak) {
    */
   Outbreak.helpers.countContactsByFollowUpFilter = function (options, filter, callback) {
     // get options
-    let followUpFlag = options.followUpFlag;
     let resultProperty = options.resultProperty;
 
     // initialize result
@@ -742,62 +741,33 @@ module.exports = function (Outbreak) {
         }
       }, filter || {}))
       .then(function (followups) {
-        // filter by relation properties
-        followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
+        // get contact ids (duplicates are removed) from all follow ups
+        results.contactIDs = [...new Set(followups.map((followup) => followup.personId))];
+        results[resultProperty] = results.contactIDs.length;
 
         // initialize map of contacts to not count same contact twice
-        let contacts = {};
-        // initialize map of teams
         let teams = {};
 
         followups.forEach(function (followup) {
-          // get contactId
-          let contactId = followup.personId;
-          // get teamId; there might be no team id, set null
-          let teamId = followup.teamId || null;
-
-          // check if a followup for the same contact was already parsed
-          if (contacts[contactId]) {
-            // if contact has the team assigned, skip it
-            if (contacts[contactId].teams[teamId]) {
-              return;
+          if (teams[followup.teamId]) {
+            if (teams[followup.teamId].contactIDs.indexOf(followup.personId) === -1) {
+              teams[followup.teamId].contactIDs.push(followup.personId);
             }
-
-            // cache followup flag information for contact in team
-            contacts[contactId].teams.push(teamId);
-
-            // initialize team entry if doesn't already exist
-            teams[teamId] = teams[teamId] || {
-              id: teamId,
-              contactIDs: [followup.personId],
-              [resultProperty]: 1
-            };
           } else {
-            // first followup for the contact
-            // cache followup flag information for contact in team and overall; eg: cache lostToFollowUp flag
-            contacts[contactId] = {
-              teams: [teamId]
+            teams[followup.teamId] = {
+              id: followup.teamId,
+              contactIDs: [followup.personId]
             };
-
-            // initialize team entry if doesn't already exist
-            teams[teamId] = teams[teamId] || {
-              id: teamId,
-              contactIDs: [followup.personId],
-              [resultProperty]: 1
-            };
-
-            // increase counters if the follow-up flag is true; add contact ID in list of IDs
-            if (followup[followUpFlag]) {
-              results[resultProperty]++;
-              results.contactIDs.push(followup.personId);
-            }
           }
-
-          // TODO: check old code, we might have missed something
         });
 
         // update results.teams; sending array with teams information only for the teams that have contacts
-        results.teams = _.values(teams).filter(teamEntry => teamEntry[resultProperty]);
+        results.teams = _.values(teams)
+          .map((teamEntry) => {
+            teamEntry[resultProperty] = teamEntry.contactIDs.length;
+            return teamEntry;
+          })
+          .filter(teamEntry => teamEntry[resultProperty]);
 
         // send response
         callback(null, results);
