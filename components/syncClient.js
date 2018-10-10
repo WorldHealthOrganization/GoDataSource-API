@@ -2,7 +2,6 @@
 
 const request = require('request');
 const fs = require('fs');
-const tmp = require('tmp');
 const app = require('../server/server');
 
 /**
