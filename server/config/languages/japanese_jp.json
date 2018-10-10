@@ -502,7 +502,7 @@
     },
     "addressFields": {
       "LNG_CASE_FIELD_LABEL_ADDRESSES": "日本の Addresses",
-      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE": "日本の Type",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID": "日本の Address Type",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY": "日本の Country",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY": "日本の CITY",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1": "日本の Address Line 1",
@@ -510,7 +510,7 @@
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE": "日本の Postal Code",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID": "日本の Location ID",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION": "日本の Geo-Location",
-      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE": "日本の Date"
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE": "日本の Valid Until Date"
     },
     "uiCaseFields": {
       "LNG_CASE_FIELD_LABEL_ADDRESSES": "日本の Addresses",
@@ -525,7 +525,7 @@
       "LNG_CASE_FIELD_LABEL_DATE_OF_ONSET_APPROXIMATE": "日本の Date of Onset Approximate",
       "LNG_CASE_FIELD_LABEL_DATE_OF_REPORTING": "日本の Date of Reporting",
       "LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE": "日本の Date of Reporting Approximate",
-      "LNG_CASE_FIELD_LABEL_RISK_REASON": "日本の Risk Reason",
+      "LNG_CASE_FIELD_LABEL_RISK_REASON": "日本の Comment",
       "LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES": "日本の Hospitalization Dates",
       "LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES_START_DATE": "日本の Hospitalization Start Date",
       "LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES_END_DATE": "日本の Hospitalization End Date",
@@ -623,7 +623,7 @@
       "LNG_CONTACT_FIELD_LABEL_FIRST_NAME": "日本の First Name",
       "LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING": "日本の Date of Reporting",
       "LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE": "日本の Date of Reporting Approximate",
-      "LNG_CONTACT_FIELD_LABEL_RISK_REASON": "日本の Risk Reason",
+      "LNG_CONTACT_FIELD_LABEL_RISK_REASON": "日本の Comment",
       "LNG_CONTACT_FIELD_LABEL_ID": "日本の ID",
       "LNG_CONTACT_FIELD_LABEL_UPDATED_AT": "日本の Updated At",
       "LNG_CONTACT_FIELD_LABEL_OUTBREAK_ID": "日本の Outbreak ID",

@@ -51,6 +51,7 @@
     },
     "date": {
       "type": "date",
+      "description": "Valid until date",
       "defaultFn": "now"
     }
   },
