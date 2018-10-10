@@ -1092,28 +1092,27 @@ module.exports = function (Outbreak) {
                   .then(() => contact);
               }))
               .then(() => Promise.all(contacts.map((contact) => {
-                  // generate response entry for the given contact
-                  let index = generatedResponse.push({contactId: contact.id, followUps: []}) - 1;
+                // generate response entry for the given contact
+                let index = generatedResponse.push({contactId: contact.id, followUps: []}) - 1;
 
-                  return FollowupGeneration
-                    .generateFollowupsForContact(
-                      contact,
-                      contact.eligibleTeams,
-                      {
-                        startDate: followupStartDate,
-                        endDate: followupEndDate
-                      },
-                      outbreakFollowUpFreq,
-                      outbreakFollowUpPerDay,
-                      options,
-                      data.targeted,
-                      contact.inconclusive
-                    )
-                    .then((followUps) => {
-                      generatedResponse[index].followUps = followUps;
-                    });
-                }))
-              );
+                return FollowupGeneration
+                  .generateFollowupsForContact(
+                    contact,
+                    contact.eligibleTeams,
+                    {
+                      startDate: followupStartDate,
+                      endDate: followupEndDate
+                    },
+                    outbreakFollowUpFreq,
+                    outbreakFollowUpPerDay,
+                    options,
+                    data.targeted,
+                    contact.inconclusive
+                  )
+                  .then((followUps) => {
+                    generatedResponse[index].followUps = followUps;
+                });
+              })));
           });
       })
       .then(() => callback(null, generatedResponse))
