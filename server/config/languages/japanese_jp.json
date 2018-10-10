@@ -510,8 +510,7 @@
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE": "日本の Postal Code",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID": "日本の Location ID",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION": "日本の Geo-Location",
-      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_VALID_TILL": "日本の Valid Till",
-      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_PHONE_NUMBER": "日本の Phone Number"
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE": "日本の Date"
     },
     "uiCaseFields": {
       "LNG_CASE_FIELD_LABEL_ADDRESSES": "日本の Addresses",

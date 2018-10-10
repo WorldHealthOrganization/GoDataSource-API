@@ -23,6 +23,7 @@ module.exports = function (Contact) {
     'wasCase': 'LNG_CONTACT_FIELD_LABEL_WAS_CASE',
     'dateBecomeContact': 'LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT',
     'dateOfReporting': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING',
+    'phoneNumber': 'LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER',
     'riskLevel': 'LNG_CONTACT_FIELD_LABEL_RISK_LEVEL',
     'riskReason': 'LNG_CONTACT_FIELD_LABEL_RISK_REASON',
     'dateOfOutcome': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME',
@@ -37,8 +38,7 @@ module.exports = function (Contact) {
     'addresses[].postalCode': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE',
     'addresses[].locationId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID',
     'addresses[].geoLocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
-    'addresses[].validTill': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_VALID_TILL',
-    'addresses[].phoneNumber': 'LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER',
+    'addresses[].date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
     'fillGeoLocation': 'LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION',
     'isDateOfReportingApproximate': 'LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
     'safeBurial': 'LNG_CONTACT_FIELD_LABEL_SAFE_BURIAL'
@@ -58,7 +58,7 @@ module.exports = function (Contact) {
   Contact.fieldToValueParsersMap = {
     dob: dateParser,
     dateDeceased: dateParser,
-    'addresses[].validTill': dateParser,
+    'addresses[].date': dateParser,
     'followUps[].date': dateParser
   };
   Contact.fieldsToParse = Object.keys(Contact.fieldToValueParsersMap);
@@ -72,6 +72,7 @@ module.exports = function (Contact) {
     'dob',
     'age',
     'occupation',
+    'phoneNumber',
     'addresses',
     'documents',
     'riskLevel',

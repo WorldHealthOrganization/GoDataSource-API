@@ -49,10 +49,7 @@
         }
       }
     },
-    "phoneNumber": {
-      "type": "string"
-    },
-    "validTill": {
+    "date": {
       "type": "date",
       "defaultFn": "now"
     }

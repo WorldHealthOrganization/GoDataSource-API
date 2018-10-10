@@ -97,14 +97,8 @@ const worker = {
       addEntryToIndex(index.name, person, ['firstName', 'middleName'], true);
       // store people indexed by middleName and lastName (also try to match reverse order)
       addEntryToIndex(index.name, person, ['middleName', 'lastName'], true);
-      // if the person has addresses
-      if (Array.isArray(person.addresses)) {
-        // go trough the addresses
-        person.addresses.forEach(function (address, idx) {
-          // store people indexed by firstName, phoneNumber and gender
-          addEntryToIndex(index.phoneNumber, person, ['firstName', `addresses.${idx}.phoneNumber`, 'gender']);
-        });
-      }
+      // store people indexed by phoneNumber and gender
+      addEntryToIndex(index.phoneNumber, person, ['phoneNumber', 'gender']);
       // if the person has documents
       if (Array.isArray(person.documents)) {
         // go trough the documents
