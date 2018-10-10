@@ -332,7 +332,7 @@ module.exports = function (Outbreak) {
             id: caseId
           });
         }
-        if (!app.models.case.nonDiscardedCaseClassifications.includes(caseModel.classification)) {
+        if (app.models.case.discardedCaseClassifications.includes(caseModel.classification)) {
           throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
             id: caseId
           });
@@ -441,7 +441,7 @@ module.exports = function (Outbreak) {
           });
         }
         // do not allow relationships with discarded cases
-        if (!app.models.case.nonDiscardedCaseClassifications.includes(caseModel.classification)) {
+        if (app.models.case.discardedCaseClassifications.includes(caseModel.classification)) {
           throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
             id: caseId
           });
@@ -655,6 +655,7 @@ module.exports = function (Outbreak) {
     params = params || {};
     params.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
     params.dateBecomeCase = params.dateBecomeCase || new Date();
+    params.wasContact = true;
     params.classification = params.classification || 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT';
 
     // override default scope to allow switching the type
@@ -770,7 +771,11 @@ module.exports = function (Outbreak) {
         }
 
         // the case has relations with other cases; proceed with the conversion
-        return caseInstance.updateAttribute('type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', options);
+        return caseInstance.updateAttributes({
+          dateBecomeContact: new Date(),
+          wasCase: true,
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+        }, options);
       })
       .then(function (contact) {
         convertedContact = contact;
@@ -1439,7 +1444,7 @@ module.exports = function (Outbreak) {
                 {
                   type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
                   classification: {
-                    inq: app.models.case.nonDiscardedCaseClassifications
+                    nin: app.models.case.discardedCaseClassifications
                   }
                 },
                 {
@@ -1561,7 +1566,7 @@ module.exports = function (Outbreak) {
                   {
                     type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
                     classification: {
-                      inq: app.models.case.nonDiscardedCaseClassifications
+                      nin: app.models.case.discardedCaseClassifications
                     }
                   },
                   {
@@ -6054,6 +6059,51 @@ module.exports = function (Outbreak) {
         // classify records by their classification
         result.classification[caseRecord.classification].count++;
         result.classification[caseRecord.classification].caseIDs.push(caseRecord.id);
+      });
+      // send back the result
+      callback(null, result);
+    });
+  };
+
+  /**
+   * Count contacts by case risk level
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countContactsPerRiskLevel = function (filter, callback) {
+    // this is a report, don't allow limit & skip
+    if (filter) {
+      delete filter.limit;
+      delete filter.skip;
+    }
+    // get the list of contacts
+    this.__get__contacts(filter, function (error, contacts) {
+      if (error) {
+        return callback(error);
+      }
+      // add filter parent functionality
+      contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
+      // build a result
+      const result = {
+        riskLevel: {},
+        count: contacts.length
+      };
+      // go through all contact records
+      contacts.forEach(function (contactRecord) {
+        // risk level is optional
+        if (contactRecord.riskLevel == null) {
+          contactRecord.riskLevel = 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED';
+        }
+        // init contact riskLevel group if needed
+        if (!result.riskLevel[contactRecord.riskLevel]) {
+          result.riskLevel[contactRecord.riskLevel] = {
+            count: 0,
+            contactIDs: []
+          };
+        }
+        // classify records by their risk level
+        result.riskLevel[contactRecord.riskLevel].count++;
+        result.riskLevel[contactRecord.riskLevel].contactIDs.push(contactRecord.id);
       });
       // send back the result
       callback(null, result);

@@ -185,7 +185,7 @@ module.exports = function (Outbreak) {
                 // do not allow relationships with discarded cases
                 if (
                   foundPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' &&
-                  !app.models.case.nonDiscardedCaseClassifications.includes(foundPerson.classification)
+                  app.models.case.discardedCaseClassifications.includes(foundPerson.classification)
                 ) {
                   throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
                     id: foundPerson.id
@@ -947,10 +947,12 @@ module.exports = function (Outbreak) {
       'dateOfInfection',
       'dateOfOnset',
       'isDateOfOnsetApproximate',
+      'wasContact',
       'dateBecomeCase',
       'dateOfOutcome',
       'deceased',
       'dateDeceased',
+      'safeBurial',
       'classification',
       'riskLevel',
       'riskReason',

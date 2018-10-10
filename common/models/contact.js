@@ -20,6 +20,8 @@ module.exports = function (Contact) {
     'documents[].type': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE',
     'documents[].number': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER',
     'dateDeceased': 'LNG_CONTACT_FIELD_LABEL_DATE_DECEASED',
+    'wasCase': 'LNG_CONTACT_FIELD_LABEL_WAS_CASE',
+    'dateBecomeContact': 'LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT',
     'dateOfReporting': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING',
     'phoneNumber': 'LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER',
     'riskLevel': 'LNG_CONTACT_FIELD_LABEL_RISK_LEVEL',
@@ -38,7 +40,8 @@ module.exports = function (Contact) {
     'addresses[].geoLocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
     'addresses[].date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
     'fillGeoLocation': 'LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION',
-    'isDateOfReportingApproximate': 'LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE'
+    'isDateOfReportingApproximate': 'LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
+    'safeBurial': 'LNG_CONTACT_FIELD_LABEL_SAFE_BURIAL'
   });
 
   Contact.referenceDataFieldsToCategoryMap = {
@@ -74,8 +77,11 @@ module.exports = function (Contact) {
     'documents',
     'riskLevel',
     'riskReason',
+    'wasCase',
+    'dateBecomeContact',
     'dateDeceased',
-    'deceased'
+    'deceased',
+    'safeBurial'
   ];
 
   Contact.foreignKeyResolverMap = {
