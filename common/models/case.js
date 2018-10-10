@@ -1,6 +1,8 @@
 'use strict';
 
 const app = require('../../server/server');
+const casesWorker = require('../../components/workerRunner').cases;
+const _ = require('lodash');
 
 module.exports = function (Case) {
   // set flag to not get controller
@@ -181,4 +183,109 @@ module.exports = function (Case) {
     archiveClassificationChanges(context);
     next();
   });
+
+  /**
+   * Count cases stratified by classification over time
+   * @param outbreak
+   * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
+   * @return {PromiseLike<T | never>}
+   */
+  Case.countStratifiedByClassificationOverTime = function (outbreak, filter) {
+    // initialize periodType filter; default is day; accepting day/week/month
+    let periodType, endDate;
+    let periodTypes = {
+      day: 'day',
+      week: 'week',
+      month: 'month'
+    };
+
+    // check if the periodType filter was sent; accepting it only on the first level
+    periodType = _.get(filter, 'where.periodType');
+    if (typeof periodType !== 'undefined') {
+      // periodType was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.periodType;
+    }
+
+    // check if the received periodType is accepted
+    if (Object.values(periodTypes).indexOf(periodType) === -1) {
+      // set default periodType
+      periodType = periodTypes.day;
+    }
+
+    // check if the periodType filter was sent; accepting it only on the first level
+    endDate = _.get(filter, 'where.endDate');
+    if (typeof endDate !== 'undefined') {
+      // periodType was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.endDate;
+    }
+
+    // always work with end of day
+    if (endDate) {
+      // get end of day for specified date
+      endDate = app.utils.helpers.getUTCDateEndOfDay(endDate);
+    } else {
+      // nothing sent, use current day's end of day
+      endDate = app.utils.helpers.getUTCDateEndOfDay();
+    }
+
+    // define period interval
+    const periodInterval = [
+      outbreak.startDate,
+      endDate
+    ];
+
+    // build period map
+    const periodMap = app.utils.helpers.getChunksForInterval(periodInterval, periodType);
+
+    // get available case classifications
+    return app.models.referenceData
+      .find({
+        where: {
+          categoryId: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION'
+        }
+      })
+      .then(function (classifications) {
+        const caseClassifications = {};
+        // add default entries for all classifications
+        classifications.forEach(function (classification) {
+          caseClassifications[classification.id] = 0;
+        });
+        // add case classifications to periodMap
+        Object.keys(periodMap)
+          .forEach(function (periodMapIndex) {
+            Object.assign(periodMap[periodMapIndex], {
+              classification: caseClassifications,
+              total: 0
+            });
+          });
+      })
+      .then(function () {
+        // find cases that have date of onset earlier then end of the period interval
+        return app.models.case
+          .find(
+            app.utils.remote
+              .mergeFilters({
+                where: {
+                  outbreakId: outbreak.id,
+                  dateOfOnset: {
+                    lte: new Date(periodInterval[1])
+                  }
+                }
+              })
+          )
+          .then(function (cases) {
+            return new Promise(function (resolve, reject) {
+              // count case classifications over time
+              casesWorker.countStratifiedByClassificationOverTime(cases, periodInterval, periodType, periodMap, function (error, periodMap) {
+                // handle errors
+                if (error) {
+                  return reject(error);
+                }
+                // send back the result
+                return resolve(periodMap);
+              });
+            });
+          });
+      });
+  };
 };

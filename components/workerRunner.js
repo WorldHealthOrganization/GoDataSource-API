@@ -87,5 +87,18 @@ module.exports = {
     count: function (people, callback) {
       invokeWorkerMethod('personDuplicate', 'count', [people], callback);
     }
+  },
+  cases: {
+    /**
+     * Count cases stratified by classification over time
+     * @param cases
+     * @param periodInterval
+     * @param periodType
+     * @param periodMap
+     * @param callback
+     */
+    countStratifiedByClassificationOverTime: function (cases, periodInterval, periodType, periodMap, callback) {
+      invokeWorkerMethod('cases', 'countStratifiedByClassificationOverTime', [cases, periodInterval, periodType, periodMap], callback);
+    }
   }
 };
