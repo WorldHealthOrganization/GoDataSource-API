@@ -1092,14 +1092,12 @@ module.exports = function (Outbreak) {
                   .then(() => contact);
               }))
               .then(() => Promise.all(contacts.map((contact) => {
-                // generate response entry for the given contact
-                let index = generatedResponse.push({contactId: contact.id, followUps: []}) - 1;
+                  // generate response entry for the given contact
+                  let index = generatedResponse.push({contactId: contact.id, followUps: []}) - 1;
 
-                return FollowupGeneration
-                  .generateFollowupsForContact(
+                  return FollowupGeneration.generateFollowupsForContact(
                     contact,
-                    contact.eligibleTeams,
-                    {
+                    contact.eligibleTeams, {
                       startDate: followupStartDate,
                       endDate: followupEndDate
                     },
@@ -1108,12 +1106,11 @@ module.exports = function (Outbreak) {
                     options,
                     data.targeted,
                     contact.inconclusive
-                  )
-                  .then((followUps) => {
+                  ).then((followUps) => {
                     generatedResponse[index].followUps = followUps;
-                });
-              }))
-            );
+                  });
+                }))
+              );
           });
       })
       .then(() => callback(null, generatedResponse))
