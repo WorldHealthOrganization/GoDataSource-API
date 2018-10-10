@@ -271,7 +271,7 @@ module.exports = function (Case) {
                     lte: new Date(periodInterval[1])
                   }
                 }
-              })
+              }, filter || {})
           )
           .then(function (cases) {
             return new Promise(function (resolve, reject) {
