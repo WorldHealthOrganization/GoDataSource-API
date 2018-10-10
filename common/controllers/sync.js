@@ -114,26 +114,31 @@ module.exports = function (Sync) {
       exportedOutbreakIDs = allowedOutbreakIDs;
     }
 
-    // initialize list of models to be excluded
-    // this list is used if the filter.where.collections is not present
-    let excludeList = [
-      'systemSettings',
-      'template',
-      'helpCategory',
-      'auditLog'
-    ];
+    // create list of exported collections depending on different filters
+    let collections;
 
-    // initialize list of collections to be exported
-    let collections = Object.keys(dbSync.collectionsMap);
-
-    // check for collections filter
-    let collectionsFilter = _.get(filter, 'where.collections');
-    if (Array.isArray(collectionsFilter)) {
-      // export the received collections
-      collections = collectionsFilter;
+    // get exportType filter
+    let exportTypeFilter = _.get(filter, 'where.exportType');
+    if (Object.keys(dbSync.collectionsForExportTypeMap).indexOf(exportTypeFilter) !== -1) {
+      // sent exportType is valid; export assigned collections
+      // in this case the collections filter is ignored
+      collections = dbSync.collectionsForExportTypeMap[exportTypeFilter];
     } else {
-      // exclude the excludeList collections from the export
-      collections = collections.filter((collection) => excludeList.indexOf(collection) === -1);
+      // check for collections filter
+      let collectionsFilter = _.get(filter, 'where.collections');
+      if (Array.isArray(collectionsFilter)) {
+        // export the received collections
+        collections = collectionsFilter;
+      } else {
+        // use mobile exportType collections by default
+        collections = dbSync.collectionsForExportTypeMap.mobile;
+      }
+    }
+
+    // get includeUsers filter to check if the user collections need to be exported
+    let includeUsersFilter = _.get(filter, 'where.includeUsers');
+    if (includeUsersFilter) {
+      collections = collections.concat(dbSync.userCollections);
     }
 
     // create export log entry
@@ -177,10 +182,14 @@ module.exports = function (Sync) {
 
   /**
    * Retrieve a compressed snapshot of the database
-   * Date filter is supported ({ fromDate: Date })
-   * outbreakId filter is supported: 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}
-   * collections filter is supported: ['modelName']
-   * Eg filter: {"where": {"fromDate": "dateString", "outbreakId": "outbreak ID", "collections": ["person", "outbreak", ...]}}
+   * Supported filters:
+   * fromDate: Date
+   * outbreakId: 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}
+   * collections: ['modelName']
+   * exportType: enum [mobile, system, outbreak, full]
+   * includeUsers: boolean
+   * Eg filter: {"where": {"fromDate": "dateString", "outbreakId": "outbreak ID", "collections": ["person", "outbreak", ...], "exportType": "mobile", "includeUsers": true}}
+   * Note: when exportType is present 'collections' is ignored. If both collections and exportType are not present default 'mobile' export type is used
    * @param filter
    * @param options Options from request
    * @param done
@@ -192,10 +201,14 @@ module.exports = function (Sync) {
   /**
    * Export a compressed snapshot of the database. Return an exportLogEntry ID
    * This action is used for asynchronous processes
-   * Date filter is supported ({ fromDate: Date })
-   * outbreakId filter is supported: 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}
-   * collections filter is supported: ['modelName']
-   * Eg filter: {"where": {"fromDate": "dateString", "outbreakId": "outbreak ID", "collections": ["person", "outbreak", ...]}}
+   * Supported filters:
+   * fromDate: Date
+   * outbreakId: 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}
+   * collections: ['modelName']
+   * exportType: enum [mobile, system, outbreak, full]
+   * includeUsers: boolean
+   * Eg filter: {"where": {"fromDate": "dateString", "outbreakId": "outbreak ID", "collections": ["person", "outbreak", ...], "exportType": "mobile", "includeUsers": true}}
+   * Note: when exportType is present 'collections' is ignored. If both collections and exportType are not present default 'mobile' export type is used
    * @param filter
    * @param options Options from request
    * @param done

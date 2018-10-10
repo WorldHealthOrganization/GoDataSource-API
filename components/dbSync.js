@@ -40,6 +40,21 @@ const collectionsMap = {
   auditLog: 'auditLog'
 };
 
+// list of user related collections
+const userCollections = ['team', 'user', 'role'];
+
+// map of export type to collections
+const collectionsForExportTypeMap = {
+  system: ['template', 'icon', 'helpCategory', 'language', 'languageToken', 'referenceData', 'location']
+};
+collectionsForExportTypeMap.outbreak = collectionsForExportTypeMap.system.concat(['outbreak']);
+collectionsForExportTypeMap.full = collectionsForExportTypeMap.outbreak.concat(['person', 'labResult', 'followUp', 'relationship', 'cluster']);
+collectionsForExportTypeMap.mobile = collectionsForExportTypeMap.full.concat(userCollections);
+// mobile export doesn't need to include template, icon, helpCategory
+collectionsForExportTypeMap.mobile.splice(collectionsForExportTypeMap.mobile.indexOf('template'), 1);
+collectionsForExportTypeMap.mobile.splice(collectionsForExportTypeMap.mobile.indexOf('icon'), 1);
+collectionsForExportTypeMap.mobile.splice(collectionsForExportTypeMap.mobile.indexOf('helpCategory'), 1);
+
 // on sync we need get all collections except the following
 let syncExcludeList = [
   'systemSettings',
@@ -428,6 +443,8 @@ module.exports = {
   syncRecord: syncRecord,
   syncRecordFlags: syncRecordFlags,
   syncCollections: syncCollections,
+  collectionsForExportTypeMap: collectionsForExportTypeMap,
+  userCollections: userCollections,
   syncModels: syncModels,
   collectionsWithFiles: collectionsWithFiles,
   exportCollectionRelatedFiles: exportCollectionRelatedFiles,
