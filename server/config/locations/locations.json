@@ -1585,12 +1585,6 @@
       },
       {
         "location": {
-          "name": "Abraka",
-          "id": "f5d21cc8-f64e-4a09-8103-9a8626e7abad"
-        }
-      },
-      {
-        "location": {
           "name": "Abuja",
           "id": "f3554a1e-85a4-4bd5-b150-0968fc8fc012"
         }
@@ -2055,12 +2049,6 @@
         "location": {
           "name": "Warri",
           "id": "a5a96ac0-d677-4c0e-8796-9e1c030f9cfc"
-        }
-      },
-      {
-        "location": {
-          "name": "Warri",
-          "id": "db8db1e7-5f3a-44fb-aa63-7ce97ecb1ac8"
         }
       },
       {
@@ -3185,12 +3173,6 @@
       },
       {
         "location": {
-          "name": "Middelburg",
-          "id": "4cb90e82-719a-4463-ba8f-8d93adafaf51"
-        }
-      },
-      {
-        "location": {
           "name": "Midrand",
           "id": "63b6b409-0810-44da-8244-1f6f9d817355"
         }
@@ -4025,12 +4007,6 @@
       },
       {
         "location": {
-          "name": "Waverley",
-          "id": "501d936f-3193-410b-bf11-6b67b86d0577"
-        }
-      },
-      {
-        "location": {
           "name": "Welgelegen",
           "id": "e0f46168-e49f-42a0-ac7a-d6855b5adccd"
         }
@@ -4045,12 +4021,6 @@
         "location": {
           "name": "Welkom",
           "id": "2d193cae-e87f-490f-90ad-5f656b5e140d"
-        }
-      },
-      {
-        "location": {
-          "name": "Welkom",
-          "id": "f4197092-b9e0-4fd7-915c-f52ba98bfee6"
         }
       },
       {
