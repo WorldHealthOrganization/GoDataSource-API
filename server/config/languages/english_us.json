@@ -293,7 +293,9 @@
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_2_MEDIUM": "2 - Medium",
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_2_MEDIUM_DESCRIPTION": "description_placeholder",
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_3_HIGH": "3 - High",
-      "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_3_HIGH_DESCRIPTION": "description_placeholder"
+      "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_3_HIGH_DESCRIPTION": "description_placeholder",
+      "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED": "No Classification",
+      "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED_DESCRIPTION": "description_placeholder"
     },
     "referenceDataCategoryContextOfTransmission": {
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION": "Context of Transmission",
@@ -503,7 +505,7 @@
     },
     "addressFields": {
       "LNG_CASE_FIELD_LABEL_ADDRESSES": "Addresses",
-      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID": "Type",
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID": "Address Type",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY": "Country",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY": "CITY",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1": "Address Line 1",
@@ -513,7 +515,7 @@
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION": "Geo-Location",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LAT": "Lat",
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LNG": "Lng",
-      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE": "Date"
+      "LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE": "Valid Until Date"
     },
     "uiCaseFields": {
       "LNG_CASE_FIELD_LABEL_ADDRESSES": "Addresses",
@@ -528,7 +530,7 @@
       "LNG_CASE_FIELD_LABEL_DATE_OF_ONSET_APPROXIMATE": "Date of Onset Approximate",
       "LNG_CASE_FIELD_LABEL_DATE_OF_REPORTING": "Date of Reporting",
       "LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE": "Date of Reporting Approximate",
-      "LNG_CASE_FIELD_LABEL_RISK_REASON": "Risk Reason",
+      "LNG_CASE_FIELD_LABEL_RISK_REASON": "Comment",
       "LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES": "Hospitalization Dates",
       "LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES_START_DATE": "Hospitalization Start Date",
       "LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES_END_DATE": "Hospitalization End Date",
@@ -537,6 +539,7 @@
       "LNG_CASE_FIELD_LABEL_OUTBREAK_ID": "Outbreak ID",
       "LNG_CASE_FIELD_LABEL_DOB": "Date of Birth",
       "LNG_CASE_FIELD_LABEL_CREATED_BY": "Created By",
+      "LNG_CASE_FIELD_LABEL_WAS_CONTACT": "Was Contact",
       "LNG_CASE_FIELD_LABEL_DATE_BECOME_CASE": "Date of Becoming case",
       "LNG_CASE_FIELD_LABEL_MIDDLE_NAME": "Middle Name",
       "LNG_CASE_FIELD_LABEL_INCUBATION_DATES": "Incubation Dates",
@@ -563,7 +566,8 @@
       "LNG_CASE_FIELD_LABEL_DATE_DECEASED": "Date of Decease",
       "LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER": "Document Number",
       "LNG_CASE_FIELD_LABEL_VISUAL_ID": "Visual ID",
-      "LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED": "Transfer Refused"
+      "LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED": "Transfer Refused",
+      "LNG_CASE_FIELD_LABEL_SAFE_BURIAL": "Performed Safe Burial"
     },
     "uiCasesListPage": {
       "LNG_PAGE_LIST_CASES_TITLE": "Cases",
@@ -624,7 +628,7 @@
       "LNG_CONTACT_FIELD_LABEL_FIRST_NAME": "First Name",
       "LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING": "Date of Reporting",
       "LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE": "Date of Reporting Approximate",
-      "LNG_CONTACT_FIELD_LABEL_RISK_REASON": "Risk Reason",
+      "LNG_CONTACT_FIELD_LABEL_RISK_REASON": "Comment",
       "LNG_CONTACT_FIELD_LABEL_ID": "ID",
       "LNG_CONTACT_FIELD_LABEL_UPDATED_AT": "Updated At",
       "LNG_CONTACT_FIELD_LABEL_OUTBREAK_ID": "Outbreak ID",
@@ -647,7 +651,10 @@
       "LNG_CONTACT_FIELD_LABEL_DATE_DECEASED": "Date of Decease",
       "LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER": "Document Number",
       "LNG_CONTACT_FIELD_LABEL_VISUAL_ID": "Visual ID",
-      "LNG_CONTACT_FIELD_LABEL_DOCUMENTS": "Documents"
+      "LNG_CONTACT_FIELD_LABEL_DOCUMENTS": "Documents",
+      "LNG_CONTACT_FIELD_LABEL_WAS_CASE": "Was Case",
+      "LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT": "Date of Becoming contact",
+      "LNG_CONTACT_FIELD_LABEL_SAFE_BURIAL": "Performed Safe Burial"
     },
     "uiContactsListPage": {
       "LNG_PAGE_LIST_CONTACTS_TITLE": "Contacts"
