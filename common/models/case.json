@@ -37,8 +37,7 @@
       "required": true
     },
     "gender": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "dateOfInfection": {
       "type": "date"
