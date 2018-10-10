@@ -1112,7 +1112,8 @@ module.exports = function (Outbreak) {
                   .then((followUps) => {
                     generatedResponse[index].followUps = followUps;
                 });
-              })));
+              }))
+            );
           });
       })
       .then(() => callback(null, generatedResponse))
