@@ -273,9 +273,6 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
               inq: existingFollowups.map((f) => f.id)
             }
           })
-            .catch((err) => {
-              let a = 1;
-            })
         );
       }
     }

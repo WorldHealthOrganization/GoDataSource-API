@@ -1,7 +1,6 @@
 'use strict';
 
 const app = require('../../server/server');
-const followupGeneration = require('../../components/followupGeneration');
 const moment = require('moment');
 const _ = require('lodash');
 
@@ -36,10 +35,10 @@ module.exports = function (FollowUp) {
   // helper functions that indicates if a follow up is performed
   Followup.isPerformed = function (obj) {
     return [
-        'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK',
-        'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK',
-        'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED'
-      ].indexOf(obj.statusId) >= 0;
+      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK',
+      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK',
+      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED'
+    ].indexOf(obj.statusId) >= 0;
   };
 
   // map language token labels for model properties

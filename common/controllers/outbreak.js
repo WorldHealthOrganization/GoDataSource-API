@@ -3,7 +3,6 @@
 const moment = require('moment');
 const app = require('../../server/server');
 const _ = require('lodash');
-const rr = require('rr');
 const genericHelpers = require('../../components/helpers');
 const async = require('async');
 const pdfUtils = app.utils.pdfDoc;
@@ -1094,10 +1093,7 @@ module.exports = function (Outbreak) {
               }))
               .then(() => Promise.all(contacts.map((contact) => {
                   // generate response entry for the given contact
-                  let index = generatedResponse.push({
-                    contactId: contact.id,
-                    followUps: []
-                  }) - 1;
+                  let index = generatedResponse.push({contactId: contact.id, followUps: []}) - 1;
 
                   return FollowupGeneration
                     .generateFollowupsForContact(
@@ -4923,7 +4919,7 @@ module.exports = function (Outbreak) {
             // get retrieved follow-up; is the latest that should have been performed
             let followUp = contact.toJSON().followUps[0];
             // check if the follow-up was performed
-            if (followUp && app.models.followUp.isPerformed(followup)) {
+            if (followUp && app.models.followUp.isPerformed(followUp)) {
               // update contactsSeenOnDateCount
               locationMap[contactLocationId].contactsSeenOnDateCount++;
               result.contactsSeenOnDateCount++;
