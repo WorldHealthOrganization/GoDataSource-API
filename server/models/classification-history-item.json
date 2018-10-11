@@ -1,7 +1,7 @@
 {
-  "name": "syncParameters",
+  "name": "classificationHistoryItem",
   "base": "Model",
-  "idInjection": false,
+  "idInjection": true,
   "options": {
     "validateUpsert": true
   },
@@ -9,9 +9,16 @@
     "id"
   ],
   "properties": {
-    "upstreamServerURL": {
+    "classification": {
       "type": "string",
       "required": true
+    },
+    "startDate": {
+      "type": "string",
+      "required": true
+    },
+    "endDate": {
+      "type": "string"
     }
   },
   "validations": [],

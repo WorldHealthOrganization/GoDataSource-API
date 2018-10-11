@@ -20,6 +20,7 @@ module.exports = function (Relationship) {
     exposureFrequencyId: 'LNG_RELATIONSHIP_FIELD_LABEL_EXPOSURE_FREQUENCY',
     exposureDurationId: 'LNG_RELATIONSHIP_FIELD_LABEL_EXPOSURE_DURATION',
     socialRelationshipTypeId: 'LNG_RELATIONSHIP_FIELD_LABEL_RELATION',
+    socialRelationshipDetail: 'LNG_RELATIONSHIP_FIELD_LABEL_RELATION_DETAIL',
     clusterId: 'LNG_RELATIONSHIP_FIELD_LABEL_CLUSTER',
     comment: 'LNG_RELATIONSHIP_FIELD_LABEL_COMMENT'
   });
@@ -56,6 +57,7 @@ module.exports = function (Relationship) {
     'exposureFrequencyId',
     'exposureDurationId',
     'socialRelationshipTypeId',
+    'socialRelationshipDetail',
     'comment',
     'person'
   ];
@@ -82,7 +84,7 @@ module.exports = function (Relationship) {
                 {
                   type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
                   classification: {
-                    inq: app.models.case.nonDiscardedCaseClassifications
+                    nin: app.models.case.discardedCaseClassifications
                   }
                 },
                 {
@@ -161,7 +163,7 @@ module.exports = function (Relationship) {
           scope: {
             where: {
               classification: {
-                inq: app.models.case.nonDiscardedCaseClassifications
+                nin: app.models.case.discardedCaseClassifications
               }
             },
             filterParent: true
@@ -360,7 +362,7 @@ module.exports = function (Relationship) {
         .then(function (cases) {
           // if one of the cases is discarded
           cases.forEach(function (caseRecord) {
-            if (!app.models.case.nonDiscardedCaseClassifications.includes(caseRecord.classification)) {
+            if (app.models.case.discardedCaseClassifications.includes(caseRecord.classification)) {
               // set the relation as inactive
               data.target.active = false;
             }
@@ -522,5 +524,118 @@ module.exports = function (Relationship) {
           });
         });
       });
+  };
+
+  /**
+   * Find or count relationship exposures or contacts for a relationship
+   * @param personId
+   * @param [filter]
+   * @param [findContacts]
+   * @param [onlyCount]
+   */
+  Relationship.findOrCountPersonRelationshipExposuresOrContacts = function (personId, filter = {}, findContacts = true, onlyCount = false) {
+    // find all relationships of the specified person where the person is source/target
+    return app.models.relationship
+      .find(app.utils.remote
+        .mergeFilters({
+          where: {
+            persons: {
+              elemMatch: {
+                id: personId,
+                [findContacts ? 'source' : 'target']: true
+              }
+            }
+          },
+        }, filter.relationships || {})
+      )
+      .then(function (relationships) {
+        // keep a map of people and their relationships
+        const personRelationshipMap = {};
+        // build a list of other people (in the relationship) IDs
+        const otherPeopleIds = [];
+        // go through all relationships
+        relationships.forEach(function (relationship) {
+          // go trough all the people in the relationships
+          Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
+            // store other person's ID
+            if (person.id !== personId) {
+              otherPeopleIds.push(person.id);
+              // init the map for current person, if not already inited
+              if (!personRelationshipMap[person.id]) {
+                personRelationshipMap[person.id] = [];
+              }
+              // map relationship to current person
+              personRelationshipMap[person.id].push(relationship);
+            }
+          });
+        });
+        // build a filer for the other people
+        const peopleFilter = app.utils.remote
+          .mergeFilters({
+            where: {
+              id: {
+                inq: otherPeopleIds
+              }
+            },
+          }, filter || {});
+
+        // check if only need to count
+        if (onlyCount) {
+          return app.models.person
+            .count(peopleFilter.where);
+        }
+
+        // find other people
+        return app.models.person
+          .find(peopleFilter)
+          .then(function (people) {
+            // go through all the people
+            people.forEach(function (person) {
+              // attach relationships information to every person
+              person.relationships = personRelationshipMap[person.id];
+            });
+            return people;
+          });
+      });
+  };
+
+  /**
+   * Find relationship exposures for a person
+   * @param personId
+   * @param filter
+   * @return {*}
+   */
+  Relationship.findPersonRelationshipExposures = function (personId, filter) {
+    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter, false);
+  };
+
+  /**
+   * Count relationship exposures for a person
+   * @param personId
+   * @param filter
+   * @return {*}
+   */
+  Relationship.countPersonRelationshipExposures = function (personId, filter) {
+    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter, false, true);
+  };
+
+  /**
+   * Find relationship contacts for a person
+   * @param personId
+   * @param filter
+   * @return {*}
+   */
+  Relationship.findPersonRelationshipContacts = function (personId, filter) {
+    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter);
+  };
+
+  /**
+   * Count relationship contacts for a person
+   * @param personId
+   * @param filter
+   * @return {*}
+   */
+  Relationship.countPersonRelationshipContacts = function (personId, filter) {
+    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter, true, true);
   };
 };

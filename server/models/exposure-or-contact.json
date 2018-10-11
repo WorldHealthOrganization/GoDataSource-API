@@ -1,15 +1,9 @@
 {
-  "name": "person",
-  "base": "extendedPersistedModel",
+  "name": "exposureOrContact",
+  "base": "Model",
   "idInjection": true,
   "options": {
     "validateUpsert": true
-  },
-  "mongodb": {
-    "collection": "person"
-  },
-  "scope": {
-    "order": ["name ASC", "lastName ASC", "firstName ASC"]
   },
   "properties": {
     "outbreakId": {
@@ -71,39 +65,10 @@
     },
     "dateOfLastContact": {
       "type": "date"
-    }
-  },
-  "indexes": {
-    "visualId_index": {
-      "visualId": 1
     },
-    "firstName_index": {
-      "firstName": 1
-    },
-    "middleName_index": {
-      "middleName": 1
-    },
-    "lastName_index": {
-      "lastName": 1
-    },
-    "documents_index": {
-      "documents": 1
-    },
-    "outbreakId_index": {
-      "outbreakId": 1
-    },
-    "addresses_geoLocation_index": {
-      "addresses.geoLocation": "2dsphere"
-    },
-    "fillGeoLocation_index": {
-      "fillGeoLocation": "2dsphere"
-    },
-    "dateOfReporting_index": {
-      "dateOfReporting": 1
-    },
-    "dateOfLastContact_index": {
-      "dateOfLastContact": 1
-    }
+    "relationships": [
+      "relationship"
+    ]
   },
   "validations": [],
   "relations": {},

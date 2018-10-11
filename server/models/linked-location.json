@@ -1,17 +1,14 @@
 {
-  "name": "syncParameters",
+  "name": "linkedLocation",
   "base": "Model",
-  "idInjection": false,
+  "idInjection": true,
   "options": {
     "validateUpsert": true
   },
-  "hidden": [
-    "id"
-  ],
   "properties": {
-    "upstreamServerURL": {
+    "id": {
       "type": "string",
-      "required": true
+      "id": true
     }
   },
   "validations": [],

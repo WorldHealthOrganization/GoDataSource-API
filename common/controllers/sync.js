@@ -507,8 +507,6 @@ module.exports = function (Sync) {
         // Sync steps:
         // 1: export local DB
         // 2: send DB to be synced on the upstream server
-        // 3: get DB from the upstream server
-        // 4. import the received DB
 
         // export local DB
         // initialize filter and update it if needed
@@ -551,56 +549,36 @@ module.exports = function (Sync) {
         return Sync.sendDBSnapshotForImport(upstreamServerEntry, exportedDBFileName, true, syncLogEntry);
       })
       .then(function () {
-        // 3: get DB from the upstream server
-        return Sync.getDBSnapshotFromUpstreamServer(upstreamServerEntry, true, syncLogEntry);
-      })
-      .then(function (upstreamServerDBSnapshotFileName) {
-        // 4. import the received DB
-        return new Promise(function (resolve, reject) {
-          Sync.syncDatabaseWithSnapshot(upstreamServerDBSnapshotFileName, syncLogEntry, syncLogEntry.outbreakIDs, options, data.triggerBackupBeforeSync, function (err) {
-            if (err && err.errorType === Sync.errorType.fatal) {
-              return reject(err);
-            }
+        // sync was successful
+        // update syncLogEntry
+        syncLogEntry.actionCompletionDate = new Date();
 
-            // sync was successful
-            // update syncLogEntry
-            syncLogEntry.actionCompletionDate = new Date();
+        // check for partial success
+        if (syncLogEntry.error) {
+          app.logger.debug(`Sync ${syncLogEntry.id}: Success with warnings; ${syncLogEntry.error}`);
+          syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS';
+        }
+        else {
+          // success
+          app.logger.debug(`Sync ${syncLogEntry.id}: Success`);
+          syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS';
+        }
 
-            // check for partial success
-            if (err && err.errorType === Sync.errorType.partial) {
-              app.logger.debug(`Sync ${syncLogEntry.id}: Success with warnings; Instance import succeeded with some errors: ${err.errorMessage}`);
-              syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS';
-              syncLogEntry.addError(`Instance import errors: ${err.errorMessage}`);
-            }
-            // check if there are errors set on the syncLogEntry (there might be from the upstream server sync); If so, the status will be success with warnings
-            else if (syncLogEntry.error) {
-              app.logger.debug(`Sync ${syncLogEntry.id}: Success with warnings; ${syncLogEntry.error}`);
-              syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS';
-            }
-            else {
-              // success
-              app.logger.debug(`Sync ${syncLogEntry.id}: Success`);
-              syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS';
-            }
-
-            // save sync log entry
-            syncLogEntry
-              .save(options)
-              .then(function () {
-                // nothing to do; sync log entry was saved
-                app.logger.debug(`Sync ${syncLogEntry.id}: Updated sync log entry status.`);
-              })
-              .catch(function (err) {
-                app.logger.debug(`Sync ${syncLogEntry.id}: Error updating sync log entry status. ${err}`);
-              });
-
-            // update Sync.inProgress map; Sync action just finished
-            Sync.inProgress.servers[upstreamServerEntry.url] = false;
-            // check for pending sync for the server and trigger it
-            Sync.checkAndTriggerPendingSync(upstreamServerEntry, options);
-            resolve();
+        // save sync log entry
+        syncLogEntry
+          .save(options)
+          .then(function () {
+            // nothing to do; sync log entry was saved
+            app.logger.debug(`Sync ${syncLogEntry.id}: Updated sync log entry status.`);
+          })
+          .catch(function (err) {
+            app.logger.debug(`Sync ${syncLogEntry.id}: Error updating sync log entry status. ${err}`);
           });
-        });
+
+        // update Sync.inProgress map; Sync action just finished
+        Sync.inProgress.servers[upstreamServerEntry.url] = false;
+        // check for pending sync for the server and trigger it
+        Sync.checkAndTriggerPendingSync(upstreamServerEntry, options);
       })
       .catch(function (err) {
         if (!callbackCalled) {

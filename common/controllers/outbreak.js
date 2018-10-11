@@ -338,7 +338,7 @@ module.exports = function (Outbreak) {
             id: caseId
           });
         }
-        if (!app.models.case.nonDiscardedCaseClassifications.includes(caseModel.classification)) {
+        if (app.models.case.discardedCaseClassifications.includes(caseModel.classification)) {
           throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
             id: caseId
           });
@@ -447,7 +447,7 @@ module.exports = function (Outbreak) {
           });
         }
         // do not allow relationships with discarded cases
-        if (!app.models.case.nonDiscardedCaseClassifications.includes(caseModel.classification)) {
+        if (app.models.case.discardedCaseClassifications.includes(caseModel.classification)) {
           throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
             id: caseId
           });
@@ -661,6 +661,7 @@ module.exports = function (Outbreak) {
     params = params || {};
     params.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
     params.dateBecomeCase = params.dateBecomeCase || new Date();
+    params.wasContact = true;
     params.classification = params.classification || 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT';
 
     // override default scope to allow switching the type
@@ -776,7 +777,11 @@ module.exports = function (Outbreak) {
         }
 
         // the case has relations with other cases; proceed with the conversion
-        return caseInstance.updateAttribute('type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', options);
+        return caseInstance.updateAttributes({
+          dateBecomeContact: new Date(),
+          wasCase: true,
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+        }, options);
       })
       .then(function (contact) {
         convertedContact = contact;
@@ -815,11 +820,71 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Retrieve the list of location + sublocations for the Outbreak
+   * Get hierarchical locations list for an outbreak
+   * @param filter Besides the default filter properties this request also accepts 'includeChildren' boolean on the first level in 'where'; this flag is taken into consideration only if other filters are applied
    * @param callback
    */
-  Outbreak.prototype.getLocations = function (callback) {
-    app.models.location.getSubLocationsWithDetails([this.locationId], [], callback);
+  Outbreak.prototype.getLocationsHierarchicalList = function (filter, callback) {
+    // define a list of location IDs used at outbreak level
+    let outbreakLocationIds;
+    // if the outbreak has a list of locations defined
+    if (Array.isArray(this.locations)) {
+      // get their IDs
+      outbreakLocationIds = this.locations.map(location => location.id);
+    }
+    // if there are no location IDs defined
+    if (!outbreakLocationIds) {
+      // use global (unrestricted) locations hierarchical list
+      return app.controllers.location.getHierarchicalList(filter, callback);
+    }
+    // otherwise get a list of all allowed location IDs (all locations and sub-locations for the configured locations)
+    app.models.location.getSubLocations(outbreakLocationIds, [], function (error, allowedLocationIds) {
+      // handle eventual errors
+      if (error) {
+        return callback(error);
+      }
+      // build an index for allowed locations (to find them faster)
+      const allowedLocationsIndex = {};
+      allowedLocationIds.forEach(function (locationId) {
+        allowedLocationsIndex[locationId] = true;
+      });
+      // build hierarchical list of locations, restricting locations to the list of allowed ones
+      return app.controllers.location.getHierarchicalList(
+        app.utils.remote.mergeFilters({
+          where: {
+            id: {
+              inq: allowedLocationIds
+            }
+          }
+        }, filter || {}),
+        function (error, hierarchicalList) {
+          // handle eventual errors
+          if (error) {
+            return callback(error);
+          }
+          // starting from the top, disable locations that are above the allowed locations
+          // hierarchical list will show all parent locations, even the ones above the selected level, mark those as disabled
+          (function disableDisallowedLocations(locationsList) {
+            // if there are locations to process
+            if (locationsList.length) {
+              // go through all of them
+              locationsList.forEach(function (location) {
+                // the location is not one of the allowed ones
+                if (!allowedLocationsIndex[location.location.id]) {
+                  // mark it as disabled
+                  location.location.disabled = true;
+                  // continue checking children
+                  if (Array.isArray(location.children)) {
+                    disableDisallowedLocations(location.children);
+                  }
+                }
+              });
+            }
+          })(hierarchicalList);
+          // return processed hierarchical location list
+          callback(null, hierarchicalList);
+        });
+    });
   };
 
   /**
@@ -1385,7 +1450,7 @@ module.exports = function (Outbreak) {
                 {
                   type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
                   classification: {
-                    inq: app.models.case.nonDiscardedCaseClassifications
+                    nin: app.models.case.discardedCaseClassifications
                   }
                 },
                 {
@@ -1507,7 +1572,7 @@ module.exports = function (Outbreak) {
                   {
                     type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
                     classification: {
-                      inq: app.models.case.nonDiscardedCaseClassifications
+                      nin: app.models.case.discardedCaseClassifications
                     }
                   },
                   {
@@ -3581,6 +3646,15 @@ module.exports = function (Outbreak) {
         }
       }, filter || {}), {disableSanitization: true})
       .then(function (people) {
+        // get case fields label map
+        let caseFieldsLabelMap = app.models.case.fieldLabelsMap;
+
+        // initialize map of possible inconsistencies operators
+        let inconsistenciesOperators = {
+          greaterThan: '>',
+          lessThan: '<'
+        };
+
         // loop through the people to add the inconsistencies array
         people.forEach(function (person, index) {
           // initialize inconsistencies
@@ -3598,7 +3672,16 @@ module.exports = function (Outbreak) {
           // for contacts only get the ones where dateDeceased < date of birth; this check also applies for cases
           // no need to check for person type as the query was done only for contacts/cases
           if (dob && dateDeceased && dob.isAfter(dateDeceased)) {
-            inconsistencies.push(['dob', 'dateDeceased']);
+            inconsistencies.push({
+              dates: [{
+                field: 'dob',
+                label: caseFieldsLabelMap.dob
+              }, {
+                field: 'dateDeceased',
+                label: caseFieldsLabelMap.dateDeceased
+              }],
+              issue: inconsistenciesOperators.greaterThan
+            });
           }
 
           // for case:
@@ -3607,22 +3690,58 @@ module.exports = function (Outbreak) {
             if (dob) {
               // dateOfInfection < date of birth
               if (dateOfInfection && dob.isAfter(dateOfInfection)) {
-                inconsistencies.push(['dob', 'dateOfInfection']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dob',
+                    label: caseFieldsLabelMap.dob
+                  }, {
+                    field: 'dateOfInfection',
+                    label: caseFieldsLabelMap.dateOfInfection
+                  }],
+                  issue: inconsistenciesOperators.greaterThan
+                });
               }
 
               // dateOfOnset < date of birth
               if (dateOfOnset && dob.isAfter(dateOfOnset)) {
-                inconsistencies.push(['dob', 'dateOfOnset']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dob',
+                    label: caseFieldsLabelMap.dob
+                  }, {
+                    field: 'dateOfOnset',
+                    label: caseFieldsLabelMap.dateOfOnset
+                  }],
+                  issue: inconsistenciesOperators.greaterThan
+                });
               }
 
               // dateBecomeCase < date of birth
               if (dateBecomeCase && dob.isAfter(dateBecomeCase)) {
-                inconsistencies.push(['dob', 'dateBecomeCase']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dob',
+                    label: caseFieldsLabelMap.dob
+                  }, {
+                    field: 'dateBecomeCase',
+                    label: caseFieldsLabelMap.dateBecomeCase
+                  }],
+                  issue: inconsistenciesOperators.greaterThan
+                });
               }
 
               // dateOfOutcome < date of birth
               if (dateOfOutcome && dob.isAfter(dateOfOutcome)) {
-                inconsistencies.push(['dob', 'dateOfOutcome']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dob',
+                    label: caseFieldsLabelMap.dob
+                  }, {
+                    field: 'dateOfOutcome',
+                    label: caseFieldsLabelMap.dateOfOutcome
+                  }],
+                  issue: inconsistenciesOperators.greaterThan
+                });
               }
             }
 
@@ -3630,54 +3749,144 @@ module.exports = function (Outbreak) {
             if (dateDeceased) {
               // dateOfInfection > dateDeceased
               if (dateOfInfection && dateOfInfection.isAfter(dateDeceased)) {
-                inconsistencies.push(['dateDeceased', 'dateOfInfection']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dateDeceased',
+                    label: caseFieldsLabelMap.dateDeceased
+                  }, {
+                    field: 'dateOfInfection',
+                    label: caseFieldsLabelMap.dateOfInfection
+                  }],
+                  issue: inconsistenciesOperators.lessThan
+                });
               }
 
               // dateOfOnset > dateDeceased
               if (dateOfOnset && dateOfOnset.isAfter(dateDeceased)) {
-                inconsistencies.push(['dateDeceased', 'dateOfOnset']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dateDeceased',
+                    label: caseFieldsLabelMap.dateDeceased
+                  }, {
+                    field: 'dateOfOnset',
+                    label: caseFieldsLabelMap.dateOfOnset
+                  }],
+                  issue: inconsistenciesOperators.lessThan
+                });
               }
 
               // dateBecomeCase > dateDeceased
               if (dateBecomeCase && dateBecomeCase.isAfter(dateDeceased)) {
-                inconsistencies.push(['dateDeceased', 'dateBecomeCase']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dateDeceased',
+                    label: caseFieldsLabelMap.dateDeceased
+                  }, {
+                    field: 'dateBecomeCase',
+                    label: caseFieldsLabelMap.dateBecomeCase
+                  }],
+                  issue: inconsistenciesOperators.lessThan
+                });
               }
 
               // dateOfOutcome > dateDeceased
               if (dateOfOutcome && dateOfOutcome.isAfter(dateDeceased)) {
-                inconsistencies.push(['dateDeceased', 'dateOfOutcome']);
+                inconsistencies.push({
+                  dates: [{
+                    field: 'dateDeceased',
+                    label: caseFieldsLabelMap.dateDeceased
+                  }, {
+                    field: 'dateOfOutcome',
+                    label: caseFieldsLabelMap.dateOfOutcome
+                  }],
+                  issue: inconsistenciesOperators.lessThan
+                });
               }
             }
 
             // compare dateOfInfection, dateOfOnset, dateBecomeCase, dateOfOutcome
             // dateOfInfection > dateOfOnset
             if (dateOfInfection && dateOfOnset && dateOfInfection.isAfter(dateOfOnset)) {
-              inconsistencies.push(['dateOfInfection', 'dateOfOnset']);
+              inconsistencies.push({
+                dates: [{
+                  field: 'dateOfInfection',
+                  label: caseFieldsLabelMap.dateOfInfection
+                }, {
+                  field: 'dateOfOnset',
+                  label: caseFieldsLabelMap.dateOfOnset
+                }],
+                issue: inconsistenciesOperators.greaterThan
+              });
             }
 
             // dateOfInfection > dateBecomeCase
             if (dateOfInfection && dateBecomeCase && dateOfInfection.isAfter(dateBecomeCase)) {
-              inconsistencies.push(['dateOfInfection', 'dateBecomeCase']);
+              inconsistencies.push({
+                dates: [{
+                  field: 'dateOfInfection',
+                  label: caseFieldsLabelMap.dateOfInfection
+                }, {
+                  field: 'dateBecomeCase',
+                  label: caseFieldsLabelMap.dateBecomeCase
+                }],
+                issue: inconsistenciesOperators.greaterThan
+              });
             }
 
             // dateOfInfection > dateOfOutcome
             if (dateOfInfection && dateOfOutcome && dateOfInfection.isAfter(dateOfOutcome)) {
-              inconsistencies.push(['dateOfInfection', 'dateOfOutcome']);
+              inconsistencies.push({
+                dates: [{
+                  field: 'dateOfInfection',
+                  label: caseFieldsLabelMap.dateOfInfection
+                }, {
+                  field: 'dateOfOutcome',
+                  label: caseFieldsLabelMap.dateOfOutcome
+                }],
+                issue: inconsistenciesOperators.greaterThan
+              });
             }
 
             // dateOfOnset > dateBecomeCase
             if (dateOfOnset && dateBecomeCase && dateOfOnset.isAfter(dateBecomeCase)) {
-              inconsistencies.push(['dateOfOnset', 'dateBecomeCase']);
+              inconsistencies.push({
+                dates: [{
+                  field: 'dateOfOnset',
+                  label: caseFieldsLabelMap.dateOfOnset
+                }, {
+                  field: 'dateBecomeCase',
+                  label: caseFieldsLabelMap.dateBecomeCase
+                }],
+                issue: inconsistenciesOperators.greaterThan
+              });
             }
 
             // dateOfOnset > dateOfOutcome
             if (dateOfOnset && dateOfOutcome && dateOfOnset.isAfter(dateOfOutcome)) {
-              inconsistencies.push(['dateOfOnset', 'dateOfOutcome']);
+              inconsistencies.push({
+                dates: [{
+                  field: 'dateOfOnset',
+                  label: caseFieldsLabelMap.dateOfOnset
+                }, {
+                  field: 'dateOfOutcome',
+                  label: caseFieldsLabelMap.dateOfOutcome
+                }],
+                issue: inconsistenciesOperators.greaterThan
+              });
             }
 
             // dateBecomeCase > dateOfOutcome
             if (dateBecomeCase && dateOfOutcome && dateBecomeCase.isAfter(dateOfOutcome)) {
-              inconsistencies.push(['dateBecomeCase', 'dateOfOutcome']);
+              inconsistencies.push({
+                dates: [{
+                  field: 'dateBecomeCase',
+                  label: caseFieldsLabelMap.dateBecomeCase
+                }, {
+                  field: 'dateOfOutcome',
+                  label: caseFieldsLabelMap.dateOfOutcome
+                }],
+                issue: inconsistenciesOperators.greaterThan
+              });
             }
 
             // compare isolationDates, hospitalizationDates, incubationDates startDate/endDate for each item in them and against the date of birth and dateDeceased
@@ -3685,7 +3894,7 @@ module.exports = function (Outbreak) {
             var datesContainers = ['isolationDates', 'hospitalizationDates', 'incubationDates'];
             datesContainers.forEach(function (datesContainer) {
               if (person[datesContainer] && person[datesContainer].length) {
-                // loop through the datesto find inconsistencies
+                // loop through the dates to find inconsistencies
                 person[datesContainer].forEach(function (dateEntry, dateEntryIndex) {
                   // get startDate and endDate
                   let startDate = moment(dateEntry.startDate);
@@ -3693,28 +3902,73 @@ module.exports = function (Outbreak) {
 
                   // compare startDate with endDate
                   if (startDate.isAfter(endDate)) {
-                    inconsistencies.push([`${datesContainer}.${dateEntryIndex}.startDate`, `${datesContainer}.${dateEntryIndex}.endDate`]);
+                    inconsistencies.push({
+                      dates: [{
+                        field: `${datesContainer}.${dateEntryIndex}.startDate`,
+                        label: caseFieldsLabelMap[`${datesContainer}[].startDate`]
+                      }, {
+                        field: `${datesContainer}.${dateEntryIndex}.endDate`,
+                        label: caseFieldsLabelMap[`${datesContainer}[].endDate`]
+                      }],
+                      issue: inconsistenciesOperators.greaterThan
+                    });
                   }
 
                   // check for dob; both startDate and endDate must be after dob
                   if (dob) {
                     if (dob.isAfter(startDate)) {
-                      inconsistencies.push(['dob', `${datesContainer}.${dateEntryIndex}.startDate`]);
+                      inconsistencies.push({
+                        dates: [{
+                          field: 'dob',
+                          label: caseFieldsLabelMap.dob
+                        }, {
+                          field: `${datesContainer}.${dateEntryIndex}.startDate`,
+                          label: caseFieldsLabelMap[`${datesContainer}[].startDate`]
+                        }],
+                        issue: inconsistenciesOperators.greaterThan
+                      });
                     }
 
                     if (dob.isAfter(endDate)) {
-                      inconsistencies.push(['dob', `${datesContainer}.${dateEntryIndex}.endDate`]);
+                      inconsistencies.push({
+                        dates: [{
+                          field: 'dob',
+                          label: caseFieldsLabelMap.dob
+                        }, {
+                          field: `${datesContainer}.${dateEntryIndex}.endDate`,
+                          label: caseFieldsLabelMap[`${datesContainer}[].endDate`]
+                        }],
+                        issue: inconsistenciesOperators.greaterThan
+                      });
                     }
                   }
 
                   // check for dateDeceased; both startDate and endDate must be before dob
                   if (dateDeceased) {
                     if (startDate.isAfter(dateDeceased)) {
-                      inconsistencies.push(['dateDeceased', `${datesContainer}.${dateEntryIndex}.startDate`]);
+                      inconsistencies.push({
+                        dates: [{
+                          field: 'dateDeceased',
+                          label: caseFieldsLabelMap.dateDeceased
+                        }, {
+                          field: `${datesContainer}.${dateEntryIndex}.startDate`,
+                          label: caseFieldsLabelMap[`${datesContainer}[].startDate`]
+                        }],
+                        issue: inconsistenciesOperators.lessThan
+                      });
                     }
 
                     if (endDate.isAfter(dateDeceased)) {
-                      inconsistencies.push(['dateDeceased', `${datesContainer}.${dateEntryIndex}.endDate`]);
+                      inconsistencies.push({
+                        dates: [{
+                          field: 'dateDeceased',
+                          label: caseFieldsLabelMap.dateDeceased
+                        }, {
+                          field: `${datesContainer}.${dateEntryIndex}.endDate`,
+                          label: caseFieldsLabelMap[`${datesContainer}[].endDate`]
+                        }],
+                        issue: inconsistenciesOperators.lessThan
+                      });
                     }
                   }
                 });
@@ -5587,4 +5841,310 @@ module.exports = function (Outbreak) {
         next();
       });
   });
+
+  /**
+   * Restore a deleted outbreak
+   * @param outbreakId
+   * @param options
+   * @param callback
+   */
+  Outbreak.restoreOutbreak = function (outbreakId, options, callback) {
+    Outbreak
+      .findOne({
+        deleted: true,
+        where: {
+          id: outbreakId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: Outbreak.modelName, id: outbreakId});
+        }
+
+        // undo outbreak delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find relationship exposures for a case
+   * @param caseId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findCaseRelationshipExposures = function (caseId, filter, callback) {
+    app.models.relationship
+      .findPersonRelationshipExposures(caseId, filter)
+      .then(function (exposures) {
+        callback(null, exposures);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count relationship exposures for a case
+   * @param caseId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countCaseRelationshipExposures = function (caseId, filter, callback) {
+    app.models.relationship
+      .countPersonRelationshipExposures(caseId, filter)
+      .then(function (exposures) {
+        callback(null, exposures);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find relationship contacts for a case. Relationship contacts are the relationships where the case is a source (it has nothing to do with person type contact)
+   * @param caseId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findCaseRelationshipContacts = function (caseId, filter, callback) {
+    app.models.relationship
+      .findPersonRelationshipContacts(caseId, filter)
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count relationship contacts for a case. Relationship contacts are the relationships where the case is a source (it has nothing to do with person type contact)
+   * @param caseId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countCaseRelationshipContacts = function (caseId, filter, callback) {
+    app.models.relationship
+      .countPersonRelationshipContacts(caseId, filter)
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find relationship exposures for a contact
+   * @param contactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findContactRelationshipExposures = function (contactId, filter, callback) {
+    app.models.relationship
+      .findPersonRelationshipExposures(contactId, filter)
+      .then(function (exposures) {
+        callback(null, exposures);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count relationship exposures for a contact
+   * @param caseId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countContactRelationshipExposures = function (caseId, filter, callback) {
+    app.models.relationship
+      .countPersonRelationshipExposures(caseId, filter)
+      .then(function (exposures) {
+        callback(null, exposures);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find relationship contacts for a contact. Relationship contacts are the relationships where the contact is a source (it has nothing to do with person type contact)
+   * @param contactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findContactRelationshipContacts = function (contactId, filter, callback) {
+    app.models.relationship
+      .findPersonRelationshipContacts(contactId, filter)
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count relationship contacts for a contact. Relationship contacts are the relationships where the contact is a source (it has nothing to do with person type contact)
+   * @param contactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countContactRelationshipContacts = function (contactId, filter, callback) {
+    app.models.relationship
+      .countPersonRelationshipContacts(contactId, filter)
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find relationship exposures for a contact
+   * @param eventId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findEventRelationshipExposures = function (eventId, filter, callback) {
+    app.models.relationship
+      .findPersonRelationshipExposures(eventId, filter)
+      .then(function (exposures) {
+        callback(null, exposures);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count relationship exposures for a contact
+   * @param eventId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countEventRelationshipExposures = function (eventId, filter, callback) {
+    app.models.relationship
+      .countPersonRelationshipExposures(eventId, filter)
+      .then(function (exposures) {
+        callback(null, exposures);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find relationship contacts for a event. Relationship contacts are the relationships where the event is a source (it has nothing to do with person type contact)
+   * @param eventId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findEventRelationshipContacts = function (eventId, filter, callback) {
+    app.models.relationship
+      .findPersonRelationshipContacts(eventId, filter)
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
+
+
+  /**
+   * Count relationship contacts for a event. Relationship contacts are the relationships where the event is a source (it has nothing to do with person type contact)
+   * @param eventId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countEventRelationshipContacts = function (eventId, filter, callback) {
+    app.models.relationship
+      .countPersonRelationshipContacts(eventId, filter)
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count cases by case classification
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countCasesPerClassification = function (filter, callback) {
+    // this is a report, don't allow limit & skip
+    if (filter) {
+      delete filter.limit;
+      delete filter.skip;
+    }
+    // get the list of cases
+    this.__get__cases(filter, function (error, cases) {
+      if (error) {
+        return callback(error);
+      }
+      // add filter parent functionality
+      cases = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(cases, filter);
+      // build a result
+      const result = {
+        classification: {},
+        count: cases.length
+      };
+      // go through all case records
+      cases.forEach(function (caseRecord) {
+        // init case classification group if needed
+        if (!result.classification[caseRecord.classification]) {
+          result.classification[caseRecord.classification] = {
+            count: 0,
+            caseIDs: []
+          };
+        }
+        // classify records by their classification
+        result.classification[caseRecord.classification].count++;
+        result.classification[caseRecord.classification].caseIDs.push(caseRecord.id);
+      });
+      // send back the result
+      callback(null, result);
+    });
+  };
+
+  /**
+   * Count contacts by case risk level
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countContactsPerRiskLevel = function (filter, callback) {
+    // this is a report, don't allow limit & skip
+    if (filter) {
+      delete filter.limit;
+      delete filter.skip;
+    }
+    // get the list of contacts
+    this.__get__contacts(filter, function (error, contacts) {
+      if (error) {
+        return callback(error);
+      }
+      // add filter parent functionality
+      contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
+      // build a result
+      const result = {
+        riskLevel: {},
+        count: contacts.length
+      };
+      // go through all contact records
+      contacts.forEach(function (contactRecord) {
+        // risk level is optional
+        if (contactRecord.riskLevel == null) {
+          contactRecord.riskLevel = 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED';
+        }
+        // init contact riskLevel group if needed
+        if (!result.riskLevel[contactRecord.riskLevel]) {
+          result.riskLevel[contactRecord.riskLevel] = {
+            count: 0,
+            contactIDs: []
+          };
+        }
+        // classify records by their risk level
+        result.riskLevel[contactRecord.riskLevel].count++;
+        result.riskLevel[contactRecord.riskLevel].contactIDs.push(contactRecord.id);
+      });
+      // send back the result
+      callback(null, result);
+    });
+  };
+
+  /**
+   * Count cases stratified by classification over time
+   * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
+   * @param callback
+   */
+  Outbreak.prototype.countCasesStratifiedByClassificationOverTime = function (filter, callback) {
+    app.models.case.countStratifiedByClassificationOverTime(this, filter)
+      .then(function(result){
+        callback(null, result);
+      })
+      .catch(callback);
+  };
 };

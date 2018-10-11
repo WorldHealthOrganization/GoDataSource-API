@@ -1327,6 +1327,49 @@ const paginateResultSet = function (filter, resultSet) {
   return resultSet;
 };
 
+/**
+ * Get a period interval of period type for date
+ * @param fullPeriodInterval period interval limits (max start date/max end date)
+ * @param periodType enum: ['day', 'week', 'month']
+ * @param date
+ * @return {['startDate', 'endDate']}
+ */
+const getPeriodIntervalForDate = function (fullPeriodInterval, periodType, date) {
+  // get period in which the case needs to be included
+  let periodInterval, beginningOfDay, endOfDay, mondayStartOfDay, sundayEndOfDay, firstDayOfMonth, lastDayOfMonth;
+
+  switch (periodType) {
+    case 'day':
+      // get day interval for date
+      beginningOfDay = getUTCDate(date).toString();
+      endOfDay = getUTCDateEndOfDay(date).toString();
+      periodInterval = [beginningOfDay, endOfDay];
+      break;
+    case 'week':
+      // get week interval for date
+      mondayStartOfDay = getUTCDate(date, 1);
+      sundayEndOfDay = getUTCDateEndOfDay(date, 7);
+      // we should use monday only if it is later than the first date of the fullPeriodInterval; else use the first date of the period interval
+      mondayStartOfDay = (mondayStartOfDay.isAfter(fullPeriodInterval[0]) ? mondayStartOfDay : getUTCDate(fullPeriodInterval[0])).toString();
+      // we should use sunday only if it is earlier than the last date of the fullPeriodInterval; else use the last date of the period interval
+      sundayEndOfDay = (sundayEndOfDay.isBefore(fullPeriodInterval[1]) ? sundayEndOfDay : getUTCDateEndOfDay(fullPeriodInterval[1])).toString();
+      periodInterval = [mondayStartOfDay, sundayEndOfDay];
+      break;
+    case 'month':
+      // get month period interval for date
+      firstDayOfMonth = getUTCDate(date).startOf('month');
+      lastDayOfMonth = getUTCDateEndOfDay(date).endOf('month');
+      // we should use first day of month only if it is later than the first date of the fullPeriodInterval; else use the first date of the period interval
+      firstDayOfMonth = (firstDayOfMonth.isAfter(fullPeriodInterval[0]) ? firstDayOfMonth : getUTCDate(fullPeriodInterval[0])).toString();
+      // we should use last day of month only if it is earlier than the last date of the fullPeriodInterval; else use the last date of the period interval
+      lastDayOfMonth = (lastDayOfMonth.isBefore(fullPeriodInterval[1]) ? lastDayOfMonth : getUTCDateEndOfDay(fullPeriodInterval[1])).toString();
+      periodInterval = [firstDayOfMonth, lastDayOfMonth];
+      break;
+  }
+  // return period interval
+  return periodInterval;
+};
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1358,5 +1401,6 @@ module.exports = {
   getOriginalValueFromContextOptions: getOriginalValueFromContextOptions,
   paginateResultSet: paginateResultSet,
   setValueInContextOptions: setValueInContextOptions,
-  getValueFromContextOptions: getValueFromContextOptions
+  getValueFromContextOptions: getValueFromContextOptions,
+  getPeriodIntervalForDate: getPeriodIntervalForDate
 };

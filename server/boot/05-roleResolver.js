@@ -104,7 +104,7 @@ module.exports = function (app) {
       }
 
       // check if the user tries to do POST/PUT/DELETE on another outbreak related data than the active one (you can modify & delete inactive outbreaks)
-      if (outbreakIdMatch[2] && context.remotingContext.req.method !== 'GET' && outbreakIdMatch[1] !== userAuthData.activeOutbreakId) {
+      if (outbreakIdMatch[2] && outbreakIdMatch[2] !== '/restore' && context.remotingContext.req.method !== 'GET' && outbreakIdMatch[1] !== userAuthData.activeOutbreakId) {
         accessErrors.push('access to POST/PUT/DELETE actions on outbreak related data is granted only for the active outbreak');
       }
     }

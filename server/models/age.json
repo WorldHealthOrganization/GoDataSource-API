@@ -1,7 +1,7 @@
 {
-  "name": "syncParameters",
+  "name": "age",
   "base": "Model",
-  "idInjection": false,
+  "idInjection": true,
   "options": {
     "validateUpsert": true
   },
@@ -9,8 +9,12 @@
     "id"
   ],
   "properties": {
-    "upstreamServerURL": {
-      "type": "string",
+    "years": {
+      "type": "number",
+      "required": true
+    },
+    "months": {
+      "type": "number",
       "required": true
     }
   },
