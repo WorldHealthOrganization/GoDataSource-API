@@ -1363,26 +1363,24 @@ module.exports = function (Outbreak) {
   Outbreak.helpers.buildFollowUpCustomFilter = function (filter, outbreakId) {
     if (filter && typeof(filter) === 'object' && Object.keys(filter).length !== 0) {
       let caseFilter, relationshipFilter, contactFilter;
-      caseFilter = relationshipFilter = contactFilter = {};
+
       let weekNumber = 0;
       let timeLastSeen = '';
 
-      if (filter.whereCase) {
+      if (filter.whereCase && Object.keys(filter.whereCase).length !== 0) {
         // Build the case filter
         caseFilter = app.utils.remote.mergeFilters({
           where: {
             'type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
           },
           filterParent: true
-        }, filter.whereCase ? {where: filter.whereCase} : {});
+        }, {where: filter.whereCase});
         delete filter.whereCase;
       }
 
-      if (filter.whereRelationship || Object.keys(caseFilter).length !== 0) {
+      if ((filter.whereRelationship && Object.keys(filter.whereRelationships)) || caseFilter) {
         // Build the relationship filter
-        relationshipFilter = filter.whereRelationship || {};
-
-        if (Object.keys(caseFilter).length !== 0) {
+        if (caseFilter) {
           relationshipFilter = app.utils.remote.mergeFilters({
             where: {
               'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
@@ -1393,6 +1391,8 @@ module.exports = function (Outbreak) {
             },
             filterParent: true
           }, filter.whereRelationship ? {where: filter.whereRelationship} : {});
+        } else {
+          relationshipFilter = filter.whereRelationship;
         }
         delete filter.whereRelationship;
       }
@@ -1423,7 +1423,7 @@ module.exports = function (Outbreak) {
       }
 
       // Build the contact filter
-      if (filter.whereContact) {
+      if (filter.whereContact && Object.keys(filter.whereContact).length !== 0) {
         contactFilter = app.utils.remote.mergeFilters(additionalContactFilter, filter.whereContact ? {where: filter.whereContact} : {});
         delete filter.whereContact;
       }
@@ -1435,7 +1435,7 @@ module.exports = function (Outbreak) {
       }
 
       // Include relationships only if necessary
-      if (Object.keys(caseFilter).length !== 0 || Object.keys(relationshipFilter).length !== 0) {
+      if (caseFilter || relationshipFilter) {
         contactFilter = app.utils.remote.mergeFilters({
           include: {
             relation: 'relationships',
@@ -1445,7 +1445,7 @@ module.exports = function (Outbreak) {
       }
 
       // If any custom filters have been mentioned
-      if (contactFilter && Object.keys(contactFilter).length !== 0) {
+      if (contactFilter) {
         return app.models.contact.find(contactFilter)
           .then((contacts) => {
             // Remove any contacts that have empty relations

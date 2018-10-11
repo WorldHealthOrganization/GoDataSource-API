@@ -206,7 +206,8 @@ module.exports = function (Outbreak) {
           });
           return Promise.resolve(results);
         }, callback);
-      });
+      })
+      .catch(callback);
   };
 
   /**
@@ -5829,7 +5830,7 @@ module.exports = function (Outbreak) {
    * The base filter's where property also accepts two additional properties: weekNumber and timeLastSeen
    */
   Outbreak.beforeRemote('prototype.__get__followUps', function (context, modelInstance, next) {
-    helpers.buildFollowUpCustomFilter(context.args.filter, context.ctorArgs.id)
+    helpers.buildFollowUpCustomFilter(context.args.filter, context.instance.id)
       .then((customFilter) => {
         if (customFilter && Object.keys(customFilter).length !== 0) {
 
@@ -5839,7 +5840,8 @@ module.exports = function (Outbreak) {
             context.args.filter || {});
         }
         next();
-      });
+      })
+      .catch(next);
   });
 
   /**
