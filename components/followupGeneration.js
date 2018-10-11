@@ -123,7 +123,7 @@ module.exports.getContactsEligibleForFollowup = function (startDate, endDate) {
                 and: [
                   {
                     'followUp.startDate': {
-                      lte: startDate
+                      gte: startDate
                     }
                   },
                   {
@@ -239,11 +239,9 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     // check if the follow up date is in the past
     // if so, check if the number of existing follow ups is the same as the generate frequency per day
     // if so, do not generate any follow ups
-    if (!ignorePeriod) {
-      if (followUpDate.isBefore(Helpers.getUTCDate())) {
-        let followUpsInThisDay = contact.followUpsLists.filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
-        numberOfFollowUpsPerDay = numberOfFollowUpsPerDay - followUpsInThisDay.length;
-      }
+    if (followUpDate.isBefore(Helpers.getUTCDate())) {
+      let followUpsInThisDay = contact.followUpsLists.filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
+      numberOfFollowUpsPerDay = numberOfFollowUpsPerDay - followUpsInThisDay.length;
     }
 
     for (let i = 0; i < numberOfFollowUpsPerDay; i++) {
