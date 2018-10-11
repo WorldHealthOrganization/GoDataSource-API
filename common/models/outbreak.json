@@ -3024,7 +3024,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Accepts 'date' on the first level of 'where' property"
         }
       ],
       "returns": [
@@ -3050,7 +3050,7 @@
           "required": true
         }
       ],
-      "description": "Count the number of contacts on follow-up list",
+      "description": "Count the number of contacts on follow-up list on a specific day (default day: today)",
       "http": {
         "verb": "get",
         "path": "/follow-ups/contacts/count"

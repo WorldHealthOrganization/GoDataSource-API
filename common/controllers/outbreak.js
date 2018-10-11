@@ -2155,49 +2155,14 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Count the contacts on follow-up list
-   * @param filter
+   * Count contacts on follow-up lists on a specific day (default day: current day)
+   * @param filter Accepts 'date' on the first level of 'where' property
    * @param callback
    */
   Outbreak.prototype.countFollowUpContacts = function (filter, callback) {
-    // get outbreakId
-    let outbreakId = this.id;
-
-    // get follow-ups
-    app.models.followUp.find(app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: outbreakId,
-          // get follow-ups that are scheduled later than today 00:00 hours
-          date: {
-            gte: (new Date()).setHours(0, 0, 0, 0)
-          }
-        }
-      }, filter || {}))
-      .then(function (followUps) {
-        // filter by relation properties
-        followUps = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followUps, filter);
-        // initialize contacts map; helper to not count contacts twice
-        let contactsMap = {};
-
-        // loop through the followups to get unique contacts
-        followUps.forEach(function (followUp) {
-          if (!contactsMap[followUp.personId]) {
-            contactsMap[followUp.personId] = true;
-          }
-        });
-
-        // get contacts IDs
-        let contactIDs = Object.keys(contactsMap);
-
-        // create result
-        let result = {
-          contactsCount: contactIDs.length,
-          followUpsCount: followUps.length,
-          contactIDs: contactIDs
-        };
-
-        // send response
+    app.models.followUp
+      .countContacts(this.id, filter)
+      .then(function (result) {
         callback(null, result);
       })
       .catch(callback);
@@ -6117,7 +6082,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countCasesStratifiedByClassificationOverTime = function (filter, callback) {
     app.models.case.countStratifiedByClassificationOverTime(this, filter)
-      .then(function(result){
+      .then(function (result) {
         callback(null, result);
       })
       .catch(callback);
