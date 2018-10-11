@@ -1,9 +1,8 @@
 'use strict';
 
 const worker = {
-  buildOrCount: function (relationships, followUpPeriod, countOnly) {
+  buildOrCount: function (relationships, followUpPeriod, countOnly, activeChainStartDate) {
     // define the start date of active chains (today - (the follow-up period + 1))
-    let activeChainStartDate = new Date();
     activeChainStartDate.setDate(activeChainStartDate.getDate() - (followUpPeriod + 1));
     // keep a list o chains
     let transmissionChains = [];
@@ -352,11 +351,11 @@ const worker = {
     // send back result
     return result;
   },
-  build: function (relationships, followUpPeriod) {
-    return this.buildOrCount(relationships, followUpPeriod);
+  build: function (relationships, followUpPeriod, activeChainStartDate = new Date()) {
+    return this.buildOrCount(relationships, followUpPeriod, false, activeChainStartDate);
   },
-  count: function (relationships, followUpPeriod) {
-    return this.buildOrCount(relationships, followUpPeriod, true);
+  count: function (relationships, followUpPeriod, activeChainStartDate = new Date()) {
+    return this.buildOrCount(relationships, followUpPeriod, true, activeChainStartDate);
   }
 };
 
