@@ -24,6 +24,7 @@ const collectionsMap = {
   template: 'template',
   icon: 'icon',
   helpCategory: 'helpCategory',
+  helpItem: 'helpItem',
   language: 'language',
   languageToken: 'languageToken',
   outbreak: 'outbreak',
@@ -45,15 +46,15 @@ const userCollections = ['team', 'user', 'role'];
 
 // map of export type to collections
 const collectionsForExportTypeMap = {
-  system: ['template', 'icon', 'helpCategory', 'language', 'languageToken', 'referenceData', 'location']
+  system: ['template', 'icon', 'helpCategory', 'helpItem', 'language', 'languageToken', 'referenceData', 'location']
 };
 collectionsForExportTypeMap.outbreak = collectionsForExportTypeMap.system.concat(['outbreak']);
 collectionsForExportTypeMap.full = collectionsForExportTypeMap.outbreak.concat(['person', 'labResult', 'followUp', 'relationship', 'cluster']);
 collectionsForExportTypeMap.mobile = collectionsForExportTypeMap.full.concat(userCollections);
-// mobile export doesn't need to include template, icon, helpCategory
-collectionsForExportTypeMap.mobile.splice(collectionsForExportTypeMap.mobile.indexOf('template'), 1);
-collectionsForExportTypeMap.mobile.splice(collectionsForExportTypeMap.mobile.indexOf('icon'), 1);
-collectionsForExportTypeMap.mobile.splice(collectionsForExportTypeMap.mobile.indexOf('helpCategory'), 1);
+// mobile export doesn't need to include template, icon, helpCategory, helpItem
+['template', 'icon', 'helpCategory', 'helpItem'].forEach(function (model) {
+  collectionsForExportTypeMap.mobile.splice(collectionsForExportTypeMap.mobile.indexOf(model), 1);
+});
 
 // on sync we need get all collections except the following
 let syncExcludeList = [
@@ -61,7 +62,9 @@ let syncExcludeList = [
   'team',
   'user',
   'role',
-  'auditLog'
+  'auditLog',
+  'helpCategory',
+  'helpItem'
 ];
 let syncCollections = Object.keys(collectionsMap).filter((collection) => syncExcludeList.indexOf(collection) === -1);
 
