@@ -114,7 +114,7 @@
     "caseIdMask": {
       "type": "string",
       "required": true,
-      "pattern": "^(?:(?!š).)*(?:9*0+|9+0*)[^š]*$",
+      "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
       "default": "9999999999"
     },
     "arcGisServers": [

@@ -169,38 +169,45 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.exportFilteredFollowups = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
     let self = this;
-    const _filters = app.utils.remote.mergeFilters(
-      {
-        where: {
-          outbreakId: this.id,
-        }
-      },
-      filter || {});
-
-    // if encrypt password is not valid, remove it
-    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-      encryptPassword = null;
-    }
-
-    // make sure anonymizeFields is valid
-    if (!Array.isArray(anonymizeFields)) {
-      anonymizeFields = [];
-
-      // file must be either encrypted or anonymized
-      if (!encryptPassword) {
-        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
+    let _filters = {
+      where: {
+        outbreakId: this.id
       }
-    }
+    };
 
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, [], function (results, dictionary) {
-      // Prepare questionnaire answers for printing
-      results.forEach((followUp) => {
-        if (followUp.questionnaireAnswers) {
-          followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+    helpers.buildFollowUpCustomFilter(filter, this.id)
+      .then((customFilter) => {
+        if (customFilter && Object.keys(customFilter).length !== 0) {
+          // Merge submitted filter with custom filter
+          _filters = app.utils.remote.mergeFilters(customFilter, _filters);
         }
-      });
-      return Promise.resolve(results);
-    }, callback);
+
+        // if encrypt password is not valid, remove it
+        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+          encryptPassword = null;
+        }
+
+        // make sure anonymizeFields is valid
+        if (!Array.isArray(anonymizeFields)) {
+          anonymizeFields = [];
+
+          // file must be either encrypted or anonymized
+          if (!encryptPassword) {
+            return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
+          }
+        }
+
+        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, [], function (results, dictionary) {
+          // Prepare questionnaire answers for printing
+          results.forEach((followUp) => {
+            if (followUp.questionnaireAnswers) {
+              followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+            }
+          });
+          return Promise.resolve(results);
+        }, callback);
+      })
+      .catch(callback);
   };
 
   /**
@@ -5781,6 +5788,26 @@ module.exports = function (Outbreak) {
       callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
     });
   };
+
+  /**
+   * Execute additional custom filter before generic GET LIST filter
+   * The additional accepted where clauses are whereCase, whereRelationship and whereContact
+   * The base filter's where property also accepts two additional properties: weekNumber and timeLastSeen
+   */
+  Outbreak.beforeRemote('prototype.__get__followUps', function (context, modelInstance, next) {
+    helpers.buildFollowUpCustomFilter(context.args.filter, context.instance.id)
+      .then((customFilter) => {
+        if (customFilter && Object.keys(customFilter).length !== 0) {
+
+          // Merge submitted filter with custom filter
+          context.args.filter = app.utils.remote.mergeFilters(
+            customFilter,
+            context.args.filter || {});
+        }
+        next();
+      })
+      .catch(next);
+  });
 
   /**
    * Restore a deleted outbreak
