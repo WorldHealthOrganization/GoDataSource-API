@@ -1215,6 +1215,14 @@ module.exports = function (Outbreak) {
     }
   };
 
+  /**
+   * Print an empty case investigation, for either a new or an existing case
+   * @param outbreakInstance
+   * @param pdfUtils
+   * @param foundCase
+   * @param options
+   * @param callback
+   */
   Outbreak.helpers.printCaseInvestigation = function (outbreakInstance, pdfUtils, foundCase, options, callback) {
     const models = app.models;
     let caseInvestigationTemplate = outbreakInstance.caseInvestigationTemplate;
@@ -1345,4 +1353,151 @@ module.exports = function (Outbreak) {
       })
       .catch(next);
   });
+
+  /**
+   * Query contacts using a series of custom filters and return their ids as an array
+   * @param filter
+   * @param outbreakId
+   * @returns {Promise.<TResult>}
+   */
+  Outbreak.helpers.buildFollowUpCustomFilter = function (filter, outbreakId) {
+    if (filter && typeof(filter) === 'object' && Object.keys(filter).length !== 0) {
+      let caseFilter, relationshipFilter, contactFilter;
+
+      let weekNumber = 0;
+      let timeLastSeen = '';
+
+      if (filter.whereCase && Object.keys(filter.whereCase).length !== 0) {
+        // Build the case filter
+        caseFilter = app.utils.remote.mergeFilters({
+          where: {
+            'type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+          },
+          filterParent: true
+        }, {where: filter.whereCase});
+        delete filter.whereCase;
+      }
+
+      if ((filter.whereRelationship && Object.keys(filter.whereRelationships)) || caseFilter) {
+        // Build the relationship filter
+        if (caseFilter) {
+          relationshipFilter = app.utils.remote.mergeFilters({
+            where: {
+              'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+            },
+            include: {
+              relation: 'people',
+              scope: caseFilter
+            },
+            filterParent: true
+          }, filter.whereRelationship ? {where: filter.whereRelationship} : {});
+        } else {
+          relationshipFilter = filter.whereRelationship;
+        }
+        delete filter.whereRelationship;
+      }
+
+      // Start building the contact filter
+      let additionalContactFilter = {
+        where: {
+          outbreakId: outbreakId
+        }
+      };
+
+      // If there is a time filter, get the contact's latest performed follow-up
+      if (filter.where.timeLastSeen) {
+        // Cache timeLastSeen filter
+        timeLastSeen = filter.where.timeLastSeen;
+
+        additionalContactFilter.include = {
+          relation: 'followUps',
+          scope: {
+            where: {
+              performed: true
+            },
+            order: 'date DESC',
+            limit: 1
+          }
+        };
+        delete filter.where.timeLastSeen;
+      }
+
+      // Build the contact filter
+      if (filter.whereContact && Object.keys(filter.whereContact).length !== 0) {
+        contactFilter = app.utils.remote.mergeFilters(additionalContactFilter, filter.whereContact ? {where: filter.whereContact} : {});
+        delete filter.whereContact;
+      }
+
+      if (filter.where.weekNumber) {
+        // Cache the week filter
+        weekNumber = filter.where.weekNumber;
+        delete filter.where.weekNumber;
+      }
+
+      // Include relationships only if necessary
+      if (caseFilter || relationshipFilter) {
+        contactFilter = app.utils.remote.mergeFilters({
+          include: {
+            relation: 'relationships',
+            scope: relationshipFilter,
+          }
+        }, contactFilter);
+      }
+
+      // If any custom filters have been mentioned
+      if (contactFilter) {
+        return app.models.contact.find(contactFilter)
+          .then((contacts) => {
+            // Remove any contacts that have empty relations
+            contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, contactFilter);
+
+            // If necessary, get only contacts that have last been seen before the specified date.
+            if (timeLastSeen && moment(timeLastSeen).isValid()) {
+              contacts = _.filter(contacts, function (contact) {
+                if (contact.followUps) {
+                  return moment(contact.followUps[0].date).isBefore(timeLastSeen, 'day');
+                } else {
+                  return false;
+                }
+              });
+            }
+
+            let contactIds = contacts.map(contact => contact.id);
+
+            let finalFilter = {
+              where: {
+                personId: {
+                  inq: contactIds
+                }
+              }
+            };
+
+            // If there was a week filter, make sure to request only follow-ups that are happening in
+            // the requested week of the follow-up period
+            if (weekNumber > 0) {
+              finalFilter.where.index = {
+                between: [(weekNumber - 1) * 7 + 1, weekNumber * 7]
+              };
+            }
+
+            // If we have a time filter, make sure to request follow-ups that are scheduled after the requested
+            // date. The other requirements of the filter (having a last seen date before the one in the filter)
+            // has been handled in the getContactIdsFromCustomFilters function
+            if (timeLastSeen) {
+              finalFilter.where.date = {
+                gt: timeLastSeen
+              };
+            }
+
+            return finalFilter;
+          });
+      } else {
+        // If the filter is only follow-up related
+        return Promise.resolve(filter);
+      }
+    } else {
+      // If no filter is mentioned
+      return Promise.resolve(filter);
+    }
+  };
 };
