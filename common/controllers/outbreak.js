@@ -1378,11 +1378,23 @@ module.exports = function (Outbreak) {
 
   /**
    * Count independent transmission chains
-   * @param filter
+   * @param filter Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
    * @param callback
    */
   Outbreak.prototype.countIndependentTransmissionChains = function (filter, callback) {
     const self = this;
+    // define an endDate filter
+    let endDate;
+    // if there's a filter
+    if (filter) {
+      // try and get the end date filter
+      endDate = _.get(filter, 'where.endDate');
+    }
+    // no end date filter provided
+    if (!endDate) {
+      // end date is current date
+      endDate = new Date();
+    }
     // initialize a person filter (will contain filters applicable on person entity)
     let personFilter;
     // if person filter was sent
@@ -1460,6 +1472,9 @@ module.exports = function (Outbreak) {
               ],
               id: {
                 nin: nodeIds
+              },
+              dateOfReporting: {
+                lte: endDate
               }
             };
 
@@ -1496,7 +1511,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Get independent transmission chains
-   * @param filter Note: also accepts 'active' boolean on the first level in 'where'
+   * @param filter Note: also accepts 'active' boolean on the first level in 'where'. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
    * @param callback
    */
   Outbreak.prototype.getIndependentTransmissionChains = function (filter, callback) {
@@ -1521,6 +1536,19 @@ module.exports = function (Outbreak) {
     }
 
     const self = this;
+
+    // define an endDate filter
+    let endDate;
+    // if there's a filter
+    if (filter) {
+      // try and get the end date filter
+      endDate = _.get(filter, 'where.endDate');
+    }
+    // no end date filter provided
+    if (!endDate) {
+      // end date is current date
+      endDate = new Date();
+    }
 
     // build a find filtered people if necessary
     let findFilteredPeople;
@@ -1579,7 +1607,10 @@ module.exports = function (Outbreak) {
                   {
                     type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
                   }
-                ]
+                ],
+                dateOfReporting: {
+                  lte: endDate
+                }
               }
             };
 
@@ -1650,7 +1681,7 @@ module.exports = function (Outbreak) {
               // update isolated nodes filter depending on active filter value
               let followUpPeriod = self.periodOfFollowup;
               // get day of the start of the follow-up period starting from today
-              let followUpStartDate = genericHelpers.getUTCDate().subtract(followUpPeriod, 'days');
+              let followUpStartDate = genericHelpers.getUTCDate(endDate).subtract(followUpPeriod, 'days');
 
               if (activeFilter) {
                 // get cases/events reported in the last followUpPeriod days
