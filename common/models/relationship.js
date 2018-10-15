@@ -124,10 +124,10 @@ module.exports = function (Relationship) {
         // add 'filterParent' capability
         relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
         if (countOnly) {
-          // count transmission chain
+          // count transmission chain - set activeChainStartDate - used for determining if a chain is active - to be specified endDate (by default today)
           transmissionChain.count(relationships, followUpPeriod, {activeChainStartDate: endDate}, callback);
         } else {
-          // build transmission chain
+          // build transmission chain - set activeChainStartDate - used for determining if a chain is active - to be specified endDate (by default today)
           transmissionChain.build(relationships, followUpPeriod, {activeChainStartDate: endDate}, callback);
         }
       })

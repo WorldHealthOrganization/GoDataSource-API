@@ -1680,7 +1680,7 @@ module.exports = function (Outbreak) {
 
               // update isolated nodes filter depending on active filter value
               let followUpPeriod = self.periodOfFollowup;
-              // get day of the start of the follow-up period starting from today
+              // get day of the start of the follow-up period starting from specified end date (by default, today)
               let followUpStartDate = genericHelpers.getUTCDate(endDate).subtract(followUpPeriod, 'days');
 
               if (activeFilter) {
