@@ -2,6 +2,7 @@
 
 const transmissionChain = require('../../components/workerRunner').transmissionChain;
 const app = require('../../server/server');
+const _ = require('lodash');
 
 module.exports = function (Relationship) {
   // set flag to not get controller
@@ -65,16 +66,33 @@ module.exports = function (Relationship) {
    * Build or count transmission chains for an outbreak
    * @param outbreakId
    * @param followUpPeriod
-   * @param filter
+   * @param filter Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
    * @param countOnly
    * @param callback
    */
   Relationship.buildOrCountTransmissionChains = function (outbreakId, followUpPeriod, filter, countOnly, callback) {
+    // define an endDate filter
+    let endDate;
+    // if there's a filter
+    if (filter) {
+      // try and get the end date filter
+      endDate = _.get(filter, 'where.endDate');
+      _.unset(filter, 'where.endDate');
+    }
+    // no end date filter provided
+    if (!endDate) {
+      // end date is current date
+      endDate = new Date();
+    }
+
     // build a filter: get all relations between non-discarded cases and contacts + events from current outbreak
     filter = app.utils.remote
       .mergeFilters({
         where: {
-          outbreakId: outbreakId
+          outbreakId: outbreakId,
+          contactDate: {
+            lte: endDate
+          }
         },
         include: {
           relation: 'people',
@@ -106,13 +124,12 @@ module.exports = function (Relationship) {
         // add 'filterParent' capability
         relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
         if (countOnly) {
-          // count transmission chain
-          transmissionChain.count(relationships, followUpPeriod, callback);
+          // count transmission chain - set activeChainStartDate - used for determining if a chain is active - to be specified endDate (by default today)
+          transmissionChain.count(relationships, followUpPeriod, {activeChainStartDate: endDate}, callback);
         } else {
-          // build transmission chain
-          transmissionChain.build(relationships, followUpPeriod, callback);
+          // build transmission chain - set activeChainStartDate - used for determining if a chain is active - to be specified endDate (by default today)
+          transmissionChain.build(relationships, followUpPeriod, {activeChainStartDate: endDate}, callback);
         }
-
       })
       .catch(callback);
   };
@@ -121,7 +138,7 @@ module.exports = function (Relationship) {
    * Build transmission chains for an outbreak
    * @param outbreakId
    * @param followUpPeriod
-   * @param filter
+   * @param filter Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
    * @param callback
    */
   Relationship.getTransmissionChains = function (outbreakId, followUpPeriod, filter, callback) {
@@ -132,7 +149,7 @@ module.exports = function (Relationship) {
    * Count transmission chains for an outbreak
    * @param outbreakId
    * @param followUpPeriod
-   * @param filter
+   * @param filter Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
    * @param callback
    */
   Relationship.countTransmissionChains = function (outbreakId, followUpPeriod, filter, callback) {
@@ -192,19 +209,21 @@ module.exports = function (Relationship) {
      * Build transmission chains
      * @param relationships
      * @param followUpPeriod
+     * @param options {{activeChainStartDate: Date}}
      * @param callback
      */
-    build: function (relationships, followUpPeriod, callback) {
-      transmissionChain.build(relationships, followUpPeriod, callback);
+    build: function (relationships, followUpPeriod, options, callback) {
+      transmissionChain.build(relationships, followUpPeriod, options, callback);
     },
     /**
      * Count transmission chains
      * @param relationships
      * @param followUpPeriod
+     * @param options {{activeChainStartDate: Date}}
      * @param callback
      */
-    count: function (relationships, followUpPeriod, callback) {
-      transmissionChain.build(relationships, followUpPeriod, callback);
+    count: function (relationships, followUpPeriod, options, callback) {
+      transmissionChain.build(relationships, followUpPeriod, options, callback);
     }
   };
 

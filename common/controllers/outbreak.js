@@ -1378,11 +1378,23 @@ module.exports = function (Outbreak) {
 
   /**
    * Count independent transmission chains
-   * @param filter
+   * @param filter Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
    * @param callback
    */
   Outbreak.prototype.countIndependentTransmissionChains = function (filter, callback) {
     const self = this;
+    // define an endDate filter
+    let endDate;
+    // if there's a filter
+    if (filter) {
+      // try and get the end date filter
+      endDate = _.get(filter, 'where.endDate');
+    }
+    // no end date filter provided
+    if (!endDate) {
+      // end date is current date
+      endDate = new Date();
+    }
     // initialize a person filter (will contain filters applicable on person entity)
     let personFilter;
     // if person filter was sent
@@ -1460,6 +1472,9 @@ module.exports = function (Outbreak) {
               ],
               id: {
                 nin: nodeIds
+              },
+              dateOfReporting: {
+                lte: endDate
               }
             };
 
@@ -1496,7 +1511,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Get independent transmission chains
-   * @param filter Note: also accepts 'active' boolean on the first level in 'where'
+   * @param filter Note: also accepts 'active' boolean on the first level in 'where'. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
    * @param callback
    */
   Outbreak.prototype.getIndependentTransmissionChains = function (filter, callback) {
@@ -1521,6 +1536,19 @@ module.exports = function (Outbreak) {
     }
 
     const self = this;
+
+    // define an endDate filter
+    let endDate;
+    // if there's a filter
+    if (filter) {
+      // try and get the end date filter
+      endDate = _.get(filter, 'where.endDate');
+    }
+    // no end date filter provided
+    if (!endDate) {
+      // end date is current date
+      endDate = new Date();
+    }
 
     // build a find filtered people if necessary
     let findFilteredPeople;
@@ -1579,7 +1607,10 @@ module.exports = function (Outbreak) {
                   {
                     type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
                   }
-                ]
+                ],
+                dateOfReporting: {
+                  lte: endDate
+                }
               }
             };
 
@@ -1649,8 +1680,8 @@ module.exports = function (Outbreak) {
 
               // update isolated nodes filter depending on active filter value
               let followUpPeriod = self.periodOfFollowup;
-              // get day of the start of the follow-up period starting from today
-              let followUpStartDate = genericHelpers.getUTCDate().subtract(followUpPeriod, 'days');
+              // get day of the start of the follow-up period starting from specified end date (by default, today)
+              let followUpStartDate = genericHelpers.getUTCDate(endDate).subtract(followUpPeriod, 'days');
 
               if (activeFilter) {
                 // get cases/events reported in the last followUpPeriod days
@@ -2162,49 +2193,14 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Count the contacts on follow-up list
-   * @param filter
+   * Count contacts on follow-up lists on a specific day (default day: current day)
+   * @param filter Accepts 'date' on the first level of 'where' property
    * @param callback
    */
   Outbreak.prototype.countFollowUpContacts = function (filter, callback) {
-    // get outbreakId
-    let outbreakId = this.id;
-
-    // get follow-ups
-    app.models.followUp.find(app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: outbreakId,
-          // get follow-ups that are scheduled later than today 00:00 hours
-          date: {
-            gte: (new Date()).setHours(0, 0, 0, 0)
-          }
-        }
-      }, filter || {}))
-      .then(function (followUps) {
-        // filter by relation properties
-        followUps = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followUps, filter);
-        // initialize contacts map; helper to not count contacts twice
-        let contactsMap = {};
-
-        // loop through the followups to get unique contacts
-        followUps.forEach(function (followUp) {
-          if (!contactsMap[followUp.personId]) {
-            contactsMap[followUp.personId] = true;
-          }
-        });
-
-        // get contacts IDs
-        let contactIDs = Object.keys(contactsMap);
-
-        // create result
-        let result = {
-          contactsCount: contactIDs.length,
-          followUpsCount: followUps.length,
-          contactIDs: contactIDs
-        };
-
-        // send response
+    app.models.followUp
+      .countContacts(this.id, filter)
+      .then(function (result) {
         callback(null, result);
       })
       .catch(callback);
@@ -6144,7 +6140,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countCasesStratifiedByClassificationOverTime = function (filter, callback) {
     app.models.case.countStratifiedByClassificationOverTime(this, filter)
-      .then(function(result){
+      .then(function (result) {
         callback(null, result);
       })
       .catch(callback);

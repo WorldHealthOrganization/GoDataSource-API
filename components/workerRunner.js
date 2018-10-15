@@ -54,19 +54,21 @@ module.exports = {
      * Build transmission chains
      * @param relationships
      * @param followUpPeriod
+     * @param options {{activeChainStartDate: Date}}
      * @param callback
      */
-    build: function (relationships, followUpPeriod, callback) {
-      invokeWorkerMethod('transmissionChain', 'build', [relationships, followUpPeriod], callback);
+    build: function (relationships, followUpPeriod, options, callback) {
+      invokeWorkerMethod('transmissionChain', 'build', [relationships, followUpPeriod, options], callback);
     },
     /**
      * Count transmission chains
      * @param relationships
      * @param followUpPeriod
+     * @param options {{activeChainStartDate: Date}}
      * @param callback
      */
-    count: function (relationships, followUpPeriod, callback) {
-      invokeWorkerMethod('transmissionChain', 'count', [relationships, followUpPeriod], callback);
+    count: function (relationships, followUpPeriod, options,  callback) {
+      invokeWorkerMethod('transmissionChain', 'count', [relationships, followUpPeriod, options], callback);
     }
   },
   personDuplicate: {
