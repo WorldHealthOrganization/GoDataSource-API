@@ -6144,8 +6144,126 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countCasesStratifiedByClassificationOverTime = function (filter, callback) {
     app.models.case.countStratifiedByClassificationOverTime(this, filter)
-      .then(function(result){
+      .then(function (result) {
         callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Returns a pdf list, containing the outbreak's cases, distributed by location and classification
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.getCasesReport = function (filter, options, callback) {
+    const self = this;
+    const languageId = options.remotingContext.req.authData.user.languageId;
+    // Get the dictionary so we can translate the case classifications and other neccessary fields
+    app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
+      helpers.getCasesPerLocation(filter, self)
+        .then((result) => {
+          return Promise.all([
+            // Get all existing case classification so we know how many rows the list will have
+            app.models.referenceData.find({
+              where: {
+                categoryId: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION'
+              }
+            }),
+            result
+          ]);
+        })
+        .then((result) => {
+          let caseClassifications = result[0];
+          let caseDistribution = result[1];
+          let headers = [];
+          // Initialize data as an object to easily distribute cases per classification. This will be changed to an array later.
+          let data = {};
+
+          // Create the list headers. These contain 2 custom headers (case type and total number of cases),
+          // and all the reporting level locations
+          headers.push({
+            id: 'type',
+            header: 'Case Type'
+          });
+
+          caseDistribution.forEach((dataObj) => {
+            headers.push({
+              id: dataObj.location.id,
+              header: dataObj.location.name
+            });
+          });
+
+          headers.push({
+            id: 'total',
+            header: 'Total'
+          });
+
+          // Add all existing classifications to the data object
+          caseClassifications.forEach((caseClassification) => {
+            if (!app.models.case.invalidCaseClassificationsForReports.includes(caseClassification.value)) {
+              data[caseClassification.value] = {
+                type: dictionary.getTranslation(caseClassification.value),
+                total: 0
+              };
+            }
+          });
+
+          // Since deceased is not a classification but is relevant to the report, add it separately
+          data.deceased = {
+            type: dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED'),
+            total: 0
+          };
+
+          // Initialize all counts per location with 0 for each case classification (including deceased)
+          Object.keys(data).forEach((key) => {
+            caseDistribution.forEach((dataObj) => {
+              data[key][dataObj.location.id] = 0;
+            });
+          });
+
+          // Go through all the cases and increment the relevent case counts
+          caseDistribution.forEach((dataObj) => {
+            dataObj.cases.forEach((caseModel) => {
+              let caseLatestLocation = _.find(caseModel.addresses, ['typeId', 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE']).locationId;
+              if (caseModel.deceased) {
+                data.deceased[caseLatestLocation]++;
+                data.deceased.total++;
+              } else {
+                data[caseModel.classification][caseLatestLocation]++;
+                data[caseModel.classification].total++;
+              }
+            });
+          });
+
+          // Create the pdf list file
+          return app.utils.helpers.exportListFile(headers, Object.values(data), 'pdf');
+        })
+        .then(function (file) {
+          // and offer it for download
+          app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Test.${file.extension}`, callback);
+        })
+        .catch(callback);
+    });
+  };
+
+  /**
+   * Return a collection of items that contain a location and the cases that belong to that location.
+   * Structure the data so that the response is consistent with other similar requests.
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countCasesPerLocation = function (filter, callback) {
+    helpers.getCasesPerLocation(filter, this)
+      .then((result) => {
+        let response = [];
+        result.forEach((dataSet) => {
+          dataSet.casesCount = dataSet.cases.length;
+          dataSet.caseIds = dataSet.cases.map(caseModel => caseModel.id);
+          delete dataSet.cases;
+          response.push(dataSet);
+        });
+        callback(null, response);
       })
       .catch(callback);
   };

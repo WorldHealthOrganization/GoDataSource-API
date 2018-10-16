@@ -119,7 +119,11 @@
     },
     "arcGisServers": [
       "arcGisServer"
-    ]
+    ],
+    "reportingGeographicalLevelId": {
+      "type": "string",
+      "description": "The maximum geographical level of locations from which reports data is gathered"
+    }
   },
   "indexes": {
     "name_index": {
@@ -1278,6 +1282,18 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "countCasesStratifiedByClassificationOverTime"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "getCasesReport"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "countCasesPerLocation"
     }
   ],
   "methods": {
@@ -5383,6 +5399,70 @@
       "http": {
         "verb": "get",
         "path": "/contacts/classification-over-time/count"
+      }
+    },
+    "prototype.getCasesReport": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export a case report for an outbreak",
+      "http": {
+        "verb": "get",
+        "path": "/cases/report"
+      }
+    },
+    "prototype.countCasesPerLocation": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "array",
+          "description": "Collection of items with location, cases and numberOfCases properties",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Return an array of locations and the cases (that pass a filter) assigned to those locations",
+      "http": {
+        "verb": "get",
+        "path": "/cases/count-per-location"
       }
     }
   }

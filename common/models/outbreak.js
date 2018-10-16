@@ -1500,4 +1500,82 @@ module.exports = function (Outbreak) {
       return Promise.resolve(filter);
     }
   };
+
+  /**
+   * Returns a collection of items that contain a location, and the cases that are from that location
+   * @param filter
+   * @param outbreak
+   * @returns {Promise}
+   */
+  Outbreak.helpers.getCasesPerLocation = function (filter, outbreak) {
+    let locationIds = outbreak.locations.map(location => location.id);
+    let allLocations = [];
+    // Make function return a promise so we can easily link additional async code
+    return new Promise((resolve) => {
+      // Avoid making secondary request to DB by using a colection of locations instead of an array of locationIds
+      app.models.location.getSubLocationsWithDetails(locationIds, allLocations, function (error, allLocations) {
+        let allLocationIds = allLocations.map(location => location.id);
+        // Get all locations that are part of the outbreak's location hierarchy and have the
+        // same location level as the outbreak
+        app.models.location.find({
+          where: {
+            and: [
+              {
+                id: {
+                  inq: allLocationIds
+                }
+              },
+              {
+                geographicalLevelId: outbreak.reportingGeographicalLevelId
+              }
+            ]
+          }
+        })
+          .then((reportingLocations) => {
+            let reportingLocationIds = reportingLocations.map(location => location.id);
+            let locationHierarchy = app.models.location.buildHierarchicalLocationsList(allLocations);
+
+            let locationCorelationMap = {};
+            // Initiate caseDistribution as an object so we can add locations/cases to it easier
+            let caseDistribution = {};
+
+            // Start building the caseDistribution by adding all reporting locations
+            reportingLocations.forEach((location) => {
+              caseDistribution[location.id] = {location: location, cases: []};
+            });
+
+            // Link lower level locations to their reporting location parent
+            app.models.location.createLocationCorelationMap(locationHierarchy, reportingLocationIds, locationCorelationMap);
+            let _filter = app.utils.remote.mergeFilters({
+              where: {
+                outbreakId: outbreak.id
+              }
+            }, filter);
+            return Promise.all([
+              app.models.case.find(_filter),
+              locationCorelationMap,
+              caseDistribution
+            ]);
+          })
+          .then((results) => {
+            let cases = results[0];
+            let locationCorelationMap = results[1];
+            let caseDistribution = results[2];
+
+            // Add the cases that pass the filter to their relevant reporting level location
+            cases.forEach((caseModel) => {
+              let caseLatestLocation = _.find(caseModel.addresses, ['typeId', 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE']).locationId;
+              if (locationCorelationMap[caseLatestLocation]) {
+                caseDistribution[locationCorelationMap[caseLatestLocation]].cases.push(caseModel);
+              }
+            });
+
+            // After the caseDistribution object is fully populate it, use only it's values from now on.
+            // The keys were used only to easily distribuite the locations/cases
+            resolve(Object.values(caseDistribution));
+          })
+          .catch(error);
+      });
+    });
+  };
 };
