@@ -173,6 +173,11 @@
       "type": "hasMany",
       "model": "labResult",
       "foreignKey": "outbreakId"
+    },
+    "attachments": {
+      "type": "hasMany",
+      "model": "fileAttachment",
+      "foreignKey": "outbreakId"
     }
   },
   "acls": [
