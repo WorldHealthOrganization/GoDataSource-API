@@ -21,6 +21,8 @@ module.exports = function (Case) {
     'gender': 'LNG_CASE_FIELD_LABEL_GENDER',
     'occupation': 'LNG_CASE_FIELD_LABEL_OCCUPATION',
     'age': 'LNG_CASE_FIELD_LABEL_AGE',
+    'age.years': 'LNG_CASE_FIELD_LABEL_AGE_YEARS',
+    'age.months': 'LNG_CASE_FIELD_LABEL_AGE_MONTHS',
     'dob': 'LNG_CASE_FIELD_LABEL_DOB',
     'classification': 'LNG_CASE_FIELD_LABEL_CLASSIFICATION',
     'documents[].type': 'LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE',

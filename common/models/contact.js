@@ -15,6 +15,8 @@ module.exports = function (Contact) {
     'gender': 'LNG_CONTACT_FIELD_LABEL_GENDER',
     'occupation': 'LNG_CONTACT_FIELD_LABEL_OCCUPATION',
     'age': 'LNG_CONTACT_FIELD_LABEL_AGE',
+    'age.years': 'LNG_CONTACT_FIELD_LABEL_AGE_YEARS',
+    'age.months': 'LNG_CONTACT_FIELD_LABEL_AGE_MONTHS',
     'dob': 'LNG_CONTACT_FIELD_LABEL_DOB',
     'documents': 'LNG_CONTACT_FIELD_LABEL_DOCUMENTS',
     'documents[].type': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE',
