@@ -71,11 +71,10 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callba
  * @param encryptPassword {string|null}
  * @param anonymizeFields
  * @param options
- * @param headersWhitelist {array|null}
  * @param [beforeExport] Optional result modifier before export
  * @param callback
  */
-function exportFilteredModelsList(app, Model, filter, exportType, fileName, encryptPassword, anonymizeFields, options, headersWhitelist, beforeExport, callback) {
+function exportFilteredModelsList(app, Model, filter, exportType, fileName, encryptPassword, anonymizeFields, options, beforeExport, callback) {
   // before export is optional
   if (!callback) {
     callback = beforeExport;
@@ -116,33 +115,26 @@ function exportFilteredModelsList(app, Model, filter, exportType, fileName, encr
       const headers = [];
       // headers come from model
       Object.keys(Model.fieldLabelsMap).forEach(function (propertyName) {
-        // check header restrictions, use property if there are no restrictions or the property is in the restricted (white)list
-        if (
-          !headersWhitelist ||
-          !headersWhitelist.length ||
-          headersWhitelist.includes(propertyName)
-        ) {
-          // if a flat file is exported, data needs to be flattened, include 3 elements for each array
-          if (!['json', 'xml'].includes(exportType) && /(\[]|\.)/.test(propertyName)) {
-            let maxElements = 3;
-            // pdf has a limited width, include only one element
-            if (exportType === 'pdf') {
-              maxElements = 1;
-            }
-            for (let i = 1; i <= maxElements; i++) {
-              headers.push({
-                id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
-                // use correct label translation for user language
-                header: `${dictionary.getTranslation(Model.fieldLabelsMap[propertyName])}${/\[]/.test(propertyName) ? ' [' + i + ']' : ''}`
-              });
-            }
-          } else {
+        // if a flat file is exported, data needs to be flattened, include 3 elements for each array
+        if (!['json', 'xml'].includes(exportType) && /(\[]|\.)/.test(propertyName)) {
+          let maxElements = 3;
+          // pdf has a limited width, include only one element
+          if (exportType === 'pdf') {
+            maxElements = 1;
+          }
+          for (let i = 1; i <= maxElements; i++) {
             headers.push({
-              id: propertyName,
+              id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
               // use correct label translation for user language
-              header: dictionary.getTranslation(Model.fieldLabelsMap[propertyName])
+              header: `${dictionary.getTranslation(Model.fieldLabelsMap[propertyName])}${/\[]/.test(propertyName) ? ' [' + i + ']' : ''}`
             });
           }
+        } else {
+          headers.push({
+            id: propertyName,
+            // use correct label translation for user language
+            header: dictionary.getTranslation(Model.fieldLabelsMap[propertyName])
+          });
         }
       });
 
