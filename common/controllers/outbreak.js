@@ -6153,7 +6153,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countFollowUpsByTeam = function (filter, callback) {
     app.models.followUp
-      .countByTeam(filter)
+      .countByTeam(this.id, filter)
       .then(function (results) {
         callback(null, results);
       })
