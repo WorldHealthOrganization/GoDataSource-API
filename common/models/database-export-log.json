@@ -30,6 +30,10 @@
       "description": "Export file location"
     }
   },
+  "excludeBaseProperties": [
+    "name",
+    "description"
+  ],
   "validations": [],
   "relations": {},
   "acls": [
