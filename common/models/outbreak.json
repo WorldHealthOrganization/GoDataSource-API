@@ -1285,6 +1285,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countFollowUpsByTeam"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_outbreak",
       "permission": "ALLOW",
       "property": "getCasesReport"
@@ -2519,7 +2525,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a (full) person filter on 'person' property of the filter."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a (full) person filter on 'person' property of the filter. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date"
         }
       ],
       "returns": [
@@ -2554,7 +2560,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'active' boolean on the first level in 'where' and a (full) person filter on 'person' property of the filter"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'active' boolean on the first level in 'where' and a (full) person filter on 'person' property of the filter. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date"
         }
       ],
       "returns": [
@@ -3040,7 +3046,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Accepts 'date' on the first level of 'where' property"
         }
       ],
       "returns": [
@@ -3066,7 +3072,7 @@
           "required": true
         }
       ],
-      "description": "Count the number of contacts on follow-up list",
+      "description": "Count the number of contacts on follow-up list on a specific day (default day: today)",
       "http": {
         "verb": "get",
         "path": "/follow-ups/contacts/count"
@@ -5399,6 +5405,44 @@
       "http": {
         "verb": "get",
         "path": "/contacts/classification-over-time/count"
+      }
+    },
+    "prototype.countFollowUpsByTeam": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": {
+            "team": {
+              "type": {
+                "<teamId>": {
+                  "type": {
+                    "followUpIds": ["string"],
+                    "count": "number"
+                  }
+                }
+              }
+            },
+            "count": {
+              "type": "number",
+              "description": "Total number of follow-ups"
+            }
+          },
+          "description": "Number of follow-ups grouped by team",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Count follow-ups grouped by team",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/per-team/count"
       }
     },
     "prototype.getCasesReport": {

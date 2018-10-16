@@ -1,9 +1,18 @@
 'use strict';
 
 const worker = {
-  buildOrCount: function (relationships, followUpPeriod, countOnly) {
+  /**
+   * Build or count transmission chains
+   * @param relationships
+   * @param followUpPeriod
+   * @param countOnly
+   * @param options {{activeChainStartDate: Date}}
+   * @return {{nodes, edges, transmissionChains: {chains: Array, length: number}}|{nodes, isolatedNodes, chains: Array, length: number, activeChainsCount: number}}
+   */
+  buildOrCount: function (relationships, followUpPeriod, countOnly, options) {
+    // default active chain start date starts from today
+    let activeChainStartDate = new Date(options.activeChainStartDate);
     // define the start date of active chains (today - (the follow-up period + 1))
-    let activeChainStartDate = new Date();
     activeChainStartDate.setDate(activeChainStartDate.getDate() - (followUpPeriod + 1));
     // keep a list o chains
     let transmissionChains = [];
@@ -352,11 +361,25 @@ const worker = {
     // send back result
     return result;
   },
-  build: function (relationships, followUpPeriod) {
-    return this.buildOrCount(relationships, followUpPeriod);
+  /**
+   * Build transmission chains
+   * @param relationships
+   * @param followUpPeriod
+   * @param options {{activeChainStartDate: Date}}
+   * @return {*|{nodes, edges, transmissionChains: {chains: Array, length: number}}|{nodes, isolatedNodes, chains: Array, length: number, activeChainsCount: number}}
+   */
+  build: function (relationships, followUpPeriod, options = {}) {
+    return this.buildOrCount(relationships, followUpPeriod, false, options);
   },
-  count: function (relationships, followUpPeriod) {
-    return this.buildOrCount(relationships, followUpPeriod, true);
+  /**
+   * Count transmission chains
+   * @param relationships
+   * @param followUpPeriod
+   * @param options {{activeChainStartDate: Date}}
+   * @return {*|{nodes, edges, transmissionChains: {chains: Array, length: number}}|{nodes, isolatedNodes, chains: Array, length: number, activeChainsCount: number}}
+   */
+  count: function (relationships, followUpPeriod, options = {}) {
+    return this.buildOrCount(relationships, followUpPeriod, true, options);
   }
 };
 

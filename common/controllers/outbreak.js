@@ -122,14 +122,6 @@ module.exports = function (Outbreak) {
       },
       filter || {});
     // get logged in user
-    const contextUser = app.utils.remote.getUserFromOptions(options);
-    // define header restrictions
-    let headerRestrictions;
-    // if the user has a list of restricted fields configured
-    if (contextUser.settings && Array.isArray(contextUser.settings.caseFields) && contextUser.settings.caseFields.length) {
-      // use that list
-      headerRestrictions = contextUser.settings.caseFields;
-    }
 
     // if encrypt password is not valid, remove it
     if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
@@ -139,14 +131,9 @@ module.exports = function (Outbreak) {
     // make sure anonymizeFields is valid
     if (!Array.isArray(anonymizeFields)) {
       anonymizeFields = [];
-
-      // file must be either encrypted or anonymized
-      if (!encryptPassword) {
-        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
-      }
     }
 
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, headerRestrictions, function (results, dictionary) {
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, function (results, dictionary) {
       // Prepare questionnaire answers for printing
       results.forEach((caseModel) => {
         if (caseModel.questionnaireAnswers) {
@@ -190,14 +177,9 @@ module.exports = function (Outbreak) {
         // make sure anonymizeFields is valid
         if (!Array.isArray(anonymizeFields)) {
           anonymizeFields = [];
-
-          // file must be either encrypted or anonymized
-          if (!encryptPassword) {
-            return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
-          }
         }
 
-        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, [], function (results, dictionary) {
+        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, function (results, dictionary) {
           // Prepare questionnaire answers for printing
           results.forEach((followUp) => {
             if (followUp.questionnaireAnswers) {
@@ -1378,11 +1360,23 @@ module.exports = function (Outbreak) {
 
   /**
    * Count independent transmission chains
-   * @param filter
+   * @param filter Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
    * @param callback
    */
   Outbreak.prototype.countIndependentTransmissionChains = function (filter, callback) {
     const self = this;
+    // define an endDate filter
+    let endDate;
+    // if there's a filter
+    if (filter) {
+      // try and get the end date filter
+      endDate = _.get(filter, 'where.endDate');
+    }
+    // no end date filter provided
+    if (!endDate) {
+      // end date is current date
+      endDate = new Date();
+    }
     // initialize a person filter (will contain filters applicable on person entity)
     let personFilter;
     // if person filter was sent
@@ -1460,6 +1454,9 @@ module.exports = function (Outbreak) {
               ],
               id: {
                 nin: nodeIds
+              },
+              dateOfReporting: {
+                lte: endDate
               }
             };
 
@@ -1496,7 +1493,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Get independent transmission chains
-   * @param filter Note: also accepts 'active' boolean on the first level in 'where'
+   * @param filter Note: also accepts 'active' boolean on the first level in 'where'. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
    * @param callback
    */
   Outbreak.prototype.getIndependentTransmissionChains = function (filter, callback) {
@@ -1521,6 +1518,19 @@ module.exports = function (Outbreak) {
     }
 
     const self = this;
+
+    // define an endDate filter
+    let endDate;
+    // if there's a filter
+    if (filter) {
+      // try and get the end date filter
+      endDate = _.get(filter, 'where.endDate');
+    }
+    // no end date filter provided
+    if (!endDate) {
+      // end date is current date
+      endDate = new Date();
+    }
 
     // build a find filtered people if necessary
     let findFilteredPeople;
@@ -1579,7 +1589,10 @@ module.exports = function (Outbreak) {
                   {
                     type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
                   }
-                ]
+                ],
+                dateOfReporting: {
+                  lte: endDate
+                }
               }
             };
 
@@ -1649,8 +1662,8 @@ module.exports = function (Outbreak) {
 
               // update isolated nodes filter depending on active filter value
               let followUpPeriod = self.periodOfFollowup;
-              // get day of the start of the follow-up period starting from today
-              let followUpStartDate = genericHelpers.getUTCDate().subtract(followUpPeriod, 'days');
+              // get day of the start of the follow-up period starting from specified end date (by default, today)
+              let followUpStartDate = genericHelpers.getUTCDate(endDate).subtract(followUpPeriod, 'days');
 
               if (activeFilter) {
                 // get cases/events reported in the last followUpPeriod days
@@ -2162,49 +2175,14 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Count the contacts on follow-up list
-   * @param filter
+   * Count contacts on follow-up lists on a specific day (default day: current day)
+   * @param filter Accepts 'date' on the first level of 'where' property
    * @param callback
    */
   Outbreak.prototype.countFollowUpContacts = function (filter, callback) {
-    // get outbreakId
-    let outbreakId = this.id;
-
-    // get follow-ups
-    app.models.followUp.find(app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: outbreakId,
-          // get follow-ups that are scheduled later than today 00:00 hours
-          date: {
-            gte: (new Date()).setHours(0, 0, 0, 0)
-          }
-        }
-      }, filter || {}))
-      .then(function (followUps) {
-        // filter by relation properties
-        followUps = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followUps, filter);
-        // initialize contacts map; helper to not count contacts twice
-        let contactsMap = {};
-
-        // loop through the followups to get unique contacts
-        followUps.forEach(function (followUp) {
-          if (!contactsMap[followUp.personId]) {
-            contactsMap[followUp.personId] = true;
-          }
-        });
-
-        // get contacts IDs
-        let contactIDs = Object.keys(contactsMap);
-
-        // create result
-        let result = {
-          contactsCount: contactIDs.length,
-          followUpsCount: followUps.length,
-          contactIDs: contactIDs
-        };
-
-        // send response
+    app.models.followUp
+      .countContacts(this.id, filter)
+      .then(function (result) {
         callback(null, result);
       })
       .catch(callback);
@@ -5009,14 +4987,9 @@ module.exports = function (Outbreak) {
     // make sure anonymizeFields is valid
     if (!Array.isArray(anonymizeFields)) {
       anonymizeFields = [];
-
-      // file must be either encrypted or anonymized
-      if (!encryptPassword) {
-        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
-      }
     }
 
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, _filters, exportType, 'Contacts List', encryptPassword, anonymizeFields, options, null, callback);
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, _filters, exportType, 'Contacts List', encryptPassword, anonymizeFields, options, callback);
   };
 
   /**
@@ -5067,15 +5040,10 @@ module.exports = function (Outbreak) {
     // make sure anonymizeFields is valid
     if (!Array.isArray(anonymizeFields)) {
       anonymizeFields = [];
-
-      // file must be either encrypted or anonymized
-      if (!encryptPassword) {
-        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
-      }
     }
 
     // export outbreaks list
-    app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', encryptPassword, anonymizeFields, options, null, function (results, languageDictionary) {
+    app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', encryptPassword, anonymizeFields, options, function (results, languageDictionary) {
       results.forEach(function (result) {
         // translate templates
         ['caseInvestigationTemplate', 'labResultsTemplate', 'contactFollowUpTemplate'].forEach(function (template) {
@@ -5106,11 +5074,6 @@ module.exports = function (Outbreak) {
     // make sure anonymizeFields is valid
     if (!Array.isArray(anonymizeFields)) {
       anonymizeFields = [];
-
-      // file must be either encrypted or anonymized
-      if (!encryptPassword) {
-        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
-      }
     }
 
     // initialize includeContactAddress and includeContactPhoneNumber filters
@@ -5414,7 +5377,7 @@ module.exports = function (Outbreak) {
         }
       },
       filter || {});
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, _filters, exportType, 'Reference Data', null, [], options, null, function (results) {
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, _filters, exportType, 'Reference Data', null, [], options, function (results) {
       // translate category, value and description fields
       return new Promise(function (resolve, reject) {
         // load context user
@@ -6146,6 +6109,20 @@ module.exports = function (Outbreak) {
     app.models.case.countStratifiedByClassificationOverTime(this, filter)
       .then(function (result) {
         callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count follow-ups grouped by associated team
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countFollowUpsByTeam = function (filter, callback) {
+    app.models.followUp
+      .countByTeam(this.id, filter)
+      .then(function (results) {
+        callback(null, results);
       })
       .catch(callback);
   };
