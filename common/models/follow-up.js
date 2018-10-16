@@ -178,4 +178,50 @@ module.exports = function (FollowUp) {
         };
       });
   };
+
+  /**
+   * Count follow-ups grouped by associated team
+   * @param outbreakId
+   * @param filter
+   */
+  FollowUp.countByTeam = function (outbreakId, filter) {
+    // find follow-ups for current outbreak
+    return FollowUp
+      .find(app.utils.remote
+        .mergeFilters({
+          where: {
+            outbreakId: outbreakId
+          }
+        }, filter || {})
+      )
+      .then(function (followUps) {
+        // filter by relation properties
+        followUps = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followUps, filter);
+        // define result
+        const result = {
+          team: {},
+          count: followUps.length
+        };
+        // go through all followUps
+        followUps.forEach(function (followUp) {
+          // use empty string for not associated team
+          if (!followUp.teamId) {
+            followUp.teamId = '';
+          }
+          // init team container if not already inited
+          if (!result.team[followUp.teamId]) {
+            result.team[followUp.teamId] = {
+              followUpIds: [],
+              count: 0
+            };
+          }
+          // add follow-up ID per team
+          result.team[followUp.teamId].followUpIds.push(followUp.id);
+          // increment the number of follow-ups per team
+          result.team[followUp.teamId].count++;
+        });
+        // return built result
+        return result;
+      });
+  };
 };
