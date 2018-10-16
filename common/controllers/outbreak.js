@@ -6112,4 +6112,18 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Count follow-ups grouped by associated team
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countFollowUpsByTeam = function (filter, callback) {
+    app.models.followUp
+      .countByTeam(this.id, filter)
+      .then(function (results) {
+        callback(null, results);
+      })
+      .catch(callback);
+  };
 };
