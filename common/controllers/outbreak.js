@@ -4516,7 +4516,11 @@ module.exports = function (Outbreak) {
                 let relationshipMember = _.find(relationship.people, (member) => {
                   return member.id !== person.id;
                 });
-
+                // if relationship member was not found
+                if (!relationshipMember) {
+                  // stop here (invalid relationship)
+                  return;
+                }
                 // Translate the values of the fields marked as reference data fields on the case/contact model
                 app.utils.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models.person.typeToModelMap[relationshipMember.type], dictionary);
 
