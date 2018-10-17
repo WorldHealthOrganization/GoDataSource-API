@@ -20,10 +20,6 @@
       "default": "sync",
       "readOnly": true
     },
-    "syncServerUrl": {
-      "type": "string",
-      "description": "URL of the server with which the client is synced. Present in the entries for Client instances"
-    },
     "syncClientId": {
       "type": "string",
       "description": "Client ID which is synced with the server. Present in the entries for Server instances"
@@ -66,7 +62,41 @@
       "principalId": "read_sys_config",
       "permission": "ALLOW",
       "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "bulkDelete"
     }
   ],
-  "methods": {}
+  "methods": {
+    "bulkDelete": {
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "required": true,
+          "description": "Number of deleted sync log entries"
+        }
+      ],
+      "description": "Delete sync log entries that match the criteria.",
+      "http": {
+        "verb": "del",
+        "path": "/"
+      }
+    }
+  }
 }
