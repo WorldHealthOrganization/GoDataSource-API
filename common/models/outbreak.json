@@ -1286,6 +1286,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countFollowUpsByTeam"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__findById__attachments"
@@ -5436,6 +5442,44 @@
       "http": {
         "verb": "get",
         "path": "/contacts/classification-over-time/count"
+      }
+    },
+    "prototype.countFollowUpsByTeam": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": {
+            "team": {
+              "type": {
+                "<teamId>": {
+                  "type": {
+                    "followUpIds": ["string"],
+                    "count": "number"
+                  }
+                }
+              }
+            },
+            "count": {
+              "type": "number",
+              "description": "Total number of follow-ups"
+            }
+          },
+          "description": "Number of follow-ups grouped by team",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Count follow-ups grouped by team",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/per-team/count"
       }
     },
     "prototype.attachmentUpload": {
