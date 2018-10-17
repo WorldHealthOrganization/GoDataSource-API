@@ -144,7 +144,7 @@ module.exports = function (Sync) {
     // create export log entry
     app.models.databaseExportLog
       .create({
-        syncClientId: options.remotingContext.req.authData.client.credentials.clientId,
+        syncClientId: _.get(options, 'remotingContext.req.authData.client.credentials.clientId', `webUser: ${_.get(options, 'remotingContext.req.authData.user.id', 'unavailable')}`),
         actionStartDate: new Date(),
         status: 'LNG_SYNC_STATUS_IN_PROGRESS',
         outbreakIDs: exportedOutbreakIDs
@@ -348,7 +348,7 @@ module.exports = function (Sync) {
       };
 
       // get outbreaks IDs for client
-      let outbreakIDs = req.authData.client.outbreakIDs;
+      let outbreakIDs = _.get(req, 'authData.client.outbreakIDs');
       if (!Array.isArray(outbreakIDs)) {
         outbreakIDs = [];
       }
@@ -356,7 +356,7 @@ module.exports = function (Sync) {
       // create sync log entry
       app.models.syncLog
         .create({
-          syncClientId: req.authData.client.credentials.clientId,
+          syncClientId: _.get(req, 'authData.client.credentials.clientId', `webUser: ${_.get(req, 'authData.user.id', 'unavailable')}`),
           actionStartDate: new Date(),
           status: 'LNG_SYNC_STATUS_IN_PROGRESS',
           outbreakIDs: outbreakIDs

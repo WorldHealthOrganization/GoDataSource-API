@@ -15,6 +15,11 @@ const collectionsWithFiles = {
     prop: 'path',
     srcDir: 'server/storage/icons',
     targetDir: 'icons'
+  },
+  fileAttachment:{
+    prop: 'path',
+    srcDir: 'server/storage/files',
+    targetDir: 'files'
   }
 };
 
@@ -38,7 +43,8 @@ const collectionsMap = {
   user: 'user',
   role: 'role',
   cluster: 'cluster',
-  auditLog: 'auditLog'
+  auditLog: 'auditLog',
+  fileAttachment: 'fileAttachment'
 };
 
 // list of user related collections
@@ -49,10 +55,10 @@ const collectionsForExportTypeMap = {
   system: ['template', 'icon', 'helpCategory', 'helpItem', 'language', 'languageToken', 'referenceData', 'location']
 };
 collectionsForExportTypeMap.outbreak = collectionsForExportTypeMap.system.concat(['outbreak']);
-collectionsForExportTypeMap.full = collectionsForExportTypeMap.outbreak.concat(['person', 'labResult', 'followUp', 'relationship', 'cluster']);
+collectionsForExportTypeMap.full = collectionsForExportTypeMap.outbreak.concat(['person', 'labResult', 'followUp', 'relationship', 'cluster', 'fileAttachment']);
 collectionsForExportTypeMap.mobile = collectionsForExportTypeMap.full.concat(userCollections);
-// mobile export doesn't need to include template, icon, helpCategory, helpItem
-['template', 'icon', 'helpCategory', 'helpItem'].forEach(function (model) {
+// mobile export doesn't need to include template, icon, helpCategory, helpItem, fileAttachment
+['template', 'icon', 'helpCategory', 'helpItem', 'fileAttachment'].forEach(function (model) {
   collectionsForExportTypeMap.mobile.splice(collectionsForExportTypeMap.mobile.indexOf(model), 1);
 });
 
@@ -145,7 +151,8 @@ const collectionsFilterMap = {
   labResult: addOutbreakIdMongoFilter,
   followUp: addOutbreakIdMongoFilter,
   relationship: addOutbreakIdMongoFilter,
-  cluster: addOutbreakIdMongoFilter
+  cluster: addOutbreakIdMongoFilter,
+  fileAttachment: addOutbreakIdMongoFilter
 };
 
 // on import some additional filters might be applied on different collections
@@ -156,7 +163,8 @@ const collectionsImportFilterMap = {
   labResult: isImportableRecord,
   followUp: isImportableRecord,
   relationship: isImportableRecord,
-  cluster: isImportableRecord
+  cluster: isImportableRecord,
+  fileAttachment: isImportableRecord
 };
 
 const syncRecordFlags = {
@@ -290,7 +298,7 @@ const syncRecord = function (logger, model, record, options, done) {
 
       // if updated timestamp is greater than the one in the main database, update
       // also make sure that if the record is soft deleted, it stays that way
-      if (dbRecord.updatedAt.getTime() < new Date(record.updatedAt).getTime()) {
+      if (new Date(dbRecord.updatedAt).getTime() < new Date(record.updatedAt).getTime()) {
         // update geopoint properties
         convertGeoPointToLoopbackFormat(record, model);
 
@@ -434,7 +442,7 @@ const importCollectionRelatedFiles = function (collectionName, tmpDir, done) {
 
   return ncp(
     path.join(tmpDir, collectionOpts.targetDir),
-    path.join(process.cwd(), collectionOpts.srcDir),
+    path.join(__dirname, '..', collectionOpts.srcDir),
     done
   );
 };
