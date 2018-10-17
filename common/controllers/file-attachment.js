@@ -45,9 +45,11 @@ module.exports = function (FileAttachment) {
    */
   FileAttachment.prototype.download = function (callback) {
     const self = this;
+    // read file from disk
     FileAttachment.readFromDisk(this.path)
       .then(function (fileBuffer) {
         const extension = path.extname(self.path);
+        // download file - use mimeType if available, otherwise fallback to 'application/octet-stream'
         app.utils.remote.helpers
           .offerFileToDownload(fileBuffer, self.mimeType && self.mimeType.length ? self.mimeType : 'application/octet-stream', `${self.name}${extension}`, callback);
       })
