@@ -22,11 +22,11 @@ module.exports = function (Backup) {
       'languageToken',
       'referenceData',
       'helpCategory',
-      'auditLog'
+      'auditLog',
+      'template',
+      'icon'
     ],
     'Data': [
-      'template',
-      'icon',
       'outbreak',
       'person',
       'labResult',
@@ -36,7 +36,8 @@ module.exports = function (Backup) {
       'location',
       'user',
       'role',
-      'cluster'
+      'cluster',
+      'fileAttachment'
     ]
   };
 

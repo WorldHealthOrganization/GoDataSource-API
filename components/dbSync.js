@@ -13,12 +13,12 @@ const ncp = require('ncp');
 const collectionsWithFiles = {
   icon: {
     prop: 'path',
-    srcDir: 'storage/icons',
+    srcDir: 'server/storage/icons',
     targetDir: 'icons'
   },
   fileAttachment:{
     prop: 'path',
-    srcDir: 'storage/files',
+    srcDir: 'server/storage/files',
     targetDir: 'files'
   }
 };
@@ -442,7 +442,7 @@ const importCollectionRelatedFiles = function (collectionName, tmpDir, done) {
 
   return ncp(
     path.join(tmpDir, collectionOpts.targetDir),
-    path.join(process.cwd(), collectionOpts.srcDir),
+    path.join(__dirname, '..', collectionOpts.srcDir),
     done
   );
 };
