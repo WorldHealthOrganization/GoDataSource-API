@@ -31,8 +31,7 @@
     }
   },
   "excludeBaseProperties": [
-    "name",
-    "description"
+    "syncServerUrl"
   ],
   "validations": [],
   "relations": {},
