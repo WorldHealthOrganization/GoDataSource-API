@@ -1283,6 +1283,54 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "countCasesStratifiedByClassificationOverTime"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "__findById__attachments"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "__findById__attachments"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "attachmentUpload"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "attachmentUpload"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "attachmentDownload"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "attachmentDownload"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "__destroyById__attachments"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "__destroyById__attachments"
     }
   ],
   "methods": {
@@ -5388,6 +5436,78 @@
       "http": {
         "verb": "get",
         "path": "/contacts/classification-over-time/count"
+      }
+    },
+    "prototype.attachmentUpload": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "name",
+          "type": "string"
+        },
+        {
+          "arg": "file",
+          "type": "file"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "file",
+          "type": "fileAttachment",
+          "root": true
+        }
+      ],
+      "description": "Upload a new attachment.",
+      "http": {
+        "verb": "post",
+        "path": "/attachments"
+      }
+    },
+    "prototype.attachmentDownload": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for attachments"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Download an attachment.",
+      "http": {
+        "verb": "get",
+        "path": "/attachments/:fk/download"
       }
     }
   }

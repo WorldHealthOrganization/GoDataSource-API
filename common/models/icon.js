@@ -76,7 +76,7 @@ module.exports = function (Icon) {
         return Icon.findById(iconId)
           .then(function (icon) {
             if (icon) {
-              helpers.setOriginalValueInContextOptions(ctx, 'deletedIcon', icon.toJSON());
+              helpers.setOriginalValueInContextOptions(ctx, 'deletedIcon', icon);
             }
             next();
           });

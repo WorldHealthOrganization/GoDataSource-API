@@ -56,9 +56,9 @@ module.exports = function (fileAttachment) {
     const fileId = ctx.currentInstance.id;
     // store the instance that's about to be deleted to remove the resource from the disk later
     fileAttachment.findById(fileId)
-      .then(function (icon) {
-        if (icon) {
-          helpers.setOriginalValueInContextOptions(ctx, 'deletedFile', icon.toJSON());
+      .then(function (file) {
+        if (file) {
+          helpers.setOriginalValueInContextOptions(ctx, 'deletedFile', file);
         }
         next();
       })
@@ -72,7 +72,7 @@ module.exports = function (fileAttachment) {
    */
   fileAttachment.observe('after delete', function (ctx, next) {
     // try to get the deleted file from context
-    let deletedFile = helpers.getOriginalValueFromContextOptions(ctx, 'deletedIcon');
+    let deletedFile = helpers.getOriginalValueFromContextOptions(ctx, 'deletedFile');
     if (deletedFile) {
       fileAttachment.removeFromDisk(deletedFile.path)
         .catch(function (error) {
