@@ -122,14 +122,6 @@ module.exports = function (Outbreak) {
       },
       filter || {});
     // get logged in user
-    const contextUser = app.utils.remote.getUserFromOptions(options);
-    // define header restrictions
-    let headerRestrictions;
-    // if the user has a list of restricted fields configured
-    if (contextUser.settings && Array.isArray(contextUser.settings.caseFields) && contextUser.settings.caseFields.length) {
-      // use that list
-      headerRestrictions = contextUser.settings.caseFields;
-    }
 
     // if encrypt password is not valid, remove it
     if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
@@ -139,14 +131,9 @@ module.exports = function (Outbreak) {
     // make sure anonymizeFields is valid
     if (!Array.isArray(anonymizeFields)) {
       anonymizeFields = [];
-
-      // file must be either encrypted or anonymized
-      if (!encryptPassword) {
-        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
-      }
     }
 
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, headerRestrictions, function (results, dictionary) {
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, function (results, dictionary) {
       // Prepare questionnaire answers for printing
       results.forEach((caseModel) => {
         if (caseModel.questionnaireAnswers) {
@@ -190,14 +177,9 @@ module.exports = function (Outbreak) {
         // make sure anonymizeFields is valid
         if (!Array.isArray(anonymizeFields)) {
           anonymizeFields = [];
-
-          // file must be either encrypted or anonymized
-          if (!encryptPassword) {
-            return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
-          }
         }
 
-        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, [], function (results, dictionary) {
+        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, function (results, dictionary) {
           // Prepare questionnaire answers for printing
           results.forEach((followUp) => {
             if (followUp.questionnaireAnswers) {
@@ -5005,14 +4987,9 @@ module.exports = function (Outbreak) {
     // make sure anonymizeFields is valid
     if (!Array.isArray(anonymizeFields)) {
       anonymizeFields = [];
-
-      // file must be either encrypted or anonymized
-      if (!encryptPassword) {
-        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
-      }
     }
 
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, _filters, exportType, 'Contacts List', encryptPassword, anonymizeFields, options, null, callback);
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, _filters, exportType, 'Contacts List', encryptPassword, anonymizeFields, options, callback);
   };
 
   /**
@@ -5063,15 +5040,10 @@ module.exports = function (Outbreak) {
     // make sure anonymizeFields is valid
     if (!Array.isArray(anonymizeFields)) {
       anonymizeFields = [];
-
-      // file must be either encrypted or anonymized
-      if (!encryptPassword) {
-        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
-      }
     }
 
     // export outbreaks list
-    app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', encryptPassword, anonymizeFields, options, null, function (results, languageDictionary) {
+    app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', encryptPassword, anonymizeFields, options, function (results, languageDictionary) {
       results.forEach(function (result) {
         // translate templates
         ['caseInvestigationTemplate', 'labResultsTemplate', 'contactFollowUpTemplate'].forEach(function (template) {
@@ -5102,11 +5074,6 @@ module.exports = function (Outbreak) {
     // make sure anonymizeFields is valid
     if (!Array.isArray(anonymizeFields)) {
       anonymizeFields = [];
-
-      // file must be either encrypted or anonymized
-      if (!encryptPassword) {
-        return callback(app.utils.apiError.getError('FILE_ENCRYPTED_OR_ANONIMIZED'));
-      }
     }
 
     // initialize includeContactAddress and includeContactPhoneNumber filters
@@ -5410,7 +5377,7 @@ module.exports = function (Outbreak) {
         }
       },
       filter || {});
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, _filters, exportType, 'Reference Data', null, [], options, null, function (results) {
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, _filters, exportType, 'Reference Data', null, [], options, function (results) {
       // translate category, value and description fields
       return new Promise(function (resolve, reject) {
         // load context user
@@ -6142,6 +6109,20 @@ module.exports = function (Outbreak) {
     app.models.case.countStratifiedByClassificationOverTime(this, filter)
       .then(function (result) {
         callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count follow-ups grouped by associated team
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countFollowUpsByTeam = function (filter, callback) {
+    app.models.followUp
+      .countByTeam(this.id, filter)
+      .then(function (results) {
+        callback(null, results);
       })
       .catch(callback);
   };
