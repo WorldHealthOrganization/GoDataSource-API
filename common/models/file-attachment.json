@@ -1,0 +1,32 @@
+{
+  "name": "fileAttachment",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "outbreakId": {
+      "type": "string",
+      "required": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "originalName": {
+      "type": "string"
+    },
+    "mimeType": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string"
+    }
+  },
+  "hidden": ["path"],
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

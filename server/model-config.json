@@ -275,5 +275,9 @@
   "classificationHistoryItem": {
     "dataSource": null,
     "public": false
+  },
+  "fileAttachment": {
+    "dataSource": "mongoDb",
+    "public": false
   }
 }
