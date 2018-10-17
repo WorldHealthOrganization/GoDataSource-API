@@ -391,7 +391,7 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
                 displayModelDetails(doc, subItem, true);
                 doc.x = initialXMargin + 20;
               });
-            } else if (typeof(item[prop]) === 'object') {
+            } else if (typeof(item[prop]) === 'object' && item[prop] !== null) {
               doc.text(prop, initialXMargin + 20).moveDown();
               doc.x += 20;
               displayModelDetails(doc, item[prop], true);
@@ -410,7 +410,7 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
 
       // reset margin
       doc.x = initialXMargin;
-    } else if (typeof(model[fieldName]) === 'object' && Object.keys(model[fieldName]).length) {
+    } else if (typeof(model[fieldName]) === 'object' && model[fieldName] !== null && Object.keys(model[fieldName]).length) {
       doc.text(fieldName, initialXMargin).moveDown();
       doc.x += 20;
       displayModelDetails(doc, model[fieldName], true);
