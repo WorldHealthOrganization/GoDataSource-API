@@ -26,7 +26,19 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permissions": "ALLOW",
+      "property": "getDatabaseSnapshot"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "importDatabaseSnapshot"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
       "permissions": "ALLOW",
       "property": "importDatabaseSnapshot"
     },
