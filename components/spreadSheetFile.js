@@ -14,17 +14,29 @@ function buildSpreadSheet(headers, data) {
 
   // if headers were passed, reformat data
   if (headers) {
-    // go through all entries
-    data.forEach(function (entry) {
-      // build formatted entry
+    // if there's data passed
+    if (data.length) {
+      // go through all entries
+      data.forEach(function (entry) {
+        // build formatted entry
+        const formattedEntry = {};
+        // use headers as properties
+        headers.forEach(function (header) {
+          formattedEntry[header.header] = entry[header.id];
+        });
+        // add formatted entry to the list
+        formattedData.push(formattedEntry);
+      });
+    } else {
+      // no data passed
       const formattedEntry = {};
-      // use headers as properties
+      //add one empty data row (to include headers)
       headers.forEach(function (header) {
-        formattedEntry[header.header] = entry[header.id];
+        formattedEntry[header.header] = '';
       });
       // add formatted entry to the list
       formattedData.push(formattedEntry);
-    });
+    }
     // otherwise use it as is
   } else {
     formattedData = data;
@@ -113,7 +125,7 @@ function createOdsFile(headers, data, callback) {
  * @param headers
  */
 const addQuestionnaireHeadersForPrint = function (data, headers) {
-  Object.keys(data[0]).forEach((key) => {
+  data.length && Object.keys(data[0]).forEach((key) => {
     if (key.indexOf('questionnaireAnswers') !== -1) {
       let indexOfSeparator = key.indexOf(' ');
       let questionText = key.substring(indexOfSeparator + 1);

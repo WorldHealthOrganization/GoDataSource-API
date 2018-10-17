@@ -47,7 +47,11 @@ module.exports = function (Outbreak) {
     'prototype.__findById__labResults',
     'prototype.__updateById__labResults',
     'prototype.__destroyById__labResults',
-
+    'prototype.__create__attachments',
+    'prototype.__get__attachments',
+    'prototype.__delete__attachments',
+    'prototype.__updateById__attachments',
+    'prototype.__count__attachments'
   ]);
 
   // attach search by relation property behavior on get contacts
@@ -6127,6 +6131,47 @@ module.exports = function (Outbreak) {
       .countByTeam(this.id, filter)
       .then(function (results) {
         callback(null, results);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Create (upload) a new file
+   * @param req
+   * @param name
+   * @param file
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.attachmentUpload = function (req, name, file, options, callback) {
+    app.models.fileAttachment
+      .upload(this.id, req, name, file, options, callback);
+  };
+
+  /**
+   * Download an attachment
+   * @param attachmentId
+   * @param callback
+   */
+  Outbreak.prototype.attachmentDownload = function (attachmentId, callback) {
+    // try and find the attachment
+    app.models.fileAttachment
+      .findOne({
+        where: {
+          id: attachmentId,
+          outbreakId: this.id,
+        }
+      })
+      .then(function (attachment) {
+        // if not found, stop with error
+        if (!attachment) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.fileAttachment.modelName,
+            id: attachmentId
+          });
+        }
+        // download the attachment
+        attachment.download(callback);
       })
       .catch(callback);
   };
