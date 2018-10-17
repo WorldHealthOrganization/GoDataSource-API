@@ -16,7 +16,7 @@
     },
     "translation": {
       "type": "string",
-      "required": true
+      "default": ""
     }
   },
   "indexes": {
