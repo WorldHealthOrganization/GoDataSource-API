@@ -668,10 +668,12 @@ module.exports = function (Relationship) {
    */
   Relationship.createRelationshipBetweenTwoPeople = function (outbreakId, sourceId, targetId, relationshipData, options) {
     // find the source person
-    app.models.person
+    return app.models.person
       .findOne({
-        id: sourceId,
-        outbreakId: outbreakId
+        where: {
+          id: sourceId,
+          outbreakId: outbreakId
+        }
       })
       .then(function (sourcePerson) {
         // stop with error if not found
@@ -685,7 +687,7 @@ module.exports = function (Relationship) {
         if (!['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'].includes(sourcePerson.type)) {
           // otherwise stop with error
           throw app.utils.apiError.getError('INVALID_RELATIONSHIP_SOURCE_TYPE', {
-            sourceType: sourcePerson.type,
+            type: sourcePerson.type,
             allowedTypes: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
           });
         }
@@ -703,8 +705,10 @@ module.exports = function (Relationship) {
         // find target person
         return app.models.person
           .findOne({
-            id: targetId,
-            outbreakId: outbreakId
+            where: {
+              id: targetId,
+              outbreakId: outbreakId
+            }
           })
           .then(function (targetPerson) {
             // stop with error if not found
@@ -733,13 +737,13 @@ module.exports = function (Relationship) {
       .then(function (people) {
         return new Promise(function (resolve, reject) {
           // create relationship between people
-          app.models.outbreak
+          app.models.outbreak.helpers
             .createPersonRelationship(outbreakId, people.source.id, people.source.type,
               // add target person to relationship data
-              Object.assign(relationshipData, {persons: [people.target.id]}), options,
+              Object.assign({}, relationshipData, {persons: [{id: people.target.id}]}), options,
               function (error, result) {
                 if (error) {
-                  reject(error);
+                  return reject(error);
                 }
                 resolve(result);
               });
@@ -771,9 +775,9 @@ module.exports = function (Relationship) {
         // register create relationship action between each source person and each target person
         createRelationships.push(Relationship
           .createRelationshipBetweenTwoPeople(outbreakId, sourceId, targetId, relationshipData, options)
-          .then(function (result) {
+          .then(function (relationship) {
             // store successful result
-            result.created.push(result);
+            result.created.push(relationship);
           })
           .catch(function (error) {
             // store errors
