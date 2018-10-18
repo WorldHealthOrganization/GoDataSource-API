@@ -657,4 +657,140 @@ module.exports = function (Relationship) {
   Relationship.countPersonRelationshipContacts = function (personId, filter) {
     return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter, true, true);
   };
+
+  /**
+   * Create a relationship between two people
+   * @param outbreakId
+   * @param sourceId
+   * @param targetId
+   * @param relationshipData
+   * @param options
+   */
+  Relationship.createRelationshipBetweenTwoPeople = function (outbreakId, sourceId, targetId, relationshipData, options) {
+    // find the source person
+    app.models.person
+      .findOne({
+        id: sourceId,
+        outbreakId: outbreakId
+      })
+      .then(function (sourcePerson) {
+        // stop with error if not found
+        if (!sourcePerson) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.person.modelName,
+            id: sourceId
+          });
+        }
+        // source person must be a case or event
+        if (!['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'].includes(sourcePerson.type)) {
+          // otherwise stop with error
+          throw app.utils.apiError.getError('INVALID_RELATIONSHIP_SOURCE_TYPE', {
+            sourceType: sourcePerson.type,
+            allowedTypes: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+          });
+        }
+        // if the source is a case, it must be a non discarded case
+        if (
+          sourcePerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' &&
+          app.models.case.discardedCaseClassifications.includes(sourcePerson.classification)
+        ) {
+          // otherwise stop with error
+          throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
+            id: sourceId
+          });
+        }
+
+        // find target person
+        return app.models.person
+          .findOne({
+            id: targetId,
+            outbreakId: outbreakId
+          })
+          .then(function (targetPerson) {
+            // stop with error if not found
+            if (!targetPerson) {
+              throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+                model: app.models.person.modelName,
+                id: targetId
+              });
+            }
+            // if the target is a case, it must be a non discarded case
+            if (
+              targetPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' &&
+              app.models.case.discardedCaseClassifications.includes(targetPerson.classification)
+            ) {
+              throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
+                id: targetId
+              });
+            }
+            // everything went fine, return the two people
+            return {
+              source: sourcePerson,
+              target: targetPerson
+            };
+          });
+      })
+      .then(function (people) {
+        return new Promise(function (resolve, reject) {
+          // create relationship between people
+          app.models.outbreak
+            .createPersonRelationship(outbreakId, people.source.id, people.source.type,
+              // add target person to relationship data
+              Object.assign(relationshipData, {persons: [people.target.id]}), options,
+              function (error, result) {
+                if (error) {
+                  reject(error);
+                }
+                resolve(result);
+              });
+        });
+      });
+  };
+
+  /**
+   * Bulk create relationships
+   * @param outbreakId
+   * @param sources Source person Ids
+   * @param targets Target person Ids
+   * @param relationshipData Common relationship data
+   * @param options
+   * @return {Promise<{created: Array, failed: Array} | never>}
+   */
+  Relationship.bulkCreate = function (outbreakId, sources, targets, relationshipData, options) {
+    // build result
+    const result = {
+      created: [],
+      failed: []
+    };
+    // keep a list of create relationship actions
+    const createRelationships = [];
+    // go through all source Ids
+    sources.forEach(function (sourceId) {
+      // go trough all target Ids
+      targets.forEach(function (targetId) {
+        // register create relationship action between each source person and each target person
+        createRelationships.push(Relationship
+          .createRelationshipBetweenTwoPeople(outbreakId, sourceId, targetId, relationshipData, options)
+          .then(function (result) {
+            // store successful result
+            result.created.push(result);
+          })
+          .catch(function (error) {
+            // store errors
+            result.failed.push({
+              sourceId: sourceId,
+              targetId: targetId,
+              error: error
+            });
+          })
+        );
+      });
+    });
+    // create all relationships
+    return Promise.all(createRelationships)
+      .then(function () {
+        // return final result
+        return result;
+      });
+  };
 };

@@ -1337,6 +1337,18 @@
       "principalId": "write_contact",
       "permission": "ALLOW",
       "property": "__destroyById__attachments"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "bulkCreateRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "bulkCreateRelationships"
     }
   ],
   "methods": {
@@ -5552,6 +5564,44 @@
       "http": {
         "verb": "get",
         "path": "/attachments/:fk/download"
+      }
+    },
+    "prototype.bulkCreateRelationships": {
+      "accepts": [
+        {
+          "arg": "sources",
+          "type": ["string"],
+          "description": "List of people (cases/events) IDs to be used as source of the relationship"
+        },
+        {
+          "arg": "targets",
+          "type": ["string"],
+          "description": "List of people IDs to be used as target of the relationship"
+        },
+        {
+          "arg": "relationship",
+          "type": "relationship",
+          "description": "Common relationship data"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationships",
+          "type": ["relationship"],
+          "root": true,
+          "required": true,
+          "description": "List of created relationships"
+        }
+      ],
+      "description": "Bulk create relationships.",
+      "http": {
+        "verb": "post",
+        "path": "/relationships/bulk"
       }
     }
   }
