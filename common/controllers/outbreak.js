@@ -1480,6 +1480,57 @@ module.exports = function (Outbreak) {
       });
   };
 
+  Outbreak.prototype.postFilterTransmissionChains = function (filter, dataSet) {
+    const result = {
+      transmissionChains: {
+        chains: []
+      },
+      nodes: {},
+      edges: {}
+    };
+
+    const filteredChainPeople = {};
+
+    const hasFilters = (filter.size !== undefined || filter.active !== undefined);
+
+    if (!hasFilters) {
+      return dataSet;
+    }
+
+    dataSet.transmissionChains.chains.forEach(function (transmissionChain) {
+      let addTransmissionChain = true;
+      if (filter.size !== undefined) {
+        addTransmissionChain = (addTransmissionChain && (transmissionChain.chain.length === filter.size));
+      }
+      if (filter.active !== undefined) {
+        addTransmissionChain = (addTransmissionChain && (transmissionChain.active === filter.active));
+      }
+      if (addTransmissionChain) {
+        result.transmissionChains.chains.push(transmissionChain);
+        transmissionChain.chain.forEach(function (peoplePair) {
+          peoplePair.forEach(function (personId) {
+            filteredChainPeople[personId] = true;
+          });
+        });
+      }
+    });
+
+    result.transmissionChains.length = result.transmissionChains.chains.length;
+
+    Object.keys(dataSet.edges).forEach(function (edgeId) {
+      const edge = dataSet.edges[edgeId];
+      if (filteredChainPeople[edge.persons[0].id] || filteredChainPeople[edge.persons[1].id]) {
+        result.edges[edgeId] = edge;
+      }
+    });
+    Object.keys(dataSet.nodes).forEach(function (nodeId) {
+      if (filteredChainPeople[nodeId]) {
+        result.nodes[nodeId] = dataSet.nodes[nodeId];
+      }
+    });
+    return result;
+  };
+
   /**
    * Count independent transmission chains
    * @param filter Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
@@ -1601,6 +1652,11 @@ module.exports = function (Outbreak) {
               return callback(error);
             }
 
+            transmissionChains = Outbreak.postFilterTransmissionChains({
+              active: activeFilter,
+              size: sizeFilter
+            }, transmissionChains);
+
             // initialize result
             let result;
             // initialize isolated nodes filter
@@ -1645,55 +1701,6 @@ module.exports = function (Outbreak) {
 
             // depending on activeFilter we need to filter the transmissionChains
             if (typeof activeFilter !== 'undefined') {
-              result = {
-                transmissionChains: {
-                  chains: []
-                },
-                nodes: {},
-                edges: {}
-              };
-
-              // initialize helper nodes to select map
-              let nodesToSelectMap = {};
-
-              // filter the transmission chains based on the activeFilter
-              let chains = _.get(transmissionChains, 'transmissionChains.chains');
-              chains.forEach(function (chain) {
-                if (chain.active === activeFilter) {
-                  // add chain in result
-                  result.transmissionChains.chains.push(chain);
-
-                  // get nodes in the chain if not already selected
-                  chain.chain.forEach(function (edgeComponents) {
-                    edgeComponents.forEach(function (comp) {
-                      if (!nodesToSelectMap[comp]) {
-                        nodesToSelectMap[comp] = true;
-                      }
-                    });
-                  });
-                }
-              });
-
-              // get chains length
-              result.transmissionChains.length = result.transmissionChains.chains.length;
-
-              // select edges/nodes for the required nodes
-              let nodesToSelect = Object.keys(nodesToSelectMap);
-              if (nodesToSelect.length) {
-                // get edges
-                let edges = _.get(transmissionChains, 'edges', {});
-                Object.keys(edges).forEach(function (edgeId) {
-                  let edge = edges[edgeId];
-                  // add edge in result if needed
-                  if (nodesToSelectMap[edge.persons[0].id] || nodesToSelectMap[edge.persons[1].id]) {
-                    result.edges[edgeId] = edge;
-                  }
-                });
-
-                // get nodes
-                let nodes = _.get(transmissionChains, 'nodes', {});
-                nodesToSelect.forEach(nodeId => result.nodes[nodeId] = nodes[nodeId]);
-              }
 
               // update isolated nodes filter only when there was no included people filter
               if (!hasIncludedPeopleFilter) {
