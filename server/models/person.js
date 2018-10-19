@@ -1,9 +1,6 @@
 'use strict';
 
 // requires
-const _ = require('lodash');
-const async = require('async');
-const mapsApi = require('../../components/mapsApi');
 const app = require('../server');
 const personDuplicate = require('../../components/workerRunner').personDuplicate;
 
@@ -153,71 +150,6 @@ module.exports = function (Person) {
     }
   };
 
-  // helper function used to update a person's address geo location based on city/coutnry/adress lines
-  // it queries the maps service to get the actual locations on the map
-  // then updates the record
-  const updateGeoLocations = function (ctx, addresses) {
-    // index is important, for update operation
-    let addressLines = addresses.map((addr) => {
-      if (!addr) {
-        return null;
-      }
-      return ['addressLine1', 'addressLine2', 'city', 'country', 'postalCode']
-        .filter((prop) => addr[prop])
-        .map((prop) => addr[prop])
-        .join();
-    });
-
-    // retrieve geo location for each address string
-    // then populate the address geo location
-    async.series(
-      addressLines.map(function (str) {
-        return function (done) {
-          if (!str || !mapsApi.isEnabled()) {
-            return done();
-          }
-          mapsApi.getGeoLocation(str, function (err, location) {
-            if (err) {
-              // error is logged inside the fn
-              return done();
-            }
-            return done(null, location);
-          });
-        };
-      }),
-      function (err, locations) {
-        Person.findById(ctx.instance.id, (err, instance) => {
-          if (!instance) {
-            return;
-          }
-
-          // create an addresses map and set value to true for the ones
-          // that should not be taken into consideration during update hook
-          // this is done plainly for default geo location value (undefined)
-          ctx.options = ctx.options || {};
-          ctx.options.addressesMap = [];
-
-          let addressCopy = instance.addresses.map((item, idx) => {
-            item = item.toObject();
-
-            // hack to know that this address index should be left unchanged on next update hook
-            ctx.options.addressesMap[idx] = true;
-
-            if (locations[idx]) {
-              item.geoLocation = locations[idx];
-            }
-
-            return item;
-          });
-
-          // update addresses array
-          instance.updateAttribute('addresses', addressCopy, ctx.options);
-        });
-      }
-    );
-  };
-
-
   /**
    * Before save hooks
    */
@@ -307,30 +239,6 @@ module.exports = function (Person) {
         });
     }
 
-    /**
-     * If address is present in the request, make sure we're getting its geo location from external API
-     * We only do this if googleApi.apiKey is present in the config
-     */
-    // defensive checks
-    if (Array.isArray(instance.addresses)) {
-      // set address items that have geo location as undefined
-      let filteredAddresses = instance.addresses.map((addr, index) => {
-        // if the geo location is filled manually or generated, leave it
-        // plainly used for case when an update has been made and the hook executed one more time
-        if ((_.get(ctx, 'options.addressesMap') && ctx.options.addressesMap[index]) || addr.geoLocation) {
-          return null;
-        }
-        return addr;
-      });
-
-      // if all the addresses have geo location generated just stop
-      if (filteredAddresses.every((addr) => addr === null)) {
-        return next();
-      }
-
-      // update geo locations, do not check anything
-      updateGeoLocations(ctx, filteredAddresses);
-    }
     // do not wait for the above operations to complete
     return next();
   });
