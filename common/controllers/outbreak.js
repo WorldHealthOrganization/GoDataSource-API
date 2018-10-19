@@ -1603,9 +1603,10 @@ module.exports = function (Outbreak) {
 
             // initialize result
             let result;
+            // initialize isolated nodes filter
             let isolatedNodesFilter;
 
-            // only look for isolated nodes if there is no includedPeopleFilter
+            // build isolated nodes filter only when there was no included people filter
             if (!hasIncludedPeopleFilter) {
               // initialize isolated nodes filter
               isolatedNodesFilter = {
@@ -1694,12 +1695,8 @@ module.exports = function (Outbreak) {
                 nodesToSelect.forEach(nodeId => result.nodes[nodeId] = nodes[nodeId]);
               }
 
-              // if has included people filter, no need to search for isolated nodes, stop here
-              if (hasIncludedPeopleFilter) {
-
-                result = transmissionChains;
-                callback(null, transmissionChains);
-              } else {
+              // update isolated nodes filter only when there was no included people filter
+              if (!hasIncludedPeopleFilter) {
 
                 // update isolated nodes filter depending on active filter value
                 let followUpPeriod = self.periodOfFollowup;
@@ -1728,8 +1725,14 @@ module.exports = function (Outbreak) {
                     }, isolatedNodesFilter);
                 }
               }
+            } else {
+              // if there is an included people filter, nothing more to do, just send result
+              if (hasIncludedPeopleFilter) {
+                callback(null, transmissionChains);
+              }
             }
 
+            // no included people filter present, look for isolated nodes
             if (!hasIncludedPeopleFilter) {
               // update isolated nodes filter
               isolatedNodesFilter = app.utils.remote
