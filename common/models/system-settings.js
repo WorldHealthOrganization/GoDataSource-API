@@ -1,6 +1,9 @@
 'use strict';
 
 const app = require('../../server/server');
+const path = require('path');
+const _ = require('lodash');
+const fs = require('fs');
 
 module.exports = function (SystemSettings) {
 
@@ -70,13 +73,35 @@ module.exports = function (SystemSettings) {
       }
     }
 
-    // check for validation error
-    if (errorMessages.length) {
-      errorInfo.errorMessages = errorMessages;
-      return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', errorInfo));
-    }
+    // get configured backup location
+    const contextData = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
+    const backupLocation = _.get(contextData, 'source.all.dataBackup.location');
+    const resolvedBackupLocation = path.resolve(backupLocation);
 
-    return callback();
+    // check if backup location is accessible for read and writes
+    fs.access(resolvedBackupLocation, fs.constants.R_OK | fs.constants.W_OK, function (error) {
+      // if error occurred
+      if (error) {
+        // save error
+        errorMessages += `Configured backup location ${backupLocation} is not accessible for read/write`;
+        errorInfo.backupLocation = {
+          path: backupLocation,
+          resolvedPath: resolvedBackupLocation,
+          error: error
+        };
+      }
+
+      // if everything went fine, use resolved backup location
+      _.set(contextData, 'target.dataBackup.location', resolvedBackupLocation);
+
+      // check for validation error
+      if (errorMessages.length) {
+        errorInfo.errorMessages = errorMessages;
+        return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', errorInfo));
+      }
+
+      return callback();
+    });
   });
 
   /**

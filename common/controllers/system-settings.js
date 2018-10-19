@@ -6,6 +6,8 @@ const moment = require('moment');
 const request = require('request');
 const packageJson = require('../../package');
 const config = require('../../server/config');
+const _ = require('lodash');
+const path = require('path');
 
 module.exports = function (SystemSettings) {
 
@@ -167,5 +169,21 @@ module.exports = function (SystemSettings) {
    */
   SystemSettings.getVersion = function (callback) {
     callback(null, app.utils.helpers.getBuildInformation());
+  };
+
+  /**
+   * Get system install and backup location
+   * @param callback
+   */
+  SystemSettings.getBackupLocation = function (callback) {
+    SystemSettings
+      .getCache()
+      .then(function (systemSettings) {
+        callback(null, {
+          install: app.ROOT_PATH,
+          'back-up': path.resolve(_.get(systemSettings, 'dataBackup.location'))
+        });
+      })
+      .catch(callback);
   };
 };
