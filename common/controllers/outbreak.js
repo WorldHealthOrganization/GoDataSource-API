@@ -6133,22 +6133,20 @@ module.exports = function (Outbreak) {
    * @param options
    * @param callback
    */
-  Outbreak.prototype.getCasesReport = function (filter, options, callback) {
+  Outbreak.prototype.downloadCaseClassificationPerLocationLevelReport = function (filter, options, callback) {
     const self = this;
     const languageId = options.remotingContext.req.authData.user.languageId;
     // Get the dictionary so we can translate the case classifications and other neccessary fields
     app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
-      helpers.getCasesPerLocation(filter, self)
+      app.models.person.getPeoplePerLocation('case', filter, self)
         .then((result) => {
-          return Promise.all([
-            // Get all existing case classification so we know how many rows the list will have
-            app.models.referenceData.find({
-              where: {
-                categoryId: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION'
-              }
-            }),
-            result
-          ]);
+          // Get all existing case classification so we know how many rows the list will have
+          return app.models.referenceData.find({
+            where: {
+              categoryId: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION'
+            }
+          })
+            .then(classification => [classification, result]);
         })
         .then((result) => {
           let caseClassifications = result[0];
@@ -6161,7 +6159,7 @@ module.exports = function (Outbreak) {
           // and all the reporting level locations
           headers.push({
             id: 'type',
-            header: 'Case Type'
+            header: dictionary.getTranslation('LNG_LIST_HEADER_CASE_CLASSIFICATION')
           });
 
           caseDistribution.forEach((dataObj) => {
@@ -6173,7 +6171,7 @@ module.exports = function (Outbreak) {
 
           headers.push({
             id: 'total',
-            header: 'Total'
+            header: dictionary.getTranslation('LNG_LIST_HEADER_TOTAL')
           });
 
           // Add all existing classifications to the data object
@@ -6201,7 +6199,7 @@ module.exports = function (Outbreak) {
 
           // Go through all the cases and increment the relevent case counts
           caseDistribution.forEach((dataObj) => {
-            dataObj.cases.forEach((caseModel) => {
+            dataObj.people.forEach((caseModel) => {
               let caseLatestLocation = _.find(caseModel.addresses, ['typeId', 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE']).locationId;
               if (caseModel.deceased) {
                 data.deceased[caseLatestLocation]++;
@@ -6214,7 +6212,7 @@ module.exports = function (Outbreak) {
           });
 
           // Create the pdf list file
-          return app.utils.helpers.exportListFile(headers, Object.values(data), 'pdf');
+          return app.utils.helpers.exportListFile(headers, Object.values(data), 'pdf', 'Case distribution per location');
         })
         .then(function (file) {
           // and offer it for download
@@ -6230,16 +6228,149 @@ module.exports = function (Outbreak) {
    * @param filter
    * @param callback
    */
-  Outbreak.prototype.countCasesPerLocation = function (filter, callback) {
-    helpers.getCasesPerLocation(filter, this)
+  Outbreak.prototype.countCasesPerLocationLevel = function (filter, callback) {
+    app.models.person.getPeoplePerLocation('case', filter, this)
       .then((result) => {
-        let response = [];
+        let response = {locations: []};
+        let allCasesCount = 0;
         result.forEach((dataSet) => {
-          dataSet.casesCount = dataSet.cases.length;
-          dataSet.caseIds = dataSet.cases.map(caseModel => caseModel.id);
-          delete dataSet.cases;
-          response.push(dataSet);
+          dataSet.casesCount = dataSet.people.length;
+          allCasesCount += dataSet.people.length;
+          dataSet.caseIds = dataSet.people.map(caseModel => caseModel.id);
+          delete dataSet.people;
+          response.locations.push(dataSet);
         });
+        response.count = allCasesCount;
+        callback(null, response);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Returns a pdf list, containing the outbreak's contacts, distributed by location and follow-up status
+   * @param filter -> accepts custom parameter <dateOfFollowUp>. It mentions the date for which we are checking if the contact has been seen or not
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.downloadContactTracingPerLocationLevelReport = function (filter, options, callback) {
+    const self = this;
+    const languageId = options.remotingContext.req.authData.user.languageId;
+    let selectedDayForReport;
+
+    // Get the dictionary so we can translate the case classifications and other neccessary fields
+    app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
+      app.models.person.getPeoplePerLocation('contact', filter, self)
+        .then((result) => {
+          // Initiate the headers for the contact tracing per location pdf list
+          let headers = [
+            {
+              id: 'location',
+              header: dictionary.getTranslation(self.reportingGeographicalLevelId)
+            },
+            {
+              id: 'underFollowUp',
+              header: dictionary.getTranslation('LNG_LIST_HEADER_UNDER_FOLLOWUP')
+            },
+            {
+              id: 'seenOnDay',
+              header: dictionary.getTranslation('LNG_LIST_HEADER_SEEN_ON_DAY')
+            },
+            {
+              id: 'coverage',
+              header: '%'
+            },
+            {
+              id: 'registered',
+              header: dictionary.getTranslation('LNG_LIST_HEADER_REGISTERED')
+            },
+            {
+              id: 'released',
+              header: dictionary.getTranslation('LNG_LIST_HEADER_RELEASED')
+            },
+            {
+              id: 'expectedRelease',
+              header: dictionary.getTranslation('LNG_LIST_HEADER_EXPECTED_RELEASE')
+            }
+          ];
+
+          let data = [];
+          result.forEach((dataObj) => {
+            // Define the base form of the data for one row of the pdf list
+            let row = {
+              location: dataObj.location.name,
+              underFollowUp: 0,
+              seenOnDay: 0,
+              coverage: 0,
+              registered: 0,
+              released: 0,
+              expectedRelease: dataObj.people.length ? moment(dataObj.people[0].followUp.endDate).format('ll') : '-'
+            };
+
+            // Update the row's values according to each contact's details
+            dataObj.people.forEach((contact) => {
+              row.registered++;
+
+              // Any status other than under follow-up will make the contact be considered as released.
+              if (contact.followUp.status === 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP') {
+                row.underFollowUp++;
+
+                // The contact can be seen only if he is under follow
+                if (contact.followUps.length) {
+                  let completedFollowUp = _.find(contact.followUps, function (followUp) {
+                    return ['LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK',
+                      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK'].includes(followUp.statusId);
+                  });
+                  if (completedFollowUp) {
+                    // Get the date of the selected day for report to add to the pdf title
+                    if (!selectedDayForReport) {
+                      selectedDayForReport = moment(completedFollowUp.date).format('ll');
+                    }
+                    row.seenOnDay++;
+                  }
+
+                  // What percentage of the contacts under followUp have been seen on the specified date.
+                  row.coverage = row.seenOnDay / row.underFollowUp * 100;
+                }
+
+              } else {
+                row.released++;
+              }
+            });
+            data.push(row);
+          });
+
+          // Create the pdf list file
+          return app.utils.helpers.exportListFile(headers, data, 'pdf', `Contact tracing ${selectedDayForReport}`);
+        })
+        .then(function (file) {
+          // and offer it for download
+          app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Test.${file.extension}`, callback);
+        })
+        .catch((error) => {
+          callback(error);
+        });
+    });
+  };
+
+  /**
+   * Return a collection of items that contain a location and the contacts that belong to that location.
+   * Structure the data so that the response is consistent with other similar requests.
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countContactsPerLocationLevel = function (filter, callback) {
+    app.models.person.getPeoplePerLocation('contact', filter, this)
+      .then((result) => {
+        let response = {locations: []};
+        let allContactsCount = 0;
+        result.forEach((dataSet) => {
+          dataSet.contactsCount = dataSet.people.length;
+          allContactsCount += dataSet.people.length;
+          dataSet.contactIds = dataSet.people.map(contact => contact.id);
+          delete dataSet.people;
+          response.locations.push(dataSet);
+        });
+        response.count = allContactsCount;
         callback(null, response);
       })
       .catch(callback);

@@ -6,6 +6,7 @@ const async = require('async');
 const mapsApi = require('../../components/mapsApi');
 const app = require('../server');
 const personDuplicate = require('../../components/workerRunner').personDuplicate;
+const moment = require('moment');
 
 module.exports = function (Person) {
 
@@ -466,4 +467,138 @@ module.exports = function (Person) {
       next();
     }
   });
+
+  /**
+   * Returns a collection of items that contain a location, and the contacts that are from that location
+   * @param filter
+   * @param outbreak
+   * @returns {Promise}
+   */
+  Person.getPeoplePerLocation = function (personModel, filter, outbreak) {
+    let locationIds = Array.isArray(outbreak.locations) ? outbreak.locations.map(location => location.id) : [];
+    let allLocations = [];
+
+    // Make function return a promise so we can easily link additional async code
+    return new Promise((resolve, reject) => {
+      // Avoid making secondary request to DB by using a collection of locations instead of an array of locationIds
+      app.models.location.getSubLocationsWithDetails(locationIds, allLocations, function (error, allLocations) {
+        let allLocationIds = allLocations.map(location => location.id);
+
+        // ReportingGeographicalLevelId should be required in the model schema as well but it is not yet implemented
+        // that way because it would be a breaking change.
+        if (!outbreak.reportingGeographicalLevelId) {
+          reject(app.utils.apiError.getError('MISSING_REQUIRED_PROPERTY', {
+            model: app.models.outbreak.modelName,
+            properties: 'reportingGeographicalLevelId'
+          }));
+        }
+
+        // Get all locations that are part of the outbreak's location hierarchy and have the
+        // same location level as the outbreak
+        app.models.location.find({
+          where: {
+            and: [
+              {
+                id: {
+                  inq: allLocationIds
+                }
+              },
+              {
+                geographicalLevelId: outbreak.reportingGeographicalLevelId
+              }
+            ]
+          }
+        })
+          .then((reportingLocations) => {
+            let reportingLocationIds = reportingLocations.map(location => location.id);
+            let locationHierarchy = app.models.location.buildHierarchicalLocationsList(allLocations);
+            let locationCorelationMap = {};
+
+            // Initiate peopleDistribution as an object so we can add locations/people to it easier
+            let peopleDistribution = {};
+
+            // Start building the peopleDistribution object by adding all reporting locations
+            reportingLocations.forEach((location) => {
+              peopleDistribution[location.id] = {location: location.toJSON(), people: []};
+            });
+
+            // Link lower level locations to their reporting location parent
+            app.models.location.createLocationCorelationMap(locationHierarchy, reportingLocationIds, locationCorelationMap);
+            let additionalFilter = {};
+
+            if (personModel === 'case') {
+              // For cases, we just make sure that the cases are from the required outbreak
+              additionalFilter = {
+                where: {
+                  outbreakId: outbreak.id
+                }
+              };
+            } else {
+              let dateInterval = [];
+
+              if (filter && filter.dateOfFollowUp) {
+                dateInterval = [moment(filter.dateOfFollowUp).startOf('day'), moment(filter.dateOfFollowUp).endOf('day')];
+                delete filter.dateOfFollowUp;
+              } else {
+                dateInterval = [moment(new Date()).startOf('day'), moment(new Date()).endOf('day')];
+              }
+
+              // For contacts, we also need the follow up from either the required date or today so the filter is
+              // a bit more complex.
+              additionalFilter = {
+                where: {
+                  outbreakId: outbreak.id
+                },
+                include: {
+                  relation: 'followUps',
+                  scope: {
+                    where: {
+                      date: {
+                        between: dateInterval
+                      }
+                    }
+                  }
+                },
+                order: 'followUp.endDate DESC'
+              };
+            }
+            // Merge the additional filter with the filter provided by the user
+            let _filter = app.utils.remote.mergeFilters(additionalFilter, filter || {});
+
+            return app.models[personModel].find(_filter)
+              .then(people => [people, locationCorelationMap, peopleDistribution, _filter]);
+          })
+          .then((results) => {
+            let locationCorelationMap = results[1];
+            let peopleDistribution = results[2];
+            let people = [];
+
+            // We do not apply filterParent logic to contacts because we are interested in the total number of contacts,
+            // whether they have follow-ups or not.
+            if (personModel === 'case') {
+              people = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(results[0], results[3]);
+            } else {
+              // We force the contacts to be regular objects for easier processing in the future.
+              // Cases does not required this step since "deepSearchByRelationProperty" covers this step
+              people = results[0].map((contact) => {
+                return contact.toJSON();
+              });
+            }
+
+            // Add the people that pass the filter to their relevant reporting level location
+            people.forEach((person) => {
+              let personLatestLocation = _.find(person.addresses, ['typeId', 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE']).locationId;
+              if (locationCorelationMap[personLatestLocation]) {
+                peopleDistribution[locationCorelationMap[personLatestLocation]].people.push(person);
+              }
+            });
+
+            // After the peopleDistribution object is fully populate it, use only it's values from now on.
+            // The keys were used only to easily distribute the locations/people
+            resolve(Object.values(peopleDistribution));
+          })
+          .catch(error);
+      });
+    });
+  };
 };

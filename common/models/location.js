@@ -607,7 +607,7 @@ module.exports = function (Location) {
           Location.linkAllChildrenToTopLevel(topLevel.children, topLevel.location.id, locationCorelationMap);
         }
       } else {
-        if (topLevel.children.length !== 0) {
+        if (topLevel.children.length) {
           Location.createLocationCorelationMap(topLevel.children, reportingLocationIds, locationCorelationMap);
         }
       }
@@ -623,7 +623,7 @@ module.exports = function (Location) {
   Location.linkAllChildrenToTopLevel = function (locationHierarchy, id, locationCorelationMap) {
     locationHierarchy.forEach((location) => {
       locationCorelationMap[location.location.id] = id;
-      if (location.children.length !== 0) {
+      if (location.children.length) {
         Location.linkAllChildrenToTopLevel(location.children, id, locationCorelationMap);
       }
     });
