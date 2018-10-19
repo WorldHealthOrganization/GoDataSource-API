@@ -120,6 +120,12 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "getVersion"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getBackupLocation"
     }
   ],
   "methods": {
@@ -306,6 +312,26 @@
       "http": {
         "verb": "get",
         "path": "/version"
+      }
+    },
+    "getBackupLocation": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "location",
+          "type": {
+            "install": "string",
+            "backup": "string"
+          },
+          "description": "Application install & backup locations",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get application install & backup locations.",
+      "http": {
+        "verb": "get",
+        "path": "/backup-location"
       }
     }
   }
