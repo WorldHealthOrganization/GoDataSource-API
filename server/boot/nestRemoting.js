@@ -12,4 +12,5 @@ module.exports = function (app) {
   app.models.outbreak.nestRemoting('cases');
   app.models.outbreak.nestRemoting('contacts');
   app.models.outbreak.nestRemoting('clusters');
+  app.models.outbreak.nestRemoting('attachments');
 };

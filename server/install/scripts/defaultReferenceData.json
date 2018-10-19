@@ -5,10 +5,6 @@
     "Suspect",
     "Not a case (discarded)"
   ],
-  "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_CONFIRMED_BY_LAB_RESULT": [
-    "Confirmed by PCR",
-    "Confirmed by Serology (IgC or IgM)"
-  ],
   "LNG_REFERENCE_DATA_CATEGORY_GENDER": [
     "Male",
     "Female"
@@ -119,9 +115,6 @@
   ],
   "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY": [
     "Clinical"
-  ],
-  "LNG_REFERENCE_DATA_CATEGORY_MISCELLANEOUS_CUSTOMIZABLE_UI_ELEMENT": [
-    "Hospitalized Case"
   ],
   "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE": [
     "Case",

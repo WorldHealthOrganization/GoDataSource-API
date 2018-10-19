@@ -5,7 +5,8 @@ const path = require('path');
 
 const relativePath = '/../../server/storage';
 const containers = {
-  icons: 'icons'
+  icons: 'icons',
+  files: 'files'
 };
 
 module.exports = function (Storage) {

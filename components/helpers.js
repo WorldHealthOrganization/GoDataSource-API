@@ -945,7 +945,7 @@ const translateFieldLabels = function (app, model, modelName, dictionary) {
         value.forEach((element, index) => {
           newValue[index] = translateFieldLabels(app, element, arrayFields[key], dictionary);
         });
-      } else if (typeof(value) === 'object' && Object.keys(value).length > 0) {
+      } else if (typeof(value) === 'object' && value !== null && Object.keys(value).length > 0) {
         newValue = translateFieldLabels(app, value, arrayFields[key], dictionary);
       }
       translatedFieldsModel[dictionary.getTranslation(app.models[modelName] ? fieldsToTranslate[key] : nonModelObjects[modelName][key])] = newValue;

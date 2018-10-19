@@ -30,6 +30,9 @@
       "description": "Export file location"
     }
   },
+  "excludeBaseProperties": [
+    "syncServerUrl"
+  ],
   "validations": [],
   "relations": {},
   "acls": [

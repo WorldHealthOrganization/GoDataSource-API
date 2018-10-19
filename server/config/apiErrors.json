@@ -206,5 +206,21 @@
   "MULTIPLE_CONTACTS_CREATION_PARTIAL_SUCCESS": {
     "defaultStatusCode": 422,
     "messagePattern": "Multiple contact creation partial Success. Some contact instances failed to be created."
+  },
+  "INVALID_RELATIONSHIP_SOURCE_TYPE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Invalid person type `<%= type %>` provided as relationship source."
+  },
+  "BULK_CREATE_RELATIONSHIP_ERRORS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "At least one relationship failed to be created. Successfully created: <%= created.count %>. Failed to create: <%= failed.count %>"
+  },
+  "MAPS_API_DISABLED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Maps API is disabled. This usually happens when an invalid Maps API key was provided"
+  },
+  "MAPS_GEO_LOCATION_ERROR": {
+    "defaultStatusCode": 422,
+    "messagePattern": "An error occurred while trying to retrieve geo-location for specified address from the Maps API"
   }
 }

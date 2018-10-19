@@ -47,7 +47,11 @@ module.exports = function (Outbreak) {
     'prototype.__findById__labResults',
     'prototype.__updateById__labResults',
     'prototype.__destroyById__labResults',
-
+    'prototype.__create__attachments',
+    'prototype.__get__attachments',
+    'prototype.__delete__attachments',
+    'prototype.__updateById__attachments',
+    'prototype.__count__attachments'
   ]);
 
   // attach search by relation property behavior on get contacts
@@ -4512,7 +4516,11 @@ module.exports = function (Outbreak) {
                 let relationshipMember = _.find(relationship.people, (member) => {
                   return member.id !== person.id;
                 });
-
+                // if relationship member was not found
+                if (!relationshipMember) {
+                  // stop here (invalid relationship)
+                  return;
+                }
                 // Translate the values of the fields marked as reference data fields on the case/contact model
                 app.utils.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models.person.typeToModelMap[relationshipMember.type], dictionary);
 
@@ -6123,6 +6131,81 @@ module.exports = function (Outbreak) {
       .countByTeam(this.id, filter)
       .then(function (results) {
         callback(null, results);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Create (upload) a new file
+   * @param req
+   * @param name
+   * @param file
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.attachmentUpload = function (req, name, file, options, callback) {
+    app.models.fileAttachment
+      .upload(this.id, req, name, file, options, callback);
+  };
+
+  /**
+   * Download an attachment
+   * @param attachmentId
+   * @param callback
+   */
+  Outbreak.prototype.attachmentDownload = function (attachmentId, callback) {
+    // try and find the attachment
+    app.models.fileAttachment
+      .findOne({
+        where: {
+          id: attachmentId,
+          outbreakId: this.id,
+        }
+      })
+      .then(function (attachment) {
+        // if not found, stop with error
+        if (!attachment) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.fileAttachment.modelName,
+            id: attachmentId
+          });
+        }
+        // download the attachment
+        attachment.download(callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Bulk create relationships
+   * @param sources Source person Ids
+   * @param targets Target person Ids
+   * @param relationshipData Common relationship data
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.bulkCreateRelationships = function (sources, targets, relationshipData, options, callback) {
+    // bulk create relationships
+    app.models.relationship.bulkCreate(this.id, sources, targets, relationshipData, options)
+      .then(function (result) {
+        // if at least one relationship failed to be created
+        if (result.failed.length) {
+          // stop with error
+          return callback(
+            app.utils.apiError.getError('BULK_CREATE_RELATIONSHIP_ERRORS', {
+              created: {
+                records: result.created,
+                count: result.created.length
+              },
+              failed: {
+                errors: result.failed,
+                count: result.failed.length
+              }
+            })
+          );
+        }
+        // everything went fine
+        return callback(null, result.created);
       })
       .catch(callback);
   };

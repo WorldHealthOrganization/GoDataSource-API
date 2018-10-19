@@ -1,35 +1,30 @@
 {
-  "name": "languageToken",
+  "name": "fileAttachment",
   "base": "extendedPersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "token": {
+    "outbreakId": {
       "type": "string",
       "required": true
     },
-    "languageId": {
+    "name": {
       "type": "string",
       "required": true
     },
-    "translation": {
-      "type": "string",
-      "default": ""
+    "originalName": {
+      "type": "string"
+    },
+    "mimeType": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string"
     }
   },
-  "indexes": {
-    "token_index": {
-      "token": 1
-    },
-    "languageId_index": {
-      "languageId": 1
-    },
-    "translation_index": {
-      "translation": "text"
-    }
-  },
+  "hidden": ["path"],
   "validations": [],
   "relations": {},
   "acls": [],

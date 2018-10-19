@@ -4,6 +4,7 @@
 const app = require('../../server/server');
 const request = require('request');
 const _ = require('lodash');
+const mapsApi = require('../../components/mapsApi');
 
 module.exports = function (Maps) {
 
@@ -50,4 +51,32 @@ module.exports = function (Maps) {
         return callback(null, Maps.scriptBuffer);
       });
   };
+
+  /**
+   * Find Geo-Location for an address
+   * @param address
+   * @param callback
+   */
+  Maps.findGeoLocationForAddress = function (address, callback) {
+
+    // check if maps api is enabled before continuing
+    if (!mapsApi.isEnabled()) {
+      return callback(app.utils.apiError.getError('MAPS_API_DISABLED'));
+    }
+
+    // build an address string
+    const _address = ['addressLine1', 'addressLine2', 'city', 'country', 'postalCode']
+      .filter((prop) => address[prop])
+      .map((prop) => address[prop])
+      .join();
+
+    // find geo-location for address
+    mapsApi.getGeoLocation(_address, function (err, location) {
+      if (err) {
+        callback(app.utils.apiError.getError('MAPS_GEO_LOCATION_ERROR', err));
+      }
+      return callback(null, location);
+    });
+  };
+
 };
