@@ -6175,4 +6175,38 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Bulk create relationships
+   * @param sources Source person Ids
+   * @param targets Target person Ids
+   * @param relationshipData Common relationship data
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.bulkCreateRelationships = function (sources, targets, relationshipData, options, callback) {
+    // bulk create relationships
+    app.models.relationship.bulkCreate(this.id, sources, targets, relationshipData, options)
+      .then(function (result) {
+        // if at least one relationship failed to be created
+        if (result.failed.length) {
+          // stop with error
+          return callback(
+            app.utils.apiError.getError('BULK_CREATE_RELATIONSHIP_ERRORS', {
+              created: {
+                records: result.created,
+                count: result.created.length
+              },
+              failed: {
+                errors: result.failed,
+                count: result.failed.length
+              }
+            })
+          );
+        }
+        // everything went fine
+        return callback(null, result.created);
+      })
+      .catch(callback);
+  };
 };
