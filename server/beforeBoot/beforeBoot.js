@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const disableRemoteMethods = require('../../components/disableRemoteMethods');
 const disableStandardRelationRemoteMethods = require('../../components/disableStandardRelationRemoteMethods');
 const disableCommonExtraRoutes = require('../../components/disableCommonExtraRoutes');
@@ -48,6 +49,7 @@ function init(app, callback) {
     spreadSheetFile: spreadSheetFile,
     dbSync: dbSync
   };
+  app.ROOT_PATH = path.resolve(__dirname, '../..');
   callback();
 }
 

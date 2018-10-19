@@ -19,8 +19,7 @@
       "type": "string"
     },
     "disease": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "countries": {
       "type": [
