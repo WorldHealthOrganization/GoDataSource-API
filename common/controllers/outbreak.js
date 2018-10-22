@@ -991,7 +991,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Generate list of follow ups
-   * @param data
+   * @param data Props: { startDate, endDate (both follow up dates are required), targeted (boolean) }
    * @param options
    * @param callback
    */
