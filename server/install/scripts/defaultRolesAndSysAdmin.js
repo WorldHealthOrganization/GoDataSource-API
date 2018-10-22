@@ -45,7 +45,8 @@ const rolesMap = {
       'read_contact',
       'write_contact',
       'read_followup',
-      'write_followup'
+      'write_followup',
+      'read_report'
     ]
   },
   'Data Manager': {
