@@ -815,9 +815,9 @@ module.exports = function (Outbreak) {
     // define a list of location IDs used at outbreak level
     let outbreakLocationIds;
     // if the outbreak has a list of locations defined
-    if (Array.isArray(this.locations)) {
-      // get their IDs
-      outbreakLocationIds = this.locations.map(location => location.id);
+    if (Array.isArray(this.locationIds)) {
+      // get them
+      outbreakLocationIds = this.locationIds;
     }
     // if there are no location IDs defined
     if (!outbreakLocationIds) {
