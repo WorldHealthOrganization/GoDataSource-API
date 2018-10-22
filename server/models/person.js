@@ -384,13 +384,10 @@ module.exports = function (Person) {
    * @returns {Promise}
    */
   Person.getPeoplePerLocation = function (personModel, filter, outbreak) {
-    let locationIds = Array.isArray(outbreak.locations) ? outbreak.locations.map(location => location.id) : [];
-    let allLocations = [];
-
     // Make function return a promise so we can easily link additional async code
     return new Promise((resolve, reject) => {
       // Avoid making secondary request to DB by using a collection of locations instead of an array of locationIds
-      app.models.location.getSubLocationsWithDetails(locationIds, allLocations, function (error, allLocations) {
+      app.models.location.getSubLocationsWithDetails(outbreak.locations, [], function (error, allLocations) {
         let allLocationIds = allLocations.map(location => location.id);
 
         // ReportingGeographicalLevelId should be required in the model schema as well but it is not yet implemented
