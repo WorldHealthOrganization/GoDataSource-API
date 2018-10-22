@@ -9,7 +9,7 @@ module.exports = function (FollowUp) {
   FollowUp.hasController = false;
 
   // filter for seen follow ups
-  Followup.seenFilter = {
+  FollowUp.seenFilter = {
     or: [
       {
         statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK'
@@ -21,7 +21,7 @@ module.exports = function (FollowUp) {
   };
 
   // filter for not seen follow ups
-  Followup.notSeenFilter = {
+  FollowUp.notSeenFilter = {
     or: [
       {
         statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
@@ -33,7 +33,7 @@ module.exports = function (FollowUp) {
   };
 
   // helper functions that indicates if a follow up is performed
-  Followup.isPerformed = function (obj) {
+  FollowUp.isPerformed = function (obj) {
     return [
       'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK',
       'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK',
