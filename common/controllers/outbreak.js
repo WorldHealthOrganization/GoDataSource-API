@@ -1488,6 +1488,12 @@ module.exports = function (Outbreak) {
       });
   };
 
+  /**
+   * Post process/filter transmission chains
+   * @param filter
+   * @param dataSet
+   * @return {{transmissionChains: {chains: Array, length: number}, nodes: {}, edges: {}}}
+   */
   Outbreak.prototype.postProcessTransmissionChains = function (filter, dataSet) {
     // define result structure
     const result = {

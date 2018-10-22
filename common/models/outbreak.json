@@ -2577,7 +2577,14 @@
             "chains": [
               {
                 "type": {
-                  "length": "number",
+                  "length": {
+                    "type": "number",
+                    "description": "Number of chain links"
+                  },
+                  "size": {
+                    "type": "number",
+                    "description": "Number of chain nodes"
+                  },
                   "active": "boolean"
                 }
               }
@@ -2602,7 +2609,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'active' boolean on the first level in 'where' and a (full) person filter on 'person' property of the filter. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'active' boolean & 'size' number on the first level in 'where' and a (full) person filter on 'person' property of the filter. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date"
         }
       ],
       "returns": [
@@ -2645,7 +2652,14 @@
                     }
                   }
                 ],
-                "length": "number"
+                "length": {
+                  "type": "number",
+                  "description": "Number of chain links"
+                },
+                "size": {
+                  "type": "number",
+                  "description": "Number of chain nodes"
+                }
               }
             }
           },
@@ -5402,7 +5416,9 @@
               "type": {
                 "<teamId>": {
                   "type": {
-                    "followUpIds": ["string"],
+                    "followUpIds": [
+                      "string"
+                    ],
                     "count": "number"
                   }
                 }
@@ -5500,12 +5516,16 @@
       "accepts": [
         {
           "arg": "sources",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "List of people (cases/events) IDs to be used as source of the relationship"
         },
         {
           "arg": "targets",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "List of people IDs to be used as target of the relationship"
         },
         {
@@ -5522,7 +5542,9 @@
       "returns": [
         {
           "arg": "relationships",
-          "type": ["relationship"],
+          "type": [
+            "relationship"
+          ],
           "root": true,
           "required": true,
           "description": "List of created relationships"
