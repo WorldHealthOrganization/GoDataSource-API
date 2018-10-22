@@ -1380,6 +1380,13 @@ module.exports = function (Outbreak) {
       delete filter.where.active;
     }
 
+    // get size filter
+    let sizeFilter = _.get(filter, 'where.size');
+    // if size filter was sent remove it from the filter
+    if (typeof sizeFilter !== 'undefined') {
+      delete filter.where.size;
+    }
+
     // initialize a person filter (will contain filters applicable on person entity)
     let personFilter;
     // if person filter was sent
@@ -1474,60 +1481,82 @@ module.exports = function (Outbreak) {
           filter: filter,
           personIds: personIds,
           endDate: endDate,
-          activeFilter: activeFilter,
-          hasIncludedPeopleFilter: !!includedPeopleFilter
+          active: activeFilter,
+          hasIncludedPeople: !!includedPeopleFilter,
+          size: sizeFilter
         };
       });
   };
 
-  Outbreak.prototype.postFilterTransmissionChains = function (filter, dataSet) {
+  Outbreak.prototype.postProcessTransmissionChains = function (filter, dataSet) {
+    // define result structure
     const result = {
       transmissionChains: {
-        chains: []
+        chains: [],
+        length: 0
       },
       nodes: {},
       edges: {}
     };
-
-    const filteredChainPeople = {};
-
-    const hasFilters = (filter.size !== undefined || filter.active !== undefined);
-
-    if (!hasFilters) {
-      return dataSet;
-    }
-
+    // keep an index of people that pass the filters
+    const filteredChainPeopleIndex = {};
+    // go through all the chains
     dataSet.transmissionChains.chains.forEach(function (transmissionChain) {
+      // keep a flag for chain passing all filters
       let addTransmissionChain = true;
-      if (filter.size !== undefined) {
-        addTransmissionChain = (addTransmissionChain && (transmissionChain.chain.length === filter.size));
+
+      // check if size filter is present
+      if (filter.size != null) {
+        // apply size filter
+        addTransmissionChain = (addTransmissionChain && (transmissionChain.size === filter.size));
       }
-      if (filter.active !== undefined) {
+
+      // check if active filter is present
+      if (filter.active != null) {
         addTransmissionChain = (addTransmissionChain && (transmissionChain.active === filter.active));
       }
+
+      // if the chain passed all filters
       if (addTransmissionChain) {
+        // add it to the result
         result.transmissionChains.chains.push(transmissionChain);
+        // update people index
         transmissionChain.chain.forEach(function (peoplePair) {
+          // map each person from the chain into the index
           peoplePair.forEach(function (personId) {
-            filteredChainPeople[personId] = true;
+            filteredChainPeopleIndex[personId] = true;
           });
         });
       }
     });
 
+    // update transmission chains no
     result.transmissionChains.length = result.transmissionChains.chains.length;
 
+    // keep an index of nodes that should be kept
+    const nodesToKeepIndex = {};
+    // filter edges, should contain only the indexed people (people that passed the filters)
     Object.keys(dataSet.edges).forEach(function (edgeId) {
+      // get the edge
       const edge = dataSet.edges[edgeId];
-      if (filteredChainPeople[edge.persons[0].id] || filteredChainPeople[edge.persons[1].id]) {
+      // if at least one person found in the index (case/event-contact relationships will have only one person in the index)
+      if (filteredChainPeopleIndex[edge.persons[0].id] || filteredChainPeopleIndex[edge.persons[1].id]) {
+        // keep the edge
         result.edges[edgeId] = edge;
+        // keep both nodes
+        nodesToKeepIndex[edge.persons[0].id] = true;
+        nodesToKeepIndex[edge.persons[1].id] = true;
       }
     });
+    // go through all the nodes
     Object.keys(dataSet.nodes).forEach(function (nodeId) {
-      if (filteredChainPeople[nodeId]) {
+      // if the node should be kept
+      if (nodesToKeepIndex[nodeId]) {
+        // store it in the result
         result.nodes[nodeId] = dataSet.nodes[nodeId];
       }
     });
+    // return processed result
     return result;
   };
 
@@ -1546,7 +1575,7 @@ module.exports = function (Outbreak) {
         filter = processedFilter.filter;
         const personIds = processedFilter.personIds;
         const endDate = processedFilter.endDate;
-        const hasIncludedPeopleFilter = processedFilter.hasIncludedPeopleFilter;
+        const hasIncludedPeopleFilter = processedFilter.hasIncludedPeople;
 
         // count transmission chains
         app.models.relationship
@@ -1640,10 +1669,11 @@ module.exports = function (Outbreak) {
       .then(function (processedFilter) {
         // use processed filters
         filter = processedFilter.filter;
-        let personIds = processedFilter.personIds;
-        let endDate = processedFilter.endDate;
-        let activeFilter = processedFilter.activeFilter;
-        let hasIncludedPeopleFilter = processedFilter.hasIncludedPeopleFilter;
+        const personIds = processedFilter.personIds;
+        const endDate = processedFilter.endDate;
+        const activeFilter = processedFilter.active;
+        const hasIncludedPeopleFilter = processedFilter.hasIncludedPeople;
+        const sizeFilter = processedFilter.size;
 
         // get transmission chains
         app.models.relationship
@@ -1652,18 +1682,24 @@ module.exports = function (Outbreak) {
               return callback(error);
             }
 
-            transmissionChains = Outbreak.postFilterTransmissionChains({
+            // apply post filtering/processing
+            transmissionChains = self.postProcessTransmissionChains({
               active: activeFilter,
               size: sizeFilter
             }, transmissionChains);
 
-            // initialize result
-            let result;
+            // determine if isolated nodes should be included
+            const shouldIncludeIsolatedNodes = (
+              // there is no size filter
+              (sizeFilter == null) &&
+              // no included people filter
+              !hasIncludedPeopleFilter);
+
             // initialize isolated nodes filter
             let isolatedNodesFilter;
 
-            // build isolated nodes filter only when there was no included people filter
-            if (!hasIncludedPeopleFilter) {
+            // build isolated nodes filter only if needed
+            if (shouldIncludeIsolatedNodes) {
               // initialize isolated nodes filter
               isolatedNodesFilter = {
                 where: {
@@ -1702,8 +1738,8 @@ module.exports = function (Outbreak) {
             // depending on activeFilter we need to filter the transmissionChains
             if (typeof activeFilter !== 'undefined') {
 
-              // update isolated nodes filter only when there was no included people filter
-              if (!hasIncludedPeopleFilter) {
+              // update isolated nodes filter only if needed
+              if (shouldIncludeIsolatedNodes) {
 
                 // update isolated nodes filter depending on active filter value
                 let followUpPeriod = self.periodOfFollowup;
@@ -1733,20 +1769,20 @@ module.exports = function (Outbreak) {
                 }
               }
             } else {
-              // if there is an included people filter, nothing more to do, just send result
-              if (hasIncludedPeopleFilter) {
+              // if isolated nodes don't need to be included, stop here
+              if (!shouldIncludeIsolatedNodes) {
                 callback(null, transmissionChains);
               }
             }
 
-            // no included people filter present, look for isolated nodes
-            if (!hasIncludedPeopleFilter) {
+            // look for isolated nodes, if needed
+            if (shouldIncludeIsolatedNodes) {
               // update isolated nodes filter
               isolatedNodesFilter = app.utils.remote
                 .mergeFilters({
                   where: {
                     id: {
-                      nin: Object.keys(result.nodes)
+                      nin: Object.keys(transmissionChains.nodes)
                     }
                   }
                 }, isolatedNodesFilter);
@@ -1757,9 +1793,9 @@ module.exports = function (Outbreak) {
                 .then(function (isolatedNodes) {
                   // add all the isolated nodes to the complete list of nodes
                   isolatedNodes.forEach(function (isolatedNode) {
-                    result.nodes[isolatedNode.id] = isolatedNode.toJSON();
+                    transmissionChains.nodes[isolatedNode.id] = isolatedNode.toJSON();
                   });
-                  callback(null, result);
+                  callback(null, transmissionChains);
                 })
                 .catch(callback);
             }
