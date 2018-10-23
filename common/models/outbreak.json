@@ -26,11 +26,7 @@
         "country"
       ]
     },
-    "locations": {
-      "type": [
-        "linkedLocation"
-      ]
-    },
+    "locationIds": ["string"],
     "startDate": {
       "type": "date",
       "required": true
