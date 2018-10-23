@@ -11,7 +11,9 @@ module.exports = function (Model) {
         propertyName,
         {
           in: Model.definition.properties[propertyName].enum,
-          message: ' value is not allowed. Allowed values: ' + Model.definition.properties[propertyName].enum.join(', ')
+          message: ' value is not allowed. Allowed values: ' + Model.definition.properties[propertyName].enum.join(', '),
+          // allow null values only if enum has 'null' entry
+          allowNull: Model.definition.properties[propertyName].enum.indexOf(null) >= 0
         }
       );
     }

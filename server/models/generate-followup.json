@@ -1,0 +1,28 @@
+{
+  "name": "generateFollowup",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true,
+    "hidden": [
+      "id"
+    ]
+  },
+  "properties": {
+    "startDate": {
+      "type": "date",
+      "required": true
+    },
+    "endDate": {
+      "type": "date",
+      "required": true
+    },
+    "targeted": {
+      "type": "boolean"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
