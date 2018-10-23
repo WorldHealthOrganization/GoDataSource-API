@@ -917,7 +917,9 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED": "Est généré",
       "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION": "Compléter la géolocalisation",
       "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "Compléter la géolocalisation latitude",
-      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "Compléter la géolocalisation longitude"
+      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "Compléter la géolocalisation longitude",
+      "LNG_FOLLOW_UP_FIELD_LABEL_TARGETED": "Targeted",
+      "LNG_FOLLOW_UP_FIELD_LABEL_STATUSID": "Status"
     },
     "uiFollowUpsListPage": {
       "LNG_PAGE_LIST_FOLLOW_UPS_TITLE": "Suivis",
@@ -2135,6 +2137,17 @@
     },
     "uiImportLocationData": {
       "LNG_PAGE_IMPORT_LOCATION_DATA_TITLE": "Import Location Data"
+    },
+    "contactDailyFollowUpStatusType": {
+      "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED": "Not Performed",
+      "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK": "Seen Ok",
+      "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK": "Seen Not Ok",
+      "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED": "Missed"
+    },
+    "contactFinalFollowUpStatusType": {
+      "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP": "Lost To Follow-up",
+      "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED": "Follow-up Completed",
+      "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP": "Under Follow-up"
     }
   }
 }
