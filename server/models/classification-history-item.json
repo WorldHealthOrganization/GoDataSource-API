@@ -14,11 +14,11 @@
       "required": true
     },
     "startDate": {
-      "type": "string",
+      "type": "date",
       "required": true
     },
     "endDate": {
-      "type": "string"
+      "type": "date"
     }
   },
   "validations": [],
