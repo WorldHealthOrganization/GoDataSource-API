@@ -592,4 +592,40 @@ module.exports = function (Location) {
       .then(() => next())
       .catch(next);
   });
+
+  /**
+   * Creates a map that links all child locations (from all sub-levels) to their reporting level parent location
+   * @param locationHierarchy
+   * @param reportingLocationIds
+   * @param locationCorelationMap (this parameter gets updated during the function call)
+   */
+  Location.createLocationCorelationMap = function (locationHierarchy, reportingLocationIds, locationCorelationMap) {
+    locationHierarchy.forEach((topLevel) => {
+      if (reportingLocationIds.includes(topLevel.location.id)) {
+        locationCorelationMap[topLevel.location.id] = topLevel.location.id;
+        if (topLevel.children.length !== 0) {
+          Location.linkAllChildrenToTopLevel(topLevel.children, topLevel.location.id, locationCorelationMap);
+        }
+      } else {
+        if (topLevel.children.length) {
+          Location.createLocationCorelationMap(topLevel.children, reportingLocationIds, locationCorelationMap);
+        }
+      }
+    });
+  };
+
+  /**
+   * Link all children from a location hierarchy to a specified reporting level location
+   * @param locationHierarchy
+   * @param id
+   * @param locationCorelationMap (this parameter gets updated during the function call)
+   */
+  Location.linkAllChildrenToTopLevel = function (locationHierarchy, id, locationCorelationMap) {
+    locationHierarchy.forEach((location) => {
+      locationCorelationMap[location.location.id] = id;
+      if (location.children.length) {
+        Location.linkAllChildrenToTopLevel(location.children, id, locationCorelationMap);
+      }
+    });
+  };
 };

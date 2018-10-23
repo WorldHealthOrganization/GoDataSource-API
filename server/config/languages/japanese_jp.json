@@ -1123,7 +1123,14 @@
       "LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON": "日本の Person",
       "LNG_PAGE_TITLE_CONTACT_WITH_FOLLOWUPS_DETAILS": "日本の Contact with follow-ups",
       "LNG_PAGE_CONTACT_WITH_FOLLOWUPS_GROUP_TITLE": "日本の Group by",
-      "LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE": "日本の Follow-ups"
+      "LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE": "日本の Follow-ups",
+      "LNG_LIST_HEADER_CASE_CLASSIFICATION": "日本の Case Classification",
+      "LNG_LIST_HEADER_TOTAL": "日本の Total",
+      "LNG_LIST_HEADER_UNDER_FOLLOWUP": "日本の Under follow-up",
+      "LNG_LIST_HEADER_SEEN_ON_DAY": "日本の Seen on day",
+      "LNG_LIST_HEADER_REGISTERED": "日本の Registered",
+      "LNG_LIST_HEADER_RELEASED": "日本の Released",
+      "LNG_LIST_HEADER_EXPECTED_RELEASE": "日本の Expected release of last contact"
     },
     "countries": {
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY": "日本の Country",

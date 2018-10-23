@@ -1124,7 +1124,14 @@
       "LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON": "Person",
       "LNG_PAGE_TITLE_CONTACT_WITH_FOLLOWUPS_DETAILS": "Contact with follow-ups",
       "LNG_PAGE_CONTACT_WITH_FOLLOWUPS_GROUP_TITLE": "Group by",
-      "LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE": "Follow-ups"
+      "LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE": "Follow-ups",
+      "LNG_LIST_HEADER_CASE_CLASSIFICATION": "Case Classification",
+      "LNG_LIST_HEADER_TOTAL": "Total",
+      "LNG_LIST_HEADER_UNDER_FOLLOWUP": "Under follow-up",
+      "LNG_LIST_HEADER_SEEN_ON_DAY": "Seen on day",
+      "LNG_LIST_HEADER_REGISTERED": "Registered",
+      "LNG_LIST_HEADER_RELEASED": "Released",
+      "LNG_LIST_HEADER_EXPECTED_RELEASE": "Expected release of last contact"
     },
     "countries": {
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY": "Country",
