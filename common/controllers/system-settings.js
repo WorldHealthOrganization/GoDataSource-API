@@ -181,7 +181,7 @@ module.exports = function (SystemSettings) {
       .then(function (systemSettings) {
         callback(null, {
           install: app.ROOT_PATH,
-          'back-up': path.resolve(_.get(systemSettings, 'dataBackup.location'))
+          backUp: path.resolve(_.get(systemSettings, 'dataBackup.location'))
         });
       })
       .catch(callback);
