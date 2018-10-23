@@ -1040,7 +1040,10 @@ module.exports = function (Outbreak) {
 
     // check if 'targeted' flag exists in the request, if not default to true
     // this flag will be set upon all generated follow ups
-    data.targeted = data.targeted || true;
+    let targeted = true;
+    if (data.hasOwnProperty('targeted')) {
+      targeted = data.targeted;
+    }
 
     // cache outbreak's follow up options
     let outbreakFollowUpFreq = this.frequencyOfFollowUp;
@@ -1104,7 +1107,7 @@ module.exports = function (Outbreak) {
                   outbreakFollowUpFreq,
                   outbreakFollowUpPerDay,
                   options,
-                  data.targeted,
+                  targeted,
                   contact.inconclusive
                 ).then((followUps) => {
                   generatedResponse[index].followUps = followUps;
