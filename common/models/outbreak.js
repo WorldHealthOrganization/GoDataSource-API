@@ -1500,4 +1500,5 @@ module.exports = function (Outbreak) {
       return Promise.resolve(filter);
     }
   };
+
 };

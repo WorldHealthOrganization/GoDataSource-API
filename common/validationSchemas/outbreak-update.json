@@ -109,6 +109,10 @@
         "$ref": "arc-gis-server"
       }
     },
+    "reportingGeographicalLevelId": {
+      "type": "string",
+      "description": "The maximum geographical level of locations from which reports data is gathered"
+    },
     "id": {
       "type": "string",
       "description": "The outbreak's unique identifier"

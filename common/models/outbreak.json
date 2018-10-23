@@ -26,11 +26,7 @@
         "country"
       ]
     },
-    "locations": {
-      "type": [
-        "linkedLocation"
-      ]
-    },
+    "locationIds": ["string"],
     "startDate": {
       "type": "date",
       "required": true
@@ -118,7 +114,11 @@
     },
     "arcGisServers": [
       "arcGisServer"
-    ]
+    ],
+    "reportingGeographicalLevelId": {
+      "type": "string",
+      "description": "The maximum geographical level of locations from which reports data is gathered"
+    }
   },
   "indexes": {
     "name_index": {
@@ -1342,6 +1342,30 @@
       "principalId": "write_contact",
       "permission": "ALLOW",
       "property": "bulkCreateRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "downloadCaseClassificationPerLocationLevelReport"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCasesPerLocationLevel"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "downloadContactTracingPerLocationLevelReport"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactsPerLocationLevel"
     }
   ],
   "methods": {
@@ -5554,6 +5578,172 @@
       "http": {
         "verb": "post",
         "path": "/relationships/bulk"
+      }
+    },
+    "prototype.downloadCaseClassificationPerLocationLevelReport": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export a case classification per location report for an outbreak",
+      "http": {
+        "verb": "get",
+        "path": "/cases/per-classification-per-location-level-report/download"
+      }
+    },
+    "prototype.countCasesPerLocationLevel": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": {
+            "locations": [
+              {
+                "type": {
+                  "location": {
+                    "type": "location"
+                  },
+                  "caseIds": {
+                    "type": "string"
+                  },
+                  "casesCount": {
+                    "type": "number"
+                  }
+                }
+              }
+            ],
+            "count": {
+              "type": "number"
+            }
+          },
+          "description": "Collection of items with location, cases and numberOfCases properties",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Return an array of locations and the cases (that pass a filter) assigned to those locations",
+      "http": {
+        "verb": "get",
+        "path": "/cases/per-location-level/count"
+      }
+    },
+    "prototype.downloadContactTracingPerLocationLevelReport": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export a contact tracing per location report for an outbreak",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/per-location-level-tracing-report/download"
+      }
+    },
+    "prototype.countContactsPerLocationLevel": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Accepts custom parameter dateOfFollowUp."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": {
+            "locations": [
+              {
+                "type": {
+                  "location": {
+                    "type": "location"
+                  },
+                  "contactIds": {
+                    "type": "string"
+                  },
+                  "contactsCount": {
+                    "type": "number"
+                  }
+                }
+              }
+            ],
+            "count": {
+              "type": "number"
+            }
+          },
+          "description": "Collection of items with location, cases and numberOfCases properties",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Return an array of locations and the contacts (that pass a filter) assigned to those locations",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/per-location-level/count"
       }
     }
   }

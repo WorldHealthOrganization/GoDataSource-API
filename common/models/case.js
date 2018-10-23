@@ -131,6 +131,10 @@ module.exports = function (Case) {
     'addresses[].geoLocation'
   ];
 
+  Case.invalidCaseClassificationsForReports = [
+    'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_NOT_A_CASE_DISCARDED'
+  ];
+
   /**
    * Archive case classification changes, when detected
    * @param context

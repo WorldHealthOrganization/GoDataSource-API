@@ -351,7 +351,7 @@ const getXmlFriendlyJson = function (jsonObj) {
  * @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
  * @return {Promise<any>}
  */
-const exportListFile = function (headers, dataSet, fileType) {
+const exportListFile = function (headers, dataSet, fileType, title = 'List') {
 
   /**
    * Build headers map in a way compatible with files that support hierarchical structures (XML, JSON)
@@ -551,7 +551,7 @@ const exportListFile = function (headers, dataSet, fileType) {
         break;
       case 'pdf':
         file.mimeType = 'application/pdf';
-        pdfDoc.createPDFList(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, pdfFile) {
+        pdfDoc.createPDFList(headers, dataSet.map(item => getFlatObject(item, null, true)), title, function (error, pdfFile) {
           if (error) {
             return reject(error);
           }
