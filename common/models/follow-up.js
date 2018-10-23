@@ -44,8 +44,6 @@ module.exports = function (FollowUp) {
   // map language token labels for model properties
   FollowUp.fieldLabelsMap = {
     'date': 'LNG_FOLLOW_UP_FIELD_LABEL_DATE',
-    'performed': 'LNG_FOLLOW_UP_FIELD_LABEL_PERFORMED',
-    'lostToFollowUp': 'LNG_FOLLOW_UP_FIELD_LABEL_LOST_TO_FOLLOW_UP',
     'address': 'LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS',
     'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
     'address.country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
@@ -63,12 +61,15 @@ module.exports = function (FollowUp) {
     'fillGeolocation.lng': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG',
     'index': 'LNG_FOLLOW_UP_FIELD_LABEL_INDEX',
     'teamId': 'LNG_FOLLOW_UP_FIELD_LABEL_TEAM',
+    'statusId': 'LNG_FOLLOW_UP_FIELD_LABEL_STATUSID',
     'isGenerated': 'LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED',
+    'targeted': 'LNG_FOLLOW_UP_FIELD_LABEL_TARGETED',
     'questionnaireAnswers': 'LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE'
   };
 
   FollowUp.referenceDataFieldsToCategoryMap = {
-    'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE'
+    'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE',
+    'statusId': 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE'
   };
 
   FollowUp.referenceDataFields = Object.keys(FollowUp.referenceDataFieldsToCategoryMap);
@@ -80,8 +81,8 @@ module.exports = function (FollowUp) {
 
   FollowUp.printFieldsinOrder = [
     'date',
-    'performed',
-    'lostToFollowUp',
+    'statusId',
+    'targeted',
     'address',
     'index',
     'teamId'

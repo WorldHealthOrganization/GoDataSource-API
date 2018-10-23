@@ -6,8 +6,7 @@ const RoundRobin = require('rr');
 const Helpers = require('./helpers');
 const Moment = require('moment');
 
-// get contacts that has inconclusive follow up period (IN THE PAST)
-// this means the last follow up has one of the following flags set (completed, lost)
+// get contacts that has inconclusive follow up period
 module.exports.getContactsWithInconclusiveLastFollowUp = function (startDate) {
   return App.models.contact
     .find({
@@ -24,18 +23,7 @@ module.exports.getContactsWithInconclusiveLastFollowUp = function (startDate) {
             }
           },
           {
-            or: [
-              {
-                'followUp.status': {
-                  neq: 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED'
-                }
-              },
-              {
-                'followUp.status': {
-                  eq: 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP'
-                }
-              }
-            ]
+            'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
           }
         ]
       }
