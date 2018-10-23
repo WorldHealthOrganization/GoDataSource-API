@@ -91,7 +91,7 @@ function merge(filter, requestFilter = {}) {
     _filter.include = mergeIncludeFilters(_filter.include);
   }
 
-  ['fields', 'limit', 'order', 'skip', 'deleted', 'filterParent'].forEach(function (filterName) {
+  ['fields', 'limit', 'order', 'skip', 'deleted', 'filterParent', '_deep'].forEach(function (filterName) {
     if (filterExists(filterName))
       _filter[filterName] = requestFilter[filterName] || filter[filterName];
   });

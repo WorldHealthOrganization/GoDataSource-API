@@ -1307,6 +1307,8 @@ module.exports = function (Outbreak) {
    */
   Outbreak.helpers.buildFollowUpCustomFilter = function (filter, outbreakId) {
     if (filter && typeof(filter) === 'object' && Object.keys(filter).length !== 0) {
+      filter.where = filter.where || {};
+
       let caseFilter, relationshipFilter, contactFilter;
 
       let weekNumber = 0;
