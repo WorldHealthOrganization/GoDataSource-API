@@ -814,8 +814,8 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.getLocationsHierarchicalList = function (filter, callback) {
     // define a list of location IDs used at outbreak level
     let outbreakLocationIds;
-    // if the outbreak has a list of locations defined
-    if (Array.isArray(this.locationIds)) {
+    // if the outbreak has a list of locations defined (if is empty array, then is not set)
+    if (Array.isArray(this.locationIds) && this.locationIds.length) {
       // get them
       outbreakLocationIds = this.locationIds;
     }
