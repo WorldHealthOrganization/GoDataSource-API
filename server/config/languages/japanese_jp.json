@@ -916,7 +916,9 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED": "日本の Is generated",
       "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION": "日本の Fill geolocation",
       "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "日本の Fill geolocation latitude",
-      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "日本の Fill geolocation longitude"
+      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "日本の Fill geolocation longitude",
+      "LNG_FOLLOW_UP_FIELD_LABEL_TARGETED": "日本の Targeted",
+      "LNG_FOLLOW_UP_FIELD_LABEL_STATUSID": "日本の Status"
     },
     "uiFollowUpsListPage": {
       "LNG_PAGE_LIST_FOLLOW_UPS_TITLE": "日本の Follow-ups",
@@ -2141,6 +2143,17 @@
     },
     "uiImportLocationData": {
       "LNG_PAGE_IMPORT_LOCATION_DATA_TITLE": "日本の Import Location Data"
+    },
+    "contactDailyFollowUpStatusType": {
+      "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED": "日本の Not Performed",
+      "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK": "日本の Seen Ok",
+      "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK": "日本の Seen Not Ok",
+      "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED": "日本の Missed"
+    },
+    "contactFinalFollowUpStatusType": {
+      "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP": "日本の Lost To Follow-up",
+      "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED": "日本の Follow-up Completed",
+      "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP": "日本の Under Follow-up"
     }
   }
 }
