@@ -4498,7 +4498,10 @@ module.exports = function (Outbreak) {
           .then((results) => {
             // transform the model into a simple JSON
             results.forEach((person, caseIndex) => {
-              sanitizedCases[caseIndex] = {};
+              // keep the initial data of the case (we currently use it to generate the QR code only)
+              sanitizedCases[caseIndex] = {
+                rawData: person
+              };
 
               // Anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
               // and formatting date type fields
@@ -4569,9 +4572,13 @@ module.exports = function (Outbreak) {
 
             // generate pdf document
             let doc = pdfUtils.createPdfDoc({
-              fontSize: 11,
+              fontSize: 7,
               layout: 'portrait',
-              margin: 20
+              margin: 20,
+              lineGap: 0,
+              wordSpacing: 0,
+              characterSpacing: 0,
+              paragraphGap: 0
             });
 
             // add a top margin of 2 lines for each page
@@ -4589,9 +4596,28 @@ module.exports = function (Outbreak) {
 
             // Print all the data
             sanitizedCases.forEach((sanitizedCase, index) => {
-              pdfUtils.displayModelDetails(doc, sanitizedCase.data, true, 'Case Information');
+              // write this as a separate function to easily remove it's listener
+              let addQrCode = function () {
+                app.utils.qrCode.addPersonQRCode(doc, sanitizedCase.rawData.outbreakId, 'case', sanitizedCase.rawData);
+              };
+
+              // add the QR code to the first page (this page has already been added and will not be covered by the next line)
+              addQrCode();
+
+              // set a listener on pageAdded to add the QR code to every new page
+              doc.on('pageAdded', addQrCode);
+
+              pdfUtils.displayModelDetails(doc, sanitizedCase.data, true, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
               pdfUtils.displayPersonRelationships(doc, sanitizedCase.relationships, relationshipsTitle);
               pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedCase.labResults, labResultsTitle, questionnaireTitle);
+
+              // add an additional empty page that contains only the QR code as per requirements
+              doc.addPage();
+
+              // stop adding this QR code. The next case will need to have a different QR code
+              doc.removeListener('pageAdded', addQrCode);
+
+              // add a new page for the next case if there is one
               if (index < sanitizedCases.length - 1) {
                 doc.addPage();
               }
@@ -4684,7 +4710,10 @@ module.exports = function (Outbreak) {
         genericHelpers.resolveModelForeignKeys(app, app.models.contact, results, dictionary)
           .then((results) => {
             results.forEach((contact, contactIndex) => {
-              sanitizedContacts[contactIndex] = {};
+              // keep the initial data of the contact (we currently use it to generate the QR code only)
+              sanitizedContacts[contactIndex] = {
+                rawData: contact
+              };
 
               // Anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
               // and format date type fields
@@ -4751,9 +4780,13 @@ module.exports = function (Outbreak) {
 
             // generate pdf document
             let doc = pdfUtils.createPdfDoc({
-              fontSize: 11,
+              fontSize: 7,
               layout: 'portrait',
-              margin: 20
+              margin: 20,
+              lineGap: 0,
+              wordSpacing: 0,
+              characterSpacing: 0,
+              paragraphGap: 0
             });
 
             // add a top margin of 2 lines for each page
@@ -4770,9 +4803,28 @@ module.exports = function (Outbreak) {
 
             // Print all the data
             sanitizedContacts.forEach((sanitizedContact, index) => {
-              pdfUtils.displayModelDetails(doc, sanitizedContact.data, true, 'Case Information');
+              // write this as a separate function to easily remove it's listener
+              let addQrCode = function () {
+                app.utils.qrCode.addPersonQRCode(doc, sanitizedContact.rawData.outbreakId, 'case', sanitizedContact.rawData);
+              };
+
+              // add the QR code to the first page (this page has already been added and will not be covered by the next line)
+              addQrCode();
+
+              // set a listener on pageAdded to add the QR code to every new page
+              doc.on('pageAdded', addQrCode);
+
+              pdfUtils.displayModelDetails(doc, sanitizedContact.data, true, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
               pdfUtils.displayPersonRelationships(doc, sanitizedContact.relationships, relationshipsTitle);
               pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedContact.followUps, followUpsTitle, followUpQuestionnaireTitle);
+
+              // add an additional empty page that contains only the QR code as per requirements
+              doc.addPage();
+
+              // stop adding this QR code. The next contact will need to have a different QR code
+              doc.removeListener('pageAdded', addQrCode);
+
+              // add a new page for the next contact if there is one
               if (index < sanitizedContacts.length - 1) {
                 doc.addPage();
               }

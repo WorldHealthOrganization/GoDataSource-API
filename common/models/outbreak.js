@@ -1273,46 +1273,50 @@ module.exports = function (Outbreak) {
 
       // generate pdf document
       let doc = pdfUtils.createPdfDoc({
-        fontSize: 11,
-        layout: 'portrait'
+        fontSize: 7,
+        layout: 'portrait',
+        lineGap: 0,
+        wordSpacing: 0,
+        characterSpacing: 0,
+        paragraphGap: 0
       });
 
-      // add a top margin of 2 lines for each page
+      // add functionality whenever a new page is added
       doc.on('pageAdded', () => {
         doc.moveDown(2);
+        app.utils.qrCode.addPersonQRCode(doc, outbreakInstance.id, 'case', foundCase);
       });
 
-      // set margin top for first page here, to not change the entire createPdfDoc functionality
+      // Apply previous code for the first page which is already added.
       doc.moveDown(2);
+      app.utils.qrCode.addPersonQRCode(doc, outbreakInstance.id, 'case', foundCase);
 
-      if (foundCase) {
-        let qrCode = app.utils.qrCode.createResourceLink('case', {
-          outbreakId: outbreakInstance.id,
-          caseId: 'caseId'
-        });
-        doc.image(qrCode, 480, 15, {width: 100, height: 100});
+      // add case profile fields (empty)
+      pdfUtils.displayModelDetails(doc, caseFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
 
-        // add case profile fields (empty)
-        pdfUtils.displayModelDetails(doc, caseFields, false, `${foundCase.firstName} ${foundCase.middleName} ${foundCase.lastName}`);
-      } else {
-        // add case profile fields (empty)
-        pdfUtils.displayModelDetails(doc, caseFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
+      // add case investigation questionnaire into the pdf in a separate page (only if the questionnaire exists)
+      if (caseQuestions && caseQuestions.length) {
+        doc.addPage();
+        pdfUtils.createQuestionnaire(doc, caseQuestions, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE'));
       }
-
-      // add case investigation questionnaire into the pdf in a separate page
-      doc.addPage();
-      pdfUtils.createQuestionnaire(doc, caseQuestions, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE'));
 
       // add lab results information into a separate page
       doc.addPage();
       pdfUtils.displayModelDetails(doc, labResultsFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_DETAILS'));
-      doc.addPage();
-      pdfUtils.createQuestionnaire(doc, labQuestions, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE'));
+
+      // add lab results questionnaire into a separate page (only if the questionnaire exists)
+      if (labQuestions && labQuestions.length) {
+        doc.addPage();
+        pdfUtils.createQuestionnaire(doc, labQuestions, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE'));
+      }
 
       // add contact relation template
       doc.addPage();
       pdfUtils.displayModelDetails(doc, contactFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
       pdfUtils.displayModelDetails(doc, relationFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_RELATIONSHIP'));
+
+      // add an additional empty page that contains only the QR code as per requirements
+      doc.addPage();
 
       // end the document stream
       // to convert it into a buffer
