@@ -8,11 +8,42 @@ module.exports = function (FollowUp) {
   // set flag to not get controller
   FollowUp.hasController = false;
 
+  // filter for seen follow ups
+  FollowUp.seenFilter = {
+    or: [
+      {
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK'
+      },
+      {
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK'
+      }
+    ]
+  };
+
+  // filter for not seen follow ups
+  FollowUp.notSeenFilter = {
+    or: [
+      {
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
+      },
+      {
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED'
+      }
+    ]
+  };
+
+  // helper functions that indicates if a follow up is performed
+  FollowUp.isPerformed = function (obj) {
+    return [
+      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK',
+      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK',
+      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED'
+    ].indexOf(obj.statusId) >= 0;
+  };
+
   // map language token labels for model properties
   FollowUp.fieldLabelsMap = {
     'date': 'LNG_FOLLOW_UP_FIELD_LABEL_DATE',
-    'performed': 'LNG_FOLLOW_UP_FIELD_LABEL_PERFORMED',
-    'lostToFollowUp': 'LNG_FOLLOW_UP_FIELD_LABEL_LOST_TO_FOLLOW_UP',
     'address': 'LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS',
     'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
     'address.country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
@@ -30,12 +61,15 @@ module.exports = function (FollowUp) {
     'fillGeolocation.lng': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG',
     'index': 'LNG_FOLLOW_UP_FIELD_LABEL_INDEX',
     'teamId': 'LNG_FOLLOW_UP_FIELD_LABEL_TEAM',
+    'statusId': 'LNG_FOLLOW_UP_FIELD_LABEL_STATUSID',
     'isGenerated': 'LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED',
+    'targeted': 'LNG_FOLLOW_UP_FIELD_LABEL_TARGETED',
     'questionnaireAnswers': 'LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE'
   };
 
   FollowUp.referenceDataFieldsToCategoryMap = {
-    'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE'
+    'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE',
+    'statusId': 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE'
   };
 
   FollowUp.referenceDataFields = Object.keys(FollowUp.referenceDataFieldsToCategoryMap);
@@ -47,8 +81,8 @@ module.exports = function (FollowUp) {
 
   FollowUp.printFieldsinOrder = [
     'date',
-    'performed',
-    'lostToFollowUp',
+    'statusId',
+    'targeted',
     'address',
     'index',
     'teamId'
@@ -87,19 +121,9 @@ module.exports = function (FollowUp) {
     app.models.person
       .findById(ctx.instance.personId)
       .then((person) => {
-        // if follow up is not within configured start/end dates throw error
-        let startDate = moment(person.followUp.originalStartDate);
-        let endDate = moment(person.followUp.endDate);
-        if (!moment(ctx.instance.date).startOf('day').isBetween(startDate, endDate, 'day', '[]')) {
-          return next(app.utils.apiError.getError('INVALID_FOLLOW_UP_DATE', {
-            startDate: startDate,
-            endDate: endDate
-          }));
-        }
-
         // set index based on the difference in days from start date until the follow up set date
         // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
-        ctx.instance.index = daysSince(person.followUp.originalStartDate, ctx.instance.date) + 1;
+        ctx.instance.index = daysSince(moment(person.followUp.startDate), ctx.instance.date) + 1;
 
         return next();
       })
@@ -222,6 +246,34 @@ module.exports = function (FollowUp) {
         });
         // return built result
         return result;
+      });
+  };
+
+  // Get contact's whose last follow up was not performed or missing
+  // Used mainly for handling a specific case during follow up generation
+  FollowUp.getContactsWithLostLastFollowUp = function () {
+    return app.models.contact
+      .find({
+        include: [
+          {
+            relation: 'followUps',
+            scope: {
+              order: ['createdAt DESC'],
+              limit: 1
+            }
+          }
+        ],
+        where: {
+          followUp: {
+            neq: null
+          }
+        }
+      })
+      // filter out contacts whose last follow up is not performed or is missing
+      .then((contacts) => {
+        return contacts.filter((contact) =>
+          contact.followUps.length ? (!contact.followUps()[0].performed || contact.followUps()[0].lostToFollowUp) : false
+        );
       });
   };
 };

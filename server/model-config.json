@@ -275,5 +275,9 @@
   "fileAttachment": {
     "dataSource": "mongoDb",
     "public": false
+  },
+  "generateFollowup": {
+    "dataSource": null,
+    "public": false
   }
 }

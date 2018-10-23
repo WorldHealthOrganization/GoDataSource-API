@@ -67,6 +67,15 @@
         "endDate": {
           "description": "Follow-up end date for the contact. Calculated from the startDate + outbreak.periodOfFollowup days",
           "type": "date"
+        },
+        "status": {
+          "description": "Follow-up status",
+          "type": "string",
+          "enum": [
+            "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP",
+            "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED",
+            "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP"
+          ]
         }
       }
     },
