@@ -158,7 +158,7 @@ module.exports = function (Sync) {
                     }
                     // Note: Encryption is not supported yet
                     // create a file with collection name as file name, containing results
-                    fs.writeFile(`${tmpDirName}/${collectionName}.json`, JSON.stringify(records), callback);
+                    fs.writeFile(`${tmpDirName}/${collectionName}.json`, JSON.stringify(records, null, 2), callback);
                   });
                 });
               });
