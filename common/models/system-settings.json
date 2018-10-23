@@ -321,7 +321,7 @@
           "arg": "location",
           "type": {
             "install": "string",
-            "backup": "string"
+            "backUp": "string"
           },
           "description": "Application install & backup locations",
           "root": true,
