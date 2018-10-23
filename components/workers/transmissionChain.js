@@ -268,10 +268,22 @@ const worker = {
           // update the number of active chains
           activeChainsLength++;
         }
+
+        // keep an index for people in the chain
+        const transmissionChainPersonIndex = {};
+        // map each person from the chain into the index
+        transmissionChain.forEach(function (peoplePair) {
+          peoplePair.forEach(function (personId) {
+            transmissionChainPersonIndex[personId] = true;
+          });
+        });
+        // transmission chain size represents the number of people in the chain
+        const transmissionChainSize = Object.keys(transmissionChainPersonIndex).length;
+
         // add it to the list of chains
-        _chains.chains[resultIndex] = {chain: transmissionChain, active: isChainActive};
+        _chains.chains[resultIndex] = {chain: transmissionChain, active: isChainActive, size: transmissionChainSize};
         // store length for each chain
-        chainsLengths[resultIndex] = {length: transmissionChain.length, active: isChainActive};
+        chainsLengths[resultIndex] = {length: transmissionChain.length, active: isChainActive, size: transmissionChainSize};
         resultIndex++;
       }
       chainIndex++;

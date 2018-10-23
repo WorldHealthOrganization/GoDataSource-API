@@ -67,7 +67,7 @@ module.exports = {
      * @param options {{activeChainStartDate: Date}}
      * @param callback
      */
-    count: function (relationships, followUpPeriod, options,  callback) {
+    count: function (relationships, followUpPeriod, options, callback) {
       invokeWorkerMethod('transmissionChain', 'count', [relationships, followUpPeriod, options], callback);
     }
   },

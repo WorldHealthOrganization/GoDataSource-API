@@ -518,34 +518,6 @@ module.exports = function (Relationship) {
   };
 
   /**
-   * Find transmission chains which include people that matched the filter
-   * @param outbreakId
-   * @param followUpPeriod
-   * @param filter
-   * @return {PromiseLike<T | never>}
-   */
-  Relationship.findTransmissionChainsForFilteredPeople = function (outbreakId, followUpPeriod, filter) {
-    // find people that matched the filter
-    return app.models.person
-      .find(filter)
-      .then(function (people) {
-        // find relationship chains for the matched people
-        return Relationship.findRelationshipChainsForPeopleIds(outbreakId, people.map(person => person.id));
-      })
-      .then(function (relationshipMap) {
-        // build transmission chains based on the relationship chains
-        return new Promise(function (resolve, reject) {
-          Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, {where: {id: {inq: Object.keys(relationshipMap)}}}, false, function (error, chains) {
-            if (error) {
-              return reject(error);
-            }
-            return resolve(chains);
-          });
-        });
-      });
-  };
-
-  /**
    * Find or count relationship exposures or contacts for a relationship
    * @param personId
    * @param [filter]
