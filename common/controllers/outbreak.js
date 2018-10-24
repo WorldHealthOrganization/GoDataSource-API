@@ -6326,7 +6326,7 @@ module.exports = function (Outbreak) {
             if (!app.models.case.invalidCaseClassificationsForReports.includes(caseClassification.value)) {
               data[caseClassification.value] = {
                 type: dictionary.getTranslation(caseClassification.value),
-                total: 0
+                total: '0'
               };
             }
           });
@@ -6334,26 +6334,27 @@ module.exports = function (Outbreak) {
           // Since deceased is not a classification but is relevant to the report, add it separately
           data.deceased = {
             type: dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED'),
-            total: 0
+            total: '0'
           };
 
           // Initialize all counts per location with 0 for each case classification (including deceased)
           Object.keys(data).forEach((key) => {
             caseDistribution.forEach((dataObj) => {
-              data[key][dataObj.location.id] = 0;
+              data[key][dataObj.location.id] = '0';
             });
           });
 
-          // Go through all the cases and increment the relevent case counts
+          // Go through all the cases and increment the relevant case counts.
+          // Keep the values as strings so that 0 actually gets displayed in the table
           caseDistribution.forEach((dataObj) => {
             dataObj.people.forEach((caseModel) => {
               let caseLatestLocation = _.find(caseModel.addresses, ['typeId', 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE']).locationId;
               if (caseModel.deceased) {
-                data.deceased[caseLatestLocation]++;
-                data.deceased.total++;
+                data.deceased[caseLatestLocation] = String(+data.deceased[caseLatestLocation] +1);
+                data.deceased.total = String(+data.deceased.total +1);
               } else {
-                data[caseModel.classification][caseLatestLocation]++;
-                data[caseModel.classification].total++;
+                data[caseModel.classification][caseLatestLocation] = String(+data[caseModel.classification][caseLatestLocation] +1);
+                data[caseModel.classification].total = String(+data[caseModel.classification].total +1);
               }
             });
           });
@@ -6443,23 +6444,24 @@ module.exports = function (Outbreak) {
           let data = [];
           result.forEach((dataObj) => {
             // Define the base form of the data for one row of the pdf list
+            // Keep the values as strings so that 0 actually gets displayed in the table
             let row = {
               location: dataObj.location.name,
-              underFollowUp: 0,
-              seenOnDay: 0,
-              coverage: 0,
-              registered: 0,
-              released: 0,
+              underFollowUp: '0',
+              seenOnDay: '0',
+              coverage: '0',
+              registered: '0',
+              released: '0',
               expectedRelease: dataObj.people.length ? moment(dataObj.people[0].followUp.endDate).format('ll') : '-'
             };
 
             // Update the row's values according to each contact's details
             dataObj.people.forEach((contact) => {
-              row.registered++;
+              row.registered = String(+row.registered + 1);
 
               // Any status other than under follow-up will make the contact be considered as released.
               if (contact.followUp.status === 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP') {
-                row.underFollowUp++;
+                row.underFollowUp = String(+row.underFollowUp + 1);
 
                 // The contact can be seen only if he is under follow
                 if (contact.followUps.length) {
@@ -6472,15 +6474,15 @@ module.exports = function (Outbreak) {
                     if (!selectedDayForReport) {
                       selectedDayForReport = moment(completedFollowUp.date).format('ll');
                     }
-                    row.seenOnDay++;
+                    row.seenOnDay = String(+row.seenOnDay + 1);
                   }
 
                   // What percentage of the contacts under followUp have been seen on the specified date.
-                  row.coverage = row.seenOnDay / row.underFollowUp * 100;
+                  row.coverage = String(+row.seenOnDay / +row.underFollowUp * 100);
                 }
 
               } else {
-                row.released++;
+                row.released = String(+row.released + 1);
               }
             });
             data.push(row);
