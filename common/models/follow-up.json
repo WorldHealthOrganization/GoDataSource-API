@@ -16,12 +16,14 @@
       "type": "date",
       "required": true
     },
-    "performed": {
-      "type": "boolean",
-      "required": true
-    },
-    "lostToFollowUp": {
-      "type": "boolean"
+    "statusId": {
+      "type": "string",
+      "enum": [
+        "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED",
+        "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK",
+        "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK",
+        "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED"
+      ]
     },
     "address": {
       "type": "address"
@@ -38,12 +40,12 @@
     "teamId": {
       "type": "string"
     },
-    "isGenerated": {
-      "description": "Hidden flag that indicates whether the follow up is generated or not",
-      "type": "boolean"
-    },
     "outbreakId": {
       "type": "string",
+      "required": true
+    },
+    "targeted": {
+      "type": "boolean",
       "required": true
     }
   },

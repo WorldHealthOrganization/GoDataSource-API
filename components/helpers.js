@@ -82,9 +82,38 @@ const getChunksForInterval = function (interval, chunk) {
   // set default chunk to 1 day
   chunk = chunk ? chunkMap[chunk] : chunkMap.day;
 
+  // make sure we're always dealing with moment dates
+  interval[0] = getUTCDate(interval[0]);
+  interval[1] = getUTCDateEndOfDay(interval[1]);
+
   // get chunks
-  // Note chunkDateRange doesn't include the last day in the interval so we add a day
   let chunks = chunkDateRange(interval[0], interval[1], chunk);
+
+  // chunk-date-range does not correctly handle date differences between on 'month' chunks for consecutive months
+  if (
+    // check if chunk is month
+    chunk === 'month' &&
+    // if the module returned just one chunk
+    chunks.length === 1 &&
+    // but interval months are different and should return more than 1 chunk
+    interval[0].get('month') !== interval[1].get('month')
+  ) {
+    // manually build chunks
+    chunks = [
+      {
+        // first chunk is from the interval start date
+        start: interval[0],
+        // end is start of next month (one day gets substracted later)
+        end: getUTCDateEndOfDay(interval[1]).startOf('month')
+      },
+      {
+        // second chunk starts from the first day of the month for interval end date
+        start: getUTCDate(interval[1]).startOf('month'),
+        // end date is interval end date
+        end: interval[1]
+      }
+    ];
+  }
 
   // initialize result
   let result = {};
@@ -351,7 +380,7 @@ const getXmlFriendlyJson = function (jsonObj) {
  * @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
  * @return {Promise<any>}
  */
-const exportListFile = function (headers, dataSet, fileType) {
+const exportListFile = function (headers, dataSet, fileType, title = 'List') {
 
   /**
    * Build headers map in a way compatible with files that support hierarchical structures (XML, JSON)
@@ -551,7 +580,7 @@ const exportListFile = function (headers, dataSet, fileType) {
         break;
       case 'pdf':
         file.mimeType = 'application/pdf';
-        pdfDoc.createPDFList(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, pdfFile) {
+        pdfDoc.createPDFList(headers, dataSet.map(item => getFlatObject(item, null, true)), title, function (error, pdfFile) {
           if (error) {
             return reject(error);
           }

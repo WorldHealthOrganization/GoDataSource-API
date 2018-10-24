@@ -3,11 +3,11 @@
 const moment = require('moment');
 const app = require('../../server/server');
 const _ = require('lodash');
-const rr = require('rr');
 const genericHelpers = require('../../components/helpers');
 const async = require('async');
 const pdfUtils = app.utils.pdfDoc;
 const searchByRelationProperty = require('../../components/searchByRelationProperty');
+const FollowupGeneration = require('../../components/followupGeneration');
 const fs = require('fs');
 const AdmZip = require('adm-zip');
 const tmp = require('tmp');
@@ -817,10 +817,10 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.getLocationsHierarchicalList = function (filter, callback) {
     // define a list of location IDs used at outbreak level
     let outbreakLocationIds;
-    // if the outbreak has a list of locations defined
-    if (Array.isArray(this.locations)) {
-      // get their IDs
-      outbreakLocationIds = this.locations.map(location => location.id);
+    // if the outbreak has a list of locations defined (if is empty array, then is not set)
+    if (Array.isArray(this.locationIds) && this.locationIds.length) {
+      // get them
+      outbreakLocationIds = this.locationIds;
     }
     // if there are no location IDs defined
     if (!outbreakLocationIds) {
@@ -994,39 +994,59 @@ module.exports = function (Outbreak) {
 
   /**
    * Generate list of follow ups
-   * @param data Contains number of days used to perform the generation
+   * @param data Props: { startDate, endDate (both follow up dates are required), targeted (boolean) }
    * @param options
    * @param callback
    */
   Outbreak.prototype.generateFollowups = function (data, options, callback) {
-    // sanity checks
-    let invalidParams = {};
-    if (this.periodOfFollowup <= 0) {
-      invalidParams.periodOfFollowup = this.periodOfFollowup;
-    }
+    let errorMessage = '';
+
+    // outbreak follow up generate params sanity checks
+    let invalidOutbreakParams = [];
     if (this.frequencyOfFollowUp <= 0) {
-      invalidParams.frequencyOfFollowUp = this.frequencyOfFollowUp;
+      invalidOutbreakParams.push('frequencyOfFollowUp');
     }
     if (this.frequencyOfFollowUpPerDay <= 0) {
-      invalidParams.frequencyOfFollowUpPerDay = this.frequencyOfFollowUpPerDay;
+      invalidOutbreakParams.push('frequencyOfFollowUpPerDay');
+    }
+    if (invalidOutbreakParams.length) {
+      errorMessage += `Following outbreak params: [${Object.keys(invalidOutbreakParams).join(',')}] should be greater than 0`;
     }
 
-    // stop follow up generation, if sanity checks failed
-    let invalidParamsNames = Object.keys(invalidParams);
-    if (invalidParamsNames.length) {
+    // parse start/end dates from request
+    let followupStartDate = genericHelpers.getUTCDate(data.startDate);
+    let followupEndDate = genericHelpers.getUTCDate(data.endDate);
+
+    // sanity checks for dates
+    let invalidFollowUpDates = [];
+    if (!followupStartDate.isValid()) {
+      invalidFollowUpDates.push('startDate');
+    }
+    if (!followupEndDate.isValid()) {
+      invalidFollowUpDates.push('endDate');
+    }
+    if (invalidFollowUpDates.length) {
+      errorMessage += `Follow up: [${Object.keys(invalidOutbreakParams).join(',')}] are not valid dates`;
+    }
+
+    // if the error message is not empty, stop the request
+    if (errorMessage) {
       return callback(
         app.utils.apiError.getError(
           'INVALID_GENERATE_FOLLOWUP_PARAMS',
           {
-            details: `Following outbreak params: [${invalidParamsNames.join(',')}] should be greater than 0`
+            details: errorMessage
           }
         )
       );
     }
 
-    // if no followup period was sent in request, assume its just for one day
-    data = data || {};
-    data.followUpPeriod = data.followUpPeriod || 1;
+    // check if 'targeted' flag exists in the request, if not default to true
+    // this flag will be set upon all generated follow ups
+    let targeted = true;
+    if (data.hasOwnProperty('targeted')) {
+      targeted = data.targeted;
+    }
 
     // cache outbreak's follow up options
     let outbreakFollowUpFreq = this.frequencyOfFollowUp;
@@ -1034,202 +1054,72 @@ module.exports = function (Outbreak) {
 
     // list of generated follow ups to be returned in the response
     // grouped per contact
-    let generateResponse = [];
+    let generatedResponse = [];
 
-    // retrieve list of contacts that has a relationship with events/cases and is eligible for generation
-    app.models.contact
-      .find({
-        where: {
-          followUp: {
-            neq: null
-          },
-          'followUp.endDate': {
-            gte: genericHelpers.getUTCDate().toDate()
-          }
-        }
+    // retrieve list of contacts that are eligible for follow up generation
+    // and those that have last follow up inconclusive
+    Promise
+      .all([
+        FollowupGeneration.getContactsEligibleForFollowup(followupStartDate.toDate(), followupEndDate.toDate()),
+        FollowupGeneration.getContactsWithInconclusiveLastFollowUp(followupStartDate.toDate())
+      ])
+      .then((contactLists) => {
+        // merge the lists of contacts
+        contactLists[0].push(...contactLists[1]);
+        return contactLists[0];
       })
       .then((contacts) => {
-        // follow up add statements
-        let followsUpsToAdd = [];
+        if (!contacts.length) {
+          return [];
+        }
 
-        // retrieve the last follow up that is brand new for contacts
-        return Promise
-          .all(contacts.map((contact) => {
-            return app.models.followUp
-              .find({
-                where: {
-                  personId: contact.id
-                },
-                order: 'createdAt DESC'
-              })
-              .then((followUps) => {
-                contact.followUpsLists = followUps;
-                return contact;
-              });
-          }))
-          .then((contacts) => {
-            if (contacts.length) {
-              // retrieve all teams and their locations/sublocations
-              return app.models.team.find()
-                .then((teams) => Promise.all(teams.map((team) => {
-                  return new Promise((resolve, reject) => {
-                    return app.models.location
-                      .getSubLocations(team.locationIds, [], (err, locations) => {
-                        if (err) {
-                          return reject(err);
-                        }
-                        return resolve(locations);
-                      });
-                  })
-                    .then((locations) => {
-                      team.locations = locations;
-                      return team;
-                    });
-                })))
-                .then((teams) => {
-                  contacts.forEach((contact) => {
-                    // generate response entry for the given contact
-                    generateResponse.push({
-                      contactId: contact.id,
-                      followUps: []
-                    });
+        // get all teams and their locations to get eligible teams for each contact
+        return FollowupGeneration
+          .getAllTeamsWithLocationsIncluded()
+          .then((teams) => {
+            return Promise
+              .all(contacts.map((contact) => {
+                // retrieve contact's follow up and eligible teams
+                return Promise
+                  .all([
+                    FollowupGeneration
+                      .getContactFollowups(contact.id)
+                      .then((followUps) => {
+                        contact.followUpsLists = followUps;
+                        return contact;
+                      }),
+                    FollowupGeneration
+                      .getContactFollowupEligibleTeams(contact, teams)
+                      .then((eligibleTeams) => {
+                        contact.eligibleTeams = eligibleTeams;
+                        return contact;
+                      })
+                  ])
+                  .then(() => contact);
+              }))
+              .then(() => Promise.all(contacts.map((contact) => {
+                // generate response entry for the given contact
+                let index = generatedResponse.push({contactId: contact.id, followUps: []}) - 1;
 
-                    // store index of the contact entry in response, to easily reference it down below
-                    let genResponseIndex = generateResponse.length - 1;
-
-                    // find all the teams that are matching the contact's location ids from addresses
-                    let eligibleTeams = [];
-                    // normalize addresses
-                    contact.addresses = contact.addresses || [];
-
-                    // first get the contact's usual place of residence
-                    let contactResidence = contact.addresses.find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
-                    if (contactResidence) {
-                      // try to find index of the address location in teams locations
-                      let filteredTeams = teams.filter((team) => team.locations.indexOf(contactResidence.locationId) !== -1);
-                      if (filteredTeams.length) {
-                        eligibleTeams = filteredTeams.map((team) => team.id);
-                      }
-                    } else {
-                      // check all contact addresses; stop at first address that has a matching team
-                      for (let i = 0; i < contact.addresses.length; i++) {
-                        // try to find index of the address location in teams locations
-                        let filteredTeams = teams.filter((team) => team.locations.indexOf(contact.addresses[i].locationId) !== -1);
-                        if (filteredTeams.length) {
-                          eligibleTeams = eligibleTeams.concat(filteredTeams.map((team) => team.id));
-                          break;
-                        }
-                      }
-                    }
-
-                    // cache last incubation day for the contact
-                    let lastIncubationDay = genericHelpers.getUTCDate(contact.followUp.endDate);
-
-                    // follow ups to be generated for the given contact
-                    // each one contains a specific date
-                    let contactFollowUpsToAdd = [];
-
-                    // check a weird case when the last follow up was yesterday and not performed
-                    // but today is the last day of incubation
-                    // it should generate a follow up for today, no matter the follow up period sent in request
-                    if (contact.followUpsLists.length) {
-                      let lastFollowUp = contact.followUpsLists[0];
-
-                      // check if last follow up is generated and not performed
-                      // also checks that, the scheduled date is the same last day of incubation
-                      if (helpers.isNewGeneratedFollowup(lastFollowUp)
-                        && genericHelpers.getUTCDate(lastFollowUp.date).isSame(lastIncubationDay, 'd')) {
-
-                        contactFollowUpsToAdd.push(
-                          app.models.followUp
-                            .create({
-                              // used to easily trace all follow ups for a given outbreak
-                              outbreakId: contact.outbreakId,
-                              personId: contact.id,
-                              // schedule for today
-                              date: genericHelpers.getUTCDate().toDate(),
-                              performed: false,
-                              // choose first team, it will be only this follow up generated
-                              // so no randomness is required
-                              teamId: eligibleTeams[0],
-                              isGenerated: true
-                            }, options)
-                            .then((createdFollowUp) => {
-                              generateResponse[genResponseIndex].followUps.push(createdFollowUp);
-                            })
-                        );
-
-                        // skip to next contact
-                        return;
-                      }
-                    }
-
-                    // last follow up day, based on the given period, starting from today
-                    let lastToGenerateFollowUpDay = genericHelpers.getUTCDate()
-                    // doing this to not generate follow ups for today and next day in case period is 1
-                      .add(data.followUpPeriod <= 1 ? 0 : data.followUpPeriod, 'days');
-
-                    // if given follow up period is higher than the last incubation day, just use it as a threshold for generation
-                    if (lastToGenerateFollowUpDay.diff(lastIncubationDay, 'days') > 0) {
-                      lastToGenerateFollowUpDay = lastIncubationDay;
-                    }
-
-                    // generate follow up, starting from today
-                    for (let now = genericHelpers.getUTCDate(); now <= lastToGenerateFollowUpDay; now.add(outbreakFollowUpFreq, 'day')) {
-                      let generatedFollowUps = [];
-                      for (let i = 0; i < outbreakFollowUpPerDay; i++) {
-                        generatedFollowUps.push(
-                          app.models.followUp
-                            .create({
-                              // used to easily trace all follow ups for a given outbreak
-                              outbreakId: contact.outbreakId,
-                              personId: contact.id,
-                              date: now.toDate(),
-                              performed: false,
-                              // split the follow ups work equally across teams
-                              teamId: rr(eligibleTeams),
-                              isGenerated: true
-                            }, options)
-                            .then((createdFollowUp) => {
-                              generateResponse[genResponseIndex].followUps.push(createdFollowUp);
-                            })
-                        );
-                      }
-
-                      // if there is generated follow ups on that day, delete it and re-create
-                      let existingFollowups = contact.followUpsLists.filter((followUp) => {
-                        return moment(followUp.date).isSame(now, 'd') && helpers.isNewGeneratedFollowup(followUp);
-                      });
-
-                      if (existingFollowups.length) {
-                        // schedule the generated follow up for database add op
-                        contactFollowUpsToAdd.push(Promise.all(
-                          [
-                            app.models.followUp.destroyAll({
-                              id: {
-                                inq: existingFollowups.map((f) => f.id)
-                              }
-                            }),
-                            Promise.all(generatedFollowUps)
-                          ])
-                        );
-                      } else {
-                        contactFollowUpsToAdd.push(...generatedFollowUps);
-                      }
-                    }
-
-                    if (contactFollowUpsToAdd.length) {
-                      followsUpsToAdd.push(Promise.all(contactFollowUpsToAdd));
-                    }
-                  });
-
-                  return Promise.all(followsUpsToAdd).then(() => generateResponse);
+                return FollowupGeneration.generateFollowupsForContact(
+                  contact,
+                  contact.eligibleTeams, {
+                    startDate: followupStartDate,
+                    endDate: followupEndDate
+                  },
+                  outbreakFollowUpFreq,
+                  outbreakFollowUpPerDay,
+                  options,
+                  targeted,
+                  contact.inconclusive
+                ).then((followUps) => {
+                  generatedResponse[index].followUps = followUps;
                 });
-            }
-          })
-          .then((response) => callback(null, response))
-          .catch((err) => callback(err));
-      });
+              })));
+          });
+      })
+      .then(() => callback(null, generatedResponse))
+      .catch((err) => callback(err));
   };
 
   /**
@@ -1366,144 +1256,16 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Count independent transmission chains
-   * @param filter Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
-   * @param callback
+   * (Pre)Process Transmission Chains Filter
+   * @param filter
+   * @return {Promise<{filter: *, personIds: any, endDate: *, activeFilter: *, hasIncludedPeopleFilter: boolean} | never>}
    */
-  Outbreak.prototype.countIndependentTransmissionChains = function (filter, callback) {
+  Outbreak.prototype.preProcessTransmissionChainsFilter = function (filter) {
     const self = this;
-    // define an endDate filter
-    let endDate;
-    // if there's a filter
-    if (filter) {
-      // try and get the end date filter
-      endDate = _.get(filter, 'where.endDate');
+    // set default filter
+    if (!filter) {
+      filter = {};
     }
-    // no end date filter provided
-    if (!endDate) {
-      // end date is current date
-      endDate = new Date();
-    }
-    // initialize a person filter (will contain filters applicable on person entity)
-    let personFilter;
-    // if person filter was sent
-    if (filter && filter.person) {
-      // get it; ask only for IDs
-      personFilter = app.utils.remote
-        .mergeFilters({
-          fields: ['id']
-        }, filter.person);
-      // remove original filter
-      delete filter.person;
-    }
-    // build a find filtered people if necessary
-    let findFilteredPeople;
-    // if we have a person filter
-    if (personFilter) {
-      // find people that match the filter
-      findFilteredPeople = app.models.person
-        .find(personFilter)
-        .then(function (people) {
-          // return their IDs
-          return people.map(person => person.id);
-        });
-    } else {
-      // no filter passed, nothing to do
-      findFilteredPeople = Promise.resolve(null);
-    }
-
-    findFilteredPeople
-      .then(function (personIds) {
-        // if there was a people filter
-        if (personIds) {
-          // make sure both people in a relation match the filter passed
-          filter = app.utils.remote
-            .mergeFilters({
-              where: {
-                'persons.0.id': {
-                  inq: personIds
-                },
-                'persons.1.id': {
-                  inq: personIds
-                }
-              }
-            }, filter);
-        }
-        // count transmission chains
-        app.models.relationship
-          .countTransmissionChains(self.id, self.periodOfFollowup, filter, function (error, noOfChains) {
-            if (error) {
-              return callback(error);
-            }
-            // get node IDs
-            const nodeIds = Object.keys(noOfChains.nodes);
-            // count isolated nodes
-            const isolatedNodesNo = Object.keys(noOfChains.isolatedNodes).reduce(function (accumulator, currentValue) {
-              if (noOfChains.isolatedNodes[currentValue]) {
-                accumulator++;
-              }
-              return accumulator;
-            }, 0);
-
-            // build a filter of isolated nodes
-            let isolatedNodesFilter = {
-              outbreakId: self.id,
-              or: [
-                {
-                  type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                  classification: {
-                    nin: app.models.case.discardedCaseClassifications
-                  }
-                },
-                {
-                  type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
-                }
-              ],
-              id: {
-                nin: nodeIds
-              },
-              dateOfReporting: {
-                lte: endDate
-              }
-            };
-
-            // if there was a people filter
-            if (personIds) {
-              // use it for isolated nodes as well
-              // merge filter knows how to handle filters, but count accepts only 'where'
-              const filter = app.utils.remote
-                .mergeFilters({
-                  where: {
-                    id: {
-                      inq: personIds
-                    }
-                  }
-                }, {where: isolatedNodesFilter});
-              // extract merged 'where' property
-              isolatedNodesFilter = filter.where;
-            }
-            // find other isolated nodes (nodes that were never in a relationship)
-            app.models.person
-              .count(isolatedNodesFilter)
-              .then(function (isolatedNodesCount) {
-                // total list of isolated nodes is composed by the nodes that were never in a relationship + the ones that
-                // come from relationships that were invalidated as part of the chain
-                noOfChains.isolatedNodesCount = isolatedNodesCount + isolatedNodesNo;
-                delete noOfChains.isolatedNodes;
-                delete noOfChains.nodes;
-                callback(null, noOfChains);
-              })
-              .catch(callback);
-          });
-      });
-  };
-
-  /**
-   * Get independent transmission chains
-   * @param filter Note: also accepts 'active' boolean on the first level in 'where'. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
-   * @param callback
-   */
-  Outbreak.prototype.getIndependentTransmissionChains = function (filter, callback) {
     // get active filter
     let activeFilter = _.get(filter, 'where.active');
     // if active filter was sent remove it from the filter
@@ -1511,10 +1273,17 @@ module.exports = function (Outbreak) {
       delete filter.where.active;
     }
 
+    // get size filter
+    let sizeFilter = _.get(filter, 'where.size');
+    // if size filter was sent remove it from the filter
+    if (typeof sizeFilter !== 'undefined') {
+      delete filter.where.size;
+    }
+
     // initialize a person filter (will contain filters applicable on person entity)
     let personFilter;
     // if person filter was sent
-    if (filter && filter.person) {
+    if (filter.person) {
       // get it; ask only for IDs
       personFilter = app.utils.remote
         .mergeFilters({
@@ -1524,38 +1293,63 @@ module.exports = function (Outbreak) {
       delete filter.person;
     }
 
-    const self = this;
-
-    // define an endDate filter
-    let endDate;
-    // if there's a filter
-    if (filter) {
-      // try and get the end date filter
-      endDate = _.get(filter, 'where.endDate');
-    }
+    // try and get the end date filter
+    let endDate = _.get(filter, 'where.endDate');
     // no end date filter provided
     if (!endDate) {
       // end date is current date
       endDate = new Date();
     }
 
-    // build a find filtered people if necessary
-    let findFilteredPeople;
-    // if we have a person filter
-    if (personFilter) {
-      // find people that match the filter
-      findFilteredPeople = app.models.person
-        .find(personFilter)
+    // keep a flag for includedPeopleFilter
+    let includedPeopleFilter = filter.chainIncludesPerson;
+
+    // find relationship IDs for included people filter, if necessary
+    let findRelationshipIdsForIncludedPeople;
+    // if there is a included people filer
+    if (includedPeopleFilter) {
+      // find the relationships that belong to chains which include the filtered people
+      findRelationshipIdsForIncludedPeople = app.models.person
+        .find(includedPeopleFilter)
         .then(function (people) {
-          // return their IDs
-          return people.map(person => person.id);
+          // find relationship chains for the matched people
+          return app.models.relationship.findRelationshipChainsForPeopleIds(self.id, people.map(person => person.id));
+        })
+        .then(function (relationships) {
+          // return relationship ids
+          return Object.keys(relationships);
         });
     } else {
-      // no filter passed, nothing to do
-      findFilteredPeople = Promise.resolve(null);
+      findRelationshipIdsForIncludedPeople = Promise.resolve(null);
     }
 
-    findFilteredPeople
+    // find relationship IDs for included people filter, if necessary
+    return findRelationshipIdsForIncludedPeople
+      .then(function (relationshipIds) {
+        // if something was returned
+        if (relationshipIds) {
+          // use it in the filter
+          filter = app.utils.remote
+            .mergeFilters({
+              where: {
+                id: {
+                  inq: relationshipIds
+                }
+              }
+            }, filter);
+        }
+
+        // if a person filter was used
+        if (personFilter) {
+          // find people that match the filter
+          return app.models.person
+            .find(personFilter)
+            .then(function (people) {
+              // return their IDs
+              return people.map(person => person.id);
+            });
+        }
+      })
       .then(function (personIds) {
         // if there was a people filter
         if (personIds) {
@@ -1572,19 +1366,144 @@ module.exports = function (Outbreak) {
               }
             }, filter);
         }
-        // get transmission chains
+        return personIds;
+      })
+      .then(function (personIds) {
+        // return needed, processed information
+        return {
+          filter: filter,
+          personIds: personIds,
+          endDate: endDate,
+          active: activeFilter,
+          hasIncludedPeople: !!includedPeopleFilter,
+          size: sizeFilter
+        };
+      });
+  };
+
+  /**
+   * Post process/filter transmission chains
+   * @param filter
+   * @param dataSet
+   * @return {{transmissionChains: {chains: Array, length: number}, nodes: {}, edges: {}}}
+   */
+  Outbreak.prototype.postProcessTransmissionChains = function (filter, dataSet) {
+    // define result structure
+    const result = {
+      transmissionChains: {
+        chains: [],
+        length: 0
+      },
+      nodes: {},
+      edges: {}
+    };
+    // keep an index of people that pass the filters
+    const filteredChainPeopleIndex = {};
+    // go through all the chains
+    dataSet.transmissionChains.chains.forEach(function (transmissionChain) {
+      // keep a flag for chain passing all filters
+      let addTransmissionChain = true;
+
+      // check if size filter is present
+      if (filter.size != null) {
+        // apply size filter
+        addTransmissionChain = (addTransmissionChain && (transmissionChain.size === filter.size));
+      }
+
+      // check if active filter is present
+      if (filter.active != null) {
+        addTransmissionChain = (addTransmissionChain && (transmissionChain.active === filter.active));
+      }
+
+      // if the chain passed all filters
+      if (addTransmissionChain) {
+        // add it to the result
+        result.transmissionChains.chains.push(transmissionChain);
+        // update people index
+        transmissionChain.chain.forEach(function (peoplePair) {
+          // map each person from the chain into the index
+          peoplePair.forEach(function (personId) {
+            filteredChainPeopleIndex[personId] = true;
+          });
+        });
+      }
+    });
+
+    // update transmission chains no
+    result.transmissionChains.length = result.transmissionChains.chains.length;
+
+    // keep an index of nodes that should be kept
+    const nodesToKeepIndex = {};
+    // filter edges, should contain only the indexed people (people that passed the filters)
+    Object.keys(dataSet.edges).forEach(function (edgeId) {
+      // get the edge
+      const edge = dataSet.edges[edgeId];
+      // if at least one person found in the index (case/event-contact relationships will have only one person in the index)
+      if (filteredChainPeopleIndex[edge.persons[0].id] || filteredChainPeopleIndex[edge.persons[1].id]) {
+        // keep the edge
+        result.edges[edgeId] = edge;
+        // keep both nodes
+        nodesToKeepIndex[edge.persons[0].id] = true;
+        nodesToKeepIndex[edge.persons[1].id] = true;
+      }
+    });
+    // go through all the nodes
+    Object.keys(dataSet.nodes).forEach(function (nodeId) {
+      // if the node should be kept
+      if (nodesToKeepIndex[nodeId]) {
+        // store it in the result
+        result.nodes[nodeId] = dataSet.nodes[nodeId];
+      }
+    });
+    // return processed result
+    return result;
+  };
+
+  /**
+   * Count independent transmission chains
+   * @param filter Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
+   * @param callback
+   */
+  Outbreak.prototype.countIndependentTransmissionChains = function (filter, callback) {
+    const self = this;
+    // processed filter
+    this.preProcessTransmissionChainsFilter(filter)
+      .then(function (processedFilter) {
+
+        // use processed filters
+        filter = processedFilter.filter;
+        const personIds = processedFilter.personIds;
+        const endDate = processedFilter.endDate;
+        const hasIncludedPeopleFilter = processedFilter.hasIncludedPeople;
+
+        // count transmission chains
         app.models.relationship
-          .getTransmissionChains(self.id, self.periodOfFollowup, filter, function (error, transmissionChains) {
+          .countTransmissionChains(self.id, self.periodOfFollowup, filter, function (error, noOfChains) {
             if (error) {
               return callback(error);
             }
 
-            // initialize result
-            let result;
+            // if we have includedPeopleFilter, we don't need isolated nodes
+            if (hasIncludedPeopleFilter) {
 
-            // initialize isolated nodes filter
-            let isolatedNodesFilter = {
-              where: {
+              delete noOfChains.isolatedNodes;
+              delete noOfChains.nodes;
+              callback(null, noOfChains);
+
+              // no includedPeopleFilter, add isolated nodes
+            } else {
+              // get node IDs
+              const nodeIds = Object.keys(noOfChains.nodes);
+              // count isolated nodes
+              const isolatedNodesNo = Object.keys(noOfChains.isolatedNodes).reduce(function (accumulator, currentValue) {
+                if (noOfChains.isolatedNodes[currentValue]) {
+                  accumulator++;
+                }
+                return accumulator;
+              }, 0);
+
+              // build a filter of isolated nodes
+              let isolatedNodesFilter = {
                 outbreakId: self.id,
                 or: [
                   {
@@ -1597,127 +1516,188 @@ module.exports = function (Outbreak) {
                     type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
                   }
                 ],
+                id: {
+                  nin: nodeIds
+                },
                 dateOfReporting: {
                   lte: endDate
                 }
-              }
-            };
+              };
 
-            // if there was a people filter
-            if (personIds) {
-              // use it for isolated nodes as well
+              // if there was a people filter
+              if (personIds) {
+                // use it for isolated nodes as well
+                // merge filter knows how to handle filters, but count accepts only 'where'
+                const filter = app.utils.remote
+                  .mergeFilters({
+                    where: {
+                      id: {
+                        inq: personIds
+                      }
+                    }
+                  }, {where: isolatedNodesFilter});
+                // extract merged 'where' property
+                isolatedNodesFilter = filter.where;
+              }
+              // find other isolated nodes (nodes that were never in a relationship)
+              app.models.person
+                .count(isolatedNodesFilter)
+                .then(function (isolatedNodesCount) {
+                  // total list of isolated nodes is composed by the nodes that were never in a relationship + the ones that
+                  // come from relationships that were invalidated as part of the chain
+                  noOfChains.isolatedNodesCount = isolatedNodesCount + isolatedNodesNo;
+                  delete noOfChains.isolatedNodes;
+                  delete noOfChains.nodes;
+                  callback(null, noOfChains);
+                })
+                .catch(callback);
+            }
+          });
+      });
+  };
+
+  /**
+   * Get independent transmission chains
+   * @param filter Note: also accepts 'active' boolean on the first level in 'where'. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
+   * @param callback
+   */
+  Outbreak.prototype.getIndependentTransmissionChains = function (filter, callback) {
+    const self = this;
+    // process filters
+    this.preProcessTransmissionChainsFilter(filter)
+      .then(function (processedFilter) {
+        // use processed filters
+        filter = processedFilter.filter;
+        const personIds = processedFilter.personIds;
+        const endDate = processedFilter.endDate;
+        const activeFilter = processedFilter.active;
+        const hasIncludedPeopleFilter = processedFilter.hasIncludedPeople;
+        const sizeFilter = processedFilter.size;
+
+        // get transmission chains
+        app.models.relationship
+          .getTransmissionChains(self.id, self.periodOfFollowup, filter, function (error, transmissionChains) {
+            if (error) {
+              return callback(error);
+            }
+
+            // apply post filtering/processing
+            transmissionChains = self.postProcessTransmissionChains({
+              active: activeFilter,
+              size: sizeFilter
+            }, transmissionChains);
+
+            // determine if isolated nodes should be included
+            const shouldIncludeIsolatedNodes = (
+              // there is no size filter
+              (sizeFilter == null) &&
+              // no included people filter
+              !hasIncludedPeopleFilter);
+
+            // initialize isolated nodes filter
+            let isolatedNodesFilter;
+
+            // build isolated nodes filter only if needed
+            if (shouldIncludeIsolatedNodes) {
+              // initialize isolated nodes filter
+              isolatedNodesFilter = {
+                where: {
+                  outbreakId: self.id,
+                  or: [
+                    {
+                      type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                      classification: {
+                        nin: app.models.case.discardedCaseClassifications
+                      }
+                    },
+                    {
+                      type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                    }
+                  ],
+                  dateOfReporting: {
+                    lte: endDate
+                  }
+                }
+              };
+
+              // if there was a people filter
+              if (personIds) {
+                // use it for isolated nodes as well
+                isolatedNodesFilter = app.utils.remote
+                  .mergeFilters({
+                    where: {
+                      id: {
+                        inq: personIds
+                      }
+                    }
+                  }, isolatedNodesFilter);
+              }
+            }
+
+            // depending on activeFilter we need to filter the transmissionChains
+            if (typeof activeFilter !== 'undefined') {
+
+              // update isolated nodes filter only if needed
+              if (shouldIncludeIsolatedNodes) {
+
+                // update isolated nodes filter depending on active filter value
+                let followUpPeriod = self.periodOfFollowup;
+                // get day of the start of the follow-up period starting from specified end date (by default, today)
+                let followUpStartDate = genericHelpers.getUTCDate(endDate).subtract(followUpPeriod, 'days');
+
+                if (activeFilter) {
+                  // get cases/events reported in the last followUpPeriod days
+                  isolatedNodesFilter = app.utils.remote
+                    .mergeFilters({
+                      where: {
+                        dateOfReporting: {
+                          gte: new Date(followUpStartDate)
+                        }
+                      }
+                    }, isolatedNodesFilter);
+                } else {
+                  // get cases/events reported earlier than in the last followUpPeriod days
+                  isolatedNodesFilter = app.utils.remote
+                    .mergeFilters({
+                      where: {
+                        dateOfReporting: {
+                          lt: new Date(followUpStartDate)
+                        }
+                      }
+                    }, isolatedNodesFilter);
+                }
+              }
+            } else {
+              // if isolated nodes don't need to be included, stop here
+              if (!shouldIncludeIsolatedNodes) {
+                callback(null, transmissionChains);
+              }
+            }
+
+            // look for isolated nodes, if needed
+            if (shouldIncludeIsolatedNodes) {
+              // update isolated nodes filter
               isolatedNodesFilter = app.utils.remote
                 .mergeFilters({
                   where: {
                     id: {
-                      inq: personIds
+                      nin: Object.keys(transmissionChains.nodes)
                     }
                   }
                 }, isolatedNodesFilter);
-            }
-            // depending on activeFilter we need to filter the transmissionChains
-            if (typeof activeFilter !== 'undefined') {
-              result = {
-                transmissionChains: {
-                  chains: []
-                },
-                nodes: {},
-                edges: {}
-              };
 
-              // initialize helper nodes to select map
-              let nodesToSelectMap = {};
-
-              // filter the transmission chains based on the activeFilter
-              let chains = _.get(transmissionChains, 'transmissionChains.chains');
-              chains.forEach(function (chain) {
-                if (chain.active === activeFilter) {
-                  // add chain in result
-                  result.transmissionChains.chains.push(chain);
-
-                  // get nodes in the chain if not already selected
-                  chain.chain.forEach(function (edgeComponents) {
-                    edgeComponents.forEach(function (comp) {
-                      if (!nodesToSelectMap[comp]) {
-                        nodesToSelectMap[comp] = true;
-                      }
-                    });
+              // get isolated nodes as well (nodes that were never part of a relationship)
+              app.models.person
+                .find(isolatedNodesFilter)
+                .then(function (isolatedNodes) {
+                  // add all the isolated nodes to the complete list of nodes
+                  isolatedNodes.forEach(function (isolatedNode) {
+                    transmissionChains.nodes[isolatedNode.id] = isolatedNode.toJSON();
                   });
-                }
-              });
-
-              // get chains length
-              result.transmissionChains.length = result.transmissionChains.chains.length;
-
-              // select edges/nodes for the required nodes
-              let nodesToSelect = Object.keys(nodesToSelectMap);
-              if (nodesToSelect.length) {
-                // get edges
-                let edges = _.get(transmissionChains, 'edges', {});
-                Object.keys(edges).forEach(function (edgeId) {
-                  let edge = edges[edgeId];
-                  // add edge in result if needed
-                  if (nodesToSelectMap[edge.persons[0].id] || nodesToSelectMap[edge.persons[1].id]) {
-                    result.edges[edgeId] = edge;
-                  }
-                });
-
-                // get nodes
-                let nodes = _.get(transmissionChains, 'nodes', {});
-                nodesToSelect.forEach(nodeId => result.nodes[nodeId] = nodes[nodeId]);
-              }
-
-              // update isolated nodes filter depending on active filter value
-              let followUpPeriod = self.periodOfFollowup;
-              // get day of the start of the follow-up period starting from specified end date (by default, today)
-              let followUpStartDate = genericHelpers.getUTCDate(endDate).subtract(followUpPeriod, 'days');
-
-              if (activeFilter) {
-                // get cases/events reported in the last followUpPeriod days
-                isolatedNodesFilter = app.utils.remote
-                  .mergeFilters({
-                    where: {
-                      dateOfReporting: {
-                        gte: new Date(followUpStartDate)
-                      }
-                    }
-                  }, isolatedNodesFilter);
-              } else {
-                // get cases/events reported earlier than in the last followUpPeriod days
-                isolatedNodesFilter = app.utils.remote
-                  .mergeFilters({
-                    where: {
-                      dateOfReporting: {
-                        lt: new Date(followUpStartDate)
-                      }
-                    }
-                  }, isolatedNodesFilter);
-              }
-            } else {
-              result = transmissionChains;
+                  callback(null, transmissionChains);
+                })
+                .catch(callback);
             }
-
-            // update isolated nodes filter
-            isolatedNodesFilter = app.utils.remote
-              .mergeFilters({
-                where: {
-                  id: {
-                    nin: Object.keys(result.nodes)
-                  }
-                }
-              }, isolatedNodesFilter);
-
-            // get isolated nodes as well (nodes that were never part of a relationship)
-            app.models.person
-              .find(isolatedNodesFilter)
-              .then(function (isolatedNodes) {
-                // add all the isolated nodes to the complete list of nodes
-                isolatedNodes.forEach(function (isolatedNode) {
-                  result.nodes[isolatedNode.id] = isolatedNode.toJSON();
-                });
-                callback(null, result);
-              })
-              .catch(callback);
           });
       });
   };
@@ -1760,9 +1740,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactsSeen = function (filter, callback) {
-    helpers.countContactsByFollowUpFlag({
+    helpers.countContactsByFollowUpFilter({
       outbreakId: this.id,
-      followUpFlag: 'performed',
+      followUpFilter: app.models.followUp.seenFilter,
       resultProperty: 'contactsSeenCount'
     }, filter, callback);
   };
@@ -1771,14 +1751,32 @@ module.exports = function (Outbreak) {
    * Count the contacts that are lost to follow-up
    * Note: The contacts are counted in total and per team. If a contact is lost to follow-up by 2 teams it will be counted once in total and once per each team.
    * @param filter
-   * @param callback
    */
-  Outbreak.prototype.countContactsLostToFollowup = function (filter, callback) {
-    helpers.countContactsByFollowUpFlag({
-      outbreakId: this.id,
-      followUpFlag: 'lostToFollowUp',
-      resultProperty: 'contactsLostToFollowupCount'
-    }, filter, callback);
+  Outbreak.prototype.countContactsLostToFollowup = function (filter) {
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // create filter as we need to use it also after the relationships are found
+    let _filter = app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId,
+          followUp: {
+            neq: null
+          },
+          'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP'
+        }
+      }, filter || {});
+
+    // get all relationships between events and contacts, where the contacts were created sooner than 'noDaysNewContacts' ago
+    return app.models.contact
+      .find(_filter)
+      .then(function (contacts) {
+        return {
+          contactsLostToFollowupCount: contacts.length,
+          contactIDs: contacts.map((contact) => contact.id)
+        };
+      });
   };
 
   /**
@@ -2368,42 +2366,31 @@ module.exports = function (Outbreak) {
     app.models.followUp.find(app.utils.remote
       .mergeFilters({
         where: {
-          outbreakId: outbreakId,
-          // get follow-ups that were scheduled in the past noDaysNotSeen days
-          date: {
-            between: [xDaysAgo, now]
-          }
+          and: [
+            {
+              outbreakId: outbreakId
+            },
+            {
+              // get follow-ups that were scheduled in the past noDaysNotSeen days
+              date: {
+                between: [xDaysAgo, now]
+              }
+            },
+            app.models.followUp.notSeenFilter
+          ]
         },
         // order by date as we need to check the follow-ups from the oldest to the most new
         order: 'date ASC'
       }, filter || {}))
       .then(function (followUps) {
-        // filter by relation properties
-        followUps = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followUps, filter);
-        // initialize contacts map; helper to not count contacts twice and keep the seen value;
-        // once a contact is seen the newer follow-ups for the same contact don't matter
-        let contactsMap = {};
-
-        // loop through the followups to get unique contacts
-        followUps.forEach(function (followUp) {
-          // check if there is an entry for the personId or if it is false; In this case, override with current seen flag
-          if (!contactsMap[followUp.personId]) {
-            // set value in the contacts map as the performed flag
-            contactsMap[followUp.personId] = followUp.performed;
-          }
-        });
-
-        // get the contacts not seen from the contacts map
-        let notSeenContactsIDs = Object.keys(contactsMap).filter(contactId => !contactsMap[contactId]);
-
-        // create result
-        let result = {
-          contactsCount: notSeenContactsIDs.length,
-          contactIDs: notSeenContactsIDs
-        };
+        // get contact ids (duplicates are removed) from all follow ups
+        let contactIDs = [...new Set(followUps.map((followUp) => followUp.personId))];
 
         // send response
-        callback(null, result);
+        callback(null, {
+          contactsCount: contactIDs.length,
+          contactIDs: contactIDs
+        });
       })
       .catch(callback);
   };
@@ -2414,6 +2401,8 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactsWithSuccessfulFollowups = function (filter, callback) {
+    const FollowUp = app.models.followUp;
+
     // initialize result
     let result = {
       totalContactsWithFollowupsCount: 0,
@@ -2426,7 +2415,7 @@ module.exports = function (Outbreak) {
     let outbreakId = this.id;
 
     // get all the followups for the filtered period
-    app.models.followUp.find(app.utils.remote
+    FollowUp.find(app.utils.remote
       .mergeFilters({
         where: {
           outbreakId: outbreakId
@@ -2455,8 +2444,8 @@ module.exports = function (Outbreak) {
             // if the previous followup was performed there is no need to update any team contacts counter;
             // total and successful counters were already updated
             if (contactsTeamMap[contactId].teams[teamId]) {
-              // new follow-up for the contact from the same team is performed; update flag and increase succcessful counter
-              if (!contactsTeamMap[contactId].teams[teamId].performed && followup.performed === true) {
+              // new follow-up for the contact from the same team is performed; update flag and increase successful counter
+              if (!contactsTeamMap[contactId].teams[teamId].performed && FollowUp.isPerformed(followup) === true) {
                 // update performed flag
                 contactsTeamMap[contactId].teams[teamId].performed = true;
                 // increase successful counter for team
@@ -2469,7 +2458,7 @@ module.exports = function (Outbreak) {
               // new teamId
               // cache followup performed information for contact in team
               contactsTeamMap[contactId].teams[teamId] = {
-                performed: followup.performed
+                performed: FollowUp.isPerformed(followup)
               };
 
               // initialize team entry if doesn't already exist
@@ -2485,7 +2474,7 @@ module.exports = function (Outbreak) {
 
               // increase team counters
               teamsMap[teamId].totalContactsWithFollowupsCount++;
-              if (followup.performed) {
+              if (FollowUp.isPerformed(followup)) {
                 teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
                 // keep contactId in the followedUpContactsIDs list
                 teamsMap[teamId].followedUpContactsIDs.push(contactId);
@@ -2506,10 +2495,10 @@ module.exports = function (Outbreak) {
             contactsTeamMap[contactId] = {
               teams: {
                 [teamId]: {
-                  performed: followup.performed
+                  performed: FollowUp.isPerformed(followup)
                 }
               },
-              performed: followup.performed,
+              performed: FollowUp.isPerformed(followup),
             };
 
             // increase overall counters
@@ -2528,7 +2517,7 @@ module.exports = function (Outbreak) {
 
             // increase team counters
             teamsMap[teamId].totalContactsWithFollowupsCount++;
-            if (followup.performed) {
+            if (FollowUp.isPerformed(followup)) {
               teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
               // keep contactId in the followedUpContactsIDs list
               teamsMap[teamId].followedUpContactsIDs.push(contactId);
@@ -2542,7 +2531,7 @@ module.exports = function (Outbreak) {
 
           // update total follow-ups counter for contact
           contactsMap[contactId].totalFollowupsCount++;
-          if (followup.performed) {
+          if (FollowUp.isPerformed(followup)) {
             // update counter for contact successful follow-ups
             contactsMap[contactId].successfulFollowupsCount++;
 
@@ -2655,7 +2644,7 @@ module.exports = function (Outbreak) {
           teamsMap[teamId].dates[dateIndexInTeam].totalFollowupsCount++;
           teamsMap[teamId].totalFollowupsCount++;
 
-          if (followup.performed) {
+          if (app.models.followUp.isPerformed(followup)) {
             teamsMap[teamId].dates[dateIndexInTeam].successfulFollowupsCount++;
             teamsMap[teamId].successfulFollowupsCount++;
             result.successfulFollowupsCount++;
@@ -3416,7 +3405,7 @@ module.exports = function (Outbreak) {
           where: {
             outbreakId: outbreakId
           },
-          fields: ['id', 'personId', 'performed'],
+          fields: ['id', 'personId', 'statusId'],
           // order by date as we need to check the follow-ups from the oldest to the most recent
           order: 'date ASC'
         }, filter || {}))
@@ -3432,11 +3421,9 @@ module.exports = function (Outbreak) {
           let contactId = followup.personId;
 
           // add in the contacts map the follow-up ID if it was not performed
-          if (!followup.performed) {
+          if (followup.statusId === 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED' &&
+            !contactsMap[followup.personId]) {
             contactsMap[contactId] = followup.id;
-          } else {
-            // reset the contactId entry in the map to null if the newer follow-up was performed
-            contactsMap[contactId] = null;
           }
         });
 
@@ -3451,9 +3438,7 @@ module.exports = function (Outbreak) {
             .mergeFilters({
               where: {
                 id: {
-                  // look only for the follow-ups found above
                   inq: Object.values(contactsMap)
-                    .filter(followUp => followUp)
                 },
                 outbreakId: outbreakId,
               },
@@ -5039,7 +5024,7 @@ module.exports = function (Outbreak) {
             // get retrieved follow-up; is the latest that should have been performed
             let followUp = contact.toJSON().followUps[0];
             // check if the follow-up was performed
-            if (followUp && followUp.performed) {
+            if (followUp && app.models.followUp.isPerformed(followUp)) {
               // update contactsSeenOnDateCount
               locationMap[contactLocationId].contactsSeenOnDateCount++;
               result.contactsSeenOnDateCount++;
@@ -5670,33 +5655,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Find transmission chains which include people that matched the filter
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.findTransmissionChainsForFilteredPeople = function (filter, callback) {
-    app.models.relationship.findTransmissionChainsForFilteredPeople(this.id, this.periodOfFollowup, filter)
-      .then(function (chains) {
-        callback(null, chains);
-      })
-      .catch(callback);
-  };
-
-  /**
-   * Since this endpoint returns person data without checking if the user has the required read permissions,
-   * check the user's permissions and return only the fields he has access to
-   */
-  Outbreak.afterRemote('prototype.findTransmissionChainsForFilteredPeople', function (context, modelInstance, next) {
-    let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
-
-    Object.keys(modelInstance.nodes).forEach((key) => {
-      Outbreak.helpers.limitPersonInformation(modelInstance.nodes[key], personTypesWithReadAccess);
-    });
-    next();
-  });
-
-
-  /**
    * Export an empty case investigation for an existing case (has qrCode)
    * @param caseId
    * @param options
@@ -6312,6 +6270,255 @@ module.exports = function (Outbreak) {
         }
         // everything went fine
         return callback(null, result.created);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Returns a pdf list, containing the outbreak's cases, distributed by location and classification
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.downloadCaseClassificationPerLocationLevelReport = function (filter, options, callback) {
+    const self = this;
+    const languageId = options.remotingContext.req.authData.user.languageId;
+    // Get the dictionary so we can translate the case classifications and other neccessary fields
+    app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
+      app.models.person.getPeoplePerLocation('case', filter, self)
+        .then((result) => {
+          // Get all existing case classification so we know how many rows the list will have
+          return app.models.referenceData.find({
+            where: {
+              categoryId: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION'
+            }
+          })
+            .then(classification => [classification, result]);
+        })
+        .then((result) => {
+          let caseClassifications = result[0];
+          let caseDistribution = result[1];
+          let headers = [];
+          // Initialize data as an object to easily distribute cases per classification. This will be changed to an array later.
+          let data = {};
+
+          // Create the list headers. These contain 2 custom headers (case type and total number of cases),
+          // and all the reporting level locations
+          headers.push({
+            id: 'type',
+            header: dictionary.getTranslation('LNG_LIST_HEADER_CASE_CLASSIFICATION')
+          });
+
+          caseDistribution.forEach((dataObj) => {
+            headers.push({
+              id: dataObj.location.id,
+              header: dataObj.location.name
+            });
+          });
+
+          headers.push({
+            id: 'total',
+            header: dictionary.getTranslation('LNG_LIST_HEADER_TOTAL')
+          });
+
+          // Add all existing classifications to the data object
+          caseClassifications.forEach((caseClassification) => {
+            if (!app.models.case.invalidCaseClassificationsForReports.includes(caseClassification.value)) {
+              data[caseClassification.value] = {
+                type: dictionary.getTranslation(caseClassification.value),
+                total: 0
+              };
+            }
+          });
+
+          // Since deceased is not a classification but is relevant to the report, add it separately
+          data.deceased = {
+            type: dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED'),
+            total: 0
+          };
+
+          // Initialize all counts per location with 0 for each case classification (including deceased)
+          Object.keys(data).forEach((key) => {
+            caseDistribution.forEach((dataObj) => {
+              data[key][dataObj.location.id] = 0;
+            });
+          });
+
+          // Go through all the cases and increment the relevent case counts
+          caseDistribution.forEach((dataObj) => {
+            dataObj.people.forEach((caseModel) => {
+              let caseLatestLocation = _.find(caseModel.addresses, ['typeId', 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE']).locationId;
+              if (caseModel.deceased) {
+                data.deceased[caseLatestLocation]++;
+                data.deceased.total++;
+              } else {
+                data[caseModel.classification][caseLatestLocation]++;
+                data[caseModel.classification].total++;
+              }
+            });
+          });
+
+          // Create the pdf list file
+          return app.utils.helpers.exportListFile(headers, Object.values(data), 'pdf', 'Case distribution per location');
+        })
+        .then(function (file) {
+          // and offer it for download
+          app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Test.${file.extension}`, callback);
+        })
+        .catch(callback);
+    });
+  };
+
+  /**
+   * Return a collection of items that contain a location and the cases that belong to that location.
+   * Structure the data so that the response is consistent with other similar requests.
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countCasesPerLocationLevel = function (filter, callback) {
+    app.models.person.getPeoplePerLocation('case', filter, this)
+      .then((result) => {
+        let response = {locations: []};
+        let allCasesCount = 0;
+        result.forEach((dataSet) => {
+          dataSet.casesCount = dataSet.people.length;
+          allCasesCount += dataSet.people.length;
+          dataSet.caseIds = dataSet.people.map(caseModel => caseModel.id);
+          delete dataSet.people;
+          response.locations.push(dataSet);
+        });
+        response.count = allCasesCount;
+        callback(null, response);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Returns a pdf list, containing the outbreak's contacts, distributed by location and follow-up status
+   * @param filter -> accepts custom parameter <dateOfFollowUp>. It mentions the date for which we are checking if the contact has been seen or not
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.downloadContactTracingPerLocationLevelReport = function (filter, options, callback) {
+    const self = this;
+    const languageId = options.remotingContext.req.authData.user.languageId;
+    let selectedDayForReport;
+
+    // Get the dictionary so we can translate the case classifications and other neccessary fields
+    app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
+      app.models.person.getPeoplePerLocation('contact', filter, self)
+        .then((result) => {
+          // Initiate the headers for the contact tracing per location pdf list
+          let headers = [
+            {
+              id: 'location',
+              header: dictionary.getTranslation(self.reportingGeographicalLevelId)
+            },
+            {
+              id: 'underFollowUp',
+              header: dictionary.getTranslation('LNG_LIST_HEADER_UNDER_FOLLOWUP')
+            },
+            {
+              id: 'seenOnDay',
+              header: dictionary.getTranslation('LNG_LIST_HEADER_SEEN_ON_DAY')
+            },
+            {
+              id: 'coverage',
+              header: '%'
+            },
+            {
+              id: 'registered',
+              header: dictionary.getTranslation('LNG_LIST_HEADER_REGISTERED')
+            },
+            {
+              id: 'released',
+              header: dictionary.getTranslation('LNG_LIST_HEADER_RELEASED')
+            },
+            {
+              id: 'expectedRelease',
+              header: dictionary.getTranslation('LNG_LIST_HEADER_EXPECTED_RELEASE')
+            }
+          ];
+
+          let data = [];
+          result.forEach((dataObj) => {
+            // Define the base form of the data for one row of the pdf list
+            let row = {
+              location: dataObj.location.name,
+              underFollowUp: 0,
+              seenOnDay: 0,
+              coverage: 0,
+              registered: 0,
+              released: 0,
+              expectedRelease: dataObj.people.length ? moment(dataObj.people[0].followUp.endDate).format('ll') : '-'
+            };
+
+            // Update the row's values according to each contact's details
+            dataObj.people.forEach((contact) => {
+              row.registered++;
+
+              // Any status other than under follow-up will make the contact be considered as released.
+              if (contact.followUp.status === 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP') {
+                row.underFollowUp++;
+
+                // The contact can be seen only if he is under follow
+                if (contact.followUps.length) {
+                  let completedFollowUp = _.find(contact.followUps, function (followUp) {
+                    return ['LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK',
+                      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK'].includes(followUp.statusId);
+                  });
+                  if (completedFollowUp) {
+                    // Get the date of the selected day for report to add to the pdf title
+                    if (!selectedDayForReport) {
+                      selectedDayForReport = moment(completedFollowUp.date).format('ll');
+                    }
+                    row.seenOnDay++;
+                  }
+
+                  // What percentage of the contacts under followUp have been seen on the specified date.
+                  row.coverage = row.seenOnDay / row.underFollowUp * 100;
+                }
+
+              } else {
+                row.released++;
+              }
+            });
+            data.push(row);
+          });
+
+          // Create the pdf list file
+          return app.utils.helpers.exportListFile(headers, data, 'pdf', `Contact tracing ${selectedDayForReport}`);
+        })
+        .then(function (file) {
+          // and offer it for download
+          app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Test.${file.extension}`, callback);
+        })
+        .catch((error) => {
+          callback(error);
+        });
+    });
+  };
+
+  /**
+   * Return a collection of items that contain a location and the contacts that belong to that location.
+   * Structure the data so that the response is consistent with other similar requests.
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countContactsPerLocationLevel = function (filter, callback) {
+    app.models.person.getPeoplePerLocation('contact', filter, this)
+      .then((result) => {
+        let response = {locations: []};
+        let allContactsCount = 0;
+        result.forEach((dataSet) => {
+          dataSet.contactsCount = dataSet.people.length;
+          allContactsCount += dataSet.people.length;
+          dataSet.contactIds = dataSet.people.map(contact => contact.id);
+          delete dataSet.people;
+          response.locations.push(dataSet);
+        });
+        response.count = allContactsCount;
+        callback(null, response);
       })
       .catch(callback);
   };

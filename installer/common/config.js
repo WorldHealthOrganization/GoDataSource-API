@@ -13,6 +13,10 @@ const sources = {
   dataSources: {
     path: `${__dirname}/../../server/datasources.json`,
     data: require('../../server/datasources')
+  },
+  package: {
+    path: `${__dirname}/../../package.json`,
+    data: require('../../package')
   }
 };
 
@@ -153,6 +157,28 @@ const cliArguments = {
   smtpPassword: {
     source: sources.dataSources,
     paramPath: 'email.transports.0.auth.pass',
+    get: {
+      convertor: e => e
+    },
+    set: {
+      allowed: true,
+      convertor: e => e
+    }
+  },
+  buildType: {
+    source: sources.package,
+    paramPath: 'build.type',
+    get: {
+      convertor: e => e
+    },
+    set: {
+      allowed: true,
+      convertor: e => e
+    }
+  },
+  buildPlatform: {
+    source: sources.package,
+    paramPath: 'build.platform',
     get: {
       convertor: e => e
     },

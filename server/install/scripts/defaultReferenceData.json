@@ -335,5 +335,16 @@
     "Admin Level 8",
     "Admin Level 9",
     "Admin Level 10"
+  ],
+  "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE": [
+    "Not Performed",
+    "Seen Ok",
+    "Seen Not Ok",
+    "Missed"
+  ],
+  "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE": [
+    "Under Follow-up",
+    "Follow-up Completed",
+    "Lost To Follow-up"
   ]
 }

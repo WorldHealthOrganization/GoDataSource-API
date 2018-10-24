@@ -8,11 +8,42 @@ module.exports = function (FollowUp) {
   // set flag to not get controller
   FollowUp.hasController = false;
 
+  // filter for seen follow ups
+  FollowUp.seenFilter = {
+    or: [
+      {
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK'
+      },
+      {
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK'
+      }
+    ]
+  };
+
+  // filter for not seen follow ups
+  FollowUp.notSeenFilter = {
+    or: [
+      {
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
+      },
+      {
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED'
+      }
+    ]
+  };
+
+  // helper functions that indicates if a follow up is performed
+  FollowUp.isPerformed = function (obj) {
+    return [
+      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK',
+      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK',
+      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED'
+    ].indexOf(obj.statusId) >= 0;
+  };
+
   // map language token labels for model properties
   FollowUp.fieldLabelsMap = {
     'date': 'LNG_FOLLOW_UP_FIELD_LABEL_DATE',
-    'performed': 'LNG_FOLLOW_UP_FIELD_LABEL_PERFORMED',
-    'lostToFollowUp': 'LNG_FOLLOW_UP_FIELD_LABEL_LOST_TO_FOLLOW_UP',
     'address': 'LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS',
     'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
     'address.country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
@@ -30,12 +61,15 @@ module.exports = function (FollowUp) {
     'fillGeolocation.lng': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG',
     'index': 'LNG_FOLLOW_UP_FIELD_LABEL_INDEX',
     'teamId': 'LNG_FOLLOW_UP_FIELD_LABEL_TEAM',
+    'statusId': 'LNG_FOLLOW_UP_FIELD_LABEL_STATUSID',
     'isGenerated': 'LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED',
+    'targeted': 'LNG_FOLLOW_UP_FIELD_LABEL_TARGETED',
     'questionnaireAnswers': 'LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE'
   };
 
   FollowUp.referenceDataFieldsToCategoryMap = {
-    'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE'
+    'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE',
+    'statusId': 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE'
   };
 
   FollowUp.referenceDataFields = Object.keys(FollowUp.referenceDataFieldsToCategoryMap);
@@ -47,8 +81,8 @@ module.exports = function (FollowUp) {
 
   FollowUp.printFieldsinOrder = [
     'date',
-    'performed',
-    'lostToFollowUp',
+    'statusId',
+    'targeted',
     'address',
     'index',
     'teamId'
@@ -75,34 +109,116 @@ module.exports = function (FollowUp) {
   };
 
   /**
-   * Enhance follow up save to include index of the created follow up
+   * Get contact current address (if needed: if follow-up does not have an address set)
+   * @param modelInstance
+   * @return {*}
    */
-  FollowUp.observe('before save', function (ctx, next) {
-    // we are interested only on new instances and on actions different than sync
-    if (!ctx.isNewInstance || (ctx.options && ctx.options._sync)) {
-      return next();
+  function getContactCurrentAddressIfNeeded(modelInstance) {
+    // if the model instance has an address (check locationId (required field with no default value),
+    // loopback automatically adds address object with default values) or is not linked to a person
+    if (modelInstance.address && modelInstance.address.locationId || !modelInstance.personId) {
+      // nothing left to do
+      return Promise.resolve();
+    } else {
+      // find contact
+      return app.models.person
+        .findById(modelInstance.personId)
+        .then((person) => {
+          // ignore if not found (it's better to return an orphaned follow-up in a list instead of failing)
+          if (!person) {
+            return;
+          }
+          // if found, get current address
+          let contactAddress = person.getCurrentAddress();
+          // if current address present
+          if (contactAddress) {
+            // update follow-up address
+            modelInstance.address = contactAddress;
+          }
+        });
     }
+  }
 
-    // retrieve the owner of the follow up to fetch followup original date
-    app.models.person
-      .findById(ctx.instance.personId)
+
+  /**
+   * Loaded hooks
+   */
+  FollowUp.observe('loaded', function (context, next) {
+    getContactCurrentAddressIfNeeded(context.data)
+      .then(
+        () => next()
+      )
+      .catch(next);
+  });
+
+  /**
+   * Update follow-up index (if needed)
+   * @param context
+   * @return {*}
+   */
+  function setFollowUpIndexIfNeeded(context) {
+    // this needs to be done only for new instances (and not for sync)
+    if (!context.isNewInstance || (context.options && context.options._sync)) {
+      return Promise.resolve();
+    }
+    return app.models.person
+      .findById(context.instance.personId)
       .then((person) => {
-        // if follow up is not within configured start/end dates throw error
-        let startDate = moment(person.followUp.originalStartDate);
-        let endDate = moment(person.followUp.endDate);
-        if (!moment(ctx.instance.date).startOf('day').isBetween(startDate, endDate, 'day', '[]')) {
-          return next(app.utils.apiError.getError('INVALID_FOLLOW_UP_DATE', {
-            startDate: startDate,
-            endDate: endDate
-          }));
+        if (!person) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.person.modelName,
+            id: context.instance.personId
+          });
         }
-
         // set index based on the difference in days from start date until the follow up set date
         // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
-        ctx.instance.index = daysSince(person.followUp.originalStartDate, ctx.instance.date) + 1;
+        context.instance.index = daysSince(moment(person.followUp.startDate), context.instance.date) + 1;
+      });
+  }
 
-        return next();
-      })
+  /**
+   * Set follow-up address, if needed
+   * @param context
+   * @return {*}
+   */
+  function setFollowUpAddressIfNeeded(context) {
+    // get data from context
+    const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
+    // check if follow-up has an address
+    let hasAddress = _.get(data, 'source.all.address.locationId');
+    // if follow-up has an address (check locationId (required field with no default value),
+    // loopback automatically adds address object with default values)
+    if (hasAddress) {
+      // make sure address stays there
+      return Promise.resolve();
+    }
+    // follow-up does not have an address, find it's contact
+    return app.models.person
+      .findById(_.get(data, 'source.all.personId'))
+      .then((person) => {
+        // if the contact was not found, just continue (maybe this is a sync and contact was not synced yet)
+        if (!person) {
+          return;
+        }
+        // get current person address
+        let contactAddress = person.getCurrentAddress();
+        // if address was found
+        if (contactAddress) {
+          // update contact address
+          _.set(data, 'target.address', contactAddress);
+        }
+      });
+  }
+
+  /**
+   * Before save hooks
+   */
+  FollowUp.observe('before save', function (ctx, next) {
+    // set follow-up index (if needed)
+    setFollowUpIndexIfNeeded(ctx)
+    // set follow-up address (if needed)
+      .then(() => setFollowUpAddressIfNeeded(ctx))
+      .then(() => next())
       .catch(next);
   });
 

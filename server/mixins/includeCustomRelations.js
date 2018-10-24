@@ -80,7 +80,7 @@ module.exports = function (Model) {
           query = {
             where: {
               id: {
-                inq: _.get(modelInstance, customRelation.definition.foreignKey)
+                inq: _.get(modelInstance, customRelation.definition.foreignKey) || []
               }
             }
           };

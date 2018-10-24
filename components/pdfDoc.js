@@ -79,7 +79,7 @@ function createPdfDoc(options) {
  * @param data
  * @param callback
  */
-function createPDFList(headers, data, callback) {
+function createPDFList(headers, data, title, callback) {
   // default document config
   const documentConfig = {};
 
@@ -116,6 +116,8 @@ function createPDFList(headers, data, callback) {
   }
 
   const document = createPdfDoc(documentConfig);
+
+  addTitle(document, title, 20);
 
   // add the questionnaire headers
   // since they depend on the translated data, we have to add them separately

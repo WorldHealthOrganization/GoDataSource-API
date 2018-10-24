@@ -26,11 +26,7 @@
         "country"
       ]
     },
-    "locations": {
-      "type": [
-        "linkedLocation"
-      ]
-    },
+    "locationIds": ["string"],
     "startDate": {
       "type": "date",
       "required": true
@@ -118,7 +114,11 @@
     },
     "arcGisServers": [
       "arcGisServer"
-    ]
+    ],
+    "reportingGeographicalLevelId": {
+      "type": "string",
+      "description": "The maximum geographical level of locations from which reports data is gathered"
+    }
   },
   "indexes": {
     "name_index": {
@@ -1141,12 +1141,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "findTransmissionChainsForFilteredPeople"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "exportExistingEmptyCaseInvestigation"
@@ -1348,6 +1342,30 @@
       "principalId": "write_contact",
       "permission": "ALLOW",
       "property": "bulkCreateRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "downloadCaseClassificationPerLocationLevelReport"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCasesPerLocationLevel"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "downloadContactTracingPerLocationLevelReport"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactsPerLocationLevel"
     }
   ],
   "methods": {
@@ -2527,7 +2545,8 @@
         {
           "arg": "body",
           "type": "object",
-          "description": "Follow up period in days. Property: followUpPeriod [number]",
+          "model": "generateFollowup",
+          "description": "Follow up required period start/end dates and targeted optional flag.",
           "http": {
             "source": "body"
           },
@@ -2583,7 +2602,14 @@
             "chains": [
               {
                 "type": {
-                  "length": "number",
+                  "length": {
+                    "type": "number",
+                    "description": "Number of chain links"
+                  },
+                  "size": {
+                    "type": "number",
+                    "description": "Number of chain nodes"
+                  },
                   "active": "boolean"
                 }
               }
@@ -2608,7 +2634,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'active' boolean on the first level in 'where' and a (full) person filter on 'person' property of the filter. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'active' boolean & 'size' number on the first level in 'where' and a (full) person filter on 'person' property of the filter. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date"
         }
       ],
       "returns": [
@@ -2651,7 +2677,14 @@
                     }
                   }
                 ],
-                "length": "number"
+                "length": {
+                  "type": "number",
+                  "description": "Number of chain links"
+                },
+                "size": {
+                  "type": "number",
+                  "description": "Number of chain nodes"
+                }
               }
             }
           },
@@ -4738,69 +4771,6 @@
         "path": "/follow-ups/export"
       }
     },
-    "prototype.findTransmissionChainsForFilteredPeople": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this filter applies on person (case/contact/event) entity"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "chains",
-          "type": {
-            "nodes": {
-              "type": {
-                "<personId>": {
-                  "type": "person"
-                }
-              }
-            },
-            "edges": {
-              "type": {
-                "<relationshipId>": {
-                  "type": "relationship"
-                }
-              }
-            },
-            "transmissionChains": {
-              "type": {
-                "chains": [
-                  {
-                    "type": {
-                      "chain": [
-                        "string"
-                      ],
-                      "period": {
-                        "type": {
-                          "startDate": "date",
-                          "endDate": "date",
-                          "duration": {
-                            "type": "number",
-                            "description": "Transmission chain duration in days"
-                          }
-                        }
-                      },
-                      "active": "boolean"
-                    }
-                  }
-                ],
-                "length": "number"
-              }
-            }
-          },
-          "description": "Transmission chains that include filtered people",
-          "required": true,
-          "root": true
-        }
-      ],
-      "description": "Transmission chains that include filtered people",
-      "http": {
-        "verb": "get",
-        "path": "/relationships/transmission-chains-including-people"
-      }
-    },
     "prototype.exportExistingEmptyCaseInvestigation": {
       "accepts": [
         {
@@ -5476,7 +5446,9 @@
               "type": {
                 "<teamId>": {
                   "type": {
-                    "followUpIds": ["string"],
+                    "followUpIds": [
+                      "string"
+                    ],
                     "count": "number"
                   }
                 }
@@ -5574,12 +5546,16 @@
       "accepts": [
         {
           "arg": "sources",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "List of people (cases/events) IDs to be used as source of the relationship"
         },
         {
           "arg": "targets",
-          "type": ["string"],
+          "type": [
+            "string"
+          ],
           "description": "List of people IDs to be used as target of the relationship"
         },
         {
@@ -5596,7 +5572,9 @@
       "returns": [
         {
           "arg": "relationships",
-          "type": ["relationship"],
+          "type": [
+            "relationship"
+          ],
           "root": true,
           "required": true,
           "description": "List of created relationships"
@@ -5606,6 +5584,172 @@
       "http": {
         "verb": "post",
         "path": "/relationships/bulk"
+      }
+    },
+    "prototype.downloadCaseClassificationPerLocationLevelReport": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export a case classification per location report for an outbreak",
+      "http": {
+        "verb": "get",
+        "path": "/cases/per-classification-per-location-level-report/download"
+      }
+    },
+    "prototype.countCasesPerLocationLevel": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": {
+            "locations": [
+              {
+                "type": {
+                  "location": {
+                    "type": "location"
+                  },
+                  "caseIds": {
+                    "type": "string"
+                  },
+                  "casesCount": {
+                    "type": "number"
+                  }
+                }
+              }
+            ],
+            "count": {
+              "type": "number"
+            }
+          },
+          "description": "Collection of items with location, cases and numberOfCases properties",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Return an array of locations and the cases (that pass a filter) assigned to those locations",
+      "http": {
+        "verb": "get",
+        "path": "/cases/per-location-level/count"
+      }
+    },
+    "prototype.downloadContactTracingPerLocationLevelReport": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export a contact tracing per location report for an outbreak",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/per-location-level-tracing-report/download"
+      }
+    },
+    "prototype.countContactsPerLocationLevel": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Accepts custom parameter dateOfFollowUp."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": {
+            "locations": [
+              {
+                "type": {
+                  "location": {
+                    "type": "location"
+                  },
+                  "contactIds": {
+                    "type": "string"
+                  },
+                  "contactsCount": {
+                    "type": "number"
+                  }
+                }
+              }
+            ],
+            "count": {
+              "type": "number"
+            }
+          },
+          "description": "Collection of items with location, cases and numberOfCases properties",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Return an array of locations and the contacts (that pass a filter) assigned to those locations",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/per-location-level/count"
       }
     }
   }

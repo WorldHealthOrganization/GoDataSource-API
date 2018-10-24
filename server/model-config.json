@@ -260,10 +260,6 @@
     "dataSource": null,
     "public": false
   },
-  "linkedLocation": {
-    "dataSource": null,
-    "public": false
-  },
   "exposureOrContact": {
     "dataSource": null,
     "public": false
@@ -278,6 +274,10 @@
   },
   "fileAttachment": {
     "dataSource": "mongoDb",
+    "public": false
+  },
+  "generateFollowup": {
+    "dataSource": null,
     "public": false
   }
 }

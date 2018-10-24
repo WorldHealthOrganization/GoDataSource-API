@@ -1,24 +1,24 @@
 {
-  "name": "classificationHistoryItem",
+  "name": "generateFollowup",
   "base": "Model",
-  "idInjection": true,
+  "idInjection": false,
   "options": {
-    "validateUpsert": true
+    "validateUpsert": true,
+    "hidden": [
+      "id"
+    ]
   },
-  "hidden": [
-    "id"
-  ],
   "properties": {
-    "classification": {
-      "type": "string",
-      "required": true
-    },
     "startDate": {
       "type": "date",
       "required": true
     },
     "endDate": {
-      "type": "date"
+      "type": "date",
+      "required": true
+    },
+    "targeted": {
+      "type": "boolean"
     }
   },
   "validations": [],
