@@ -108,7 +108,6 @@ module.exports = function (FollowUp) {
     containerProperty: 'questionnaireAnswers'
   };
 
-
   /**
    * Get contact current address (if needed: if follow-up does not have an address set)
    * @param modelInstance
@@ -144,7 +143,7 @@ module.exports = function (FollowUp) {
   /**
    * Loaded hooks
    */
-  FollowUp.observe('loaded', function includeRelations(context, next) {
+  FollowUp.observe('loaded', function (context, next) {
     getContactCurrentAddressIfNeeded(context.data)
       .then(
         () => next()
