@@ -515,4 +515,20 @@ module.exports = function (Person) {
       });
     });
   };
+
+  /**
+   * Get current address for a person
+   * @return {*}
+   */
+  Person.prototype.getCurrentAddress = function () {
+    // define current address
+    let currentAddress;
+    // check if the person has addressed defined
+    if (Array.isArray(this.addresses) && this.addresses.length) {
+      // get current address
+      currentAddress = this.addresses.filter(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE').pop();
+    }
+    // return current address
+    return currentAddress;
+  };
 };
