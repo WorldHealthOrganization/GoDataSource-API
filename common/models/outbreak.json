@@ -3938,6 +3938,11 @@
     "prototype.exportCaseInvestigationTemplate": {
       "accepts": [
         {
+          "arg": "copies",
+          "type": "number",
+          "required": true
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"

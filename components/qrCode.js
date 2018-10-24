@@ -1,7 +1,6 @@
 'use strict';
 
 let qrImage = require('qr-image');
-let uuid = require('uuid');
 
 const TYPES = {
   RESOURCE_LINK: 'resource-link'
@@ -25,9 +24,9 @@ function createResourceLink(resourceName, contextInfo) {
  * Add a QR code and additional information to a person export file
  * @param qrCode
  * @param document
- * @param person
+ * @param identifier
  */
-function addPersonQRCode(document, outbreakId, personType, person) {
+function addPersonQRCode(document, outbreakId, personType, identifier) {
   // Cache initial cursor position
   let initialXPosition = document.x;
   let initialYPosition = document.y;
@@ -35,25 +34,23 @@ function addPersonQRCode(document, outbreakId, personType, person) {
 
   // Generate the QR code and add it to the page, together with some extra
   // details for either an existing or a new person
-  if (person) {
+  if (identifier && typeof(identifier) === 'object') {
     qrCode = createResourceLink(personType, {
       outbreakId: outbreakId,
-      [`${personType}Id`]: person.id
+      [`${personType}Id`]: identifier.id
     });
 
     document.image(qrCode, 465, 15, {width: 100, height: 100});
-    document.text(`${person.id}`, 420, 115, {align: 'right'});
-    document.text(`${person.firstName || ''} ${person.middleName || ''} ${person.lastName || ''}`, {align: 'right'});
+    document.text(`${identifier.id}`, 420, 115, {align: 'right'});
+    document.text(`${identifier.firstName || ''} ${identifier.middleName || ''} ${identifier.lastName || ''}`, {align: 'right'});
   } else {
-    let newId = uuid.v4();
-
     qrCode = createResourceLink(personType, {
       outbreakId: outbreakId,
-      [`${personType}Id`]: newId
+      [`${personType}Id`]: identifier
     });
 
     document.image(qrCode, 465, 15, {width: 100, height: 100});
-    document.text(newId, 420, 115, {align: 'right'});
+    document.text(identifier, 420, 115, {align: 'right'});
     document.text('_ '.repeat(52), {align: 'right'});
   }
 

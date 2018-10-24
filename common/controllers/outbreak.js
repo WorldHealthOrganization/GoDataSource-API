@@ -8,6 +8,9 @@ const genericHelpers = require('../../components/helpers');
 const async = require('async');
 const pdfUtils = app.utils.pdfDoc;
 const searchByRelationProperty = require('../../components/searchByRelationProperty');
+const fs = require('fs');
+const AdmZip = require('adm-zip');
+const tmp = require('tmp');
 
 module.exports = function (Outbreak) {
 
@@ -4419,11 +4422,12 @@ module.exports = function (Outbreak) {
 
   /**
    * Build and return a pdf containing case investigation template
-   * @param request
+   * @param copies
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.exportCaseInvestigationTemplate = function (options, callback) {
-    helpers.printCaseInvestigation(this, pdfUtils, null, options, callback);
+  Outbreak.prototype.exportCaseInvestigationTemplate = function (copies, options, callback) {
+    helpers.printCaseInvestigation(this, pdfUtils, copies, null, options, callback);
   };
 
   /**
@@ -4436,6 +4440,8 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.caseDossier = function (cases, anonymousFields, options, callback) {
     const labResultsQuestionnaire = this.labResultsTemplate.toJSON();
     let questions = [];
+    let tmpDir = tmp.dirSync({unsafeCleanup: true});
+    let tmpDirName = tmpDir.name;
     // Get all requested cases, including their relationships and labResults
     this.__get__cases({
       where: {
@@ -4570,69 +4576,92 @@ module.exports = function (Outbreak) {
               sanitizedCases[caseIndex].data = person;
             });
 
-            // generate pdf document
-            let doc = pdfUtils.createPdfDoc({
-              fontSize: 7,
-              layout: 'portrait',
-              margin: 20,
-              lineGap: 0,
-              wordSpacing: 0,
-              characterSpacing: 0,
-              paragraphGap: 0
-            });
-
-            // add a top margin of 2 lines for each page
-            doc.on('pageAdded', () => {
-              doc.moveDown(2);
-            });
-
-            // set margin top for first page here, to not change the entire createPdfDoc functionality
-            doc.moveDown(2);
-
             // Translate the pdf section titles
             const relationshipsTitle = dictionary.getTranslation('LNG_PAGE_ACTION_RELATIONSHIPS');
             const labResultsTitle = dictionary.getTranslation('LNG_PAGE_LIST_CASE_LAB_RESULTS_TITLE');
             const questionnaireTitle = dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE');
 
+            let pdfPromises = [];
+
             // Print all the data
-            sanitizedCases.forEach((sanitizedCase, index) => {
-              // write this as a separate function to easily remove it's listener
-              let addQrCode = function () {
-                app.utils.qrCode.addPersonQRCode(doc, sanitizedCase.rawData.outbreakId, 'case', sanitizedCase.rawData);
-              };
+            sanitizedCases.forEach((sanitizedCase) => {
+              pdfPromises.push(
+                new Promise((resolve, reject) => {
+                  // generate pdf document
+                  let doc = pdfUtils.createPdfDoc({
+                    fontSize: 7,
+                    layout: 'portrait',
+                    margin: 20,
+                    lineGap: 0,
+                    wordSpacing: 0,
+                    characterSpacing: 0,
+                    paragraphGap: 0
+                  });
 
-              // add the QR code to the first page (this page has already been added and will not be covered by the next line)
-              addQrCode();
+                  // add a top margin of 2 lines for each page
+                  doc.on('pageAdded', () => {
+                    doc.moveDown(2);
+                  });
 
-              // set a listener on pageAdded to add the QR code to every new page
-              doc.on('pageAdded', addQrCode);
+                  // set margin top for first page here, to not change the entire createPdfDoc functionality
+                  doc.moveDown(2);
+                  // write this as a separate function to easily remove it's listener
+                  let addQrCode = function () {
+                    app.utils.qrCode.addPersonQRCode(doc, sanitizedCase.rawData.outbreakId, 'case', sanitizedCase.rawData);
+                  };
 
-              pdfUtils.displayModelDetails(doc, sanitizedCase.data, true, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
-              pdfUtils.displayPersonRelationships(doc, sanitizedCase.relationships, relationshipsTitle);
-              pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedCase.labResults, labResultsTitle, questionnaireTitle);
+                  // add the QR code to the first page (this page has already been added and will not be covered by the next line)
+                  addQrCode();
 
-              // add an additional empty page that contains only the QR code as per requirements
-              doc.addPage();
+                  // set a listener on pageAdded to add the QR code to every new page
+                  doc.on('pageAdded', addQrCode);
 
-              // stop adding this QR code. The next case will need to have a different QR code
-              doc.removeListener('pageAdded', addQrCode);
+                  pdfUtils.displayModelDetails(doc, sanitizedCase.data, true, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
+                  pdfUtils.displayPersonRelationships(doc, sanitizedCase.relationships, relationshipsTitle);
+                  pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedCase.labResults, labResultsTitle, questionnaireTitle);
 
-              // add a new page for the next case if there is one
-              if (index < sanitizedCases.length - 1) {
-                doc.addPage();
-              }
+                  // add an additional empty page that contains only the QR code as per requirements
+                  doc.addPage();
+
+                  // stop adding this QR code. The next contact will need to have a different QR code
+                  doc.removeListener('pageAdded', addQrCode);
+                  doc.end();
+
+                  // convert pdf stream to buffer and send it as response
+                  genericHelpers.streamToBuffer(doc, (err, buffer) => {
+                    if (err) {
+                      reject(err);
+                    } else {
+                      fs.writeFile(`${tmpDirName}/${sanitizedCase.rawData.id}.pdf`, buffer, (err) => {
+                        if (err) {
+                          reject(err);
+                        } else {
+                          resolve();
+                        }
+                      });
+                    }
+                  });
+                })
+              );
             });
+            return Promise.all(pdfPromises);
+          })
+          .then(() => {
+            let archiveName = `caseDossiers_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+            let archivePath = `${tmpDirName}/${archiveName}`;
+            let zip = new AdmZip();
 
-            // convert pdf stream to buffer and send it as response
-            genericHelpers.streamToBuffer(doc, (err, buffer) => {
+            zip.addLocalFolder(tmpDirName);
+            zip.writeZip(archivePath);
+
+            fs.readFile(archivePath, (err, data) => {
               if (err) {
                 callback(err);
               } else {
-                app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'case_dossier.pdf', callback);
+                tmpDir.removeCallback();
+                app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
               }
             });
-
-            doc.end();
           });
       });
     });
@@ -4648,6 +4677,8 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.contactDossier = function (contacts, anonymousFields, options, callback) {
     const followUpQuestionnaire = this.contactFollowUpTemplate.toJSON();
     let questions = [];
+    let tmpDir = tmp.dirSync({unsafeCleanup: true});
+    let tmpDirName = tmpDir.name;
     // Get all requested contacts, including their relationships and followUps
     this.__get__contacts({
       where: {
@@ -4778,68 +4809,91 @@ module.exports = function (Outbreak) {
               sanitizedContacts[contactIndex].data = contact;
             });
 
-            // generate pdf document
-            let doc = pdfUtils.createPdfDoc({
-              fontSize: 7,
-              layout: 'portrait',
-              margin: 20,
-              lineGap: 0,
-              wordSpacing: 0,
-              characterSpacing: 0,
-              paragraphGap: 0
-            });
-
-            // add a top margin of 2 lines for each page
-            doc.on('pageAdded', () => {
-              doc.moveDown(2);
-            });
-
-            // set margin top for first page here, to not change the entire createPdfDoc functionality
-            doc.moveDown(2);
-
             const relationshipsTitle = dictionary.getTranslation('LNG_PAGE_ACTION_RELATIONSHIPS');
             const followUpsTitle = dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE');
             const followUpQuestionnaireTitle = dictionary.getTranslation('LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE');
 
+            let pdfPromises = [];
+
             // Print all the data
-            sanitizedContacts.forEach((sanitizedContact, index) => {
-              // write this as a separate function to easily remove it's listener
-              let addQrCode = function () {
-                app.utils.qrCode.addPersonQRCode(doc, sanitizedContact.rawData.outbreakId, 'case', sanitizedContact.rawData);
-              };
+            sanitizedContacts.forEach((sanitizedContact) => {
+              pdfPromises.push(
+                new Promise((resolve, reject) => {
+                  // generate pdf document
+                  let doc = pdfUtils.createPdfDoc({
+                    fontSize: 7,
+                    layout: 'portrait',
+                    margin: 20,
+                    lineGap: 0,
+                    wordSpacing: 0,
+                    characterSpacing: 0,
+                    paragraphGap: 0
+                  });
 
-              // add the QR code to the first page (this page has already been added and will not be covered by the next line)
-              addQrCode();
+                  // add a top margin of 2 lines for each page
+                  doc.on('pageAdded', () => {
+                    doc.moveDown(2);
+                  });
 
-              // set a listener on pageAdded to add the QR code to every new page
-              doc.on('pageAdded', addQrCode);
+                  // set margin top for first page here, to not change the entire createPdfDoc functionality
+                  doc.moveDown(2);
+                  // write this as a separate function to easily remove it's listener
+                  let addQrCode = function () {
+                    app.utils.qrCode.addPersonQRCode(doc, sanitizedContact.rawData.outbreakId, 'contact', sanitizedContact.rawData);
+                  };
 
-              pdfUtils.displayModelDetails(doc, sanitizedContact.data, true, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
-              pdfUtils.displayPersonRelationships(doc, sanitizedContact.relationships, relationshipsTitle);
-              pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedContact.followUps, followUpsTitle, followUpQuestionnaireTitle);
+                  // add the QR code to the first page (this page has already been added and will not be covered by the next line)
+                  addQrCode();
 
-              // add an additional empty page that contains only the QR code as per requirements
-              doc.addPage();
+                  // set a listener on pageAdded to add the QR code to every new page
+                  doc.on('pageAdded', addQrCode);
 
-              // stop adding this QR code. The next contact will need to have a different QR code
-              doc.removeListener('pageAdded', addQrCode);
+                  pdfUtils.displayModelDetails(doc, sanitizedContact.data, true, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
+                  pdfUtils.displayPersonRelationships(doc, sanitizedContact.relationships, relationshipsTitle);
+                  pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedContact.followUps, followUpsTitle, followUpQuestionnaireTitle);
 
-              // add a new page for the next contact if there is one
-              if (index < sanitizedContacts.length - 1) {
-                doc.addPage();
-              }
+                  // add an additional empty page that contains only the QR code as per requirements
+                  doc.addPage();
+
+                  // stop adding this QR code. The next contact will need to have a different QR code
+                  doc.removeListener('pageAdded', addQrCode);
+                  doc.end();
+
+                  // convert pdf stream to buffer and send it as response
+                  genericHelpers.streamToBuffer(doc, (err, buffer) => {
+                    if (err) {
+                      callback(err);
+                    } else {
+                      fs.writeFile(`${tmpDirName}/${sanitizedContact.rawData.id}.pdf`, buffer, (err) => {
+                        if (err) {
+                          reject(err);
+                        } else {
+                          resolve();
+                        }
+                      });
+                    }
+                  });
+                })
+              );
             });
+            return Promise.all(pdfPromises);
+          })
+          .then(() => {
+            let archiveName = `contactDossiers_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+            let archivePath = `${tmpDirName}/${archiveName}`;
+            let zip = new AdmZip();
 
-            // convert pdf stream to buffer and send it as response
-            genericHelpers.streamToBuffer(doc, (err, buffer) => {
+            zip.addLocalFolder(tmpDirName);
+            zip.writeZip(archivePath);
+
+            fs.readFile(archivePath, (err, data) => {
               if (err) {
                 callback(err);
               } else {
-                app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'case_dossier.pdf', callback);
+                tmpDir.removeCallback();
+                app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
               }
             });
-
-            doc.end();
           });
       });
     });
@@ -5652,7 +5706,7 @@ module.exports = function (Outbreak) {
     let self = this;
 
     this.__findById__cases(caseId, function (error, foundCase) {
-      helpers.printCaseInvestigation(self, pdfUtils, foundCase, options, callback);
+      helpers.printCaseInvestigation(self, pdfUtils, 1, foundCase, options, callback);
     });
   };
 
