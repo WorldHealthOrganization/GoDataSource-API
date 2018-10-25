@@ -64,7 +64,8 @@ module.exports = function (FollowUp) {
     'statusId': 'LNG_FOLLOW_UP_FIELD_LABEL_STATUSID',
     'isGenerated': 'LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED',
     'targeted': 'LNG_FOLLOW_UP_FIELD_LABEL_TARGETED',
-    'questionnaireAnswers': 'LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE'
+    'questionnaireAnswers': 'LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE',
+    'comment': 'LNG_FOLLOW_UP_FIELD_LABEL_COMMENT'
   };
 
   FollowUp.referenceDataFieldsToCategoryMap = {
