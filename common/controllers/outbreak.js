@@ -8,6 +8,9 @@ const async = require('async');
 const pdfUtils = app.utils.pdfDoc;
 const searchByRelationProperty = require('../../components/searchByRelationProperty');
 const FollowupGeneration = require('../../components/followupGeneration');
+const fs = require('fs');
+const AdmZip = require('adm-zip');
+const tmp = require('tmp');
 
 module.exports = function (Outbreak) {
 
@@ -4404,11 +4407,12 @@ module.exports = function (Outbreak) {
 
   /**
    * Build and return a pdf containing case investigation template
-   * @param request
+   * @param copies
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.exportCaseInvestigationTemplate = function (options, callback) {
-    helpers.printCaseInvestigation(this, pdfUtils, null, options, callback);
+  Outbreak.prototype.exportCaseInvestigationTemplate = function (copies, options, callback) {
+    helpers.printCaseInvestigation(this, pdfUtils, copies, null, options, callback);
   };
 
   /**
@@ -4421,6 +4425,8 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.caseDossier = function (cases, anonymousFields, options, callback) {
     const labResultsQuestionnaire = this.labResultsTemplate.toJSON();
     let questions = [];
+    let tmpDir = tmp.dirSync({unsafeCleanup: true});
+    let tmpDirName = tmpDir.name;
     // Get all requested cases, including their relationships and labResults
     this.__get__cases({
       where: {
@@ -4483,7 +4489,10 @@ module.exports = function (Outbreak) {
           .then((results) => {
             // transform the model into a simple JSON
             results.forEach((person, caseIndex) => {
-              sanitizedCases[caseIndex] = {};
+              // keep the initial data of the case (we currently use it to generate the QR code only)
+              sanitizedCases[caseIndex] = {
+                rawData: person
+              };
 
               // Anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
               // and formatting date type fields
@@ -4552,46 +4561,92 @@ module.exports = function (Outbreak) {
               sanitizedCases[caseIndex].data = person;
             });
 
-            // generate pdf document
-            let doc = pdfUtils.createPdfDoc({
-              fontSize: 11,
-              layout: 'portrait',
-              margin: 20
-            });
-
-            // add a top margin of 2 lines for each page
-            doc.on('pageAdded', () => {
-              doc.moveDown(2);
-            });
-
-            // set margin top for first page here, to not change the entire createPdfDoc functionality
-            doc.moveDown(2);
-
             // Translate the pdf section titles
             const relationshipsTitle = dictionary.getTranslation('LNG_PAGE_ACTION_RELATIONSHIPS');
             const labResultsTitle = dictionary.getTranslation('LNG_PAGE_LIST_CASE_LAB_RESULTS_TITLE');
             const questionnaireTitle = dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE');
 
-            // Print all the data
-            sanitizedCases.forEach((sanitizedCase, index) => {
-              pdfUtils.displayModelDetails(doc, sanitizedCase.data, true, 'Case Information');
-              pdfUtils.displayPersonRelationships(doc, sanitizedCase.relationships, relationshipsTitle);
-              pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedCase.labResults, labResultsTitle, questionnaireTitle);
-              if (index < sanitizedCases.length - 1) {
-                doc.addPage();
-              }
-            });
+            let pdfPromises = [];
 
-            // convert pdf stream to buffer and send it as response
-            genericHelpers.streamToBuffer(doc, (err, buffer) => {
+            // Print all the data
+            sanitizedCases.forEach((sanitizedCase) => {
+              pdfPromises.push(
+                new Promise((resolve, reject) => {
+                  // generate pdf document
+                  let doc = pdfUtils.createPdfDoc({
+                    fontSize: 7,
+                    layout: 'portrait',
+                    margin: 20,
+                    lineGap: 0,
+                    wordSpacing: 0,
+                    characterSpacing: 0,
+                    paragraphGap: 0
+                  });
+
+                  // add a top margin of 2 lines for each page
+                  doc.on('pageAdded', () => {
+                    doc.moveDown(2);
+                  });
+
+                  // set margin top for first page here, to not change the entire createPdfDoc functionality
+                  doc.moveDown(2);
+                  // write this as a separate function to easily remove it's listener
+                  let addQrCode = function () {
+                    app.utils.qrCode.addPersonQRCode(doc, sanitizedCase.rawData.outbreakId, 'case', sanitizedCase.rawData);
+                  };
+
+                  // add the QR code to the first page (this page has already been added and will not be covered by the next line)
+                  addQrCode();
+
+                  // set a listener on pageAdded to add the QR code to every new page
+                  doc.on('pageAdded', addQrCode);
+
+                  pdfUtils.displayModelDetails(doc, sanitizedCase.data, true, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
+                  pdfUtils.displayPersonRelationships(doc, sanitizedCase.relationships, relationshipsTitle);
+                  pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedCase.labResults, labResultsTitle, questionnaireTitle);
+
+                  // add an additional empty page that contains only the QR code as per requirements
+                  doc.addPage();
+
+                  // stop adding this QR code. The next contact will need to have a different QR code
+                  doc.removeListener('pageAdded', addQrCode);
+                  doc.end();
+
+                  // convert pdf stream to buffer and send it as response
+                  genericHelpers.streamToBuffer(doc, (err, buffer) => {
+                    if (err) {
+                      reject(err);
+                    } else {
+                      fs.writeFile(`${tmpDirName}/${sanitizedCase.rawData.id}.pdf`, buffer, (err) => {
+                        if (err) {
+                          reject(err);
+                        } else {
+                          resolve();
+                        }
+                      });
+                    }
+                  });
+                })
+              );
+            });
+            return Promise.all(pdfPromises);
+          })
+          .then(() => {
+            let archiveName = `caseDossiers_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+            let archivePath = `${tmpDirName}/${archiveName}`;
+            let zip = new AdmZip();
+
+            zip.addLocalFolder(tmpDirName);
+            zip.writeZip(archivePath);
+
+            fs.readFile(archivePath, (err, data) => {
               if (err) {
                 callback(err);
               } else {
-                app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'case_dossier.pdf', callback);
+                tmpDir.removeCallback();
+                app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
               }
             });
-
-            doc.end();
           });
       });
     });
@@ -4607,6 +4662,8 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.contactDossier = function (contacts, anonymousFields, options, callback) {
     const followUpQuestionnaire = this.contactFollowUpTemplate.toJSON();
     let questions = [];
+    let tmpDir = tmp.dirSync({unsafeCleanup: true});
+    let tmpDirName = tmpDir.name;
     // Get all requested contacts, including their relationships and followUps
     this.__get__contacts({
       where: {
@@ -4669,7 +4726,10 @@ module.exports = function (Outbreak) {
         genericHelpers.resolveModelForeignKeys(app, app.models.contact, results, dictionary)
           .then((results) => {
             results.forEach((contact, contactIndex) => {
-              sanitizedContacts[contactIndex] = {};
+              // keep the initial data of the contact (we currently use it to generate the QR code only)
+              sanitizedContacts[contactIndex] = {
+                rawData: contact
+              };
 
               // Anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
               // and format date type fields
@@ -4734,45 +4794,91 @@ module.exports = function (Outbreak) {
               sanitizedContacts[contactIndex].data = contact;
             });
 
-            // generate pdf document
-            let doc = pdfUtils.createPdfDoc({
-              fontSize: 11,
-              layout: 'portrait',
-              margin: 20
-            });
-
-            // add a top margin of 2 lines for each page
-            doc.on('pageAdded', () => {
-              doc.moveDown(2);
-            });
-
-            // set margin top for first page here, to not change the entire createPdfDoc functionality
-            doc.moveDown(2);
-
             const relationshipsTitle = dictionary.getTranslation('LNG_PAGE_ACTION_RELATIONSHIPS');
             const followUpsTitle = dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE');
             const followUpQuestionnaireTitle = dictionary.getTranslation('LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE');
 
-            // Print all the data
-            sanitizedContacts.forEach((sanitizedContact, index) => {
-              pdfUtils.displayModelDetails(doc, sanitizedContact.data, true, 'Case Information');
-              pdfUtils.displayPersonRelationships(doc, sanitizedContact.relationships, relationshipsTitle);
-              pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedContact.followUps, followUpsTitle, followUpQuestionnaireTitle);
-              if (index < sanitizedContacts.length - 1) {
-                doc.addPage();
-              }
-            });
+            let pdfPromises = [];
 
-            // convert pdf stream to buffer and send it as response
-            genericHelpers.streamToBuffer(doc, (err, buffer) => {
+            // Print all the data
+            sanitizedContacts.forEach((sanitizedContact) => {
+              pdfPromises.push(
+                new Promise((resolve, reject) => {
+                  // generate pdf document
+                  let doc = pdfUtils.createPdfDoc({
+                    fontSize: 7,
+                    layout: 'portrait',
+                    margin: 20,
+                    lineGap: 0,
+                    wordSpacing: 0,
+                    characterSpacing: 0,
+                    paragraphGap: 0
+                  });
+
+                  // add a top margin of 2 lines for each page
+                  doc.on('pageAdded', () => {
+                    doc.moveDown(2);
+                  });
+
+                  // set margin top for first page here, to not change the entire createPdfDoc functionality
+                  doc.moveDown(2);
+                  // write this as a separate function to easily remove it's listener
+                  let addQrCode = function () {
+                    app.utils.qrCode.addPersonQRCode(doc, sanitizedContact.rawData.outbreakId, 'contact', sanitizedContact.rawData);
+                  };
+
+                  // add the QR code to the first page (this page has already been added and will not be covered by the next line)
+                  addQrCode();
+
+                  // set a listener on pageAdded to add the QR code to every new page
+                  doc.on('pageAdded', addQrCode);
+
+                  pdfUtils.displayModelDetails(doc, sanitizedContact.data, true, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
+                  pdfUtils.displayPersonRelationships(doc, sanitizedContact.relationships, relationshipsTitle);
+                  pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedContact.followUps, followUpsTitle, followUpQuestionnaireTitle);
+
+                  // add an additional empty page that contains only the QR code as per requirements
+                  doc.addPage();
+
+                  // stop adding this QR code. The next contact will need to have a different QR code
+                  doc.removeListener('pageAdded', addQrCode);
+                  doc.end();
+
+                  // convert pdf stream to buffer and send it as response
+                  genericHelpers.streamToBuffer(doc, (err, buffer) => {
+                    if (err) {
+                      callback(err);
+                    } else {
+                      fs.writeFile(`${tmpDirName}/${sanitizedContact.rawData.id}.pdf`, buffer, (err) => {
+                        if (err) {
+                          reject(err);
+                        } else {
+                          resolve();
+                        }
+                      });
+                    }
+                  });
+                })
+              );
+            });
+            return Promise.all(pdfPromises);
+          })
+          .then(() => {
+            let archiveName = `contactDossiers_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+            let archivePath = `${tmpDirName}/${archiveName}`;
+            let zip = new AdmZip();
+
+            zip.addLocalFolder(tmpDirName);
+            zip.writeZip(archivePath);
+
+            fs.readFile(archivePath, (err, data) => {
               if (err) {
                 callback(err);
               } else {
-                app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'case_dossier.pdf', callback);
+                tmpDir.removeCallback();
+                app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
               }
             });
-
-            doc.end();
           });
       });
     });
@@ -5558,7 +5664,7 @@ module.exports = function (Outbreak) {
     let self = this;
 
     this.__findById__cases(caseId, function (error, foundCase) {
-      helpers.printCaseInvestigation(self, pdfUtils, foundCase, options, callback);
+      helpers.printCaseInvestigation(self, pdfUtils, 1, foundCase, options, callback);
     });
   };
 
@@ -6216,38 +6322,41 @@ module.exports = function (Outbreak) {
           });
 
           // Add all existing classifications to the data object
+          // Keep the values as strings so that 0 actually gets displayed in the table
           caseClassifications.forEach((caseClassification) => {
             if (!app.models.case.invalidCaseClassificationsForReports.includes(caseClassification.value)) {
               data[caseClassification.value] = {
                 type: dictionary.getTranslation(caseClassification.value),
-                total: 0
+                total: '0'
               };
             }
           });
 
           // Since deceased is not a classification but is relevant to the report, add it separately
+          // Keep the values as strings so that 0 actually gets displayed in the table
           data.deceased = {
             type: dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED'),
-            total: 0
+            total: '0'
           };
 
           // Initialize all counts per location with 0 for each case classification (including deceased)
+          // Keep the values as strings so that 0 actually gets displayed in the table
           Object.keys(data).forEach((key) => {
             caseDistribution.forEach((dataObj) => {
-              data[key][dataObj.location.id] = 0;
+              data[key][dataObj.location.id] = '0';
             });
           });
 
-          // Go through all the cases and increment the relevent case counts
+          // Go through all the cases and increment the relevant case counts.
           caseDistribution.forEach((dataObj) => {
             dataObj.people.forEach((caseModel) => {
               let caseLatestLocation = _.find(caseModel.addresses, ['typeId', 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE']).locationId;
               if (caseModel.deceased) {
-                data.deceased[caseLatestLocation]++;
-                data.deceased.total++;
+                data.deceased[caseLatestLocation] = +data.deceased[caseLatestLocation] + 1;
+                data.deceased.total = +data.deceased.total + 1;
               } else {
-                data[caseModel.classification][caseLatestLocation]++;
-                data[caseModel.classification].total++;
+                data[caseModel.classification][caseLatestLocation] = +data[caseModel.classification][caseLatestLocation] + 1;
+                data[caseModel.classification].total = +data[caseModel.classification].total + 1;
               }
             });
           });
@@ -6337,23 +6446,24 @@ module.exports = function (Outbreak) {
           let data = [];
           result.forEach((dataObj) => {
             // Define the base form of the data for one row of the pdf list
+            // Keep the values as strings so that 0 actually gets displayed in the table
             let row = {
               location: dataObj.location.name,
-              underFollowUp: 0,
-              seenOnDay: 0,
-              coverage: 0,
-              registered: 0,
-              released: 0,
+              underFollowUp: '0',
+              seenOnDay: '0',
+              coverage: '0',
+              registered: '0',
+              released: '0',
               expectedRelease: dataObj.people.length ? moment(dataObj.people[0].followUp.endDate).format('ll') : '-'
             };
 
             // Update the row's values according to each contact's details
             dataObj.people.forEach((contact) => {
-              row.registered++;
+              row.registered = +row.registered + 1;
 
               // Any status other than under follow-up will make the contact be considered as released.
               if (contact.followUp.status === 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP') {
-                row.underFollowUp++;
+                row.underFollowUp = +row.underFollowUp + 1;
 
                 // The contact can be seen only if he is under follow
                 if (contact.followUps.length) {
@@ -6366,15 +6476,15 @@ module.exports = function (Outbreak) {
                     if (!selectedDayForReport) {
                       selectedDayForReport = moment(completedFollowUp.date).format('ll');
                     }
-                    row.seenOnDay++;
+                    row.seenOnDay = +row.seenOnDay + 1;
                   }
 
                   // What percentage of the contacts under followUp have been seen on the specified date.
-                  row.coverage = row.seenOnDay / row.underFollowUp * 100;
+                  row.coverage = +row.seenOnDay / +row.underFollowUp * 100;
                 }
 
               } else {
-                row.released++;
+                row.released = +row.released + 1;
               }
             });
             data.push(row);

@@ -4,6 +4,11 @@ const app = require('../../server/server');
 const _ = require('lodash');
 const genericHelpers = require('../../components/helpers');
 const templateParser = require('./../../components/templateParser');
+const uuid = require('uuid');
+const AdmZip = require('adm-zip');
+const tmp = require('tmp');
+const async = require('async');
+const fs = require('fs');
 
 // used to manipulate dates
 const moment = require('moment');
@@ -1168,10 +1173,13 @@ module.exports = function (Outbreak) {
    * @param options
    * @param callback
    */
-  Outbreak.helpers.printCaseInvestigation = function (outbreakInstance, pdfUtils, foundCase, options, callback) {
+  Outbreak.helpers.printCaseInvestigation = function (outbreakInstance, pdfUtils, copies = 1, foundCase, options, callback) {
     const models = app.models;
     let caseInvestigationTemplate = outbreakInstance.caseInvestigationTemplate;
     let labResultsTemplate = outbreakInstance.labResultsTemplate;
+    let generatedId = '';
+    let tmpDir = tmp.dirSync({unsafeCleanup: true});
+    let tmpDirName = tmpDir.name;
 
     // authenticated user's language, used to know in which language to translate
     let languageId = options.remotingContext.req.authData.userInstance.languageId;
@@ -1216,59 +1224,103 @@ module.exports = function (Outbreak) {
       let caseQuestions = Outbreak.helpers.parseTemplateQuestions(caseInvestigationTemplate, dictionary);
       let labQuestions = Outbreak.helpers.parseTemplateQuestions(labResultsTemplate, dictionary);
 
-      // generate pdf document
-      let doc = pdfUtils.createPdfDoc({
-        fontSize: 11,
-        layout: 'portrait'
-      });
+      let pdfRequests = [];
 
-      // add a top margin of 2 lines for each page
-      doc.on('pageAdded', () => {
-        doc.moveDown(2);
-      });
+      for (let i = 0; i < copies; i++) {
+        pdfRequests.push(
+          (callback) => {
+            // generate pdf document
+            let doc = pdfUtils.createPdfDoc({
+              fontSize: 7,
+              layout: 'portrait',
+              lineGap: 0,
+              wordSpacing: 0,
+              characterSpacing: 0,
+              paragraphGap: 0
+            });
 
-      // set margin top for first page here, to not change the entire createPdfDoc functionality
-      doc.moveDown(2);
+            if (!foundCase) {
+              generatedId = uuid.v4();
+            }
 
-      if (foundCase) {
-        let qrCode = app.utils.qrCode.createResourceLink('case', {
-          outbreakId: outbreakInstance.id,
-          caseId: 'caseId'
-        });
-        doc.image(qrCode, 480, 15, {width: 100, height: 100});
+            // add functionality whenever a new page is added
+            doc.on('pageAdded', () => {
+              doc.moveDown(2);
+              app.utils.qrCode.addPersonQRCode(doc, outbreakInstance.id, 'case', foundCase || generatedId);
+            });
 
-        // add case profile fields (empty)
-        pdfUtils.displayModelDetails(doc, caseFields, false, `${foundCase.firstName} ${foundCase.middleName} ${foundCase.lastName}`);
-      } else {
-        // add case profile fields (empty)
-        pdfUtils.displayModelDetails(doc, caseFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
+            // Apply previous code for the first page which is already added.
+            doc.moveDown(2);
+            app.utils.qrCode.addPersonQRCode(doc, outbreakInstance.id, 'case', foundCase || generatedId);
+
+            // add case profile fields (empty)
+            pdfUtils.displayModelDetails(doc, caseFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
+
+            // add case investigation questionnaire into the pdf in a separate page (only if the questionnaire exists)
+            if (caseQuestions && caseQuestions.length) {
+              doc.addPage();
+              pdfUtils.createQuestionnaire(doc, caseQuestions, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE'));
+            }
+
+            // add lab results information into a separate page
+            doc.addPage();
+            pdfUtils.displayModelDetails(doc, labResultsFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_DETAILS'));
+
+            // add lab results questionnaire into a separate page (only if the questionnaire exists)
+            if (labQuestions && labQuestions.length) {
+              doc.addPage();
+              pdfUtils.createQuestionnaire(doc, labQuestions, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE'));
+            }
+
+            // add contact relation template
+            doc.addPage();
+            pdfUtils.displayModelDetails(doc, contactFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
+            pdfUtils.displayModelDetails(doc, relationFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_RELATIONSHIP'));
+
+            // add an additional empty page that contains only the QR code as per requirements
+            doc.addPage();
+
+            // end the document stream
+            // to convert it into a buffer
+            doc.end();
+
+            // convert pdf stream to buffer and send it as response
+            genericHelpers.streamToBuffer(doc, (err, buffer) => {
+              if (err) {
+                callback(err);
+              } else {
+                fs.writeFile(`${tmpDirName}/${foundCase ? foundCase.id : generatedId}.pdf`, buffer, (err) => {
+                  if (err) {
+                    callback(err);
+                  } else {
+                    callback(null, null);
+                  }
+                });
+              }
+            });
+          }
+        );
       }
 
-      // add case investigation questionnaire into the pdf in a separate page
-      doc.addPage();
-      pdfUtils.createQuestionnaire(doc, caseQuestions, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE'));
-
-      // add lab results information into a separate page
-      doc.addPage();
-      pdfUtils.displayModelDetails(doc, labResultsFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_DETAILS'));
-      doc.addPage();
-      pdfUtils.createQuestionnaire(doc, labQuestions, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE'));
-
-      // add contact relation template
-      doc.addPage();
-      pdfUtils.displayModelDetails(doc, contactFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
-      pdfUtils.displayModelDetails(doc, relationFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_RELATIONSHIP'));
-
-      // end the document stream
-      // to convert it into a buffer
-      doc.end();
-
-      // convert pdf stream to buffer and send it as response
-      genericHelpers.streamToBuffer(doc, (err, buffer) => {
+      async.series(pdfRequests, (err) => {
         if (err) {
           callback(err);
         } else {
-          app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'case_investigation.pdf', callback);
+          let archiveName = `caseInvestigationTemplates_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+          let archivePath = `${tmpDirName}/${archiveName}`;
+          let zip = new AdmZip();
+
+          zip.addLocalFolder(tmpDirName);
+          zip.writeZip(archivePath);
+
+          fs.readFile(archivePath, (err, data) => {
+            if (err) {
+              callback(err);
+            } else {
+              tmpDir.removeCallback();
+              app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
+            }
+          });
         }
       });
     });

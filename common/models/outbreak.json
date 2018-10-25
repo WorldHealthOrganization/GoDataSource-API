@@ -26,7 +26,9 @@
         "country"
       ]
     },
-    "locationIds": ["string"],
+    "locationIds": [
+      "string"
+    ],
     "startDate": {
       "type": "date",
       "required": true
@@ -3982,6 +3984,11 @@
     },
     "prototype.exportCaseInvestigationTemplate": {
       "accepts": [
+        {
+          "arg": "copies",
+          "type": "number",
+          "required": true
+        },
         {
           "arg": "options",
           "type": "object",
