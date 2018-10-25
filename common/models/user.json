@@ -73,7 +73,8 @@
     "AuditLogger": true,
     "SoftDelete" : true,
     "AttachController": true,
-    "IncludeCustomRelations": true
+    "IncludeCustomRelations": true,
+    "DateProperty": true
   },
   "validations": [],
   "relations": {
