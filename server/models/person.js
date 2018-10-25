@@ -531,4 +531,33 @@ module.exports = function (Person) {
     // return current address
     return currentAddress;
   };
+
+  /**
+   * Return the movement of a person.
+   * Movement: list of addresses that contain geoLocation information, sorted from the oldest to newest based on date.
+   * Empty date is treated as the most recent
+   * @return {Array}
+   */
+  Person.prototype.getMovement = function () {
+    // start with empty movement
+    let movement = [];
+    // if the person has addresses defined
+    if (Array.isArray(this.addresses) && this.addresses.length) {
+      // keep only addresses that have geo-location information
+      movement = this.addresses.filter(address => !!address.geoLocation);
+      // sort them by date, in asc order (addresses without date are treated as most recent)
+      movement.sort(function (a, b) {
+        if (!a.date && b.date) {
+          return 1;
+        } else if (a.date && !b.date) {
+          return -1;
+        } else if (!a.date && !b.date) {
+          return 0;
+        } else {
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        }
+      });
+    }
+    return movement;
+  };
 };
