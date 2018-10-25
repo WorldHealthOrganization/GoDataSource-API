@@ -147,7 +147,7 @@ module.exports = function (Contact) {
         let shouldUpdate = false;
         // build a list of properties that need to be updated
         let propsToUpdate = {};
-        propsToUpdate.status = 'LNG_REFERENCE_DATA_CONTACT_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP';
+        propsToUpdate.status = 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP';
         // preserve original startDate, if any
         if (contactInstance.followUp && contactInstance.followUp.originalStartDate) {
           propsToUpdate.originalStartDate = contactInstance.followUp.originalStartDate;
