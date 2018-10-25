@@ -6322,6 +6322,7 @@ module.exports = function (Outbreak) {
           });
 
           // Add all existing classifications to the data object
+          // Keep the values as strings so that 0 actually gets displayed in the table
           caseClassifications.forEach((caseClassification) => {
             if (!app.models.case.invalidCaseClassificationsForReports.includes(caseClassification.value)) {
               data[caseClassification.value] = {
@@ -6332,12 +6333,14 @@ module.exports = function (Outbreak) {
           });
 
           // Since deceased is not a classification but is relevant to the report, add it separately
+          // Keep the values as strings so that 0 actually gets displayed in the table
           data.deceased = {
             type: dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED'),
             total: '0'
           };
 
           // Initialize all counts per location with 0 for each case classification (including deceased)
+          // Keep the values as strings so that 0 actually gets displayed in the table
           Object.keys(data).forEach((key) => {
             caseDistribution.forEach((dataObj) => {
               data[key][dataObj.location.id] = '0';
@@ -6345,16 +6348,15 @@ module.exports = function (Outbreak) {
           });
 
           // Go through all the cases and increment the relevant case counts.
-          // Keep the values as strings so that 0 actually gets displayed in the table
           caseDistribution.forEach((dataObj) => {
             dataObj.people.forEach((caseModel) => {
               let caseLatestLocation = _.find(caseModel.addresses, ['typeId', 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE']).locationId;
               if (caseModel.deceased) {
-                data.deceased[caseLatestLocation] = String(+data.deceased[caseLatestLocation] +1);
-                data.deceased.total = String(+data.deceased.total +1);
+                data.deceased[caseLatestLocation] = +data.deceased[caseLatestLocation] + 1;
+                data.deceased.total = +data.deceased.total + 1;
               } else {
-                data[caseModel.classification][caseLatestLocation] = String(+data[caseModel.classification][caseLatestLocation] +1);
-                data[caseModel.classification].total = String(+data[caseModel.classification].total +1);
+                data[caseModel.classification][caseLatestLocation] = +data[caseModel.classification][caseLatestLocation] + 1;
+                data[caseModel.classification].total = +data[caseModel.classification].total + 1;
               }
             });
           });
@@ -6457,11 +6459,11 @@ module.exports = function (Outbreak) {
 
             // Update the row's values according to each contact's details
             dataObj.people.forEach((contact) => {
-              row.registered = String(+row.registered + 1);
+              row.registered = +row.registered + 1;
 
               // Any status other than under follow-up will make the contact be considered as released.
               if (contact.followUp.status === 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP') {
-                row.underFollowUp = String(+row.underFollowUp + 1);
+                row.underFollowUp = +row.underFollowUp + 1;
 
                 // The contact can be seen only if he is under follow
                 if (contact.followUps.length) {
@@ -6474,15 +6476,15 @@ module.exports = function (Outbreak) {
                     if (!selectedDayForReport) {
                       selectedDayForReport = moment(completedFollowUp.date).format('ll');
                     }
-                    row.seenOnDay = String(+row.seenOnDay + 1);
+                    row.seenOnDay = +row.seenOnDay + 1;
                   }
 
                   // What percentage of the contacts under followUp have been seen on the specified date.
-                  row.coverage = String(+row.seenOnDay / +row.underFollowUp * 100);
+                  row.coverage = +row.seenOnDay / +row.underFollowUp * 100;
                 }
 
               } else {
-                row.released = String(+row.released + 1);
+                row.released = +row.released + 1;
               }
             });
             data.push(row);
