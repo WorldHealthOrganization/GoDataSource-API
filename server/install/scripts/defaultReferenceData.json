@@ -123,6 +123,7 @@
   ],
   "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE": [
     "Usual Place of Residence",
+    "Previous Usual Place of Residence",
     "Other"
   ],
   "LNG_REFERENCE_DATA_CATEGORY_COUNTRY": [
