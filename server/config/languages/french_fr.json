@@ -921,7 +921,8 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "Compléter la géolocalisation latitude",
       "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "Compléter la géolocalisation longitude",
       "LNG_FOLLOW_UP_FIELD_LABEL_TARGETED": "Targeted",
-      "LNG_FOLLOW_UP_FIELD_LABEL_STATUSID": "Status"
+      "LNG_FOLLOW_UP_FIELD_LABEL_STATUSID": "Status",
+      "LNG_FOLLOW_UP_FIELD_LABEL_COMMENT": "Comment"
     },
     "uiFollowUpsListPage": {
       "LNG_PAGE_LIST_FOLLOW_UPS_TITLE": "Suivis",
