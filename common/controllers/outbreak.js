@@ -6416,4 +6416,58 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Get movement for a case
+   * Movement: list of addresses that contain geoLocation information, sorted from the oldest to newest based on date.
+   * Empty date is treated as the most recent
+   * @param caseId
+   * @param callback
+   */
+  Outbreak.prototype.getCaseMovement = function (caseId, callback) {
+    app.models.case
+      .findOne({
+        where: {
+          id: caseId,
+          outbreakId: this.id
+        }
+      })
+      .then(function (caseRecord) {
+        if (!caseRecord) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.case.modelName,
+            id: caseId
+          });
+        }
+        callback(null, caseRecord.getMovement());
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Get movement for a contact
+   * Movement: list of addresses that contain geoLocation information, sorted from the oldest to newest based on date.
+   * Empty date is treated as the most recent
+   * @param contactId
+   * @param callback
+   */
+  Outbreak.prototype.getContactMovement = function (contactId, callback) {
+    app.models.contact
+      .findOne({
+        where: {
+          id: contactId,
+          outbreakId: this.id
+        }
+      })
+      .then(function (contactRecord) {
+        if (!contactRecord) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.contact.modelName,
+            id: contactId
+          });
+        }
+        callback(null, contactRecord.getMovement());
+      })
+      .catch(callback);
+  };
 };
