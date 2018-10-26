@@ -10,7 +10,8 @@
     "UniqueValidator": true,
     "AuthorTimeStamp": true,
     "AuditLogger": true,
-    "SoftDelete": true
+    "SoftDelete": true,
+    "DateProperty": true
   },
   "validations": [],
   "relations": {
