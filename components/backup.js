@@ -187,9 +187,7 @@ const restoreBackupFromFile = function (filePath, done) {
                         'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
                         'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
                       ].indexOf(record.type) >= 0) {
-                      // get model name from reference data id
-                      let typeParts = record.type.split('_');
-                      specialDatePropsMap = app.models[typeParts[typeParts.length - 1].toLowerCase()]._parsedDateProperties;
+                      specialDatePropsMap = app.models[app.models.person.typeToModelMap[record.type]]._parsedDateProperties;
                     }
 
                     (function setDateProps(obj, map) {

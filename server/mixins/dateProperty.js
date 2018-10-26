@@ -95,6 +95,7 @@ module.exports = function (Model) {
   Model._dateProperties = getDateProperties(Model);
 
   // store a list of date properties with parsed array props (nested mapping for arrays)
+  // example: [ a[].b, a[].c, d ] => [ a: { b:b, c: c }, d:d ]
   Model._parsedDateProperties = (function mapProps(props) {
     let map = {};
     let seenArrayProps = [];
@@ -102,6 +103,9 @@ module.exports = function (Model) {
     props.forEach((prop) => {
       // split reference to check if it is an array
       let splitRef = prop.split('.');
+      // make sure the array has not been processed before
+      // doing this because on a single level you can have multiple references that point to the same array prop
+      // example: [ a[].b, a[].c ]
       if (splitRef[0].indexOf('[]') >= 0 && seenArrayProps.indexOf(splitRef) === -1) {
         // find all occurrences of this array reference on the map
         let arrayNestedProps = props
@@ -110,6 +114,9 @@ module.exports = function (Model) {
 
         // mark array seen
         seenArrayProps.push(splitRef[0]);
+
+        // convert all the references related to this array to a nested map
+        // example: [ a[].b, a[].c ] => [ a: { b: b, c:c } ]
         map[splitRef[0].substring(0, splitRef[0].length - 2)] = mapProps(arrayNestedProps);
       } else {
         map[prop] = prop;
