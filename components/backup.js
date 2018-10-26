@@ -174,7 +174,8 @@ const restoreBackupFromFile = function (filePath, done) {
 
                   collectionRecords.forEach((record) => {
                     let specialDatePropsMap = null;
-                    if (record.hasOwnProperty('type') && [
+                    if (record.hasOwnProperty('type') &&
+                      [
                         'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
                         'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
                         'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
