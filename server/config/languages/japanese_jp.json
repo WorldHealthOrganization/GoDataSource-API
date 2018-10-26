@@ -920,7 +920,8 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "日本の Fill geolocation latitude",
       "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "日本の Fill geolocation longitude",
       "LNG_FOLLOW_UP_FIELD_LABEL_TARGETED": "日本の Targeted",
-      "LNG_FOLLOW_UP_FIELD_LABEL_STATUSID": "日本の Status"
+      "LNG_FOLLOW_UP_FIELD_LABEL_STATUSID": "日本の Status",
+      "LNG_FOLLOW_UP_FIELD_LABEL_COMMENT": "日本の Comment"
     },
     "uiFollowUpsListPage": {
       "LNG_PAGE_LIST_FOLLOW_UPS_TITLE": "日本の Follow-ups",

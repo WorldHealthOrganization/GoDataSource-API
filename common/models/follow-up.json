@@ -47,6 +47,9 @@
     "targeted": {
       "type": "boolean",
       "required": true
+    },
+    "comment": {
+      "type": "string"
     }
   },
   "indexes": {
