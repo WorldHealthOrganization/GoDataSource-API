@@ -587,11 +587,13 @@ module.exports = function (Sync) {
               headers: _.get(options, 'remotingContext.req.headers'),
               connection: _.get(options, 'remotingContext.req.connection')
             }
-          }
+          },
+          syncOnEveryChange: true
         };
-        // add a (Sync on every change) suffix to the user ID to be saved in the sync log entry audit log
-        _.set(newOptions, 'remotingContext.req.authData.user.id', `${_.get(newOptions, 'remotingContext.req.authData.user.id')} (Sync on every change)`);
-
+        if (!options.syncOnEveryChange) {
+          // add a (Sync on every change) suffix to the user ID to be saved in the sync log entry audit log
+          _.set(newOptions, 'remotingContext.req.authData.user.id', `${_.get(newOptions, 'remotingContext.req.authData.user.id')} (Sync on every change)`);
+        }
         app.logger.debug(`Sync on every change: Started sync with server '${server.name}'`);
         // start the sync process
         Sync.sync(data, newOptions, function (err, syncLogId) {
