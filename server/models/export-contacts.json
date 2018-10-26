@@ -1,0 +1,27 @@
+{
+  "name": "exportContacts",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "date": {
+      "type": "date"
+    },
+    "groupBy": {
+      "type": "string",
+      "enum": [
+        "place",
+        "case"
+      ]
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

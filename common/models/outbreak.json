@@ -6027,6 +6027,39 @@
         "verb": "post",
         "path": "/cases/:nk/lab-results/:fk/restore"
       }
+    },
+    "prototype.exportDailyListOfContacts": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "description": "Model instance data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "movement",
+          "type": ["address"],
+          "description": "List of addresses with GeoLocations ordered from the oldest one to the most recent",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get list of addresses with GeoLocations ordered from the oldest one to the most recent",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/movement"
+      }
     }
   }
 }

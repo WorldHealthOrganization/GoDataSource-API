@@ -6813,4 +6813,14 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+
+  /**
+   * Export list of contacts that should be seen on a given date
+   * Grouped by case/place
+   * @param callback
+   */
+  Outbreak.prototype.exportDailyListOfContacts = function (callback) {
+
+  };
 };
