@@ -165,51 +165,25 @@ const restoreBackupFromFile = function (filePath, done) {
                   return doneCollection(mongoDbError);
                 }
 
-                // list of date references, also nested
-                let dateProps = [];
-
-                // get date properties for the given collection name
-                // most of the time it matches a Loopback model name
-                // there is a special case for 'person' collection, where it will correspond to 3 Loopback models
-                if (collectionName === 'person') {
-                  dateProps = [...new Set(dateProps.concat(
-                    app.models.case._dateProperties,
-                    app.models.contact._dateProperties,
-                    app.models.event._dateProperties
-                  ))];
-                } else {
-                  dateProps = app.models[collectionName]._dateProperties;
-                }
-
-                let datePropsMap = (function mapProps(props) {
-                  let map = {};
-                  let seenArrayProps = [];
-
-                  props.forEach((prop) => {
-                    // split reference to check if it is an array
-                    let splitRef = prop.split('.');
-                    if (splitRef[0].indexOf('[]') >= 0 && seenArrayProps.indexOf(splitRef) === -1) {
-                      // find all occurrences of this array reference on the map
-                      let arrayNestedProps = props
-                        .filter((prop) => prop.indexOf(splitRef[0]) >= 0)
-                        .map((prop) => prop.slice(splitRef[0].length + 1));
-
-                      // mark array seen
-                      seenArrayProps.push(splitRef[0]);
-                      map[splitRef[0].substring(0, splitRef[0].length - 2)] = mapProps(arrayNestedProps);
-                    } else {
-                      map[prop] = prop;
-                    }
-                  });
-
-                  return map;
-                })(dateProps || []);
+                // list of date map properties to convert
+                let datePropsMap = app.models[collectionName]._parsedDateProperties;
 
                 // parse file contents to JavaScript object
                 try {
                   let collectionRecords = JSON.parse(data);
 
                   collectionRecords.forEach((record) => {
+                    let specialDatePropsMap = null;
+                    if (record.hasOwnProperty('type') && [
+                        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                      ].indexOf(record.type) >= 0) {
+                        // get model name from reference data id
+                        let typeParts = record.type.split('_');
+                        specialDatePropsMap = app.models[typeParts[typeParts.length - 1].toLowerCase()]._parsedDateProperties;
+                    }
+
                     (function setDateProps(obj, map) {
                       // go through each date properties and parse date properties
                       for (let prop in map) {
@@ -227,7 +201,7 @@ const restoreBackupFromFile = function (filePath, done) {
                           }
                         }
                       }
-                    })(record, datePropsMap);
+                    })(record, specialDatePropsMap ? specialDatePropsMap : datePropsMap);
                   });
 
                   // restore a collection's record using raw mongodb connector

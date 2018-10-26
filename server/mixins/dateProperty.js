@@ -93,4 +93,29 @@ module.exports = function (Model) {
 
   // store a list of date properties
   Model._dateProperties = getDateProperties(Model);
+
+  // store a list of date properties with parsed array props (nested mapping for arrays)
+  Model._parsedDateProperties = (function mapProps(props) {
+    let map = {};
+    let seenArrayProps = [];
+
+    props.forEach((prop) => {
+      // split reference to check if it is an array
+      let splitRef = prop.split('.');
+      if (splitRef[0].indexOf('[]') >= 0 && seenArrayProps.indexOf(splitRef) === -1) {
+        // find all occurrences of this array reference on the map
+        let arrayNestedProps = props
+          .filter((prop) => prop.indexOf(splitRef[0]) >= 0)
+          .map((prop) => prop.slice(splitRef[0].length + 1));
+
+        // mark array seen
+        seenArrayProps.push(splitRef[0]);
+        map[splitRef[0].substring(0, splitRef[0].length - 2)] = mapProps(arrayNestedProps);
+      } else {
+        map[prop] = prop;
+      }
+    });
+
+    return map;
+  })(Model._dateProperties || []);
 };
