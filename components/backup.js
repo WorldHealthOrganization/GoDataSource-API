@@ -10,6 +10,7 @@ const tmp = require('tmp');
 const dbSync = require('./dbSync');
 const helpers = require('../components/helpers');
 const _ = require('lodash');
+const moment = require('moment');
 
 /**
  * Create a new backup
@@ -173,6 +174,12 @@ const restoreBackupFromFile = function (filePath, done) {
                   let collectionRecords = JSON.parse(data);
 
                   collectionRecords.forEach((record) => {
+                    // custom properties should be checked property by property
+                    // we can't know exactly the types
+                    if (record.questionnaireAnswers) {
+                      helpers.convertPropsToDate(record.questionnaireAnswers);
+                    }
+
                     let specialDatePropsMap = null;
                     if (record.hasOwnProperty('type') &&
                       [
@@ -197,7 +204,11 @@ const restoreBackupFromFile = function (filePath, done) {
                           } else {
                             let recordPropValue = _.get(obj, prop);
                             if (recordPropValue) {
-                              _.set(obj, prop, new Date(recordPropValue));
+                              // try to convert the string value to date, if valid, replace the old value
+                              let convertedDate = moment(recordPropValue);
+                              if (convertedDate.isValid()) {
+                                _.set(obj, prop, convertedDate.toDate());
+                              }
                             }
                           }
                         }
