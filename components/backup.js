@@ -215,9 +215,9 @@ const restoreBackupFromFile = function (filePath, done) {
                       for (let prop in map) {
                         if (map.hasOwnProperty(prop)) {
                           // this is an array prop
-                          if (typeof prop === 'object') {
+                          if (typeof map[prop] === 'object') {
                             if (Array.isArray(obj[prop])) {
-                              obj[prop].forEach((item) => setDateProps(item, prop));
+                              obj[prop].forEach((item) => setDateProps(item, map[prop]));
                             }
                           } else {
                             let recordPropValue = _.get(obj, prop);
