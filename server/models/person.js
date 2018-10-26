@@ -161,7 +161,7 @@ module.exports = function (Person) {
     // keep validation error
     let error;
     // if the person has addresses defined
-    if (Array.isArray(personInstance.addresses)) {
+    if (Array.isArray(personInstance.addresses) && personInstance.addresses.length) {
       // keep a list of current (usual place of residence) addresses
       const currentAddresses = [];
       // keep a list of previous (previous usual place of residence) addresses
