@@ -128,6 +128,9 @@ module.exports = function (Model) {
           changedData: []
         };
         let instanceData = context.instance.toJSON();
+        // add record id
+        logData.recordId = instanceData.id;
+        // add changes
         Object.keys(instanceData).forEach(function (field) {
           if (isMonitoredField(field) && instanceData[field] != undefined) {
             logData.changedData.push({
@@ -146,6 +149,7 @@ module.exports = function (Model) {
           let logData = {
             action: app.models.auditLog.actions.modified,
             modelName: Model.modelName,
+            recordId: context.instance.id,
             userId: user.id,
             userRole: user.role,
             userIPAddress: user.iPAddress,
@@ -186,6 +190,7 @@ module.exports = function (Model) {
         let logData = {
           action: app.models.auditLog.actions.removed,
           modelName: Model.modelName,
+          recordId: context.options.deletedInstance.id,
           userId: user.id,
           userRole: user.role,
           userIPAddress: user.iPAddress,
@@ -225,6 +230,9 @@ module.exports = function (Model) {
       if (instance.toJSON) {
         instance = instance.toJSON();
       }
+      // add record id
+      logData.recordId = instance.id;
+      // add changes
       Object.keys(instance).forEach(function (field) {
         if (isMonitoredField(field) && instance[field] !== undefined) {
           logData.changedData.push({
