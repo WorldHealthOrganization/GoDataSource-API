@@ -1398,6 +1398,12 @@
       "principalId": "write_case",
       "permission": "ALLOW",
       "property": "restoreLabResult"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "exportDailyListOfContacts"
     }
   ],
   "methods": {
@@ -6033,7 +6039,8 @@
         {
           "arg": "data",
           "type": "object",
-          "description": "Model instance data",
+          "model": "exportContacts",
+          "description": "Group By, Date properties",
           "http": {
             "source": "body"
           },
@@ -6048,17 +6055,30 @@
       ],
       "returns": [
         {
-          "arg": "movement",
-          "type": ["address"],
-          "description": "List of addresses with GeoLocations ordered from the oldest one to the most recent",
+          "arg": "body",
+          "type": "file",
           "root": true,
           "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
         }
       ],
-      "description": "Get list of addresses with GeoLocations ordered from the oldest one to the most recent",
+      "description": "Export pdf containing contacts to be seen by place/case",
       "http": {
-        "verb": "get",
-        "path": "/contacts/:nk/movement"
+        "verb": "post",
+        "path": "/contacts/daily-list/export"
       }
     }
   }

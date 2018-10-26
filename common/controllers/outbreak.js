@@ -6818,9 +6818,76 @@ module.exports = function (Outbreak) {
   /**
    * Export list of contacts that should be seen on a given date
    * Grouped by case/place
+   * @param body
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.exportDailyListOfContacts = function (callback) {
+  Outbreak.prototype.exportDailyListOfContacts = function (body, options, callback) {
+    // get list of questions for contacts from outbreak
+    let questions = this.contactFollowUpTemplate;
 
+    // get list of contacts
+    app.models.contact
+      .getGroupedByDate(this, body.date, body.groupBy)
+      .then((contacts) => {
+        const languageId = options.remotingContext.req.authData.user.languageId;
+        app.models.language
+          .getLanguageDictionary(
+            options.remotingContext.req.authData.user.languageId,
+            (error, dictionary) => {
+
+            }
+          )
+          .then((result) => {
+            // build tables for each group item
+            result.forEach((group, index, array) => {
+              // TODO: table title
+
+              // common headers
+              let headers = [
+                {
+                  id: 'contact',
+                  header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_CONTACT')
+                },
+                {
+                  id: 'status',
+                  header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_STATUSID')
+                }
+              ];
+
+              // include contact questions into the table
+              questions.forEach((question) => {
+                headers.push({
+                  id: question.id,
+                  // translate the value i think
+                  header: item.question
+                });
+              });
+
+              // start building table data
+              let tableData = contacts.map((contact) => {
+                  // define the base form of the data for one row of the pdf list
+                  // keep the values as strings so that 0 actually gets displayed in the table
+                  let row = {
+                    // TBD what to add here firstName or combined firstName/lastName
+                    contact: contact.firstName,
+                    status: dictionary.getTranslation(contact.followUp.status)
+                  };
+              });
+
+              // TODO: add table to pdf file
+            });
+
+            // create the pdf list file
+            return app.utils.helpers.exportListFile(headers, data, 'pdf', `Contact tracing ${selectedDayForReport}`);
+        })
+          .then(function (file) {
+            // and offer it for download
+            app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Test.${file.extension}`, callback);
+          })
+          .catch((error) => {
+            callback(error);
+        });
+      });
   };
 };
