@@ -26,7 +26,9 @@
         "country"
       ]
     },
-    "locationIds": ["string"],
+    "locationIds": [
+      "string"
+    ],
     "startDate": {
       "type": "date",
       "required": true
@@ -1366,6 +1368,18 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "countContactsPerLocationLevel"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "getCaseMovement"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "getContactMovement"
     }
   ],
   "methods": {
@@ -3971,6 +3985,11 @@
     "prototype.exportCaseInvestigationTemplate": {
       "accepts": [
         {
+          "arg": "copies",
+          "type": "number",
+          "required": true
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -5745,6 +5764,52 @@
       "http": {
         "verb": "get",
         "path": "/contacts/per-location-level/count"
+      }
+    },
+    "prototype.getCaseMovement": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "movement",
+          "type": ["address"],
+          "description": "List of addresses with GeoLocations ordered from the oldest one to the most recent",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get list of addresses with GeoLocations ordered from the oldest one to the most recent",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/movement"
+      }
+    },
+    "prototype.getContactMovement": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "movement",
+          "type": ["address"],
+          "description": "List of addresses with GeoLocations ordered from the oldest one to the most recent",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get list of addresses with GeoLocations ordered from the oldest one to the most recent",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/movement"
       }
     }
   }

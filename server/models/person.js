@@ -153,10 +153,63 @@ module.exports = function (Person) {
   };
 
   /**
+   * Basic person address validation
+   * @param personInstance
+   * @return {*}
+   */
+  function validatePersonAddresses(personInstance) {
+    // keep validation error
+    let error;
+    // if the person has addresses defined
+    if (Array.isArray(personInstance.addresses)) {
+      // keep a list of current (usual place of residence) addresses
+      const currentAddresses = [];
+      // keep a list of previous (previous usual place of residence) addresses
+      const previousAddressesWithoutDate = [];
+      // go through the addresses
+      personInstance.addresses.forEach(function (address) {
+        // store usual place of residence
+        if (address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE') {
+          currentAddresses.push(address);
+          // store previous addresses without dates
+        } else if (address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_PREVIOUS_USUAL_PLACE_OF_RESIDENCE' && !address.date) {
+          previousAddressesWithoutDate.push(address);
+        }
+      });
+      // check if there is a current address set
+      if (!currentAddresses.length) {
+        error = app.utils.apiError.getError('ADDRESS_MUST_HAVE_USUAL_PLACE_OF_RESIDENCE', {
+          addresses: personInstance.addresses
+        });
+        // check if there are more current addresses set
+      } else if (currentAddresses.length > 1) {
+        error = app.utils.apiError.getError('ADDRESS_MULTIPLE_USUAL_PLACE_OF_RESIDENCE', {
+          addresses: personInstance.addresses,
+          usualPlaceOfResidence: currentAddresses
+        });
+        // check if there are previous addresses without date
+      } else if (previousAddressesWithoutDate.length) {
+        error = app.utils.apiError.getError('ADDRESS_PREVIOUS_PLACE_OF_RESIDENCE_MUST_HAVE_DATE', {
+          addresses: personInstance.addresses,
+          previousUsualPlaceOfResidence: previousAddressesWithoutDate
+        });
+      }
+    }
+    return error;
+  }
+
+  /**
    * Before save hooks
    */
   Person.observe('before save', function (context, next) {
     const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
+    // validate person addresses
+    const addressValidationError = validatePersonAddresses(data.source.all);
+    // if there is an address validation error
+    if (addressValidationError) {
+      // stop with error
+      return next(addressValidationError);
+    }
     // if case classification was changed
     if (
       (
@@ -514,5 +567,50 @@ module.exports = function (Person) {
           .catch(error);
       });
     });
+  };
+
+  /**
+   * Get current address for a person
+   * @return {*}
+   */
+  Person.prototype.getCurrentAddress = function () {
+    // define current address
+    let currentAddress;
+    // check if the person has addressed defined
+    if (Array.isArray(this.addresses) && this.addresses.length) {
+      // get current address
+      currentAddress = this.addresses.filter(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE').pop();
+    }
+    // return current address
+    return currentAddress;
+  };
+
+  /**
+   * Return the movement of a person.
+   * Movement: list of addresses that contain geoLocation information, sorted from the oldest to newest based on date.
+   * Empty date is treated as the most recent
+   * @return {Array}
+   */
+  Person.prototype.getMovement = function () {
+    // start with empty movement
+    let movement = [];
+    // if the person has addresses defined
+    if (Array.isArray(this.addresses) && this.addresses.length) {
+      // keep only addresses that have geo-location information
+      movement = this.addresses.filter(address => !!address.geoLocation);
+      // sort them by date, in asc order (addresses without date are treated as most recent)
+      movement.sort(function (a, b) {
+        if (!a.date && b.date) {
+          return 1;
+        } else if (a.date && !b.date) {
+          return -1;
+        } else if (!a.date && !b.date) {
+          return 0;
+        } else {
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        }
+      });
+    }
+    return movement;
   };
 };

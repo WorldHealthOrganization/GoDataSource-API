@@ -222,5 +222,17 @@
   "MAPS_GEO_LOCATION_ERROR": {
     "defaultStatusCode": 422,
     "messagePattern": "An error occurred while trying to retrieve geo-location for specified address from the Maps API"
+  },
+  "ADDRESS_MUST_HAVE_USUAL_PLACE_OF_RESIDENCE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "One of the addresses must be set as Usual Place of Residence"
+  },
+  "ADDRESS_MULTIPLE_USUAL_PLACE_OF_RESIDENCE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Multiple addresses set as Usual Place of Residence. Only one address should be set as Usual Place of Residence"
+  },
+  "ADDRESS_PREVIOUS_PLACE_OF_RESIDENCE_MUST_HAVE_DATE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Addresses set as Previous Usual Place of Residence must have a date set"
   }
 }

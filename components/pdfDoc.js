@@ -14,7 +14,7 @@ const defaultDocumentConfiguration = {
   autoFirstPage: false,
   layout: 'landscape',
   widthForPageSize: 841,
-  margin: 50,
+  margin: 30,
   fontSize: 8,
   lineWidth: 1
 };
@@ -45,7 +45,7 @@ function addPageNumber(document) {
       lineBreak: false,
     });
   // Reset text writer position
-  document.text('', 50, 50);
+  document.text('', 30, 50);
   // reset page bottom margin
   document.page.margins.bottom = bottomMargin;
 }
@@ -274,7 +274,7 @@ const createQuestionnaire = function (doc, questions, withData, title) {
 
   // add questionnaire page title
   if (title) {
-    addTitle(doc, title);
+    addTitle(doc, title, 14);
   }
 
   // recursively insert each question and their answers into the document
@@ -293,7 +293,7 @@ const createQuestionnaire = function (doc, questions, withData, title) {
               doc.moveDown().text('Answer: ', isNested ? initialXMargin + 60 : initialXMargin + 20);
             }
           } else {
-            doc.moveDown().text(`Answer: ${'_'.repeat(25)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
+            doc.moveDown().text(`Answer: ${'_'.repeat(50)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
           }
           break;
         // File uploads are not handled when printing a pdf
@@ -347,7 +347,7 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
 
   // add page title
   if (title) {
-    addTitle(doc, title);
+    addTitle(doc, title, 14);
     doc.moveDown();
   }
 
@@ -373,7 +373,7 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
         // number of empty entries to set
         emptyEntries.forEach((fields, index, arr) => {
           fields.forEach((field) => {
-            doc.text(`${field}: ${'_'.repeat(25)}`, initialXMargin + 20).moveDown();
+            doc.text(`${field}: ${'_'.repeat(50)}`, initialXMargin + 20).moveDown();
           });
 
           // separate each group of fields
@@ -417,7 +417,7 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
       doc.x += 20;
       displayModelDetails(doc, model[fieldName], true);
     } else {
-      doc.text(`${fieldName}: ${displayValues ? model[fieldName] : '_'.repeat(25)}`, initialXMargin).moveDown();
+      doc.text(`${fieldName}: ${displayValues ? model[fieldName] : '_'.repeat(50)}`, initialXMargin).moveDown();
     }
   });
 
@@ -450,8 +450,10 @@ const displayPersonSectionsWithQuestionnaire = function (doc, sections, title, q
     sections.forEach((section, index) => {
       doc.addPage();
       displayModelDetails(doc, _.omit(section, 'questionnaire'), true, index === 0 ? title : null);
-      doc.addPage();
-      createQuestionnaire(doc, section.questionnaire, true, questionnaireTitle);
+      if (section.questionnaire && section.questionnaire.length) {
+        doc.addPage();
+        createQuestionnaire(doc, section.questionnaire, true, questionnaireTitle);
+      }
     });
   }
 };

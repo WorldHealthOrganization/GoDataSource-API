@@ -166,7 +166,12 @@ const restoreBackupFromFile = function (filePath, done) {
 
                 // parse file contents to JavaScript object
                 try {
+
                   let collectionRecords = JSON.parse(data);
+                  /**
+                   * FIXME: Quick fix for restore back-up problem for date properties
+                   */
+                  helpers.convertPropsToDate(collectionRecords);
 
                   // restore a collection's record using raw mongodb connector
                   const restoreCollection = function () {
