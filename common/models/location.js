@@ -86,7 +86,11 @@ module.exports = function (Location) {
     let allLocationsIds = allLocations.map(location => location.id);
 
     // get IDs of the parentLocations that are not in the allLocations array
-    let notRetrievedParentLocationsIds = parentLocationsIds.filter(locationId => allLocationsIds.indexOf(locationId) === -1);
+    let notRetrievedParentLocationsIds = [];
+    if (Array.isArray(parentLocationsIds)) {
+      // get IDs of the parentLocations that are not in the allLocations array
+      notRetrievedParentLocationsIds = parentLocationsIds.filter(locationId => allLocationsIds.indexOf(locationId) === -1);
+    }
 
     // find not already retrieved parent locations as well as sublocations
     Location
