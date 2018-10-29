@@ -80,7 +80,8 @@ gulp.task('copy', ['clean'], function (callback) {
           '!node_modules',
           '!node_modules/**',
           '!gulpfile.js'
-        ]
+        ],
+        {buffer: false}
       ),
       gulp.dest('build')
     ],
@@ -94,7 +95,7 @@ gulp.task('copy', ['clean'], function (callback) {
 gulp.task('compress', ['copy'], function (callback) {
   pump(
     [
-      gulp.src(['build/**/*.js']),
+      gulp.src(['build/**/*.js'], {buffer: false}),
       uglify(),
       gulp.dest('build')
     ],
