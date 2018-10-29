@@ -5822,6 +5822,29 @@
         "path": "/contacts/:nk/movement"
       }
     },
+    "prototype.__get__people": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: it supports 'identifier' property on the first level of where. This allows searching people based on id, visualId and documents.number"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "people",
+          "type": ["person"],
+          "description": "List of people that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries people of outbreak.",
+      "http": {
+        "verb": "get",
+        "path": "/people"
+      }
+    },
     "prototype.caseDelayBetweenOnsetAndLabTesting": {
       "accepts": [
         {

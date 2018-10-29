@@ -6582,6 +6582,39 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Add support for 'identifier' search: Allow searching people based on id, visualId and documents.number
+   */
+  Outbreak.beforeRemote('prototype.__get__people', function (context, modelInstance, next) {
+    // get filter (if any)
+    const filter = context.args.filter || {};
+    // get identifier query (if any)
+    const identifier = _.get(filter, 'where.identifier');
+    // if there is an identifier
+    if (identifier !== undefined) {
+      // remove it from the query
+      delete filter.where.identifier;
+      // update filter with custom query around identifier
+      context.args.filter = app.utils.remote.mergeFilters(
+        {
+          where: {
+            or: [
+              {
+                id: identifier
+              },
+              {
+                visualId: identifier
+              },
+              {
+                'documents.number': identifier
+              }
+            ]
+          }
+        }, filter || {});
+    }
+    next();
+  });
+
+  /**
    * Get a list of entries that show the delay between date of symptom onset and the lab testing for a case
    * @param filter
    * @param callback
