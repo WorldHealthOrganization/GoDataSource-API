@@ -6580,4 +6580,19 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * (Global) Search for a person using different identifiers (id, visualId, documents.number)
+   * @param identifier
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.searchPeopleUsingIdentifier = function (identifier, filter, callback) {
+    app.models.person
+      .searchUsingIdentifiers(this.id, identifier, filter)
+      .then(function (people) {
+        callback(null, people);
+      })
+      .catch(callback);
+  };
 };
