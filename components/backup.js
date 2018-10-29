@@ -9,6 +9,8 @@ const async = require('async');
 const tmp = require('tmp');
 const dbSync = require('./dbSync');
 const helpers = require('../components/helpers');
+const _ = require('lodash');
+const moment = require('moment');
 
 /**
  * Create a new backup
@@ -164,14 +166,53 @@ const restoreBackupFromFile = function (filePath, done) {
                   return doneCollection(mongoDbError);
                 }
 
+                // list of date map properties to convert
+                let datePropsMap = app.models[collectionName]._parsedDateProperties;
+
                 // parse file contents to JavaScript object
                 try {
-
                   let collectionRecords = JSON.parse(data);
-                  /**
-                   * FIXME: Quick fix for restore back-up problem for date properties
-                   */
-                  helpers.convertPropsToDate(collectionRecords);
+
+                  collectionRecords.forEach((record) => {
+                    // custom properties should be checked property by property
+                    // we can't know exactly the types
+                    if (record.questionnaireAnswers) {
+                      helpers.convertPropsToDate(record.questionnaireAnswers);
+                    }
+
+                    let specialDatePropsMap = null;
+                    if (record.hasOwnProperty('type') &&
+                      [
+                        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                      ].indexOf(record.type) >= 0) {
+                      specialDatePropsMap = app.models[app.models.person.typeToModelMap[record.type]]._parsedDateProperties;
+                    }
+
+                    (function setDateProps(obj, map) {
+                      // go through each date properties and parse date properties
+                      for (let prop in map) {
+                        if (map.hasOwnProperty(prop)) {
+                          // this is an array prop
+                          if (typeof map[prop] === 'object') {
+                            if (Array.isArray(obj[prop])) {
+                              obj[prop].forEach((item) => setDateProps(item, map[prop]));
+                            }
+                          } else {
+                            let recordPropValue = _.get(obj, prop);
+                            if (recordPropValue) {
+                              // try to convert the string value to date, if valid, replace the old value
+                              let convertedDate = moment(recordPropValue);
+                              if (convertedDate.isValid()) {
+                                _.set(obj, prop, convertedDate.toDate());
+                              }
+                            }
+                          }
+                        }
+                      }
+                    })(record, specialDatePropsMap ? specialDatePropsMap : datePropsMap);
+                  });
 
                   // restore a collection's record using raw mongodb connector
                   const restoreCollection = function () {

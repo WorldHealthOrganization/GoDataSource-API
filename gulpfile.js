@@ -80,7 +80,8 @@ gulp.task('copy', ['clean'], function (callback) {
           '!node_modules',
           '!node_modules/**',
           '!gulpfile.js'
-        ]
+        ],
+        {buffer: false}
       ),
       gulp.dest('build')
     ],

@@ -1383,6 +1383,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "caseDelayBetweenOnsetAndLabTesting"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "exportDailyContactFollowUpForm"
@@ -5783,7 +5789,9 @@
       "returns": [
         {
           "arg": "movement",
-          "type": ["address"],
+          "type": [
+            "address"
+          ],
           "description": "List of addresses with GeoLocations ordered from the oldest one to the most recent",
           "root": true,
           "required": true
@@ -5806,7 +5814,9 @@
       "returns": [
         {
           "arg": "movement",
-          "type": ["address"],
+          "type": [
+            "address"
+          ],
           "description": "List of addresses with GeoLocations ordered from the oldest one to the most recent",
           "root": true,
           "required": true
@@ -5816,6 +5826,64 @@
       "http": {
         "verb": "get",
         "path": "/contacts/:nk/movement"
+      }
+    },
+    "prototype.__get__people": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: it supports 'identifier' property on the first level of where. This allows searching people based on id, visualId and documents.number"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "people",
+          "type": ["person"],
+          "description": "List of people that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries people of outbreak.",
+      "http": {
+        "verb": "get",
+        "path": "/people"
+      }
+    },
+    "prototype.caseDelayBetweenOnsetAndLabTesting": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "delays",
+          "type": [
+            {
+              "type": {
+                "dateOfOnset": "date",
+                "dateOfFirstLabTest": "date",
+                "delay": {
+                  "type": "number",
+                  "description": "Number of days between date of onset and the date of the first lab test sample"
+                },
+                "case": "case"
+              }
+            }
+          ],
+          "description": "List of entries that show the delay between date of symptom onset and the lab testing for a case",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get a list of entries that show the delay between date of symptom onset and the lab testing for a case",
+      "http": {
+        "verb": "get",
+        "path": "/cases/delay-onset-lab-testing"
       }
     },
     "prototype.exportDailyContactFollowUpForm": {
