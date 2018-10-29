@@ -95,7 +95,7 @@ gulp.task('copy', ['clean'], function (callback) {
 gulp.task('compress', ['copy'], function (callback) {
   pump(
     [
-      gulp.src(['build/**/*.js'], {buffer: false}),
+      gulp.src(['build/**/*.js']),
       uglify(),
       gulp.dest('build')
     ],
