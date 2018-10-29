@@ -6613,4 +6613,18 @@ module.exports = function (Outbreak) {
     }
     next();
   });
+
+  /**
+   * Get a list of entries that show the delay between date of symptom onset and the lab testing for a case
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.caseDelayBetweenOnsetAndLabTesting = function (filter, callback) {
+    app.models.case
+      .delayBetweenOnsetAndLabTesting(this.id, filter)
+      .then(function (result) {
+        callback(null, result);
+      })
+      .catch(callback);
+  };
 };
