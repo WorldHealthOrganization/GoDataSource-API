@@ -1422,6 +1422,7 @@ module.exports = {
   translateFieldLabels: translateFieldLabels,
   includeSubLocationsInLocationFilter: includeSubLocationsInLocationFilter,
   translateQuestionnaire: translateQuestionnaire,
+  translateQuestionAnswers: translateQuestionAnswers,
   getBuildInformation: getBuildInformation,
   convertBooleanProperties: convertBooleanProperties,
   getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext,

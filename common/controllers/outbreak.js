@@ -6580,4 +6580,125 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Export a daily contact follow-up form for every contact from a specified date.
+   * @param date
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportDailyContactFollowUpForm = function (date, options, callback) {
+    const self = this;
+    const languageId = options.remotingContext.req.authData.user.languageId;
+    let endOfDay = genericHelpers.getUTCDateEndOfDay(date).toString();
+
+    // Filter to get all of the outbreak's contacts that are under follow-up, and all their follow-ups, up to the specified date
+    let filter = {
+      where: {
+        and: [
+          {outbreakId: this.id},
+          {'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'}
+        ]
+      },
+      include: {
+        relation: 'followUps',
+        scope: {
+          where: {
+            date: {
+              lt: endOfDay
+            }
+          },
+          filterParent: true
+        }
+      }
+    };
+
+    app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
+      app.models.contact.find(filter)
+        .then((contacts) => {
+          // Filter contacts with no follow-ups
+          contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
+
+          // Create the document
+          const doc = pdfUtils.createPdfDoc({
+            fontSize: 6,
+            layout: 'landscape',
+            margin: 20,
+            lineGap: 0,
+            wordSpacing: 0,
+            characterSpacing: 0,
+            paragraphGap: 0
+          });
+
+          // add a top margin of 2 lines for each page
+          doc.on('pageAdded', () => {
+            doc.moveDown(2);
+          });
+
+          // set margin top for first page here, to not change the entire createPdfDoc functionality
+          doc.moveDown(2);
+
+          contacts.forEach((contact, index) => {
+            // Initiate the data
+            let data = [{
+              description: 'Date'
+            }];
+
+            // Initiate the headers
+            let headers = [{
+              id: 'description',
+              header: ''
+            }];
+
+            // Add a header for each day of the follow-up period
+            for (let i = 1; i <= self.periodOfFollowup; i++) {
+              headers.push({
+                id: 'index' + i,
+                header: i
+              });
+
+              // Add the dates of each follow-up
+              data[0]['index' + i] = moment(date).subtract((contact.followUps[0].index - i), 'days').format('YYYY-MM-DD');
+            }
+
+            // Add all questions as rows
+            self.contactFollowUpTemplate.forEach((question) => {
+              data.push({description: question.text});
+              contact.followUps.forEach((followUp) => {
+                data[data.length - 1]['index' + followUp.index] = genericHelpers.translateQuestionAnswers(question, followUp.questionnaireAnswers[question.variable], dictionary);
+              });
+            });
+
+            // Add additional information at the start of each page
+            pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'), 14);
+            doc.text(`${dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_GENDER')}: ${dictionary.getTranslation(contact.gender)}`);
+            doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')}: ${contact.age.years} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${contact.age.months} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`);
+            doc.text(`${dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE')}: ${moment(contact.dateOfLastContact).format('YYYY-MM-DD')}`);
+            doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_ADDRESSES')}: ${app.models.address.getHumanReadableAddress(app.models.person.getCurrentAddress(contact))}`);
+            doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER')}: ${contact.phoneNumber}`);
+            doc.moveDown(2);
+
+            // Add the symptoms/follow-up table
+            pdfUtils.createTableInPDFDocument(headers, data, doc);
+
+            // Add a new page for every contact
+            if (index < contacts.length - 1) {
+              doc.addPage();
+            }
+          });
+
+          // Finish the document
+          doc.end();
+
+          // Export the file
+          genericHelpers.streamToBuffer(doc, (err, buffer) => {
+            if (err) {
+              callback(err);
+            } else {
+              app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'Daily Contact Follow-up.pdf', callback);
+            }
+          });
+        });
+    });
+  };
 };

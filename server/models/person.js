@@ -517,19 +517,28 @@ module.exports = function (Person) {
   };
 
   /**
-   * Get current address for a person
-   * @return {*}
+   * Get current address from an object (not a person instance)
+   * @param person
+   * @returns {*}
    */
-  Person.prototype.getCurrentAddress = function () {
+  Person.getCurrentAddress = function (person) {
     // define current address
     let currentAddress;
     // check if the person has addressed defined
-    if (Array.isArray(this.addresses) && this.addresses.length) {
+    if (Array.isArray(person.addresses) && person.addresses.length) {
       // get current address
-      currentAddress = this.addresses.filter(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE').pop();
+      currentAddress = person.addresses.filter(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE').pop();
     }
     // return current address
     return currentAddress;
+  };
+
+  /**
+   * Get current address for a person instance
+   * @return {*}
+   */
+  Person.prototype.getCurrentAddress = function () {
+    Person.getCurrentAddress(this);
   };
 
   /**
