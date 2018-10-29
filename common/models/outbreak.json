@@ -1380,18 +1380,6 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "getContactMovement"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "searchPeopleUsingIdentifier"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "searchPeopleUsingIdentifier"
     }
   ],
   "methods": {
@@ -5824,17 +5812,12 @@
         "path": "/contacts/:nk/movement"
       }
     },
-    "prototype.searchPeopleUsingIdentifier": {
+    "prototype.__get__people": {
       "accepts": [
-        {
-          "arg": "identifier",
-          "type": "string",
-          "description": "Person identifier"
-        },
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: it supports 'identifier' property on the first level of where. This allows searching people based on id, visualId and documents.number"
         }
       ],
       "returns": [
@@ -5846,10 +5829,10 @@
           "required": true
         }
       ],
-      "description": "Get list of people that match the search criteria (identifier and filters)",
+      "description": "Queries people of outbreak.",
       "http": {
         "verb": "get",
-        "path": "/people/identifier/:identifier/search"
+        "path": "/people"
       }
     }
   }

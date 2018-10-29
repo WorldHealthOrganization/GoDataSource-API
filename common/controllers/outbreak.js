@@ -6582,17 +6582,35 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * (Global) Search for a person using different identifiers (id, visualId, documents.number)
-   * @param identifier
-   * @param filter
-   * @param callback
+   * Add support for 'identifier' search: Allow searching people based on id, visualId and documents.number
    */
-  Outbreak.prototype.searchPeopleUsingIdentifier = function (identifier, filter, callback) {
-    app.models.person
-      .searchUsingIdentifiers(this.id, identifier, filter)
-      .then(function (people) {
-        callback(null, people);
-      })
-      .catch(callback);
-  };
+  Outbreak.beforeRemote('prototype.__get__people', function (context, modelInstance, next) {
+    // get filter (if any)
+    const filter = context.args.filter || {};
+    // get identifier query (if any)
+    const identifier = _.get(filter, 'where.identifier');
+    // if there is an identifier
+    if (identifier !== undefined) {
+      // remove it from the query
+      delete filter.where.identifier;
+      // update filter with custom query around identifier
+      context.args.filter = app.utils.remote.mergeFilters(
+        {
+          where: {
+            or: [
+              {
+                id: identifier
+              },
+              {
+                visualId: identifier
+              },
+              {
+                'documents.number': identifier
+              }
+            ]
+          }
+        }, filter || {});
+    }
+    next();
+  });
 };

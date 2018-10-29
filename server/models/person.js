@@ -613,32 +613,4 @@ module.exports = function (Person) {
     }
     return movement;
   };
-
-  /**
-   * (Global) Search for a person using different identifiers (id, visualId, documents.number)
-   * @param outbreakId
-   * @param identifier
-   * @param filter
-   * @return {*}
-   */
-  Person.searchUsingIdentifiers = function (outbreakId, identifier, filter) {
-    return app.models.person
-      .find(app.utils.remote.mergeFilters(
-        {
-          where: {
-            outbreakId: outbreakId,
-            or: [
-              {
-                id: identifier
-              },
-              {
-                visualId: identifier
-              },
-              {
-                'documents.number': identifier
-              }
-            ]
-          }
-        }, filter || {}));
-  };
 };
