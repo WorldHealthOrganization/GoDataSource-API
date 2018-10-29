@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const casesWorker = require('../../components/workerRunner').cases;
 const _ = require('lodash');
+const moment = require('moment');
 
 module.exports = function (Case) {
   // set flag to not get controller
@@ -292,6 +293,62 @@ module.exports = function (Case) {
               });
             });
           });
+      });
+  };
+
+  /**
+   * Get a list of entries that show the delay between date of symptom onset and the lab testing for a case
+   * @param outbreakId
+   * @param filter
+   * @return {*}
+   */
+  Case.delayBetweenOnsetAndLabTesting = function (outbreakId, filter) {
+    // find all cases that have date of onset defined and include their first lab result
+    return Case
+      .find(app.utils.remote
+        .mergeFilters({
+          where: {
+            outbreakId: outbreakId,
+            dateOfOnset: {
+              ne: null
+            }
+          },
+          include: {
+            relation: 'labResults',
+            scope: {
+              order: 'dateSampleTaken ASC',
+              fields: ['dateSampleTaken'],
+              limit: 1
+            }
+          },
+          order: 'dateOfOnset ASC'
+        }, filter || {})
+      )
+      .then(function (cases) {
+        // build the list of results
+        const results = [];
+        // go through case records
+        cases.forEach(function (caseRecord) {
+          caseRecord = caseRecord.toJSON();
+          // get lab result's dateSampleTaken, if available
+          const labResultDate = caseRecord.labResults.length ? caseRecord.labResults.shift().dateSampleTaken : null;
+          // build each result
+          const result = {
+            dateOfOnset: caseRecord.dateOfOnset,
+            dateOfFirstLabTest: labResultDate,
+            delay: null,
+            case: caseRecord
+          };
+          // calculate delay if both dates are available (onset is ensured by the query)
+          if (labResultDate) {
+            const onset = moment(result.dateOfOnset);
+            const labTest = moment(result.dateOfFirstLabTest);
+            result.delay = labTest.diff(onset, 'days');
+          }
+          results.push(result);
+        });
+        // return the list of results
+        return results;
       });
   };
 };
