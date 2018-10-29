@@ -6824,70 +6824,136 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.exportDailyListOfContacts = function (body, options, callback) {
     // get list of questions for contacts from outbreak
-    let questions = this.contactFollowUpTemplate;
+    let questions = this.contactFollowUpTemplate.sort((a, b) => a.order > b.order);
 
     // get list of contacts
     app.models.contact
       .getGroupedByDate(this, body.date, body.groupBy)
-      .then((contacts) => {
+      .then((contactGroups) => {
         const languageId = options.remotingContext.req.authData.user.languageId;
         app.models.language
           .getLanguageDictionary(
-            options.remotingContext.req.authData.user.languageId,
-            (error, dictionary) => {
+            languageId,
+            (err, dictionary) => {
+              if (err) {
+                return callback(err);
+              }
 
-            }
-          )
-          .then((result) => {
-            // build tables for each group item
-            result.forEach((group, index, array) => {
-              // TODO: table title
+              // generate pdf document
+              let doc = pdfUtils.createPdfDoc();
+              pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_DAILY_CONTACTS_LIST'));
+              doc.moveDown();
 
-              // common headers
-              let headers = [
-                {
-                  id: 'contact',
-                  header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_CONTACT')
-                },
-                {
-                  id: 'status',
-                  header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_STATUSID')
+              // get locations names or cases names
+              // based on the group by operation
+              // needed to display them in the pdf
+              let groupNames = {};
+              let groupFns = [];
+
+              for (let groupId in contactGroups) {
+                if (contactGroups.hasOwnProperty(groupId)) {
+                  if (body.groupBy === 'place') {
+                    groupFns.push(
+                      (done) => {
+                        app.models.location
+                          .findById(groupId)
+                          .then((location) => {
+                            groupNames[groupId] = location.name;
+                            return done();
+                          })
+                          .catch((err) => done(err))
+                      }
+                    );
+                  } else {
+                    groupFns.push(
+                      (done) => {
+                        app.models.person
+                          .findById(groupId)
+                          .then((person) => {
+                            groupNames[groupId] = `${person.firstName} ${person.lastName}`;
+                            return done();
+                          })
+                          .catch((err) => done(err))
+                      }
+                    );
+                  }
                 }
-              ];
+              }
 
-              // include contact questions into the table
-              questions.forEach((question) => {
-                headers.push({
-                  id: question.id,
-                  // translate the value i think
-                  header: item.question
+              async.series(groupFns, (err) => {
+                if (err) {
+                  return callback(err);
+                }
+
+                // build tables for each group item
+                for (let groupId in contactGroups) {
+                  if (contactGroups.hasOwnProperty(groupId)) {
+                    // group title
+                    pdfUtils.addTitle(doc, groupNames[groupId], 12);
+
+                    // common headers
+                    let headers = [
+                      {
+                        id: 'contact',
+                        header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_CONTACT')
+                      },
+                      {
+                        id: 'status',
+                        header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_STATUSID')
+                      }
+                    ];
+
+                    // include contact questions into the table
+                    questions.forEach((item) => {
+                      headers.push({
+                        id: item.variable,
+                        header: item.text
+                      });
+                    });
+
+                    // start building table data
+                    let tableData = [];
+                    contactGroups[groupId].forEach((contact) => {
+                      contact.followUps.forEach((followUp) => {
+                        let row = {
+                          contact: `${contact.firstName} ${contact.lastName}`,
+                          status: dictionary.getTranslation(followUp.statusId)
+                        };
+
+                        let questions = followUp.questionnaireAnswers || {};
+
+                        // add questionnaire answers into the table if any
+                        for (let questionId in questions) {
+                          if (questions.hasOwnProperty(questionId)) {
+                            row[questionId] = questions[questionId];
+                          }
+                        }
+
+                        tableData.push(row);
+                      });
+                    });
+
+                    // insert table into the document
+                    pdfUtils.createTableInPDFDocument(headers, tableData, doc);
+                  }
+                }
+
+                // end the document stream
+                // to convert it into a buffer
+                doc.end();
+
+                // convert pdf stream to buffer and send it as response
+                genericHelpers.streamToBuffer(doc, (err, buffer) => {
+                  if (err) {
+                    return callback(err);
+                  }
+
+                  // serve the file as response
+                  app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'Daily Concts.pdf', callback);
                 });
               });
-
-              // start building table data
-              let tableData = contacts.map((contact) => {
-                  // define the base form of the data for one row of the pdf list
-                  // keep the values as strings so that 0 actually gets displayed in the table
-                  let row = {
-                    // TBD what to add here firstName or combined firstName/lastName
-                    contact: contact.firstName,
-                    status: dictionary.getTranslation(contact.followUp.status)
-                  };
-              });
-
-              // TODO: add table to pdf file
-            });
-
-            // create the pdf list file
-            return app.utils.helpers.exportListFile(headers, data, 'pdf', `Contact tracing ${selectedDayForReport}`);
-        })
-          .then(function (file) {
-            // and offer it for download
-            app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Test.${file.extension}`, callback);
-          })
-          .catch((error) => {
-            callback(error);
-        });
+            }
+          );
       });
   };
 };
