@@ -236,7 +236,9 @@ module.exports = function (Contact) {
   Contact.getGroupedByDate = function (outbreak, date, groupBy) {
     if (groupBy === 'case') {
       let dateInterval = [];
-      if (date) {
+      if (typeof date === 'object' && date.startDate && date.endDate) {
+        dateInterval = [moment(date.startDate).startOf('day'), moment(date.endDate).endOf('day')];
+      } else if (typeof date === 'string') {
         dateInterval = [moment(date).startOf('day'), moment(date).endOf('day')];
       } else {
         dateInterval = [moment(new Date()).startOf('day'), moment(new Date()).endOf('day')];

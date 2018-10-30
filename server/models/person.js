@@ -502,9 +502,13 @@ module.exports = function (Person) {
             } else {
               let dateInterval = [];
 
-              if (filter && filter.dateOfFollowUp) {
-                dateInterval = [moment(filter.dateOfFollowUp).startOf('day'), moment(filter.dateOfFollowUp).endOf('day')];
-                delete filter.dateOfFollowUp;
+              if (filter) {
+                if (filter.dateOfFollowUp) {
+                  dateInterval = [moment(filter.dateOfFollowUp).startOf('day'), moment(filter.dateOfFollowUp).endOf('day')];
+                  delete filter.dateOfFollowUp;
+                } else if (filter.startDate && filter.endDate) {
+                  dateInterval = [moment(filter.startDate).startOf('day'), moment(filter.endDate).endOf('day')];
+                }
               } else {
                 dateInterval = [moment(new Date()).startOf('day'), moment(new Date()).endOf('day')];
               }
