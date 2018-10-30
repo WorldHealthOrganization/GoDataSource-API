@@ -5648,11 +5648,16 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.filteredCountFollowUps = function (filter, callback) {
     helpers.buildFollowUpCustomFilter(filter, this.id)
       .then((customFilter) => {
+        // Merge custom filter with base filter
+        customFilter = app.utils.remote.mergeFilters(
+          customFilter,
+          filter || {});
+
         Outbreak.prototype.__get__followUps(customFilter, function (err, res) {
           if (err) {
             return callback(err);
           }
-          callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
+          callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, customFilter).length);
         });
       });
   };
