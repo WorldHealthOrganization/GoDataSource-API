@@ -193,9 +193,16 @@ module.exports = function (FollowUp) {
       // make sure address stays there
       return Promise.resolve();
     }
+    // make sure we have person id (bulk delete/updates are missing this info)
+    const personId = _.get(data, 'source.all.personId');
+    // if there is no person id
+    if (!personId) {
+      // stop here
+      return Promise.resolve();
+    }
     // follow-up does not have an address, find it's contact
     return app.models.person
-      .findById(_.get(data, 'source.all.personId'))
+      .findById(personId)
       .then((person) => {
         // if the contact was not found, just continue (maybe this is a sync and contact was not synced yet)
         if (!person) {

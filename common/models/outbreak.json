@@ -1386,6 +1386,12 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "caseDelayBetweenOnsetAndLabTesting"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "exportDailyContactFollowUpForm"
     }
   ],
   "methods": {
@@ -5878,6 +5884,47 @@
       "http": {
         "verb": "get",
         "path": "/cases/delay-onset-lab-testing"
+      }
+    },
+    "prototype.exportDailyContactFollowUpForm": {
+      "accepts": [
+        {
+          "arg": "date",
+          "type": "date",
+          "required": "true"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export a pdf file with the daily contact follow-up form, for every relevant contact, from a specific day",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/daily-followup-form/export"
       }
     }
   }
