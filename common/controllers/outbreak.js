@@ -6914,4 +6914,162 @@ module.exports = function (Outbreak) {
           );
       });
   };
+
+  /**
+   * Export range list of contacts and follow ups
+   * Grouped by case/place
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportRangeListOfContacts = function (body, options, callback) {
+    // follow up statuses map
+    let followUpStatusMap = {
+      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED': 'N',
+      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK': 'O',
+      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK': 'S',
+      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED': 'M'
+    };
+
+    // get list of contacts
+    app.models.contact
+      .getGroupedByDate(this, { startDate: body.startDate, endDate: body.endDate } , body.groupBy)
+      .then((contactGroups) => {
+        const languageId = options.remotingContext.req.authData.user.languageId;
+        app.models.language
+          .getLanguageDictionary(
+            languageId,
+            (err, dictionary) => {
+              if (err) {
+                return callback(err);
+              }
+
+              // generate pdf document
+              let doc = pdfUtils.createPdfDoc();
+              pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_DAILY_CONTACTS_LIST'));
+              doc.moveDown();
+
+              // build tables for each group item
+              for (let groupName in contactGroups) {
+                if (contactGroups.hasOwnProperty(groupName)) {
+                  // group title
+                  pdfUtils.addTitle(doc, groupName, 12);
+
+                  // common headers
+                  let headers = [
+                    {
+                      id: 'contact',
+                      header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_CONTACT')
+                    },
+                    {
+                      id: 'age',
+                      header: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')
+                    },
+                    {
+                      id: 'gender',
+                      header: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_GENDER')
+                    },
+                    {
+                      id: 'place',
+                      header: dictionary.getTranslation('LNG_ENTITY_FIELD_LABEL_PLACE')
+                    },
+                    {
+                      id: 'city',
+                      header: dictionary.getTranslation('LNG_ADDRESS_FIELD_LABEL_CITY')
+                    },
+                    {
+                      id: 'address',
+                      header: dictionary.getTranslation('LNG_ENTITY_FIELD_LABEL_ADDRESS')
+                    },
+                    {
+                      id: 'followUpStartDate',
+                      header: dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_START_DATE')
+                    },
+                    {
+                      id: 'followUpEndDate',
+                      header: dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_END_DATE')
+                    }
+                  ];
+
+                  let standardFormat = 'MM-DD-YYYY';
+                  let startDate = genericHelpers.getUTCDate(body.startDate);
+                  let endDate = genericHelpers.getUTCDate(body.endDate);
+                  for (let date = startDate.clone(); date.isSameOrBefore(endDate); date.add(1, 'day')) {
+                    headers.push({
+                      id: date.format(standardFormat),
+                      header: date.format('MM-DD')
+                    });
+                  }
+
+                  // start building table data
+                  let tableData = [];
+
+                  contactGroups[groupName].forEach((contact) => {
+                    let row = {
+                      contact: `${contact.firstName} ${contact.middleName} ${contact.lastName}`,
+                      gender: contact.gender
+                    };
+
+                    let age = '';
+                    if (contact.age) {
+                      if (contact.age.months > 0) {
+                        age = `${contact.age.months} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`;
+                      } else {
+                        age = `${contact.age.years} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')}`;
+                      }
+                    }
+                    row.age = age;
+
+                    if (contact.followUp) {
+                      row.followUpStartDate = moment(contact.followUp.startDate).format(standardFormat);
+                      row.followUpEndDate = moment(contact.followUp.endDate).format(standardFormat);
+                    }
+
+                    if (contact.addresses.length) {
+                      let address = contact.addresses[0];
+                      row.place = address.locationId;
+                      row.city = address.city;
+
+                      // check which address to show
+                      let addressLine = '';
+                      if (address.addressLine1) {
+                        addressLine = address.addressLine1;
+                      } else if (address.addressLine2) {
+                        addressLine = address.addressLine2;
+                      }
+
+                      row.address = addressLine;
+                    }
+
+                    // only the latest follow up will be shown
+                    // they are ordered by desceding by date prior to this
+                    if (contact.followUps.length) {
+                      row[moment(contact.followUps[0].date).format(standardFormat)] = followUpStatusMap[contact.followUps[0].statusId];
+                    }
+
+                    tableData.push(row);
+                  });
+
+                  // insert table into the document
+                  pdfUtils.createTableInPDFDocument(headers, tableData, doc);
+                }
+              }
+
+              // end the document stream
+              // to convert it into a buffer
+              doc.end();
+
+              // convert pdf stream to buffer and send it as response
+              genericHelpers.streamToBuffer(doc, (err, buffer) => {
+                if (err) {
+                  return callback(err);
+                }
+
+                // serve the file as response
+                app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'Range_Contacts.pdf', callback);
+              });
+            }
+          );
+      });
+  };
 };

@@ -291,5 +291,9 @@
   "exportContacts": {
     "dataSource": null,
     "public": false
+  },
+  "exportRangeContacts": {
+    "dataSource": null,
+    "public": false
   }
 }
