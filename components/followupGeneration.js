@@ -150,7 +150,7 @@ module.exports.getAllTeamsWithLocationsIncluded = function () {
     .then((teams) => Promise.all(teams.map((team) => {
       return new Promise((resolve, reject) => {
         return App.models.location
-          .getSubLocations(team.locationIds, [], (err, locations) => {
+          .getSubLocations(team.locationIds || [], [], (err, locations) => {
             if (err) {
               return reject(err);
             }
