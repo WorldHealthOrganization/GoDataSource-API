@@ -35,6 +35,10 @@ module.exports = function (Location) {
    * @param callback
    */
   Location.getSubLocations = function (parentLocations, allLocations, callback) {
+    // defensive checks
+    if (!parentLocations) {
+      parentLocations = [];
+    }
     // all locations include parent locations
     parentLocations.forEach(function (location) {
       if (allLocations.indexOf(location) === -1) {
