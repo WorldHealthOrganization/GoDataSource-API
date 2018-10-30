@@ -11,16 +11,7 @@
           "name": "Algiers",
           "id": "b8321424-b86a-47eb-9cc5-bdd86c83f8c8",
           "geographicalLevelId": "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_1"
-        },
-        "children": [
-          {
-            "location": {
-              "name": "Algiers_LEVEL2",
-              "id": "a11e1e32-9cb9-4caca-ba1a-76d8f9e5e1e7",
-              "geographicalLevelId": "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_2"
-            }
-          }
-        ]
+        }
       },
       {
         "location": {
