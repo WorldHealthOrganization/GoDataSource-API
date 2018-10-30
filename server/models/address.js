@@ -44,4 +44,18 @@ module.exports = function (Address) {
     'id',
     'geoLocation'
   ];
+
+  Address.getHumanReadableAddress = function (address) {
+    let readableAddress = '';
+
+    if (address.city) {
+      readableAddress += address.city;
+    }
+
+    if (address.addressLine1) {
+      readableAddress += (readableAddress.length ? `, ${address.addressLine1}` : address.addressLine1);
+    }
+
+    return readableAddress;
+  };
 };
