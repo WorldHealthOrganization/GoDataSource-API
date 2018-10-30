@@ -37,7 +37,7 @@ gulp.task('prepare-build', function (callback) {
   // validate type
   const supportedTypes = ['hub', 'consolidation-server'];
   if (!supportedTypes.includes(type)) {
-    errors.push(`Invalid platform: ${type}. Supported platforms: ${type.join(', ')}`);
+    errors.push(`Invalid platform: ${type}. Supported platforms: ${supportedTypes.join(', ')}`);
   }
 
   // check if there are errors
