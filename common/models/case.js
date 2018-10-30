@@ -245,6 +245,7 @@ module.exports = function (Case) {
     const periodMap = app.utils.helpers.getChunksForInterval(periodInterval, periodType);
 
     // get available case classifications
+    const caseClassifications = {};
     return app.models.referenceData
       .find({
         where: {
@@ -252,7 +253,6 @@ module.exports = function (Case) {
         }
       })
       .then(function (classifications) {
-        const caseClassifications = {};
         // add default entries for all classifications
         classifications.forEach(function (classification) {
           caseClassifications[classification.id] = 0;
@@ -283,7 +283,7 @@ module.exports = function (Case) {
           .then(function (cases) {
             return new Promise(function (resolve, reject) {
               // count case classifications over time
-              casesWorker.countStratifiedByClassificationOverTime(cases, periodInterval, periodType, periodMap, function (error, periodMap) {
+              casesWorker.countStratifiedByClassificationOverTime(cases, periodInterval, periodType, periodMap, caseClassifications, function (error, periodMap) {
                 // handle errors
                 if (error) {
                   return reject(error);
