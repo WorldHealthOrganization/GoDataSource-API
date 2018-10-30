@@ -2415,9 +2415,40 @@
         }
       ],
       "description": "Counts the cases that pass a filter (which now can accept relations)",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/cases/filtered-count"
+        },
+        {
+          "verb": "post",
+          "path": "/cases/filtered-count"
+        }
+      ]
+    },
+    "prototype.__get__cases": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts a `noRelationships` flag on the first level of `where`."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": [
+            "case"
+          ],
+          "description": "Cases of an outbreak",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Queries cases of an outbreak",
       "http": {
-        "verb": "get",
-        "path": "/cases/filtered-count"
+        "verb": "post",
+        "path": "/cases/filter"
       }
     },
     "prototype.filteredCountContacts": {
@@ -2437,10 +2468,39 @@
         }
       ],
       "description": "Counts the contacts that pass a filter (which now can accept relations)",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/contacts/filtered-count"
+        },
+        {
+          "verb": "post",
+          "path": "/contacts/filtered-count"
+        }
+      ]
+    },
+    "prototype.__get__contacts": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": ["contact"],
+          "description": "Contacts of an outbreak",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Queries contacts of an outbreak",
       "http": {
-        "verb": "get",
-        "path": "/contacts/filtered-count"
-      }
+          "verb": "post",
+          "path": "/contacts/filter"
+        }
     },
     "prototype.filteredCountEvents": {
       "accepts": [
@@ -5839,7 +5899,9 @@
       "returns": [
         {
           "arg": "people",
-          "type": ["person"],
+          "type": [
+            "person"
+          ],
           "description": "List of people that match the search criteria",
           "root": true,
           "required": true
