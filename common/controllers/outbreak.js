@@ -5654,7 +5654,7 @@ module.exports = function (Outbreak) {
           }
           callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
         });
-      })
+      });
   };
 
   /**
