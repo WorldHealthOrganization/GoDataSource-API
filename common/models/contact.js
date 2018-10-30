@@ -300,13 +300,50 @@ module.exports = function (Contact) {
           });
 
           // group them by case id
-          contacts = _.groupBy(contacts, (c) => c.caseId);
+          let groups = _.groupBy(contacts, (c) => c.caseId);
 
-          return contacts;
+          // replace case id's with combination of first/middle/last name
+          let groupNameResolvePromise = [];
+          for (let groupId in groups) {
+            if (groups.hasOwnProperty(groupId)) {
+              groupNameResolvePromise.push(
+                new Promise((resolve, reject) => {
+                  return app.models.person
+                    .findById(groupId)
+                    .then((person) => {
+                      groups[`${person.firstName} ${person.middleName} ${person.lastName}`] = groups[groupId].slice();
+                      delete groups[groupId];
+                      return resolve();
+                    })
+                    .catch(reject);
+                })
+              );
+            }
+          }
+
+          return Promise
+            .all(groupNameResolvePromise)
+            .then(() => groups);
         });
     }
 
     // return contacts grouped by location that have follow ups in the given day
-    return app.models.person.getPeoplePerLocation('contact', {}, outbreak);
+    return app.models.person
+      .getPeoplePerLocation('contact', {
+        dateOfFollowUp: date
+      }, outbreak)
+      .then((groups) => {
+        // rebuild the result to match the structure resulted from 'case' grouping
+        // doing this because we're reusing existing functionality that does not build the result the same way
+        let contactGroups = {};
+
+        groups.forEach((group) => {
+          if (group.people.length) {
+            contactGroups[group.location.name] = group.people;
+          }
+        });
+
+        return contactGroups;
+      });
   };
 };

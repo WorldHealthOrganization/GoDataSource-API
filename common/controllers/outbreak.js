@@ -6844,113 +6844,71 @@ module.exports = function (Outbreak) {
               pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_DAILY_CONTACTS_LIST'));
               doc.moveDown();
 
-              // get locations names or cases names
-              // based on the group by operation
-              // needed to display them in the pdf
-              let groupNames = {};
-              let groupFns = [];
+              // build tables for each group item
+              for (let groupName in contactGroups) {
+                if (contactGroups.hasOwnProperty(groupName)) {
+                  // group title
+                  pdfUtils.addTitle(doc, groupName, 12);
 
-              for (let groupId in contactGroups) {
-                if (contactGroups.hasOwnProperty(groupId)) {
-                  if (body.groupBy === 'place') {
-                    groupFns.push(
-                      (done) => {
-                        app.models.location
-                          .findById(groupId)
-                          .then((location) => {
-                            groupNames[groupId] = location.name;
-                            return done();
-                          })
-                          .catch((err) => done(err))
+                  // common headers
+                  let headers = [
+                    {
+                      id: 'contact',
+                      header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_CONTACT')
+                    },
+                    {
+                      id: 'status',
+                      header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_STATUSID')
+                    }
+                  ];
+
+                  // include contact questions into the table
+                  questions.forEach((item) => {
+                    headers.push({
+                      id: item.variable,
+                      header: item.text
+                    });
+                  });
+
+                  // start building table data
+                  let tableData = [];
+                  contactGroups[groupName].forEach((contact) => {
+                    contact.followUps.forEach((followUp) => {
+                      let row = {
+                        contact: `${contact.firstName} ${contact.middleName} ${contact.lastName}`,
+                        status: dictionary.getTranslation(followUp.statusId)
+                      };
+
+                      let questions = followUp.questionnaireAnswers || {};
+
+                      // add questionnaire answers into the table if any
+                      for (let questionId in questions) {
+                        if (questions.hasOwnProperty(questionId)) {
+                          row[questionId] = questions[questionId];
+                        }
                       }
-                    );
-                  } else {
-                    groupFns.push(
-                      (done) => {
-                        app.models.person
-                          .findById(groupId)
-                          .then((person) => {
-                            groupNames[groupId] = `${person.firstName} ${person.lastName}`;
-                            return done();
-                          })
-                          .catch((err) => done(err))
-                      }
-                    );
-                  }
+
+                      tableData.push(row);
+                    });
+                  });
+
+                  // insert table into the document
+                  pdfUtils.createTableInPDFDocument(headers, tableData, doc);
                 }
               }
 
-              async.series(groupFns, (err) => {
+              // end the document stream
+              // to convert it into a buffer
+              doc.end();
+
+              // convert pdf stream to buffer and send it as response
+              genericHelpers.streamToBuffer(doc, (err, buffer) => {
                 if (err) {
                   return callback(err);
                 }
 
-                // build tables for each group item
-                for (let groupId in contactGroups) {
-                  if (contactGroups.hasOwnProperty(groupId)) {
-                    // group title
-                    pdfUtils.addTitle(doc, groupNames[groupId], 12);
-
-                    // common headers
-                    let headers = [
-                      {
-                        id: 'contact',
-                        header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_CONTACT')
-                      },
-                      {
-                        id: 'status',
-                        header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_STATUSID')
-                      }
-                    ];
-
-                    // include contact questions into the table
-                    questions.forEach((item) => {
-                      headers.push({
-                        id: item.variable,
-                        header: item.text
-                      });
-                    });
-
-                    // start building table data
-                    let tableData = [];
-                    contactGroups[groupId].forEach((contact) => {
-                      contact.followUps.forEach((followUp) => {
-                        let row = {
-                          contact: `${contact.firstName} ${contact.lastName}`,
-                          status: dictionary.getTranslation(followUp.statusId)
-                        };
-
-                        let questions = followUp.questionnaireAnswers || {};
-
-                        // add questionnaire answers into the table if any
-                        for (let questionId in questions) {
-                          if (questions.hasOwnProperty(questionId)) {
-                            row[questionId] = questions[questionId];
-                          }
-                        }
-
-                        tableData.push(row);
-                      });
-                    });
-
-                    // insert table into the document
-                    pdfUtils.createTableInPDFDocument(headers, tableData, doc);
-                  }
-                }
-
-                // end the document stream
-                // to convert it into a buffer
-                doc.end();
-
-                // convert pdf stream to buffer and send it as response
-                genericHelpers.streamToBuffer(doc, (err, buffer) => {
-                  if (err) {
-                    return callback(err);
-                  }
-
-                  // serve the file as response
-                  app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'Daily Concts.pdf', callback);
-                });
+                // serve the file as response
+                app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'Daily_Contacts.pdf', callback);
               });
             }
           );

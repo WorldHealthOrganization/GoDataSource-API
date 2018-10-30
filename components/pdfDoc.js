@@ -61,7 +61,7 @@ function createPdfDoc(options) {
   const document = new PdfKit(options);
   // set logo on all pages and default line width
   document.on('pageAdded', function () {
-    this.image(`${__dirname}/../resources/images/logo-black.png`, 50, 15, {height: 25});
+    this.image(`${__dirname}/../resources/images/logo-black.png`, document.options.margin, 15, {height: 25});
     this.lineWidth(options.lineWidth);
     this.fontSize(options.fontSize);
     this.font(`${__dirname}/../resources/fonts/NotoSansCJKjp-Regular.min.ttf`);
