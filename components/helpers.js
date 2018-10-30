@@ -1152,7 +1152,7 @@ const getSourceAndTargetFromModelHookContext = function (context) {
     result.target = context.instance;
   } else {
     // data source & target are on context data
-    if (typeof context.currentInstance.toJSON === 'function') {
+    if (context.currentInstance && typeof context.currentInstance.toJSON === 'function') {
       result.source = {
         existing: context.currentInstance.toJSON(),
         existingRaw: context.currentInstance,
