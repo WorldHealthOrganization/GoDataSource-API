@@ -5646,12 +5646,15 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.filteredCountFollowUps = function (filter, callback) {
-    this.__get__followUps(filter, function (err, res) {
-      if (err) {
-        return callback(err);
-      }
-      callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
-    });
+    helpers.buildFollowUpCustomFilter(filter, this.id)
+      .then((customFilter) => {
+        Outbreak.prototype.__get__followUps(customFilter, function (err, res) {
+          if (err) {
+            return callback(err);
+          }
+          callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
+        });
+      });
   };
 
   /**
