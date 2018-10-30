@@ -2,6 +2,7 @@
 
 const fork = require('child_process').fork;
 const workersPath = `${__dirname}/../components/workers`;
+const app = require('../server/server');
 
 /**
  * Invoke worker method
@@ -20,6 +21,11 @@ function invokeWorkerMethod(workerName, method, args, callback) {
    * @param result
    */
   function next(error, result) {
+    // if error occurred
+    if (error) {
+      // make sure it is logged
+      app.logger.error(error, error.stack);
+    }
     // execute callback
     cb(error, result);
     // replace callback with no-op to prevent calling it multiple times
@@ -97,10 +103,11 @@ module.exports = {
      * @param periodInterval
      * @param periodType
      * @param periodMap
+     * @param caseClassifications
      * @param callback
      */
-    countStratifiedByClassificationOverTime: function (cases, periodInterval, periodType, periodMap, callback) {
-      invokeWorkerMethod('cases', 'countStratifiedByClassificationOverTime', [cases, periodInterval, periodType, periodMap], callback);
+    countStratifiedByClassificationOverTime: function (cases, periodInterval, periodType, periodMap, caseClassifications, callback) {
+      invokeWorkerMethod('cases', 'countStratifiedByClassificationOverTime', [cases, periodInterval, periodType, periodMap, caseClassifications], callback);
     }
   }
 };
