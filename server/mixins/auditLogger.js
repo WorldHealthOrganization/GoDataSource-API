@@ -129,10 +129,10 @@ module.exports = function (Model) {
         };
         let instanceData = context.instance.toJSON();
         // add record id
-        logData.recordId = instanceData.id;
+        logData.recordId = context.instance.id;
         // add changes
         Object.keys(instanceData).forEach(function (field) {
-          if (isMonitoredField(field) && instanceData[field] != undefined) {
+          if (isMonitoredField(field) && instanceData[field] !== undefined) {
             logData.changedData.push({
               field: field,
               newValue: instanceData[field]
@@ -140,7 +140,11 @@ module.exports = function (Model) {
           }
         });
         app.models.auditLog
-          .create(logData, context.options);
+          .create(logData, context.options)
+          .catch(function (error) {
+            // just log the error
+            app.logger.log(error);
+          });
         // call the callback without waiting for the audit log changes to be persisted
         callback();
       } else {
@@ -156,7 +160,11 @@ module.exports = function (Model) {
             changedData: context.options.changedFields
           };
           app.models.auditLog
-            .create(logData, context.options);
+            .create(logData, context.options)
+            .catch(function (error) {
+              // just log the error
+              app.logger.log(error);
+            });
 
         }
         // call the callback without waiting for the audit log changes to be persisted
@@ -205,7 +213,11 @@ module.exports = function (Model) {
           }
         });
         app.models.auditLog
-          .create(logData, context.options);
+          .create(logData, context.options)
+          .catch(function (error) {
+            // just log the error
+            app.logger.log(error);
+          });
         // call the callback without waiting for the audit log changes to be persisted
         callback();
       } else {
@@ -242,7 +254,11 @@ module.exports = function (Model) {
         }
       });
       app.models.auditLog
-        .create(logData, context.options);
+        .create(logData, context.options)
+        .catch(function (error) {
+          // just log the error
+          app.logger.log(error);
+        });
       // call the callback without waiting for the audit log changes to be persisted
       callback();
     });
