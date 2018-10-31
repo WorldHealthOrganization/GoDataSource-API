@@ -6924,12 +6924,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.exportRangeListOfContacts = function (body, options, callback) {
     // follow up statuses map
-    let followUpStatusMap = {
-      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED': 'N',
-      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK': 'O',
-      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK': 'S',
-      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED': 'M'
-    };
+    let followUpStatusMap = app.models.followUp.statusAcronymMap;
 
     // get list of contacts
     app.models.contact
@@ -6948,7 +6943,15 @@ module.exports = function (Outbreak) {
 
               // generate pdf document
               let doc = pdfUtils.createPdfDoc();
-              pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_DAILY_CONTACTS_LIST'));
+              pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_RANGE_CONTACTS_LIST'));
+              doc.moveDown();
+
+
+              // follow up status legend
+              pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_FOLLOW_UP_STATUS_LEGEND'), 12);
+              for (let statusId in followUpStatusMap) {
+                pdfUtils.addTitle(doc, `${dictionary.getTranslation(statusId)} = ${dictionary.getTranslation(followUpStatusMap[statusId])}`, 9);
+              }
               doc.moveDown();
 
               // build tables for each group item
@@ -7054,7 +7057,8 @@ module.exports = function (Outbreak) {
                     // only the latest follow up will be shown
                     // they are ordered by descending by date prior to this
                     if (contact.followUps.length) {
-                      row[moment(contact.followUps[0].date).format(standardFormat)] = followUpStatusMap[contact.followUps[0].statusId];
+                      let statusAcronym = dictionary.getTranslation(followUpStatusMap[contact.followUps[0].statusId]);
+                      row[moment(contact.followUps[0].date).format(standardFormat)] = statusAcronym;
                     }
 
                     tableData.push(row);
