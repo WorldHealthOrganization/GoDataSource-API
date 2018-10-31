@@ -346,11 +346,18 @@ module.exports = function (Contact) {
         });
     }
 
+    // check if we need to send an interval of dates or a single date
+    let dateFilter =  { dateOfFollowUp: date };
+    if (typeof date === 'object') {
+      dateFilter = {
+        startDate: date.startDate,
+        endDate: date.endDate
+      };
+    }
+
     // return contacts grouped by location that have follow ups in the given day
     return app.models.person
-      .getPeoplePerLocation('contact', {
-        dateOfFollowUp: date
-      }, outbreak)
+      .getPeoplePerLocation('contact', dateFilter, outbreak)
       .then((groups) => {
         // rebuild the result to match the structure resulted from 'case' grouping
         // doing this because we're reusing existing functionality that does not build the result the same way

@@ -7069,8 +7069,12 @@ module.exports = function (Outbreak) {
                     // only the latest follow up will be shown
                     // they are ordered by descending by date prior to this
                     if (contact.followUps.length) {
-                      let statusAcronym = dictionary.getTranslation(followUpStatusMap[contact.followUps[0].statusId]);
-                      row[moment(contact.followUps[0].date).format(standardFormat)] = statusAcronym;
+                      contact.followUps.forEach((followUp) => {
+                        let rowId = moment(followUp.date).format(standardFormat);
+                        if (!row[rowId]) {
+                          row[rowId] = dictionary.getTranslation(followUpStatusMap[followUp.statusId]);
+                        }
+                      });
                     }
 
                     tableData.push(row);
