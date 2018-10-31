@@ -1,0 +1,25 @@
+{
+  "name": "deviceHistory",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "deviceId": {
+      "type": "string",
+      "required": true,
+      "readOnly": true
+    },
+    "status": {
+      "type": "string",
+      "required": true,
+      "default": "LNG_DEVICE_HISTORY_WIPE_STATUS_PENDING",
+      "readOnly": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

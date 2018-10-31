@@ -2151,6 +2151,15 @@
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP": "Lost To Follow-up",
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED": "Follow-up Completed",
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP": "Under Follow-up"
+    },
+    "deviceStatus": {
+      "LNG_DEVICE_WIPE_STATUS_READY" : "Ready to Wipe",
+      "LNG_DEVICE_WIPE_STATUS_PENDING": "Pending Wipe"
+    },
+    "deviceHistoryStatus": {
+      "LNG_DEVICE_HISTORY_WIPE_STATUS_PENDING": "Wipe Pending",
+      "LNG_DEVICE_HISTORY_WIPE_STATUS_FAILED": "Wipe Failed",
+      "LNG_DEVICE_HISTORY_WIPE_STATUS_SUCCESS": "Wipe Successful"
     }
   }
 }

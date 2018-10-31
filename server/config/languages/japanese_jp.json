@@ -2157,6 +2157,15 @@
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP": "日本の Lost To Follow-up",
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED": "日本の Follow-up Completed",
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP": "日本の Under Follow-up"
+    },
+    "deviceStatus": {
+      "LNG_DEVICE_WIPE_STATUS_READY" : "日本の Ready to Wipe",
+      "LNG_DEVICE_WIPE_STATUS_PENDING": "日本の Pending Wipe"
+    },
+    "deviceHistoryStatus": {
+      "LNG_DEVICE_HISTORY_WIPE_STATUS_PENDING": "日本の Wipe Pending",
+      "LNG_DEVICE_HISTORY_WIPE_STATUS_FAILED": "日本の Wipe Failed",
+      "LNG_DEVICE_HISTORY_WIPE_STATUS_SUCCESS": "日本の Wipe Successful"
     }
   }
 }

@@ -279,5 +279,13 @@
   "generateFollowup": {
     "dataSource": null,
     "public": false
+  },
+  "device": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "deviceHistory": {
+    "dataSource": "mongoDb",
+    "public": false
   }
 }

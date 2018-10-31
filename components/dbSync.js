@@ -44,7 +44,9 @@ const collectionsMap = {
   role: 'role',
   cluster: 'cluster',
   auditLog: 'auditLog',
-  fileAttachment: 'fileAttachment'
+  fileAttachment: 'fileAttachment',
+  device: 'device',
+  deviceHistory: 'deviceHistory'
 };
 
 // list of user related collections
@@ -70,7 +72,9 @@ let syncExcludeList = [
   'role',
   'auditLog',
   'helpCategory',
-  'helpItem'
+  'helpItem',
+  'device',
+  'deviceHistory'
 ];
 let syncCollections = Object.keys(collectionsMap).filter((collection) => syncExcludeList.indexOf(collection) === -1);
 
