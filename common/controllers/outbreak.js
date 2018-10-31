@@ -7026,8 +7026,20 @@ module.exports = function (Outbreak) {
                     row.age = age;
 
                     if (contact.followUp) {
-                      row.followUpStartDate = moment(contact.followUp.startDate).format(standardFormat);
-                      row.followUpEndDate = moment(contact.followUp.endDate).format(standardFormat);
+                      let followUpStartDate = genericHelpers.getUTCDate(contact.followUp.startDate);
+                      let followUpEndDate = genericHelpers.getUTCDate(contact.followUp.endDate);
+
+                      row.followUpStartDate = followUpStartDate.format(standardFormat);
+                      row.followUpEndDate = followUpEndDate.format(standardFormat);
+
+                      // mark them unusable from startDate to followup start date
+                      // and from follow up end date to document end date
+                      for (let date = startDate.clone(); date.isBefore(followUpStartDate); date.add(1, 'day')) {
+                        row[date.format(standardFormat)] = 'X';
+                      }
+                      for (let date = followUpEndDate.clone().add(1, 'day'); date.isSameOrBefore(endDate); date.add(1, 'day')) {
+                        row[date.format(standardFormat)] = 'X';
+                      }
                     }
 
                     if (contact.addresses.length) {
