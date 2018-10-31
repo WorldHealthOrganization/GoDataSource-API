@@ -301,31 +301,48 @@ module.exports = function (Contact) {
             return contact;
           });
 
-          // group them by case id
-          let groups = _.groupBy(contacts, (c) => c.caseId);
-
-          // replace case id's with combination of first/middle/last name
-          let groupNameResolvePromise = [];
-          for (let groupId in groups) {
-            if (groups.hasOwnProperty(groupId)) {
-              groupNameResolvePromise.push(
-                new Promise((resolve, reject) => {
-                  return app.models.person
-                    .findById(groupId)
-                    .then((person) => {
-                      groups[`${person.firstName} ${person.middleName} ${person.lastName}`] = groups[groupId].slice();
-                      delete groups[groupId];
-                      return resolve();
-                    })
-                    .catch(reject);
-                })
-              );
-            }
-          }
-
+          // retrieve contact's first address location
           return Promise
-            .all(groupNameResolvePromise)
-            .then(() => groups);
+            .all(contacts.map((contact) => {
+              if (contact.addresses.length) {
+                return app.models.location
+                  .findById(contact.addresses[0].locationId)
+                  .then((location) => {
+                    if (location) {
+                      contact.addresses[0].locationName = location.name;
+                    }
+                    return contact;
+                  });
+              }
+              return contact;
+            }))
+            .then((contacts) => {
+              // group them by case id
+              let groups = _.groupBy(contacts, (c) => c.caseId);
+
+              // replace case id's with combination of first/middle/last name
+              let groupNameResolvePromise = [];
+              for (let groupId in groups) {
+                if (groups.hasOwnProperty(groupId)) {
+                  groupNameResolvePromise.push(
+                    new Promise((resolve, reject) => {
+                      return app.models.person
+                        .findById(groupId)
+                        .then((person) => {
+                          groups[`${person.firstName} ${person.middleName} ${person.lastName}`] = groups[groupId].slice();
+                          delete groups[groupId];
+                          return resolve();
+                        })
+                        .catch(reject);
+                    })
+                  );
+                }
+              }
+
+              return Promise
+                .all(groupNameResolvePromise)
+                .then(() => groups);
+            });
         });
     }
 

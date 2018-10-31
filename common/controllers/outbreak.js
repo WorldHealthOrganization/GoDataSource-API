@@ -6944,6 +6944,8 @@ module.exports = function (Outbreak) {
                 return callback(err);
               }
 
+              // get location for each contact
+
               // generate pdf document
               let doc = pdfUtils.createPdfDoc();
               pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_DAILY_CONTACTS_LIST'));
@@ -7027,7 +7029,15 @@ module.exports = function (Outbreak) {
 
                     if (contact.addresses.length) {
                       let address = contact.addresses[0];
-                      row.place = address.locationId;
+
+                      // if contacts are grouped per location
+                      // then use the group name which is location name as place for each contact under the group
+                      if (body.groupBy === 'place') {
+                        row.place = groupName;
+                      } else {
+                        row.place = address.locationName;
+                      }
+
                       row.city = address.city;
 
                       // check which address to show
@@ -7042,7 +7052,7 @@ module.exports = function (Outbreak) {
                     }
 
                     // only the latest follow up will be shown
-                    // they are ordered by desceding by date prior to this
+                    // they are ordered by descending by date prior to this
                     if (contact.followUps.length) {
                       row[moment(contact.followUps[0].date).format(standardFormat)] = followUpStatusMap[contact.followUps[0].statusId];
                     }
