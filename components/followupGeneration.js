@@ -252,15 +252,9 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     // delete them and then insert the newly generated
     if (!followUpDate.isBefore(Helpers.getUTCDate())) {
       let existingFollowups = contact.followUpsLists.filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
-      if (existingFollowups.length) {
-        followUpsToDelete.push(
-          App.models.followUp.destroyAll({
-            id: {
-              inq: existingFollowups.map((f) => f.id)
-            }
-          })
-        );
-      }
+      existingFollowups.map((existingFollowup) => {
+        followUpsToDelete.push(existingFollowup.destroy(reqOpts));
+      });
     }
 
     followUpsToAdd.push(...generatedFollowUps);
