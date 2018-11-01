@@ -3,7 +3,6 @@
 // requires
 const app = require('../server');
 const personDuplicate = require('../../components/workerRunner').personDuplicate;
-const _ = require('lodash');
 const moment = require('moment');
 
 module.exports = function (Person) {
