@@ -35,7 +35,10 @@
     "loopback-boot": "2.27.1",
     "loopback-component-explorer": "6.3.0",
     "loopback-connector-mongodb": "3.8.0",
+    "mkdirp": "0.5.1",
     "moment": "2.22.2",
+    "ncp": "2.0.0",
+    "parse": "2.1.0",
     "pdfkit": "0.8.3",
     "qr-image": "3.2.0",
     "request": "2.88.0",
@@ -48,9 +51,7 @@
     "voilab-pdf-table": "0.4.0",
     "winston": "2.4.4",
     "xlsx": "0.13.5",
-    "xml2js": "0.4.19",
-    "ncp": "2.0.0",
-    "mkdirp": "0.5.1"
+    "xml2js": "0.4.19"
   },
   "devDependencies": {
     "eslint": "3.19.0",
