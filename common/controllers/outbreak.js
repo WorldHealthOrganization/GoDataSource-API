@@ -6928,6 +6928,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportRangeListOfContacts = function (body, options, callback) {
+    // application model's reference
+    const models = app.models;
+
     let standardFormat = 'MM-DD-YYYY';
     let startDate = genericHelpers.getUTCDate(body.startDate);
     let endDate = genericHelpers.getUTCDate(body.endDate);
@@ -6941,8 +6944,87 @@ module.exports = function (Outbreak) {
     let followUpStatusMap = app.models.followUp.statusAcronymMap;
 
     // get list of contacts
-    app.models.contact
-      .getGroupedByDate(this, { startDate: body.startDate, endDate: body.endDate } , body.groupBy)
+    models.contact
+      .getGroupedByDate(
+        this, // outbreak model
+        {
+          startDate: body.startDate,
+          endDate: body.endDate
+        },
+        body.groupBy
+      )
+      .then((contactGroups) => {
+        return new Promise((resolve) => {
+          // resolve location names if contacts are being grouped by case
+          if (body.groupBy === 'case') {
+            let groupContactLocationMap = {};
+            let allLocationsIds = [];
+
+            for (let group in contactGroups) {
+              if (contactGroups.hasOwnProperty(group)) {
+                groupContactLocationMap[group] = contactGroups[group].map((contact, index) => {
+                  let locationId = _.find(
+                    contact.addresses,
+                    [
+                      'typeId',
+                      'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
+                    ]
+                  ).locationId;
+
+                  allLocationsIds.push(locationId);
+
+                  return {
+                    locationId: locationId,
+                    arrayIndex: index
+                  };
+                });
+              }
+            }
+
+            return models.location
+              .resolveLocationsWithLevel(
+                allLocationsIds,
+                {
+                  locationIds: this.locationIds,
+                  reportingGeographicalLevelId: this.reportingGeographicalLevelId
+                }
+              )
+              .then((resolvedLocationIdsMap) => {
+                // resolve the locations names
+                let locationNameResolvePromises = [];
+
+                // remap each location to each contact
+                for (let group in groupContactLocationMap) {
+                  if (groupContactLocationMap.hasOwnProperty(group)) {
+                    // check if any of the group's contacts have an entry in the resolved location map
+                    let contactsWithResolvedLocation = groupContactLocationMap[group].filter((contactLocation) => {
+                      return resolvedLocationIdsMap.hasOwnProperty(contactLocation.locationId);
+                    });
+
+                    contactsWithResolvedLocation.forEach((item) => {
+                      ((locationId, index, groupName) => {
+                        locationNameResolvePromises.push(
+                          new Promise((resolve, reject) => {
+                            models.location
+                              .findById(locationId)
+                              .then((location) => {
+                                contactGroups[groupName][index].locationName = location.name;
+                                return resolve();
+                              })
+                              .catch(reject)
+                          })
+                        );
+                      })(resolvedLocationIdsMap[item.locationId], item.arrayIndex, group);
+                    });
+                  }
+                }
+
+                return Promise.all(locationNameResolvePromises).then(() => resolve(contactGroups));
+              });
+          }
+          return resolve(contactGroups);
+        })
+      })
       .then((contactGroups) => {
         const languageId = options.remotingContext.req.authData.user.languageId;
         app.models.language
@@ -6964,7 +7046,9 @@ module.exports = function (Outbreak) {
               // follow up status legend
               pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_FOLLOW_UP_STATUS_LEGEND'), 12);
               for (let statusId in followUpStatusMap) {
-                pdfUtils.addTitle(doc, `${dictionary.getTranslation(statusId)} = ${dictionary.getTranslation(followUpStatusMap[statusId])}`, 9);
+                if (followUpStatusMap.hasOwnProperty(statusId)) {
+                  pdfUtils.addTitle(doc, `${dictionary.getTranslation(statusId)} = ${dictionary.getTranslation(followUpStatusMap[statusId])}`, 9);
+                }
               }
               doc.moveDown();
 
@@ -7053,16 +7137,16 @@ module.exports = function (Outbreak) {
                       }
                     }
 
+                    // if contacts are grouped per location
+                    // then use the group name which is location name as place for each contact under the group
+                    if (body.groupBy === 'place') {
+                      row.place = groupName;
+                    } else {
+                      row.place = contact.locationName;
+                    }
+
                     if (contact.addresses.length) {
                       let address = contact.addresses[0];
-
-                      // if contacts are grouped per location
-                      // then use the group name which is location name as place for each contact under the group
-                      if (body.groupBy === 'place') {
-                        row.place = groupName;
-                      } else {
-                        row.place = address.locationName;
-                      }
 
                       row.city = address.city;
 
