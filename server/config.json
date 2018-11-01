@@ -48,5 +48,10 @@
       "actionTimeout": 3600000
     },
     "actionCleanupInterval": 24
+  },
+  "pushNotifications": {
+    "serverURL": "http://192.168.0.125:1337/api",
+    "appId": "b61f5946-1af3-4e07-9986-9ffd1e36ae93",
+    "masterKey": "KlYddh2OdVycHuVBhXv2"
   }
 }
