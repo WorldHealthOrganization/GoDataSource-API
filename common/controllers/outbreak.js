@@ -6428,7 +6428,18 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.downloadContactTracingPerLocationLevelReport = function (filter, options, callback) {
     const self = this;
     const languageId = options.remotingContext.req.authData.user.languageId;
-    let selectedDayForReport;
+
+    // set default filter values
+    if (!filter) {
+      filter = {};
+      // set default dateOfFollowUp
+      if (!filter.dateOfFollowUp) {
+        filter.dateOfFollowUp = new Date();
+      }
+    }
+
+    // Get the date of the selected day for report to add to the pdf title (by default, current day)
+    let selectedDayForReport = moment(filter.dateOfFollowUp).format('ll');
 
     // Get the dictionary so we can translate the case classifications and other neccessary fields
     app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
@@ -6485,7 +6496,7 @@ module.exports = function (Outbreak) {
               row.registered = +row.registered + 1;
 
               // Any status other than under follow-up will make the contact be considered as released.
-              if (contact.followUp.status === 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP') {
+              if (contact.followUp && contact.followUp.status === 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP') {
                 row.underFollowUp = +row.underFollowUp + 1;
 
                 // The contact can be seen only if he is under follow
@@ -6495,10 +6506,6 @@ module.exports = function (Outbreak) {
                       'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK'].includes(followUp.statusId);
                   });
                   if (completedFollowUp) {
-                    // Get the date of the selected day for report to add to the pdf title
-                    if (!selectedDayForReport) {
-                      selectedDayForReport = moment(completedFollowUp.date).format('ll');
-                    }
                     row.seenOnDay = +row.seenOnDay + 1;
                   }
 
@@ -6518,7 +6525,7 @@ module.exports = function (Outbreak) {
         })
         .then(function (file) {
           // and offer it for download
-          app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Test.${file.extension}`, callback);
+          app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Contact tracing report.${file.extension}`, callback);
         })
         .catch((error) => {
           callback(error);
