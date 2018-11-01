@@ -187,6 +187,17 @@ const cliArguments = {
       convertor: e => e
     }
   },
+  version: {
+    source: sources.package,
+    paramPath: 'build.version',
+    get: {
+      convertor: e => e
+    },
+    set: {
+      allowed: false,
+      convertor: e => e
+    }
+  },
 };
 
 /**
