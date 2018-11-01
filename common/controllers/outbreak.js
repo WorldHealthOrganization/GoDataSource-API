@@ -6946,12 +6946,12 @@ module.exports = function (Outbreak) {
     // get list of contacts
     models.contact
       .getGroupedByDate(
-        this, // outbreak model
-        {
-          startDate: body.startDate,
-          endDate: body.endDate
-        },
-        body.groupBy
+      this, // outbreak model
+      {
+        startDate: body.startDate,
+        endDate: body.endDate
+      },
+      body.groupBy
       )
       .then((contactGroups) => {
         return new Promise((resolve) => {
@@ -7020,7 +7020,7 @@ module.exports = function (Outbreak) {
                                 }
                                 return resolve();
                               })
-                              .catch(reject)
+                              .catch(reject);
                           })
                         );
                       })(resolvedLocationIdsMap[item.locationId], item.arrayIndex, group);
@@ -7032,7 +7032,7 @@ module.exports = function (Outbreak) {
               });
           }
           return resolve(contactGroups);
-        })
+        });
       })
       .then((contactGroups) => {
         const languageId = options.remotingContext.req.authData.user.languageId;
