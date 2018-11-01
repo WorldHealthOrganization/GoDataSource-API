@@ -6376,7 +6376,7 @@ module.exports = function (Outbreak) {
                 data.deceased.total = +data.deceased.total + 1;
               } else if (data[caseModel.classification]) {
                 // if the case has a current location and the location is a reporting location
-                if (caseLatestLocation && data[caseModel.classification] && data[caseModel.classification][caseLatestLocation]) {
+                if (caseLatestLocation && data[caseModel.classification][caseLatestLocation]) {
                   data[caseModel.classification][caseLatestLocation] = +data[caseModel.classification][caseLatestLocation] + 1;
                 }
                 data[caseModel.classification].total = +data[caseModel.classification].total + 1;
