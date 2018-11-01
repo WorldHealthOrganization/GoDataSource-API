@@ -6963,18 +6963,25 @@ module.exports = function (Outbreak) {
             for (let group in contactGroups) {
               if (contactGroups.hasOwnProperty(group)) {
                 groupContactLocationMap[group] = contactGroups[group].map((contact, index) => {
-                  let locationId = _.find(
+                  let address = _.find(
                     contact.addresses,
                     [
                       'typeId',
                       'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
                     ]
-                  ).locationId;
+                  );
 
-                  allLocationsIds.push(locationId);
+                  if (address) {
+                    allLocationsIds.push(address.locationId);
+
+                    return {
+                      locationId: address.locationId,
+                      arrayIndex: index
+                    };
+                  }
 
                   return {
-                    locationId: locationId,
+                    locationId: null,
                     arrayIndex: index
                   };
                 });
@@ -7008,7 +7015,9 @@ module.exports = function (Outbreak) {
                             models.location
                               .findById(locationId)
                               .then((location) => {
-                                contactGroups[groupName][index].locationName = location.name;
+                                if (location) {
+                                  contactGroups[groupName][index].locationName = location.name;
+                                }
                                 return resolve();
                               })
                               .catch(reject)
@@ -7034,8 +7043,6 @@ module.exports = function (Outbreak) {
               if (err) {
                 return callback(err);
               }
-
-              // get location for each contact
 
               // generate pdf document
               let doc = pdfUtils.createPdfDoc();
