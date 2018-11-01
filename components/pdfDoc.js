@@ -179,12 +179,27 @@ const createImageDoc = function (imageData, splitFactor, callback) {
         // load the image into Jimp
         Jimp.read(buffer)
           .then(function (image) {
+            // handle errors
+            if (!image) {
+              return callback(new Error('Unknown image format.'));
+            }
+            // if the image is wider than taller
+            if (image.bitmap.width > image.bitmap.height) {
+              // resize its width according to the split factor
+              image.resize(imageSize.width * splitFactor, Jimp.AUTO);
+            } else {
+              // otherwise resize its height according to the split factor
+              image.resize(Jimp.AUTO, imageSize.height * splitFactor);
+            }
+            // compute width and height
+            const width = image.bitmap.width / splitFactor;
+            const height = image.bitmap.height / splitFactor;
             // store image parts
             let images = [];
             // build a matrix of images, each cropped to its own position in the matrix
             for (let row = 0; row < splitFactor; row++) {
               for (let column = 0; column < splitFactor; column++) {
-                images.push(image.clone().crop(column * imageSize.width, row * imageSize.height, imageSize.width, imageSize.height));
+                images.push(image.clone().crop(column * width, row * height, width, height));
               }
             }
             // keep a flag for first image (first page is auto-added, we don't want to add it twice)
