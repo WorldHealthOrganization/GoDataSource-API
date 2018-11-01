@@ -6923,6 +6923,15 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportRangeListOfContacts = function (body, options, callback) {
+    let standardFormat = 'MM-DD-YYYY';
+    let startDate = genericHelpers.getUTCDate(body.startDate);
+    let endDate = genericHelpers.getUTCDate(body.endDate);
+
+    // make sure range dates are valid or single date
+    if (!startDate.isValid() || !endDate.isValid()) {
+      return callback(app.utils.apiError.getError('INVALID_DATES'));
+    }
+
     // follow up statuses map
     let followUpStatusMap = app.models.followUp.statusAcronymMap;
 
@@ -6996,9 +7005,6 @@ module.exports = function (Outbreak) {
                     }
                   ];
 
-                  let standardFormat = 'MM-DD-YYYY';
-                  let startDate = genericHelpers.getUTCDate(body.startDate);
-                  let endDate = genericHelpers.getUTCDate(body.endDate);
                   for (let date = startDate.clone(); date.isSameOrBefore(endDate); date.add(1, 'day')) {
                     headers.push({
                       id: date.format(standardFormat),
