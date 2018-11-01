@@ -705,7 +705,7 @@ module.exports = function (Location) {
 
             return resolve(resolvedLocationsMap);
           });
-        });
+      });
     });
   };
 };
