@@ -1139,7 +1139,9 @@
       "LNG_LIST_HEADER_RELEASED": "Released",
       "LNG_LIST_HEADER_EXPECTED_RELEASE": "Expected release of last contact",
       "LNG_FOLLOW_UP_STATUS_LEGEND": "Follow-up Status Legend",
-      "LNG_PAGE_TITLE_RANGE_CONTACTS_LIST": "Range list of Contacts"
+      "LNG_PAGE_TITLE_RANGE_CONTACTS_LIST": "Range list of Contacts",
+      "LNG_FILE_NAME_DAILY_CONTACTS_LIST": "Daily_Contacts",
+      "LNG_FILE_NAME_RANGE_CONTACTS_LIST": "Range_Contacts"
     },
     "countries": {
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY": "Country",

@@ -1138,7 +1138,9 @@
       "LNG_LIST_HEADER_RELEASED": "日本の Released",
       "LNG_LIST_HEADER_EXPECTED_RELEASE": "日本の Expected release of last contact",
       "LNG_FOLLOW_UP_STATUS_LEGEND": "日本の Follow-up Status Legend",
-      "LNG_PAGE_TITLE_RANGE_CONTACTS_LIST": "日本の Range list of Contacts"
+      "LNG_PAGE_TITLE_RANGE_CONTACTS_LIST": "日本の Range list of Contacts",
+      "LNG_FILE_NAME_DAILY_CONTACTS_LIST": "日本の Daily_Contacts",
+      "LNG_FILE_NAME_RANGE_CONTACTS_LIST": "日本の Range_Contacts"
     },
     "countries": {
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY": "日本の Country",
