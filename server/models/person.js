@@ -3,7 +3,6 @@
 // requires
 const app = require('../server');
 const personDuplicate = require('../../components/workerRunner').personDuplicate;
-const _ = require('lodash');
 const moment = require('moment');
 
 module.exports = function (Person) {
@@ -554,9 +553,18 @@ module.exports = function (Person) {
 
             // Add the people that pass the filter to their relevant reporting level location
             people.forEach((person) => {
-              let personLatestLocation = _.find(person.addresses, ['typeId', 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE']).locationId;
-              if (locationCorelationMap[personLatestLocation]) {
-                peopleDistribution[locationCorelationMap[personLatestLocation]].people.push(person);
+              // get current person address
+              const personCurrentAddress = Person.getCurrentAddress(person);
+              // define current person location
+              let personCurrentLocation;
+              // if the person has a current address
+              if (personCurrentAddress) {
+                // get it's location
+                personCurrentLocation = personCurrentAddress.locationId;
+              }
+              // if it has a current location, get it's correlated location
+              if (personCurrentLocation && locationCorelationMap[personCurrentLocation]) {
+                peopleDistribution[locationCorelationMap[personCurrentLocation]].people.push(person);
               }
             });
 
