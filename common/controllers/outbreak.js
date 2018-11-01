@@ -6989,13 +6989,11 @@ module.exports = function (Outbreak) {
             }
 
             return models.location
-              .resolveLocationsWithLevel(
-                allLocationsIds,
-                {
-                  locationIds: this.locationIds,
-                  reportingGeographicalLevelId: this.reportingGeographicalLevelId
-                }
-              )
+              .resolveLocationsWithLevel(allLocationsIds,
+              {
+                locationIds: this.locationIds,
+                reportingGeographicalLevelId: this.reportingGeographicalLevelId
+              })
               .then((resolvedLocationIdsMap) => {
                 // resolve the locations names
                 let locationNameResolvePromises = [];
