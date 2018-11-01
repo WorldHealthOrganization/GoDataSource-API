@@ -12,6 +12,9 @@
     "order": ["name ASC", "lastName ASC", "firstName ASC"]
   },
   "properties": {
+    "type": {
+      "type": "string"
+    },
     "outbreakId": {
       "type": "string",
       "required": true,
@@ -74,6 +77,9 @@
     }
   },
   "indexes": {
+    "type_index": {
+      "type": 1
+    },
     "visualId_index": {
       "visualId": 1
     },
