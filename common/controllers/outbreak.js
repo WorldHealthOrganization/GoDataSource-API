@@ -6296,11 +6296,12 @@ module.exports = function (Outbreak) {
       app.models.person.getPeoplePerLocation('case', filter, self)
         .then((result) => {
           // Get all existing case classification so we know how many rows the list will have
-          return app.models.referenceData.find({
-            where: {
-              categoryId: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION'
-            }
-          })
+          return app.models.referenceData
+            .find({
+              where: {
+                categoryId: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION'
+              }
+            })
             .then(classification => [classification, result]);
         })
         .then((result) => {
@@ -6358,12 +6359,26 @@ module.exports = function (Outbreak) {
           // Go through all the cases and increment the relevant case counts.
           caseDistribution.forEach((dataObj) => {
             dataObj.people.forEach((caseModel) => {
-              let caseLatestLocation = _.find(caseModel.addresses, ['typeId', 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE']).locationId;
+              // get case current address
+              const caseCurrentAddress = app.models.person.getCurrentAddress(caseModel);
+              // define case latest location
+              let caseLatestLocation;
+              // if the case has a current address
+              if (caseCurrentAddress) {
+                // get case current location
+                caseLatestLocation = caseCurrentAddress.locationId;
+              }
               if (caseModel.deceased) {
-                data.deceased[caseLatestLocation] = +data.deceased[caseLatestLocation] + 1;
+                // if the case has a current location and the location is a reporting location
+                if (caseLatestLocation && data.deceased[caseLatestLocation]) {
+                  data.deceased[caseLatestLocation] = +data.deceased[caseLatestLocation] + 1;
+                }
                 data.deceased.total = +data.deceased.total + 1;
-              } else {
-                data[caseModel.classification][caseLatestLocation] = +data[caseModel.classification][caseLatestLocation] + 1;
+              } else if (data[caseModel.classification]) {
+                // if the case has a current location and the location is a reporting location
+                if (caseLatestLocation && data[caseModel.classification] && data[caseModel.classification][caseLatestLocation]) {
+                  data[caseModel.classification][caseLatestLocation] = +data[caseModel.classification][caseLatestLocation] + 1;
+                }
                 data[caseModel.classification].total = +data[caseModel.classification].total + 1;
               }
             });
@@ -6374,7 +6389,7 @@ module.exports = function (Outbreak) {
         })
         .then(function (file) {
           // and offer it for download
-          app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Test.${file.extension}`, callback);
+          app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Case distribution per location.${file.extension}`, callback);
         })
         .catch(callback);
     });
