@@ -7,11 +7,6 @@ const fs = require('fs');
 
 module.exports = function (SystemSettings) {
 
-  SystemSettings.imageTypes = {
-    SVG: 'SVG',
-    PNG: 'PNG'
-  };
-
   // initialize system settings cache
   SystemSettings.cache;
 

@@ -6292,7 +6292,7 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.downloadCaseClassificationPerLocationLevelReport = function (filter, options, callback) {
     const self = this;
     const languageId = options.remotingContext.req.authData.user.languageId;
-    // Get the dictionary so we can translate the case classifications and other neccessary fields
+    // Get the dictionary so we can translate the case classifications and other necessary fields
     app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
       app.models.person.getPeoplePerLocation('case', filter, self)
         .then((result) => {

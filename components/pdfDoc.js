@@ -2,7 +2,6 @@
 
 const PdfKit = require('pdfkit');
 const PdfTable = require('voilab-pdf-table');
-const svg2png = require('svg2png');
 const streamUtils = require('./streamUtils');
 const Jimp = require('jimp');
 const _ = require('lodash');
@@ -133,14 +132,23 @@ function createPDFList(headers, data, title, callback) {
 }
 
 /**
- * Create a PDF file containing PNG images coming from SVG/PNG files
+ * Create a PDF file containing PNG images
  * @param imageData
- * @param imageType Image types (SVG, PNG)
  * @param splitFactor Split the image into a square matrix with a side of splitFactor (1 no split, 2 => 2x2 grid, 3 => 3x3 grid)
  * @param callback
  */
-const createImageDoc = function (imageData, imageType, splitFactor, callback) {
-  const app = require('./../server/server');
+const createImageDoc = function (imageData, splitFactor, callback) {
+
+  /**
+   * Get PNG image buffer from base64 encoded content
+   * @param base64content
+   * @return {Promise<any>}
+   */
+  function getPNGImageBuffer(base64content) {
+    return new Promise(function (resolve) {
+      resolve(Buffer.from(base64content, 'base64'));
+    });
+  }
 
   // create a PDF doc
   const document = createPdfDoc({
@@ -151,12 +159,6 @@ const createImageDoc = function (imageData, imageType, splitFactor, callback) {
   const imageSize = {
     width: 1090,
     height: 740
-  };
-
-  // render the image at 120% resolution of the page (make the image sharper)
-  const renderImageSize = {
-    width: imageSize.width * 1.2,
-    height: imageSize.height * 1.2
   };
 
   // default splitFactor is 1
@@ -170,81 +172,86 @@ const createImageDoc = function (imageData, imageType, splitFactor, callback) {
   // when done, send back document buffer
   streamUtils.streamToBuffer(document, callback);
 
-  // build image buffer based on the image type
-  // operations are different
-  (new Promise((resolve) => {
-    if (imageType === app.models.systemSettings.imageTypes.PNG) {
-      return resolve(Buffer.from(imageData, 'base64'));
-    }
-
-    // render a PNG from a SVG at a resolution of a rendered image, multiplied by the split factor
-    return svg2png(imageData, {
-      width: renderImageSize.width * splitFactor,
-      height: renderImageSize.height * splitFactor
-    }).then((buffer) => resolve(buffer));
-  })).then(function (buffer) {
-    // check if we need to split the image
-    if (splitFactor > 1) {
-      // load the image into Jimp
-      Jimp.read(buffer)
-        .then(function (image) {
-          // store image parts
-          let images = [];
-          // build a matrix of images, each cropped to its own position in the matrix
-          for (let row = 0; row < splitFactor; row++) {
-            for (let column = 0; column < splitFactor; column++) {
-              images.push(image.clone().crop(column * renderImageSize.width, row * renderImageSize.height, renderImageSize.width, renderImageSize.height));
+  getPNGImageBuffer(imageData)
+    .then(function (buffer) {
+      // check if we need to split the image
+      if (splitFactor > 1) {
+        // load the image into Jimp
+        Jimp.read(buffer)
+          .then(function (image) {
+            // handle errors
+            if (!image) {
+              return callback(new Error('Unknown image format.'));
             }
-          }
-          // keep a flag for first image (first page is auto-added, we don't want to add it twice)
-          let firstImage = true;
-
-          /**
-           * Add images to PDF doc
-           * @param done
-           */
-          function writeImageToPage(done) {
-            // get first image from the queue
-            const image = images.shift();
-            // if the image is a valid one
-            if (image) {
-              // if this is the first image added, do not add a new page
-              if (!firstImage) {
-                document.addPage();
-              }
-              firstImage = false;
-              // get image buffer
-              image.getBuffer(Jimp.MIME_PNG, function (error, buffer) {
-                if (error) {
-                  return done(error);
-                }
-                // store it in the document (fit to document size - margins)
-                document.image(buffer, 50, 50, {fit: [imageSize.width, imageSize.height]});
-                // move to the next page
-                writeImageToPage(done);
-              });
+            // if the image is wider than taller
+            if (image.bitmap.width > image.bitmap.height) {
+              // resize its width according to the split factor
+              image.resize(imageSize.width * splitFactor, Jimp.AUTO);
             } else {
-              // no more images to add, move along
-              done();
+              // otherwise resize its height according to the split factor
+              image.resize(Jimp.AUTO, imageSize.height * splitFactor);
             }
-          }
+            // compute width and height
+            const width = image.bitmap.width / splitFactor;
+            const height = image.bitmap.height / splitFactor;
+            // store image parts
+            let images = [];
+            // build a matrix of images, each cropped to its own position in the matrix
+            for (let row = 0; row < splitFactor; row++) {
+              for (let column = 0; column < splitFactor; column++) {
+                images.push(image.clone().crop(column * width, row * height, width, height));
+              }
+            }
+            // keep a flag for first image (first page is auto-added, we don't want to add it twice)
+            let firstImage = true;
 
-          // write images to pdf
-          writeImageToPage(function (error) {
-            if (error) {
-              return callback(error);
+            /**
+             * Add images to PDF doc
+             * @param done
+             */
+            function writeImageToPage(done) {
+              // get first image from the queue
+              const image = images.shift();
+              // if the image is a valid one
+              if (image) {
+                // if this is the first image added, do not add a new page
+                if (!firstImage) {
+                  document.addPage();
+                }
+                firstImage = false;
+                // get image buffer
+                image.getBuffer(Jimp.MIME_PNG, function (error, buffer) {
+                  if (error) {
+                    return done(error);
+                  }
+                  // store it in the document (fit to document size - margins)
+                  document.image(buffer, 50, 50, {fit: [imageSize.width, imageSize.height]});
+                  // move to the next page
+                  writeImageToPage(done);
+                });
+              } else {
+                // no more images to add, move along
+                done();
+              }
             }
-            // finalize document
-            document.end();
+
+            // write images to pdf
+            writeImageToPage(function (error) {
+              if (error) {
+                return callback(error);
+              }
+              // finalize document
+              document.end();
+            });
           });
-        });
-    } else {
-      // fit the image to page (page dimensions - margins)
-      document.image(buffer, 50, 50, {fit: [imageSize.width, imageSize.height]});
-      // finalize document
-      document.end();
-    }
-  }).catch(callback);
+      } else {
+        // fit the image to page (page dimensions - margins)
+        document.image(buffer, 50, 50, {fit: [imageSize.width, imageSize.height]});
+        // finalize document
+        document.end();
+      }
+    })
+    .catch(callback);
 };
 
 /**
