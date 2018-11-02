@@ -570,7 +570,7 @@ module.exports = function (Person) {
 
             // After the peopleDistribution object is fully populate it, use only it's values from now on.
             // The keys were used only to easily distribute the locations/people
-            resolve(Object.values(peopleDistribution));
+            resolve(Object.values(peopleDistribution).filter(entry => entry.people.length));
           })
           .catch(error);
       });

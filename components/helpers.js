@@ -12,6 +12,7 @@ const streamUtils = require('./streamUtils');
 const async = require('async');
 const fs = require('fs');
 const packageJson = require('../package');
+const workerRunner = require('./workerRunner');
 
 const arrayFields = {
   'addresses': 'address',
@@ -374,13 +375,13 @@ const getXmlFriendlyJson = function (jsonObj) {
 };
 
 /**
- * Export a list in a file
+ * Export a list in a file (synchronously)
  * @param headers file list headers
  * @param dataSet {Array} actual data set
  * @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
  * @return {Promise<any>}
  */
-const exportListFile = function (headers, dataSet, fileType, title = 'List') {
+const exportListFileSync = function (headers, dataSet, fileType, title = 'List') {
 
   /**
    * Build headers map in a way compatible with files that support hierarchical structures (XML, JSON)
@@ -594,6 +595,15 @@ const exportListFile = function (headers, dataSet, fileType, title = 'List') {
     }
   });
 };
+
+/**
+* Export a list in a file (asynchronously)
+* @param headers file list headers
+* @param dataSet {Array} actual data set
+* @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
+* @return {Promise<any>}
+*/
+const exportListFile = workerRunner.helpers.exportListFile;
 
 /**
  * Get a referenced value. Similar to loDash _.get but it can map properties from arrays also
@@ -1410,6 +1420,7 @@ module.exports = {
   isValidDate: isValidDate,
   extractImportableFields: extractImportableFields,
   exportListFile: exportListFile,
+  exportListFileSync: exportListFileSync,
   getReferencedValue: getReferencedValue,
   resolveModelForeignKeys: resolveModelForeignKeys,
   getFlatObject: getFlatObject,
