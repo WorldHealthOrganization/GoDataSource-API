@@ -1058,10 +1058,11 @@ module.exports = function (Outbreak) {
 
     // retrieve list of contacts that are eligible for follow up generation
     // and those that have last follow up inconclusive
+    let outbreakId = this.id;
     Promise
       .all([
-        FollowupGeneration.getContactsEligibleForFollowup(followupStartDate.toDate(), followupEndDate.toDate()),
-        FollowupGeneration.getContactsWithInconclusiveLastFollowUp(followupStartDate.toDate())
+        FollowupGeneration.getContactsEligibleForFollowup(followupStartDate.toDate(), followupEndDate.toDate(), outbreakId),
+        FollowupGeneration.getContactsWithInconclusiveLastFollowUp(followupStartDate.toDate(), outbreakId)
       ])
       .then((contactLists) => {
         // merge the lists of contacts
@@ -6488,7 +6489,7 @@ module.exports = function (Outbreak) {
               coverage: '0',
               registered: '0',
               released: '0',
-              expectedRelease: dataObj.people.length ? moment(dataObj.people[0].followUp.endDate).format('ll') : '-'
+              expectedRelease: dataObj.people.length && dataObj.people[0].followUp ? moment(dataObj.people[0].followUp.endDate).format('ll') : '-'
             };
 
             // Update the row's values according to each contact's details

@@ -5866,7 +5866,7 @@
       "description": "Get list of addresses with GeoLocations ordered from the oldest one to the most recent",
       "http": {
         "verb": "get",
-        "path": "/cases/:nk/movement"
+        "path": "/cases/:fk/movement"
       }
     },
     "prototype.getContactMovement": {
@@ -5891,7 +5891,7 @@
       "description": "Get list of addresses with GeoLocations ordered from the oldest one to the most recent",
       "http": {
         "verb": "get",
-        "path": "/contacts/:nk/movement"
+        "path": "/contacts/:fk/movement"
       }
     },
     "prototype.__get__people": {
