@@ -205,13 +205,7 @@
           "arg": "image",
           "type": "string",
           "required": true,
-          "description": "Image content"
-        },
-        {
-          "arg": "imageType",
-          "type": "string",
-          "required": true,
-          "description": "Image Type [PNG/SVG]"
+          "description": "PNG Base64 image content"
         },
         {
           "arg": "splitFactor",
@@ -241,7 +235,7 @@
           }
         }
       ],
-      "description": "Create a PDF file containing PNG images coming from SVG/PNG files",
+      "description": "Create a PDF file containing PNG images coming from PNG files",
       "http": {
         "verb": "post",
         "path": "/image-to-pdf"
