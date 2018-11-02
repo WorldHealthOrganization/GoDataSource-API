@@ -6778,4 +6778,36 @@ module.exports = function (Outbreak) {
         });
     });
   };
+
+  /**
+   * Restore a deleted lab result
+   * @param labResultId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.restoreLabResult = function (labResultId, options, callback) {
+    app.models.labResult
+      .findOne({
+        deleted: true,
+        where: {
+          id: labResultId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError(
+            'MODEL_NOT_FOUND',
+            {
+              model: app.models.labResult.modelName,
+              id: labResultId
+            }
+          );
+        }
+
+        // undo case delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
+  };
 };
