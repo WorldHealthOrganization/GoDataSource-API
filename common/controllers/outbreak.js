@@ -6488,7 +6488,7 @@ module.exports = function (Outbreak) {
               coverage: '0',
               registered: '0',
               released: '0',
-              expectedRelease: dataObj.people.length ? moment(dataObj.people[0].followUp.endDate).format('ll') : '-'
+              expectedRelease: dataObj.people.length && dataObj.people[0].followUp ? moment(dataObj.people[0].followUp.endDate).format('ll') : '-'
             };
 
             // Update the row's values according to each contact's details

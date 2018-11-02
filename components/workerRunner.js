@@ -2,7 +2,6 @@
 
 const fork = require('child_process').fork;
 const workersPath = `${__dirname}/../components/workers`;
-const app = require('../server/server');
 
 /**
  * Invoke worker method
@@ -21,11 +20,6 @@ function invokeWorkerMethod(workerName, method, args, callback) {
    * @param result
    */
   function next(error, result) {
-    // if error occurred
-    if (error) {
-      // make sure it is logged
-      app.logger.error(error, error.stack);
-    }
     // execute callback
     cb(error, result);
     // replace callback with no-op to prevent calling it multiple times
@@ -108,6 +102,32 @@ module.exports = {
      */
     countStratifiedByClassificationOverTime: function (cases, periodInterval, periodType, periodMap, caseClassifications, callback) {
       invokeWorkerMethod('cases', 'countStratifiedByClassificationOverTime', [cases, periodInterval, periodType, periodMap, caseClassifications], callback);
+    }
+  },
+  helpers: {
+    /**
+     * Export a list in a file
+     * @param headers file list headers
+     * @param dataSet {Array} actual data set
+     * @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
+     * @return {Promise<any>}
+     */
+    exportListFile: function (headers, dataSet, fileType, title = 'List') {
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('helpers', 'exportListFile', [headers, dataSet, fileType, title], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+          // if data was buffer, transform it back to buffer
+          if (
+            result &&
+            result.data &&
+            result.data.type === 'Buffer') {
+            result.data = Buffer.from(result.data.data);
+          }
+          resolve(result);
+        });
+      });
     }
   }
 };
