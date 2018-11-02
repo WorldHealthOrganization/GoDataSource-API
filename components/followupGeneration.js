@@ -7,11 +7,14 @@ const Helpers = require('./helpers');
 const Moment = require('moment');
 
 // get contacts that has inconclusive follow up period
-module.exports.getContactsWithInconclusiveLastFollowUp = function (startDate) {
+module.exports.getContactsWithInconclusiveLastFollowUp = function (startDate, outbreakId) {
   return App.models.contact
     .find({
       where: {
         and: [
+          {
+            outbreakId: outbreakId
+          },
           {
             followUp: {
               neq: null
@@ -38,11 +41,14 @@ module.exports.getContactsWithInconclusiveLastFollowUp = function (startDate) {
 };
 
 // get contacts that have follow up period between the passed start/end dates
-module.exports.getContactsEligibleForFollowup = function (startDate, endDate) {
+module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId) {
   return App.models.contact
     .find({
       where: {
         and: [
+          {
+            outbreakId: outbreakId
+          },
           {
             followUp: {
               neq: null
@@ -252,15 +258,9 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     // delete them and then insert the newly generated
     if (!followUpDate.isBefore(Helpers.getUTCDate())) {
       let existingFollowups = contact.followUpsLists.filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
-      if (existingFollowups.length) {
-        followUpsToDelete.push(
-          App.models.followUp.destroyAll({
-            id: {
-              inq: existingFollowups.map((f) => f.id)
-            }
-          })
-        );
-      }
+      existingFollowups.map((existingFollowup) => {
+        followUpsToDelete.push(existingFollowup.destroy(reqOpts));
+      });
     }
 
     followUpsToAdd.push(...generatedFollowUps);
