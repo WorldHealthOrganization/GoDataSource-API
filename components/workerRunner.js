@@ -128,6 +128,52 @@ module.exports = {
           resolve(result);
         });
       });
+    },
+    /**
+     * Encrypt file (AES-256) using password
+     * @param password
+     * @param filePath
+     * @return {Promise<any>}
+     */
+    encryptFile: function (password, filePath) {
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('helpers', 'encryptFile', [password, filePath], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+          // if data was buffer, transform it back to buffer
+          if (
+            result &&
+            result.data &&
+            result.type === 'Buffer') {
+            result = Buffer.from(result.data);
+          }
+          resolve(result);
+        });
+      });
+    },
+    /**
+     * Decrypt file (AES-256) using password
+     * @param password
+     * @param filePath
+     * @return {Promise<any>}
+     */
+    decryptFile: function (password, filePath) {
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('helpers', 'decryptFile', [password, filePath], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+          // if data was buffer, transform it back to buffer
+          if (
+            result &&
+            result.data &&
+            result.type === 'Buffer') {
+            result = Buffer.from(result.data);
+          }
+          resolve(result);
+        });
+      });
     }
   }
 };

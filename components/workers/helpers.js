@@ -1,6 +1,7 @@
 'use strict';
 
 const helpers = require('../helpers');
+const fileCrypto = require('../fileCrypto');
 
 const worker = {
   /**
@@ -10,7 +11,21 @@ const worker = {
    * @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
    * @return {Promise<any>}
    */
-  exportListFile: helpers.exportListFileSync
+  exportListFile: helpers.exportListFileSync,
+  /**
+   * Encrypt file (AES-256) using password
+   * @param password
+   * @param filePath
+   * @return {Promise<any>}
+   */
+  encryptFile: fileCrypto.encryptSync,
+  /**
+   * Decrypt file (AES-256) using password
+   * @param password
+   * @param filePath
+   * @return {Promise<any>}
+   */
+  decryptFile: fileCrypto.decryptSync
 };
 
 process.on('message', function (message) {

@@ -36,28 +36,33 @@ const createBackup = function (modules, location, done) {
     helpers.isPathOK(location);
 
     // run the database export
-    models.sync.exportDatabase(null, collections, null, (exportError, archivePath) => {
-      if (exportError) {
-        app.logger.error(`Backup process failed. ${exportError}`);
-        return done(exportError);
-      }
-
-      // get file name from archive path
-      let fileParse = path.parse(archivePath);
-      let fileName = fileParse.name + fileParse.ext;
-
-      // build new path for the backup file
-      let newPath = `${location}/${fileName}`;
-
-      // copy the archive from temporary OS directory to the desired location
-      fs.copyFile(archivePath, newPath, (copyError) => {
-        if (copyError) {
-          app.logger.error(`Failed to copy backup file from ${archivePath} to ${newPath}. ${copyError}`);
-          return done(copyError);
+    models.sync.exportDatabase(
+      null,
+      collections,
+      null,
+      {password: null},
+      (exportError, archivePath) => {
+        if (exportError) {
+          app.logger.error(`Backup process failed. ${exportError}`);
+          return done(exportError);
         }
-        return done(null, newPath);
+
+        // get file name from archive path
+        let fileParse = path.parse(archivePath);
+        let fileName = fileParse.name + fileParse.ext;
+
+        // build new path for the backup file
+        let newPath = `${location}/${fileName}`;
+
+        // copy the archive from temporary OS directory to the desired location
+        fs.copyFile(archivePath, newPath, (copyError) => {
+          if (copyError) {
+            app.logger.error(`Failed to copy backup file from ${archivePath} to ${newPath}. ${copyError}`);
+            return done(copyError);
+          }
+          return done(null, newPath);
+        });
       });
-    });
   } catch (pathAccessError) {
     let pathErr = `Backup location: '${location}' is not OK. ${pathAccessError}`;
     app.logger.error(pathErr);
@@ -112,7 +117,7 @@ const restoreBackupFromFile = function (filePath, done) {
       helpers.isPathOK(filePath);
 
       // create a temporary directory to store the backup files
-      let tmpDir = tmp.dirSync({ unsafeCleanup: true });
+      let tmpDir = tmp.dirSync({unsafeCleanup: true});
       let tmpDirName = tmpDir.name;
 
       // extract backup archive

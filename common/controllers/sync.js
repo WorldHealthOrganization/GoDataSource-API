@@ -23,6 +23,7 @@ module.exports = function (Sync) {
      * @param fileName
      * @param exportLogEntry
      * @param options
+     * @param done
      */
     function exportCallback(err, fileName, exportLogEntry, options, done) {
       // update exportLogEntry
@@ -156,6 +157,7 @@ module.exports = function (Sync) {
             collections,
             // no collection specific options
             [],
+            {password: null},
             (err, fileName) => {
               // send the done function as the response needs to be returned
               exportCallback(err, fileName, exportLogEntry, options, done);
@@ -171,6 +173,7 @@ module.exports = function (Sync) {
             collections,
             // no collection specific options
             [],
+            {password: null},
             (err, fileName) => {
               // don't send the done function as the response was already sent
               exportCallback(err, fileName, exportLogEntry, options);
@@ -338,7 +341,7 @@ module.exports = function (Sync) {
       }
 
       // get asynchronous flag value
-      asynchronous = fields.asynchronous && fields.asynchronous === 'true' ? true : false;
+      asynchronous = fields.asynchronous && fields.asynchronous === 'true';
 
       // get request options
       let requestOptions = {
@@ -364,20 +367,34 @@ module.exports = function (Sync) {
         .then(function (syncLogEntry) {
           if (!asynchronous) {
             // extract the archive to the temporary directory
-            Sync.syncDatabaseWithSnapshot(files.snapshot.path, syncLogEntry, outbreakIDs, requestOptions, triggerBackupBeforeSync, function (err) {
-              // send done function to return the response
-              importCallback(err, syncLogEntry, requestOptions, done);
-            });
+            Sync.syncDatabaseWithSnapshot(
+              files.snapshot.path,
+              syncLogEntry,
+              outbreakIDs,
+              requestOptions,
+              triggerBackupBeforeSync,
+              {password: null},
+              function (err) {
+                // send done function to return the response
+                importCallback(err, syncLogEntry, requestOptions, done);
+              });
           } else {
             // import is done asynchronous
             // send response; don't wait for import
             done(null, syncLogEntry.id);
 
             // extract the archive to the temporary directory
-            Sync.syncDatabaseWithSnapshot(files.snapshot.path, syncLogEntry, outbreakIDs, requestOptions, triggerBackupBeforeSync, function (err) {
-              // don't send the done function as the response was already sent
-              importCallback(err, syncLogEntry, requestOptions);
-            });
+            Sync.syncDatabaseWithSnapshot(
+              files.snapshot.path,
+              syncLogEntry,
+              outbreakIDs,
+              requestOptions,
+              triggerBackupBeforeSync,
+              {password: null},
+              function (err) {
+                // don't send the done function as the response was already sent
+                importCallback(err, syncLogEntry, requestOptions);
+              });
           }
         })
         .catch(done);
@@ -386,6 +403,7 @@ module.exports = function (Sync) {
 
   /**
    * Retrieve the list of IDs for the client available outbreaks
+   * @param options
    * @param callback
    */
   Sync.getAvailableOutbreaksForClient = function (options, callback) {
@@ -397,6 +415,8 @@ module.exports = function (Sync) {
 
   /**
    * Start sync process with a received upstream server
+   * @param data,
+   * @param options
    * @param callback
    */
   Sync.sync = function (data, options, callback) {
@@ -548,6 +568,7 @@ module.exports = function (Sync) {
             collections,
             // no collection specific options
             [],
+            {password: null},
             (err, fileName) => {
               if (err) {
                 return reject(err);
