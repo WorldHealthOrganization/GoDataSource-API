@@ -285,7 +285,6 @@ module.exports = function (Sync) {
     /**
      * Import action callback; Depending on the asynchronous it can be called with/without the callback
      * @param err
-     * @param result
      * @param syncLogEntry
      * @param requestOptions
      * @param callback
@@ -315,10 +314,21 @@ module.exports = function (Sync) {
           app.logger.debug(`Sync ${syncLogEntry.id}: Error updating sync log entry status. ${err}`);
         });
 
-      // call callback if received; don't wait for sync log entry to be updated
-      callback && callback(err ? buildError('INSTANCE_SYNC_FAILED', {
-        syncError: err.toString ? err.toString() : err
-      }) : null, syncLogEntry.id);
+      // execute callback if received
+      if (callback) {
+        // if an error was encountered
+        if (err) {
+          // rewrite toString to something useful
+          err.toString = function() {
+            return JSON.stringify(this);
+          };
+          // rewrite error with API error
+          err = buildError('INSTANCE_SYNC_FAILED', {
+            syncError: err
+          });
+        }
+        return callback(err, syncLogEntry.id);
+      }
     }
 
     const form = new formidable.IncomingForm();
