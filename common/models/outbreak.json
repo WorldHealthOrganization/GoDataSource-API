@@ -1392,6 +1392,12 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "exportDailyContactFollowUpForm"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "restoreLabResult"
     }
   ],
   "methods": {
@@ -5860,7 +5866,7 @@
       "description": "Get list of addresses with GeoLocations ordered from the oldest one to the most recent",
       "http": {
         "verb": "get",
-        "path": "/cases/:nk/movement"
+        "path": "/cases/:fk/movement"
       }
     },
     "prototype.getContactMovement": {
@@ -5885,7 +5891,7 @@
       "description": "Get list of addresses with GeoLocations ordered from the oldest one to the most recent",
       "http": {
         "verb": "get",
-        "path": "/contacts/:nk/movement"
+        "path": "/contacts/:fk/movement"
       }
     },
     "prototype.__get__people": {
@@ -5987,6 +5993,34 @@
       "http": {
         "verb": "get",
         "path": "/contacts/daily-followup-form/export"
+      }
+    },
+    "prototype.restoreLabResult": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for lab results"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "labResult",
+          "type": "labResult",
+          "description": "Lab Result",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted lab result.",
+      "http": {
+        "verb": "post",
+        "path": "/lab-results/:nk/restore"
       }
     }
   }

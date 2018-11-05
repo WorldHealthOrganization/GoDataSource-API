@@ -135,10 +135,6 @@
     "defaultStatusCode": 422,
     "messagePattern": "Cannot delete a contact's last relationship with a case or event. The contact with ID <%= contactIDs %> doesn't have an additional relationship with a case or event."
   },
-  "INVALID_IMAGE_TYPE": {
-    "defaultStatusCode": 400,
-    "messagePattern": "Provided image type `<%= imageType %>` is invalid."
-  },
   "EXTERNAL_API_CONNECTION_ERROR": {
     "defaultStatusCode": 503,
     "messagePattern": "Communication with external service (<%= serviceName %>) failed"

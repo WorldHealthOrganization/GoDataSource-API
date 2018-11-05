@@ -1058,10 +1058,11 @@ module.exports = function (Outbreak) {
 
     // retrieve list of contacts that are eligible for follow up generation
     // and those that have last follow up inconclusive
+    let outbreakId = this.id;
     Promise
       .all([
-        FollowupGeneration.getContactsEligibleForFollowup(followupStartDate.toDate(), followupEndDate.toDate()),
-        FollowupGeneration.getContactsWithInconclusiveLastFollowUp(followupStartDate.toDate())
+        FollowupGeneration.getContactsEligibleForFollowup(followupStartDate.toDate(), followupEndDate.toDate(), outbreakId),
+        FollowupGeneration.getContactsWithInconclusiveLastFollowUp(followupStartDate.toDate(), outbreakId)
       ])
       .then((contactLists) => {
         // merge the lists of contacts
@@ -6291,7 +6292,7 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.downloadCaseClassificationPerLocationLevelReport = function (filter, options, callback) {
     const self = this;
     const languageId = options.remotingContext.req.authData.user.languageId;
-    // Get the dictionary so we can translate the case classifications and other neccessary fields
+    // Get the dictionary so we can translate the case classifications and other necessary fields
     app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
       app.models.person.getPeoplePerLocation('case', filter, self)
         .then((result) => {
@@ -6428,7 +6429,18 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.downloadContactTracingPerLocationLevelReport = function (filter, options, callback) {
     const self = this;
     const languageId = options.remotingContext.req.authData.user.languageId;
-    let selectedDayForReport;
+
+    // set default filter values
+    if (!filter) {
+      filter = {};
+      // set default dateOfFollowUp
+      if (!filter.dateOfFollowUp) {
+        filter.dateOfFollowUp = new Date();
+      }
+    }
+
+    // Get the date of the selected day for report to add to the pdf title (by default, current day)
+    let selectedDayForReport = moment(filter.dateOfFollowUp).format('ll');
 
     // Get the dictionary so we can translate the case classifications and other neccessary fields
     app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
@@ -6477,7 +6489,7 @@ module.exports = function (Outbreak) {
               coverage: '0',
               registered: '0',
               released: '0',
-              expectedRelease: dataObj.people.length ? moment(dataObj.people[0].followUp.endDate).format('ll') : '-'
+              expectedRelease: dataObj.people.length && dataObj.people[0].followUp ? moment(dataObj.people[0].followUp.endDate).format('ll') : '-'
             };
 
             // Update the row's values according to each contact's details
@@ -6485,7 +6497,7 @@ module.exports = function (Outbreak) {
               row.registered = +row.registered + 1;
 
               // Any status other than under follow-up will make the contact be considered as released.
-              if (contact.followUp.status === 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP') {
+              if (contact.followUp && contact.followUp.status === 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP') {
                 row.underFollowUp = +row.underFollowUp + 1;
 
                 // The contact can be seen only if he is under follow
@@ -6495,10 +6507,6 @@ module.exports = function (Outbreak) {
                       'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK'].includes(followUp.statusId);
                   });
                   if (completedFollowUp) {
-                    // Get the date of the selected day for report to add to the pdf title
-                    if (!selectedDayForReport) {
-                      selectedDayForReport = moment(completedFollowUp.date).format('ll');
-                    }
                     row.seenOnDay = +row.seenOnDay + 1;
                   }
 
@@ -6518,7 +6526,7 @@ module.exports = function (Outbreak) {
         })
         .then(function (file) {
           // and offer it for download
-          app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Test.${file.extension}`, callback);
+          app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Contact tracing report.${file.extension}`, callback);
         })
         .catch((error) => {
           callback(error);
@@ -6770,5 +6778,37 @@ module.exports = function (Outbreak) {
           });
         });
     });
+  };
+
+  /**
+   * Restore a deleted lab result
+   * @param labResultId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.restoreLabResult = function (labResultId, options, callback) {
+    app.models.labResult
+      .findOne({
+        deleted: true,
+        where: {
+          id: labResultId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError(
+            'MODEL_NOT_FOUND',
+            {
+              model: app.models.labResult.modelName,
+              id: labResultId
+            }
+          );
+        }
+
+        // undo case delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
   };
 };
