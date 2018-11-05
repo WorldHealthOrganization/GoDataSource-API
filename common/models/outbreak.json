@@ -6000,6 +6000,11 @@
         {
           "arg": "nk",
           "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
           "description": "Foreign key for lab results"
         },
         {
@@ -6020,7 +6025,7 @@
       "description": "Restores a deleted lab result.",
       "http": {
         "verb": "post",
-        "path": "/lab-results/:nk/restore"
+        "path": "/cases/:nk/lab-results/:fk/restore"
       }
     }
   }
