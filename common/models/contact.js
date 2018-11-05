@@ -304,12 +304,14 @@ module.exports = function (Contact) {
           // retrieve contact's first address location
           return Promise
             .all(contacts.map((contact) => {
-              if (contact.addresses.length) {
+              // get contact address
+              let contactAddress = contact.getCurrentAddress();
+              if (contactAddress.locationId) {
                 return app.models.location
                   .findById(contact.addresses[0].locationId)
                   .then((location) => {
                     if (location) {
-                      contact.addresses[0].locationName = location.name;
+                      contactAddress.locationName = location.name;
                     }
                     return contact;
                   });

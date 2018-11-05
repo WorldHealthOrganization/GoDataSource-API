@@ -6963,13 +6963,7 @@ module.exports = function (Outbreak) {
             for (let group in contactGroups) {
               if (contactGroups.hasOwnProperty(group)) {
                 groupContactLocationMap[group] = contactGroups[group].map((contact, index) => {
-                  let address = _.find(
-                    contact.addresses,
-                    [
-                      'typeId',
-                      'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
-                    ]
-                  );
+                  let address = contact.getCurrentAddress();
 
                   if (address) {
                     allLocationsIds.push(address.locationId);
@@ -7150,17 +7144,17 @@ module.exports = function (Outbreak) {
                       row.place = contact.locationName;
                     }
 
-                    if (contact.addresses.length) {
-                      let address = contact.addresses[0];
-
-                      row.city = address.city;
+                    // get contact's current address
+                    let contactAddress = contact.getCurrentAddress();
+                    if (contactAddress) {
+                      row.city = contactAddress.city;
 
                       // check which address to show
                       let addressLine = '';
-                      if (address.addressLine1) {
-                        addressLine = address.addressLine1;
-                      } else if (address.addressLine2) {
-                        addressLine = address.addressLine2;
+                      if (contactAddress.addressLine1) {
+                        addressLine = contactAddress.addressLine1;
+                      } else if (contactAddress.addressLine2) {
+                        addressLine = contactAddress.addressLine2;
                       }
 
                       row.address = addressLine;
