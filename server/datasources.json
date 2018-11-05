@@ -10,7 +10,8 @@
     "connector": "mongodb",
     "allowExtendedOperators": true,
     "enableGeoIndexing": true,
-    "ignoreUndefined": true
+    "ignoreUndefined": true,
+    "maxDepthOfQuery": 24
   },
   "email": {
     "name": "email",
