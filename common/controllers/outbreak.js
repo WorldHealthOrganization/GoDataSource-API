@@ -6826,9 +6826,38 @@ module.exports = function (Outbreak) {
     // get list of questions for contacts from outbreak
     let questions = this.contactFollowUpTemplate.sort((a, b) => a.order > b.order);
 
+    // case id value maps
+    // mainly used to know which value should be set into document for each case id
+    let caseIdValueMap = {};
+
     // get list of contacts
     app.models.contact
       .getGroupedByDate(this, body.date, body.groupBy)
+      .then((contactGroups) => {
+        // create a map of group id and corresponding value that should be displayed
+        if (body.groupBy === 'case') {
+          let groupNameResolvePromise = [];
+          for (let groupId in contactGroups) {
+            if (contactGroups.hasOwnProperty(groupId)) {
+              groupNameResolvePromise.push(
+                new Promise((resolve, reject) => {
+                  return app.models.person
+                    .findById(groupId)
+                    .then((person) => {
+                      caseIdValueMap[groupId] = `${person.firstName} ${person.middleName} ${person.lastName}`;
+                      return resolve();
+                    })
+                    .catch(reject);
+                })
+              );
+            }
+          }
+          return Promise
+            .all(groupNameResolvePromise)
+            .then(() => contactGroups);
+        }
+        return contactGroups;
+      })
       .then((contactGroups) => {
         const languageId = options.remotingContext.req.authData.user.languageId;
         app.models.language
@@ -6847,8 +6876,13 @@ module.exports = function (Outbreak) {
               // build tables for each group item
               for (let groupName in contactGroups) {
                 if (contactGroups.hasOwnProperty(groupName)) {
-                  // group title
-                  pdfUtils.addTitle(doc, groupName, 12);
+                  // if contacts are grouped by case search the group name in the configured map
+                  // otherwise use group id as title
+                  let groupTitle = groupName;
+                  if (body.groupBy === 'case') {
+                    groupTitle = caseIdValueMap[groupName];
+                  }
+                  pdfUtils.addTitle(doc, groupTitle, 12);
 
                   // common headers
                   let headers = [
@@ -6992,7 +7026,7 @@ module.exports = function (Outbreak) {
             for (let group in contactGroups) {
               if (contactGroups.hasOwnProperty(group)) {
                 groupContactLocationMap[group] = contactGroups[group].map((contact, index) => {
-                  let address = contact.getCurrentAddress();
+                  let address = models.person.getCurrentAddress(contact);
 
                   if (address) {
                     allLocationsIds.push(address.locationId);
@@ -7179,7 +7213,7 @@ module.exports = function (Outbreak) {
                     }
 
                     // get contact's current address
-                    let contactAddress = contact.getCurrentAddress();
+                    let contactAddress = models.person.getCurrentAddress(contact);
                     if (contactAddress) {
                       row.city = contactAddress.city;
 

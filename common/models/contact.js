@@ -305,7 +305,7 @@ module.exports = function (Contact) {
           return Promise
             .all(contacts.map((contact) => {
               // get contact address
-              let contactAddress = contact.getCurrentAddress();
+              let contactAddress = app.models.person.getCurrentAddress(contact);
               if (contactAddress.locationId) {
                 return app.models.location
                   .findById(contact.addresses[0].locationId)
