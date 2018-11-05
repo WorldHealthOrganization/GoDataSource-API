@@ -5,6 +5,10 @@ const PdfTable = require('voilab-pdf-table');
 const streamUtils = require('./streamUtils');
 const Jimp = require('jimp');
 const _ = require('lodash');
+const helpers = require('./helpers');
+
+// PDF mime type
+const MIME_TYPE = 'application/pdf';
 
 // define a default document configuration
 const defaultDocumentConfiguration = {
@@ -558,6 +562,27 @@ const addQuestionnaireHeadersForPrint = function (data, headers) {
   return require('./helpers').addQuestionnaireHeadersForPrint(data, headers);
 };
 
+// convert a document into a binary buffer
+// send it over
+const sendPdfDoc = function (document, filename, callback) {
+  const app = require('../server/server');
+
+  // convert pdf stream to buffer and send it as response
+  helpers.streamToBuffer(document, (err, buffer) => {
+    if (err) {
+      return callback(err);
+    }
+
+    // serve the file as response
+    app.utils.remote.helpers.offerFileToDownload(
+      buffer,
+      MIME_TYPE,
+      `${filename}.pdf`,
+      callback
+    );
+  });
+};
+
 module.exports = {
   createPDFList: createPDFList,
   createImageDoc: createImageDoc,
@@ -567,5 +592,7 @@ module.exports = {
   displayPersonRelationships: displayPersonRelationships,
   displayPersonSectionsWithQuestionnaire: displayPersonSectionsWithQuestionnaire,
   createTableInPDFDocument: createTableInPDFDocument,
-  addTitle: addTitle
+  addTitle: addTitle,
+  MIME_TYPE: MIME_TYPE,
+  sendPdfDoc: sendPdfDoc
 };

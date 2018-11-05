@@ -7183,20 +7183,8 @@ module.exports = function (Outbreak) {
               // to convert it into a buffer
               doc.end();
 
-              // convert pdf stream to buffer and send it as response
-              genericHelpers.streamToBuffer(doc, (err, buffer) => {
-                if (err) {
-                  return callback(err);
-                }
-
-                // serve the file as response
-                app.utils.remote.helpers.offerFileToDownload(
-                  buffer,
-                  'application/pdf',
-                  `${dictionary.getTranslation('LNG_FILE_NAME_RANGE_CONTACTS_LIST')}.pdf`,
-                  callback
-                );
-              });
+              // send pdf doc as response
+              pdfUtils.sendPdfDoc(doc, dictionary.getTranslation('LNG_FILE_NAME_RANGE_CONTACTS_LIST'), callback);
             }
           );
       });

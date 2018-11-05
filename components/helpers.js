@@ -1409,6 +1409,8 @@ const getPeriodIntervalForDate = function (fullPeriodInterval, periodType, date)
   return periodInterval;
 };
 
+
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
