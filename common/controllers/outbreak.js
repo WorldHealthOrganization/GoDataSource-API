@@ -6782,16 +6782,18 @@ module.exports = function (Outbreak) {
 
   /**
    * Restore a deleted lab result
+   * @param caseId
    * @param labResultId
    * @param options
    * @param callback
    */
-  Outbreak.prototype.restoreLabResult = function (labResultId, options, callback) {
+  Outbreak.prototype.restoreLabResult = function (caseId, labResultId, options, callback) {
     app.models.labResult
       .findOne({
         deleted: true,
         where: {
           id: labResultId,
+          personId: caseId,
           deleted: true
         }
       })
