@@ -16,6 +16,7 @@ const remoteHelpers = require('../../components/remoteHelpers');
 const pdfDoc = require('../../components/pdfDoc');
 const spreadSheetFile = require('../../components/spreadSheetFile');
 const dbSync = require('../../components/dbSync');
+const pushNotificationsApi = require('../../components/services/pushNotificationsApi');
 
 function init(app, callback) {
   app.utils = {
@@ -47,7 +48,10 @@ function init(app, callback) {
     helpers: helpers,
     pdfDoc: pdfDoc,
     spreadSheetFile: spreadSheetFile,
-    dbSync: dbSync
+    dbSync: dbSync,
+    services: {
+      pushNotificationsApi: pushNotificationsApi
+    }
   };
   app.ROOT_PATH = path.resolve(__dirname, '../..');
   callback();

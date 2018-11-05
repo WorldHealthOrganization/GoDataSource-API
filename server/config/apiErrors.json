@@ -230,5 +230,13 @@
   "ADDRESS_PREVIOUS_PLACE_OF_RESIDENCE_MUST_HAVE_DATE": {
     "defaultStatusCode": 422,
     "messagePattern": "Addresses set as Previous Usual Place of Residence must have a date set"
+  },
+  "READ_DEVICE_INFORMATION_FAILURE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Unable to read device information."
+  },
+  "SAVE_DEVICE_INFORMATION_FAILURE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Unable to save device information."
   }
 }

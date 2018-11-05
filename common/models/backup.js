@@ -24,7 +24,9 @@ module.exports = function (Backup) {
       'helpCategory',
       'auditLog',
       'template',
-      'icon'
+      'icon',
+      'device',
+      'deviceHistory'
     ],
     'Data': [
       'outbreak',
