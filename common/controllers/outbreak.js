@@ -6943,6 +6943,10 @@ module.exports = function (Outbreak) {
     // follow up statuses map
     let followUpStatusMap = app.models.followUp.statusAcronymMap;
 
+    // case id value maps
+    // mainly used to know which value should be set into document for each case id
+    let caseIdValueMap = {};
+
     // get list of contacts
     models.contact
       .getGroupedByDate(
@@ -6953,6 +6957,31 @@ module.exports = function (Outbreak) {
       },
       body.groupBy
       )
+      .then((contactGroups) => {
+        // create a map of group id and corresponding value that should be displayed
+        if (body.groupBy === 'case') {
+          let groupNameResolvePromise = [];
+          for (let groupId in contactGroups) {
+            if (contactGroups.hasOwnProperty(groupId)) {
+              groupNameResolvePromise.push(
+                new Promise((resolve, reject) => {
+                  return app.models.person
+                    .findById(groupId)
+                    .then((person) => {
+                      caseIdValueMap[groupId] = `${person.firstName} ${person.middleName} ${person.lastName}`;
+                      return resolve();
+                    })
+                    .catch(reject);
+                })
+              );
+            }
+          }
+          return Promise
+            .all(groupNameResolvePromise)
+            .then(() => contactGroups);
+        }
+        return contactGroups;
+      })
       .then((contactGroups) => {
         return new Promise((resolve) => {
           // resolve location names if contacts are being grouped by case
@@ -7054,8 +7083,13 @@ module.exports = function (Outbreak) {
               // build tables for each group item
               for (let groupName in contactGroups) {
                 if (contactGroups.hasOwnProperty(groupName)) {
-                  // group title
-                  pdfUtils.addTitle(doc, groupName, 12);
+                  // if contacts are grouped by case search the group name in the configured map
+                  // otherwise use group id as title
+                  let groupTitle = groupName;
+                  if (body.groupBy === 'case') {
+                    groupTitle = caseIdValueMap[groupName];
+                  }
+                  pdfUtils.addTitle(doc, groupTitle, 12);
 
                   // common headers
                   let headers = [
@@ -7184,7 +7218,21 @@ module.exports = function (Outbreak) {
               doc.end();
 
               // send pdf doc as response
-              pdfUtils.sendPdfDoc(doc, dictionary.getTranslation('LNG_FILE_NAME_RANGE_CONTACTS_LIST'), callback);
+              pdfUtils.sendPdfDoc(doc, )
+              // convert pdf stream to buffer and send it as response
+              genericHelpers.streamToBuffer(doc, (err, buffer) => {
+                if (err) {
+                  return callback(err);
+                }
+
+                // serve the file as response
+                app.utils.remote.helpers.offerFileToDownload(
+                  buffer,
+                  'application/pdf',
+                  `${dictionary.getTranslation('LNG_FILE_NAME_RANGE_CONTACTS_LIST')}.pdf`,
+                  callback
+                );
+              });
             }
           );
       });

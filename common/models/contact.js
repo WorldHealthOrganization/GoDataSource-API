@@ -320,30 +320,7 @@ module.exports = function (Contact) {
             }))
             .then((contacts) => {
               // group them by case id
-              let groups = _.groupBy(contacts, (c) => c.caseId);
-
-              // replace case id's with combination of first/middle/last name
-              let groupNameResolvePromise = [];
-              for (let groupId in groups) {
-                if (groups.hasOwnProperty(groupId)) {
-                  groupNameResolvePromise.push(
-                    new Promise((resolve, reject) => {
-                      return app.models.person
-                        .findById(groupId)
-                        .then((person) => {
-                          groups[`${person.firstName} ${person.middleName} ${person.lastName}`] = groups[groupId].slice();
-                          delete groups[groupId];
-                          return resolve();
-                        })
-                        .catch(reject);
-                    })
-                  );
-                }
-              }
-
-              return Promise
-                .all(groupNameResolvePromise)
-                .then(() => groups);
+              return _.groupBy(contacts, (c) => c.caseId);
             });
         });
     }
