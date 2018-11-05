@@ -34,6 +34,14 @@ const getGeoLocation = function (address, callback) {
         }
 
         if (responseBody) {
+          if (typeof responseBody === 'string') {
+            try {
+              responseBody = JSON.parse(responseBody);
+            } catch (parseError) {
+              app.logger.warn(`Failed to parse response. ${parseError}`);
+              return callback(parseError);
+            }
+          }
           if (responseBody.error) {
             // invalid token
             if (responseBody.error.code === 498) {
@@ -66,6 +74,7 @@ const getGeoLocation = function (address, callback) {
       }
     );
   };
+  getLocation();
 };
 
 /**
@@ -73,7 +82,9 @@ const getGeoLocation = function (address, callback) {
  * Information about the token are stored inside the module
  * Credentials are token from application config
  */
-const generateAccessToken = function (cb) {
+const generateAccessToken = function (callback) {
+  callback = callback || function () {};
+
   let mapsOpts = appConfig.mapsApi;
 
   return request.get(
@@ -91,6 +102,14 @@ const generateAccessToken = function (cb) {
       }
 
       if (responseBody) {
+        if (typeof responseBody === 'string') {
+          try {
+            responseBody = JSON.parse(responseBody);
+          } catch (parseError) {
+            app.logger.warn(`Failed to parse response. ${parseError}`);
+            return callback(parseError);
+          }
+        }
         if (responseBody.error) {
           app.logger.warn(`Failed to generate access token for maps API. ${responseBody}`);
           return callback();
@@ -98,9 +117,7 @@ const generateAccessToken = function (cb) {
         token = responseBody.access_token;
       }
 
-      if (cb) {
-        return cb();
-      }
+      return callback();
     }
   );
 };

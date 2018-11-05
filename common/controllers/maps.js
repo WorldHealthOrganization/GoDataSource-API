@@ -58,12 +58,6 @@ module.exports = function (Maps) {
    * @param callback
    */
   Maps.findGeoLocationForAddress = function (address, callback) {
-
-    // check if maps api is enabled before continuing
-    if (!mapsApi.isEnabled()) {
-      return callback(app.utils.apiError.getError('MAPS_API_DISABLED'));
-    }
-
     // build an address string
     const _address = ['addressLine1', 'addressLine2', 'city', 'country', 'postalCode']
       .filter((prop) => address[prop])
@@ -78,5 +72,4 @@ module.exports = function (Maps) {
       return callback(null, location);
     });
   };
-
 };
