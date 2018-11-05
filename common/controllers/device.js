@@ -40,7 +40,7 @@ module.exports = function (Device) {
           });
       })
       .then(function () {
-        // if it succeeded, set device status as pending pending
+        // if it succeeded, set device status as pending wipe
         return device
           .updateAttributes({
             status: Device.statusList.wipePending
