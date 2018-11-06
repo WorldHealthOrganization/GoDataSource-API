@@ -8,6 +8,27 @@ const _ = require('lodash');
 const moment = require('moment');
 
 module.exports = function (Sync) {
+
+  /**
+   * Get encrypt/decrypt password for sync process
+   * @param password
+   * @param clientCredentials
+   * @return {*}
+   */
+  function getSyncEncryptPassword(password, clientCredentials) {
+    // if a password was not provided, but client credentials were
+    if (password == null && clientCredentials) {
+      // build the password by concatenating clientId and clientSecret
+      password = clientCredentials.clientId + clientCredentials.clientSecret;
+    }
+    // if a password is present
+    if (password) {
+      // hash it
+      password = app.utils.helpers.sha256(password);
+    }
+    return password;
+  }
+
   /**
    * Get Database Snapshot in sync/async mode
    * @param filter
@@ -200,13 +221,7 @@ module.exports = function (Sync) {
    * @param done
    */
   Sync.getDatabaseSnapshot = function (filter, password, options, done) {
-    if (password == null) {
-      const credentials = _.get(options, 'remotingContext.req.authData.credentials');
-      if (credentials) {
-        password = app.utils.helpers.sha256(credentials.clientId + credentials.clientSecret);
-      }
-    }
-    getDatabaseSnapshot(filter, false, password, options, done);
+    getDatabaseSnapshot(filter, false, getSyncEncryptPassword(password, _.get(options, 'remotingContext.req.authData.credentials')), options, done);
   };
 
   /**
@@ -226,13 +241,7 @@ module.exports = function (Sync) {
    * @param done
    */
   Sync.getDatabaseSnapshotAsynchronous = function (filter, password, options, done) {
-    if (password == null) {
-      const credentials = _.get(options, 'remotingContext.req.authData.credentials');
-      if (credentials) {
-        password = app.utils.helpers.sha256(credentials.clientId + credentials.clientSecret);
-      }
-    }
-    getDatabaseSnapshot(filter, true, password, options, done);
+    getDatabaseSnapshot(filter, true, getSyncEncryptPassword(password, _.get(options, 'remotingContext.req.authData.credentials')), options, done);
   };
 
   /**
@@ -382,14 +391,8 @@ module.exports = function (Sync) {
         outbreakIDs = [];
       }
 
-      let password = fields.password;
-
-      if (password == null) {
-        const credentials = _.get(requestOptions, 'remotingContext.req.authData.credentials');
-        if (credentials) {
-          password = app.utils.helpers.sha256(credentials.clientId + credentials.clientSecret);
-        }
-      }
+      // get password
+      const password = getSyncEncryptPassword(fields.password, _.get(requestOptions, 'remotingContext.req.authData.credentials'));
 
       // create sync log entry
       app.models.syncLog
@@ -596,7 +599,8 @@ module.exports = function (Sync) {
         // export the sync collections
         let collections = dbSync.syncCollections;
 
-        const password = app.util.helpers.sha256(upstreamServerEntry.credentials.clientId + upstreamServerEntry.credentials.clientSecret);
+        // get password
+        const password = getSyncEncryptPassword(null, upstreamServerEntry.credentials);
 
         app.logger.debug(`Sync ${syncLogEntry.id}: Exporting DB.`);
         return new Promise(function (resolve, reject) {
