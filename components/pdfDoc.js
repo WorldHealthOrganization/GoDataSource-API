@@ -5,7 +5,6 @@ const PdfTable = require('voilab-pdf-table');
 const streamUtils = require('./streamUtils');
 const Jimp = require('jimp');
 const _ = require('lodash');
-const helpers = require('./helpers');
 
 // PDF mime type
 const MIME_TYPE = 'application/pdf';
