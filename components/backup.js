@@ -13,6 +13,21 @@ const _ = require('lodash');
 const moment = require('moment');
 const config = require('../server/config');
 
+
+/**
+ * Get backup password
+ * @return {*}
+ */
+const getBackupPassword = function () {
+  // read backup password from config
+  let password = _.get(config, 'backUp.password');
+  if (password) {
+    // if present, hash it
+    password = app.utils.helpers.sha256(password);
+  }
+  return password;
+};
+
 /**
  * Create a new backup
  * Returns the path of the backup file
@@ -32,11 +47,6 @@ const createBackup = function (modules, location, done) {
     }
   });
 
-  let password = _.get(config, 'backUp.password');
-  if (password) {
-    password = app.utils.helpers.sha256(password);
-  }
-
   try {
     // make sure the location path of the backups exists and is accessible
     helpers.isPathOK(location);
@@ -46,7 +56,7 @@ const createBackup = function (modules, location, done) {
       null,
       collections,
       null,
-      {password: password},
+      {password: getBackupPassword()},
       (exportError, archivePath) => {
         if (exportError) {
           app.logger.error(`Backup process failed. ${exportError}`);
@@ -118,10 +128,7 @@ const restoreBackupFromFile = function (filePath, done) {
       return done(mongoDbConnError);
     }
 
-    let password = _.get(config, 'backUp.password');
-    if (password) {
-      password = app.utils.helpers.sha256(password);
-    }
+    const password = getBackupPassword();
 
     // define archive decryption action
     let decryptArchive;
