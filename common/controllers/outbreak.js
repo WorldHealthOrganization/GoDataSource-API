@@ -7204,16 +7204,7 @@ module.exports = function (Outbreak) {
                     let contactAddress = models.person.getCurrentAddress(contact);
                     if (contactAddress) {
                       row.city = contactAddress.city;
-
-                      // check which address to show
-                      let addressLine = '';
-                      if (contactAddress.addressLine1) {
-                        addressLine = contactAddress.addressLine1;
-                      } else if (contactAddress.addressLine2) {
-                        addressLine = contactAddress.addressLine2;
-                      }
-
-                      row.address = addressLine;
+                      row.address = `${contactAddress.addressLine1} ${contactAddress.addressLine2}`;
                     }
 
                     // only the latest follow up will be shown
