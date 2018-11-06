@@ -189,7 +189,7 @@ module.exports = function (Sync) {
           }
           // password provided, encrypt archive
           return app.utils.fileCrypto
-            .encrypt(options.password, archiveName)
+            .encrypt(options.password, {}, archiveName)
             .then(function (archiveName) {
               return done(null, archiveName);
             })
