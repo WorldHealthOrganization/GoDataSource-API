@@ -54,10 +54,11 @@ function init(app, callback) {
     services: {
       pushNotificationsApi: pushNotificationsApi
     },
-    fileCryptoSync: fileCryptoSync,
     fileCrypto: {
       encrypt: worker.helpers.encryptFile,
-      decrypt: worker.helpers.decryptFile
+      encryptSync: fileCryptoSync.encryptSync,
+      decrypt: worker.helpers.decryptFile,
+      decryptSync: fileCryptoSync.decryptSync
     }
   };
   app.ROOT_PATH = path.resolve(__dirname, '../..');
