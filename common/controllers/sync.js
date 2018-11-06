@@ -12,11 +12,12 @@ module.exports = function (Sync) {
    * Get Database Snapshot in sync/async mode
    * @param filter
    * @param asynchronous
+   * @param password Encryption password
    * @param options
    * @param done
    * @returns {*}
    */
-  function getDatabaseSnapshot(filter, asynchronous, options, done) {
+  function getDatabaseSnapshot(filter, asynchronous, password, options, done) {
     /**
      * Update export log entry and offer file for download if needed
      * @param err
@@ -157,7 +158,7 @@ module.exports = function (Sync) {
             collections,
             // no collection specific options
             [],
-            {password: null},
+            {password: password},
             (err, fileName) => {
               // send the done function as the response needs to be returned
               exportCallback(err, fileName, exportLogEntry, options, done);
@@ -173,7 +174,7 @@ module.exports = function (Sync) {
             collections,
             // no collection specific options
             [],
-            {password: null},
+            {password: password},
             (err, fileName) => {
               // don't send the done function as the response was already sent
               exportCallback(err, fileName, exportLogEntry, options);
@@ -194,11 +195,18 @@ module.exports = function (Sync) {
    * Eg filter: {"where": {"fromDate": "dateString", "outbreakId": "outbreak ID", "collections": ["person", "outbreak", ...], "exportType": "mobile", "includeUsers": true}}
    * Note: when exportType is present 'collections' is ignored. If both collections and exportType are not present default 'mobile' export type is used
    * @param filter
+   * @param password Encryption password
    * @param options Options from request
    * @param done
    */
-  Sync.getDatabaseSnapshot = function (filter, options, done) {
-    getDatabaseSnapshot(filter, false, options, done);
+  Sync.getDatabaseSnapshot = function (filter, password, options, done) {
+    if (password == null) {
+      const credentials = _.get(options, 'remotingContext.req.authData.credentials');
+      if (credentials) {
+        password = app.utils.helpers.sha256(credentials.clientId + credentials.clientSecret);
+      }
+    }
+    getDatabaseSnapshot(filter, false, password, options, done);
   };
 
   /**
@@ -213,11 +221,18 @@ module.exports = function (Sync) {
    * Eg filter: {"where": {"fromDate": "dateString", "outbreakId": "outbreak ID", "collections": ["person", "outbreak", ...], "exportType": "mobile", "includeUsers": true}}
    * Note: when exportType is present 'collections' is ignored. If both collections and exportType are not present default 'mobile' export type is used
    * @param filter
+   * @param password Encryption password
    * @param options Options from request
    * @param done
    */
-  Sync.getDatabaseSnapshotAsynchronous = function (filter, options, done) {
-    getDatabaseSnapshot(filter, true, options, done);
+  Sync.getDatabaseSnapshotAsynchronous = function (filter, password, options, done) {
+    if (password == null) {
+      const credentials = _.get(options, 'remotingContext.req.authData.credentials');
+      if (credentials) {
+        password = app.utils.helpers.sha256(credentials.clientId + credentials.clientSecret);
+      }
+    }
+    getDatabaseSnapshot(filter, true, password, options, done);
   };
 
   /**
@@ -283,6 +298,7 @@ module.exports = function (Sync) {
    * @param done
    */
   Sync.importDatabaseSnapshot = function (req, snapshot, asynchronous, triggerBackupBeforeSync, done) {
+
     const buildError = app.utils.apiError.getError;
 
     /**
@@ -322,7 +338,7 @@ module.exports = function (Sync) {
         // if an error was encountered
         if (err) {
           // rewrite toString to something useful
-          err.toString = function() {
+          err.toString = function () {
             return JSON.stringify(this);
           };
           // rewrite error with API error
@@ -366,6 +382,15 @@ module.exports = function (Sync) {
         outbreakIDs = [];
       }
 
+      let password = fields.password;
+
+      if (password == null) {
+        const credentials = _.get(requestOptions, 'remotingContext.req.authData.credentials');
+        if (credentials) {
+          password = app.utils.helpers.sha256(credentials.clientId + credentials.clientSecret);
+        }
+      }
+
       // create sync log entry
       app.models.syncLog
         .create({
@@ -383,7 +408,7 @@ module.exports = function (Sync) {
               outbreakIDs,
               requestOptions,
               triggerBackupBeforeSync,
-              {password: null},
+              {password: password},
               function (err) {
                 // send done function to return the response
                 importCallback(err, syncLogEntry, requestOptions, done);
@@ -400,7 +425,7 @@ module.exports = function (Sync) {
               outbreakIDs,
               requestOptions,
               triggerBackupBeforeSync,
-              {password: null},
+              {password: password},
               function (err) {
                 // don't send the done function as the response was already sent
                 importCallback(err, syncLogEntry, requestOptions);
@@ -571,6 +596,8 @@ module.exports = function (Sync) {
         // export the sync collections
         let collections = dbSync.syncCollections;
 
+        const password = app.util.helpers.sha256(upstreamServerEntry.credentials.clientId + upstreamServerEntry.credentials.clientSecret);
+
         app.logger.debug(`Sync ${syncLogEntry.id}: Exporting DB.`);
         return new Promise(function (resolve, reject) {
           Sync.exportDatabase(
@@ -578,7 +605,7 @@ module.exports = function (Sync) {
             collections,
             // no collection specific options
             [],
-            {password: null},
+            {password: password},
             (err, fileName) => {
               if (err) {
                 return reject(err);

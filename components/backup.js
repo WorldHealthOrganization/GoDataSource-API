@@ -11,6 +11,7 @@ const dbSync = require('./dbSync');
 const helpers = require('../components/helpers');
 const _ = require('lodash');
 const moment = require('moment');
+const config = require('../server/config');
 
 /**
  * Create a new backup
@@ -31,6 +32,11 @@ const createBackup = function (modules, location, done) {
     }
   });
 
+  let password = _.get(config, 'backUp.password');
+  if (password) {
+    password = app.utils.helpers.sha256(password);
+  }
+
   try {
     // make sure the location path of the backups exists and is accessible
     helpers.isPathOK(location);
@@ -40,7 +46,7 @@ const createBackup = function (modules, location, done) {
       null,
       collections,
       null,
-      {password: null},
+      {password: password},
       (exportError, archivePath) => {
         if (exportError) {
           app.logger.error(`Backup process failed. ${exportError}`);
@@ -112,174 +118,195 @@ const restoreBackupFromFile = function (filePath, done) {
       return done(mongoDbConnError);
     }
 
-    try {
-      // make sure the location path of the backups exists and is accessible
-      helpers.isPathOK(filePath);
+    let password = _.get(config, 'backUp.password');
+    if (password) {
+      password = app.utils.helpers.sha256(password);
+    }
 
-      // create a temporary directory to store the backup files
-      let tmpDir = tmp.dirSync({unsafeCleanup: true});
-      let tmpDirName = tmpDir.name;
+    // define archive decryption action
+    let decryptArchive;
+    // if no password was provided
+    if (!password) {
+      // nothing to do, return file path as is
+      decryptArchive = Promise.resolve(filePath);
+    } else {
+      // password provided, decrypt archive
+      decryptArchive = app.utils.fileCrypto
+        .decrypt(password, filePath);
+    }
 
-      // extract backup archive
-      try {
-        let archive = new AdmZip(filePath);
-        archive.extractAllTo(tmpDirName);
-      } catch (zipError) {
-        app.logger.error(`Failed to extract zip archive: ${filePath}`);
-        return done(zipError);
-      }
+    return decryptArchive
+      .then(function (filePath) {
+        try {
+          // make sure the location path of the backups exists and is accessible
+          helpers.isPathOK(filePath);
 
-      // read backup files in the temporary dir
-      return fs.readdir(tmpDirName, (err, filenames) => {
-        if (err) {
-          return done(err);
-        }
+          // create a temporary directory to store the backup files
+          let tmpDir = tmp.dirSync({unsafeCleanup: true});
+          let tmpDirName = tmpDir.name;
 
-        // filter files that match a collection name
-        let collectionsFiles = filenames.filter((filename) => {
-          // split filename into 'collection name' and 'extension'
-          filename = filename.split('.');
-          return filename[0] && dbSync.collectionsMap.hasOwnProperty(filename[0]);
-        });
+          // extract backup archive
+          try {
+            let archive = new AdmZip(filePath);
+            archive.extractAllTo(tmpDirName);
+          } catch (zipError) {
+            app.logger.error(`Failed to extract zip archive: ${filePath}`);
+            return done(zipError);
+          }
 
-        // start restoring the database using provided collection files
-        return async.series(
-          collectionsFiles.map((fileName) => (doneCollection) => {
-            let filePath = `${tmpDirName}/${fileName}`;
+          // read backup files in the temporary dir
+          return fs.readdir(tmpDirName, (err, filenames) => {
+            if (err) {
+              return done(err);
+            }
 
-            return fs.readFile(
-              filePath,
-              {
-                encoding: 'utf8'
-              },
-              (err, data) => {
-                if (err) {
-                  app.logger.error(`Failed to read collection file ${filePath}`);
-                  return doneCollection(err);
-                }
+            // filter files that match a collection name
+            let collectionsFiles = filenames.filter((filename) => {
+              // split filename into 'collection name' and 'extension'
+              filename = filename.split('.');
+              return filename[0] && dbSync.collectionsMap.hasOwnProperty(filename[0]);
+            });
 
-                // split filename into 'collection name' and 'extension'
-                let collectionName = fileName.split('.')[0];
+            // start restoring the database using provided collection files
+            return async.series(
+              collectionsFiles.map((fileName) => (doneCollection) => {
+                let filePath = `${tmpDirName}/${fileName}`;
 
-                let collectionRef = null;
-
-                try {
-                  // get collection reference of the mongodb driver
-                  collectionRef = connection.collection(dbSync.collectionsMap[collectionName]);
-                } catch (mongoDbError) {
-                  app.logger.error(`Failed to establish connection to ${collectionName} collection`);
-                  return doneCollection(mongoDbError);
-                }
-
-                // list of date map properties to convert
-                let datePropsMap = app.models[collectionName]._parsedDateProperties;
-
-                // parse file contents to JavaScript object
-                try {
-                  let collectionRecords = JSON.parse(data);
-
-                  collectionRecords.forEach((record) => {
-                    // custom properties should be checked property by property
-                    // we can't know exactly the types
-                    if (record.questionnaireAnswers) {
-                      helpers.convertPropsToDate(record.questionnaireAnswers);
+                return fs.readFile(
+                  filePath,
+                  {
+                    encoding: 'utf8'
+                  },
+                  (err, data) => {
+                    if (err) {
+                      app.logger.error(`Failed to read collection file ${filePath}`);
+                      return doneCollection(err);
                     }
 
-                    let specialDatePropsMap = null;
-                    if (record.hasOwnProperty('type') &&
-                      [
-                        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
-                        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
-                      ].indexOf(record.type) >= 0) {
-                      specialDatePropsMap = app.models[app.models.person.typeToModelMap[record.type]]._parsedDateProperties;
+                    // split filename into 'collection name' and 'extension'
+                    let collectionName = fileName.split('.')[0];
+
+                    let collectionRef = null;
+
+                    try {
+                      // get collection reference of the mongodb driver
+                      collectionRef = connection.collection(dbSync.collectionsMap[collectionName]);
+                    } catch (mongoDbError) {
+                      app.logger.error(`Failed to establish connection to ${collectionName} collection`);
+                      return doneCollection(mongoDbError);
                     }
 
-                    (function setDateProps(obj, map) {
-                      // go through each date properties and parse date properties
-                      for (let prop in map) {
-                        if (map.hasOwnProperty(prop)) {
-                          // this is an array prop
-                          if (typeof map[prop] === 'object') {
-                            if (Array.isArray(obj[prop])) {
-                              obj[prop].forEach((item) => setDateProps(item, map[prop]));
-                            }
-                          } else {
-                            let recordPropValue = _.get(obj, prop);
-                            if (recordPropValue) {
-                              // try to convert the string value to date, if valid, replace the old value
-                              let convertedDate = moment(recordPropValue);
-                              if (convertedDate.isValid()) {
-                                _.set(obj, prop, convertedDate.toDate());
+                    // list of date map properties to convert
+                    let datePropsMap = app.models[collectionName]._parsedDateProperties;
+
+                    // parse file contents to JavaScript object
+                    try {
+                      let collectionRecords = JSON.parse(data);
+
+                      collectionRecords.forEach((record) => {
+                        // custom properties should be checked property by property
+                        // we can't know exactly the types
+                        if (record.questionnaireAnswers) {
+                          helpers.convertPropsToDate(record.questionnaireAnswers);
+                        }
+
+                        let specialDatePropsMap = null;
+                        if (record.hasOwnProperty('type') &&
+                          [
+                            'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                            'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                            'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                          ].indexOf(record.type) >= 0) {
+                          specialDatePropsMap = app.models[app.models.person.typeToModelMap[record.type]]._parsedDateProperties;
+                        }
+
+                        (function setDateProps(obj, map) {
+                          // go through each date properties and parse date properties
+                          for (let prop in map) {
+                            if (map.hasOwnProperty(prop)) {
+                              // this is an array prop
+                              if (typeof map[prop] === 'object') {
+                                if (Array.isArray(obj[prop])) {
+                                  obj[prop].forEach((item) => setDateProps(item, map[prop]));
+                                }
+                              } else {
+                                let recordPropValue = _.get(obj, prop);
+                                if (recordPropValue) {
+                                  // try to convert the string value to date, if valid, replace the old value
+                                  let convertedDate = moment(recordPropValue);
+                                  if (convertedDate.isValid()) {
+                                    _.set(obj, prop, convertedDate.toDate());
+                                  }
+                                }
                               }
                             }
                           }
-                        }
+                        })(record, specialDatePropsMap ? specialDatePropsMap : datePropsMap);
+                      });
+
+                      // restore a collection's record using raw mongodb connector
+                      const restoreCollection = function () {
+                        // remove all the documents from the collection, then bulk insert the ones from the file
+                        collectionRef.deleteMany({}, (err) => {
+                          // if delete fails, don't continue
+                          if (err) {
+                            app.logger.error(`Failed to delete database records of collection: ${collectionName}`);
+                            return doneCollection(err);
+                          }
+
+                          // if there are no records in the files just
+                          // skip it
+                          if (!collectionRecords.length) {
+                            app.logger.debug(`Collection ${collectionName} has no records in the file. Skipping it`);
+                            return doneCollection();
+                          }
+
+                          // create a bulk operation
+                          const bulk = collectionRef.initializeOrderedBulkOp();
+
+                          // insert all entries from the file in the collection
+                          collectionRecords.forEach((record) => {
+                            bulk.insert(record);
+                          });
+
+                          // execute the bulk operations
+                          bulk.execute((err) => {
+                            if (err) {
+                              app.logger.error(`Failed to insert records for collection ${collectionName}`);
+                              // stop at once, if any error has occurred
+                              return doneCollection(err);
+                            }
+                            return doneCollection();
+                          });
+                        });
+                      };
+
+                      // copy collection linked files
+                      if (dbSync.collectionsWithFiles.hasOwnProperty(collectionName)) {
+                        dbSync.importCollectionRelatedFiles(collectionName, tmpDirName, (err) => {
+                          if (err) {
+                            return doneCollection();
+                          }
+                          return restoreCollection();
+                        });
+                      } else {
+                        return restoreCollection();
                       }
-                    })(record, specialDatePropsMap ? specialDatePropsMap : datePropsMap);
+                    } catch (parseError) {
+                      app.logger.error(`Failed to parse collection file ${filePath}`);
+                      return doneCollection(parseError);
+                    }
                   });
-
-                  // restore a collection's record using raw mongodb connector
-                  const restoreCollection = function () {
-                    // remove all the documents from the collection, then bulk insert the ones from the file
-                    collectionRef.deleteMany({}, (err) => {
-                      // if delete fails, don't continue
-                      if (err) {
-                        app.logger.error(`Failed to delete database records of collection: ${collectionName}`);
-                        return doneCollection(err);
-                      }
-
-                      // if there are no records in the files just
-                      // skip it
-                      if (!collectionRecords.length) {
-                        app.logger.debug(`Collection ${collectionName} has no records in the file. Skipping it`);
-                        return doneCollection();
-                      }
-
-                      // create a bulk operation
-                      const bulk = collectionRef.initializeOrderedBulkOp();
-
-                      // insert all entries from the file in the collection
-                      collectionRecords.forEach((record) => {
-                        bulk.insert(record);
-                      });
-
-                      // execute the bulk operations
-                      bulk.execute((err) => {
-                        if (err) {
-                          app.logger.error(`Failed to insert records for collection ${collectionName}`);
-                          // stop at once, if any error has occurred
-                          return doneCollection(err);
-                        }
-                        return doneCollection();
-                      });
-                    });
-                  };
-
-                  // copy collection linked files
-                  if (dbSync.collectionsWithFiles.hasOwnProperty(collectionName)) {
-                    dbSync.importCollectionRelatedFiles(collectionName, tmpDirName, (err) => {
-                      if (err) {
-                        return doneCollection();
-                      }
-                      return restoreCollection();
-                    });
-                  } else {
-                    return restoreCollection();
-                  }
-                } catch (parseError) {
-                  app.logger.error(`Failed to parse collection file ${filePath}`);
-                  return doneCollection(parseError);
-                }
-              });
-          }),
-          (err) => done(err)
-        );
-      });
-    } catch (pathAccessError) {
-      app.logger.error(`Backup location: ${filePath} is not OK. ${pathAccessError}`);
-      return done(pathAccessError);
-    }
+              }),
+              (err) => done(err)
+            );
+          });
+        } catch (pathAccessError) {
+          app.logger.error(`Backup location: ${filePath} is not OK. ${pathAccessError}`);
+          return done(pathAccessError);
+        }
+      })
+      .catch(done);
   });
 };
 

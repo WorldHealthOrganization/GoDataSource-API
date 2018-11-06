@@ -13,6 +13,7 @@ const async = require('async');
 const fs = require('fs');
 const packageJson = require('../package');
 const workerRunner = require('./workerRunner');
+const crypto = require('crypto');
 
 const arrayFields = {
   'addresses': 'address',
@@ -1409,6 +1410,16 @@ const getPeriodIntervalForDate = function (fullPeriodInterval, periodType, date)
   return periodInterval;
 };
 
+
+/**
+ * Hexadecimal Sha256 hash
+ * @param string
+ * @return {string}
+ */
+function sha256(string){
+  return crypto.createHash('sha256').update(string).digest('hex');
+}
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1443,5 +1454,6 @@ module.exports = {
   paginateResultSet: paginateResultSet,
   setValueInContextOptions: setValueInContextOptions,
   getValueFromContextOptions: getValueFromContextOptions,
-  getPeriodIntervalForDate: getPeriodIntervalForDate
+  getPeriodIntervalForDate: getPeriodIntervalForDate,
+  sha256: sha256
 };
