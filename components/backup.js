@@ -132,7 +132,7 @@ const restoreBackupFromFile = function (filePath, done) {
     } else {
       // password provided, decrypt archive
       decryptArchive = app.utils.fileCrypto
-        .decrypt(password, filePath);
+        .decrypt(password, {keepOriginal: true}, filePath);
     }
 
     return decryptArchive

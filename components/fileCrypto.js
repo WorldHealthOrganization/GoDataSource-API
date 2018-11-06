@@ -6,14 +6,17 @@
 
 const aesCrypto = require('./aesCrypto');
 const fs = require('fs');
+const path = require('path');
+const uuid = require('uuid');
 
 /**
  * Encrypt file (AES-256) using password
  * @param password
+ * @param options {{keepOriginal: boolean}}
  * @param filePath
  * @return {Promise<any>}
  */
-function encryptSync(password, filePath) {
+function encryptSync(password, options, filePath) {
   // promisify the result
   return new Promise(function (resolve, reject) {
     // read the file
@@ -26,7 +29,14 @@ function encryptSync(password, filePath) {
       return aesCrypto
         .encrypt(password, buffer)
         .then(function (encryptedData) {
-          // replace original file with encrypted one
+          // if original file should be preserved
+          if (options.keepOriginal) {
+            // extract its extension
+            const extension = path.extname(filePath);
+            // define a new path for the file
+            filePath = filePath.replace(extension, `-${uuid.v4()}${extension}`);
+          }
+          // write encrypted file
           fs.writeFile(filePath, encryptedData, function (error) {
             if (error) {
               return reject(error);
@@ -41,10 +51,11 @@ function encryptSync(password, filePath) {
 /**
  * Decrypt file (AES-256) using password
  * @param password
+ * @param options {{keepOriginal: boolean}}
  * @param filePath
  * @return {Promise<any>}
  */
-function decryptSync(password, filePath) {
+function decryptSync(password, options, filePath) {
   // promisify the result
   return new Promise(function (resolve, reject) {
     // read the file
@@ -57,7 +68,14 @@ function decryptSync(password, filePath) {
       return aesCrypto
         .decrypt(password, buffer)
         .then(function (decryptedData) {
-          // replace original file with decrypted one
+          // if original file should be preserved
+          if (options.keepOriginal) {
+            // extract its extension
+            const extension = path.extname(filePath);
+            // define a new path for the file
+            filePath = filePath.replace(extension, `-${uuid.v4()}${extension}`);
+          }
+          // write decrypted file
           fs.writeFile(filePath, decryptedData, function (error) {
             if (error) {
               return reject(error);

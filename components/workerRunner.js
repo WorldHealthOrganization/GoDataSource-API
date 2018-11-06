@@ -132,12 +132,13 @@ module.exports = {
     /**
      * Encrypt file (AES-256) using password
      * @param password
+     * @param options
      * @param filePath
      * @return {Promise<any>}
      */
-    encryptFile: function (password, filePath) {
+    encryptFile: function (password, options, filePath) {
       return new Promise(function (resolve, reject) {
-        invokeWorkerMethod('helpers', 'encryptFile', [password, filePath], function (error, result) {
+        invokeWorkerMethod('helpers', 'encryptFile', [password, options, filePath], function (error, result) {
           if (error) {
             return reject(error);
           }
@@ -155,12 +156,13 @@ module.exports = {
     /**
      * Decrypt file (AES-256) using password
      * @param password
+     * @param options
      * @param filePath
      * @return {Promise<any>}
      */
-    decryptFile: function (password, filePath) {
+    decryptFile: function (password, options, filePath) {
       return new Promise(function (resolve, reject) {
-        invokeWorkerMethod('helpers', 'decryptFile', [password, filePath], function (error, result) {
+        invokeWorkerMethod('helpers', 'decryptFile', [password, options, filePath], function (error, result) {
           if (error) {
             return reject(error);
           }

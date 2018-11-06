@@ -256,7 +256,7 @@ module.exports = function (Sync) {
         } else {
           // password provided, decrypt archive
           decryptArchive = app.utils.fileCrypto
-            .decrypt(options.password, filePath);
+            .decrypt(options.password, {}, filePath);
         }
 
         return decryptArchive

@@ -15,6 +15,7 @@ const worker = {
   /**
    * Encrypt file (AES-256) using password
    * @param password
+   * @param options
    * @param filePath
    * @return {Promise<any>}
    */
@@ -22,6 +23,7 @@ const worker = {
   /**
    * Decrypt file (AES-256) using password
    * @param password
+   * @param options
    * @param filePath
    * @return {Promise<any>}
    */
