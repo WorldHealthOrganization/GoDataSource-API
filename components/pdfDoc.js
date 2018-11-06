@@ -568,7 +568,7 @@ const sendPdfDoc = function (document, filename, callback) {
   const app = require('../server/server');
 
   // convert pdf stream to buffer and send it as response
-  helpers.streamToBuffer(document, (err, buffer) => {
+  streamUtils.streamToBuffer(document, (err, buffer) => {
     if (err) {
       return callback(err);
     }
