@@ -307,7 +307,6 @@ module.exports = function (Sync) {
    * @param done
    */
   Sync.importDatabaseSnapshot = function (req, snapshot, asynchronous, triggerBackupBeforeSync, done) {
-
     const buildError = app.utils.apiError.getError;
 
     /**
