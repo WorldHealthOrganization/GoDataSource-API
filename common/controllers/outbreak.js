@@ -3172,10 +3172,21 @@ module.exports = function (Outbreak) {
   /**
    * Merge multiple cases and contacts
    * @param data List of records ids, to be merged
+   * @param options
+   * @param callback
    */
-  Outbreak.prototype.mergeCasesAndContacts = function (data) {
+  Outbreak.prototype.mergeCasesAndContacts = function (data, options, callback) {
+    // defensive checks
     data = data || {};
     data.ids = data.ids || [];
+    data.type = data.type || 'case';
+    data.model = data.model || {};
+
+    // reference to application models
+    const models = app.models;
+
+    // friendly person type value
+    const modelType = models.person.typeToModelMap[data.type];
 
     /**
      * Helper function used to retrieve relations for a given case
@@ -3189,209 +3200,202 @@ module.exports = function (Outbreak) {
       });
     };
 
-    // retrieve all the case/contacts that should be merged, ordered by their last update date
-    return Promise.all([
-      app.models.case.find(
-        {
-          where: {
-            id: {
-              inq: data.ids
-            }
+    // reference to the model type we should work upon (case/contact)
+    const targetModel = models[models.person.typeToModelMap[data.type]];
+
+    // retrieve all the models that should be merged (cases or contacts)
+    // include follow-up/lab results, based on the person type
+    let includes = [];
+    if (modelType === 'case') {
+      includes.push('labResults');
+    } else {
+      includes.push('followUps');
+    }
+
+    targetModel
+      .find({
+        where: {
+          id: {
+            inq: data.ids
           },
-          include: ['labResults'],
-          order: 'updatedAt DESC'
+          include: includes
         }
-      ),
-      app.models.contact.find(
-        {
-          where: {
-            id: {
-              inq: data.ids
-            }
-          },
-          include: ['followUps'],
-          order: 'updatedAt DESC'
-        }
-      )
-    ])
-    // retrieve all relationships belonging to the case/contacts
-      .then((listOfCaseAndContacts) => Promise
-        .all(listOfCaseAndContacts.map((item) => Promise
-          .all(item.map((model) => _findRelations(model.id)
+      })
+      // retrieve relations of each model
+      .then((models) => Promise.all(
+        models.map((model) => {
+          return _findRelations(model.id)
             .then((relations) => {
               model.relationships = relations;
               return model;
-            }))))
-        )
+            });
+        }))
       )
-      .then((items) => {
-        // clone the items original array, needed to filter relation from spliced items as well
-        let originalList = [].concat(...items.slice(0));
+      .then((models) => {
+        // make sure the number of follow ups in a single day do not exceed the limit configured on outbreak
+        let outbreakLimitPerDay = this.frequencyOfFollowUpPerDay;
 
-        // create reference for case/contact lists
-        let cases = items[0];
-        let contacts = items[1];
+        // winner model id
+        // choose first model, doesn't really matter
+        // we're replacing its properties anyways
+        let winnerModelId = data.ids[0];
 
-        // pick the most updated case and contact
-        // those will be the base models used in merging
-        let baseCase = cases.splice(0, 1)[0];
-        let baseContact = contacts.splice(0, 1)[0];
+        // get winner model reference, used when updating its properties
+        let winnerModelRef = models.find((model) => model.id === winnerModelId);
 
-        // if a case is found, then it will be the resulted model of the merging
-        // the contact most updated one is used mainly to merge contact's specific properties
-        // that eventually will be merged into case result model
-        let isCase = !!baseCase;
-        let resultModel = baseCase ? baseCase : baseContact;
+        // collect follow ups from all the contacts
+        // reset date to the start of the day
+        // group them by day, and sorted by creation date
+        // make sure limit per day is not exceededs
+        let followUpsToAdd = [];
+        if (modelType === 'contact') {
+          let allFollowUps = [];
+          models.forEach((model) => {
+            if (model.followUps().length) {
+              // reset follow up day to the start of the day
+              // change person id to point to winner model
+              let followUps = models.followUps().map((followUp) => {
+                followUp.date = genericHelpers.getUTCDate(followUp.date).toDate().toISOString();
+                return followUp;
+              });
 
-        // store reference to the properties that belong to the result model
-        let resultModelProps = resultModel.__data;
+              allFollowUps = allFollowUps.concat(followUps);
+            }
+          });
 
-        // start merging basic properties
-        // go levels below to the most last updatedAt one, if any property is missing
-        // we start with case because it has priority
-        // in case, a base case was not found we consider it being a contact to contact merge
-        // hence ignoring case merge feature whatsoever
-        if (!isCase) {
-          resultModel = helpers.mergePersonModels(baseContact, contacts, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
-        } else {
-          resultModel = helpers.mergePersonModels(resultModel, cases, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE');
+          // group them by day
+          let groupedFollowUps = _.groupBy(allFollowUps, (f) => f.date);
 
-          // make sure we're not doing anything related to contact merging, if no contact id was given
-          if (baseContact) {
-            baseContact = helpers.mergePersonModels(baseContact, contacts, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
+          // sort each group of follow ups by creation date
+          // remove from the end until the limit per day is ok
+          for (let group in groupedFollowUps) {
+            if (groupedFollowUps.hasOwnProperty(group)) {
+              groupedFollowUps[group] = groupedFollowUps[group].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-            // store ref to base contact props
-            let baseContactProps = baseContact.__data;
+              let lengthDiff = groupedFollowUps[group].length - outbreakLimitPerDay;
+              if (lengthDiff > 0) {
+                for (let i = 0; i < lengthDiff; i++) {
+                  groupedFollowUps[group].pop();
+                }
+              }
 
-            // attach predefined contact props on the case model
-            ['riskLevel', 'riskReason'].forEach((prop) => {
-              resultModelProps[prop] = baseContactProps[prop];
-            });
-
-            // also after simple properties merge is done, addresses/documents of the resulted contact should be merged on the base case
-            resultModelProps.addresses = resultModelProps.addresses.concat(baseContactProps.addresses);
-            resultModelProps.documents = resultModelProps.documents.concat(
-              baseContactProps.documents.filter((doc) => resultModelProps.documents.findIndex((resultItem) => {
-                return resultItem.type === doc.type && resultItem.number === doc.number;
-              }) === -1)
-            );
+              // keep only the lab result id and person id in the result, we don't need to change other things
+              followUpsToAdd = followUpsToAdd.concat(groupedFollowUps[group].map((f) => {
+                return {
+                  id: f.id,
+                  personId: winnerModelId
+                };
+              }));
+            }
           }
         }
 
-        // strip model related props from documents/addresses entries
-        resultModelProps.addresses = resultModelProps.addresses.map((entry) => entry.__data);
-        resultModelProps.documents = resultModelProps.documents.map((entry) => entry.__data);
-
-        // make sure, that if the case is the base model, we're collecting followups/relations from base contact as well
-        if (isCase) {
-          contacts.push(baseContact);
+        // for cases update each lab result person id reference to the winning model
+        // keep only the lab result id and person id in the result, we don't need to change other things
+        let labResultsToAdd = [];
+        if (modelType === 'case') {
+          models.forEach((model) => {
+            if (model.labResults().length) {
+              labResultsToAdd = labResultsToAdd.concat(model.labResults().map((labResult) => {
+                return {
+                  id: labResult.id,
+                  personId: winnerModelId
+                };
+              }));
+            }
+          });
         }
 
-        // get all the ids for case/contact, needed to verify that there are no relations between 2 cases that should be merged
-        // also make a list of ids and based on their type, used when updating database records
-        let caseIds = cases.map((item) => item.id);
-        let contactIds = contacts.map((item) => item.id);
+        // better name for merge candidates ids
+        let modelsIds = data.ids;
 
-        // take follow ups from all the contacts and change their contact id to point to result model
-        let followUps = [];
-        contacts.forEach((contact) => {
-          if (contact.followUps().length) {
-            contact.followUps().forEach((followUp) => {
-              followUps.push({
-                id: followUp.id,
-                personId: resultModel.id
-              });
-            });
-          }
-        });
-
-        // prepare lab results
-        let labResults = [];
-        cases.forEach((caseItem) => {
-          if (caseItem.labResults().length) {
-            caseItem.labResults().forEach((labResult) => {
-              labResults.push({
-                id: labResult.id,
-                personId: resultModel.id
-              });
-            });
-          }
-        });
-
-        // prepare relations
-        let relations = [];
-
-        // build a list of all ids, used to filter any relationship between them
-        let ids = originalList.map((item) => item.id);
-
-        // filter relations from case/contacts
-        // item points to either case or contact list
-        originalList.forEach((entry) => {
-          entry.relationships.forEach((relation) => {
-            let firstMember = ids.indexOf(relation.persons[0].id);
-            let secondMember = ids.indexOf(relation.persons[1].id);
+        // remove relations between merge candidates
+        // the rest of relationships should have the self id the winner model id and also the type
+        let relationsToAdd = [];
+        models.forEach((model) => {
+          model.relationships.forEach((relation) => {
+            let firstMember = modelsIds.indexOf(relation.persons[0].id);
+            let secondMember = modelsIds.indexOf(relation.persons[1].id);
 
             // if there is a relation between 2 merge candidates skip it
             if (firstMember !== -1 && secondMember !== -1) {
               return;
             }
 
-            // otherwise try check which of the candidates is a from the merging list and replace it with base's id
-            firstMember = firstMember === -1 ? relation.persons[0].id : resultModel.id;
-            secondMember = secondMember === -1 ? relation.persons[1].id : resultModel.id;
+            // otherwise try check which of the candidates is from the merging list and replace it with winner's id
+            firstMember = firstMember === -1 ? relation.persons[0].id : winnerModelId;
+            secondMember = secondMember === -1 ? relation.persons[1].id : winnerModelId;
 
-            relations.push({
+            relationsToAdd.push({
               id: relation.id,
               persons: [
                 {
                   id: firstMember,
-                  type: firstMember === resultModel.id ? resultModel.type : relation.persons[0].type
+                  type: firstMember === winnerModelId ? data.type : relation.persons[0].type
                 },
                 {
                   id: secondMember,
-                  type: firstMember === resultModel.id ? resultModel.type : relation.persons[1].type
+                  type: firstMember === winnerModelId ? data.type : relation.persons[1].type
                 }
               ]
             });
           });
         });
 
-        // type of model that updates the record
-        let updateBaseRecord = resultModel.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ? app.models.case : app.models.contact;
+        // remove first id from the list of ids, this is the winner model
+        // shouldn't be removed
+        let modelsIdsToRemove = modelsIds.slice();
+        modelsIdsToRemove.shift();
 
         // make changes into database
-        return Promise
-          .all([
-            // soft delete merged contacts/cases
-            app.models.case.destroyAll({id: {inq: caseIds}}),
-            app.models.contact.destroyAll({id: {inq: contactIds}}),
-            // update base record
-            updateBaseRecord.upsertWithWhere({id: resultModel.id}, resultModelProps),
-            // update lab results
-            Promise.all(labResults.map((labResult) => app.models.labResult.upsertWithWhere(
-              {
-                id: labResult.id
-              },
-              labResult))
-            ),
-            // update relations
-            Promise.all(relations.map((relation) => app.models.relationship.upsertWithWhere(
-              {
-                id: relation.id
-              },
-              relation))
-            ),
-            // update follow ups
-            Promise.all(followUps.map((followUp) => app.models.followUp.upsertWithWhere(
-              {
-                id: followUp.id
-              },
-              followUp))
-            )
-          ])
-          // return the base model
-          .then((result) => result[2]);
+        // first delete all the merge candidates models, except the one we chose as winner
+        // then edit the winner model id properties
+        // then make changed to lab results/follow ups and relationships
+        // if anything happens during the winner model properties update
+        // rollback the deletion of merge candidates
+        targetModel
+          .destroyAll({ id: { inq: modelsIdsToRemove} })
+          .then(() => {
+            // update winner model props
+            // if this fails rollback and stop
+            return targetModel
+              .upsertWithWhere({ id: winnerModelId }, data.model)
+              .then(() => {
+                return Promise
+                  .all(
+                    // update lab results
+                    Promise.all(labResultsToAdd.map((labResult) => models.labResult.upsertWithWhere(
+                      {
+                        id: labResult.id
+                      },
+                      labResult))
+                    ),
+                    // update relations
+                    Promise.all(relationsToAdd.map((relation) => models.relationship.upsertWithWhere(
+                      {
+                        id: relation.id
+                      },
+                      relation))
+                    ),
+                    // update follow ups
+                    Promise.all(followUpsToAdd.map((followUp) => models.followUp.upsertWithWhere(
+                      {
+                        id: followUp.id
+                      },
+                      followUp))
+                    )
+                  )
+                  .then(() => targetModel.findById(winnerModelId).then((winnerModel) => callback(null, winnerModel)));
+              })
+              .catch((err) => {
+                // undo delete
+                return Promise
+                  .all(models.map((model) => model.undoDelete(options)))
+                  .then(() => callback(err));
+              });
+          });
       });
+      }
   };
 
   /**
