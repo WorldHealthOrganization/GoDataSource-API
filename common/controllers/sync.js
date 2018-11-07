@@ -304,9 +304,10 @@ module.exports = function (Sync) {
    * @param snapshot Database snapshot .tar.gz archive
    * @param asynchronous Flag to specify whether the import is sync or async. Default: sync (false)
    * @param triggerBackupBeforeSync Flag to specify whether before the import a backup should be triggered. If the flag is not sent the System settings triggerBackupBeforeSync flag will be used
+   * @param password Encryption password
    * @param done
    */
-  Sync.importDatabaseSnapshot = function (req, snapshot, asynchronous, triggerBackupBeforeSync, done) {
+  Sync.importDatabaseSnapshot = function (req, snapshot, asynchronous, triggerBackupBeforeSync, password, done) {
     const buildError = app.utils.apiError.getError;
 
     /**

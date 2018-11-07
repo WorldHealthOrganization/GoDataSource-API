@@ -156,6 +156,16 @@ const restoreBackupFromFile = function (filePath, done) {
           try {
             let archive = new AdmZip(filePath);
             archive.extractAllTo(tmpDirName);
+            // if a decryption was performed
+            if (password) {
+              // clean-up decrypted backup
+              fs.unlink(filePath, function (error) {
+                // log clean-up error, but don't fail
+                if (error) {
+                  app.logger.error('Failed to remove decrypted backup', error);
+                }
+              });
+            }
           } catch (zipError) {
             app.logger.error(`Failed to extract zip archive: ${filePath}`);
             return done(zipError);
