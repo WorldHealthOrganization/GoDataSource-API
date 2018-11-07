@@ -67,7 +67,13 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "cluster": {
+      "type": "belongsTo",
+      "model": "cluster",
+      "foreignKey": "clusterId"
+    }
+  },
   "acls": [],
   "methods": {}
 }
