@@ -1300,6 +1300,9 @@ module.exports = function (Outbreak) {
     if (!endDate) {
       // end date is current date
       endDate = new Date();
+    } else {
+      // remove end date from filter
+      delete filter.where.endDate;
     }
 
     // keep a flag for includedPeopleFilter
@@ -1477,6 +1480,9 @@ module.exports = function (Outbreak) {
         const endDate = processedFilter.endDate;
         const hasIncludedPeopleFilter = processedFilter.hasIncludedPeople;
 
+        // end date is supported only one first level of where in transmission chains
+        _.set(filter, 'where.endDate', endDate);
+
         // count transmission chains
         app.models.relationship
           .countTransmissionChains(self.id, self.periodOfFollowup, filter, function (error, noOfChains) {
@@ -1574,6 +1580,9 @@ module.exports = function (Outbreak) {
         const activeFilter = processedFilter.active;
         const hasIncludedPeopleFilter = processedFilter.hasIncludedPeople;
         const sizeFilter = processedFilter.size;
+
+        // end date is supported only one first level of where in transmission chains
+        _.set(filter, 'where.endDate', endDate);
 
         // get transmission chains
         app.models.relationship
@@ -7034,8 +7043,7 @@ module.exports = function (Outbreak) {
             }
 
             return models.location
-              .resolveLocationsWithLevel(allLocationsIds,
-              {
+              .resolveLocationsWithLevel(allLocationsIds, {
                 locationIds: this.locationIds,
                 reportingGeographicalLevelId: this.reportingGeographicalLevelId
               })
