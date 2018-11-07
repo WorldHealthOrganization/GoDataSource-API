@@ -6936,7 +6936,7 @@ module.exports = function (Outbreak) {
               doc.end();
 
               // send pdf doc as response
-              pdfUtils.sendPdfDoc(doc, dictionary.getTranslation('LNG_FILE_NAME_DAILY_CONTACTS_LIST'), callback);
+              pdfUtils.downloadPdfDoc(doc, dictionary.getTranslation('LNG_FILE_NAME_DAILY_CONTACTS_LIST'), callback);
             }
           );
       });
@@ -6953,7 +6953,7 @@ module.exports = function (Outbreak) {
     // application model's reference
     const models = app.models;
 
-    let standardFormat = 'MM-DD-YYYY';
+    let standardFormat = 'YYYY-MM-DD';
     let startDate = genericHelpers.getUTCDate(body.startDate);
     let endDate = genericHelpers.getUTCDate(body.endDate);
 
@@ -7231,7 +7231,7 @@ module.exports = function (Outbreak) {
               doc.end();
 
               // send pdf doc as response
-              pdfUtils.sendPdfDoc(doc, dictionary.getTranslation('LNG_FILE_NAME_RANGE_CONTACTS_LIST'), callback);
+              pdfUtils.downloadPdfDoc(doc, dictionary.getTranslation('LNG_FILE_NAME_RANGE_CONTACTS_LIST'), callback);
             }
           );
       });

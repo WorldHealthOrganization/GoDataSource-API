@@ -308,7 +308,7 @@ module.exports = function (Contact) {
               let contactAddress = app.models.person.getCurrentAddress(contact);
               if (contactAddress.locationId) {
                 return app.models.location
-                  .findById(contact.addresses[0].locationId)
+                  .findById(contactAddress.locationId)
                   .then((location) => {
                     if (location) {
                       contactAddress.locationName = location.name;

@@ -562,8 +562,8 @@ const addQuestionnaireHeadersForPrint = function (data, headers) {
 };
 
 // convert a document into a binary buffer
-// send it over
-const sendPdfDoc = function (document, filename, callback) {
+// send it over the network
+const downloadPdfDoc = function (document, filename, callback) {
   const app = require('../server/server');
 
   // convert pdf stream to buffer and send it as response
@@ -593,5 +593,5 @@ module.exports = {
   createTableInPDFDocument: createTableInPDFDocument,
   addTitle: addTitle,
   MIME_TYPE: MIME_TYPE,
-  sendPdfDoc: sendPdfDoc
+  downloadPdfDoc: downloadPdfDoc
 };
