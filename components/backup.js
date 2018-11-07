@@ -203,6 +203,8 @@ const restoreBackupFromFile = function (filePath, done) {
                     // split filename into 'collection name' and 'extension'
                     let collectionName = fileName.split('.')[0];
 
+                    app.logger.debug(`Restoring Collection ${collectionName}...`);
+
                     let collectionRef = null;
 
                     try {
@@ -293,6 +295,7 @@ const restoreBackupFromFile = function (filePath, done) {
                               // stop at once, if any error has occurred
                               return doneCollection(err);
                             }
+                            app.logger.debug(`Restoring Collection ${collectionName} complete.`);
                             return doneCollection();
                           });
                         });
