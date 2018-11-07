@@ -6813,4 +6813,427 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+
+  /**
+   * Export list of contacts that should be seen on a given date
+   * Grouped by case/place
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportDailyListOfContacts = function (body, options, callback) {
+    // get list of questions for contacts from outbreak
+    let questions = this.contactFollowUpTemplate.sort((a, b) => a.order > b.order);
+
+    // case id value maps
+    // mainly used to know which value should be set into document for each case id
+    let caseIdValueMap = {};
+
+    // get list of contacts
+    app.models.contact
+      .getGroupedByDate(this, body.date, body.groupBy)
+      .then((contactGroups) => {
+        // create a map of group id and corresponding value that should be displayed
+        if (body.groupBy === 'case') {
+          let groupNameResolvePromise = [];
+          for (let groupId in contactGroups) {
+            if (contactGroups.hasOwnProperty(groupId)) {
+              groupNameResolvePromise.push(
+                new Promise((resolve, reject) => {
+                  return app.models.person
+                    .findById(groupId)
+                    .then((person) => {
+                      caseIdValueMap[groupId] = `${person.firstName} ${person.middleName} ${person.lastName}`;
+                      return resolve();
+                    })
+                    .catch(reject);
+                })
+              );
+            }
+          }
+          return Promise
+            .all(groupNameResolvePromise)
+            .then(() => contactGroups);
+        }
+        return contactGroups;
+      })
+      .then((contactGroups) => {
+        const languageId = options.remotingContext.req.authData.user.languageId;
+        app.models.language
+          .getLanguageDictionary(
+            languageId,
+            (err, dictionary) => {
+              if (err) {
+                return callback(err);
+              }
+
+              // generate pdf document
+              let doc = pdfUtils.createPdfDoc();
+              pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_DAILY_CONTACTS_LIST'));
+              doc.moveDown();
+
+              // build tables for each group item
+              for (let groupName in contactGroups) {
+                if (contactGroups.hasOwnProperty(groupName)) {
+                  // if contacts are grouped by case search the group name in the configured map
+                  // otherwise use group id as title
+                  let groupTitle = groupName;
+                  if (body.groupBy === 'case') {
+                    groupTitle = caseIdValueMap[groupName];
+                  }
+                  pdfUtils.addTitle(doc, groupTitle, 12);
+
+                  // common headers
+                  let headers = [
+                    {
+                      id: 'contact',
+                      header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_CONTACT')
+                    },
+                    {
+                      id: 'status',
+                      header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_STATUSID')
+                    }
+                  ];
+
+                  // include contact questions into the table
+                  questions.forEach((item) => {
+                    headers.push({
+                      id: item.variable,
+                      header: item.text
+                    });
+                  });
+
+                  // start building table data
+                  let tableData = [];
+                  contactGroups[groupName].forEach((contact) => {
+                    contact.followUps.forEach((followUp) => {
+                      let row = {
+                        contact: `${contact.firstName} ${contact.middleName} ${contact.lastName}`,
+                        status: dictionary.getTranslation(followUp.statusId)
+                      };
+
+                      let questions = followUp.questionnaireAnswers || {};
+
+                      // add questionnaire answers into the table if any
+                      for (let questionId in questions) {
+                        if (questions.hasOwnProperty(questionId)) {
+                          row[questionId] = questions[questionId];
+                        }
+                      }
+
+                      tableData.push(row);
+                    });
+                  });
+
+                  // insert table into the document
+                  pdfUtils.createTableInPDFDocument(headers, tableData, doc);
+                }
+              }
+
+              // end the document stream
+              // to convert it into a buffer
+              doc.end();
+
+              // send pdf doc as response
+              pdfUtils.downloadPdfDoc(doc, dictionary.getTranslation('LNG_FILE_NAME_DAILY_CONTACTS_LIST'), callback);
+            }
+          );
+      });
+  };
+
+  /**
+   * Export range list of contacts and follow ups
+   * Grouped by case/place
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportRangeListOfContacts = function (body, options, callback) {
+    // application model's reference
+    const models = app.models;
+
+    let standardFormat = 'YYYY-MM-DD';
+    let startDate = genericHelpers.getUTCDate(body.startDate);
+    let endDate = genericHelpers.getUTCDate(body.endDate);
+
+    // make sure range dates are valid or single date
+    if (!startDate.isValid() || !endDate.isValid()) {
+      return callback(app.utils.apiError.getError('INVALID_DATES'));
+    }
+
+    // follow up statuses map
+    let followUpStatusMap = app.models.followUp.statusAcronymMap;
+
+    // case id value maps
+    // mainly used to know which value should be set into document for each case id
+    let caseIdValueMap = {};
+
+    // get list of contacts
+    models.contact
+      .getGroupedByDate(
+      this, // outbreak model
+      {
+        startDate: body.startDate,
+        endDate: body.endDate
+      },
+      body.groupBy
+      )
+      .then((contactGroups) => {
+        // create a map of group id and corresponding value that should be displayed
+        if (body.groupBy === 'case') {
+          let groupNameResolvePromise = [];
+          for (let groupId in contactGroups) {
+            if (contactGroups.hasOwnProperty(groupId)) {
+              groupNameResolvePromise.push(
+                new Promise((resolve, reject) => {
+                  return app.models.person
+                    .findById(groupId)
+                    .then((person) => {
+                      caseIdValueMap[groupId] = `${person.firstName} ${person.middleName} ${person.lastName}`;
+                      return resolve();
+                    })
+                    .catch(reject);
+                })
+              );
+            }
+          }
+          return Promise
+            .all(groupNameResolvePromise)
+            .then(() => contactGroups);
+        }
+        return contactGroups;
+      })
+      .then((contactGroups) => {
+        return new Promise((resolve) => {
+          // resolve location names if contacts are being grouped by case
+          if (body.groupBy === 'case') {
+            let groupContactLocationMap = {};
+            let allLocationsIds = [];
+
+            for (let group in contactGroups) {
+              if (contactGroups.hasOwnProperty(group)) {
+                groupContactLocationMap[group] = contactGroups[group].map((contact, index) => {
+                  let address = models.person.getCurrentAddress(contact);
+
+                  if (address) {
+                    allLocationsIds.push(address.locationId);
+
+                    return {
+                      locationId: address.locationId,
+                      arrayIndex: index
+                    };
+                  }
+
+                  return {
+                    locationId: null,
+                    arrayIndex: index
+                  };
+                });
+              }
+            }
+
+            return models.location
+              .resolveLocationsWithLevel(allLocationsIds,
+              {
+                locationIds: this.locationIds,
+                reportingGeographicalLevelId: this.reportingGeographicalLevelId
+              })
+              .then((resolvedLocationIdsMap) => {
+                // resolve the locations names
+                let locationNameResolvePromises = [];
+
+                // remap each location to each contact
+                for (let group in groupContactLocationMap) {
+                  if (groupContactLocationMap.hasOwnProperty(group)) {
+                    // check if any of the group's contacts have an entry in the resolved location map
+                    let contactsWithResolvedLocation = groupContactLocationMap[group].filter((contactLocation) => {
+                      return resolvedLocationIdsMap.hasOwnProperty(contactLocation.locationId);
+                    });
+
+                    contactsWithResolvedLocation.forEach((item) => {
+                      ((locationId, index, groupName) => {
+                        locationNameResolvePromises.push(
+                          new Promise((resolve, reject) => {
+                            models.location
+                              .findById(locationId)
+                              .then((location) => {
+                                if (location) {
+                                  contactGroups[groupName][index].locationName = location.name;
+                                }
+                                return resolve();
+                              })
+                              .catch(reject);
+                          })
+                        );
+                      })(resolvedLocationIdsMap[item.locationId], item.arrayIndex, group);
+                    });
+                  }
+                }
+
+                return Promise.all(locationNameResolvePromises).then(() => resolve(contactGroups));
+              });
+          }
+          return resolve(contactGroups);
+        });
+      })
+      .then((contactGroups) => {
+        const languageId = options.remotingContext.req.authData.user.languageId;
+        app.models.language
+          .getLanguageDictionary(
+            languageId,
+            (err, dictionary) => {
+              if (err) {
+                return callback(err);
+              }
+
+              // generate pdf document
+              let doc = pdfUtils.createPdfDoc();
+              pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_RANGE_CONTACTS_LIST'));
+              doc.moveDown();
+
+
+              // follow up status legend
+              pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_FOLLOW_UP_STATUS_LEGEND'), 12);
+              for (let statusId in followUpStatusMap) {
+                if (followUpStatusMap.hasOwnProperty(statusId)) {
+                  pdfUtils.addTitle(doc, `${dictionary.getTranslation(statusId)} = ${dictionary.getTranslation(followUpStatusMap[statusId])}`, 9);
+                }
+              }
+              doc.moveDown();
+
+              // build tables for each group item
+              for (let groupName in contactGroups) {
+                if (contactGroups.hasOwnProperty(groupName)) {
+                  // if contacts are grouped by case search the group name in the configured map
+                  // otherwise use group id as title
+                  let groupTitle = groupName;
+                  if (body.groupBy === 'case') {
+                    groupTitle = caseIdValueMap[groupName];
+                  }
+                  pdfUtils.addTitle(doc, groupTitle, 12);
+
+                  // common headers
+                  let headers = [
+                    {
+                      id: 'contact',
+                      header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_CONTACT')
+                    },
+                    {
+                      id: 'age',
+                      header: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')
+                    },
+                    {
+                      id: 'gender',
+                      header: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_GENDER')
+                    },
+                    {
+                      id: 'place',
+                      header: dictionary.getTranslation('LNG_ENTITY_FIELD_LABEL_PLACE')
+                    },
+                    {
+                      id: 'city',
+                      header: dictionary.getTranslation('LNG_ADDRESS_FIELD_LABEL_CITY')
+                    },
+                    {
+                      id: 'address',
+                      header: dictionary.getTranslation('LNG_ENTITY_FIELD_LABEL_ADDRESS')
+                    },
+                    {
+                      id: 'followUpStartDate',
+                      header: dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_START_DATE')
+                    },
+                    {
+                      id: 'followUpEndDate',
+                      header: dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_END_DATE')
+                    }
+                  ];
+
+                  for (let date = startDate.clone(); date.isSameOrBefore(endDate); date.add(1, 'day')) {
+                    headers.push({
+                      id: date.format(standardFormat),
+                      header: date.format('MM-DD')
+                    });
+                  }
+
+                  // start building table data
+                  let tableData = [];
+
+                  contactGroups[groupName].forEach((contact) => {
+                    let row = {
+                      contact: `${contact.firstName} ${contact.middleName} ${contact.lastName}`,
+                      gender: contact.gender
+                    };
+
+                    let age = '';
+                    if (contact.age) {
+                      if (contact.age.months > 0) {
+                        age = `${contact.age.months} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`;
+                      } else {
+                        age = `${contact.age.years} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')}`;
+                      }
+                    }
+                    row.age = age;
+
+                    if (contact.followUp) {
+                      let followUpStartDate = genericHelpers.getUTCDate(contact.followUp.startDate);
+                      let followUpEndDate = genericHelpers.getUTCDate(contact.followUp.endDate);
+
+                      row.followUpStartDate = followUpStartDate.format(standardFormat);
+                      row.followUpEndDate = followUpEndDate.format(standardFormat);
+
+                      // mark them unusable from startDate to followup start date
+                      // and from follow up end date to document end date
+                      for (let date = startDate.clone(); date.isBefore(followUpStartDate); date.add(1, 'day')) {
+                        row[date.format(standardFormat)] = 'X';
+                      }
+                      for (let date = followUpEndDate.clone().add(1, 'day'); date.isSameOrBefore(endDate); date.add(1, 'day')) {
+                        row[date.format(standardFormat)] = 'X';
+                      }
+                    }
+
+                    // if contacts are grouped per location
+                    // then use the group name which is location name as place for each contact under the group
+                    if (body.groupBy === 'place') {
+                      row.place = groupName;
+                    } else {
+                      row.place = contact.locationName;
+                    }
+
+                    // get contact's current address
+                    let contactAddress = models.person.getCurrentAddress(contact);
+                    if (contactAddress) {
+                      row.city = contactAddress.city;
+                      row.address = `${contactAddress.addressLine1} ${contactAddress.addressLine2}`;
+                    }
+
+                    // only the latest follow up will be shown
+                    // they are ordered by descending by date prior to this
+                    if (contact.followUps.length) {
+                      contact.followUps.forEach((followUp) => {
+                        let rowId = moment(followUp.date).format(standardFormat);
+                        if (!row[rowId]) {
+                          row[rowId] = dictionary.getTranslation(followUpStatusMap[followUp.statusId]);
+                        }
+                      });
+                    }
+
+                    tableData.push(row);
+                  });
+
+                  // insert table into the document
+                  pdfUtils.createTableInPDFDocument(headers, tableData, doc);
+                }
+              }
+
+              // end the document stream
+              // to convert it into a buffer
+              doc.end();
+
+              // send pdf doc as response
+              pdfUtils.downloadPdfDoc(doc, dictionary.getTranslation('LNG_FILE_NAME_RANGE_CONTACTS_LIST'), callback);
+            }
+          );
+      });
+  };
 };

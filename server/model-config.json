@@ -287,5 +287,13 @@
   "deviceHistory": {
     "dataSource": "mongoDb",
     "public": false
+  },
+  "exportContacts": {
+    "dataSource": null,
+    "public": false
+  },
+  "exportRangeContacts": {
+    "dataSource": null,
+    "public": false
   }
 }

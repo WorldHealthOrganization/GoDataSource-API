@@ -77,10 +77,11 @@ module.exports = function (SystemSettings) {
    * Create a PDF file containing PNG images coming from PNG files
    * @param image Image content
    * @param splitFactor Split the image into a square matrix with a side of splitFactor (1 no split, 2 => 2x2 grid, 3 => 3x3 grid)
+   * @param splitType enum: ['grid', 'horizontal', 'vertical']. Default 'grid'.
    * @param callback
    */
-  SystemSettings.createPdfFromImage = function (image, splitFactor, callback) {
-    app.utils.pdfDoc.createImageDoc(image, splitFactor, function (error, pdfDoc) {
+  SystemSettings.createPdfFromImage = function (image, splitFactor, splitType, callback) {
+    app.utils.pdfDoc.createImageDoc(image, splitFactor, splitType, function (error, pdfDoc) {
       if (error) {
         return callback(error);
       }

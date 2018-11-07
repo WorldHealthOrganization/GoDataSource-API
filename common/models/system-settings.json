@@ -211,6 +211,12 @@
           "arg": "splitFactor",
           "type": "number",
           "description": "Split the image into a square matrix with a side of splitFactor (1 no split, 2 => 2x2 grid, 3 => 3x3 grid)"
+        },
+        {
+          "arg": "splitType",
+          "type": "string",
+          "enum": ["grid", "horizontal", "vertical"],
+          "description": "How should apply the split. Enum: ['grid', 'horizontal', 'vertical']. Default 'grid'."
         }
       ],
       "returns": [

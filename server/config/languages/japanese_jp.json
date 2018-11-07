@@ -1125,6 +1125,7 @@
       "LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE": "日本の Lab results questionnaire",
       "LNG_PAGE_TITLE_CONTACT_DETAILS": "日本の Contact details",
       "LNG_PAGE_TITLE_CONTACT_RELATIONSHIP": "日本の Contact relationship",
+      "LNG_PAGE_TITLE_DAILY_CONTACTS_LIST": "日本の Daily contacts",
       "LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON": "日本の Person",
       "LNG_PAGE_TITLE_CONTACT_WITH_FOLLOWUPS_DETAILS": "日本の Contact with follow-ups",
       "LNG_PAGE_CONTACT_WITH_FOLLOWUPS_GROUP_TITLE": "日本の Group by",
@@ -1135,7 +1136,11 @@
       "LNG_LIST_HEADER_SEEN_ON_DAY": "日本の Seen on day",
       "LNG_LIST_HEADER_REGISTERED": "日本の Registered",
       "LNG_LIST_HEADER_RELEASED": "日本の Released",
-      "LNG_LIST_HEADER_EXPECTED_RELEASE": "日本の Expected release of last contact"
+      "LNG_LIST_HEADER_EXPECTED_RELEASE": "日本の Expected release of last contact",
+      "LNG_FOLLOW_UP_STATUS_LEGEND": "日本の Follow-up Status Legend",
+      "LNG_PAGE_TITLE_RANGE_CONTACTS_LIST": "日本の Range list of Contacts",
+      "LNG_FILE_NAME_DAILY_CONTACTS_LIST": "日本の Daily_Contacts",
+      "LNG_FILE_NAME_RANGE_CONTACTS_LIST": "日本の Range_Contacts"
     },
     "countries": {
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY": "日本の Country",
@@ -2154,6 +2159,12 @@
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK": "日本の Seen Ok",
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK": "日本の Seen Not Ok",
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED": "日本の Missed"
+    },
+    "contactDailyFollowUpStatusAcronymType": {
+      "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED_ACRONYM": "日本の N",
+      "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK_ACRONYM": "日本の O",
+      "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK_ACRONYM": "日本の S",
+      "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED_ACRONYM": "日本の M"
     },
     "contactFinalFollowUpStatusType": {
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP": "日本の Lost To Follow-up",

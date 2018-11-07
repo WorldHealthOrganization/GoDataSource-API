@@ -1398,6 +1398,18 @@
       "principalId": "write_case",
       "permission": "ALLOW",
       "property": "restoreLabResult"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "exportDailyListOfContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "exportRangeListOfContacts"
     }
   ],
   "methods": {
@@ -6026,6 +6038,100 @@
       "http": {
         "verb": "post",
         "path": "/cases/:nk/lab-results/:fk/restore"
+      }
+    },
+    "prototype.exportDailyListOfContacts": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "exportContacts",
+          "description": "Group By, Date properties",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export pdf containing contacts to be seen by place/case",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/daily-list/export"
+      }
+    },
+    "prototype.exportRangeListOfContacts": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "exportRangeContacts",
+          "description": "Group By, Range Date properties",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export pdf containing range of contacts to be seen by place/case",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/range-list/export"
       }
     }
   }

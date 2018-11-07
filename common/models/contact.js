@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const dateParser = app.utils.helpers.getDateDisplayValue;
 const moment = require('moment');
+const _ = require('lodash');
 
 module.exports = function (Contact) {
   // set flag to not get controller
@@ -223,4 +224,131 @@ module.exports = function (Contact) {
       next();
     }
   });
+
+  /**
+   * Retrieve all contact's that have follow ups on the given date
+   * Group them by place/case
+   * If group by place is set, placeLevel property is required
+   * @param outbreak
+   * @param date
+   * @param groupBy
+   */
+  Contact.getGroupedByDate = function (outbreak, date, groupBy) {
+    if (groupBy === 'case') {
+      let dateInterval = [];
+      if (typeof date === 'object' && date.startDate && date.endDate) {
+        dateInterval = [moment(date.startDate).startOf('day'), moment(date.endDate).endOf('day')];
+      } else if (typeof date === 'string') {
+        dateInterval = [moment(date).startOf('day'), moment(date).endOf('day')];
+      } else {
+        dateInterval = [moment(new Date()).startOf('day'), moment(new Date()).endOf('day')];
+      }
+
+      let filter = {
+        where: {
+          outbreakId: outbreak.id
+        },
+        include: [
+          {
+            relation: 'followUps',
+            scope: {
+              where: {
+                date: {
+                  between: dateInterval
+                }
+              },
+              // remove the contacts that don't have follow ups in the given day
+              filterParent: true,
+            }
+          },
+          {
+            relation: 'relationships',
+            scope: {
+              where: {
+                'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+              },
+              order: 'contactDate DESC',
+              limit: 1,
+              // remove the contacts that don't have relationships to cases
+              filterParent: true,
+              // include the case model
+              include: [
+                {
+                  relation: 'people',
+                  scope: {
+                    where: {
+                      type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      };
+
+      return Contact
+        .find(filter)
+        .then((contacts) => {
+          // add support for filter parent
+          contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
+
+          // expose case id to first level, to easily group the contacts
+          contacts = contacts.map((contact) => {
+            let caseItem = contact.relationships[0].persons
+              .find(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE');
+            contact.caseId = caseItem.id;
+            return contact;
+          });
+
+          // retrieve contact's first address location
+          return Promise
+            .all(contacts.map((contact) => {
+              // get contact address
+              let contactAddress = app.models.person.getCurrentAddress(contact);
+              if (contactAddress.locationId) {
+                return app.models.location
+                  .findById(contactAddress.locationId)
+                  .then((location) => {
+                    if (location) {
+                      contactAddress.locationName = location.name;
+                    }
+                    return contact;
+                  });
+              }
+              return contact;
+            }))
+            .then((contacts) => {
+              // group them by case id
+              return _.groupBy(contacts, (c) => c.caseId);
+            });
+        });
+    }
+
+    // check if we need to send an interval of dates or a single date
+    let dateFilter =  { dateOfFollowUp: date };
+    if (typeof date === 'object') {
+      dateFilter = {
+        startDate: date.startDate,
+        endDate: date.endDate
+      };
+    }
+
+    // return contacts grouped by location that have follow ups in the given day
+    return app.models.person
+      .getPeoplePerLocation('contact', dateFilter, outbreak)
+      .then((groups) => {
+        // rebuild the result to match the structure resulted from 'case' grouping
+        // doing this because we're reusing existing functionality that does not build the result the same way
+        let contactGroups = {};
+
+        groups.forEach((group) => {
+          if (group.people.length) {
+            contactGroups[group.location.name] = group.people;
+          }
+        });
+
+        return contactGroups;
+      });
+  };
 };

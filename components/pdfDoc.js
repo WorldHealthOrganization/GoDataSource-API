@@ -6,6 +6,9 @@ const streamUtils = require('./streamUtils');
 const Jimp = require('jimp');
 const _ = require('lodash');
 
+// PDF mime type
+const MIME_TYPE = 'application/pdf';
+
 // define a default document configuration
 const defaultDocumentConfiguration = {
   size: 'A4',
@@ -61,7 +64,15 @@ function createPdfDoc(options) {
   const document = new PdfKit(options);
   // set logo on all pages and default line width
   document.on('pageAdded', function () {
-    this.image(`${__dirname}/../resources/images/logo-black.png`, 50, 15, {height: 25});
+    // include standard logo for non-borde-less printing
+    if (!options.borderLess) {
+      this.image(`${__dirname}/../resources/images/logo-black.png`, document.options.margin, 15, {height: 25});
+    } else {
+      // for border-less printing, add transparent logo on demand
+      document.once('addTransparentLogo', function () {
+        this.image(`${__dirname}/../resources/images/logo-black-transparent.png`, 15, 15, {height: 25});
+      });
+    }
     this.lineWidth(options.lineWidth);
     this.fontSize(options.fontSize);
     this.font(`${__dirname}/../resources/fonts/NotoSansCJKjp-Regular.min.ttf`);
@@ -69,6 +80,13 @@ function createPdfDoc(options) {
   });
   // add first page
   document.addPage(options);
+
+  /**
+   * Expose functionality to overlay transparent logo (useful for borderless printing)
+   */
+  document.addTransparentLogo = function () {
+    this.emit('addTransparentLogo');
+  };
   return document;
 }
 
@@ -135,9 +153,24 @@ function createPDFList(headers, data, title, callback) {
  * Create a PDF file containing PNG images
  * @param imageData
  * @param splitFactor Split the image into a square matrix with a side of splitFactor (1 no split, 2 => 2x2 grid, 3 => 3x3 grid)
+ * @param splitType enum: ['grid', 'horizontal', 'vertical']. Default 'grid'.
  * @param callback
  */
-const createImageDoc = function (imageData, splitFactor, callback) {
+const createImageDoc = function (imageData, splitFactor, splitType, callback) {
+
+  // define supported split types
+  const splitTypes = {
+    horizontal: 'horizontal',
+    vertical: 'vertical',
+    grid: 'grid'
+  };
+
+  // make sure the split type is one of the supported ones
+  splitType = splitTypes[splitType];
+  // default split type is grid
+  if (!splitType) {
+    splitType = splitTypes.grid;
+  }
 
   /**
    * Get PNG image buffer from base64 encoded content
@@ -152,13 +185,14 @@ const createImageDoc = function (imageData, splitFactor, callback) {
 
   // create a PDF doc
   const document = createPdfDoc({
+    borderLess: true,
     size: 'A3'
   });
 
   // image size is A3 page - margins
   const imageSize = {
-    width: 1090,
-    height: 740
+    width: 1190,
+    height: 840
   };
 
   // default splitFactor is 1
@@ -183,22 +217,46 @@ const createImageDoc = function (imageData, splitFactor, callback) {
             if (!image) {
               return callback(new Error('Unknown image format.'));
             }
-            // if the image is wider than taller
-            if (image.bitmap.width > image.bitmap.height) {
+
+            // compute page and image aspect ratio
+            const pageAspectRatio = imageSize.width / imageSize.height;
+            const imageAspectRatio = image.bitmap.width / image.bitmap.height;
+
+            // if the image is wider than page (proportionally)
+            if (imageAspectRatio > pageAspectRatio) {
               // resize its width according to the split factor
               image.resize(imageSize.width * splitFactor, Jimp.AUTO);
             } else {
               // otherwise resize its height according to the split factor
               image.resize(Jimp.AUTO, imageSize.height * splitFactor);
             }
-            // compute width and height
-            const width = image.bitmap.width / splitFactor;
-            const height = image.bitmap.height / splitFactor;
+            // compute width, height, rows and columns
+            let width, height, rows, columns;
+
+            // decide image height and number of rows based on split type
+            if ([splitTypes.grid, splitTypes.vertical].includes(splitType)) {
+              height = image.bitmap.height / splitFactor;
+              rows = splitFactor;
+            } else {
+              height = image.bitmap.height;
+              rows = 1;
+            }
+
+            // decide image width and number of colums based on split type
+            if ([splitTypes.grid, splitTypes.horizontal].includes(splitType)) {
+              width = image.bitmap.width / splitFactor;
+              columns = splitFactor;
+            } else {
+              width = image.bitmap.width;
+              columns = 1;
+            }
+
             // store image parts
             let images = [];
+
             // build a matrix of images, each cropped to its own position in the matrix
-            for (let row = 0; row < splitFactor; row++) {
-              for (let column = 0; column < splitFactor; column++) {
+            for (let row = 0; row < rows; row++) {
+              for (let column = 0; column < columns; column++) {
                 images.push(image.clone().crop(column * width, row * height, width, height));
               }
             }
@@ -225,7 +283,9 @@ const createImageDoc = function (imageData, splitFactor, callback) {
                     return done(error);
                   }
                   // store it in the document (fit to document size - margins)
-                  document.image(buffer, 50, 50, {fit: [imageSize.width, imageSize.height]});
+                  document.image(buffer, 0, 0, {fit: [imageSize.width, imageSize.height]});
+                  // overlay transparent logo
+                  document.addTransparentLogo();
                   // move to the next page
                   writeImageToPage(done);
                 });
@@ -246,7 +306,9 @@ const createImageDoc = function (imageData, splitFactor, callback) {
           });
       } else {
         // fit the image to page (page dimensions - margins)
-        document.image(buffer, 50, 50, {fit: [imageSize.width, imageSize.height]});
+        document.image(buffer, 0, 0, {fit: [imageSize.width, imageSize.height]});
+        // overlay transparent logo
+        document.addTransparentLogo();
         // finalize document
         document.end();
       }
@@ -558,6 +620,27 @@ const addQuestionnaireHeadersForPrint = function (data, headers) {
   return require('./helpers').addQuestionnaireHeadersForPrint(data, headers);
 };
 
+// convert a document into a binary buffer
+// send it over the network
+const downloadPdfDoc = function (document, filename, callback) {
+  const app = require('../server/server');
+
+  // convert pdf stream to buffer and send it as response
+  streamUtils.streamToBuffer(document, (err, buffer) => {
+    if (err) {
+      return callback(err);
+    }
+
+    // serve the file as response
+    app.utils.remote.helpers.offerFileToDownload(
+      buffer,
+      MIME_TYPE,
+      `${filename}.pdf`,
+      callback
+    );
+  });
+};
+
 module.exports = {
   createPDFList: createPDFList,
   createImageDoc: createImageDoc,
@@ -567,5 +650,7 @@ module.exports = {
   displayPersonRelationships: displayPersonRelationships,
   displayPersonSectionsWithQuestionnaire: displayPersonSectionsWithQuestionnaire,
   createTableInPDFDocument: createTableInPDFDocument,
-  addTitle: addTitle
+  addTitle: addTitle,
+  MIME_TYPE: MIME_TYPE,
+  downloadPdfDoc: downloadPdfDoc
 };
