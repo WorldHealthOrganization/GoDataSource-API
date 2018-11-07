@@ -3240,9 +3240,6 @@ module.exports = function (Outbreak) {
         // we're replacing its properties anyways
         let winnerModelId = data.ids[0];
 
-        // get winner model reference, used when updating its properties
-        let winnerModelRef = models.find((model) => model.id === winnerModelId);
-
         // collect follow ups from all the contacts
         // reset date to the start of the day
         // group them by day, and sorted by creation date
