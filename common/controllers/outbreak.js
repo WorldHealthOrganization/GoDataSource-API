@@ -3183,10 +3183,10 @@ module.exports = function (Outbreak) {
     data.model = data.model || {};
 
     // reference to application models
-    const models = app.models;
+    const appModels = app.models;
 
     // friendly person type value
-    const modelType = models.person.typeToModelMap[data.type];
+    const modelType = appModels.person.typeToModelMap[data.type];
 
     /**
      * Helper function used to retrieve relations for a given case
@@ -3201,7 +3201,7 @@ module.exports = function (Outbreak) {
     };
 
     // reference to the model type we should work upon (case/contact)
-    const targetModel = models[models.person.typeToModelMap[data.type]];
+    const targetModel = appModels[modelType];
 
     // retrieve all the models that should be merged (cases or contacts)
     // include follow-up/lab results, based on the person type
@@ -3217,9 +3217,9 @@ module.exports = function (Outbreak) {
         where: {
           id: {
             inq: data.ids
-          },
-          include: includes
-        }
+          }
+        },
+        include: includes
       })
       // retrieve relations of each model
       .then((models) => Promise.all(
@@ -3350,8 +3350,7 @@ module.exports = function (Outbreak) {
         // then make changed to lab results/follow ups and relationships
         // if anything happens during the winner model properties update
         // rollback the deletion of merge candidates
-        targetModel
-          .destroyAll({ id: { inq: modelsIdsToRemove} })
+        Promise.all(modelsIdsToRemove.map((id) => targetModel.destroyById(id, options)))
           .then(() => {
             // update winner model props
             // if this fails rollback and stop
@@ -3359,29 +3358,29 @@ module.exports = function (Outbreak) {
               .upsertWithWhere({ id: winnerModelId }, data.model)
               .then(() => {
                 return Promise
-                  .all(
+                  .all([
                     // update lab results
-                    Promise.all(labResultsToAdd.map((labResult) => models.labResult.upsertWithWhere(
+                    Promise.all(labResultsToAdd.map((labResult) => appModels.labResult.upsertWithWhere(
                       {
                         id: labResult.id
                       },
                       labResult))
                     ),
                     // update relations
-                    Promise.all(relationsToAdd.map((relation) => models.relationship.upsertWithWhere(
+                    Promise.all(relationsToAdd.map((relation) => appModels.relationship.upsertWithWhere(
                       {
                         id: relation.id
                       },
                       relation))
                     ),
                     // update follow ups
-                    Promise.all(followUpsToAdd.map((followUp) => models.followUp.upsertWithWhere(
+                    Promise.all(followUpsToAdd.map((followUp) => appModels.followUp.upsertWithWhere(
                       {
                         id: followUp.id
                       },
                       followUp))
                     )
-                  )
+                  ])
                   .then(() => targetModel.findById(winnerModelId).then((winnerModel) => callback(null, winnerModel)));
               })
               .catch((err) => {
@@ -3392,7 +3391,6 @@ module.exports = function (Outbreak) {
               });
           });
       });
-      }
   };
 
   /**
