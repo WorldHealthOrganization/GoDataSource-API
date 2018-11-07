@@ -238,5 +238,9 @@
   "SAVE_DEVICE_INFORMATION_FAILURE": {
     "defaultStatusCode": 422,
     "messagePattern": "Unable to save device information."
+  },
+  "INVALID_DATES": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid date properties"
   }
 }

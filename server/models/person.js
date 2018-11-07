@@ -3,7 +3,7 @@
 // requires
 const app = require('../server');
 const personDuplicate = require('../../components/workerRunner').personDuplicate;
-const moment = require('moment');
+const helpers = require('../../components/helpers');
 
 module.exports = function (Person) {
 
@@ -502,11 +502,15 @@ module.exports = function (Person) {
             } else {
               let dateInterval = [];
 
-              if (filter && filter.dateOfFollowUp) {
-                dateInterval = [moment(filter.dateOfFollowUp).startOf('day'), moment(filter.dateOfFollowUp).endOf('day')];
-                delete filter.dateOfFollowUp;
+              if (filter) {
+                if (filter.dateOfFollowUp) {
+                  dateInterval = [helpers.getUTCDate(filter.dateOfFollowUp), helpers.getUTCDateEndOfDay(filter.dateOfFollowUp)];
+                  delete filter.dateOfFollowUp;
+                } else if (filter.startDate && filter.endDate) {
+                  dateInterval = [helpers.getUTCDate(filter.startDate), helpers.getUTCDateEndOfDay(filter.endDate)];
+                }
               } else {
-                dateInterval = [moment(new Date()).startOf('day'), moment(new Date()).endOf('day')];
+                dateInterval = [helpers.getUTCDate(), helpers.getUTCDateEndOfDay()];
               }
 
               // For contacts, we also need the follow up from either the required date or today so the filter is

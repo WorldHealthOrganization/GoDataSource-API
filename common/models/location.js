@@ -636,4 +636,76 @@ module.exports = function (Location) {
       }
     });
   };
+
+  /**
+   * Resolve a list of location by taking into consideration the geographic level
+   * @param locationIds
+   * @param outbreakOpts Outbreak location options: locationIds, reportingGeographicalLevelId
+   */
+  Location.resolveLocationsWithLevel = function (locationIds, outbreakOpts) {
+    // application model's reference
+    const models = app.models;
+
+    return new Promise((resolve, reject) => {
+      // outbreak locations filter
+      let outbreakLocations;
+      // update filter only if outbreak has locations ids defined (otherwise leave it as undefined)
+      if (Array.isArray(outbreakOpts.locationIds) && outbreakOpts.locationIds.length) {
+        // get outbreak location ids
+        outbreakLocations = outbreakOpts.locationIds;
+      }
+
+      // avoid making secondary request to DB by using a collection of locations instead of an array of locationIds
+      return models.location.getSubLocationsWithDetails(outbreakLocations, [], function (error, allLocations) {
+        let allLocationIds = allLocations.map((location) => location.id);
+
+        // reportingGeographicalLevelId should be required in the model schema as well but it is not yet implemented
+        // that way because it would be a breaking change
+        let outbreakLevelId = outbreakOpts.reportingGeographicalLevelId;
+        if (!outbreakLevelId) {
+          return reject(app.utils.apiError.getError('MISSING_REQUIRED_PROPERTY', {
+            model: models.outbreak.modelName,
+            properties: 'reportingGeographicalLevelId'
+          }));
+        }
+
+        // Get all locations that are part of the outbreak's location hierarchy and have the
+        // same location level as the outbreak
+        return models.location
+          .find({
+            where: {
+              and: [
+                {
+                  id: {
+                    inq: allLocationIds
+                  }
+                },
+                {
+                  geographicalLevelId: outbreakLevelId
+                }
+              ]
+            }
+          })
+          .then((reportingLocations) => {
+            let reportingLocationIds = reportingLocations.map((location) => location.id);
+            let locationHierarchy = models.location.buildHierarchicalLocationsList(allLocations);
+            let locationCorrelationMap = {};
+
+            // link lower level locations to their reporting location parent
+            app.models.location.createLocationCorelationMap(locationHierarchy, reportingLocationIds, locationCorrelationMap);
+
+            // lookup passed location ids into correlation map
+            let resolvedLocationsMap = {};
+            locationIds.forEach((locationId) => {
+              let resolvedLocationId = locationCorrelationMap[locationId];
+              if (resolvedLocationId) {
+                resolvedLocationsMap[locationId] = resolvedLocationId;
+              }
+            });
+
+            return resolve(resolvedLocationsMap);
+          });
+      });
+    });
+  };
 };

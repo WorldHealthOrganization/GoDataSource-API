@@ -6,6 +6,9 @@ const streamUtils = require('./streamUtils');
 const Jimp = require('jimp');
 const _ = require('lodash');
 
+// PDF mime type
+const MIME_TYPE = 'application/pdf';
+
 // define a default document configuration
 const defaultDocumentConfiguration = {
   size: 'A4',
@@ -61,7 +64,7 @@ function createPdfDoc(options) {
   const document = new PdfKit(options);
   // set logo on all pages and default line width
   document.on('pageAdded', function () {
-    this.image(`${__dirname}/../resources/images/logo-black.png`, 50, 15, {height: 25});
+    this.image(`${__dirname}/../resources/images/logo-black.png`, document.options.margin, 15, {height: 25});
     this.lineWidth(options.lineWidth);
     this.fontSize(options.fontSize);
     this.font(`${__dirname}/../resources/fonts/NotoSansCJKjp-Regular.min.ttf`);
@@ -558,6 +561,27 @@ const addQuestionnaireHeadersForPrint = function (data, headers) {
   return require('./helpers').addQuestionnaireHeadersForPrint(data, headers);
 };
 
+// convert a document into a binary buffer
+// send it over the network
+const downloadPdfDoc = function (document, filename, callback) {
+  const app = require('../server/server');
+
+  // convert pdf stream to buffer and send it as response
+  streamUtils.streamToBuffer(document, (err, buffer) => {
+    if (err) {
+      return callback(err);
+    }
+
+    // serve the file as response
+    app.utils.remote.helpers.offerFileToDownload(
+      buffer,
+      MIME_TYPE,
+      `${filename}.pdf`,
+      callback
+    );
+  });
+};
+
 module.exports = {
   createPDFList: createPDFList,
   createImageDoc: createImageDoc,
@@ -567,5 +591,7 @@ module.exports = {
   displayPersonRelationships: displayPersonRelationships,
   displayPersonSectionsWithQuestionnaire: displayPersonSectionsWithQuestionnaire,
   createTableInPDFDocument: createTableInPDFDocument,
-  addTitle: addTitle
+  addTitle: addTitle,
+  MIME_TYPE: MIME_TYPE,
+  downloadPdfDoc: downloadPdfDoc
 };
