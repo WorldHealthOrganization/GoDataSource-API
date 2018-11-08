@@ -30,9 +30,13 @@
     "from": "no-reply@who.int"
   },
   "logging": {
-    "level": "debug",
-    "maxSize": 1000000,
-    "maxFiles": 10
+    "level": "info",
+    "maxSize": 10000000,
+    "maxFiles": 10,
+    "requestResponse": {
+      "trim": true,
+      "maxLength": 1024
+    }
   },
   "updatesServer": {
     "host": "localhost",

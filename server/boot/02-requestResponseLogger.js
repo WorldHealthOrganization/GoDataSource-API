@@ -1,5 +1,7 @@
 'use strict';
 const Timer = require('../../components/Timer');
+const _ = require('lodash');
+const config = require('../config');
 
 /**
  * Log outgoing response (if not already logged)
@@ -10,8 +12,23 @@ const Timer = require('../../components/Timer');
 function logResponse(data, req, res) {
   if (!req.loggedResponse) {
     req.loggedResponse = true;
+
+    // get stringified response body
+    let responseBody = data ? ` Body: ${data.toString()}` : '';
+
+    // check if response body should be trimmed
+    const trimResponseBody = _.get(config, 'logging.requestResponse.trim', false);
+    if (trimResponseBody) {
+      // get maximum request body length
+      const maxLength = _.get(config, 'logging.requestResponse.maxLength');
+      // trim request body length to configured one
+      if (responseBody.length > maxLength) {
+        responseBody = responseBody.substring(0, maxLength) + '...(trimmed)';
+      }
+    }
+
     // log outgoing response
-    req.logger.debug(`Sent Response: ${res.statusCode} ${req.method} ${req.originalUrl} Headers: ${JSON.stringify(res._headers)}${data ? ` Body: ${data.toString()}` : ''}. Response time: ${req.timer.getElapsedMilliseconds()} msec`);
+    req.logger.debug(`Sent Response: ${res.statusCode} ${req.method} ${req.originalUrl} Headers: ${JSON.stringify(res._headers)}${responseBody}. Response time: ${req.timer.getElapsedMilliseconds()} msec`);
   }
 }
 
@@ -27,8 +44,23 @@ module.exports = function (app) {
       const res = context.res;
       req.timer = new Timer();
       req.timer.start();
+
+      // get stringified request body
+      let requestBody = JSON.stringify(req.body);
+
+      // check if request body should be trimmed
+      const trimResponseBody = _.get(config, 'logging.requestResponse.trim', false);
+      if (trimResponseBody) {
+        // get maximum request body length
+        const maxLength = _.get(config, 'logging.requestResponse.maxLength');
+        // trim request body length to configured one
+        if (requestBody.length > maxLength) {
+          requestBody = requestBody.substring(0, maxLength) + '...(trimmed)';
+        }
+      }
+
       // log incoming request
-      req.logger.debug(`Received Request: ${req.method} ${req.originalUrl} Headers: ${JSON.stringify(req.headers)} Body: ${JSON.stringify(req.body)}`);
+      req.logger.debug(`Received Request: ${req.method} ${req.originalUrl} Headers: ${JSON.stringify(req.headers)} Body: ${requestBody}`);
 
       // set the Transaction-Id header in the response
       res.setHeader('Transaction-Id', req.transactionId);

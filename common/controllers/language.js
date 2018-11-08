@@ -98,7 +98,21 @@ module.exports = function (Language) {
           .then(function (languageTokens) {
             callback(null, languageTokens);
           })
-          .catch(callback);
+          .catch(function (error) {
+            // make error response readable
+            error.errors.toString = function () {
+              return this.length;
+            };
+            error.success.toString = function () {
+              return this.length;
+            };
+            // on error, return error details
+            return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+              model: app.models.languageToken.modelName,
+              failed: error.errors,
+              success: error.success
+            }));
+          });
       });
     });
   };
