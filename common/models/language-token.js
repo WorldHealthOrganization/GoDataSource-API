@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const uuid = require('uuid');
 
 module.exports = function (LanguageToken) {
   // set flag to not get controller
@@ -13,6 +14,11 @@ module.exports = function (LanguageToken) {
    * @returns {string}
    */
   LanguageToken.generateID = function (token, languageId) {
+    // id can have at most 1024 chars
+    if (token.length > 900) {
+      // make token smaller (and make sure its unique)
+      token = `${token.substring(0, 100)}_${_.snakeCase(uuid.v4().toUpperCase())}`;
+    }
     return `${token}_${_.snakeCase(languageId).toUpperCase()}`;
   };
 

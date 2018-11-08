@@ -16,6 +16,8 @@ module.exports = function (Language) {
     const self = this;
     // keep a list of language tokens to be created/updated
     const createLanguageTokens = [];
+    // keep a list of errors;
+    const errors = [];
     // method uses promises
     return new Promise(function (resolve, reject) {
       // for each language token
@@ -49,13 +51,32 @@ module.exports = function (Language) {
             .then(function (token) {
               callback(null, token);
             })
-            .catch(callback);
+            .catch(function (error) {
+              // store error
+              errors.push({
+                token: languageToken,
+                error: error
+              });
+              // but continue updating languages
+              callback();
+            });
         });
       });
       // start creating/updating tokens
       async.parallelLimit(createLanguageTokens, 10, function (error, results) {
+        // check if there was an error and handle it
         if (error) {
-          return reject(error);
+          return reject({
+            errors: [error],
+            success: results || []
+          });
+        }
+        // check if errors were collected and handle them
+        if (errors.length) {
+          return reject({
+            errors: errors,
+            success: results || []
+          });
         }
         resolve(results);
       });
