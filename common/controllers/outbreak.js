@@ -11,6 +11,7 @@ const FollowupGeneration = require('../../components/followupGeneration');
 const fs = require('fs');
 const AdmZip = require('adm-zip');
 const tmp = require('tmp');
+const Uuid = require('uuid');
 
 module.exports = function (Outbreak) {
 
@@ -3188,16 +3189,39 @@ module.exports = function (Outbreak) {
     // friendly person type value
     const modelType = appModels.person.typeToModelMap[data.type];
 
+    const outbreakId = this.id;
+
     /**
      * Helper function used to retrieve relations for a given case
      * @param personId
      */
-    let _findRelations = function (personId) {
+    const _findRelations = function (personId) {
       return app.models.relationship.find({
         where: {
           'persons.id': personId
         }
       });
+    };
+
+    /**
+     * Helper function used to delete model props like id, createdAt...
+     * @param clone
+     * @private
+     */
+    const _removeCloneProps = function (clone) {
+      clone = clone || {};
+
+      delete clone.id;
+
+      delete clone.createdAt;
+      delete clone.createdBy;
+
+      delete clone.updatedAt;
+      delete clone.updatedBy;
+
+      delete clone.deletedAt;
+
+      return clone;
     };
 
     // reference to the model type we should work upon (case/contact)
@@ -3232,13 +3256,56 @@ module.exports = function (Outbreak) {
         }))
       )
       .then((models) => {
+        // generate a unique id for the new instance to be created
+        let winnerId = Uuid.v4();
+
         // make sure the number of follow ups in a single day do not exceed the limit configured on outbreak
         let outbreakLimitPerDay = this.frequencyOfFollowUpPerDay;
 
-        // winner model id
-        // choose first model, doesn't really matter
-        // we're replacing its properties anyways
-        let winnerModelId = data.ids[0];
+        // better name for merge candidates ids
+        let modelsIds = data.ids;
+
+        // skip relations between merge candidates
+        let relationsToAdd = [];
+        models.forEach((model) => {
+          model.relationships.forEach((relation) => {
+            let people = relation.persons;
+
+            let firstMember = modelsIds.indexOf(people[0].id);
+            let secondMember = modelsIds.indexOf(people[1].id);
+
+            // if there is a relation between 2 merge candidates, skip it
+            if (firstMember !== -1 && secondMember !== -1) {
+              return;
+            }
+
+            // otherwise try check which of the candidates is from the merging list and replace it with winner's id
+            firstMember = firstMember === -1 ? people[0].id : winnerId;
+            secondMember = secondMember === -1 ? people[1].id : winnerId;
+
+            // create a copy of the relationship data
+            // alter participants and remove its id (auto generated)
+            let clone = relation.toJSON();
+            clone.persons = [
+              {
+                id: firstMember,
+                type: firstMember === winnerId ? data.type : people[0].type,
+                source: people[0].source,
+                target: people[0].target
+              },
+              {
+                id: secondMember,
+                type: firstMember === winnerId ? data.type : people[1].type,
+                source: people[1].source,
+                target: people[1].target
+              }
+            ];
+
+            clone = _removeCloneProps(clone);
+
+            relationsToAdd.push(clone);
+          });
+        });
 
         // collect follow ups from all the contacts
         // reset date to the start of the day
@@ -3275,119 +3342,73 @@ module.exports = function (Outbreak) {
                   groupedFollowUps[group].pop();
                 }
               }
-
-              // keep only the lab result id and person id in the result, we don't need to change other things
               followUpsToAdd = followUpsToAdd.concat(groupedFollowUps[group].map((f) => {
-                return {
-                  id: f.id,
-                  personId: winnerModelId
-                };
+                // create a copy of the follow up
+                // remove not needed properties
+                let clone = f.toJSON();
+
+                // alter person id
+                clone.personId = winnerId;
+
+                clone = _removeCloneProps(clone);
+
+                return clone;
               }));
             }
           }
         }
 
         // for cases update each lab result person id reference to the winning model
-        // keep only the lab result id and person id in the result, we don't need to change other things
         let labResultsToAdd = [];
         if (modelType === 'case') {
           models.forEach((model) => {
             if (model.labResults().length) {
-              labResultsToAdd = labResultsToAdd.concat(model.labResults().map((labResult) => {
-                return {
-                  id: labResult.id,
-                  personId: winnerModelId
-                };
-              }));
+              labResultsToAdd = model.labResults().map((labResult) => {
+                // create a copy of the lab results
+                // remove not needed properties
+                let clone = labResult.toJSON();
+
+                // alter person id
+                clone.personId = winnerId;
+
+                clone = _removeCloneProps(clone);
+                return clone;
+              });
             }
           });
         }
 
-        // better name for merge candidates ids
-        let modelsIds = data.ids;
-
-        // remove relations between merge candidates
-        // the rest of relationships should have the self id the winner model id and also the type
-        let relationsToAdd = [];
-        models.forEach((model) => {
-          model.relationships.forEach((relation) => {
-            let firstMember = modelsIds.indexOf(relation.persons[0].id);
-            let secondMember = modelsIds.indexOf(relation.persons[1].id);
-
-            // if there is a relation between 2 merge candidates skip it
-            if (firstMember !== -1 && secondMember !== -1) {
-              return;
-            }
-
-            // otherwise try check which of the candidates is from the merging list and replace it with winner's id
-            firstMember = firstMember === -1 ? relation.persons[0].id : winnerModelId;
-            secondMember = secondMember === -1 ? relation.persons[1].id : winnerModelId;
-
-            relationsToAdd.push({
-              id: relation.id,
-              persons: [
-                {
-                  id: firstMember,
-                  type: firstMember === winnerModelId ? data.type : relation.persons[0].type
-                },
-                {
-                  id: secondMember,
-                  type: firstMember === winnerModelId ? data.type : relation.persons[1].type
-                }
-              ]
-            });
-          });
-        });
-
-        // remove first id from the list of ids, this is the winner model
-        // shouldn't be removed
-        let modelsIdsToRemove = modelsIds.slice();
-        modelsIdsToRemove.shift();
-
+        // attach generated own and outbreak ids to the model
+        data.model = Object.assign({}, data.model, { id: winnerId, outbreakId: outbreakId });
         // make changes into database
-        // first delete all the merge candidates models, except the one we chose as winner
-        // then edit the winner model id properties
-        // then make changed to lab results/follow ups and relationships
-        // if anything happens during the winner model properties update
-        // rollback the deletion of merge candidates
-        Promise.all(modelsIdsToRemove.map((id) => targetModel.destroyById(id, options)))
-          .then(() => {
-            // update winner model props
-            // if this fails rollback and stop
-            return targetModel
-              .upsertWithWhere({ id: winnerModelId }, data.model)
-              .then(() => {
-                return Promise
-                  .all([
-                    // update lab results
-                    Promise.all(labResultsToAdd.map((labResult) => appModels.labResult.upsertWithWhere(
-                      {
-                        id: labResult.id
-                      },
-                      labResult))
-                    ),
-                    // update relations
-                    Promise.all(relationsToAdd.map((relation) => appModels.relationship.upsertWithWhere(
-                      {
-                        id: relation.id
-                      },
-                      relation))
-                    ),
-                    // update follow ups
-                    Promise.all(followUpsToAdd.map((followUp) => appModels.followUp.upsertWithWhere(
-                      {
-                        id: followUp.id
-                      },
-                      followUp))
-                    )
-                  ])
-                  .then(() => targetModel.findById(winnerModelId).then((winnerModel) => callback(null, winnerModel)));
+        Promise
+          .all(modelsIds.map((id) => targetModel.destroyById(id, options)))
+          .then(() => targetModel.create(data.model, options))
+          .then(() => Promise.all([
+            // relations
+            Promise.all(relationsToAdd.map((relation) => appModels.relationship.create(relation, options))),
+            // lab results
+            Promise.all(labResultsToAdd.map((labResult) => appModels.labResult.create(labResult, options))),
+            // follow ups
+            Promise.all(followUpsToAdd.map((followUp) => appModels.followUp.create(followUp, options)))
+          ]))
+          .then(() => targetModel.findById(winnerId).then((winnerModel) => callback(null, winnerModel)))
+          .catch((err) => {
+            // make sure the newly created instance is deleted
+            targetModel
+              .findById(winnerId)
+              .then((instance) => {
+                if (instance) {
+                  return instance.destroy(options);
+                }
               })
-              .catch((err) => {
-                // undo delete
-                return Promise
+              .then(() => {
+                // restore deleted instances
+                Promise
                   .all(models.map((model) => model.undoDelete(options)))
-                  .then(() => callback(err));
+                  .then(() => {
+                    callback(err)
+                  });
               });
           });
       });
