@@ -64,19 +64,20 @@ function createPdfDoc(options) {
   const document = new PdfKit(options);
   // set logo on all pages and default line width
   document.on('pageAdded', function () {
-    // include standard logo for non-borde-less printing
+    this.lineWidth(options.lineWidth);
+    this.fontSize(options.fontSize);
+    this.font(`${__dirname}/../resources/fonts/NotoSansCJKjp-Regular.min.ttf`);
+    // include standard logo for non-border-less printing
     if (!options.borderLess) {
       this.image(`${__dirname}/../resources/images/logo-black.png`, document.options.margin, 15, {height: 25});
+      addPageNumber(document);
     } else {
       // for border-less printing, add transparent logo on demand
       document.once('addTransparentLogo', function () {
         this.image(`${__dirname}/../resources/images/logo-black-transparent.png`, 15, 15, {height: 25});
+        addPageNumber(document);
       });
     }
-    this.lineWidth(options.lineWidth);
-    this.fontSize(options.fontSize);
-    this.font(`${__dirname}/../resources/fonts/NotoSansCJKjp-Regular.min.ttf`);
-    addPageNumber(document);
   });
   // add first page
   document.addPage(options);
@@ -152,8 +153,12 @@ function createPDFList(headers, data, title, callback) {
 /**
  * Create a PDF file containing PNG images
  * @param imageData
- * @param splitFactor Split the image into a square matrix with a side of splitFactor (1 no split, 2 => 2x2 grid, 3 => 3x3 grid)
- * @param splitType enum: ['grid', 'horizontal', 'vertical']. Default 'grid'.
+ * @param splitFactor Split the image into:
+ * - a nxm matrix computed based on the provided image size
+ * - a square matrix with a side of <splitFactor> (1 no split, 2 => 2x2 grid, 3 => 3x3 grid) when splitType is grid
+ * - a list of <splitFactor> images, divided horizontally when splitType is horizontal
+ * - a list of <splitFactor> images, divided vertically when splitType is vertical
+ * @param splitType enum: ['auto', grid', 'horizontal', 'vertical']. Default 'auto'.
  * @param callback
  */
 const createImageDoc = function (imageData, splitFactor, splitType, callback) {
@@ -162,14 +167,15 @@ const createImageDoc = function (imageData, splitFactor, splitType, callback) {
   const splitTypes = {
     horizontal: 'horizontal',
     vertical: 'vertical',
-    grid: 'grid'
+    grid: 'grid',
+    auto: 'auto'
   };
 
   // make sure the split type is one of the supported ones
   splitType = splitTypes[splitType];
-  // default split type is grid
+  // default split type is auto
   if (!splitType) {
-    splitType = splitTypes.grid;
+    splitType = splitTypes.auto;
   }
 
   /**
@@ -208,31 +214,39 @@ const createImageDoc = function (imageData, splitFactor, splitType, callback) {
 
   getPNGImageBuffer(imageData)
     .then(function (buffer) {
-      // check if we need to split the image
-      if (splitFactor > 1) {
-        // load the image into Jimp
-        Jimp.read(buffer)
-          .then(function (image) {
-            // handle errors
-            if (!image) {
-              return callback(new Error('Unknown image format.'));
-            }
+      // load the image into Jimp
+      Jimp.read(buffer)
+        .then(function (image) {
+          // handle errors
+          if (!image) {
+            return callback(new Error('Unknown image format.'));
+          }
 
-            // compute page and image aspect ratio
-            const pageAspectRatio = imageSize.width / imageSize.height;
-            const imageAspectRatio = image.bitmap.width / image.bitmap.height;
+          // compute page and image aspect ratio
+          const pageAspectRatio = imageSize.width / imageSize.height;
+          const imageAspectRatio = image.bitmap.width / image.bitmap.height;
 
-            // if the image is wider than page (proportionally)
-            if (imageAspectRatio > pageAspectRatio) {
-              // resize its width according to the split factor
-              image.resize(imageSize.width * splitFactor, Jimp.AUTO);
-            } else {
-              // otherwise resize its height according to the split factor
-              image.resize(Jimp.AUTO, imageSize.height * splitFactor);
-            }
-            // compute width, height, rows and columns
-            let width, height, rows, columns;
+          // if the image is wider than page (proportionally)
+          if (imageAspectRatio > pageAspectRatio) {
+            // resize its width according to the split factor
+            image.resize(imageSize.width * splitFactor, Jimp.AUTO);
+          } else {
+            // otherwise resize its height according to the split factor
+            image.resize(Jimp.AUTO, imageSize.height * splitFactor);
+          }
+          // compute width, height, rows and columns
+          let width, height, rows, columns;
 
+          // for split type auto, decide automatically how many pages to create
+          if (splitType === splitTypes.auto) {
+            // compute how many columns and rows are needed based on image dimensions
+            columns = Math.ceil(image.bitmap.width / imageSize.width);
+            rows = Math.ceil(image.bitmap.height / imageSize.height);
+            // the width and height match page dimension
+            width = imageSize.width;
+            height = imageSize.height;
+
+          } else {
             // decide image height and number of rows based on split type
             if ([splitTypes.grid, splitTypes.vertical].includes(splitType)) {
               height = image.bitmap.height / splitFactor;
@@ -242,7 +256,7 @@ const createImageDoc = function (imageData, splitFactor, splitType, callback) {
               rows = 1;
             }
 
-            // decide image width and number of colums based on split type
+            // decide image width and number of columns based on split type
             if ([splitTypes.grid, splitTypes.horizontal].includes(splitType)) {
               width = image.bitmap.width / splitFactor;
               columns = splitFactor;
@@ -250,68 +264,78 @@ const createImageDoc = function (imageData, splitFactor, splitType, callback) {
               width = image.bitmap.width;
               columns = 1;
             }
+          }
 
-            // store image parts
-            let images = [];
+          // store image parts
+          let images = [];
 
-            // build a matrix of images, each cropped to its own position in the matrix
-            for (let row = 0; row < rows; row++) {
-              for (let column = 0; column < columns; column++) {
-                images.push(image.clone().crop(column * width, row * height, width, height));
+          // build a matrix of images, each cropped to its own position in the matrix
+          for (let row = 0; row < rows; row++) {
+            for (let column = 0; column < columns; column++) {
+              let processedHeight = row * height;
+              let processedWidth = column * width;
+              // calculate crop size and position
+              let cropWidth = Math.min(Math.max(0, image.bitmap.width - processedWidth), width);
+              let cropHeight = Math.min(Math.max(0, image.bitmap.height - processedHeight), height);
+              // if something was cropped, add it to the list of images
+              if (cropWidth && cropHeight) {
+                images.push(
+                  image
+                    .clone()
+                    .crop(
+                      processedWidth,
+                      processedHeight,
+                      cropWidth,
+                      cropHeight
+                    )
+                );
               }
             }
-            // keep a flag for first image (first page is auto-added, we don't want to add it twice)
-            let firstImage = true;
+          }
+          // keep a flag for first image (first page is auto-added, we don't want to add it twice)
+          let firstImage = true;
 
-            /**
-             * Add images to PDF doc
-             * @param done
-             */
-            function writeImageToPage(done) {
-              // get first image from the queue
-              const image = images.shift();
-              // if the image is a valid one
-              if (image) {
-                // if this is the first image added, do not add a new page
-                if (!firstImage) {
-                  document.addPage();
+          /**
+           * Add images to PDF doc
+           * @param done
+           */
+          function writeImageToPage(done) {
+            // get first image from the queue
+            const image = images.shift();
+            // if the image is a valid one
+            if (image) {
+              // if this is the first image added, do not add a new page
+              if (!firstImage) {
+                document.addPage();
+              }
+              firstImage = false;
+              // get image buffer
+              image.getBuffer(Jimp.MIME_PNG, function (error, buffer) {
+                if (error) {
+                  return done(error);
                 }
-                firstImage = false;
-                // get image buffer
-                image.getBuffer(Jimp.MIME_PNG, function (error, buffer) {
-                  if (error) {
-                    return done(error);
-                  }
-                  // store it in the document (fit to document size - margins)
-                  document.image(buffer, 0, 0, {fit: [imageSize.width, imageSize.height]});
-                  // overlay transparent logo
-                  document.addTransparentLogo();
-                  // move to the next page
-                  writeImageToPage(done);
-                });
-              } else {
-                // no more images to add, move along
-                done();
-              }
+                // store it in the document (fit to document size - margins)
+                document.image(buffer, 0, 0, {fit: [imageSize.width, imageSize.height]});
+                // overlay transparent logo
+                document.addTransparentLogo();
+                // move to the next page
+                writeImageToPage(done);
+              });
+            } else {
+              // no more images to add, move along
+              done();
             }
+          }
 
-            // write images to pdf
-            writeImageToPage(function (error) {
-              if (error) {
-                return callback(error);
-              }
-              // finalize document
-              document.end();
-            });
+          // write images to pdf
+          writeImageToPage(function (error) {
+            if (error) {
+              return callback(error);
+            }
+            // finalize document
+            document.end();
           });
-      } else {
-        // fit the image to page (page dimensions - margins)
-        document.image(buffer, 0, 0, {fit: [imageSize.width, imageSize.height]});
-        // overlay transparent logo
-        document.addTransparentLogo();
-        // finalize document
-        document.end();
-      }
+        });
     })
     .catch(callback);
 };
