@@ -3406,8 +3406,8 @@ module.exports = function (Outbreak) {
               })
               // restore deleted instances
               .then(() => Promise
-                  .all(models.map((model) => model.undoDelete(options)))
-                  .then(() => callback(err)));
+                .all(models.map((model) => model.undoDelete(options)))
+                .then(() => callback(err)));
           });
       });
   };
