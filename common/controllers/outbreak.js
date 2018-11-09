@@ -3315,10 +3315,11 @@ module.exports = function (Outbreak) {
         if (modelType === 'contact') {
           let allFollowUps = [];
           models.forEach((model) => {
-            if (model.followUps().length) {
+            let modelFollowUs = model.followUps();
+            if (modelFollowUs.length) {
               // reset follow up day to the start of the day
               // change person id to point to winner model
-              let followUps = models.followUps().map((followUp) => {
+              let followUps = modelFollowUs.map((followUp) => {
                 followUp.date = genericHelpers.getUTCDate(followUp.date).toDate().toISOString();
                 return followUp;
               });
@@ -3363,7 +3364,7 @@ module.exports = function (Outbreak) {
         if (modelType === 'case') {
           models.forEach((model) => {
             if (model.labResults().length) {
-              labResultsToAdd = model.labResults().map((labResult) => {
+              labResultsToAdd = labResultsToAdd.concat(model.labResults().map((labResult) => {
                 // create a copy of the lab results
                 // remove not needed properties
                 let clone = labResult.toJSON();
@@ -3373,13 +3374,14 @@ module.exports = function (Outbreak) {
 
                 clone = _removeCloneProps(clone);
                 return clone;
-              });
+              }));
             }
           });
         }
 
         // attach generated own and outbreak ids to the model
         data.model = Object.assign({}, data.model, { id: winnerId, outbreakId: outbreakId });
+
         // make changes into database
         Promise
           .all(modelsIds.map((id) => targetModel.destroyById(id, options)))
@@ -3402,14 +3404,10 @@ module.exports = function (Outbreak) {
                   return instance.destroy(options);
                 }
               })
-              .then(() => {
-                // restore deleted instances
-                Promise
+              // restore deleted instances
+              .then(() => Promise
                   .all(models.map((model) => model.undoDelete(options)))
-                  .then(() => {
-                    callback(err)
-                  });
-              });
+                  .then(() => callback(err)));
           });
       });
   };
