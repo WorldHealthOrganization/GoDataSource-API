@@ -1142,6 +1142,20 @@ module.exports = function (Outbreak) {
     templateParser.afterHook(context, next);
   });
 
+  // on load, include default ArcGis servers
+  Outbreak.observe('loaded', function (context, next) {
+    // if the outbreak does not have ArcGis servers defined
+    if (
+      !context.data.arcGisServers ||
+      !Array.isArray(context.data.arcGisServers) ||
+      !context.data.arcGisServers.length
+    ) {
+      // use default ArcGis servers
+      context.data.arcGisServers = app.models.systemSettings.getDefaultArcGisServers();
+    }
+    next();
+  });
+
   /**
    * Resolve person visual id template, if visualId field present
    * @param outbreak

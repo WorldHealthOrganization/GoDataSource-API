@@ -4,6 +4,7 @@ const app = require('../../server/server');
 const path = require('path');
 const _ = require('lodash');
 const fs = require('fs');
+const config = require('../../server/config');
 
 module.exports = function (SystemSettings) {
 
@@ -146,4 +147,29 @@ module.exports = function (SystemSettings) {
     app.logger.debug('Successfully cached the system settings');
     callback();
   });
+
+  /**
+   * Get default ArcGis Servers
+   * @return {Array}
+   */
+  SystemSettings.getDefaultArcGisServers = function () {
+    // start with an empty list of default servers
+    const arcGisServers = [];
+    // read default information from config
+    const configArcGisServers = _.get(config, 'defaultArcGisServers', []);
+    // do some basic validation of config data
+    if (Array.isArray(configArcGisServers) && configArcGisServers.length) {
+      // go through configured ArcGis servers
+      configArcGisServers.forEach(function (arcGisServer) {
+        // add arcGis server only if it has URL defined
+        if (arcGisServer.url) {
+          arcGisServers.push({
+            name: arcGisServer.name,
+            url: arcGisServer.url
+          });
+        }
+      });
+    }
+    return arcGisServers;
+  };
 };
