@@ -57,5 +57,15 @@
     "serverURL": "http://localhost:1337/api",
     "appId": "b61f5946-1af3-4e07-9986-9ffd1e36ae93",
     "masterKey": "KlYddh2OdVycHuVBhXv2"
-  }
+  },
+  "defaultArcGisServers": [
+    {
+      "name": "WHO_West_Africa_background_7",
+      "url": "http://maps.who.int/arcgis/rest/services/Basemap/WHO_West_Africa_background_7/MapServer"
+    },
+    {
+      "name": "WHO_Reference_layer",
+      "url": "http://maps.who.int/arcgis/rest/services/Basemap/WHO_Reference_layer/MapServer"
+    }
+  ]
 }
