@@ -21,7 +21,7 @@
   },
   "indexes": {
     "token_index": {
-      "token": 1
+      "token": "hashed"
     },
     "languageId_index": {
       "languageId": 1
