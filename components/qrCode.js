@@ -7,6 +7,14 @@ const TYPES = {
 };
 
 /**
+ * Encode JSON data in QR image
+ * @param data
+ */
+function encodeDataInQr(data) {
+  return qrImage.imageSync(JSON.stringify(data));
+}
+
+/**
  * Create a QR Resource Link
  * @param resourceName
  * @param contextInfo
@@ -17,13 +25,14 @@ function createResourceLink(resourceName, contextInfo) {
     targetResource: resourceName,
     resourceContext: contextInfo
   };
-  return qrImage.imageSync(JSON.stringify(encodedResource));
+  return encodeDataInQr(encodedResource);
 }
 
 /**
  * Add a QR code and additional information to a person export file
- * @param qrCode
  * @param document
+ * @param outbreakId
+ * @param personType
  * @param identifier
  */
 function addPersonQRCode(document, outbreakId, personType, identifier) {
@@ -61,5 +70,6 @@ function addPersonQRCode(document, outbreakId, personType, identifier) {
 
 module.exports = {
   createResourceLink: createResourceLink,
-  addPersonQRCode: addPersonQRCode
+  addPersonQRCode: addPersonQRCode,
+  encodeDataInQr: encodeDataInQr
 };
