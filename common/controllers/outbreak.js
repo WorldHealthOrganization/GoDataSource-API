@@ -3180,7 +3180,8 @@ module.exports = function (Outbreak) {
     // defensive checks
     data = data || {};
     data.ids = data.ids || [];
-    data.type = data.type || 'case';
+    // default model type to case
+    data.type = data.type || 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
     data.model = data.model || {};
 
     // reference to application models
@@ -3230,7 +3231,7 @@ module.exports = function (Outbreak) {
     // retrieve all the models that should be merged (cases or contacts)
     // include follow-up/lab results, based on the person type
     let includes = [];
-    if (modelType === 'case') {
+    if (modelType === appModels.case.modelName) {
       includes.push('labResults');
     } else {
       includes.push('followUps');
@@ -3295,7 +3296,7 @@ module.exports = function (Outbreak) {
               },
               {
                 id: secondMember,
-                type: firstMember === winnerId ? data.type : people[1].type,
+                type: secondMember === winnerId ? data.type : people[1].type,
                 source: people[1].source,
                 target: people[1].target
               }
@@ -3310,9 +3311,11 @@ module.exports = function (Outbreak) {
         // collect follow ups from all the contacts
         // reset date to the start of the day
         // group them by day, and sorted by creation date
-        // make sure limit per day is not exceededs
+        // make sure limit per day is not exceeded for upcoming follow ups
         let followUpsToAdd = [];
-        if (modelType === 'contact') {
+        // store today date references, needed when checking for future follow ups
+        let today = genericHelpers.getUTCDate();
+        if (modelType === appModels.contact.modelName) {
           let allFollowUps = [];
           models.forEach((model) => {
             let modelFollowUs = model.followUps();
@@ -3332,17 +3335,20 @@ module.exports = function (Outbreak) {
           let groupedFollowUps = _.groupBy(allFollowUps, (f) => f.date);
 
           // sort each group of follow ups by creation date
-          // remove from the end until the limit per day is ok
+          // if group is in the future, remove from the end until the limit per day is ok
           for (let group in groupedFollowUps) {
             if (groupedFollowUps.hasOwnProperty(group)) {
-              groupedFollowUps[group] = groupedFollowUps[group].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+              if (genericHelpers.getUTCDate(group).isAfter(today)) {
+                groupedFollowUps[group] = groupedFollowUps[group].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-              let lengthDiff = groupedFollowUps[group].length - outbreakLimitPerDay;
-              if (lengthDiff > 0) {
-                for (let i = 0; i < lengthDiff; i++) {
-                  groupedFollowUps[group].pop();
+                let lengthDiff = groupedFollowUps[group].length - outbreakLimitPerDay;
+                if (lengthDiff > 0) {
+                  for (let i = 0; i < lengthDiff; i++) {
+                    groupedFollowUps[group].pop();
+                  }
                 }
               }
+
               followUpsToAdd = followUpsToAdd.concat(groupedFollowUps[group].map((f) => {
                 // create a copy of the follow up
                 // remove not needed properties
@@ -3361,7 +3367,7 @@ module.exports = function (Outbreak) {
 
         // for cases update each lab result person id reference to the winning model
         let labResultsToAdd = [];
-        if (modelType === 'case') {
+        if (modelType === appModels.case.modelName) {
           models.forEach((model) => {
             if (model.labResults().length) {
               labResultsToAdd = labResultsToAdd.concat(model.labResults().map((labResult) => {
@@ -3384,7 +3390,9 @@ module.exports = function (Outbreak) {
 
         // make changes into database
         Promise
+          // delete all the merge candidates
           .all(modelsIds.map((id) => targetModel.destroyById(id, options)))
+          // create a new model containing the result properties
           .then(() => targetModel.create(data.model, options))
           .then(() => Promise.all([
             // relations
