@@ -4808,7 +4808,7 @@
       "description": "Counts the relationships that pass a filter (which now can accept relations) of a case",
       "http": {
         "verb": "get",
-        "path": "/cases/:nk/events/filteredCount"
+        "path": "/events/:nk/relationships/filtered-count"
       }
     },
     "prototype.exportFilteredFollowups": {
