@@ -2696,7 +2696,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a (full) person filter on 'person' property of the filter. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a (full) person filter on 'person' and 'chainIncludesPerson' properties of the filter. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date"
         }
       ],
       "returns": [
@@ -2738,7 +2738,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'active' boolean & 'size' number on the first level in 'where' and a (full) person filter on 'person' property of the filter. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'active' boolean & 'size' number on the first level in 'where' and a (full) person filter on 'person' and 'chainIncludesPerson' properties of the filter. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date"
         }
       ],
       "returns": [

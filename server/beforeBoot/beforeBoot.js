@@ -17,6 +17,8 @@ const pdfDoc = require('../../components/pdfDoc');
 const spreadSheetFile = require('../../components/spreadSheetFile');
 const dbSync = require('../../components/dbSync');
 const pushNotificationsApi = require('../../components/services/pushNotificationsApi');
+const fileCryptoSync = require('../../components/fileCrypto');
+const worker = require('../../components/workerRunner');
 
 function init(app, callback) {
   app.utils = {
@@ -51,6 +53,12 @@ function init(app, callback) {
     dbSync: dbSync,
     services: {
       pushNotificationsApi: pushNotificationsApi
+    },
+    fileCrypto: {
+      encrypt: worker.helpers.encryptFile,
+      encryptSync: fileCryptoSync.encryptSync,
+      decrypt: worker.helpers.decryptFile,
+      decryptSync: fileCryptoSync.decryptSync
     }
   };
   app.ROOT_PATH = path.resolve(__dirname, '../..');

@@ -51,12 +51,16 @@
       "intervalTimeout": 10000,
       "actionTimeout": 3600000
     },
-    "actionCleanupInterval": 24
+    "actionCleanupInterval": 24,
+    "encrypt": false
   },
   "pushNotifications": {
     "serverURL": "http://localhost:1337/api",
     "appId": "b61f5946-1af3-4e07-9986-9ffd1e36ae93",
     "masterKey": "KlYddh2OdVycHuVBhXv2"
+  },
+  "backUp": {
+    "password": "x$^56fwm173s1a#2@oaxlnbk0z541lsd"
   },
   "defaultArcGisServers": [
     {
