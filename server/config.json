@@ -51,7 +51,8 @@
       "intervalTimeout": 10000,
       "actionTimeout": 3600000
     },
-    "actionCleanupInterval": 24
+    "actionCleanupInterval": 24,
+    "encrypt": false
   },
   "pushNotifications": {
     "serverURL": "http://localhost:1337/api",

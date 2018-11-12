@@ -6,6 +6,7 @@ const app = require('../../server/server');
 const dbSync = require('../../components/dbSync');
 const _ = require('lodash');
 const moment = require('moment');
+const config = require('../../server/config');
 
 module.exports = function (Sync) {
 
@@ -16,8 +17,10 @@ module.exports = function (Sync) {
    * @return {*}
    */
   function getSyncEncryptPassword(password, clientCredentials) {
-    // if a password was not provided, but client credentials were
-    if (password == null && clientCredentials) {
+    // get auto-encrypt setting from config
+    const autoEncrypt = _.get(config, 'sync.encrypt', false);
+    // if a password was not provided, auto-encrypt is enabled and client credentials were provided
+    if (password == null && autoEncrypt && clientCredentials) {
       // build the password by concatenating clientId and clientSecret
       password = clientCredentials.clientId + clientCredentials.clientSecret;
     }
