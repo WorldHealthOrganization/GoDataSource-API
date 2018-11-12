@@ -3439,22 +3439,25 @@
       "accepts": [
         {
           "arg": "data",
+          "model": "mergeCaseContact",
           "type": "object",
-          "description": "List of case ids to be merged. Property: 'ids' array[string]",
           "http": {
             "source": "body"
           },
           "root": true,
           "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
         {
-          "arg": "case",
-          "type": [
-            "case"
-          ],
-          "description": "Case",
+          "arg": "model",
+          "type": "object",
+          "description": "Case/Contact",
           "root": true,
           "required": true
         }
