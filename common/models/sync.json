@@ -76,6 +76,11 @@
           "description": "This request accepts 'fromDate': date, 'outbreakId': 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}, 'collections': ['modelName'], 'exportType': mobile/system/outbreak/full (Note: when exportType is present 'collections' is ignored), 'includeUsers': boolean on the first level in 'where'"
         },
         {
+          "arg": "password",
+          "type": "string",
+          "description": "Snapshot Encryption Password"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -115,6 +120,11 @@
           "arg": "filter",
           "type": "object",
           "description": "This request accepts 'fromDate': date, 'outbreakId': 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}, 'collections': ['modelName'] on the first level in 'where'"
+        },
+        {
+          "arg": "password",
+          "type": "string",
+          "description": "Snapshot Encryption Password"
         },
         {
           "arg": "options",
@@ -197,6 +207,11 @@
           "arg": "triggerBackupBeforeSync",
           "type": "boolean",
           "description": "Flag to specify whether before the import a backup should be triggered. If the flag is not sent the System settings triggerBackupBeforeSync flag will be used"
+        },
+        {
+          "arg": "password",
+          "type": "string",
+          "description": "Snapshot Encryption Password"
         }
       ],
       "returns": [

@@ -7,7 +7,7 @@
   },
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
-    "build": "./node_modules/gulp/bin/gulp.js build",
+    "build": "node ./node_modules/gulp/bin/gulp.js build",
     "start": "node .",
     "posttest": "npm run lint && nsp check",
     "init-database": "node ./server/install/install.js init-database",

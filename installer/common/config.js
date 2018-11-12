@@ -198,6 +198,17 @@ const cliArguments = {
       convertor: e => e
     }
   },
+  backUpPassword: {
+    source: sources.config,
+    paramPath: 'backUp.password',
+    get: {
+      convertor: e => e
+    },
+    set: {
+      allowed: true,
+      convertor: e => e
+    }
+  },
 };
 
 /**
