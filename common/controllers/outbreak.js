@@ -1402,6 +1402,10 @@ module.exports = function (Outbreak) {
       nodes: {},
       edges: {}
     };
+
+    // keep a flag to see if any transmission chain filters were applied (people should be filtered out)
+    let appliedTransmissionChainsFilters = false;
+
     // keep an index of people that pass the filters
     const filteredChainPeopleIndex = {};
     // go through all the chains
@@ -1411,12 +1415,17 @@ module.exports = function (Outbreak) {
 
       // check if size filter is present
       if (filter.size != null) {
+        // mark this filtering
+        appliedTransmissionChainsFilters = true;
         // apply size filter
         addTransmissionChain = (addTransmissionChain && (transmissionChain.size === filter.size));
       }
 
       // check if active filter is present
       if (filter.active != null) {
+        // mark this filtering
+        appliedTransmissionChainsFilters = true;
+        // apply active filter
         addTransmissionChain = (addTransmissionChain && (transmissionChain.active === filter.active));
       }
 
@@ -1443,8 +1452,8 @@ module.exports = function (Outbreak) {
     Object.keys(dataSet.edges).forEach(function (edgeId) {
       // get the edge
       const edge = dataSet.edges[edgeId];
-      // if at least one person found in the index (case/event-contact relationships will have only one person in the index)
-      if (filteredChainPeopleIndex[edge.persons[0].id] || filteredChainPeopleIndex[edge.persons[1].id]) {
+      // if no transmission chain filters applied or at least one person found in the index (case/event-contact relationships will have only one person in the index)
+      if (!appliedTransmissionChainsFilters || filteredChainPeopleIndex[edge.persons[0].id] || filteredChainPeopleIndex[edge.persons[1].id]) {
         // keep the edge
         result.edges[edgeId] = edge;
         // keep both nodes
@@ -3386,11 +3395,11 @@ module.exports = function (Outbreak) {
         }
 
         // attach generated own and outbreak ids to the model
-        data.model = Object.assign({}, data.model, { id: winnerId, outbreakId: outbreakId });
+        data.model = Object.assign({}, data.model, {id: winnerId, outbreakId: outbreakId});
 
         // make changes into database
         Promise
-          // delete all the merge candidates
+        // delete all the merge candidates
           .all(modelsIds.map((id) => targetModel.destroyById(id, options)))
           // create a new model containing the result properties
           .then(() => targetModel.create(data.model, options))
