@@ -3395,11 +3395,11 @@ module.exports = function (Outbreak) {
         }
 
         // attach generated own and outbreak ids to the model
-        data.model = Object.assign({}, data.model, { id: winnerId, outbreakId: outbreakId });
+        data.model = Object.assign({}, data.model, {id: winnerId, outbreakId: outbreakId});
 
         // make changes into database
         Promise
-          // delete all the merge candidates
+        // delete all the merge candidates
           .all(modelsIds.map((id) => targetModel.destroyById(id, options)))
           // create a new model containing the result properties
           .then(() => targetModel.create(data.model, options))
