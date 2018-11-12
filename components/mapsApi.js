@@ -102,7 +102,7 @@ const generateAccessToken = function (callback) {
     `${generateBaseURL}?${queryPart}`,
     (err, response, responseBody) => {
       if (err) {
-        app.logger.warn(`Failed to generate access token for maps API`);
+        app.logger.warn('Failed to generate access token for maps API');
         return callback(err);
       }
 

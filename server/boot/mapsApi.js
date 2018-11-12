@@ -1,7 +1,6 @@
 'use strict';
 
 // requires
-const _ = require('lodash');
 const appConfig = require('../config.json');
 
 module.exports = function () {
