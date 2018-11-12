@@ -61,5 +61,15 @@
   },
   "backUp": {
     "password": "x$^56fwm173s1a#2@oaxlnbk0z541lsd"
-  }
+  },
+  "defaultArcGisServers": [
+    {
+      "name": "WHO_West_Africa_background_7",
+      "url": "http://maps.who.int/arcgis/rest/services/Basemap/WHO_West_Africa_background_7/MapServer"
+    },
+    {
+      "name": "WHO_Reference_layer",
+      "url": "http://maps.who.int/arcgis/rest/services/Basemap/WHO_Reference_layer/MapServer"
+    }
+  ]
 }

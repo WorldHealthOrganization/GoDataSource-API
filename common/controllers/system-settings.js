@@ -181,4 +181,30 @@ module.exports = function (SystemSettings) {
       })
       .catch(callback);
   };
+
+  /**
+   * Generate a JSON or a QR-Code (PNG) file that encodes a JSON
+   * @param type
+   * @param data Data to be encoded
+   * @param callback
+   */
+  SystemSettings.generateFile = function (type, data, callback) {
+    // be more permissive on capitalisation
+    type = type.toLowerCase();
+    // handle each type individually
+    switch (type) {
+      case 'json':
+        app.utils.remote.helpers
+          .offerFileToDownload(JSON.stringify(data), 'application/json', `${uuid.v4()}.json`, callback);
+        break;
+      case 'qr':
+        app.utils.remote.helpers
+          .offerFileToDownload(app.utils.qrCode.encodeDataInQr(data), 'image/png', `${uuid.v4()}.png`, callback);
+        break;
+      default:
+        // send error for invalid types
+        callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {errorMessages: `Invalid File Type: ${type}. Supported options: json, qr`}));
+        break;
+    }
+  };
 };
