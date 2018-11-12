@@ -75,7 +75,7 @@ function encrypt(password, data) {
 function decrypt(password, data) {
   // promisify the result
   return new Promise(function (resolve, reject) {
-    // convert from base64
+    // buffer data
     const cypherText = Buffer.from(data);
     // read IV
     const iv = cypherText.slice(0, ivLength);

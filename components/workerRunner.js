@@ -130,6 +130,54 @@ module.exports = {
       });
     },
     /**
+     * Encrypt file (AES-256) using password
+     * @param password
+     * @param options
+     * @param filePath
+     * @return {Promise<any>}
+     */
+    encryptFile: function (password, options, filePath) {
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('helpers', 'encryptFile', [password, options, filePath], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+          // if data was buffer, transform it back to buffer
+          if (
+            result &&
+            result.data &&
+            result.type === 'Buffer') {
+            result = Buffer.from(result.data);
+          }
+          resolve(result);
+        });
+      });
+    },
+    /**
+     * Decrypt file (AES-256) using password
+     * @param password
+     * @param options
+     * @param filePath
+     * @return {Promise<any>}
+     */
+    decryptFile: function (password, options, filePath) {
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('helpers', 'decryptFile', [password, options, filePath], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+          // if data was buffer, transform it back to buffer
+          if (
+            result &&
+            result.data &&
+            result.type === 'Buffer') {
+            result = Buffer.from(result.data);
+          }
+          resolve(result);
+        });
+      });
+    },
+    /**
      * Create a PDF file containing PNG images
      * @param imageData
      * @param splitFactor Split the image into:

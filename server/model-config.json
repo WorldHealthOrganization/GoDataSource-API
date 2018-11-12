@@ -295,5 +295,9 @@
   "exportRangeContacts": {
     "dataSource": null,
     "public": false
+  },
+  "mergeCaseContact": {
+    "dataSource": null,
+    "public": false
   }
 }
