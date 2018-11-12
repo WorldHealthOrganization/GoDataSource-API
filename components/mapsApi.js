@@ -53,7 +53,7 @@ const getGeoLocation = function (address, callback) {
                 // token generation failed
                 // nothing to do
                 if (!token) {
-                  return callback();
+                  return callback('Invalid external API credentials');
                 }
 
                 // retry the request
@@ -97,7 +97,7 @@ const generateAccessToken = function (callback) {
     `,
     (err, response, responseBody) => {
       if (err) {
-        app.logger.warn(`Failed to generate access token for maps API. ${err}`);
+        app.logger.warn(`Failed to generate access token for maps API`);
         return callback(err);
       }
 

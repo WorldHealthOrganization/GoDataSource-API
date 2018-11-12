@@ -5,6 +5,7 @@ const app = require('../../server/server');
 const request = require('request');
 const _ = require('lodash');
 const mapsApi = require('../../components/mapsApi');
+const appConfig = require('../../server/config.json');
 
 module.exports = function (Maps) {
 
@@ -22,9 +23,6 @@ module.exports = function (Maps) {
    * @param callback
    */
   Maps.getAPIScript = function (callback) {
-    // try to retrieve api key from configuration
-    const appConfig = require('../../server/config.json');
-
     // try to get reference to the api key
     let apiKey = _.get(appConfig, 'googleApi.apiKey');
 
@@ -58,6 +56,11 @@ module.exports = function (Maps) {
    * @param callback
    */
   Maps.findGeoLocationForAddress = function (address, callback) {
+    // if maps api is not enabled, stop
+    if (!appConfig.mapsApi.enabled) {
+      return callback(app.utils.apiError.getError('MAPS_API_DISABLED'));
+    }
+
     // build an address string
     const _address = ['addressLine1', 'addressLine2', 'city', 'country', 'postalCode']
       .filter((prop) => address[prop])
@@ -68,8 +71,9 @@ module.exports = function (Maps) {
     mapsApi.getGeoLocation(_address, function (err, location) {
       if (err) {
         callback(app.utils.apiError.getError('MAPS_GEO_LOCATION_ERROR', err));
+      } else {
+        callback(null, location);
       }
-      return callback(null, location);
     });
   };
 };

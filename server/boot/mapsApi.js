@@ -2,7 +2,11 @@
 
 // requires
 const _ = require('lodash');
+const appConfig = require('../config.json');
 
 module.exports = function () {
-  require('../../components/mapsApi').initClient();
+  // do not generate access token if maps API is disabled
+  if (appConfig.mapsApi.enabled) {
+    require('../../components/mapsApi').initClient();
+  }
 };
