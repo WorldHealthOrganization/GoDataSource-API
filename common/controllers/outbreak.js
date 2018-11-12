@@ -1401,8 +1401,12 @@ module.exports = function (Outbreak) {
       nodes: {},
       edges: {}
     };
-    // keep an index of people that failed to pass the filters
-    const filteredOutChainPeopleIndex = {};
+
+    // keep a flag to see if any transmission chain filters were applied (people should be filtered out)
+    let appliedTransmissionChainsFilters = false;
+
+    // keep an index of people that pass the filters
+    const filteredChainPeopleIndex = {};
     // go through all the chains
     dataSet.transmissionChains.chains.forEach(function (transmissionChain) {
       // keep a flag for chain passing all filters
@@ -1410,12 +1414,17 @@ module.exports = function (Outbreak) {
 
       // check if size filter is present
       if (filter.size != null) {
+        // mark this filtering
+        appliedTransmissionChainsFilters = true;
         // apply size filter
         addTransmissionChain = (addTransmissionChain && (transmissionChain.size === filter.size));
       }
 
       // check if active filter is present
       if (filter.active != null) {
+        // mark this filtering
+        appliedTransmissionChainsFilters = true;
+        // apply active filter
         addTransmissionChain = (addTransmissionChain && (transmissionChain.active === filter.active));
       }
 
@@ -1423,12 +1432,11 @@ module.exports = function (Outbreak) {
       if (addTransmissionChain) {
         // add it to the result
         result.transmissionChains.chains.push(transmissionChain);
-      } else {
-        // transmission chain failed to pass filters
+        // update people index
         transmissionChain.chain.forEach(function (peoplePair) {
-          // blacklist each person from the chain by adding it into the index
+          // map each person from the chain into the index
           peoplePair.forEach(function (personId) {
-            filteredOutChainPeopleIndex[personId] = true;
+            filteredChainPeopleIndex[personId] = true;
           });
         });
       }
@@ -1443,8 +1451,8 @@ module.exports = function (Outbreak) {
     Object.keys(dataSet.edges).forEach(function (edgeId) {
       // get the edge
       const edge = dataSet.edges[edgeId];
-      // if none of the people are blacklisted, keep the edge
-      if (!filteredOutChainPeopleIndex[edge.persons[0].id] && !filteredOutChainPeopleIndex[edge.persons[1].id]) {
+      // if no transmission chain filters applied or at least one person found in the index (case/event-contact relationships will have only one person in the index)
+      if (!appliedTransmissionChainsFilters || filteredChainPeopleIndex[edge.persons[0].id] || filteredChainPeopleIndex[edge.persons[1].id]) {
         // keep the edge
         result.edges[edgeId] = edge;
         // keep both nodes
@@ -6982,12 +6990,12 @@ module.exports = function (Outbreak) {
     // get list of contacts
     models.contact
       .getGroupedByDate(
-      this, // outbreak model
-      {
-        startDate: body.startDate,
-        endDate: body.endDate
-      },
-      body.groupBy
+        this, // outbreak model
+        {
+          startDate: body.startDate,
+          endDate: body.endDate
+        },
+        body.groupBy
       )
       .then((contactGroups) => {
         // create a map of group id and corresponding value that should be displayed
