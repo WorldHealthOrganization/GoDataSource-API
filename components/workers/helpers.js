@@ -1,6 +1,7 @@
 'use strict';
 
 const helpers = require('../helpers');
+const fileCrypto = require('../fileCrypto');
 const pdfDoc = require('../pdfDoc');
 
 const worker = {
@@ -12,7 +13,22 @@ const worker = {
    * @return {Promise<any>}
    */
   exportListFile: helpers.exportListFileSync,
-
+  /**
+   * Encrypt file (AES-256) using password
+   * @param password
+   * @param options
+   * @param filePath
+   * @return {Promise<any>}
+   */
+  encryptFile: fileCrypto.encryptSync,
+  /**
+   * Decrypt file (AES-256) using password
+   * @param password
+   * @param options
+   * @param filePath
+   * @return {Promise<any>}
+   */
+  decryptFile: fileCrypto.decryptSync,
   /**
    * Create a PDF file containing PNG images
    * @param imageData
