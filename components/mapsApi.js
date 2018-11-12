@@ -1,6 +1,7 @@
 'use strict';
 
 // requires
+const querystring = require('querystring');
 const app = require('../server/server');
 const appConfig = require('../server/config.json');
 const request = require('request');
@@ -26,7 +27,7 @@ let token = null;
 const getGeoLocation = function (address, callback) {
   let getLocation = function () {
     return request.get(
-      `${baseURL}/findAddressCandidates?SingleLine=${address}&category=&outFields=*&forStorage=false&f=json&token=${token}`,
+      `${baseURL}/findAddressCandidates?SingleLine=${address}&forStorage=false&f=json&token=${token}`,
       (err, response, responseBody) => {
         if (err) {
           app.logger.warn(`Failed to generate geocode. ${err}`);
@@ -87,14 +88,18 @@ const generateAccessToken = function (callback) {
 
   let mapsOpts = appConfig.mapsApi;
 
+  // build the URL for generate request
+  let generateBaseURL = 'https://www.arcgis.com/sharing/oauth2/token';
+  let queryPart = querystring.stringify({
+    client_id: mapsOpts.clientId,
+    client_secret: mapsOpts.clientSecret,
+    expiration: tokenExpirationInMinutes,
+    grant_type: 'client_credentials',
+    f: 'json'
+  });
+
   return request.get(
-    `https://www.arcgis.com/sharing/oauth2/token?
-      client_id=${mapsOpts.clientId}&
-      grant_type=client_credentials&
-      client_secret=${mapsOpts.clientSecret}&
-      expiration=${tokenExpirationInMinutes}&
-      f=json
-    `,
+    `${generateBaseURL}?${queryPart}`,
     (err, response, responseBody) => {
       if (err) {
         app.logger.warn(`Failed to generate access token for maps API`);
