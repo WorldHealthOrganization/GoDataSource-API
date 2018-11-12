@@ -1401,8 +1401,8 @@ module.exports = function (Outbreak) {
       nodes: {},
       edges: {}
     };
-    // keep an index of people that pass the filters
-    const filteredChainPeopleIndex = {};
+    // keep an index of people that failed to pass the filters
+    const filteredOutChainPeopleIndex = {};
     // go through all the chains
     dataSet.transmissionChains.chains.forEach(function (transmissionChain) {
       // keep a flag for chain passing all filters
@@ -1423,11 +1423,12 @@ module.exports = function (Outbreak) {
       if (addTransmissionChain) {
         // add it to the result
         result.transmissionChains.chains.push(transmissionChain);
-        // update people index
+      } else {
+        // transmission chain failed to pass filters
         transmissionChain.chain.forEach(function (peoplePair) {
-          // map each person from the chain into the index
+          // blacklist each person from the chain by adding it into the index
           peoplePair.forEach(function (personId) {
-            filteredChainPeopleIndex[personId] = true;
+            filteredOutChainPeopleIndex[personId] = true;
           });
         });
       }
@@ -1442,8 +1443,8 @@ module.exports = function (Outbreak) {
     Object.keys(dataSet.edges).forEach(function (edgeId) {
       // get the edge
       const edge = dataSet.edges[edgeId];
-      // if at least one person found in the index (case/event-contact relationships will have only one person in the index)
-      if (filteredChainPeopleIndex[edge.persons[0].id] || filteredChainPeopleIndex[edge.persons[1].id]) {
+      // if none of the people are blacklisted, keep the edge
+      if (!filteredOutChainPeopleIndex[edge.persons[0].id] && !filteredOutChainPeopleIndex[edge.persons[1].id]) {
         // keep the edge
         result.edges[edgeId] = edge;
         // keep both nodes
