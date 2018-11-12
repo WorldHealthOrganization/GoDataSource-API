@@ -7016,12 +7016,12 @@ module.exports = function (Outbreak) {
     // get list of contacts
     models.contact
       .getGroupedByDate(
-        this, // outbreak model
-        {
-          startDate: body.startDate,
-          endDate: body.endDate
-        },
-        body.groupBy
+      this, // outbreak model
+      {
+        startDate: body.startDate,
+        endDate: body.endDate
+      },
+      body.groupBy
       )
       .then((contactGroups) => {
         // create a map of group id and corresponding value that should be displayed
