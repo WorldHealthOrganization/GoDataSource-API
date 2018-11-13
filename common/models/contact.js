@@ -297,7 +297,9 @@ module.exports = function (Contact) {
           contacts = contacts.map((contact) => {
             let caseItem = contact.relationships[0].persons
               .find(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE');
-            contact.caseId = caseItem.id;
+            // check for relation integrity (has a case id)
+            // if it doesn't just set it to null and remove the entire 'null' group altogether
+            contact.caseId = caseItem ? caseItem.id : null;
             return contact;
           });
 
@@ -306,7 +308,7 @@ module.exports = function (Contact) {
             .all(contacts.map((contact) => {
               // get contact address
               let contactAddress = app.models.person.getCurrentAddress(contact);
-              if (contactAddress.locationId) {
+              if (contactAddress && contactAddress.locationId) {
                 return app.models.location
                   .findById(contactAddress.locationId)
                   .then((location) => {
