@@ -7033,8 +7033,13 @@ module.exports = function (Outbreak) {
                 new Promise((resolve, reject) => {
                   return app.models.person
                     .findById(groupId)
-                    .then((person) => {
-                      caseIdValueMap[groupId] = `${person.firstName} ${person.middleName} ${person.lastName}`;
+                    .then((caseModel) => {
+                      // if case is somehow deleted, to not display the contacts in the group altogether
+                      if (!caseModel) {
+                        delete contactGroups[groupId];
+                      } else {
+                        caseIdValueMap[groupId] = `${caseModel.firstName} ${caseModel.middleName} ${caseModel.lastName}`;
+                      }
                       return resolve();
                     })
                     .catch(reject);
@@ -7160,7 +7165,8 @@ module.exports = function (Outbreak) {
                   let headers = [
                     {
                       id: 'contact',
-                      header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_CONTACT')
+                      header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_CONTACT'),
+                      width: 60
                     },
                     {
                       id: 'age',
@@ -7168,7 +7174,8 @@ module.exports = function (Outbreak) {
                     },
                     {
                       id: 'gender',
-                      header: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_GENDER')
+                      header: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_GENDER'),
+                      width: 60
                     },
                     {
                       id: 'place',
@@ -7180,22 +7187,24 @@ module.exports = function (Outbreak) {
                     },
                     {
                       id: 'address',
-                      header: dictionary.getTranslation('LNG_ENTITY_FIELD_LABEL_ADDRESS')
+                      header: dictionary.getTranslation('LNG_ENTITY_FIELD_LABEL_ADDRESS'),
+                      width: 60
                     },
                     {
                       id: 'followUpStartDate',
-                      header: dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_START_DATE')
+                      header: dictionary.getTranslation('LNG_RANGE_CONTACTS_LIST_HEADER_START_DATE')
                     },
                     {
                       id: 'followUpEndDate',
-                      header: dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_END_DATE')
+                      header: dictionary.getTranslation('LNG_RANGE_CONTACTS_LIST_HEADER_END_DATE')
                     }
                   ];
 
                   for (let date = startDate.clone(); date.isSameOrBefore(endDate); date.add(1, 'day')) {
                     headers.push({
                       id: date.format(standardFormat),
-                      header: date.format('MM-DD')
+                      header: date.format('MM/DD'),
+                      width: 20
                     });
                   }
 
