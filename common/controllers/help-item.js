@@ -9,6 +9,8 @@ module.exports = function (HelpItem) {
     'create',
     'prototype.patchAttributes',
     'findById',
-    'deleteById'
+    'deleteById',
+    'prototype.__get__category',
+    'prototype.__get__user'
   ]);
 };
