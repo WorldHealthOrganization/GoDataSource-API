@@ -46,7 +46,10 @@
   "mapsApi": {
     "enabled": true,
     "clientId": "wnMny6pZCuvpZ3bh",
-    "clientSecret": "152db6a30f264e689c31f40d34463d4c"
+    "clientSecret": "152db6a30f264e689c31f40d34463d4c",
+    "tokenExpirationInMinutes": "20160",
+    "tokenUrl": "https://www.arcgis.com/sharing/oauth2/token",
+    "geocodeServerUrl": "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer"
   },
   "sync": {
     "asyncActionsSettings": {
