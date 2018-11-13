@@ -328,7 +328,9 @@ module.exports = function (Sync) {
         app.logger.debug(`Sync ${syncLogEntry.id}: Error ${err}`);
         syncLogEntry.status = err.errorType === Sync.errorType.fatal ? 'LNG_SYNC_STATUS_FAILED' : 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS';
         let errorMessage = err.errorMessage;
-        syncLogEntry.error = errorMessage.toString ? errorMessage.toString() : errorMessage;
+        if (errorMessage) {
+          syncLogEntry.error = errorMessage.toString ? errorMessage.toString() : errorMessage;
+        }
       } else {
         app.logger.debug(`Sync ${syncLogEntry.id}: Success`);
         syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS';
