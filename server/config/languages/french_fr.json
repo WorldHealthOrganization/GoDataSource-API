@@ -1134,7 +1134,9 @@
       "LNG_FOLLOW_UP_STATUS_LEGEND": "Follow-up Status Legend",
       "LNG_PAGE_TITLE_RANGE_CONTACTS_LIST": "Range list of Contacts",
       "LNG_FILE_NAME_DAILY_CONTACTS_LIST": "Daily_Contacts",
-      "LNG_FILE_NAME_RANGE_CONTACTS_LIST": "Range_Contacts"
+      "LNG_FILE_NAME_RANGE_CONTACTS_LIST": "Range_Contacts",
+      "LNG_RANGE_CONTACTS_LIST_HEADER_START_DATE": "Start",
+      "LNG_RANGE_CONTACTS_LIST_HEADER_END_DATE": "End"
     },
     "countries": {
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY": "Pays",

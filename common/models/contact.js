@@ -308,7 +308,7 @@ module.exports = function (Contact) {
             .all(contacts.map((contact) => {
               // get contact address
               let contactAddress = app.models.person.getCurrentAddress(contact);
-              if (contactAddress.locationId) {
+              if (contactAddress && contactAddress.locationId) {
                 return app.models.location
                   .findById(contactAddress.locationId)
                   .then((location) => {
