@@ -7203,16 +7203,63 @@ module.exports = function (Outbreak) {
                     }
                   ];
 
+                  // additional tables for many days
+                  let additionalTables = [];
+                  // allow only 10 days be displayed on the same table with contact information
+                  let mainTableMaxCount = 10;
+                  // check to know that main table count threshold is overcome
+                  let isMainTableFull = false;
+                  // allow only 20 days per additional table to be displayed
+                  let additionalTableMaxCount = 39;
+                  let counter = 1;
                   for (let date = startDate.clone(); date.isSameOrBefore(endDate); date.add(1, 'day')) {
-                    headers.push({
-                      id: date.format(standardFormat),
-                      header: date.format('MM/DD')
-                    });
+                    if (counter <= mainTableMaxCount && !isMainTableFull) {
+                      headers.push({
+                        id: date.format(standardFormat),
+                        header: date.format('YY/MM/DD'),
+                        width: 20,
+                        isDate: true
+                      });
+
+                      if (counter === mainTableMaxCount) {
+                        isMainTableFull = true;
+                        counter = 1;
+                        continue;
+                      }
+                    }
+
+                    if (counter <= additionalTableMaxCount && isMainTableFull) {
+                      if (!additionalTables.length) {
+                        additionalTables.push({
+                          headers: [],
+                          values: []
+                        });
+                      }
+
+                      let lastAdditionalTable = additionalTables[additionalTables.length - 1];
+                      lastAdditionalTable.headers.push({
+                        id: date.format(standardFormat),
+                        header: date.format('YY/MM/DD'),
+                        width: 20
+                      });
+
+                      if (counter === additionalTableMaxCount) {
+                        additionalTables.push({
+                          headers: [],
+                          values: []
+                        });
+                        counter = 1;
+                        continue;
+                      }
+                    }
+
+                    counter++;
                   }
 
                   // start building table data
                   let tableData = [];
 
+                  let rowIndex = 0;
                   contactGroups[groupName].forEach((contact) => {
                     let row = {
                       contact: `${display(contact.firstName)} ${display(contact.middleName)} ${display(contact.lastName)}`,
@@ -7239,10 +7286,16 @@ module.exports = function (Outbreak) {
                       // mark them unusable from startDate to followup start date
                       // and from follow up end date to document end date
                       for (let date = startDate.clone(); date.isBefore(followUpStartDate); date.add(1, 'day')) {
-                        row[date.format(standardFormat)] = 'X';
+                        row[date.format(standardFormat)] = {
+                          value: 'X',
+                          isDate: true
+                        };
                       }
                       for (let date = followUpEndDate.clone().add(1, 'day'); date.isSameOrBefore(endDate); date.add(1, 'day')) {
-                        row[date.format(standardFormat)] = 'X';
+                        row[date.format(standardFormat)] = {
+                          value: 'X',
+                          isDate: true
+                        };
                       }
                     }
 
@@ -7267,16 +7320,50 @@ module.exports = function (Outbreak) {
                       contact.followUps.forEach((followUp) => {
                         let rowId = moment(followUp.date).format(standardFormat);
                         if (!row[rowId]) {
-                          row[rowId] = dictionary.getTranslation(followUpStatusMap[followUp.statusId]) || '';
+                          row[rowId] = {
+                            value: dictionary.getTranslation(followUpStatusMap[followUp.statusId]) || '',
+                            isDate: true
+                          };
                         }
                       });
                     }
 
+                    // move days that don't belong to main table to additional day tables
+                    let mainTableDateHeaders = headers.filter((header) => header.hasOwnProperty('isDate'));
+                    let lastDayInMainTable = genericHelpers.getUTCDate(mainTableDateHeaders[mainTableDateHeaders.length - 1]);
+
+                    // get all date values from row, keep only until last day in the table
+                    // rest split among additional tables
+                    for (let prop in row) {
+                      if (row.hasOwnProperty(prop) && row[prop].isDate) {
+                        let parsedDate = genericHelpers.getUTCDate(prop);
+                        if (parsedDate.isAfter(lastDayInMainTable)) {
+                          // find the suitable additional table
+                          let suitableAdditionalTable = additionalTables.filter((tableDef) => {
+                            let lastDay = tableDef.headers[tableDef.headers.length - 1].id;
+                            return parsedDate.isSameOrBefore(genericHelpers.getUTCDate(lastDay));
+                          });
+                          if (suitableAdditionalTable.length) {
+                            suitableAdditionalTable[0].values[rowIndex] = suitableAdditionalTable[0].values[rowIndex] || {};
+                            suitableAdditionalTable[0].values[rowIndex][prop] = row[prop].value;
+                          }
+                          delete row[prop];
+                        } else {
+                          row[prop] = row[prop].value;
+                        }
+                      }
+                    }
+
                     tableData.push(row);
+                    rowIndex++;
                   });
 
                   // insert table into the document
                   pdfUtils.createTableInPDFDocument(headers, tableData, doc);
+
+                  additionalTables.forEach((tableDef) => {
+                    pdfUtils.createTableInPDFDocument(tableDef.headers, tableDef.values, doc);
+                  });
                 }
               }
 
