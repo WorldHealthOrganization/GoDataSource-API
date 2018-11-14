@@ -184,6 +184,9 @@ module.exports = function (Sync) {
             return done(zipError);
           }
 
+          // log archive name location
+          app.logger.debug(`Sync payload created at ${archiveName}`);
+
           // no password provided, return file path as is
           if (!options.password) {
             return done(null, archiveName);
