@@ -8,7 +8,8 @@ const fs = require('fs');
 const dbSync = require('../../components/dbSync');
 const AdmZip = require('adm-zip');
 const SyncClient = require('../../components/syncClient');
-const asyncActionsSettings = require('../../server/config.json').sync.asyncActionsSettings;
+const syncConfig = require('../../server/config.json').sync;
+const asyncActionsSettings = syncConfig.asyncActionsSettings;
 const _ = require('lodash');
 const Moment = require('moment');
 
@@ -261,6 +262,8 @@ module.exports = function (Sync) {
 
         return decryptArchive
           .then(function (filePath) {
+            // log the path of the payload
+            app.logger.debug(`Payload saved at ${filePath}`);
             // extract the compressed database snapshot into the newly created temporary directory
             try {
               let archive = new AdmZip(filePath);
@@ -379,13 +382,19 @@ module.exports = function (Sync) {
                     });
                 }),
                 () => {
-                  // remove temporary directory
-                  tmpDir.removeCallback();
+                  // on debug, keep payload
+                  if (!syncConfig.debug) {
+                    // remove temporary directory
+                    tmpDir.removeCallback();
 
-                  // remove temporary uploaded file
-                  fs.unlink(filePath, () => {
-                    app.logger.debug(`Sync ${syncLogEntry.id}: Removed temporary files at ${filePath}`);
-                  });
+                    // remove temporary uploaded file
+                    fs.unlink(filePath, () => {
+                      app.logger.debug(`Sync ${syncLogEntry.id}: Removed temporary files at ${filePath}`);
+                    });
+                  } else {
+                    // log sync running in debug mode
+                    app.logger.info('Sync running in debug mode, no cleanup performed');
+                  }
 
                   // The sync doesn't stop at an error but the entire action will return an error for failed collection/collection record
                   // check for failed collections/collection records
