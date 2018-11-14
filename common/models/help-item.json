@@ -33,7 +33,18 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "approvedBy"
+    },
+    "category": {
+      "type": "belongsTo",
+      "model": "helpCategory",
+      "foreignKey": "categoryId"
+    }
+  },
   "acls": [
     {
       "principalType": "ROLE",
