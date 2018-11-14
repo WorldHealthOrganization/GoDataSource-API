@@ -2,7 +2,6 @@
 
 // requires
 const app = require('../../server/server');
-const _ = require('lodash');
 const mapsApi = require('../../components/mapsApi');
 const appConfig = require('../../server/config.json');
 
