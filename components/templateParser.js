@@ -349,8 +349,41 @@ function extractVariablesAndAnswerOptions(template) {
   return variables;
 }
 
+/**
+ * Order questions
+ * @param questions
+ */
+function orderQuestions(questions) {
+  // check if there are questions
+  if (Array.isArray(questions)) {
+    // sort them using order
+    questions.sort(function (a, b) {
+      // set defaults for order
+      if (a.order == null) {
+        a.order = 1;
+      }
+      if (b.order == null) {
+        b.order = 1;
+      }
+      return a.order - b.order;
+    });
+    // go through each question
+    questions.forEach(function (question) {
+      // check if there are predefined answers
+      if (Array.isArray(question.answers)) {
+        // go through the predefined answers
+        question.answers.forEach(function (answer) {
+          // order additional questions
+          orderQuestions(answer.additionalQuestions);
+        });
+      }
+    });
+  }
+}
+
 module.exports = {
   beforeHook: beforeHook,
   afterHook: afterHook,
-  extractVariablesAndAnswerOptions: extractVariablesAndAnswerOptions
+  extractVariablesAndAnswerOptions: extractVariablesAndAnswerOptions,
+  orderQuestions: orderQuestions
 };
