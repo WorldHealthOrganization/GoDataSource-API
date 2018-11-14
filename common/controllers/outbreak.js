@@ -1402,6 +1402,10 @@ module.exports = function (Outbreak) {
       nodes: {},
       edges: {}
     };
+
+    // keep a flag to see if any transmission chain filters were applied (people should be filtered out)
+    let appliedTransmissionChainsFilters = false;
+
     // keep an index of people that pass the filters
     const filteredChainPeopleIndex = {};
     // go through all the chains
@@ -1411,12 +1415,17 @@ module.exports = function (Outbreak) {
 
       // check if size filter is present
       if (filter.size != null) {
+        // mark this filtering
+        appliedTransmissionChainsFilters = true;
         // apply size filter
         addTransmissionChain = (addTransmissionChain && (transmissionChain.size === filter.size));
       }
 
       // check if active filter is present
       if (filter.active != null) {
+        // mark this filtering
+        appliedTransmissionChainsFilters = true;
+        // apply active filter
         addTransmissionChain = (addTransmissionChain && (transmissionChain.active === filter.active));
       }
 
@@ -1443,8 +1452,8 @@ module.exports = function (Outbreak) {
     Object.keys(dataSet.edges).forEach(function (edgeId) {
       // get the edge
       const edge = dataSet.edges[edgeId];
-      // if at least one person found in the index (case/event-contact relationships will have only one person in the index)
-      if (filteredChainPeopleIndex[edge.persons[0].id] || filteredChainPeopleIndex[edge.persons[1].id]) {
+      // if no transmission chain filters applied or at least one person found in the index (case/event-contact relationships will have only one person in the index)
+      if (!appliedTransmissionChainsFilters || filteredChainPeopleIndex[edge.persons[0].id] || filteredChainPeopleIndex[edge.persons[1].id]) {
         // keep the edge
         result.edges[edgeId] = edge;
         // keep both nodes
@@ -3386,11 +3395,11 @@ module.exports = function (Outbreak) {
         }
 
         // attach generated own and outbreak ids to the model
-        data.model = Object.assign({}, data.model, { id: winnerId, outbreakId: outbreakId });
+        data.model = Object.assign({}, data.model, {id: winnerId, outbreakId: outbreakId});
 
         // make changes into database
         Promise
-          // delete all the merge candidates
+        // delete all the merge candidates
           .all(modelsIds.map((id) => targetModel.destroyById(id, options)))
           // create a new model containing the result properties
           .then(() => targetModel.create(data.model, options))
@@ -6858,6 +6867,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportDailyListOfContacts = function (body, options, callback) {
+    // shortcut for safe display a value in the document
+    const display = pdfUtils.displayValue;
+
     // get list of questions for contacts from outbreak
     let questions = this.contactFollowUpTemplate.sort((a, b) => a.order > b.order);
 
@@ -6879,7 +6891,7 @@ module.exports = function (Outbreak) {
                   return app.models.person
                     .findById(groupId)
                     .then((person) => {
-                      caseIdValueMap[groupId] = `${person.firstName} ${person.middleName} ${person.lastName}`;
+                      caseIdValueMap[groupId] = `${display(person.firstName)} ${display(person.middleName)} ${display(person.lastName)}`;
                       return resolve();
                     })
                     .catch(reject);
@@ -6944,8 +6956,8 @@ module.exports = function (Outbreak) {
                   contactGroups[groupName].forEach((contact) => {
                     contact.followUps.forEach((followUp) => {
                       let row = {
-                        contact: `${contact.firstName} ${contact.middleName} ${contact.lastName}`,
-                        status: dictionary.getTranslation(followUp.statusId)
+                        contact: `${display(contact.firstName)} ${display(contact.middleName)} ${display(contact.lastName)}`,
+                        status: dictionary.getTranslation(followUp.statusId) || ''
                       };
 
                       let questions = followUp.questionnaireAnswers || {};
@@ -6953,7 +6965,7 @@ module.exports = function (Outbreak) {
                       // add questionnaire answers into the table if any
                       for (let questionId in questions) {
                         if (questions.hasOwnProperty(questionId)) {
-                          row[questionId] = questions[questionId];
+                          row[questionId] = display(questions[questionId]);
                         }
                       }
 
@@ -6985,6 +6997,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportRangeListOfContacts = function (body, options, callback) {
+    // shortcut for safe display a value in the document
+    const display = pdfUtils.displayValue;
+
     // application model's reference
     const models = app.models;
 
@@ -7024,8 +7039,13 @@ module.exports = function (Outbreak) {
                 new Promise((resolve, reject) => {
                   return app.models.person
                     .findById(groupId)
-                    .then((person) => {
-                      caseIdValueMap[groupId] = `${person.firstName} ${person.middleName} ${person.lastName}`;
+                    .then((caseModel) => {
+                      // if case is somehow deleted, to not display the contacts in the group altogether
+                      if (!caseModel) {
+                        delete contactGroups[groupId];
+                      } else {
+                        caseIdValueMap[groupId] = `${display(caseModel.firstName)} ${display(caseModel.middleName)} ${display(caseModel.lastName)}`;
+                      }
                       return resolve();
                     })
                     .catch(reject);
@@ -7175,18 +7195,18 @@ module.exports = function (Outbreak) {
                     },
                     {
                       id: 'followUpStartDate',
-                      header: dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_START_DATE')
+                      header: dictionary.getTranslation('LNG_RANGE_CONTACTS_LIST_HEADER_START_DATE')
                     },
                     {
                       id: 'followUpEndDate',
-                      header: dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_END_DATE')
+                      header: dictionary.getTranslation('LNG_RANGE_CONTACTS_LIST_HEADER_END_DATE')
                     }
                   ];
 
                   for (let date = startDate.clone(); date.isSameOrBefore(endDate); date.add(1, 'day')) {
                     headers.push({
                       id: date.format(standardFormat),
-                      header: date.format('MM-DD')
+                      header: date.format('MM/DD')
                     });
                   }
 
@@ -7195,16 +7215,16 @@ module.exports = function (Outbreak) {
 
                   contactGroups[groupName].forEach((contact) => {
                     let row = {
-                      contact: `${contact.firstName} ${contact.middleName} ${contact.lastName}`,
-                      gender: contact.gender
+                      contact: `${display(contact.firstName)} ${display(contact.middleName)} ${display(contact.lastName)}`,
+                      gender: display(contact.gender)
                     };
 
                     let age = '';
                     if (contact.age) {
                       if (contact.age.months > 0) {
-                        age = `${contact.age.months} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`;
+                        age = `${display(contact.age.months)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`;
                       } else {
-                        age = `${contact.age.years} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')}`;
+                        age = `${display(contact.age.years)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')}`;
                       }
                     }
                     row.age = age;
@@ -7231,14 +7251,14 @@ module.exports = function (Outbreak) {
                     if (body.groupBy === 'place') {
                       row.place = groupName;
                     } else {
-                      row.place = contact.locationName;
+                      row.place = display(contact.locationName);
                     }
 
                     // get contact's current address
                     let contactAddress = models.person.getCurrentAddress(contact);
                     if (contactAddress) {
-                      row.city = contactAddress.city;
-                      row.address = `${contactAddress.addressLine1} ${contactAddress.addressLine2}`;
+                      row.city = display(contactAddress.city);
+                      row.address = `${display(contactAddress.addressLine1)} ${display(contactAddress.addressLine2)}`;
                     }
 
                     // only the latest follow up will be shown
@@ -7247,7 +7267,7 @@ module.exports = function (Outbreak) {
                       contact.followUps.forEach((followUp) => {
                         let rowId = moment(followUp.date).format(standardFormat);
                         if (!row[rowId]) {
-                          row[rowId] = dictionary.getTranslation(followUpStatusMap[followUp.statusId]);
+                          row[rowId] = dictionary.getTranslation(followUpStatusMap[followUp.statusId]) || '';
                         }
                       });
                     }

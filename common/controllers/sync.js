@@ -55,9 +55,13 @@ module.exports = function (Sync) {
       exportLogEntry.actionCompletionDate = new Date();
 
       if (err) {
+        // make error readable
+        err.toString = function () {
+          return JSON.stringify(this);
+        };
         app.logger.debug(`Export ${exportLogEntry.id}: Error ${err}`);
         exportLogEntry.status = 'LNG_SYNC_STATUS_FAILED';
-        exportLogEntry.error = err.toString ? err.toString() : err;
+        exportLogEntry.error = err;
       } else {
         app.logger.debug(`Export ${exportLogEntry.id}: Success`);
         exportLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS';
@@ -328,7 +332,13 @@ module.exports = function (Sync) {
         app.logger.debug(`Sync ${syncLogEntry.id}: Error ${err}`);
         syncLogEntry.status = err.errorType === Sync.errorType.fatal ? 'LNG_SYNC_STATUS_FAILED' : 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS';
         let errorMessage = err.errorMessage;
-        syncLogEntry.error = errorMessage.toString ? errorMessage.toString() : errorMessage;
+        if (errorMessage) {
+          // make error readable
+          errorMessage.toString = function () {
+            return JSON.stringify(this);
+          };
+          syncLogEntry.error = errorMessage;
+        }
       } else {
         app.logger.debug(`Sync ${syncLogEntry.id}: Success`);
         syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS';
@@ -659,6 +669,10 @@ module.exports = function (Sync) {
         Sync.checkAndTriggerPendingSync(upstreamServerEntry, options);
       })
       .catch(function (err) {
+        // make error readable
+        err.toString = function () {
+          return JSON.stringify(this);
+        };
         if (!callbackCalled) {
           // sync wasn't started; the error response is sent directly in the response
           callback(err);
@@ -668,7 +682,7 @@ module.exports = function (Sync) {
           // update sync log status
           syncLogEntry.actionCompletionDate = new Date();
           syncLogEntry.status = 'LNG_SYNC_STATUS_FAILED';
-          syncLogEntry.addError(err.toString ? err.toString() : err);
+          syncLogEntry.addError(err);
           syncLogEntry
             .save(options)
             .then(function () {

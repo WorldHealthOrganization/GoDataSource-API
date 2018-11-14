@@ -1140,7 +1140,9 @@
       "LNG_FOLLOW_UP_STATUS_LEGEND": "日本の Follow-up Status Legend",
       "LNG_PAGE_TITLE_RANGE_CONTACTS_LIST": "日本の Range list of Contacts",
       "LNG_FILE_NAME_DAILY_CONTACTS_LIST": "日本の Daily_Contacts",
-      "LNG_FILE_NAME_RANGE_CONTACTS_LIST": "日本の Range_Contacts"
+      "LNG_FILE_NAME_RANGE_CONTACTS_LIST": "日本の Range_Contacts",
+      "LNG_RANGE_CONTACTS_LIST_HEADER_START_DATE": "日本の Start",
+      "LNG_RANGE_CONTACTS_LIST_HEADER_END_DATE": "日本の End"
     },
     "countries": {
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY": "日本の Country",
@@ -2155,6 +2157,7 @@
       "LNG_PAGE_IMPORT_LOCATION_DATA_TITLE": "日本の Import Location Data"
     },
     "contactDailyFollowUpStatusType": {
+      "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE": "日本の Contact Daily Follow-up Status",
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED": "日本の Not Performed",
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK": "日本の Seen Ok",
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK": "日本の Seen Not Ok",
@@ -2167,6 +2170,7 @@
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED_ACRONYM": "日本の M"
     },
     "contactFinalFollowUpStatusType": {
+      "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE": "日本の Contact Final Follow-Up Status",
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP": "日本の Lost To Follow-up",
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED": "日本の Follow-up Completed",
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP": "日本の Under Follow-up"

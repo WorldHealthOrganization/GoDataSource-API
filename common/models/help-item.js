@@ -5,8 +5,6 @@ const _ = require('lodash');
 const helpers = require('../../components/helpers');
 
 module.exports = function (HelpItem) {
-  // set flag to not get controller
-  HelpItem.hasController = false;
 
   /**
    * Replace the translatable fields with language tokens before saving

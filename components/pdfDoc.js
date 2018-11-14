@@ -665,6 +665,15 @@ const downloadPdfDoc = function (document, filename, callback) {
   });
 };
 
+/**
+ * Safely display a value in the document
+ * In case value is undefined/null fallback to empty string
+ * @param value
+ */
+const displayValue = function (value) {
+  return (typeof value === 'undefined' || value === null) ? '' : value;
+};
+
 module.exports = {
   createPDFList: createPDFList,
   createImageDoc: createImageDoc,
@@ -676,5 +685,6 @@ module.exports = {
   createTableInPDFDocument: createTableInPDFDocument,
   addTitle: addTitle,
   MIME_TYPE: MIME_TYPE,
-  downloadPdfDoc: downloadPdfDoc
+  downloadPdfDoc: downloadPdfDoc,
+  displayValue: displayValue
 };

@@ -116,7 +116,7 @@ const worker = {
               if (relationshipPerson1.type !== 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' && isolatedNodes[relationshipPerson1.id] === undefined) {
                 isolatedNodes[relationshipPerson1.id] = true;
               }
-              // only person 2 is not a contact, mark rhe node as isolated (if it was not previously marked otherwise)
+              // only person 2 is not a contact, mark the node as isolated (if it was not previously marked otherwise)
               if (relationshipPerson2.type !== 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' && isolatedNodes[relationshipPerson2.id] === undefined) {
                 isolatedNodes[relationshipPerson2.id] = true;
               }
