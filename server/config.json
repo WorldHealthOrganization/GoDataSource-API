@@ -30,7 +30,7 @@
     "from": "no-reply@who.int"
   },
   "logging": {
-    "level": "info",
+    "level": "debug",
     "maxSize": 10000000,
     "maxFiles": 10,
     "requestResponse": {
@@ -52,7 +52,8 @@
       "actionTimeout": 3600000
     },
     "actionCleanupInterval": 24,
-    "encrypt": false
+    "encrypt": false,
+    "debug": true
   },
   "pushNotifications": {
     "serverURL": "http://localhost:1337/api",
