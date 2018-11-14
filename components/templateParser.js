@@ -358,11 +358,14 @@ function orderQuestions(questions) {
   if (Array.isArray(questions)) {
     // sort them using order
     questions.sort(function (a, b) {
+      // make sure we're working with numbers
+      a.order = parseInt(a.order);
+      b.order = parseInt(b.order);
       // set defaults for order
-      if (a.order == null) {
+      if (isNaN(a.order)) {
         a.order = 1;
       }
-      if (b.order == null) {
+      if (isNaN(b.order)) {
         b.order = 1;
       }
       return a.order - b.order;
