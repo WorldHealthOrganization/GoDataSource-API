@@ -7212,6 +7212,12 @@ module.exports = function (Outbreak) {
                   // allow only 20 days per additional table to be displayed
                   let additionalTableMaxCount = 39;
                   let counter = 1;
+                  let insertAdditionalTable = function () {
+                    additionalTables.push({
+                      headers: [],
+                      values: []
+                    });
+                  };
                   for (let date = startDate.clone(); date.isSameOrBefore(endDate); date.add(1, 'day')) {
                     if (counter <= mainTableMaxCount && !isMainTableFull) {
                       headers.push({
@@ -7230,10 +7236,7 @@ module.exports = function (Outbreak) {
 
                     if (counter <= additionalTableMaxCount && isMainTableFull) {
                       if (!additionalTables.length) {
-                        additionalTables.push({
-                          headers: [],
-                          values: []
-                        });
+                        insertAdditionalTable();
                       }
 
                       let lastAdditionalTable = additionalTables[additionalTables.length - 1];
@@ -7244,10 +7247,7 @@ module.exports = function (Outbreak) {
                       });
 
                       if (counter === additionalTableMaxCount) {
-                        additionalTables.push({
-                          headers: [],
-                          values: []
-                        });
+                        insertAdditionalTable();
                         counter = 1;
                         continue;
                       }
@@ -7261,8 +7261,10 @@ module.exports = function (Outbreak) {
 
                   let rowIndex = 0;
                   contactGroups[groupName].forEach((contact) => {
+                    let contactInfo = `${display(contact.firstName)} ${display(contact.middleName)} ${display(contact.lastName)}`;
+
                     let row = {
-                      contact: `${display(contact.firstName)} ${display(contact.middleName)} ${display(contact.lastName)}`,
+                      contact: contactInfo,
                       gender: display(contact.gender)
                     };
 
@@ -7330,18 +7332,21 @@ module.exports = function (Outbreak) {
 
                     // move days that don't belong to main table to additional day tables
                     let mainTableDateHeaders = headers.filter((header) => header.hasOwnProperty('isDate'));
-                    let lastDayInMainTable = genericHelpers.getUTCDate(mainTableDateHeaders[mainTableDateHeaders.length - 1]);
+                    let lastDayInMainTable = genericHelpers.convertToDate(mainTableDateHeaders[mainTableDateHeaders.length - 1].id);
 
                     // get all date values from row, keep only until last day in the table
                     // rest split among additional tables
                     for (let prop in row) {
                       if (row.hasOwnProperty(prop) && row[prop].isDate) {
-                        let parsedDate = genericHelpers.getUTCDate(prop);
+                        let parsedDate = genericHelpers.convertToDate(prop);
                         if (parsedDate.isAfter(lastDayInMainTable)) {
                           // find the suitable additional table
                           let suitableAdditionalTable = additionalTables.filter((tableDef) => {
-                            let lastDay = tableDef.headers[tableDef.headers.length - 1].id;
-                            return parsedDate.isSameOrBefore(genericHelpers.getUTCDate(lastDay));
+                            if (tableDef.headers.length) {
+                              let lastDay = tableDef.headers[tableDef.headers.length - 1].id;
+                              return parsedDate.isSameOrBefore(genericHelpers.convertToDate(lastDay));
+                            }
+                            return false;
                           });
                           if (suitableAdditionalTable.length) {
                             suitableAdditionalTable[0].values[rowIndex] = suitableAdditionalTable[0].values[rowIndex] || {};
@@ -7362,8 +7367,10 @@ module.exports = function (Outbreak) {
                   pdfUtils.createTableInPDFDocument(headers, tableData, doc);
 
                   additionalTables.forEach((tableDef) => {
-                    pdfUtils.createTableInPDFDocument(tableDef.headers, tableDef.values, doc);
+                    pdfUtils.createTableInPDFDocument(tableDef.headers, tableDef.values, doc, null, true);
                   });
+
+                  doc.moveDown();
                 }
               }
 
