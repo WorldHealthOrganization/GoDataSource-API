@@ -6945,10 +6945,12 @@ module.exports = function (Outbreak) {
 
                   // include contact questions into the table
                   questions.forEach((item) => {
-                    headers.push({
-                      id: item.variable,
-                      header: item.text
-                    });
+                    if (item.variable) {
+                      headers.push({
+                        id: item.variable,
+                        header: item.text
+                      });
+                    }
                   });
 
                   // start building table data
@@ -6974,7 +6976,7 @@ module.exports = function (Outbreak) {
                   });
 
                   // insert table into the document
-                  pdfUtils.createTableInPDFDocument(headers, tableData, doc);
+                  pdfUtils.createTableInPDFDocument(headers, tableData, doc, null, true);
                 }
               }
 
@@ -7364,7 +7366,7 @@ module.exports = function (Outbreak) {
                   });
 
                   // insert table into the document
-                  pdfUtils.createTableInPDFDocument(headers, tableData, doc);
+                  pdfUtils.createTableInPDFDocument(headers, tableData, doc, null, true);
 
                   additionalTables.forEach((tableDef) => {
                     pdfUtils.createTableInPDFDocument(tableDef.headers, tableDef.values, doc, null, true);
