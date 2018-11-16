@@ -929,13 +929,13 @@
       "principalType": "ROLE",
       "principalId": "write_case",
       "permission": "ALLOW",
-      "property": "mergeCasesAndContacts"
+      "property": "mergePeople"
     },
     {
       "principalType": "ROLE",
       "principalId": "write_contact",
       "permission": "ALLOW",
-      "property": "mergeCasesAndContacts"
+      "property": "mergePeople"
     },
     {
       "principalType": "ROLE",
@@ -3435,11 +3435,11 @@
         "path": "/follow-ups/per-team-per-day/count"
       }
     },
-    "prototype.mergeCasesAndContacts": {
+    "prototype.mergePeople": {
       "accepts": [
         {
           "arg": "data",
-          "model": "mergeCaseContact",
+          "model": "mergePeopleProps",
           "type": "object",
           "http": {
             "source": "body"
@@ -3462,7 +3462,7 @@
           "required": true
         }
       ],
-      "description": "Merge multiple cases/contacts",
+      "description": "Merge multiple people of the same type (case/event/contact)",
       "http": {
         "verb": "post",
         "path": "/merge"

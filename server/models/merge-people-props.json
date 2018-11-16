@@ -1,5 +1,5 @@
 {
-  "name": "mergeCaseContact",
+  "name": "mergePeopleProps",
   "base": "Model",
   "idInjection": false,
   "options": {
@@ -13,7 +13,8 @@
       "type": "string",
       "enum": [
         "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE",
-        "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT"
+        "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT",
+        "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT"
       ],
       "required": true
     },
