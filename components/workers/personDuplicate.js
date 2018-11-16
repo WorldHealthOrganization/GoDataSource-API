@@ -59,9 +59,11 @@ function getEntryId(entry, keys) {
  */
 function addEntryToIndex(index, entry, keys, searchReverse) {
   // get index id for that key
-  const id = getEntryId(entry, keys);
+  let id = getEntryId(entry, keys);
   // if the id is valid
   if (id.length) {
+    // group people with same types
+    id = `${entry.type.toLowerCase()}${id}`;
     // add the entry to the index using generated id
     addEntryToIndexWithId(index, id, entry);
     // if the match should be done in a reverse order as well
