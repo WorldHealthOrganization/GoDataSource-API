@@ -43,8 +43,13 @@
     "protocol": "http",
     "port": 3001
   },
-  "googleApi": {
-    "apiKey": ""
+  "mapsApi": {
+    "enabled": true,
+    "clientId": "xyphXQJjQwLVB8rY",
+    "clientSecret": "8dea73811df04e4e9709f15b2177b1f9",
+    "tokenExpirationInMinutes": "20160",
+    "tokenUrl": "https://www.arcgis.com/sharing/oauth2/token",
+    "geocodeServerUrl": "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer"
   },
   "sync": {
     "asyncActionsSettings": {
