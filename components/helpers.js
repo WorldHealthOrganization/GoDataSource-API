@@ -1433,6 +1433,10 @@ function sha256(string){
   return crypto.createHash('sha256').update(string).digest('hex');
 }
 
+function convertToDate(date) {
+  return moment(date).startOf('day');
+}
+
 module.exports = {
   getUTCDate: getUTCDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1469,5 +1473,6 @@ module.exports = {
   getValueFromContextOptions: getValueFromContextOptions,
   getPeriodIntervalForDate: getPeriodIntervalForDate,
   sha256: sha256,
-  createImageDoc: createImageDoc
+  createImageDoc: createImageDoc,
+  convertToDate: convertToDate
 };
