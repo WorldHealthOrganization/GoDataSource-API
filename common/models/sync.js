@@ -50,8 +50,9 @@ module.exports = function (Sync) {
 
   /**
    * Get a fatal error
+   * Note: Error message must be an object containing at least 'message' property
    * @param error
-   * @returns {{errorType, errorMessage}}
+   * @returns {{errorType, errorMessage: { message: string }}}
    */
   Sync.getFatalError = function (error) {
     return getSyncError(Sync.errorType.fatal, error);
@@ -59,8 +60,9 @@ module.exports = function (Sync) {
 
   /**
    * Get a partial error
+   * Note: Error message must be an object containing at least 'message' property
    * @param error
-   * @returns {{errorType, errorMessage}}
+   * @returns {{errorType, errorMessage: { message: string }}}
    */
   Sync.getPartialError = function (error) {
     return getSyncError(Sync.errorType.partial, error);
@@ -273,7 +275,7 @@ module.exports = function (Sync) {
               archive.extractAllTo(tmpDirName);
             } catch (zipError) {
               app.logger.error(`Sync ${syncLogEntry.id}: Failed to extract zip archive: ${filePath}. ${zipError}`);
-              return callback(Sync.getFatalError(zipError));
+              return callback(Sync.getFatalError(typeof zipError === 'string' ? { message: zipError } : zipError));
             }
 
             // read all files in the temp dir

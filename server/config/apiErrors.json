@@ -213,7 +213,7 @@
   },
   "MAPS_API_DISABLED": {
     "defaultStatusCode": 422,
-    "messagePattern": "Maps API is disabled. This usually happens when an invalid Maps API key was provided"
+    "messagePattern": "Maps API is disabled."
   },
   "MAPS_GEO_LOCATION_ERROR": {
     "defaultStatusCode": 422,
