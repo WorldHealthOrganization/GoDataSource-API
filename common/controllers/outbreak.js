@@ -5781,7 +5781,7 @@ module.exports = function (Outbreak) {
     };
     // find possible person duplicates groups
     app.models.person
-      .findOrCountPossibleDuplicates(where, true)
+      .findOrCountPossibleDuplicates({where: where}, true)
       .then(function (duplicatesNo) {
         callback(null, duplicatesNo);
       })
