@@ -30,6 +30,9 @@
     },
     "comment": {
       "type": "string"
+    },
+    "page": {
+      "type": "string"
     }
   },
   "validations": [],
