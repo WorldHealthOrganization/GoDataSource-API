@@ -195,8 +195,8 @@ const createImageDoc = function (imageData, splitFactor, splitType, callback) {
     size: 'A3'
   });
 
-  // image size is A3 page - margins
-  const imageSize = {
+  // A3 page - margins
+  const pageSize = {
     width: 1190,
     height: 840
   };
@@ -224,12 +224,13 @@ const createImageDoc = function (imageData, splitFactor, splitType, callback) {
 
           // compute image aspect ratio
           const imageAspectRatio = image.bitmap.width / image.bitmap.height;
+          const pageAspectRatio = pageSize.width / pageSize.height;
 
           // resize image to fill the page based on aspect ratio
-          if (imageAspectRatio > 1) {
-            image.resize(Jimp.AUTO, imageSize.height * splitFactor);
+          if (imageAspectRatio > pageAspectRatio) {
+            image.resize(Jimp.AUTO, pageSize.height * splitFactor);
           } else {
-            image.resize(imageSize.width * splitFactor, Jimp.AUTO);
+            image.resize(pageSize.width * splitFactor, Jimp.AUTO);
           }
 
           // compute width, height, rows and columns
@@ -238,11 +239,11 @@ const createImageDoc = function (imageData, splitFactor, splitType, callback) {
           // for split type auto, decide automatically how many pages to create
           if (splitType === splitTypes.auto) {
             // compute how many columns and rows are needed based on image dimensions
-            columns = Math.ceil(image.bitmap.width / imageSize.width);
-            rows = Math.ceil(image.bitmap.height / imageSize.height);
+            columns = Math.ceil(image.bitmap.width / pageSize.width);
+            rows = Math.ceil(image.bitmap.height / pageSize.height);
             // the width and height match page dimension
-            width = imageSize.width;
-            height = imageSize.height;
+            width = pageSize.width;
+            height = pageSize.height;
 
           } else {
             // decide image height and number of rows based on split type
@@ -313,7 +314,7 @@ const createImageDoc = function (imageData, splitFactor, splitType, callback) {
                   return done(error);
                 }
                 // store it in the document (fit to document size - margins)
-                document.image(buffer, 0, 0, {fit: [imageSize.width, imageSize.height]});
+                document.image(buffer, 0, 0, {fit: [pageSize.width, pageSize.height]});
                 // overlay transparent logo
                 document.addTransparentLogo();
                 // move to the next page
