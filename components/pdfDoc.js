@@ -227,7 +227,10 @@ const createImageDoc = function (imageData, splitFactor, splitType, callback) {
           const imageAspectRatio = image.bitmap.width / image.bitmap.height;
 
           // if the image is wider than page (proportionally)
-          if (imageAspectRatio > pageAspectRatio) {
+          if (
+            splitType === splitTypes.auto && imageAspectRatio < pageAspectRatio ||
+            imageAspectRatio > pageAspectRatio
+          ) {
             // resize its width according to the split factor
             image.resize(imageSize.width * splitFactor, Jimp.AUTO);
           } else {
