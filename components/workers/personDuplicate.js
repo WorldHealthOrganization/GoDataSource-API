@@ -63,7 +63,7 @@ function addEntryToIndex(index, entry, keys, searchReverse) {
   // if the id is valid
   if (id.length) {
     // group people with same types
-    id = `${entry.type.toLowerCase()}${id}`;
+    id = `${typeof entry.type === 'string' ? entry.type.toLowerCase() : 'unknown_type'}${id}`;
     // add the entry to the index using generated id
     addEntryToIndexWithId(index, id, entry);
     // if the match should be done in a reverse order as well
