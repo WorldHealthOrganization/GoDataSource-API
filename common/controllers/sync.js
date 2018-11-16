@@ -333,10 +333,12 @@ module.exports = function (Sync) {
         syncLogEntry.status = err.errorType === Sync.errorType.fatal ? 'LNG_SYNC_STATUS_FAILED' : 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS';
         let errorMessage = err.errorMessage;
         if (errorMessage) {
-          // make error readable
-          errorMessage.toString = function () {
-            return JSON.stringify(this);
-          };
+          if (typeof errorMessage === 'object') {
+            // make error readable
+            errorMessage.toString = function () {
+              return JSON.stringify(this);
+            };
+          }
           syncLogEntry.error = errorMessage;
         }
       } else {
@@ -360,9 +362,12 @@ module.exports = function (Sync) {
         // if an error was encountered
         if (err) {
           // rewrite toString to something useful
-          err.toString = function () {
-            return JSON.stringify(this);
-          };
+          if (typeof err === 'object') {
+            // make error readable
+            err.toString = function () {
+              return JSON.stringify(this);
+            };
+          }
           // rewrite error with API error
           err = buildError('INSTANCE_SYNC_FAILED', {
             syncError: err

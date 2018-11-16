@@ -6,7 +6,7 @@ const mkdirp = require('mkdirp');
 const fs = require('fs');
 const path = require('path');
 const async = require('async');
-const ncp = require('ncp');
+const fsExtra = require('fs-extra');
 
 // map of collection names and property name that matches a file on the disk
 // also directory path (relative to the project) that holds the files should be left unchanged
@@ -444,7 +444,7 @@ const importCollectionRelatedFiles = function (collectionName, tmpDir, done) {
   // get the property, directory names from the mapping
   const collectionOpts = collectionsWithFiles[collectionName];
 
-  return ncp(
+  fsExtra.copy(
     path.join(tmpDir, collectionOpts.targetDir),
     path.join(__dirname, '..', collectionOpts.srcDir),
     done
