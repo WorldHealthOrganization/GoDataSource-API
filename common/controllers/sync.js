@@ -361,15 +361,22 @@ module.exports = function (Sync) {
       if (callback) {
         // if an error was encountered
         if (err) {
+          // assume sync failed completely
+          let errorCode = 'INSTANCE_SYNC_FAILED';
           // rewrite toString to something useful
           if (typeof err === 'object') {
             // make error readable
             err.toString = function () {
               return JSON.stringify(this);
             };
+            // if sync failed only partially
+            if (err.errorType === Sync.errorType.partial) {
+              // change error to partial failure
+              errorCode = 'INSTANCE_SYNC_PARTIAL_FAILURE';
+            }
           }
           // rewrite error with API error
-          err = buildError('INSTANCE_SYNC_FAILED', {
+          err = buildError(errorCode, {
             syncError: err
           });
         }
