@@ -1,15 +1,11 @@
 'use strict';
 
 // requires
-const _ = require('lodash');
+const appConfig = require('../config.json');
 
 module.exports = function () {
-  // retrieve app's config and try to find the google's api key
-  const appConfig = require('../config.json');
-
-  // try to get reference to the api key
-  let apiKey = _.get(appConfig, 'googleApi.apiKey');
-
-  // if API key is not set, the component will not boot
-  require('../../components/mapsApi').initClient(apiKey);
+  // do not generate access token if maps API is disabled
+  if (appConfig.mapsApi.enabled) {
+    require('../../components/mapsApi').initClient();
+  }
 };

@@ -12,32 +12,10 @@
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
-      "property": "getAPIScript"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
       "property": "findGeoLocationForAddress"
     }
   ],
   "methods": {
-    "getAPIScript": {
-      "accepts": [],
-      "returns": [
-        {
-          "arg": "script",
-          "type": "file",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Download API script",
-      "http": {
-        "verb": "get",
-        "path": "/js-script"
-      }
-    },
     "findGeoLocationForAddress": {
       "accepts": [
         {
