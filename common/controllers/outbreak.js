@@ -3180,12 +3180,12 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Merge multiple cases and contacts
+   * Merge multiple people of the same type (event/case/contact)
    * @param data List of records ids, to be merged
    * @param options
    * @param callback
    */
-  Outbreak.prototype.mergeCasesAndContacts = function (data, options, callback) {
+  Outbreak.prototype.mergePeople = function (data, options, callback) {
     // defensive checks
     data = data || {};
     data.ids = data.ids || [];
@@ -3237,12 +3237,12 @@ module.exports = function (Outbreak) {
     // reference to the model type we should work upon (case/contact)
     const targetModel = appModels[modelType];
 
-    // retrieve all the models that should be merged (cases or contacts)
     // include follow-up/lab results, based on the person type
     let includes = [];
     if (modelType === appModels.case.modelName) {
       includes.push('labResults');
-    } else {
+    }
+    if (modelType === appModels.contact.modelName) {
       includes.push('followUps');
     }
 
@@ -3311,9 +3311,23 @@ module.exports = function (Outbreak) {
               }
             ];
 
-            clone = _removeCloneProps(clone);
+            // filter relations that might be duplicated
+            // like 2 merge candidates that have a relation with an external entity
+            let resultSourceEntity = clone.persons.find((person) => person.source);
+            let resultTargetEntity = clone.persons.find((person) => person.target);
+            let existingRelation = relationsToAdd.find((relation) => {
+              // check if source/target entities are the same
+              // if so, this is a duplicate
+              let sourceEntity = relation.persons.find((person) => person.source);
+              let targetEntity = relation.persons.find((person) => person.target);
+              return (resultSourceEntity.id === sourceEntity.id) && (resultTargetEntity.id === targetEntity.id);
+            });
 
-            relationsToAdd.push(clone);
+            if (!existingRelation) {
+              clone = _removeCloneProps(clone);
+
+              relationsToAdd.push(clone);
+            }
           });
         });
 

@@ -296,7 +296,7 @@
     "dataSource": null,
     "public": false
   },
-  "mergeCaseContact": {
+  "mergePeopleProps": {
     "dataSource": null,
     "public": false
   }
