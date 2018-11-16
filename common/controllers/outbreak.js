@@ -3320,7 +3320,9 @@ module.exports = function (Outbreak) {
               // if so, this is a duplicate
               let sourceEntity = relation.persons.find((person) => person.source);
               let targetEntity = relation.persons.find((person) => person.target);
-              return (resultSourceEntity.id === sourceEntity.id) && (resultTargetEntity.id === targetEntity.id);
+              return (resultSourceEntity && resultTargetEntity && sourceEntity && targetEntity) &&
+                (resultSourceEntity.id === sourceEntity.id) &&
+                (resultTargetEntity.id === targetEntity.id);
             });
 
             if (!existingRelation) {
