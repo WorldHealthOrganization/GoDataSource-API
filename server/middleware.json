@@ -1,9 +1,5 @@
 {
-  "initial:before": {
-    "loopback#favicon": {
-      "params": "../client/favicon.ico"
-    }
-  },
+  "initial:before": {},
   "initial": {
     "compression": {},
     "cors": {
