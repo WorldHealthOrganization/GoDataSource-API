@@ -222,21 +222,16 @@ const createImageDoc = function (imageData, splitFactor, splitType, callback) {
             return callback(new Error('Unknown image format.'));
           }
 
-          // compute page and image aspect ratio
-          const pageAspectRatio = imageSize.width / imageSize.height;
+          // compute image aspect ratio
           const imageAspectRatio = image.bitmap.width / image.bitmap.height;
 
-          // if the image is wider than page (proportionally)
-          if (
-            splitType === splitTypes.auto && imageAspectRatio < pageAspectRatio ||
-            imageAspectRatio > pageAspectRatio
-          ) {
-            // resize its width according to the split factor
-            image.resize(imageSize.width * splitFactor, Jimp.AUTO);
-          } else {
-            // otherwise resize its height according to the split factor
+          // resize image to fill the page based on aspect ratio
+          if (imageAspectRatio > 1) {
             image.resize(Jimp.AUTO, imageSize.height * splitFactor);
+          } else {
+            image.resize(imageSize.width * splitFactor, Jimp.AUTO);
           }
+
           // compute width, height, rows and columns
           let width, height, rows, columns;
 
