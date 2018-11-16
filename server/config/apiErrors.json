@@ -175,6 +175,10 @@
     "defaultStatusCode": 422,
     "messagePattern": "Instance sync failed: `<%= syncError %>`"
   },
+  "INSTANCE_SYNC_PARTIAL_FAILURE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Instance sync failed partially (incomplete sync): `<%= syncError %>`"
+  },
   "INSTANCE_EXPORT_FAILED": {
     "defaultStatusCode": 422,
     "messagePattern": "Instance export failed: `<%= error %>`"
