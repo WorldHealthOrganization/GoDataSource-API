@@ -6886,6 +6886,9 @@ module.exports = function (Outbreak) {
     // shortcut for safe display a value in the document
     const display = pdfUtils.displayValue;
 
+    // standard date format
+    let standardFormat = 'YYYY-MM-DD';
+
     // get list of questions for contacts from outbreak
     let questions = this.contactFollowUpTemplate.sort((a, b) => a.order > b.order);
 
@@ -6954,43 +6957,222 @@ module.exports = function (Outbreak) {
                       header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_CONTACT')
                     },
                     {
+                      id: 'age',
+                      header: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')
+                    },
+                    {
+                      id: 'gender',
+                      header: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_GENDER')
+                    },
+                    {
+                      id: 'place',
+                      header: dictionary.getTranslation('LNG_ENTITY_FIELD_LABEL_PLACE')
+                    },
+                    {
+                      id: 'city',
+                      header: dictionary.getTranslation('LNG_ADDRESS_FIELD_LABEL_CITY')
+                    },
+                    {
+                      id: 'address',
+                      header: dictionary.getTranslation('LNG_ENTITY_FIELD_LABEL_ADDRESS')
+                    },
+                    {
+                      id: 'followUpStartDate',
+                      header: dictionary.getTranslation('LNG_RANGE_CONTACTS_LIST_HEADER_START_DATE')
+                    },
+                    {
+                      id: 'followUpEndDate',
+                      header: dictionary.getTranslation('LNG_RANGE_CONTACTS_LIST_HEADER_END_DATE')
+                    },
+                    {
                       id: 'status',
                       header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_STATUSID')
                     }
                   ];
 
-                  // include contact questions into the table
-                  questions.forEach((item) => {
-                    headers.push({
-                      id: item.variable,
-                      header: item.text
+                  // additional tables for questionnaire
+                  let additionalTables = [];
+                  // allow only 9 questions to be displayed on the same table with contact information
+                  let mainTableMaxQuestionsCount = 9;
+                  // flag that indicates if main table questions limit is reached
+                  let isMainTableFull = false;
+                  // allow only 13 questions per additional table to be displayed
+                  let additionalTableMaxCount = 13;
+                  // global counter for questions
+                  let counter = 1;
+
+                  // helper function used to create new additional table, when limit is reached
+                  let insertAdditionalTable = function () {
+                    additionalTables.push({
+                      headers: [],
+                      values: []
                     });
+                  };
+
+                  // go through each question and make sure you get the additional questions on first level as well
+                  let questionsClone = [];
+
+                  questions.forEach((question) => {
+                    (function parseAdditionalQuestions(question) {
+                      if (question) {
+                        // make sure the question is in the main questions list
+                        if (questionsClone.findIndex((q) => q.variable === question.variable) === -1) {
+                          questionsClone.push(question);
+                        }
+
+                        if (question.answers) {
+                          question.answers.forEach((answer) => {
+                            if (answer.additionalQuestions && answer.additionalQuestions.length) {
+                              answer.additionalQuestions.forEach((additionalQuestion) => {
+                                parseAdditionalQuestions(additionalQuestion);
+                              });
+                            }
+                          });
+                        }
+                      }
+                    })(question);
+                  });
+
+                  // include contact questions into the table
+                  questionsClone.forEach((item) => {
+                    if (item.variable) {
+                      if (counter <= mainTableMaxQuestionsCount && !isMainTableFull) {
+                        headers.push({
+                          id: item.variable,
+                          header: dictionary.getTranslation(item.text),
+                          width: 50
+                        });
+
+                        if (counter === mainTableMaxQuestionsCount) {
+                          isMainTableFull = true;
+                          counter = 1;
+                          // continue with next question
+                          return false;
+                        }
+                      }
+
+                      if (counter <= additionalTableMaxCount && isMainTableFull) {
+                        if (!additionalTables.length) {
+                          insertAdditionalTable();
+                        }
+
+                        let lastAdditionalTable = additionalTables[additionalTables.length - 1];
+                        lastAdditionalTable.headers.push({
+                          id: item.variable,
+                          header: dictionary.getTranslation(item.text),
+                          width: 60
+                        });
+
+                        if (counter === additionalTableMaxCount) {
+                          insertAdditionalTable();
+                          counter = 1;
+                          // continue with next question
+                          return false;
+                        }
+                      }
+
+                      counter++;
+                    }
                   });
 
                   // start building table data
                   let tableData = [];
                   contactGroups[groupName].forEach((contact) => {
+                    let rowIndex = 0;
                     contact.followUps.forEach((followUp) => {
                       let row = {
                         contact: `${display(contact.firstName)} ${display(contact.middleName)} ${display(contact.lastName)}`,
-                        status: dictionary.getTranslation(followUp.statusId) || ''
+                        status: dictionary.getTranslation(followUp.statusId) || '',
+                        gender: display(contact.gender)
                       };
 
+                      let age = '';
+                      if (contact.age) {
+                        if (contact.age.months > 0) {
+                          age = `${display(contact.age.months)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`;
+                        } else {
+                          age = `${display(contact.age.years)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')}`;
+                        }
+                      }
+                      row.age = age;
+
+                      if (contact.followUp) {
+                        let followUpStartDate = genericHelpers.getUTCDate(contact.followUp.startDate);
+                        let followUpEndDate = genericHelpers.getUTCDate(contact.followUp.endDate);
+
+                        row.followUpStartDate = followUpStartDate.format(standardFormat);
+                        row.followUpEndDate = followUpEndDate.format(standardFormat);
+                      }
+
+                      // if contacts are grouped per location
+                      // then use the group name which is location name as place for each contact under the group
+                      if (body.groupBy === 'place') {
+                        row.place = groupName;
+                      } else {
+                        row.place = display(contact.locationName);
+                      }
+
+                      // get contact's current address
+                      let contactAddress = app.models.person.getCurrentAddress(contact);
+                      if (contactAddress) {
+                        row.city = display(contactAddress.city);
+                        row.address = `${display(contactAddress.addressLine1)} ${display(contactAddress.addressLine2)}`;
+                      }
+
+                      // defensive check
                       let questions = followUp.questionnaireAnswers || {};
 
                       // add questionnaire answers into the table if any
                       for (let questionId in questions) {
                         if (questions.hasOwnProperty(questionId)) {
-                          row[questionId] = display(questions[questionId]);
+                          // filter the question answer through display function
+                          // to be sure it will not display unwanted values like undefined/null in the document
+
+                          // if its array all the things commented above for each item in the array
+                          // then the result is joined with comma
+                          let answer = '';
+                          if (Array.isArray(questions[questionId])) {
+                            answer = questions[questionId]
+                              .map((q) => display(dictionary.getTranslation(q)))
+                              .join();
+                          } else {
+                            answer = display(dictionary.getTranslation(questions[questionId]));
+                          }
+
+                          // first check if its in the main table
+                          let headerMainTableIndex = headers.findIndex((header) => header.id === questionId);
+                          if (headerMainTableIndex >= 0) {
+                            row[questionId] = answer;
+                            continue;
+                          }
+                          // try to identify the question in any of the additional tables
+                          // using filter to make sure that if the question is repeating itself
+                          // the code doesn't break and just supplies the answer to all questions that have the same id
+                          // doing this because table library also supports multiple headers with same id
+                          let matchingTables = additionalTables.filter((table) => {
+                            return table.headers.find((header) => header.id === questionId);
+                          });
+
+                          matchingTables.forEach((table) => {
+                            table.values[rowIndex] = table.values[rowIndex] || {};
+                            table.values[rowIndex][questionId] = answer;
+                          });
                         }
                       }
 
                       tableData.push(row);
+                      rowIndex++;
                     });
                   });
 
                   // insert table into the document
-                  pdfUtils.createTableInPDFDocument(headers, tableData, doc);
+                  pdfUtils.createTableInPDFDocument(headers, tableData, doc, null, true);
+
+                  additionalTables.forEach((tableDef) => {
+                    pdfUtils.createTableInPDFDocument(tableDef.headers, tableDef.values, doc, null, true);
+                  });
+
+                  doc.moveDown();
                 }
               }
 
@@ -7219,19 +7401,68 @@ module.exports = function (Outbreak) {
                     }
                   ];
 
-                  for (let date = startDate.clone(); date.isSameOrBefore(endDate); date.add(1, 'day')) {
-                    headers.push({
-                      id: date.format(standardFormat),
-                      header: date.format('MM/DD')
+                  // additional tables for many days
+                  let additionalTables = [];
+                  // allow only 10 days be displayed on the same table with contact information
+                  let mainTableMaxCount = 10;
+                  // check to know that main table count threshold is overcome
+                  let isMainTableFull = false;
+                  // allow only 20 days per additional table to be displayed
+                  let additionalTableMaxCount = 39;
+                  let counter = 1;
+                  let insertAdditionalTable = function () {
+                    additionalTables.push({
+                      headers: [],
+                      values: []
                     });
+                  };
+                  for (let date = startDate.clone(); date.isSameOrBefore(endDate); date.add(1, 'day')) {
+                    if (counter <= mainTableMaxCount && !isMainTableFull) {
+                      headers.push({
+                        id: date.format(standardFormat),
+                        header: date.format('YY/MM/DD'),
+                        width: 20,
+                        isDate: true
+                      });
+
+                      if (counter === mainTableMaxCount) {
+                        isMainTableFull = true;
+                        counter = 1;
+                        continue;
+                      }
+                    }
+
+                    if (counter <= additionalTableMaxCount && isMainTableFull) {
+                      if (!additionalTables.length) {
+                        insertAdditionalTable();
+                      }
+
+                      let lastAdditionalTable = additionalTables[additionalTables.length - 1];
+                      lastAdditionalTable.headers.push({
+                        id: date.format(standardFormat),
+                        header: date.format('YY/MM/DD'),
+                        width: 20
+                      });
+
+                      if (counter === additionalTableMaxCount) {
+                        insertAdditionalTable();
+                        counter = 1;
+                        continue;
+                      }
+                    }
+
+                    counter++;
                   }
 
                   // start building table data
                   let tableData = [];
 
+                  let rowIndex = 0;
                   contactGroups[groupName].forEach((contact) => {
+                    let contactInfo = `${display(contact.firstName)} ${display(contact.middleName)} ${display(contact.lastName)}`;
+
                     let row = {
-                      contact: `${display(contact.firstName)} ${display(contact.middleName)} ${display(contact.lastName)}`,
+                      contact: contactInfo,
                       gender: display(contact.gender)
                     };
 
@@ -7255,10 +7486,16 @@ module.exports = function (Outbreak) {
                       // mark them unusable from startDate to followup start date
                       // and from follow up end date to document end date
                       for (let date = startDate.clone(); date.isBefore(followUpStartDate); date.add(1, 'day')) {
-                        row[date.format(standardFormat)] = 'X';
+                        row[date.format(standardFormat)] = {
+                          value: 'X',
+                          isDate: true
+                        };
                       }
                       for (let date = followUpEndDate.clone().add(1, 'day'); date.isSameOrBefore(endDate); date.add(1, 'day')) {
-                        row[date.format(standardFormat)] = 'X';
+                        row[date.format(standardFormat)] = {
+                          value: 'X',
+                          isDate: true
+                        };
                       }
                     }
 
@@ -7283,16 +7520,55 @@ module.exports = function (Outbreak) {
                       contact.followUps.forEach((followUp) => {
                         let rowId = moment(followUp.date).format(standardFormat);
                         if (!row[rowId]) {
-                          row[rowId] = dictionary.getTranslation(followUpStatusMap[followUp.statusId]) || '';
+                          row[rowId] = {
+                            value: dictionary.getTranslation(followUpStatusMap[followUp.statusId]) || '',
+                            isDate: true
+                          };
                         }
                       });
                     }
 
+                    // move days that don't belong to main table to additional day tables
+                    let mainTableDateHeaders = headers.filter((header) => header.hasOwnProperty('isDate'));
+                    let lastDayInMainTable = genericHelpers.convertToDate(mainTableDateHeaders[mainTableDateHeaders.length - 1].id);
+
+                    // get all date values from row, keep only until last day in the table
+                    // rest split among additional tables
+                    for (let prop in row) {
+                      if (row.hasOwnProperty(prop) && row[prop].isDate) {
+                        let parsedDate = genericHelpers.convertToDate(prop);
+                        if (parsedDate.isAfter(lastDayInMainTable)) {
+                          // find the suitable additional table
+                          let suitableAdditionalTable = additionalTables.filter((tableDef) => {
+                            if (tableDef.headers.length) {
+                              let lastDay = tableDef.headers[tableDef.headers.length - 1].id;
+                              return parsedDate.isSameOrBefore(genericHelpers.convertToDate(lastDay));
+                            }
+                            return false;
+                          });
+                          if (suitableAdditionalTable.length) {
+                            suitableAdditionalTable[0].values[rowIndex] = suitableAdditionalTable[0].values[rowIndex] || {};
+                            suitableAdditionalTable[0].values[rowIndex][prop] = row[prop].value;
+                          }
+                          delete row[prop];
+                        } else {
+                          row[prop] = row[prop].value;
+                        }
+                      }
+                    }
+
                     tableData.push(row);
+                    rowIndex++;
                   });
 
                   // insert table into the document
-                  pdfUtils.createTableInPDFDocument(headers, tableData, doc);
+                  pdfUtils.createTableInPDFDocument(headers, tableData, doc, null, true);
+
+                  additionalTables.forEach((tableDef) => {
+                    pdfUtils.createTableInPDFDocument(tableDef.headers, tableDef.values, doc, null, true);
+                  });
+
+                  doc.moveDown();
                 }
               }
 

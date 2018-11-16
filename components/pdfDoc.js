@@ -557,8 +557,9 @@ const displayPersonSectionsWithQuestionnaire = function (doc, sections, title, q
  * @param data Table data
  * @param document PDF document in which to add table
  * @param documentConfig Optional configuration
+ * @param noHeaderOnNewPage
  */
-function createTableInPDFDocument(headers, data, document, documentConfig) {
+function createTableInPDFDocument(headers, data, document, documentConfig, noHeaderOnNewPage) {
   documentConfig = documentConfig || defaultDocumentConfiguration;
 
   const pdfTable = new PdfTable(document);
@@ -588,7 +589,9 @@ function createTableInPDFDocument(headers, data, document, documentConfig) {
 
   // add table header on all pages
   pdfTable.onPageAdded(function (tb) {
-    tb.addHeader();
+    if (!noHeaderOnNewPage) {
+      tb.addHeader();
+    }
   });
 
   // compute width
