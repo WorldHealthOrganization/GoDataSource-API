@@ -178,6 +178,11 @@ module.exports = function (FollowUp) {
             id: context.instance.personId
           });
         }
+        if (!person.followUp) {
+          throw app.utils.apiError.getError('INTERNAL_ERROR', {
+            error: `Contact record (id: '${person.id}) missing follow-up interval information`
+          });
+        }
         // set index based on the difference in days from start date until the follow up set date
         // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
         context.instance.index = daysSince(moment(person.followUp.startDate), context.instance.date) + 1;
