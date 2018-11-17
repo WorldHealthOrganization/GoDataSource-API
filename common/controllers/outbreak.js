@@ -3186,6 +3186,11 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.mergePeople = function (data, options, callback) {
+    if (!options) {
+      options = {};
+    }
+    // execute same hooks as for sync (data should already exist)
+    options._sync = true;
     // defensive checks
     data = data || {};
     data.ids = data.ids || [];
