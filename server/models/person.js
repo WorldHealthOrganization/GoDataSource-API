@@ -202,9 +202,8 @@ module.exports = function (Person) {
    */
   Person.observe('before save', function (context, next) {
     const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
-    const systemTriggeredUpdate = app.utils.helpers.getValueFromContextOptions(context, 'triggerPeopleUpdates');
     // if the record is not being deleted or this is not a system triggered update
-    if (!data.source.all.deleted && !systemTriggeredUpdate) {
+    if (!data.source.all.deleted && !data.source.all.systemTriggeredUpdate) {
       // validate person addresses
       const addressValidationError = validatePersonAddresses(data.source.all);
       // if there is an address validation error
