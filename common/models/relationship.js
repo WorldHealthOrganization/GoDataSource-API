@@ -420,6 +420,7 @@ module.exports = function (Relationship) {
             if (!personRecord) {
               throw app.logger.error(`Failed to trigger person record updates. Person (id: ${person.id}) not found.`);
             }
+            personRecord.systemTriggeredUpdate = true;
             // trigger record update
             return personRecord.updateAttributes({}, context.options);
           })
@@ -442,6 +443,7 @@ module.exports = function (Relationship) {
               if (!contactRecord) {
                 throw app.logger.error(`Failed to trigger contact record updates. Contact (id: ${contactInPersons.id}) not found.`);
               }
+              contactRecord.systemTriggeredUpdate = true;
               // trigger record update
               return contactRecord.updateAttributes({}, context.options);
             })
