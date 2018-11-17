@@ -5712,6 +5712,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.filteredCountFollowUps = function (filter, callback) {
+    const self = this;
     helpers.buildFollowUpCustomFilter(filter, this.id)
       .then((customFilter) => {
         // Merge custom filter with base filter
@@ -5719,7 +5720,7 @@ module.exports = function (Outbreak) {
           customFilter,
           filter || {});
 
-        Outbreak.prototype.__get__followUps(customFilter, function (err, res) {
+        self.__get__followUps(customFilter, function (err, res) {
           if (err) {
             return callback(err);
           }
