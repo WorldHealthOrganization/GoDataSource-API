@@ -642,7 +642,7 @@
       "LNG_CASE_FIELD_LABEL_LAST_NAME": "日本の Last name",
       "LNG_CASE_FIELD_LABEL_DATE_DECEASED": "日本の Date of death",
       "LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER": "日本の Document number",
-      "LNG_CASE_FIELD_LABEL_VISUAL_ID": "日本の Visual ID",
+      "LNG_CASE_FIELD_LABEL_VISUAL_ID": "日本の Case ID",
       "LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED": "日本の Refused transfer to treatment unit",
       "LNG_CASE_FIELD_LABEL_SAFE_BURIAL": "日本の Performed safe burial",
       "LNG_CASE_FIELD_LABEL_DATE_OF_INFECTION_DESCRIPTION": "日本の ",
@@ -702,7 +702,7 @@
       "LNG_PAGE_CREATE_CASE_TITLE": "日本の Create case",
       "LNG_PAGE_CREATE_CASE_TAB_ADDRESS_TITLE": "日本の Address",
       "LNG_PAGE_CREATE_CASE_TAB_PERSONAL_TITLE": "日本の Personal",
-      "LNG_PAGE_CREATE_CASE_TAB_INFECTION_TITLE": "日本の Infection",
+      "LNG_PAGE_CREATE_CASE_TAB_INFECTION_TITLE": "日本の Epidemiology",
       "LNG_PAGE_CREATE_CASE_TAB_QUESTIONNAIRE_TITLE": "日本の Questionnaire",
       "LNG_PAGE_CREATE_CASE_ACTION_CREATE_CASE_BUTTON": "日本の Create case",
       "LNG_PAGE_CREATE_CASE_ACTION_CREATE_CASE_SUCCESS_MESSAGE": "日本の Case created"
@@ -809,7 +809,7 @@
       "LNG_CONTACT_FIELD_LABEL_LAST_NAME": "日本の Last Name",
       "LNG_CONTACT_FIELD_LABEL_DATE_DECEASED": "日本の Date of death",
       "LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER": "日本の Document number",
-      "LNG_CONTACT_FIELD_LABEL_VISUAL_ID": "日本の Visual ID",
+      "LNG_CONTACT_FIELD_LABEL_VISUAL_ID": "日本の Contact ID",
       "LNG_CONTACT_FIELD_LABEL_DOCUMENTS": "日本の Documents",
       "LNG_CONTACT_FIELD_LABEL_WAS_CASE": "日本の Was case",
       "LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT": "日本の Date of becoming contact",
@@ -1114,7 +1114,7 @@
     "uiTransmissionChainsListPage": {
       "LNG_PAGE_LIST_TRANSMISSION_CHAINS_TITLE": "日本の Chains of transmission",
       "LNG_PAGE_LIST_TRANSMISSION_CHAINS_LABEL_DURATION_DAYS": "日本の days",
-      "LNG_PAGE_LIST_TRANSMISSION_CHAINS_ACTION_GEO_MAP_BUTTON": "日本の Geospatially map",
+      "LNG_PAGE_LIST_TRANSMISSION_CHAINS_ACTION_GEO_MAP_BUTTON": "日本の Geospatial map",
       "LNG_PAGE_LIST_TRANSMISSION_CHAINS_ACTION_LIST_BUTTON": "日本の List",
       "LNG_PAGE_LIST_TRANSMISSION_CHAINS_ACTION_GRAPH_BUTTON": "日本の Graph"
     },
@@ -1834,7 +1834,7 @@
       "LNG_TRANSMISSION_CHAIN_FIELD_LABEL_DURATION": "日本の Duration"
     },
     "uiTransmissionChainsGeoMap": {
-      "LNG_PAGE_TRANSMISSION_CHAINS_GEO_MAP_TITLE": "日本の Geospatially map",
+      "LNG_PAGE_TRANSMISSION_CHAINS_GEO_MAP_TITLE": "日本の Geospatial map",
       "LNG_PAGE_TRANSMISSION_CHAINS_GEO_MAP_NO_DATA": "日本の No chains with geolocation provided"
     },
     "uiSideFilter": {
