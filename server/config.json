@@ -70,11 +70,11 @@
   },
   "defaultArcGisServers": [
     {
-      "name": "WHO_West_Africa_background_7",
+      "name": "WHO Background",
       "url": "http://maps.who.int/arcgis/rest/services/Basemap/WHO_West_Africa_background_7/MapServer"
     },
     {
-      "name": "WHO_Reference_layer",
+      "name": "WHO Reference",
       "url": "http://maps.who.int/arcgis/rest/services/Basemap/WHO_Reference_layer/MapServer"
     }
   ]
