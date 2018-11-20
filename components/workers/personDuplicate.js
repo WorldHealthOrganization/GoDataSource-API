@@ -91,16 +91,22 @@ const worker = {
     };
     // go through the list of people
     people.forEach(function (person) {
-      // store people indexed by name
-      addEntryToIndex(index.name, person, ['name']);
+      // if person has name (type event)
+      if (person.name) {
+        // store people indexed by name
+        addEntryToIndex(index.name, person, ['name']);
+      }
       // store people indexed by firstName and lastName (also try to match reverse order)
       addEntryToIndex(index.name, person, ['firstName', 'lastName'], true);
       // store people indexed by firstName and middleName (also try to match reverse order)
       addEntryToIndex(index.name, person, ['firstName', 'middleName'], true);
       // store people indexed by middleName and lastName (also try to match reverse order)
       addEntryToIndex(index.name, person, ['middleName', 'lastName'], true);
-      // store people indexed by phoneNumber and gender
-      addEntryToIndex(index.phoneNumber, person, ['phoneNumber', 'gender']);
+      // if phone number is present
+      if (person.phoneNumber) {
+        // store people indexed by phoneNumber and gender
+        addEntryToIndex(index.phoneNumber, person, ['phoneNumber', 'gender']);
+      }
       // if the person has documents
       if (Array.isArray(person.documents)) {
         // go trough the documents
