@@ -134,7 +134,7 @@
     "prototype.approveHelpItem": {
       "accepts": [
         {
-          "arg": "nk",
+          "arg": "fk",
           "type": "string",
           "description": "Foreign key for help items"
         },
