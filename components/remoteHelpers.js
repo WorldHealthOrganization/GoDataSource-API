@@ -75,15 +75,16 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callba
  * @param callback
  */
 function exportFilteredModelsList(app, Model, filter, exportType, fileName, encryptPassword, anonymizeFields, options, beforeExport, callback) {
+  // no-op fallback function for beforeExport hook
+  // used for defensive checks, when it is not passed
+  let noOp = (results) => Promise.resolve(results);
+  beforeExport = beforeExport || noOp;
+
   // before export is optional
   if (!callback) {
     callback = beforeExport;
     // by default before export is a no-op function that returns a promise
-    beforeExport = function (results) {
-      return new Promise(function (resolve) {
-        resolve(results);
-      });
-    };
+    beforeExport = noOp;
   }
   // find results
   Model.find(filter, function (error, result) {
