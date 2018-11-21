@@ -1,6 +1,6 @@
 {
   "mongoDb": {
-    "host": "localhost",
+    "host": "127.0.0.1",
     "port": 27017,
     "url": "",
     "database": "go-data",
@@ -11,7 +11,9 @@
     "allowExtendedOperators": true,
     "enableGeoIndexing": true,
     "ignoreUndefined": true,
-    "maxDepthOfQuery": 24
+    "maxDepthOfQuery": 24,
+    "connectTimeoutMS": 100000,
+    "socketTimeoutMS":100000
   },
   "email": {
     "name": "email",
