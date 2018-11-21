@@ -24,7 +24,8 @@ const rolesMap = {
       'read_role',
       'write_role',
       'write_help',
-      'approve_help'
+      'approve_help',
+      'read_outbreak'
     ]
   },
   'GO.Data Administrator': {
