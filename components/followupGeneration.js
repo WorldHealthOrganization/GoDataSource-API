@@ -233,7 +233,7 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     // check if the follow up date is in the past
     // if so, check if the number of existing follow ups is the same as the generate frequency per day
     // if so, do not generate any follow ups
-    if (followUpDate.isBefore(Helpers.getUTCDate())) {
+    if (followUpDate.isBefore(Helpers.getUTCDateEndOfDay())) {
       let followUpsInThisDay = contact.followUpsLists.filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
       numberOfFollowUpsPerDay = numberOfFollowUpsPerDay - followUpsInThisDay.length;
     }
@@ -256,7 +256,7 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
 
     // if there are follow ups on the same day and day is in the future
     // delete them and then insert the newly generated
-    if (!followUpDate.isBefore(Helpers.getUTCDate())) {
+    if (!followUpDate.isBefore(Helpers.getUTCDateEndOfDay())) {
       let existingFollowups = contact.followUpsLists.filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
       existingFollowups.map((existingFollowup) => {
         followUpsToDelete.push(existingFollowup.destroy(reqOpts));
