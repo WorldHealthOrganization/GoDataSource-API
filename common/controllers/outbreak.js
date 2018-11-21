@@ -839,15 +839,37 @@ module.exports = function (Outbreak) {
       allowedLocationIds.forEach(function (locationId) {
         allowedLocationsIndex[locationId] = true;
       });
+
+      // initialize includeChildren filter
+      let includeChildren;
+      // check if the includeChildren filter was sent; accepting it only on the first level
+      includeChildren = _.get(filter, 'where.includeChildren');
+      if (typeof includeChildren !== 'undefined') {
+        // includeChildren was sent; remove it from the filter as it shouldn't reach DB
+        delete filter.where.includeChildren;
+      } else {
+        // default value is true
+        includeChildren = true;
+      }
+
+      // build the filter
+      const _filter = app.utils.remote.mergeFilters({
+        where: {
+          id: {
+            inq: allowedLocationIds
+          }
+        }
+      }, filter || {});
+
+      // if include children was provided
+      if (includeChildren) {
+        //set it back on the first level of where (where the getHierarchicalList expects it to be)
+        _.set(_filter, 'where.includeChildren', includeChildren);
+      }
+
       // build hierarchical list of locations, restricting locations to the list of allowed ones
       return app.controllers.location.getHierarchicalList(
-        app.utils.remote.mergeFilters({
-          where: {
-            id: {
-              inq: allowedLocationIds
-            }
-          }
-        }, filter || {}),
+        _filter,
         function (error, hierarchicalList) {
           // handle eventual errors
           if (error) {

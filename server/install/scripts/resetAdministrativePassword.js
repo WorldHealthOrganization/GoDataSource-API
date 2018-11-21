@@ -24,7 +24,8 @@ const defaultSystemAdminRole = {
     'read_user_account',
     'write_user_account',
     'read_role',
-    'write_role'
+    'write_role',
+    'read_outbreak'
   ]
 };
 
