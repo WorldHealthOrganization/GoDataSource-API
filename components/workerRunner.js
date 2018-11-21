@@ -28,7 +28,7 @@ function invokeWorkerMethod(workerName, method, args, callback) {
   }
 
   // fork the worker
-  const worker = fork(`${workersPath}/${workerName}`, [], {execArgv: []});
+  const worker = fork(`${workersPath}/${workerName}`, [], {execArgv: [], windowsHide: true});
   // invoke it
   worker.send({fn: method, args});
   // wait for it's response and process it
