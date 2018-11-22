@@ -48,6 +48,10 @@ module.exports = function (Address) {
   Address.getHumanReadableAddress = function (address) {
     let readableAddress = '';
 
+    if (!address) {
+      return readableAddress;
+    }
+
     if (address.city) {
       readableAddress += address.city;
     }
