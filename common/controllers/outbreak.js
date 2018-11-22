@@ -6829,7 +6829,7 @@ module.exports = function (Outbreak) {
 
             // Add all questions as rows
             self.contactFollowUpTemplate.forEach((question) => {
-              data.push({description: question.text});
+              data.push({description: dictionary.getTranslation(question.text)});
               contact.followUps.forEach((followUp) => {
                 data[data.length - 1]['index' + followUp.index] = genericHelpers.translateQuestionAnswers(question, _.get(followUp, `questionnaireAnswers[${question.variable}]`), dictionary);
               });
