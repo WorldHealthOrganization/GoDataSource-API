@@ -6837,14 +6837,14 @@ module.exports = function (Outbreak) {
             self.contactFollowUpTemplate.forEach((question) => {
               data.push({description: question.text});
               contact.followUps.forEach((followUp) => {
-                data[data.length - 1]['index' + followUp.index] = genericHelpers.translateQuestionAnswers(question, followUp.questionnaireAnswers[question.variable], dictionary);
+                data[data.length - 1]['index' + followUp.index] = genericHelpers.translateQuestionAnswers(question, _.get(followUp, `questionnaireAnswers[${question.variable}]`), dictionary);
               });
             });
 
             // Add additional information at the start of each page
             pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'), 14);
             doc.text(`${dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_GENDER')}: ${dictionary.getTranslation(contact.gender)}`);
-            doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')}: ${contact.age.years} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${contact.age.months} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`);
+            doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')}: ${_.get(contact, 'age.years')} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(contact, 'age.months')} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`);
             doc.text(`${dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE')}: ${moment(contact.dateOfLastContact).format('YYYY-MM-DD')}`);
             doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_ADDRESSES')}: ${app.models.address.getHumanReadableAddress(app.models.person.getCurrentAddress(contact))}`);
             doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER')}: ${contact.phoneNumber}`);
