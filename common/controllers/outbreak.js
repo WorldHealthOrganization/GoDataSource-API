@@ -6668,7 +6668,10 @@ module.exports = function (Outbreak) {
             id: caseId
           });
         }
-        callback(null, caseRecord.getMovement());
+        return caseRecord.getMovement()
+          .then(function (movement) {
+            callback(null, movement);
+          });
       })
       .catch(callback);
   };
@@ -6695,7 +6698,10 @@ module.exports = function (Outbreak) {
             id: contactId
           });
         }
-        callback(null, contactRecord.getMovement());
+        return contactRecord.getMovement()
+          .then(function (movement) {
+            callback(null, movement);
+          });
       })
       .catch(callback);
   };
