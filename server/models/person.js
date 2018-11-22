@@ -613,7 +613,7 @@ module.exports = function (Person) {
    * Return the movement of a person.
    * Movement: list of addresses that contain geoLocation information, sorted from the oldest to newest based on date.
    * Empty date is treated as the most recent
-   * @return {Array}
+   * @returns {Promise<Array | never>}
    */
   Person.prototype.getMovement = function () {
     // start with empty movement
@@ -635,6 +635,25 @@ module.exports = function (Person) {
         }
       });
     }
-    return movement;
+    // resolve locations
+    const getLocations = [];
+    // go through address list
+    movement.forEach(function (address) {
+      // if the location has an address
+      if (address.locationId) {
+        // get it
+        getLocations.push(app.models.location
+          .findById(address.locationId)
+          .then(function (location) {
+            // add it to the address
+            address.location = location;
+          }));
+      }
+    });
+    // get locations for addresses
+    return Promise.all(getLocations)
+      .then(function () {
+        return movement;
+      });
   };
 };
