@@ -213,8 +213,8 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
   if (!ignorePeriod) {
     // if passed period is higher than contact's follow up period
     // restrict follow up start/date to a maximum of contact's follow up period
-    let firstIncubationDay = Helpers.getUTCDate(contact.followUp.startDate);
-    let lastIncubationDay = Helpers.getUTCDate(contact.followUp.endDate);
+    let firstIncubationDay = Helpers.getDate(contact.followUp.startDate);
+    let lastIncubationDay = Helpers.getDate(contact.followUp.endDate);
     if (period.endDate.isAfter(lastIncubationDay)) {
       period.endDate = lastIncubationDay.clone();
     }
@@ -233,7 +233,7 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     // check if the follow up date is in the past
     // if so, check if the number of existing follow ups is the same as the generate frequency per day
     // if so, do not generate any follow ups
-    if (followUpDate.isBefore(Helpers.getUTCDateEndOfDay())) {
+    if (followUpDate.isBefore(Helpers.getDateEndOfDay())) {
       let followUpsInThisDay = contact.followUpsLists.filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
       numberOfFollowUpsPerDay = numberOfFollowUpsPerDay - followUpsInThisDay.length;
     }
@@ -256,7 +256,7 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
 
     // if there are follow ups on the same day and day is in the future
     // delete them and then insert the newly generated
-    if (!followUpDate.isBefore(Helpers.getUTCDateEndOfDay())) {
+    if (!followUpDate.isBefore(Helpers.getDateEndOfDay())) {
       let existingFollowups = contact.followUpsLists.filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
       existingFollowups.map((existingFollowup) => {
         followUpsToDelete.push(existingFollowup.destroy(reqOpts));

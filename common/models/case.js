@@ -229,10 +229,10 @@ module.exports = function (Case) {
     // always work with end of day
     if (endDate) {
       // get end of day for specified date
-      endDate = app.utils.helpers.getUTCDateEndOfDay(endDate);
+      endDate = app.utils.helpers.getDateEndOfDay(endDate);
     } else {
       // nothing sent, use current day's end of day
-      endDate = app.utils.helpers.getUTCDateEndOfDay();
+      endDate = app.utils.helpers.getDateEndOfDay();
     }
 
     // define period interval
