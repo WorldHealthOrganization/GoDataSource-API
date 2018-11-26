@@ -12,7 +12,11 @@ const app = require('../server');
 function internalError(error, request, response, next) {
   if (!error.statusCode) {
     // log original error
-    request.logger.error(error, error.stack);
+    if (request.logger) {
+      request.logger.error(error, error.stack);
+    } else {
+      app.logger.error(error, error.stack);
+    }
     // handle error
     next(app.utils.apiError.getError('INTERNAL_ERROR', {
       error: {
