@@ -36,24 +36,24 @@ const nonModelObjects = {
 };
 
 /**
- * Convert a Date object into moment UTC date and reset time to start of the day
+ * Convert a Date object into moment date and reset time to start of the day
  * Additionally if dayOfWeek is sent the function will return the date for the date's corresponding day of the week
  * @param date If no date is given, the current datetime is returned
  * @param dayOfWeek If not sent the day of the week will not be changed
  */
-const getUTCDate = function (date, dayOfWeek) {
-  let momentDate = date ? moment.utc(date).startOf('day') : moment.utc().startOf('day');
+const getDate = function (date, dayOfWeek) {
+  let momentDate = date ? moment(date).startOf('day') : moment().startOf('day');
   return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
 };
 
 /**
- * Convert a Date object into moment UTC date and reset time to end of the day
+ * Convert a Date object into moment date and reset time to end of the day
  * Additionally if dayOfWeek is sent the function will return the date for the date's corresponding day of the week
  * @param date If no date is given, the current datetime is returned
  * @param dayOfWeek If not sent the date will not be changed
  */
-const getUTCDateEndOfDay = function (date, dayOfWeek) {
-  let momentDate = date ? moment.utc(date).endOf('day') : moment.utc().endOf('day');
+const getDateEndOfDay = function (date, dayOfWeek) {
+  let momentDate = date ? moment(date).endOf('day') : moment().endOf('day');
   return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
 };
 
@@ -85,8 +85,8 @@ const getChunksForInterval = function (interval, chunk) {
   chunk = chunk ? chunkMap[chunk] : chunkMap.day;
 
   // make sure we're always dealing with moment dates
-  interval[0] = getUTCDate(interval[0]);
-  interval[1] = getUTCDateEndOfDay(interval[1]);
+  interval[0] = getDate(interval[0]);
+  interval[1] = getDateEndOfDay(interval[1]);
 
   // get chunks
   let chunks = chunkDateRange(interval[0], interval[1], chunk);
@@ -106,11 +106,11 @@ const getChunksForInterval = function (interval, chunk) {
         // first chunk is from the interval start date
         start: interval[0],
         // end is start of next month (one day gets substracted later)
-        end: getUTCDateEndOfDay(interval[1]).startOf('month')
+        end: getDateEndOfDay(interval[1]).startOf('month')
       },
       {
         // second chunk starts from the first day of the month for interval end date
-        start: getUTCDate(interval[1]).startOf('month'),
+        start: getDate(interval[1]).startOf('month'),
         // end date is interval end date
         end: interval[1]
       }
@@ -123,10 +123,10 @@ const getChunksForInterval = function (interval, chunk) {
   // parse the chunks and create map with UTC dates
   chunks.forEach(function (chunk, index) {
     // get the chunk margins and format to UTC
-    let start = getUTCDate(chunk.start);
+    let start = getDate(chunk.start);
     // chunkDateRange uses for both start and end 00:00 hours;
     // we use 23:59 hours for end so we need to get the end of day for the previous day except for the last day in the interval since we already send it at 23:59 hours
-    let end = getUTCDateEndOfDay(chunk.end);
+    let end = getDateEndOfDay(chunk.end);
     if (index !== chunks.length - 1) {
       end.add(-1, 'd');
     }
@@ -1381,28 +1381,28 @@ const getPeriodIntervalForDate = function (fullPeriodInterval, periodType, date)
   switch (periodType) {
     case 'day':
       // get day interval for date
-      beginningOfDay = getUTCDate(date).toString();
-      endOfDay = getUTCDateEndOfDay(date).toString();
+      beginningOfDay = getDate(date).toString();
+      endOfDay = getDateEndOfDay(date).toString();
       periodInterval = [beginningOfDay, endOfDay];
       break;
     case 'week':
       // get week interval for date
-      mondayStartOfDay = getUTCDate(date, 1);
-      sundayEndOfDay = getUTCDateEndOfDay(date, 7);
+      mondayStartOfDay = getDate(date, 1);
+      sundayEndOfDay = getDateEndOfDay(date, 7);
       // we should use monday only if it is later than the first date of the fullPeriodInterval; else use the first date of the period interval
-      mondayStartOfDay = (mondayStartOfDay.isAfter(fullPeriodInterval[0]) ? mondayStartOfDay : getUTCDate(fullPeriodInterval[0])).toString();
+      mondayStartOfDay = (mondayStartOfDay.isAfter(fullPeriodInterval[0]) ? mondayStartOfDay : getDate(fullPeriodInterval[0])).toString();
       // we should use sunday only if it is earlier than the last date of the fullPeriodInterval; else use the last date of the period interval
-      sundayEndOfDay = (sundayEndOfDay.isBefore(fullPeriodInterval[1]) ? sundayEndOfDay : getUTCDateEndOfDay(fullPeriodInterval[1])).toString();
+      sundayEndOfDay = (sundayEndOfDay.isBefore(fullPeriodInterval[1]) ? sundayEndOfDay : getDateEndOfDay(fullPeriodInterval[1])).toString();
       periodInterval = [mondayStartOfDay, sundayEndOfDay];
       break;
     case 'month':
       // get month period interval for date
-      firstDayOfMonth = getUTCDate(date).startOf('month');
-      lastDayOfMonth = getUTCDateEndOfDay(date).endOf('month');
+      firstDayOfMonth = getDate(date).startOf('month');
+      lastDayOfMonth = getDateEndOfDay(date).endOf('month');
       // we should use first day of month only if it is later than the first date of the fullPeriodInterval; else use the first date of the period interval
-      firstDayOfMonth = (firstDayOfMonth.isAfter(fullPeriodInterval[0]) ? firstDayOfMonth : getUTCDate(fullPeriodInterval[0])).toString();
+      firstDayOfMonth = (firstDayOfMonth.isAfter(fullPeriodInterval[0]) ? firstDayOfMonth : getDate(fullPeriodInterval[0])).toString();
       // we should use last day of month only if it is earlier than the last date of the fullPeriodInterval; else use the last date of the period interval
-      lastDayOfMonth = (lastDayOfMonth.isBefore(fullPeriodInterval[1]) ? lastDayOfMonth : getUTCDateEndOfDay(fullPeriodInterval[1])).toString();
+      lastDayOfMonth = (lastDayOfMonth.isBefore(fullPeriodInterval[1]) ? lastDayOfMonth : getDateEndOfDay(fullPeriodInterval[1])).toString();
       periodInterval = [firstDayOfMonth, lastDayOfMonth];
       break;
   }
@@ -1438,10 +1438,10 @@ function convertToDate(date) {
 }
 
 module.exports = {
-  getUTCDate: getUTCDate,
+  getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
   remapProperties: remapProperties,
-  getUTCDateEndOfDay: getUTCDateEndOfDay,
+  getDateEndOfDay: getDateEndOfDay,
   getAsciiString: getAsciiString,
   getChunksForInterval: getChunksForInterval,
   convertPropsToDate: convertPropsToDate,

@@ -507,13 +507,13 @@ module.exports = function (Person) {
 
               if (filter) {
                 if (filter.dateOfFollowUp) {
-                  dateInterval = [helpers.getUTCDate(filter.dateOfFollowUp), helpers.getUTCDateEndOfDay(filter.dateOfFollowUp)];
+                  dateInterval = [helpers.getDate(filter.dateOfFollowUp), helpers.getDateEndOfDay(filter.dateOfFollowUp)];
                   delete filter.dateOfFollowUp;
                 } else if (filter.startDate && filter.endDate) {
-                  dateInterval = [helpers.getUTCDate(filter.startDate), helpers.getUTCDateEndOfDay(filter.endDate)];
+                  dateInterval = [helpers.getDate(filter.startDate), helpers.getDateEndOfDay(filter.endDate)];
                 }
               } else {
-                dateInterval = [helpers.getUTCDate(), helpers.getUTCDateEndOfDay()];
+                dateInterval = [helpers.getDate(), helpers.getDateEndOfDay()];
               }
 
               // For contacts, we also need the follow up from either the required date or today so the filter is

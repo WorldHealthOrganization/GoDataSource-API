@@ -1061,8 +1061,8 @@ module.exports = function (Outbreak) {
     }
 
     // parse start/end dates from request
-    let followupStartDate = genericHelpers.getUTCDate(data.startDate);
-    let followupEndDate = genericHelpers.getUTCDate(data.endDate);
+    let followupStartDate = moment(data.startDate);
+    let followupEndDate = moment(data.endDate);
 
     // sanity checks for dates
     let invalidFollowUpDates = [];
@@ -1709,7 +1709,7 @@ module.exports = function (Outbreak) {
                 // update isolated nodes filter depending on active filter value
                 let followUpPeriod = self.periodOfFollowup;
                 // get day of the start of the follow-up period starting from specified end date (by default, today)
-                let followUpStartDate = genericHelpers.getUTCDate(endDate).subtract(followUpPeriod, 'days');
+                let followUpStartDate = genericHelpers.getDate(endDate).subtract(followUpPeriod, 'days');
 
                 if (activeFilter) {
                   // get cases/events reported in the last followUpPeriod days
@@ -2649,10 +2649,10 @@ module.exports = function (Outbreak) {
     // check if the filter includes date; if not, set the filter to get all the follow-ups from today by default
     if (!filter || !filter.where || JSON.stringify(filter.where).indexOf('date') === -1) {
       // to get the entire day today, filter between today 00:00 and tomorrow 00:00
-      let today = genericHelpers.getUTCDate().toString();
+      let today = genericHelpers.getDate().toString();
       let tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow = genericHelpers.getUTCDate(tomorrow).toString();
+      tomorrow = genericHelpers.getDate(tomorrow).toString();
 
       defaultFilter.where.date = {
         between: [today, tomorrow]
@@ -2676,7 +2676,7 @@ module.exports = function (Outbreak) {
           // get teamId; there might be no team id, set null
           let teamId = followup.teamId || null;
           // get date; format it to UTC 00:00:00
-          let date = genericHelpers.getUTCDate(followup.date).toString();
+          let date = genericHelpers.getDate(followup.date).toString();
 
           // initialize team entry if not already initialized
           if (!teamsMap[teamId]) {
@@ -2773,27 +2773,27 @@ module.exports = function (Outbreak) {
       // periodInterval was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.periodInterval;
       // normalize periodInterval dates
-      periodInterval[0] = genericHelpers.getUTCDate(periodInterval[0]);
-      periodInterval[1] = genericHelpers.getUTCDateEndOfDay(periodInterval[1]);
+      periodInterval[0] = genericHelpers.getDate(periodInterval[0]);
+      periodInterval[1] = genericHelpers.getDateEndOfDay(periodInterval[1]);
     } else {
       // set default periodInterval depending on periodType
       switch (periodType) {
         case periodTypes.day:
           // get interval for today
-          today = genericHelpers.getUTCDate();
-          todayEndOfDay = genericHelpers.getUTCDateEndOfDay();
+          today = genericHelpers.getDate();
+          todayEndOfDay = genericHelpers.getDateEndOfDay();
           periodInterval = [today, todayEndOfDay];
           break;
         case periodTypes.week:
           // get interval for this week
-          mondayStartOfDay = genericHelpers.getUTCDate(null, 1);
-          sundayEndOfDay = genericHelpers.getUTCDateEndOfDay(null, 7);
+          mondayStartOfDay = genericHelpers.getDate(null, 1);
+          sundayEndOfDay = genericHelpers.getDateEndOfDay(null, 7);
           periodInterval = [mondayStartOfDay, sundayEndOfDay];
           break;
         case periodTypes.month:
           // get interval for this month
-          firstDayOfMonth = genericHelpers.getUTCDate().startOf('month');
-          lastDayOfMonth = genericHelpers.getUTCDateEndOfDay().endOf('month');
+          firstDayOfMonth = genericHelpers.getDate().startOf('month');
+          lastDayOfMonth = genericHelpers.getDateEndOfDay().endOf('month');
           periodInterval = [firstDayOfMonth, lastDayOfMonth];
           break;
       }
@@ -2960,14 +2960,14 @@ module.exports = function (Outbreak) {
             switch (periodType) {
               case periodTypes.day:
                 // get interval for today
-                today = genericHelpers.getUTCDate(caseDate).toString();
-                todayEndOfDay = genericHelpers.getUTCDateEndOfDay(caseDate).toString();
+                today = genericHelpers.getDate(caseDate).toString();
+                todayEndOfDay = genericHelpers.getDateEndOfDay(caseDate).toString();
                 casePeriodInterval = [today, todayEndOfDay];
                 break;
               case periodTypes.week:
                 // get interval for this week
-                mondayStartOfDay = genericHelpers.getUTCDate(caseDate, 1);
-                sundayEndOfDay = genericHelpers.getUTCDateEndOfDay(caseDate, 7);
+                mondayStartOfDay = genericHelpers.getDate(caseDate, 1);
+                sundayEndOfDay = genericHelpers.getDateEndOfDay(caseDate, 7);
 
                 // we should use monday only if it is later than the first date of the periodInterval; else use the first date of the period interval
                 mondayStartOfDay = (mondayStartOfDay.isAfter(periodInterval[0]) ? mondayStartOfDay : periodInterval[0]).toString();
@@ -2979,8 +2979,8 @@ module.exports = function (Outbreak) {
                 break;
               case periodTypes.month:
                 // get interval for this month
-                firstDayOfMonth = genericHelpers.getUTCDate(caseDate).startOf('month');
-                lastDayOfMonth = genericHelpers.getUTCDateEndOfDay(caseDate).endOf('month');
+                firstDayOfMonth = genericHelpers.getDate(caseDate).startOf('month');
+                lastDayOfMonth = genericHelpers.getDateEndOfDay(caseDate).endOf('month');
 
                 // we should use first day of month only if it is later than the first date of the periodInterval; else use the first date of the period interval
                 firstDayOfMonth = (firstDayOfMonth.isAfter(periodInterval[0]) ? firstDayOfMonth : periodInterval[0]).toString();
@@ -3390,7 +3390,7 @@ module.exports = function (Outbreak) {
         // make sure limit per day is not exceeded for upcoming follow ups
         let followUpsToAdd = [];
         // store today date references, needed when checking for future follow ups
-        let today = genericHelpers.getUTCDate();
+        let today = genericHelpers.getDate();
         if (modelType === appModels.contact.modelName) {
           let allFollowUps = [];
           models.forEach((model) => {
@@ -3399,7 +3399,7 @@ module.exports = function (Outbreak) {
               // reset follow up day to the start of the day
               // change person id to point to winner model
               let followUps = modelFollowUs.map((followUp) => {
-                followUp.date = genericHelpers.getUTCDate(followUp.date).toDate().toISOString();
+                followUp.date = genericHelpers.getDate(followUp.date).toDate().toISOString();
                 return followUp;
               });
 
@@ -3414,7 +3414,7 @@ module.exports = function (Outbreak) {
           // if group is in the future, remove from the end until the limit per day is ok
           for (let group in groupedFollowUps) {
             if (groupedFollowUps.hasOwnProperty(group)) {
-              if (genericHelpers.getUTCDate(group).isAfter(today)) {
+              if (genericHelpers.getDate(group).isAfter(today)) {
                 groupedFollowUps[group] = groupedFollowUps[group].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
                 let lengthDiff = groupedFollowUps[group].length - outbreakLimitPerDay;
@@ -5019,13 +5019,13 @@ module.exports = function (Outbreak) {
     dateToFilter = _.get(filter, 'where.date', null);
     if (dateToFilter !== null) {
       // add date to filter if it is valid; else use today
-      dateToFilter = moment(dateToFilter).isValid() ? genericHelpers.getUTCDateEndOfDay(dateToFilter) : genericHelpers.getUTCDateEndOfDay();
+      dateToFilter = moment(dateToFilter).isValid() ? genericHelpers.getDateEndOfDay(dateToFilter) : genericHelpers.getDateEndOfDay();
 
       // date was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.date;
     } else {
       // use today as default filter
-      dateToFilter = genericHelpers.getUTCDateEndOfDay();
+      dateToFilter = genericHelpers.getDateEndOfDay();
     }
 
     // add date to filter
@@ -5127,7 +5127,7 @@ module.exports = function (Outbreak) {
           // get end date of contact follow-ups
           // not having an end date should not be encountered; considering this case as still under follow-up
           let followUpEndDate = moment(_.get(contact, 'followUp.endDate', null));
-          followUpEndDate = genericHelpers.getUTCDateEndOfDay(followUpEndDate);
+          followUpEndDate = genericHelpers.getDateEndOfDay(followUpEndDate);
           if (!followUpEndDate.isValid() || followUpEndDate.isSameOrAfter(dateToFilter)) {
             // update contactsUnderFollowUpCount
             locationMap[contactLocationId].contactsUnderFollowUpCount++;
@@ -6786,7 +6786,7 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.exportDailyContactFollowUpForm = function (date, options, callback) {
     const self = this;
     const languageId = options.remotingContext.req.authData.user.languageId;
-    let endOfDay = genericHelpers.getUTCDateEndOfDay(date).toString();
+    let endOfDay = genericHelpers.getDateEndOfDay(date).toString();
 
     // Filter to get all of the outbreak's contacts that are under follow-up, and all their follow-ups, up to the specified date
     let filter = {
@@ -7155,8 +7155,8 @@ module.exports = function (Outbreak) {
                       row.age = age;
 
                       if (contact.followUp) {
-                        let followUpStartDate = genericHelpers.getUTCDate(contact.followUp.startDate);
-                        let followUpEndDate = genericHelpers.getUTCDate(contact.followUp.endDate);
+                        let followUpStartDate = genericHelpers.getDate(contact.followUp.startDate);
+                        let followUpEndDate = genericHelpers.getDate(contact.followUp.endDate);
 
                         row.followUpStartDate = followUpStartDate.format(standardFormat);
                         row.followUpEndDate = followUpEndDate.format(standardFormat);
@@ -7260,8 +7260,8 @@ module.exports = function (Outbreak) {
     const models = app.models;
 
     let standardFormat = 'YYYY-MM-DD';
-    let startDate = genericHelpers.getUTCDate(body.startDate);
-    let endDate = genericHelpers.getUTCDate(body.endDate);
+    let startDate = genericHelpers.getDate(body.startDate);
+    let endDate = genericHelpers.getDate(body.endDate);
 
     // make sure range dates are valid or single date
     if (!startDate.isValid() || !endDate.isValid()) {
@@ -7535,8 +7535,8 @@ module.exports = function (Outbreak) {
                     row.age = age;
 
                     if (contact.followUp) {
-                      let followUpStartDate = genericHelpers.getUTCDate(contact.followUp.startDate);
-                      let followUpEndDate = genericHelpers.getUTCDate(contact.followUp.endDate);
+                      let followUpStartDate = genericHelpers.getDate(contact.followUp.startDate);
+                      let followUpEndDate = genericHelpers.getDate(contact.followUp.endDate);
 
                       row.followUpStartDate = followUpStartDate.format(standardFormat);
                       row.followUpEndDate = followUpEndDate.format(standardFormat);
