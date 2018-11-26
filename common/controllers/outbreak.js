@@ -71,6 +71,30 @@ module.exports = function (Outbreak) {
   ]);
 
   /**
+   * Allow changing follow-up status (only status property)
+   */
+  Outbreak.beforeRemote('prototype.__updateById__contacts', function (context, modelInstance, next) {
+    // get follow-up status property
+    const followUpStatus = _.get(context, 'args.data.followUp.status');
+    // if status was provided
+    if (followUpStatus) {
+      // load contact instance
+      app.models.contact
+        .findById(context.args.fk)
+        .then(function(contact){
+          // get instance data
+          const instance = contact.toJSON();
+          // update follow-up status
+          Object.assign(context.args.data.followUp, instance.followUp, {status: followUpStatus});
+          // move along
+          next();
+        });
+    } else {
+      next();
+    }
+  });
+
+  /**
    * Allows count requests with advanced filters (like the ones we can use on GET requests)
    * to be made on outbreak/{id}/cases.
    */

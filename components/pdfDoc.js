@@ -430,9 +430,10 @@ const createQuestionnaire = function (doc, questions, withData, title) {
  * This flag is needed to create empty profile pages
  * Optionally a title can be added
  * @param doc
- * @param person
+ * @param model
  * @param displayValues
  * @param title
+ * @param numberOfEmptyEntries
  */
 const displayModelDetails = function (doc, model, displayValues, title, numberOfEmptyEntries) {
   numberOfEmptyEntries = numberOfEmptyEntries || 2;
@@ -581,7 +582,7 @@ function createTableInPDFDocument(headers, data, document, documentConfig, noHea
     }
   });
 
-  // reset fill color after setting backround as the fill color is used for all elements
+  // reset fill color after setting background as the fill color is used for all elements
   pdfTable.onCellBackgroundAdded(function (table) {
     table.pdf.fillColor('#000000');
   });
