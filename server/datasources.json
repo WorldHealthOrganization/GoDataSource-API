@@ -12,8 +12,7 @@
     "enableGeoIndexing": true,
     "ignoreUndefined": true,
     "maxDepthOfQuery": 24,
-    "connectTimeoutMS": 100000,
-    "socketTimeoutMS":100000
+    "lazyConnect": true
   },
   "email": {
     "name": "email",
