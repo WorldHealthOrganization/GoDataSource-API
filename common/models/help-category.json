@@ -162,7 +162,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). The filter should contain a 'where' with a text search that will pe applied on the language tokens only, the rest of the filter will be applied on the help categories referenced by the language tokens that pass the where condition",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). The filter should contain a 'where.token' (supported only on top level) with a text search that will pe applied on the language tokens only, the rest of the filter will be applied on the help categories referenced by the language tokens that pass the where condition",
           "required": true
         },
         {
@@ -189,7 +189,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). The filter should contain a 'where' with a text search that will pe applied on the language tokens only, the rest of the filter will be applied on the help items referenced by the language tokens that pass the where condition",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). The filter should contain a 'where.token' (supported only on top level) with a text search that will pe applied on the language tokens only, the rest of the filter will be applied on the help items referenced by the language tokens that pass the where condition",
           "required": true
         },
         {
