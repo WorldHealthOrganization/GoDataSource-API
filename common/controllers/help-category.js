@@ -43,7 +43,7 @@ module.exports = function (HelpCategory) {
 
   /**
    * Search for all help categories that contain certain strings
-   * @param filter
+   * @param filter Accepts "token" on the first level of "where" property. Token supports "$text: {"search": "..."}"
    * @param options
    * @param callback
    */
@@ -92,7 +92,7 @@ module.exports = function (HelpCategory) {
 
   /**
    * Search for all help categories that contain certain strings
-   * @param filter
+   * @param filter Accepts "token" on the first level of "where" property. Token supports "$text: {"search": "..."}"
    * @param options
    * @param callback
    */
