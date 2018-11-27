@@ -82,7 +82,7 @@ module.exports = function (Outbreak) {
       // load contact instance
       app.models.contact
         .findById(context.args.fk)
-        .then(function(contact){
+        .then(function (contact) {
           // get instance data
           const instance = contact.toJSON();
           // update follow-up status
@@ -1881,8 +1881,8 @@ module.exports = function (Outbreak) {
           // go trough all the people
           if (Array.isArray(relation.people)) {
             relation.people.forEach(function (person) {
-              // count each case only once
-              if (!casesIndex[person.id]) {
+              // count each case only once (do a specific check for person type as transmission chains may include events)
+              if (!casesIndex[person.id] && person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
                 casesIndex[person.id] = true;
                 result.total++;
                 // check if the case is new (date of reporting is later than the threshold date)
