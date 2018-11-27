@@ -60,7 +60,7 @@ module.exports = function (HelpItem) {
 
     // retrieve original values
     let originalTitle = helpers.getOriginalValueFromContextOptions(context, 'title');
-    let originalContent = helpers.getOriginalValueFromContextOptions(context, 'content') || ' ';
+    let originalContent = helpers.getOriginalValueFromContextOptions(context, 'content');
 
     if (context.isNewInstance) {
       // content is optional
