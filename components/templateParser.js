@@ -319,6 +319,8 @@ function extractVariablesAndAnswerOptions(template) {
         text: question.text,
         answerType: question.answerType
       };
+      // store variable in the list of variables
+      variables.push(variable);
       // if the question has predefined answers
       if (
         ['LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER',
@@ -342,8 +344,6 @@ function extractVariablesAndAnswerOptions(template) {
           }
         });
       }
-      // store variable in the list of variables
-      variables.push(variable);
     });
   }
   return variables;
