@@ -411,7 +411,7 @@ const exportListFileSync = function (headers, dataSet, fileType, title = 'List')
           jsonHeadersMap[property] = {};
         }
         // remap sub-levels
-        jsonHeadersMap[property] = Object.assign({}, typeof(jsonHeadersMap[property]) === 'object' ? jsonHeadersMap[property] : {}, buildHeadersMap([{
+        jsonHeadersMap[property] = Object.assign({}, typeof (jsonHeadersMap[property]) === 'object' ? jsonHeadersMap[property] : {}, buildHeadersMap([{
           id: leftPath,
           header: header.header
         }], jsonHeadersMap[property]));
@@ -598,12 +598,12 @@ const exportListFileSync = function (headers, dataSet, fileType, title = 'List')
 };
 
 /**
-* Export a list in a file (asynchronously)
-* @param headers file list headers
-* @param dataSet {Array} actual data set
-* @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
-* @return {Promise<any>}
-*/
+ * Export a list in a file (asynchronously)
+ * @param headers file list headers
+ * @param dataSet {Array} actual data set
+ * @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
+ * @return {Promise<any>}
+ */
 const exportListFile = workerRunner.helpers.exportListFile;
 
 /**
@@ -709,6 +709,7 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
             // store the map for the result set entry, that will be resolved later
             resultSetResolverMap[`[${index}].${foreignKeyValue.exactPath}`] = {
               modelName: Model.foreignKeyResolverMap[foreignKey].modelName,
+              key: foreignKey,
               value: foreignKeyValue.value,
               useProperty: Model.foreignKeyResolverMap[foreignKey].useProperty
             };
@@ -768,8 +769,29 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
 
         // replace foreign key references with configured related model value
         Object.keys(resultSetResolverMap).forEach(function (foreignKeyPath) {
-          // use the values from foreignKeysResults map
-          _.set(resultSet, foreignKeyPath, _.get(foreignKeyResultsMap, `${resultSetResolverMap[foreignKeyPath].modelName}.${resultSetResolverMap[foreignKeyPath].value}.${resultSetResolverMap[foreignKeyPath].useProperty}`));
+          // if there are more values that should be mapped for one foreign key
+          if (Array.isArray(resultSetResolverMap[foreignKeyPath].useProperty)) {
+            // build a container for resolved values, container name is resolved model name
+            let resolvedForeignKeyContainerPath = foreignKeyPath.replace(resultSetResolverMap[foreignKeyPath].key, resultSetResolverMap[foreignKeyPath].modelName);
+            // go through all values that need to be mapped
+            resultSetResolverMap[foreignKeyPath].useProperty.forEach(function (property) {
+              // use the values from foreignKeysResults map
+              _.set(
+                resultSet,
+                `${resolvedForeignKeyContainerPath}.${property}`,
+                _.get(
+                  foreignKeyResultsMap,
+                  `${resultSetResolverMap[foreignKeyPath].modelName}.${resultSetResolverMap[foreignKeyPath].value}.${property}`));
+            });
+          } else {
+            // use the values from foreignKeysResults map
+            _.set(
+              resultSet,
+              foreignKeyPath,
+              _.get(
+                foreignKeyResultsMap,
+                `${resultSetResolverMap[foreignKeyPath].modelName}.${resultSetResolverMap[foreignKeyPath].value}.${resultSetResolverMap[foreignKeyPath].useProperty}`));
+          }
         });
         // foreign keys resolved
         resolve(resultSet);
@@ -924,7 +946,7 @@ const formatUndefinedValues = function (model) {
       model[key].forEach((child) => {
         formatUndefinedValues(child);
       });
-    } else if (typeof(model[key]) === 'object' && model[key] !== null) {
+    } else if (typeof (model[key]) === 'object' && model[key] !== null) {
       formatUndefinedValues(model[key]);
     } else if (model[key] === undefined) {
       _.set(model, key, ' ');
@@ -980,12 +1002,12 @@ const translateFieldLabels = function (app, model, modelName, dictionary) {
     let value = model[key];
     let newValue = value;
     if (fieldsToTranslate && fieldsToTranslate[key]) {
-      if (Array.isArray(value) && value.length && typeof(value[0]) === 'object' && arrayFields[key]) {
+      if (Array.isArray(value) && value.length && typeof (value[0]) === 'object' && arrayFields[key]) {
         newValue = [];
         value.forEach((element, index) => {
           newValue[index] = translateFieldLabels(app, element, arrayFields[key], dictionary);
         });
-      } else if (typeof(value) === 'object' && value !== null && Object.keys(value).length > 0) {
+      } else if (typeof (value) === 'object' && value !== null && Object.keys(value).length > 0) {
         newValue = translateFieldLabels(app, value, arrayFields[key], dictionary);
       }
       translatedFieldsModel[dictionary.getTranslation(app.models[modelName] ? fieldsToTranslate[key] : nonModelObjects[modelName][key])] = newValue;
@@ -1429,7 +1451,7 @@ const createImageDoc = workerRunner.helpers.createImageDoc;
  * @param string
  * @return {string}
  */
-function sha256(string){
+function sha256(string) {
   return crypto.createHash('sha256').update(string).digest('hex');
 }
 
