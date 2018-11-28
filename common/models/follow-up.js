@@ -49,7 +49,10 @@ module.exports = function (FollowUp) {
   };
 
   // map language token labels for model properties
-  FollowUp.fieldLabelsMap = {
+  FollowUp.fieldLabelsMap = Object.assign({}, FollowUp.fieldLabelsMap, {
+    'personId': 'LNG_FOLLOW_UP_FIELD_LABEL_PERSON_ID',
+    'contact.firstName': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FIRST_NAME',
+    'contact.lastName': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_LAST_NAME',
     'date': 'LNG_FOLLOW_UP_FIELD_LABEL_DATE',
     'address': 'LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS',
     'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
@@ -71,9 +74,9 @@ module.exports = function (FollowUp) {
     'statusId': 'LNG_FOLLOW_UP_FIELD_LABEL_STATUSID',
     'isGenerated': 'LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED',
     'targeted': 'LNG_FOLLOW_UP_FIELD_LABEL_TARGETED',
+    'comment': 'LNG_FOLLOW_UP_FIELD_LABEL_COMMENT',
     'questionnaireAnswers': 'LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE',
-    'comment': 'LNG_FOLLOW_UP_FIELD_LABEL_COMMENT'
-  };
+  });
 
   FollowUp.referenceDataFieldsToCategoryMap = {
     'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE',
@@ -104,6 +107,10 @@ module.exports = function (FollowUp) {
     'address.locationId': {
       modelName: 'location',
       useProperty: 'name'
+    },
+    'personId': {
+      modelName: 'contact',
+      useProperty: ['firstName', 'lastName']
     },
     'teamId': {
       modelName: 'team',
