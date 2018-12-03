@@ -5,6 +5,7 @@
  */
 const app = require('../../server');
 const migrations = [];
+let connected = false;
 
 /**
  * Set up collections
@@ -13,8 +14,16 @@ app.models().forEach(function (Model) {
   const dataSource = Model.dataSource;
   if (dataSource && Model.modelName.match(/^[a-z]/)) {
     migrations.push(function migrate(callback) {
-      console.log(`(Re)Creating ${Model.modelName}...`);
-      dataSource.automigrate(Model.modelName, callback);
+      if (!connected) {
+        dataSource.connect(function () {
+          connected = true;
+          console.log(`(Re)Creating ${Model.modelName}...`);
+          dataSource.automigrate(Model.modelName, callback);
+        });
+      } else {
+        console.log(`(Re)Creating ${Model.modelName}...`);
+        dataSource.automigrate(Model.modelName, callback);
+      }
     });
   }
 });
