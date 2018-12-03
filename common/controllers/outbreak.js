@@ -100,12 +100,20 @@ module.exports = function (Outbreak) {
    * to be made on outbreak/{id}/cases.
    */
   Outbreak.prototype.filteredCountCases = function (filter, callback) {
-    this.__get__cases(filter, function (err, res) {
-      if (err) {
-        return callback(err);
-      }
-      callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
-    });
+    // set default filter value
+    filter = filter || {};
+    // check if deep count should be used (this is expensive, should be avoided if possible)
+    if (app.utils.remote.searchByRelationProperty.shouldUseDeepCount(filter)) {
+      this.__get__cases(filter, function (err, res) {
+        if (err) {
+          return callback(err);
+        }
+        callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
+      });
+    } else {
+      // use native count
+      this.__count__cases(filter.where, callback);
+    }
   };
 
   /**
@@ -113,12 +121,20 @@ module.exports = function (Outbreak) {
    * to be made on outbreak/{id}/contacts.
    */
   Outbreak.prototype.filteredCountContacts = function (filter, callback) {
-    this.__get__contacts(filter, function (err, res) {
-      if (err) {
-        return callback(err);
-      }
-      callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
-    });
+    // set default filter value
+    filter = filter || {};
+    // check if deep count should be used (this is expensive, should be avoided if possible)
+    if (app.utils.remote.searchByRelationProperty.shouldUseDeepCount(filter)) {
+      this.__get__contacts(filter, function (err, res) {
+        if (err) {
+          return callback(err);
+        }
+        callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
+      });
+    } else {
+      // use native count
+      this.__count__contacts(filter.where, callback);
+    }
   };
 
   /**
@@ -128,12 +144,20 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.filteredCountEvents = function (filter, callback) {
-    this.__get__events(filter, function (err, res) {
-      if (err) {
-        return callback(err);
-      }
-      callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
-    });
+    // set default filter value
+    filter = filter || {};
+    // check if deep count should be used (this is expensive, should be avoided if possible)
+    if (app.utils.remote.searchByRelationProperty.shouldUseDeepCount(filter)) {
+      this.__get__events(filter, function (err, res) {
+        if (err) {
+          return callback(err);
+        }
+        callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
+      });
+    } else {
+      // use native count
+      this.__count__events(filter.where, callback);
+    }
   };
 
   /**
@@ -5766,13 +5790,18 @@ module.exports = function (Outbreak) {
         customFilter = app.utils.remote.mergeFilters(
           customFilter,
           filter || {});
-
-        self.__get__followUps(customFilter, function (err, res) {
-          if (err) {
-            return callback(err);
-          }
-          callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, customFilter).length);
-        });
+        // check if deep count should be used (this is expensive, should be avoided if possible)
+        if (app.utils.remote.searchByRelationProperty.shouldUseDeepCount(customFilter)) {
+          self.__get__followUps(customFilter, function (err, res) {
+            if (err) {
+              return callback(err);
+            }
+            callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, customFilter).length);
+          });
+        } else {
+          // use native count
+          self.__count__followUps(customFilter.where, callback);
+        }
       });
   };
 
@@ -5863,7 +5892,7 @@ module.exports = function (Outbreak) {
    * @param options
    * @param callback
    */
-  Outbreak.prototype.createEventMultipleContacts = function(eventId, data, options, callback) {
+  Outbreak.prototype.createEventMultipleContacts = function (eventId, data, options, callback) {
     Outbreak.createPersonMultipleContacts(this, app.models.event.modelName, eventId, data, options)
       .then(function (results) {
         callback(null, results);
@@ -5876,12 +5905,20 @@ module.exports = function (Outbreak) {
    * to be made on outbreak/{id}/lab-results.
    */
   Outbreak.prototype.filteredCountLabResults = function (filter, callback) {
-    this.__get__labResults(filter, function (err, res) {
-      if (err) {
-        return callback(err);
-      }
-      callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
-    });
+    // set default filter value
+    filter = filter || {};
+    // check if deep count should be used (this is expensive, should be avoided if possible)
+    if (app.utils.remote.searchByRelationProperty.shouldUseDeepCount(filter)) {
+      this.__get__labResults(filter, function (err, res) {
+        if (err) {
+          return callback(err);
+        }
+        callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
+      });
+    } else {
+      // use native count
+      this.__count__labResults(filter.where, callback);
+    }
   };
 
   /**

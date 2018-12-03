@@ -116,6 +116,35 @@ function deepSearchByRelationProperty(resource, filter) {
 }
 
 /**
+ * Check if deep-search should be used (deep search is heavy, does in memory pagination, should be avoided if possible)
+ * @param context
+ * @return {boolean}
+ */
+function shouldUseDeepSearch(context = {}) {
+  // assume deep search should not be used
+  let useDeepSearch = false;
+  // get include filter
+  let include = _.get(context, 'args.filter.include', []);
+  // get custom include filter
+  let includeCustom = _.get(context, 'args.filter.includeCustom', []);
+  // standard include filter may not always be an array
+  if (!Array.isArray(include)) {
+    include = [include];
+  }
+  // merge the two filters
+  include = include.concat(includeCustom);
+  // go through the relations
+  include.forEach(function (relation) {
+    // check if the relation needs filter deep filters
+    if (typeof relation === 'object' && _.get(relation, 'scope.filterParent')) {
+      // if it does, update the flag
+      useDeepSearch = true;
+    }
+  });
+  return useDeepSearch;
+}
+
+/**
  * Attach behavior or a Model remote
  * @param Model
  * @param remote
@@ -125,20 +154,23 @@ function attachOnRemote(Model, remote) {
    * Attach the behavior on specified remote
    */
   Model.beforeRemote(remote, function (context, model, next) {
-    // native pagination is incompatible with filter search by relation property
-    const skip = _.get(context, 'args.filter.skip');
-    const limit = _.get(context, 'args.filter.limit');
-    // store skip for custom pagination
-    if (skip !== undefined) {
-      // remove skip from native pagination
-      delete context.args.filter.skip;
-      _.set(context, 'args.filter._deep.skip', skip);
-    }
-    // store limit for custom pagination
-    if (limit !== undefined) {
-      // remove limit from native pagination
-      delete context.args.filter.limit;
-      _.set(context, 'args.filter._deep.limit', limit);
+    // check if deep search should be used instead of native
+    if (shouldUseDeepSearch(context)) {
+      // native pagination is incompatible with filter search by relation property
+      const skip = _.get(context, 'args.filter.skip');
+      const limit = _.get(context, 'args.filter.limit');
+      // store skip for custom pagination
+      if (skip !== undefined) {
+        // remove skip from native pagination
+        delete context.args.filter.skip;
+        _.set(context, 'args.filter._deep.skip', skip);
+      }
+      // store limit for custom pagination
+      if (limit !== undefined) {
+        // remove limit from native pagination
+        delete context.args.filter.limit;
+        _.set(context, 'args.filter._deep.limit', limit);
+      }
     }
     next();
   });
@@ -147,15 +179,18 @@ function attachOnRemote(Model, remote) {
    * Attach the behavior on specified remote
    */
   Model.afterRemote(remote, function (context, model, next) {
-    // overwrite the found results
-    context.result = deepSearchByRelationProperty(context.result, _.get(context, 'args.filter', {}));
-    // custom pagination
-    const skip = _.get(context, 'args.filter._deep.skip', 0);
-    let limit = _.get(context, 'args.filter._deep.limit');
-    if (limit !== undefined) {
-      limit = limit + skip;
+    // check if deep search should be used instead of native
+    if (shouldUseDeepSearch(context)) {
+      // overwrite the found results
+      context.result = deepSearchByRelationProperty(context.result, _.get(context, 'args.filter', {}));
+      // custom pagination
+      const skip = _.get(context, 'args.filter._deep.skip', 0);
+      let limit = _.get(context, 'args.filter._deep.limit');
+      if (limit !== undefined) {
+        limit = limit + skip;
+      }
+      context.result = context.result.slice(skip, limit);
     }
-    context.result = context.result.slice(skip, limit);
     next();
   });
 }
@@ -197,5 +232,8 @@ module.exports = {
     });
   },
   deepSearchByRelationProperty: deepSearchByRelationProperty,
-  deletePaginationFilterFromContext: deletePaginationFilterFromContext
+  deletePaginationFilterFromContext: deletePaginationFilterFromContext,
+  shouldUseDeepCount: function (filter) {
+    return shouldUseDeepSearch({filter: filter});
+  }
 };
