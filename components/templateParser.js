@@ -213,7 +213,7 @@ function beforeHook(context, next) {
   // in order to assure the language tokens to be unique, on create generate model ID and set it to the model
   let modelId;
   if (context.isNewInstance) {
-    modelId = context.instance.id = uuid.v4();
+    modelId = context.instance.id = (context.instance.id || uuid.v4());
   } else {
     modelId = context.currentInstance.id;
   }
