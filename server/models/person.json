@@ -109,6 +109,18 @@
     },
     "dateOfLastContact_index": {
       "dateOfLastContact": 1
+    },
+    "name_index": {
+      "name": 1
+    },
+    "lastName_firstName_index": {
+      "lastName": 1,
+      "firstName": 1
+    },
+    "name_lastName_firstName_index": {
+      "name": 1,
+      "lastName": 1,
+      "firstName": 1
     }
   },
   "validations": [],
