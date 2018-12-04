@@ -16,7 +16,8 @@
     "AttachController": true,
     "IncludeCustomRelations": true,
     "ConvertNestedGeoPoints": true,
-    "DateProperty": true
+    "DateProperty": true,
+    "RawFind": true
   },
   "replaceOnPUT": false,
   "properties": {

@@ -1779,11 +1779,11 @@ module.exports = function (Outbreak) {
 
               // get isolated nodes as well (nodes that were never part of a relationship)
               app.models.person
-                .find(isolatedNodesFilter)
+                .rawFind(app.utils.remote.convertLoopbackFilterToMongo(isolatedNodesFilter.where))
                 .then(function (isolatedNodes) {
                   // add all the isolated nodes to the complete list of nodes
                   isolatedNodes.forEach(function (isolatedNode) {
-                    transmissionChains.nodes[isolatedNode.id] = isolatedNode.toJSON();
+                    transmissionChains.nodes[isolatedNode.id] = isolatedNode;
                   });
                   callback(null, transmissionChains);
                 })
