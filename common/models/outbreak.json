@@ -5582,7 +5582,7 @@
       "description": "Count cases stratified by classification over time",
       "http": {
         "verb": "get",
-        "path": "/contacts/classification-over-time/count"
+        "path": "/cases/classification-over-time/count"
       }
     },
     "prototype.countFollowUpsByTeam": {
