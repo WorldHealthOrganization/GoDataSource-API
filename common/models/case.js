@@ -269,16 +269,17 @@ module.exports = function (Case) {
       .then(function () {
         // find cases that have date of onset earlier then end of the period interval
         return app.models.case
-          .find(
-            app.utils.remote
-              .mergeFilters({
+          .rawFind(
+            app.utils.remote.convertLoopbackFilterToMongo(
+              app.utils.remote.mergeFilters({
                 where: {
                   outbreakId: outbreak.id,
                   dateOfOnset: {
                     lte: new Date(periodInterval[1])
                   }
                 }
-              }, filter || {})
+              }, filter || {}).where
+            )
           )
           .then(function (cases) {
             return new Promise(function (resolve, reject) {
