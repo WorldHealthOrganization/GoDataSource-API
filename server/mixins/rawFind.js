@@ -17,6 +17,8 @@ module.exports = function (Model) {
     // get it from model name
     collectionName = Model.modelName;
   }
+  // get default scope query, if any
+  const defaultScopeQuery = _.get(Model, 'definition.settings.scope.where');
   /**
    * Find using connector
    * @return {Promise<any>}
@@ -27,6 +29,14 @@ module.exports = function (Model) {
     timer.start();
     // get function arguments
     const args = Array.prototype.slice.call(arguments);
+    // if there is a default scope query
+    if (defaultScopeQuery) {
+      // merge it in the sent query
+      args[0] = app.utils.remote
+        .convertLoopbackFilterToMongo(
+          app.utils.remote.mergeFilters({where: defaultScopeQuery}, {where: args[0]})
+        ).where;
+    }
     app.logger.debug(`[QueryId: ${queryId}] Performing MongoDB request on collection '${collectionName}': find ${JSON.stringify(args)}`);
     // promisify the action
     return new Promise(function (resolve, reject) {
