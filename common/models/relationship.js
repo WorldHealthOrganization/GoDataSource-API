@@ -117,19 +117,61 @@ module.exports = function (Relationship) {
         }
       }, filter || {});
 
-    // search relations
+    // use raw queries for relationships
     app.models.relationship
-      .find(filter)
+      .rawFind(app.utils.remote.convertLoopbackFilterToMongo(filter.where))
       .then(function (relationships) {
-        // add 'filterParent' capability
-        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
-        if (countOnly) {
-          // count transmission chain - set activeChainStartDate - used for determining if a chain is active - to be specified endDate (by default today)
-          transmissionChain.count(relationships, followUpPeriod, {activeChainStartDate: endDate}, callback);
-        } else {
-          // build transmission chain - set activeChainStartDate - used for determining if a chain is active - to be specified endDate (by default today)
-          transmissionChain.build(relationships, followUpPeriod, {activeChainStartDate: endDate}, callback);
-        }
+        // build a list of people ids (to query related data later)
+        const peopleIds = [];
+        // go through all relationships
+        relationships.forEach(function (relationship) {
+          // go through relationship persons
+          Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
+            // store person ids
+            peopleIds.push(person.id);
+          });
+        });
+
+        // use raw queries for related people
+        return app.models.person
+          .rawFind(
+            app.utils.remote.convertLoopbackFilterToMongo(
+              app.utils.remote.mergeFilters(
+                _.get(filter, 'include.0.scope'),
+                {
+                  where: {
+                    id: {
+                      inq: peopleIds
+                    }
+                  }
+                }).where
+            )
+          )
+          .then(function (people) {
+            // build a map of people to easily connect them to relations
+            const peopleMap = {};
+            people.forEach(function (person) {
+              peopleMap[person.id] = person;
+            });
+            // add people to relations
+            relationships.forEach(function (relationship) {
+              relationship.people = [];
+              Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
+                if (peopleMap[person.id]) {
+                  relationship.people.push(peopleMap[person.id]);
+                }
+              });
+            });
+            // add filterParent support
+            relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
+            if (countOnly) {
+              // count transmission chain - set activeChainStartDate - used for determining if a chain is active - to be specified endDate (by default today)
+              transmissionChain.count(relationships, followUpPeriod, {activeChainStartDate: endDate}, callback);
+            } else {
+              // build transmission chain - set activeChainStartDate - used for determining if a chain is active - to be specified endDate (by default today)
+              transmissionChain.build(relationships, followUpPeriod, {activeChainStartDate: endDate}, callback);
+            }
+          });
       })
       .catch(callback);
   };

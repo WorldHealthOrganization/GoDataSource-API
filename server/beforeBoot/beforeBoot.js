@@ -6,6 +6,7 @@ const disableStandardRelationRemoteMethods = require('../../components/disableSt
 const disableCommonExtraRoutes = require('../../components/disableCommonExtraRoutes');
 const searchByRelationProperty = require('../../components/searchByRelationProperty');
 const mergeFilters = require('../../components/mergeFilters');
+const convertLoopbackFilterToMongo = require('../../components/convertLoopbackFilterToMongo');
 const apiError = require('../../components/apiError');
 const aesCrypto = require('../../components/aesCrypto');
 const anonymizeDatasetFields = require('../../components/anonymizeDatasetFields');
@@ -28,6 +29,7 @@ function init(app, callback) {
       disableStandardRelationRemoteMethods: disableStandardRelationRemoteMethods,
       disableCommonExtraRoutes: disableCommonExtraRoutes,
       mergeFilters: mergeFilters,
+      convertLoopbackFilterToMongo: convertLoopbackFilterToMongo,
       helpers: remoteHelpers,
       /**
        * Get user from options (context)
