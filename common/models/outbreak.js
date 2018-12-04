@@ -819,7 +819,7 @@ module.exports = function (Outbreak) {
       };
     // find the cases
     app.models.case
-      .find(_filter)
+      .rawFind(_filter.where)
       .then(function (cases) {
         // remove those without relations
         cases = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(cases, _filter);

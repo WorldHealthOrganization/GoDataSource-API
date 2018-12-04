@@ -1,6 +1,34 @@
 'use strict';
 
 const helpers = require('./helpers');
+const moment = require('moment');
+
+const convertProps = function (obj) {
+  for (let prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      if (prop === 'between') {
+        if (Array.isArray(obj[prop])) {
+          obj.$gte = obj[prop][0];
+          obj.$lte = obj[prop][1];
+        }
+        delete obj[prop];
+      }
+      if (typeof obj[prop] == 'object' && obj[prop] !== null) {
+        convertProps(obj[prop]);
+      } else {
+        // we're only looking for strings properties that have a date format to convert
+        if (typeof obj[prop] === 'string' && helpers.isValidDate(obj[prop])) {
+          // try to convert the string value to date, if valid, replace the old value
+          let convertedDate = moment(obj[prop]);
+          if (convertedDate.isValid()) {
+            obj[prop] = convertedDate.toDate();
+          }
+        }
+      }
+    }
+  }
+};
+
 
 /**
  * Convert a loopback filter to a mongo filter
@@ -19,10 +47,13 @@ function convert(loopbackFilter) {
       .replace(/"lte"/g, '"$lte"')
       .replace(/"gt"/g, '"$gt"')
       .replace(/"gte"/g, '"$gte"')
-      .replace(/"between"/g, '"$between"')
+      .replace(/"regexp"/g, '"$regexp"')
+      .replace(/"eq"/g, '"$eq"')
+      .replace(/"neq"/g, '"$ne"')
+      .replace(/"ne"/g, '"$ne"')
   );
   // dates need to be date object
-  helpers.convertPropsToDate(mongoFilter);
+  convertProps(mongoFilter);
   return mongoFilter;
 }
 
