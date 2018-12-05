@@ -7632,10 +7632,49 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countFollowUps = function (filter, callback) {
     // pre-filter using related data (case, contact)
-    app.models.followUp.preFilterForOutbreak(this, filter)
+    app.models.followUp
+      .preFilterForOutbreak(this, filter)
       .then(function (filter) {
         // count using query
         return app.models.followUp.count(filter.where);
+      })
+      .then(function (followUps) {
+        callback(null, followUps);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find outbreak lab results
+   * @param filter Supports 'where.case' MongoDB compatible queries
+   * @param callback
+   */
+  Outbreak.prototype.findLabResults = function (filter, callback) {
+    // pre-filter using related data (case)
+    app.models.labResult
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // find follow-ups using filter
+        return app.models.labResult.find(filter);
+      })
+      .then(function (followUps) {
+        callback(null, followUps);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count outbreak lab-results
+   * @param filter Supports 'where.case' MongoDB compatible queries
+   * @param callback
+   */
+  Outbreak.prototype.countLabResults = function (filter, callback) {
+    // pre-filter using related data (case)
+    app.models.labResult
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // count using query
+        return app.models.labResult.count(filter.where);
       })
       .then(function (followUps) {
         callback(null, followUps);

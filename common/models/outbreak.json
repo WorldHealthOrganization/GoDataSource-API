@@ -1199,6 +1199,18 @@
       "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
+      "property": "findLabResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countLabResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
       "property": "filteredCountLabResults"
     },
     {
@@ -6039,6 +6051,53 @@
       "http": {
         "verb": "get",
         "path": "/followUps/v2/count"
+      }
+    },
+    "prototype.findLabResults": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "labResults",
+          "type": [
+            "labResult"
+          ],
+          "description": "List of labResults that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries labResults of outbreak.",
+      "http": {
+        "verb": "get",
+        "path": "/labResults/v2"
+      }
+    },
+    "prototype.countLabResults": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of labResults that match the search criteria",
+          "required": true
+        }
+      ],
+      "description": "Counts labResults of outbreak.",
+      "http": {
+        "verb": "get",
+        "path": "/labResults/v2/count"
       }
     },
     "prototype.caseDelayBetweenOnsetAndLabTesting": {
