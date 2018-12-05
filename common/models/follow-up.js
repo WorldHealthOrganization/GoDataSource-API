@@ -371,7 +371,7 @@ module.exports = function (FollowUp) {
   /**
    * Pre-filter follow-ups for an outbreak using related models (case, contact)
    * @param outbreak
-   * @param filter
+   * @param filter Supports 'where.contact', 'where.case' MongoDB compatible queries
    * @return {Promise<void | never>}
    */
   FollowUp.preFilterForOutbreak = function(outbreak, filter)  {

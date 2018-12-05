@@ -5999,7 +5999,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact', 'where.case' MongoDB compatible queries"
         }
       ],
       "returns": [
@@ -6024,18 +6024,18 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact', 'where.case' MongoDB compatible queries"
         }
       ],
       "returns": [
         {
           "arg": "count",
           "type": "number",
-          "description": "List of followUps that match the search criteria",
+          "description": "Number of followUps that match the search criteria",
           "required": true
         }
       ],
-      "description": "Queries followUps of outbreak.",
+      "description": "Counts followUps of outbreak.",
       "http": {
         "verb": "get",
         "path": "/followUps/v2/count"
