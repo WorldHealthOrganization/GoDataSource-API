@@ -70,6 +70,9 @@
     },
     "outbreakId_index": {
       "outbreakId": 1
+    },
+    "clusterId_index": {
+      "clusterId": 1
     }
   },
   "validations": [],

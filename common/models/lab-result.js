@@ -87,7 +87,7 @@ module.exports = function (LabResult) {
       buildQuery = buildQuery
         .then(function () {
           return app.models.case
-            .rawFind(caseQuery)
+            .rawFind(caseQuery, {projection: {_id: 1}})
             .then(function (cases) {
               // build a list of case ids that passed the filter
               return cases.map(caseRecord => caseRecord.id);

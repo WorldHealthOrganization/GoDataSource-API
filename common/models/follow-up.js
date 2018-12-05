@@ -374,7 +374,7 @@ module.exports = function (FollowUp) {
    * @param filter Supports 'where.contact', 'where.case' MongoDB compatible queries
    * @return {Promise<void | never>}
    */
-  FollowUp.preFilterForOutbreak = function(outbreak, filter)  {
+  FollowUp.preFilterForOutbreak = function (outbreak, filter) {
     // set a default filter
     filter = filter || {};
     // get case query, if any
@@ -409,7 +409,7 @@ module.exports = function (FollowUp) {
       buildQuery = buildQuery
         .then(function () {
           return app.models.case
-            .rawFind(caseQuery)
+            .rawFind(caseQuery, {projection: {_id: 1}})
             .then(function (cases) {
               // build a list of case ids that passed the filter
               const caseIds = cases.map(caseRecord => caseRecord.id);
@@ -421,6 +421,8 @@ module.exports = function (FollowUp) {
                   'persons.id': {
                     $in: caseIds
                   }
+                }, {
+                  projection: {persons: 1}
                 });
             })
             .then(function (relationships) {
@@ -469,7 +471,7 @@ module.exports = function (FollowUp) {
           };
           // query contacts
           return app.models.contact
-            .rawFind(contactQuery)
+            .rawFind(contactQuery, {projection: {_id: 1}})
             .then(function (contacts) {
               // update follow-up query, restrict it to the list of contacts found
               followUpQuery = {
