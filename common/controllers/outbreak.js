@@ -7605,4 +7605,41 @@ module.exports = function (Outbreak) {
           );
       });
   };
+
+  /**
+   * Find outbreak follow-ups
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findFollowUps = function (filter, callback) {
+    // pre-filter using related data (case, contact)
+    app.models.followUp
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // find follow-ups using filter
+        return app.models.followUp.find(filter);
+      })
+      .then(function (followUps) {
+        callback(null, followUps);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count outbreak follow-ups
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countFollowUps = function (filter, callback) {
+    // pre-filter using related data (case, contact)
+    app.models.followUp.preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // count using query
+        return app.models.followUp.count(filter.where);
+      })
+      .then(function (followUps) {
+        callback(null, followUps);
+      })
+      .catch(callback);
+  };
 };

@@ -10,10 +10,16 @@ const convertProps = function (obj) {
         if (Array.isArray(obj[prop])) {
           obj.$gte = obj[prop][0];
           obj.$lte = obj[prop][1];
+          convertProps(obj.$gte);
+          convertProps(obj.$lte);
         }
         delete obj[prop];
-      }
-      if (typeof obj[prop] == 'object' && obj[prop] !== null) {
+      } else if (prop === '$regex') {
+        if (typeof obj[prop] === 'string' && /\/(.+)\/(.+)/.test(obj[prop])) {
+          let matches = /\/(.+)\/(.+)/.exec(obj[prop]);
+          obj[prop] = new RegExp(matches[1], matches[2]);
+        }
+      } else if (typeof obj[prop] == 'object' && obj[prop] !== null) {
         convertProps(obj[prop]);
       } else {
         // we're only looking for strings properties that have a date format to convert
@@ -47,7 +53,7 @@ function convert(loopbackFilter) {
       .replace(/"lte"/g, '"$lte"')
       .replace(/"gt"/g, '"$gt"')
       .replace(/"gte"/g, '"$gte"')
-      .replace(/"regexp"/g, '"$regexp"')
+      .replace(/"regexp"/g, '"$regex"')
       .replace(/"eq"/g, '"$eq"')
       .replace(/"neq"/g, '"$ne"')
       .replace(/"ne"/g, '"$ne"')

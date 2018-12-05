@@ -23,7 +23,7 @@ module.exports = function (Model) {
   /**
    * Find using connector
    * @param query
-   * @param options {{order:*, projection:*}}
+   * @param options {{skip:number, limit:number, order:*, projection:*}}
    * @return {Promise<any>}
    */
   Model.rawFind = function (query, options = {}) {
@@ -36,36 +36,52 @@ module.exports = function (Model) {
     // if there is a default scope query
     if (defaultScopeQuery) {
       // merge it in the sent query
-      query = app.utils.remote.mergeFilters({where: defaultScopeQuery}, {where: query}).where;
+      query = {
+        $and: [
+          defaultScopeQuery,
+          query
+        ]
+      };
     }
 
     // query only non deleted data
-    query = app.utils.remote
-      .convertLoopbackFilterToMongo(
-        app.utils.remote.mergeFilters({
-          where: {
-            or: [
+    query = app.utils.remote.convertLoopbackFilterToMongo(
+      {
+        $and: [
+          {
+            $or: [
               {deleted: false},
-              {deleted: {eq: null}}
+              {deleted: {$eq: null}}
             ]
-          }
-        }, {where: query})
-      ).where;
+          },
+          query
+        ]
+      });
 
     // log usage
     app.logger.debug(`[QueryId: ${queryId}] Performing MongoDB request on collection '${collectionName}': find ${JSON.stringify(query)}`);
 
     // perform find using mongo connector
-    let execSteps = app.dataSources.mongoDb.connector.collection(collectionName)
+    let queryDb = app.dataSources.mongoDb.connector.collection(collectionName)
       .find(query, options.projection);
 
     // sort, if needed
     if (options.order) {
-      execSteps = execSteps.sort(options.order);
+      queryDb = queryDb.sort(options.order);
     }
 
-    return execSteps
-      // convert result to array
+    // apply skip
+    if (options.skip) {
+      queryDb = queryDb.skip(options.skip);
+    }
+
+    // apply limit
+    if (options.limit) {
+      queryDb = queryDb.limit(options.limit);
+    }
+
+    // convert result to array
+    return queryDb
       .toArray()
       .then(function (records) {
         app.logger.debug(`[QueryId: ${queryId}] MongoDB request completed after ${timer.getElapsedMilliseconds()} msec`);
