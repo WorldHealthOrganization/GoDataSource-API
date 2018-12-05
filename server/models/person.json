@@ -101,6 +101,9 @@
     "addresses_geoLocation_index": {
       "addresses.geoLocation": "2dsphere"
     },
+    "addresses_locationId_index": {
+      "addresses.locationId": 1
+    },
     "fillGeoLocation_index": {
       "fillGeoLocation": "2dsphere"
     },

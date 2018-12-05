@@ -110,6 +110,11 @@
     "name",
     "description"
   ],
+  "indexes": {
+    "dateOfOnset_index": {
+      "dateOfOnset": 1
+    }
+  },
   "validations": [],
   "relations": {
     "labResults": {
