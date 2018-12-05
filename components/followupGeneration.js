@@ -5,31 +5,70 @@ const App = require('../server/server');
 const RoundRobin = require('rr');
 const Helpers = require('./helpers');
 const Moment = require('moment');
+const _ = require('lodash');
+const UUID = require('uuid').v4;
+
+/**
+ *
+ * @param startDate
+ * @param endDate
+ */
+const daysSince = function (startDate, endDate) {
+  return (Moment(endDate).startOf('day')).diff(Moment(startDate).startOf('day'), 'days');
+};
+
+// attach author timestamps (createdAt, updatedAt, createdBy, updatedBy)
+// attach follow up index and address
+const _createFollowUpEntry = function (props, contact, reqOpts) {
+  // create a unique id
+  props._id = UUID();
+  // make it active
+  props.deleted = false;
+
+  // set index based on the difference in days from start date until the follow up set date
+  // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
+  props.index = daysSince(Moment(contact.followUp.startDate), props.date) + 1;
+
+  // set follow up address to match contact's current address
+  props.address = App.models.person.getCurrentAddress(contact);
+
+  // logged in user id
+  let userId = _.get(reqOpts, 'accessToken.userId', 'unavailable');
+
+  // author timestamps date
+  let now = new Date();
+
+  // update createdAt property if it's not a sync or the property is missing from the instance
+  props.createdAt = now;
+  props.updateAt = now;
+  props.createdBy = userId;
+  props.updatedBy = userId;
+
+  return props;
+};
 
 // get contacts that has inconclusive follow up period
 module.exports.getContactsWithInconclusiveLastFollowUp = function (startDate, outbreakId) {
   return App.models.contact
-    .find({
-      where: {
-        and: [
-          {
-            outbreakId: outbreakId
-          },
-          {
-            followUp: {
-              neq: null
-            }
-          },
-          {
-            'followUp.endDate': {
-              lt: startDate
-            }
-          },
-          {
-            'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
+    .rawFind({
+      $and: [
+        {
+          outbreakId: outbreakId
+        },
+        {
+          followUp: {
+            $ne: null
           }
-        ]
-      }
+        },
+        {
+          'followUp.endDate': {
+            $lt: startDate
+          }
+        },
+        {
+          'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
+        }
+      ]
     })
     // filter out contacts whose last follow up is not completed or lost
     .then((contacts) => {
@@ -43,111 +82,109 @@ module.exports.getContactsWithInconclusiveLastFollowUp = function (startDate, ou
 // get contacts that have follow up period between the passed start/end dates
 module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId) {
   return App.models.contact
-    .find({
-      where: {
-        and: [
-          {
-            outbreakId: outbreakId
-          },
-          {
-            followUp: {
-              neq: null
-            }
-          },
-          {
-            or: [
-              {
-                // follow up period is inside contact's follow up period
-                and: [
-                  {
-                    'followUp.startDate': {
-                      lte: startDate
-                    }
-                  },
-                  {
-                    'followUp.endDate': {
-                      gte: endDate
-                    }
-                  }
-                ]
-              },
-              {
-                // period starts before contact's start date but ends before contact's end date
-                and: [
-                  {
-                    'followUp.startDate': {
-                      gte: startDate
-                    }
-                  },
-                  {
-                    'followUp.startDate': {
-                      lte: endDate
-                    }
-                  },
-                  {
-                    'followUp.endDate': {
-                      gte: endDate
-                    }
-                  }
-                ]
-              },
-              {
-                // period starts before contact's end date and after contact's start date
-                // but stops after contact's end date
-                and: [
-                  {
-                    'followUp.startDate': {
-                      lte: startDate
-                    }
-                  },
-                  {
-                    'followUp.endDate': {
-                      gte: startDate
-                    }
-                  },
-                  {
-                    'followUp.endDate': {
-                      lte: endDate
-                    }
-                  }
-                ]
-              },
-              {
-                // contact's period is inside follow up period
-                and: [
-                  {
-                    'followUp.startDate': {
-                      gte: startDate
-                    }
-                  },
-                  {
-                    'followUp.endDate': {
-                      gte: startDate
-                    }
-                  },
-                  {
-                    'followUp.endDate': {
-                      lte: endDate
-                    }
-                  }
-                ]
-              }
-            ]
+    .rawFind({
+      $and: [
+        {
+          outbreakId: outbreakId
+        },
+        {
+          followUp: {
+            $ne: null
           }
-        ]
-      }
+        },
+        {
+          $or: [
+            {
+              // follow up period is inside contact's follow up period
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $lte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: endDate
+                  }
+                }
+              ]
+            },
+            {
+              // period starts before contact's start date but ends before contact's end date
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.startDate': {
+                    $lte: endDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: endDate
+                  }
+                }
+              ]
+            },
+            {
+              // period starts before contact's end date and after contact's start date
+              // but stops after contact's end date
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $lte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $lte: endDate
+                  }
+                }
+              ]
+            },
+            {
+              // contact's period is inside follow up period
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $lte: endDate
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
     });
 };
 
 // get list of follow ups ordered by created date for a given contact
-module.exports.getContactFollowups = function (contactId) {
+module.exports.getContactFollowups = function (contactIds) {
   return App.models.followUp
-    .find({
-      where: {
-        personId: contactId
-      },
-      order: 'createdAt DESC'
-    });
+    .rawFind({
+      personId: {
+        $in: contactIds
+      }
+    })
+    .then((followUps) => _.groupBy(followUps, (f) => f.personId));
 };
 
 // retrieve all teams and corresponding location/sub location
@@ -207,8 +244,6 @@ module.exports.getContactFollowupEligibleTeams = function (contact, teams) {
 module.exports.generateFollowupsForContact = function (contact, teams, period, freq, freqPerDay, reqOpts, targeted, ignorePeriod) {
   // list of follow up create promise functions that should be executed
   let followUpsToAdd = [];
-  // list of follow ups that are in the future and should be deleted, as the newly generated will take their place
-  let followUpsToDelete = [];
 
   if (!ignorePeriod) {
     // if passed period is higher than contact's follow up period
@@ -225,47 +260,29 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
 
   // generate follow up, starting from today
   for (let followUpDate = period.startDate.clone(); followUpDate <= period.endDate; followUpDate.add(freq, 'day')) {
-    let generatedFollowUps = [];
-
     // number of follow ups to be generated per day
     let numberOfFollowUpsPerDay = freqPerDay;
 
-    // check if the follow up date is in the past
-    // if so, check if the number of existing follow ups is the same as the generate frequency per day
+    // check if the number of existing follow ups is the same as the generate frequency per day
     // if so, do not generate any follow ups
-    if (followUpDate.isBefore(Helpers.getDateEndOfDay())) {
-      let followUpsInThisDay = contact.followUpsLists.filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
-      numberOfFollowUpsPerDay = numberOfFollowUpsPerDay - followUpsInThisDay.length;
-    }
+    let followUpsInThisDay = contact.followUpsList.filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
+    numberOfFollowUpsPerDay = numberOfFollowUpsPerDay - followUpsInThisDay.length;
 
     for (let i = 0; i < numberOfFollowUpsPerDay; i++) {
-      generatedFollowUps.push(
-        App.models.followUp
-          .create({
-            // used to easily trace all follow ups for a given outbreak
-            outbreakId: contact.outbreakId,
-            personId: contact.id,
-            date: followUpDate.toDate().toISOString(),
-            targeted: targeted,
-            // split the follow ups work equally across teams
-            teamId: RoundRobin(teams),
-            statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
-          }, reqOpts)
-      );
-    }
+      let followUp = _createFollowUpEntry({
+        // used to easily trace all follow ups for a given outbreak
+        outbreakId: contact.outbreakId,
+        personId: contact.id,
+        date: followUpDate.toDate().toISOString(),
+        targeted: targeted,
+        // split the follow ups work equally across teams
+        teamId: RoundRobin(teams),
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
+      }, contact, reqOpts);
 
-    // if there are follow ups on the same day and day is in the future
-    // delete them and then insert the newly generated
-    if (!followUpDate.isBefore(Helpers.getDateEndOfDay())) {
-      let existingFollowups = contact.followUpsLists.filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
-      existingFollowups.map((existingFollowup) => {
-        followUpsToDelete.push(existingFollowup.destroy(reqOpts));
-      });
+      followUpsToAdd.push(followUp);
     }
-
-    followUpsToAdd.push(...generatedFollowUps);
   }
 
-  return Promise.all(followUpsToAdd)
-    .then((createdFollowups) => Promise.all(followUpsToDelete).then(() => createdFollowups));
+  return followUpsToAdd;
 };

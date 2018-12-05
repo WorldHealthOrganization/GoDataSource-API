@@ -13,6 +13,7 @@ const AdmZip = require('adm-zip');
 const tmp = require('tmp');
 const Uuid = require('uuid');
 const templateParser = require('./../../components/templateParser');
+const PromisePool = require('es6-promise-pool');
 
 module.exports = function (Outbreak) {
 
@@ -1124,10 +1125,6 @@ module.exports = function (Outbreak) {
     let outbreakFollowUpFreq = this.frequencyOfFollowUp;
     let outbreakFollowUpPerDay = this.frequencyOfFollowUpPerDay;
 
-    // list of generated follow ups to be returned in the response
-    // grouped per contact
-    let generatedResponse = [];
-
     // retrieve list of contacts that are eligible for follow up generation
     // and those that have last follow up inconclusive
     let outbreakId = this.id;
@@ -1146,52 +1143,55 @@ module.exports = function (Outbreak) {
           return [];
         }
 
-        // get all teams and their locations to get eligible teams for each contact
+        // // get all teams and their locations to get eligible teams for each contact
         return FollowupGeneration
           .getAllTeamsWithLocationsIncluded()
           .then((teams) => {
-            return Promise
-              .all(contacts.map((contact) => {
-                // retrieve contact's follow up and eligible teams
-                return Promise
-                  .all([
-                    FollowupGeneration
-                      .getContactFollowups(contact.id)
-                      .then((followUps) => {
-                        contact.followUpsLists = followUps;
-                        return contact;
-                      }),
-                    FollowupGeneration
+            // get follow ups list for all contacts
+            return FollowupGeneration
+              .getContactFollowups(contacts.map(c => c.id))
+              .then((followUpGroups) => {
+                let followUpsToAdd = [];
+                let pool = new PromisePool(
+                  contacts.map((contact) => {
+                    contact.followUpsList = followUpGroups[contact.id] || [];
+                    return FollowupGeneration
                       .getContactFollowupEligibleTeams(contact, teams)
                       .then((eligibleTeams) => {
                         contact.eligibleTeams = eligibleTeams;
-                        return contact;
                       })
-                  ])
-                  .then(() => contact);
-              }))
-              .then(() => Promise.all(contacts.map((contact) => {
-                // generate response entry for the given contact
-                let index = generatedResponse.push({contactId: contact.id, followUps: []}) - 1;
+                      .then(() => {
+                        followUpsToAdd.push(...FollowupGeneration.generateFollowupsForContact(
+                          contact,
+                          contact.eligibleTeams,
+                          {
+                            startDate: followupStartDate,
+                            endDate: followupEndDate
+                          },
+                          outbreakFollowUpFreq,
+                          outbreakFollowUpPerDay,
+                          options,
+                          targeted,
+                          contact.inconclusive
+                        ));
+                      });
+                  }),
+                  100
+                );
+                let poolPromise = pool.start();
 
-                return FollowupGeneration.generateFollowupsForContact(
-                  contact,
-                  contact.eligibleTeams, {
-                    startDate: followupStartDate,
-                    endDate: followupEndDate
-                  },
-                  outbreakFollowUpFreq,
-                  outbreakFollowUpPerDay,
-                  options,
-                  targeted,
-                  contact.inconclusive
-                ).then((followUps) => {
-                  generatedResponse[index].followUps = followUps;
+                return poolPromise.then(() => {
+                  if (followUpsToAdd.length) {
+                    return app.dataSources.mongoDb.connector.collection('followUp')
+                      .insertMany(followUpsToAdd)
+                      .then(result => result.insertedCount);
+                  }
+                  return 0;
                 });
-              })));
+              });
           });
       })
-      .then(() => callback(null, generatedResponse))
+      .then((count) => callback(null, { count: count }))
       .catch((err) => callback(err));
   };
 
