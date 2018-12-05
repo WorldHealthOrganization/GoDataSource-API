@@ -1176,7 +1176,7 @@ module.exports = function (Outbreak) {
                         ));
                       });
                   }),
-                  100
+                  100 // concurrency limit
                 );
                 let poolPromise = pool.start();
 
