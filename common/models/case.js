@@ -306,50 +306,72 @@ module.exports = function (Case) {
   Case.delayBetweenOnsetAndLabTesting = function (outbreakId, filter) {
     // find all cases that have date of onset defined and include their first lab result
     return Case
-      .find(app.utils.remote
-        .mergeFilters({
-          where: {
-            outbreakId: outbreakId,
-            dateOfOnset: {
-              ne: null
+      .rawFind(
+        app.utils.remote.convertLoopbackFilterToMongo(
+          app.utils.remote.mergeFilters({
+            where: {
+              outbreakId: outbreakId,
+              dateOfOnset: {
+                ne: null
+              }
             }
-          },
-          include: {
-            relation: 'labResults',
-            scope: {
-              order: 'dateSampleTaken ASC',
-              fields: ['dateSampleTaken'],
-              limit: 1
-            }
-          },
-          order: 'dateOfOnset ASC'
-        }, filter || {})
+          }, filter || {})
+        ).where, {
+          order: {
+            dateOfOnset: 1
+          }
+        }
       )
       .then(function (cases) {
-        // build the list of results
-        const results = [];
-        // go through case records
-        cases.forEach(function (caseRecord) {
-          caseRecord = caseRecord.toJSON();
-          // get lab result's dateSampleTaken, if available
-          const labResultDate = caseRecord.labResults.length ? caseRecord.labResults.shift().dateSampleTaken : null;
-          // build each result
-          const result = {
-            dateOfOnset: caseRecord.dateOfOnset,
-            dateOfFirstLabTest: labResultDate,
-            delay: null,
-            case: caseRecord
-          };
-          // calculate delay if both dates are available (onset is ensured by the query)
-          if (labResultDate) {
-            const onset = moment(result.dateOfOnset);
-            const labTest = moment(result.dateOfFirstLabTest);
-            result.delay = labTest.diff(onset, 'days');
-          }
-          results.push(result);
-        });
-        // return the list of results
-        return results;
+        // build a list of caseIds to get their lab results
+        const caseIds = cases.map(caseRecord => caseRecord.id);
+        // do a raw find for lab results
+        return app.models.labResult.rawFind(
+          {
+            personId: {
+              inq: caseIds
+            }
+          },
+          {
+            order: {dateSampleTaken: 1},
+            projection: {personId: 1, dateSampleTaken: 1}
+          })
+          .then(function (labResults) {
+            // build a map of personId to oldest lab result
+            const labResultsMap = {};
+            // go through all lab results
+            labResults.forEach(function (labResult) {
+              // only keep the first one for each person
+              if (!labResultsMap[labResult.personId]) {
+                labResultsMap[labResult.personId] = labResult;
+              }
+            });
+
+            // build the list of results
+            const results = [];
+            // go through case records
+            cases.forEach(function (caseRecord) {
+
+              // get lab result's dateSampleTaken, if available
+              const labResultDate = labResultsMap[caseRecord.id] ? labResultsMap[caseRecord.id].dateSampleTaken : null;
+              // build each result
+              const result = {
+                dateOfOnset: caseRecord.dateOfOnset,
+                dateOfFirstLabTest: labResultDate,
+                delay: null,
+                case: caseRecord
+              };
+              // calculate delay if both dates are available (onset is ensured by the query)
+              if (labResultDate) {
+                const onset = moment(result.dateOfOnset);
+                const labTest = moment(result.dateOfFirstLabTest);
+                result.delay = labTest.diff(onset, 'days');
+              }
+              results.push(result);
+            });
+            // return the list of results
+            return results;
+          });
       });
   };
 };

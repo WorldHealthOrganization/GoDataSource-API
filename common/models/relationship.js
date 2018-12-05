@@ -286,8 +286,9 @@ module.exports = function (Relationship) {
 
     // get all relationships between cases and contacts
     return app.models.relationship
-      .find(app.utils.remote
-        .mergeFilters({
+      .rawFind(
+        app.utils.remote.convertLoopbackFilterToMongo(
+        app.utils.remote.mergeFilters({
           where: {
             outbreakId: outbreakId,
             and: [
@@ -295,10 +296,9 @@ module.exports = function (Relationship) {
               {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'}
             ]
           }
-        }, filter || {})
+        }, filter || {})).where
       )
       .then(function (relationships) {
-        relationships = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, filter);
 
         // initialize contacts map and caseContactsMap
         // helper properties to keep the contacts already counted

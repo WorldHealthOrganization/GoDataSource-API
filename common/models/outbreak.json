@@ -785,6 +785,18 @@
       "principalType": "ROLE",
       "principalId": "read_followup",
       "permission": "ALLOW",
+      "property": "findFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "countFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
       "property": "__findById__followUps"
     },
     {
@@ -5980,6 +5992,53 @@
       "http": {
         "verb": "get",
         "path": "/people"
+      }
+    },
+    "prototype.findFollowUps": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "followUps",
+          "type": [
+            "followUp"
+          ],
+          "description": "List of followUps that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries followUps of outbreak.",
+      "http": {
+        "verb": "get",
+        "path": "/followUps/v2"
+      }
+    },
+    "prototype.countFollowUps": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "List of followUps that match the search criteria",
+          "required": true
+        }
+      ],
+      "description": "Queries followUps of outbreak.",
+      "http": {
+        "verb": "get",
+        "path": "/followUps/v2/count"
       }
     },
     "prototype.caseDelayBetweenOnsetAndLabTesting": {

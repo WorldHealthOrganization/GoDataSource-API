@@ -19,44 +19,78 @@ module.exports = function (Model) {
   }
   // get default scope query, if any
   const defaultScopeQuery = _.get(Model, 'definition.settings.scope.where');
+
   /**
    * Find using connector
+   * @param query
+   * @param options {{skip:number, limit:number, order:*, projection:*}}
    * @return {Promise<any>}
    */
-  Model.rawFind = function () {
+  Model.rawFind = function (query, options = {}) {
+
+    // set query id and start timer (for logging purposes)
     const queryId = uuid.v4();
     const timer = new Timer();
     timer.start();
-    // get function arguments
-    const args = Array.prototype.slice.call(arguments);
+
     // if there is a default scope query
     if (defaultScopeQuery) {
       // merge it in the sent query
-      args[0] = app.utils.remote
-        .convertLoopbackFilterToMongo(
-          app.utils.remote.mergeFilters({where: defaultScopeQuery}, {where: args[0]})
-        ).where;
+      query = {
+        $and: [
+          defaultScopeQuery,
+          query
+        ]
+      };
     }
-    app.logger.debug(`[QueryId: ${queryId}] Performing MongoDB request on collection '${collectionName}': find ${JSON.stringify(args)}`);
-    // promisify the action
-    return new Promise(function (resolve, reject) {
-      // perform find using mongo connector
-      app.dataSources.mongoDb.connector.collection(collectionName)
-        .find(...args)
-        // convert result to array
-        .toArray(function (error, records) {
-          app.logger.debug(`[QueryId: ${queryId}] MongoDB request completed after ${timer.getElapsedMilliseconds()} msec`);
-          // handle errors
-          if (error) {
-            return reject(error);
-          }
-          // add id property (not the native _id property)
-          records.forEach(function (record) {
-            record.id = record._id;
-            delete record._id;
-          });
-          resolve(records);
+
+    // query only non deleted data
+    query = app.utils.remote.convertLoopbackFilterToMongo(
+      {
+        $and: [
+          {
+            $or: [
+              {deleted: false},
+              {deleted: {$eq: null}}
+            ]
+          },
+          query
+        ]
+      });
+
+    // log usage
+    app.logger.debug(`[QueryId: ${queryId}] Performing MongoDB request on collection '${collectionName}': find ${JSON.stringify(query)}`);
+
+    // perform find using mongo connector
+    let queryDb = app.dataSources.mongoDb.connector.collection(collectionName)
+      .find(query, options.projection);
+
+    // sort, if needed
+    if (options.order) {
+      queryDb = queryDb.sort(options.order);
+    }
+
+    // apply skip
+    if (options.skip) {
+      queryDb = queryDb.skip(options.skip);
+    }
+
+    // apply limit
+    if (options.limit) {
+      queryDb = queryDb.limit(options.limit);
+    }
+
+    // convert result to array
+    return queryDb
+      .toArray()
+      .then(function (records) {
+        app.logger.debug(`[QueryId: ${queryId}] MongoDB request completed after ${timer.getElapsedMilliseconds()} msec`);
+        // add id property (not the native _id property)
+        records.forEach(function (record) {
+          record.id = record._id;
+          delete record._id;
         });
-    });
+        return records;
+      });
   };
 };
