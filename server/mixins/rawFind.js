@@ -23,7 +23,11 @@ module.exports = function (Model) {
   /**
    * Find using connector
    * @param query
-   * @param options {{skip:number, limit:number, order:*, projection:*}}
+   * @param {object} [options]
+   * @param {number} [options.skip]
+   * @param {number} [options.limit]
+   * @param {object} [options.order]
+   * @param {object} [options.projection]
    * @return {Promise<any>}
    */
   Model.rawFind = function (query, options = {}) {
@@ -63,7 +67,7 @@ module.exports = function (Model) {
 
     // perform find using mongo connector
     let queryDb = app.dataSources.mongoDb.connector.collection(collectionName)
-      .find(query, options.projection);
+      .find(query, {projection: options.projection});
 
     // sort, if needed
     if (options.order) {

@@ -374,4 +374,84 @@ module.exports = function (Case) {
           });
       });
   };
+
+
+  /**
+   * Pre-filter cases for an outbreak using related models (relationship)
+   * @param outbreak
+   * @param filter Supports 'where.case' MongoDB compatible queries
+   * @return {Promise<void | never>}
+   */
+  Case.preFilterForOutbreak = function (outbreak, filter) {
+    // set a default filter
+    filter = filter || {};
+    // get relationship query, if any
+    let relationshipQuery = _.get(filter, 'where.relationship');
+    // if found, remove it form main query
+    if (relationshipQuery) {
+      delete filter.where.relationship;
+    }
+    // get main cases query
+    let casesQuery = _.get(filter, 'where', {});
+    // start with a resolved promise (so we can link others)
+    let buildQuery = Promise.resolve();
+    // if a relationship query is present
+    if (relationshipQuery) {
+      // restrict query to current outbreak
+      relationshipQuery = {
+        $and: [
+          relationshipQuery,
+          {
+            outbreakId: outbreak.id
+          }
+        ]
+      };
+      // filter cases based on query
+      buildQuery = buildQuery
+        .then(function () {
+          return app.models.relationship
+            .rawFind(relationshipQuery, {projection: {persons: 1}})
+            .then(function (relationships) {
+              let caseIds = [];
+              // build a list of caseIds that passed the filter
+              relationships.forEach(function (relation) {
+                relation.persons.forEach(function (person) {
+                  if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
+                    caseIds.push(person.id);
+                  }
+                });
+              });
+              return caseIds;
+            });
+        });
+    }
+    return buildQuery
+      .then(function (caseIds) {
+        // if caseIds filter present
+        if (caseIds) {
+          // update cases query to filter based on caseIds
+          casesQuery = {
+            $and: [
+              casesQuery,
+              {
+                _id: {
+                  $in: caseIds
+                }
+              }
+            ]
+          };
+        }
+        // restrict cases query to current outbreak
+        casesQuery = {
+          $and: [
+            casesQuery,
+            {
+              outbreakId: outbreak.id
+            }
+          ]
+        };
+        // return updated filter
+        return Object.assign(filter, {where: casesQuery});
+      });
+  };
 };

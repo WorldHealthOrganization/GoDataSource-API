@@ -237,6 +237,30 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "findCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "findCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countCases"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_case",
       "permission": "ALLOW",
       "property": "__create__cases"
@@ -1296,6 +1320,12 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "countCasesPerClassification"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCasesPerClassificationv2"
     },
     {
       "principalType": "ROLE",
@@ -5530,6 +5560,43 @@
         "path": "/cases/per-classification/count"
       }
     },
+    "prototype.countCasesPerClassificationv2": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: it supports same filters as GET /outbreak/:id/cases"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": {
+            "classification": {
+              "type": {
+                "<caseClassification>": {
+                  "type": {
+                    "count": "number",
+                    "caseIDs": [
+                      "string"
+                    ]
+                  }
+                }
+              }
+            },
+            "count": "number"
+          },
+          "description": "Number of cases grouped by case classification",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Counts the number of cases grouped by case classification",
+      "http": {
+        "verb": "get",
+        "path": "/cases/v2/per-classification/count"
+      }
+    },
     "prototype.countContactsPerRiskLevel": {
       "accepts": [
         {
@@ -6078,26 +6145,73 @@
         "path": "/labResults/v2"
       }
     },
-    "prototype.countLabResults": {
+    "prototype.countFollowUps": {
       "accepts": [
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact', 'where.case' MongoDB compatible queries"
         }
       ],
       "returns": [
         {
           "arg": "count",
           "type": "number",
-          "description": "Number of labResults that match the search criteria",
+          "description": "Number of followUps that match the search criteria",
           "required": true
         }
       ],
-      "description": "Counts labResults of outbreak.",
+      "description": "Counts followUps of outbreak.",
       "http": {
         "verb": "get",
-        "path": "/labResults/v2/count"
+        "path": "/followUps/v2/count"
+      }
+    },
+    "prototype.findCases": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship' MongoDB compatible queries"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "cases",
+          "type": [
+            "case"
+          ],
+          "description": "List of cases that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries cases of outbreak.",
+      "http": {
+        "verb": "get",
+        "path": "/cases/v2"
+      }
+    },
+    "prototype.countCases": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship' MongoDB compatible queries"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of cases that match the search criteria",
+          "required": true
+        }
+      ],
+      "description": "Counts cases of outbreak.",
+      "http": {
+        "verb": "get",
+        "path": "/cases/v2/count"
       }
     },
     "prototype.caseDelayBetweenOnsetAndLabTesting": {
