@@ -53,6 +53,18 @@
     }
   },
   "indexes": {
+    "personId_index": {
+      "personId": 1
+    },
+    "statusId_index": {
+      "statusId": 1
+    },
+    "teamId_index": {
+      "teamId": 1
+    },
+    "targeted_index": {
+      "targeted": 1
+    },
     "address_geoLocation_index": {
       "address.geoLocation": "2dsphere"
     },

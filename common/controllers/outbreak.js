@@ -7608,7 +7608,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Find outbreak follow-ups
-   * @param filter
+   * @param filter Supports 'where.contact', 'where.case' MongoDB compatible queries
    * @param callback
    */
   Outbreak.prototype.findFollowUps = function (filter, callback) {
@@ -7627,7 +7627,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Count outbreak follow-ups
-   * @param filter
+   * @param filter Supports 'where.contact', 'where.case' MongoDB compatible queries
    * @param callback
    */
   Outbreak.prototype.countFollowUps = function (filter, callback) {
