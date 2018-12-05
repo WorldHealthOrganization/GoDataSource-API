@@ -6145,26 +6145,26 @@
         "path": "/labResults/v2"
       }
     },
-    "prototype.countFollowUps": {
+    "prototype.countLabResults": {
       "accepts": [
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact', 'where.case' MongoDB compatible queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
         }
       ],
       "returns": [
         {
           "arg": "count",
           "type": "number",
-          "description": "Number of followUps that match the search criteria",
+          "description": "Number of lab results that match the search criteria",
           "required": true
         }
       ],
-      "description": "Counts followUps of outbreak.",
+      "description": "Counts lab results of outbreak.",
       "http": {
         "verb": "get",
-        "path": "/followUps/v2/count"
+        "path": "/labResults/v2/count"
       }
     },
     "prototype.findCases": {
