@@ -2755,22 +2755,13 @@
       ],
       "returns": [
         {
-          "arg": "generatedFollowUps",
-          "type": [
-            {
-              "type": {
-                "contactId": {
-                  "type": "string"
-                },
-                "followUps": {
-                  "type": [
-                    "followUp"
-                  ]
-                }
-              }
+          "arg": "response",
+          "type": {
+            "count": {
+              "type": "number"
             }
-          ],
-          "description": "Generated Follow Ups",
+          },
+          "description": "Number of generated follow ups",
           "root": true,
           "required": true
         }
