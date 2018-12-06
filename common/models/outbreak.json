@@ -1349,13 +1349,19 @@
       "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
-      "property": "countCasesPerClassificationv2"
+      "property": "countCasesPerClassificationV2"
     },
     {
       "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "countContactsPerRiskLevel"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactsPerRiskLevelV2"
     },
     {
       "principalType": "ROLE",
@@ -5584,7 +5590,7 @@
         "path": "/cases/per-classification/count"
       }
     },
-    "prototype.countCasesPerClassificationv2": {
+    "prototype.countCasesPerClassificationV2": {
       "accepts": [
         {
           "arg": "filter",
@@ -5656,6 +5662,43 @@
       "http": {
         "verb": "get",
         "path": "/contacts/per-risk-level/count"
+      }
+    },
+    "prototype.countContactsPerRiskLevelV2": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: it supports same filters as GET /outbreak/:id/contacts"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": {
+            "riskLevel": {
+              "type": {
+                "<riskLevel>": {
+                  "type": {
+                    "count": "number",
+                    "contactIDs": [
+                      "string"
+                    ]
+                  }
+                }
+              }
+            },
+            "count": "number"
+          },
+          "description": "Number of contacts grouped by case risk level",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Counts the number of contacts grouped by case risk level",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/v2/per-risk-level/count"
       }
     },
     "prototype.countCasesStratifiedByClassificationOverTime": {
