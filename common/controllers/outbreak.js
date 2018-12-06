@@ -7756,4 +7756,42 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Find outbreak contacts
+   * @param filter Supports 'where.case', 'where.followUp' MongoDB compatible queries
+   * @param callback
+   */
+  Outbreak.prototype.findContacts = function (filter, callback) {
+    // pre-filter using related data (case, followUps)
+    app.models.contact
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // find follow-ups using filter
+        return app.models.contact.find(filter);
+      })
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count outbreak contacts
+   * @param filter Supports 'where.case', 'where.followUp' MongoDB compatible queries
+   * @param callback
+   */
+  Outbreak.prototype.countContacts = function (filter, callback) {
+    // pre-filter using related data (case, followUps)
+    app.models.contact
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // count using query
+        return app.models.contact.count(filter.where);
+      })
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
 };

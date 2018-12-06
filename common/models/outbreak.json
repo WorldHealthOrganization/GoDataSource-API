@@ -303,6 +303,30 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "findContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "findContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countContacts"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_contact",
       "permission": "ALLOW",
       "property": "__create__contacts"
@@ -6212,6 +6236,53 @@
       "http": {
         "verb": "get",
         "path": "/cases/v2/count"
+      }
+    },
+    "prototype.findContacts": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "contacts",
+          "type": [
+            "contact"
+          ],
+          "description": "List of contacts that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries contacts of outbreak.",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/v2"
+      }
+    },
+    "prototype.countContacts": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of contacts that match the search criteria",
+          "required": true
+        }
+      ],
+      "description": "Counts contacts of outbreak.",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/v2/count"
       }
     },
     "prototype.caseDelayBetweenOnsetAndLabTesting": {

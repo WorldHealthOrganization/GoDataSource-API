@@ -379,7 +379,7 @@ module.exports = function (Case) {
   /**
    * Pre-filter cases for an outbreak using related models (relationship)
    * @param outbreak
-   * @param filter Supports 'where.case' MongoDB compatible queries
+   * @param filter Supports 'where.relationship' MongoDB compatible queries
    * @return {Promise<void | never>}
    */
   Case.preFilterForOutbreak = function (outbreak, filter) {
