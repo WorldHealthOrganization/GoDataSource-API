@@ -1170,7 +1170,6 @@ module.exports = function (Outbreak) {
                           },
                           outbreakFollowUpFreq,
                           outbreakFollowUpPerDay,
-                          options,
                           targeted,
                           contact.inconclusive
                         ));
@@ -1182,8 +1181,8 @@ module.exports = function (Outbreak) {
 
                 return poolPromise.then(() => {
                   if (followUpsToAdd.length) {
-                    return app.dataSources.mongoDb.connector.collection('followUp')
-                      .insertMany(followUpsToAdd)
+                    return app.models.followUp
+                      .rawInsert(followUpsToAdd, null, options)
                       .then(result => result.insertedCount);
                   }
                   return 0;

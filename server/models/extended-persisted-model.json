@@ -17,7 +17,8 @@
     "IncludeCustomRelations": true,
     "ConvertNestedGeoPoints": true,
     "DateProperty": true,
-    "RawFind": true
+    "RawFind": true,
+    "RawInsert": true
   },
   "replaceOnPUT": false,
   "properties": {
