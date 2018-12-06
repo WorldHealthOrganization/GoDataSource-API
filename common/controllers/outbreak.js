@@ -7685,126 +7685,126 @@ module.exports = function (Outbreak) {
 
     // merge filter props from request with the built-in filter
     const mergedFilter = app.utils.remote.mergeFilters({
-        where: {
-          or: [
-            {
-              // eligible for follow ups
-              and: [
-                {
-                  outbreakId: this.id
-                },
-                {
-                  followUp: {
-                    neq: null
-                  }
-                },
-                {
-                  or: [
-                    {
-                      // follow up period is inside contact's follow up period
-                      and: [
-                        {
-                          'followUp.startDate': {
-                            lte: startDate
-                          }
-                        },
-                        {
-                          'followUp.endDate': {
-                            gte: endDate
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      // period starts before contact's start date but ends before contact's end date
-                      and: [
-                        {
-                          'followUp.startDate': {
-                            gte: startDate
-                          }
-                        },
-                        {
-                          'followUp.startDate': {
-                            lte: endDate
-                          }
-                        },
-                        {
-                          'followUp.endDate': {
-                            gte: endDate
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      // period starts before contact's end date and after contact's start date
-                      // but stops after contact's end date
-                      and: [
-                        {
-                          'followUp.startDate': {
-                            lte: startDate
-                          }
-                        },
-                        {
-                          'followUp.endDate': {
-                            gte: startDate
-                          }
-                        },
-                        {
-                          'followUp.endDate': {
-                            lte: endDate
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      // contact's period is inside follow up period
-                      and: [
-                        {
-                          'followUp.startDate': {
-                            gte: startDate
-                          }
-                        },
-                        {
-                          'followUp.endDate': {
-                            gte: startDate
-                          }
-                        },
-                        {
-                          'followUp.endDate': {
-                            lte: endDate
-                          }
-                        }
-                      ]
-                    }
-                  ]
+      where: {
+        or: [
+          {
+            // eligible for follow ups
+            and: [
+              {
+                outbreakId: this.id
+              },
+              {
+                followUp: {
+                  neq: null
                 }
-              ]
-            },
-            {
-              // inconclusive follow up period
-              and: [
-                {
-                  outbreakId: this.id
-                },
-                {
-                  followUp: {
-                    neq: null
+              },
+              {
+                or: [
+                  {
+                    // follow up period is inside contact's follow up period
+                    and: [
+                      {
+                        'followUp.startDate': {
+                          lte: startDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          gte: endDate
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    // period starts before contact's start date but ends before contact's end date
+                    and: [
+                      {
+                        'followUp.startDate': {
+                          gte: startDate
+                        }
+                      },
+                      {
+                        'followUp.startDate': {
+                          lte: endDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          gte: endDate
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    // period starts before contact's end date and after contact's start date
+                    // but stops after contact's end date
+                    and: [
+                      {
+                        'followUp.startDate': {
+                          lte: startDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          gte: startDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          lte: endDate
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    // contact's period is inside follow up period
+                    and: [
+                      {
+                        'followUp.startDate': {
+                          gte: startDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          gte: startDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          lte: endDate
+                        }
+                      }
+                    ]
                   }
-                },
-                {
-                  'followUp.endDate': {
-                    lt: startDate
-                  }
-                },
-                {
-                  'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
+                ]
+              }
+            ]
+          },
+          {
+            // inconclusive follow up period
+            and: [
+              {
+                outbreakId: this.id
+              },
+              {
+                followUp: {
+                  neq: null
                 }
-              ]
-            }
-          ]
+              },
+              {
+                'followUp.endDate': {
+                  lt: startDate
+                }
+              },
+              {
+                'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
+              }
+            ]
+          }
+        ]
 
-        }
-      }, filter);
+      }
+    }, filter);
 
     // get contacts that are available for follow up generation
     app.models.contact
