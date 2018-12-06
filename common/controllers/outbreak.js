@@ -7631,13 +7631,127 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countFollowUps = function (filter, callback) {
     // pre-filter using related data (case, contact)
-    app.models.followUp.preFilterForOutbreak(this, filter)
+    app.models.followUp
+      .preFilterForOutbreak(this, filter)
       .then(function (filter) {
         // count using query
         return app.models.followUp.count(filter.where);
       })
       .then(function (followUps) {
         callback(null, followUps);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find outbreak lab results
+   * @param filter Supports 'where.case' MongoDB compatible queries
+   * @param callback
+   */
+  Outbreak.prototype.findLabResults = function (filter, callback) {
+    // pre-filter using related data (case)
+    app.models.labResult
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // find follow-ups using filter
+        return app.models.labResult.find(filter);
+      })
+      .then(function (followUps) {
+        callback(null, followUps);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count outbreak lab-results
+   * @param filter Supports 'where.case' MongoDB compatible queries
+   * @param callback
+   */
+  Outbreak.prototype.countLabResults = function (filter, callback) {
+    // pre-filter using related data (case)
+    app.models.labResult
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // count using query
+        return app.models.labResult.count(filter.where);
+      })
+      .then(function (followUps) {
+        callback(null, followUps);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find outbreak cases
+   * @param filter Supports 'where.relationship' MongoDB compatible queries
+   * @param callback
+   */
+  Outbreak.prototype.findCases = function (filter, callback) {
+    // pre-filter using related data (case)
+    app.models.case
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // find follow-ups using filter
+        return app.models.case.find(filter);
+      })
+      .then(function (cases) {
+        callback(null, cases);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count outbreak cases
+   * @param filter Supports 'where.relationship' MongoDB compatible queries
+   * @param callback
+   */
+  Outbreak.prototype.countCases = function (filter, callback) {
+    // pre-filter using related data (case)
+    app.models.case
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // count using query
+        return app.models.case.count(filter.where);
+      })
+      .then(function (cases) {
+        callback(null, cases);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count cases by case classification
+   * @param filter Supports 'where.relationship' MongoDB compatible queries
+   * @param callback
+   */
+  Outbreak.prototype.countCasesPerClassificationv2 = function (filter, callback) {
+    app.models.case
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // count using query
+        return app.models.case.rawFind(filter.where, {projection: {classification: 1}});
+      })
+      .then(function (cases) {
+        // build a result
+        const result = {
+          classification: {},
+          count: cases.length
+        };
+        // go through all case records
+        cases.forEach(function (caseRecord) {
+          // init case classification group if needed
+          if (!result.classification[caseRecord.classification]) {
+            result.classification[caseRecord.classification] = {
+              count: 0,
+              caseIDs: []
+            };
+          }
+          // classify records by their classification
+          result.classification[caseRecord.classification].count++;
+          result.classification[caseRecord.classification].caseIDs.push(caseRecord.id);
+        });
+        // send back the result
+        callback(null, result);
       })
       .catch(callback);
   };

@@ -1,5 +1,8 @@
 'use strict';
 
+const app = require('../../server/server');
+const _ = require('lodash');
+
 module.exports = function (LabResult) {
   // set flag to not get controller
   LabResult.hasController = false;
@@ -48,5 +51,76 @@ module.exports = function (LabResult) {
   LabResult.extendedForm = {
     template: 'labResultsTemplate',
     containerProperty: 'questionnaireAnswers'
+  };
+
+  /**
+   * Pre-filter lab-results for an outbreak using related models (case)
+   * @param outbreak
+   * @param filter Supports 'where.case' MongoDB compatible queries
+   * @return {Promise<void | never>}
+   */
+  LabResult.preFilterForOutbreak = function (outbreak, filter) {
+    // set a default filter
+    filter = filter || {};
+    // get case query, if any
+    let caseQuery = _.get(filter, 'where.case');
+    // if found, remove it form main query
+    if (caseQuery) {
+      delete filter.where.case;
+    }
+    // get main lab results query
+    let labResultsQuery = _.get(filter, 'where', {});
+    // start with a resolved promise (so we can link others)
+    let buildQuery = Promise.resolve();
+    // if a case query is present
+    if (caseQuery) {
+      // restrict query to current outbreak
+      caseQuery = {
+        $and: [
+          caseQuery,
+          {
+            outbreakId: outbreak.id
+          }
+        ]
+      };
+      // filter cases based on query
+      buildQuery = buildQuery
+        .then(function () {
+          return app.models.case
+            .rawFind(caseQuery, {projection: {_id: 1}})
+            .then(function (cases) {
+              // build a list of case ids that passed the filter
+              return cases.map(caseRecord => caseRecord.id);
+            });
+        });
+    }
+    return buildQuery
+      .then(function (caseIds) {
+        // if caseIds filter present
+        if (caseIds) {
+          // update lab results query to filter based on caseIds
+          labResultsQuery = {
+            $and: [
+              labResultsQuery,
+              {
+                personId: {
+                  $in: caseIds
+                }
+              }
+            ]
+          };
+        }
+        // restrict lab results query to current outbreak
+        labResultsQuery = {
+          $and: [
+            labResultsQuery,
+            {
+              outbreakId: outbreak.id
+            }
+          ]
+        };
+        // return updated filter
+        return Object.assign(filter, {where: labResultsQuery});
+      });
   };
 };

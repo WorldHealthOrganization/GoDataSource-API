@@ -234,6 +234,6 @@ module.exports = {
   deepSearchByRelationProperty: deepSearchByRelationProperty,
   deletePaginationFilterFromContext: deletePaginationFilterFromContext,
   shouldUseDeepCount: function (filter) {
-    return shouldUseDeepSearch({filter: filter});
+    return shouldUseDeepSearch({args: {filter: filter}});
   }
 };
