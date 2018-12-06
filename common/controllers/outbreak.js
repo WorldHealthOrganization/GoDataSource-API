@@ -7724,7 +7724,7 @@ module.exports = function (Outbreak) {
    * @param filter Supports 'where.relationship' MongoDB compatible queries
    * @param callback
    */
-  Outbreak.prototype.countCasesPerClassificationv2 = function (filter, callback) {
+  Outbreak.prototype.countCasesPerClassificationV2 = function (filter, callback) {
     app.models.case
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
@@ -7749,6 +7749,86 @@ module.exports = function (Outbreak) {
           // classify records by their classification
           result.classification[caseRecord.classification].count++;
           result.classification[caseRecord.classification].caseIDs.push(caseRecord.id);
+        });
+        // send back the result
+        callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find outbreak contacts
+   * @param filter Supports 'where.case', 'where.followUp' MongoDB compatible queries
+   * @param callback
+   */
+  Outbreak.prototype.findContacts = function (filter, callback) {
+    // pre-filter using related data (case, followUps)
+    app.models.contact
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // find follow-ups using filter
+        return app.models.contact.find(filter);
+      })
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count outbreak contacts
+   * @param filter Supports 'where.case', 'where.followUp' MongoDB compatible queries
+   * @param callback
+   */
+  Outbreak.prototype.countContacts = function (filter, callback) {
+    // pre-filter using related data (case, followUps)
+    app.models.contact
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // count using query
+        return app.models.contact.count(filter.where);
+      })
+      .then(function (contacts) {
+        callback(null, contacts);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count contacts by case risk level
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countContactsPerRiskLevelV2 = function (filter, callback) {
+    // pre-filter using related data (case, followUps)
+    app.models.contact
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // find follow-ups using filter
+        return app.models.contact.rawFind(filter.where, {projection: {riskLevel: 1}});
+      })
+      .then(function (contacts) {
+        // build a result
+        const result = {
+          riskLevel: {},
+          count: contacts.length
+        };
+        // go through all contact records
+        contacts.forEach(function (contactRecord) {
+          // risk level is optional
+          if (contactRecord.riskLevel == null) {
+            contactRecord.riskLevel = 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED';
+          }
+          // init contact riskLevel group if needed
+          if (!result.riskLevel[contactRecord.riskLevel]) {
+            result.riskLevel[contactRecord.riskLevel] = {
+              count: 0,
+              contactIDs: []
+            };
+          }
+          // classify records by their risk level
+          result.riskLevel[contactRecord.riskLevel].count++;
+          result.riskLevel[contactRecord.riskLevel].contactIDs.push(contactRecord.id);
         });
         // send back the result
         callback(null, result);
