@@ -1366,10 +1366,7 @@ module.exports = function (Outbreak) {
     // if person filter was sent
     if (filter.person) {
       // get it; ask only for IDs
-      personFilter = app.utils.remote
-        .mergeFilters({
-          fields: ['id']
-        }, filter.person);
+      personFilter = filter.person;
       // remove original filter
       delete filter.person;
     }
@@ -1394,7 +1391,7 @@ module.exports = function (Outbreak) {
     if (includedPeopleFilter) {
       // find the relationships that belong to chains which include the filtered people
       findRelationshipIdsForIncludedPeople = app.models.person
-        .find(includedPeopleFilter)
+        .rawFind(includedPeopleFilter.where, {projection: {_id: 1}})
         .then(function (people) {
           // find relationship chains for the matched people
           return app.models.relationship.findRelationshipChainsForPeopleIds(self.id, people.map(person => person.id));
@@ -1427,7 +1424,7 @@ module.exports = function (Outbreak) {
         if (personFilter) {
           // find people that match the filter
           return app.models.person
-            .find(personFilter)
+            .rawFind(personFilter.where, {projection: {_id: 1}})
             .then(function (people) {
               // return their IDs
               return people.map(person => person.id);
