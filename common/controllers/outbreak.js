@@ -1339,6 +1339,14 @@ module.exports = function (Outbreak) {
     if (!filter) {
       filter = {};
     }
+
+    // check if contacts should be included
+    let includeContacts = _.get(filter, 'includeContacts', false);
+    // if present remove it from the main filter
+    if (includeContacts) {
+      delete filter.includeContacts;
+    }
+
     // get active filter
     let activeFilter = _.get(filter, 'where.active');
     // if active filter was sent remove it from the filter
@@ -1445,6 +1453,21 @@ module.exports = function (Outbreak) {
         return personIds;
       })
       .then(function (personIds) {
+        // if contacts should not be included
+        if (!includeContacts) {
+          // restrict chain data to cases and events
+          filter = app.utils.remote
+            .mergeFilters({
+              where: {
+                'persons.0.type': {
+                  inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+                },
+                'persons.1.type': {
+                  inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+                }
+              }
+            }, filter);
+        }
         // return needed, processed information
         return {
           filter: filter,
