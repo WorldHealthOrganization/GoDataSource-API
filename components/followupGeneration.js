@@ -6,7 +6,6 @@ const RoundRobin = require('rr');
 const Helpers = require('./helpers');
 const Moment = require('moment');
 const _ = require('lodash');
-const UUID = require('uuid').v4;
 
 /**
  *
