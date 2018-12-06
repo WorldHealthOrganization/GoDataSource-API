@@ -13,7 +13,7 @@ const _ = require('lodash');
  * @param endDate
  */
 const _daysSince = function (startDate, endDate) {
-  return (Moment(endDate).startOf('day')).diff(Moment(startDate).startOf('day'), 'days');
+  return (Helpers.getDate(endDate)).diff(Helpers.getDate(startDate), 'days');
 };
 
 // attach author timestamps (createdAt, updatedAt, createdBy, updatedBy)

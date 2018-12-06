@@ -26,7 +26,7 @@ module.exports = function (Model) {
    * @param reqOpts Request options, used to find the logged in user
    * @return {Promise<any>}
    */
-  Model.rawInsert = function (data = [], opts = {}, reqOpts = {}) {
+  Model.rawBulkInsert = function (data = [], opts = {}, reqOpts = {}) {
     if (!data.length) {
       return null;
     }
@@ -63,6 +63,11 @@ module.exports = function (Model) {
     App.logger.debug(`[Id: ${queryId}] Performing MongoDB insert on collection '${collectionName}'}`);
 
     // perform insert using mongodb native driver
-    return App.dataSources.mongoDb.connector.collection(collectionName).insertMany(data, opts);
+    return App.dataSources.mongoDb.connector.collection(collectionName)
+      .insertMany(data, opts)
+      .then((result) => {
+        App.logger.debug(`[QueryId: ${queryId}] MongoDB bulk insert completed after ${timer.getElapsedMilliseconds()} msec`);
+        return result;
+      });
   };
 };

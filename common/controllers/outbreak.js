@@ -1182,7 +1182,7 @@ module.exports = function (Outbreak) {
                 return poolPromise.then(() => {
                   if (followUpsToAdd.length) {
                     return app.models.followUp
-                      .rawInsert(followUpsToAdd, null, options)
+                      .rawBulkInsert(followUpsToAdd, null, options)
                       .then(result => result.insertedCount);
                   }
                   return 0;
