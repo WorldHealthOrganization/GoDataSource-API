@@ -16,7 +16,7 @@ const collectionsWithFiles = {
     srcDir: 'server/storage/icons',
     targetDir: 'icons'
   },
-  fileAttachment:{
+  fileAttachment: {
     prop: 'path',
     srcDir: 'server/storage/files',
     targetDir: 'files'
@@ -381,11 +381,12 @@ const syncRecord = function (logger, model, record, options, done) {
  * @param collectionName
  * @param records
  * @param tmpDir
+ * @param logger
  * @param done
  */
-const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, done) {
-  let app = require('../server/server');
-  let storageModel = app.models.storage;
+const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, logger, done) {
+  let storageModel = {};
+  require('./../server/models/storage')(storageModel);
 
   // if there are no records, do not run anything
   if (!records.length) {
@@ -414,7 +415,7 @@ const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, 
           // make sure the source file is okay
           return fs.lstat(filePath, function (err) {
             if (err) {
-              app.logger.warn(`Failed to export file: ${filePath}. Related record: ${record}.`, err);
+              logger.warn(`Failed to export file: ${filePath}. Related record: ${record}.`, err);
               return doneRecord();
             }
 

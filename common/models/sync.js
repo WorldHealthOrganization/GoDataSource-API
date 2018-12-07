@@ -12,6 +12,7 @@ const syncConfig = require('../../server/config.json').sync;
 const asyncActionsSettings = syncConfig.asyncActionsSettings;
 const _ = require('lodash');
 const Moment = require('moment');
+const syncWorker = require('./../../components/workerRunner').sync;
 
 module.exports = function (Sync) {
   Sync.hasController = true;
@@ -89,9 +90,6 @@ module.exports = function (Sync) {
     filter = filter || {where: {}};
     collections = collections || [];
 
-    // cache reference to mongodb connection
-    let connection = app.dataSources.mongoDb.connector;
-
     // parse from date filter
     let customFilter = null;
     if (filter.where.hasOwnProperty('fromDate')) {
@@ -114,107 +112,33 @@ module.exports = function (Sync) {
       });
     }
 
-    // create a temporary directory to store the database files
-    // it always created the folder in the system temporary directory
-    let tmpDir = tmp.dirSync();
-    let tmpDirName = tmpDir.name;
 
-    return async
-      .series(
-        Object.keys(allCollections).map((collectionName) => {
-          return (callback) => {
-            // get mongoDB filter that will be sent; for some collections we might send additional filters
-            let mongoDBFilter = dbSync.collectionsFilterMap[collectionName] ? dbSync.collectionsFilterMap[collectionName](collectionName, customFilter, filter) : customFilter;
+    const dbConfig = require('./../../server/datasources').mongoDb;
+    const MongoClient = require('mongodb').MongoClient;
 
-            app.logger.debug(`Exporting collection: ${collectionName}`);
+    /**
+     * Create MongoDB connection and return it
+     * @returns {Promise<Db | never>}
+     */
+    function getMongoDBConnection() {
+      return MongoClient
+        .connect(`mongodb://${dbConfig.host}:${dbConfig.port}`)
+        .then(function (client) {
+          return client
+            .db(dbConfig.database)
+        });
+    }
 
-            exportCollectionInBatches(connection, collectionName, mongoDBFilter, 1000, callback);
+    getMongoDBConnection()
+      .then(function(client) {
+        let a = 2;
+      })
+      .catch(function(err) {
+        let a = 2;
+      });
 
-            function exportCollectionInBatches(dbConnection, collectionName, filter, batchSize, callback) {
-              getNextBatch();
-
-              function getNextBatch(skip = 0) {
-                let batchNumber = skip ? skip / batchSize : 0;
-
-                let cursor = dbConnection
-                  .collection(allCollections[collectionName])
-                  .find(filter, {
-                    skip: skip,
-                    limit: batchSize
-                  });
-
-                // retrieve
-                cursor
-                  .toArray()
-                  .then(function (records) {
-                    if (records && records.length) {
-                      // export related files
-                      // if collection is not supported, it will be skipped
-                      dbSync.exportCollectionRelatedFiles(collectionName, records, tmpDirName, (err) => {
-                        if (err) {
-                          app.logger.debug(`Collection '${collectionName}' related files export failed. Error: ${err}`);
-                          return callback(err);
-                        }
-                        // create a file with collection name as file name, containing results
-                        fs.writeFile(`${tmpDirName}/${collectionName}_${batchNumber}.json`, JSON.stringify(records, null, 2), function () {
-                          if (records.length < batchSize) {
-                            app.logger.debug(`Collection '${collectionName}' export success.`);
-                            return callback();
-                            // finish
-                          } else {
-                            app.logger.debug(`Exported batch ${batchNumber} of collection '${collectionName}'.`);
-                            getNextBatch(skip + batchSize);
-                          }
-                        });
-                      });
-                    } else {
-                      app.logger.debug(`Collection '${collectionName}' export success.`);
-                      callback();
-                    }
-                  })
-                  .catch(function (err) {
-                    app.logger.debug(`Collection '${collectionName}' export failed. Error: ${err}`);
-                    return callback(err);
-                  });
-              }
-            }
-          };
-        }),
-        (err) => {
-          if (err) {
-            return done(err);
-          }
-
-          // archive file name
-          let archiveName = `${tmpDirName}/snapshot_${Moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
-
-          // compress all collection files from the tmp dir into .zip file
-          try {
-            app.logger.debug(`Creating zip file`);
-            let zip = new AdmZip();
-            zip.addLocalFolder(tmpDirName);
-            zip.writeZip(archiveName);
-          } catch (zipError) {
-            app.logger.error(`Failed to create zip file. ${zipError}`);
-            return done(zipError);
-          }
-
-          // log archive name location
-          app.logger.debug(`Sync payload created at ${archiveName}`);
-
-          // no password provided, return file path as is
-          if (!options.password) {
-            return done(null, archiveName);
-          }
-          // password provided, encrypt archive
-          return app.utils.fileCrypto
-            .encrypt(options.password, {}, archiveName)
-            .then(function (archiveName) {
-              return done(null, archiveName);
-            })
-            .catch(done);
-        }
-      );
+    // call worker
+    // syncWorker.exportCollections(allCollections, customFilter, filter, done);
   };
 
   /**
