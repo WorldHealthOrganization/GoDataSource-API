@@ -65,7 +65,7 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callba
  * Export filtered model list
  * @param app Inject app
  * @param Model Model that will be exported
- * @param filter
+ * @param query
  * @param exportType
  * @param fileName
  * @param encryptPassword {string|null}
@@ -74,7 +74,7 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callba
  * @param [beforeExport] Optional result modifier before export
  * @param callback
  */
-function exportFilteredModelsList(app, Model, filter, exportType, fileName, encryptPassword, anonymizeFields, options, beforeExport, callback) {
+function exportFilteredModelsList(app, Model, query, exportType, fileName, encryptPassword, anonymizeFields, options, beforeExport, callback) {
   // no-op fallback function for beforeExport hook
   // used for defensive checks, when it is not passed
   let noOp = (results) => Promise.resolve(results);
@@ -87,94 +87,89 @@ function exportFilteredModelsList(app, Model, filter, exportType, fileName, encr
     beforeExport = noOp;
   }
   // find results
-  Model.find(filter, function (error, result) {
-    // handle errors
-    if (error) {
-      return callback(error);
-    }
-
-    // by default export CSV
-    if (!exportType) {
-      exportType = 'json';
-    } else {
-      // be more permissive, always convert to lowercase
-      exportType = exportType.toLowerCase();
-    }
-
-    // add support for filter parent
-    const results = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, filter);
-    const contextUser = app.utils.remote.getUserFromOptions(options);
-
-    // load user language dictionary
-    app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-      // handle errors
-      if (error) {
-        return callback(error);
+  Model.rawFind(query)
+    .then(function (results) {
+      // by default export CSV
+      if (!exportType) {
+        exportType = 'json';
+      } else {
+        // be more permissive, always convert to lowercase
+        exportType = exportType.toLowerCase();
       }
 
-      // define a list of table headers
-      const headers = [];
-      // headers come from model
-      Object.keys(Model.fieldLabelsMap).forEach(function (propertyName) {
-        // if a flat file is exported, data needs to be flattened, include 3 elements for each array
-        if (!['json', 'xml'].includes(exportType) && /(\[]|\.)/.test(propertyName)) {
-          let maxElements = 3;
-          // pdf has a limited width, include only one element
-          if (exportType === 'pdf') {
-            maxElements = 1;
-          }
-          for (let i = 1; i <= maxElements; i++) {
+      const contextUser = app.utils.remote.getUserFromOptions(options);
+
+      // load user language dictionary
+      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+        // handle errors
+        if (error) {
+          return callback(error);
+        }
+
+        // define a list of table headers
+        const headers = [];
+        // headers come from model
+        Object.keys(Model.fieldLabelsMap).forEach(function (propertyName) {
+          // if a flat file is exported, data needs to be flattened, include 3 elements for each array
+          if (!['json', 'xml'].includes(exportType) && /(\[]|\.)/.test(propertyName)) {
+            let maxElements = 3;
+            // pdf has a limited width, include only one element
+            if (exportType === 'pdf') {
+              maxElements = 1;
+            }
+            for (let i = 1; i <= maxElements; i++) {
+              headers.push({
+                id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
+                // use correct label translation for user language
+                header: `${dictionary.getTranslation(Model.fieldLabelsMap[propertyName])}${/\[]/.test(propertyName) ? ' [' + i + ']' : ''}`
+              });
+            }
+          } else {
             headers.push({
-              id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
+              id: propertyName,
               // use correct label translation for user language
-              header: `${dictionary.getTranslation(Model.fieldLabelsMap[propertyName])}${/\[]/.test(propertyName) ? ' [' + i + ']' : ''}`
+              header: dictionary.getTranslation(Model.fieldLabelsMap[propertyName])
             });
           }
-        } else {
-          headers.push({
-            id: propertyName,
-            // use correct label translation for user language
-            header: dictionary.getTranslation(Model.fieldLabelsMap[propertyName])
-          });
-        }
-      });
+        });
 
-      // resolve model foreign keys (if any)
-      helpers.resolveModelForeignKeys(app, Model, results, dictionary)
-        .then(function (results) {
-          // execute before export hook
-          return beforeExport(results, dictionary);
-        })
-        .then(function (results) {
-          // if a there are fields to be anonymized
-          if (anonymizeFields.length) {
-            // anonymize them
-            app.utils.anonymizeDatasetFields.anonymize(results, anonymizeFields);
-          }
-          return results;
-        })
-        .then(function (results) {
-          // create file with the results
-          return app.utils.helpers.exportListFile(headers, results, exportType);
-        })
-        .then(function (file) {
-          if (encryptPassword) {
-            return app.utils.aesCrypto.encrypt(encryptPassword, file.data)
-              .then(function (data) {
-                file.data = data;
-                return file;
-              });
-          } else {
-            return file;
-          }
-        })
-        .then(function (file) {
-          // and offer it for download
-          app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `${fileName}.${file.extension}`, callback);
-        })
-        .catch(callback);
-    });
-  });
+        // resolve model foreign keys (if any)
+        helpers.resolveModelForeignKeys(app, Model, results, dictionary)
+          .then(function (results) {
+            // execute before export hook
+            return beforeExport(results, dictionary);
+          })
+          .then(function (results) {
+            // if a there are fields to be anonymized
+            if (anonymizeFields.length) {
+              // anonymize them
+              app.utils.anonymizeDatasetFields.anonymize(results, anonymizeFields);
+            }
+            return results;
+          })
+          .then(function (results) {
+            // create file with the results
+            return app.utils.helpers.exportListFile(headers, results, exportType);
+          })
+          .then(function (file) {
+            if (encryptPassword) {
+              return app.utils.aesCrypto.encrypt(encryptPassword, file.data)
+                .then(function (data) {
+                  file.data = data;
+                  return file;
+                });
+            } else {
+              return file;
+            }
+          })
+          .then(function (file) {
+            // and offer it for download
+            app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `${fileName}.${file.extension}`, callback);
+          })
+          .catch(callback);
+      });
+    })
+    .catch(callback);
 }
 
 module.exports = {

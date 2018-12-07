@@ -232,12 +232,37 @@ module.exports = function (Relationship) {
 
     // find relationships
     return Relationship
-      .find(_filter)
+      .rawFind(_filter.where)
       .then(function (relationships) {
-        return app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, _filter)
-        // some relations may be invalid after applying scope filtering, remove invalid ones
-          .filter(function (relationship) {
-            return relationship.people.length === 2;
+        return app.models.person
+          .rawFind({
+            $and: [
+              _.get(_filter, 'include.0.scope.where'),
+              {
+                type: {
+                  $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+                }
+              }]
+          })
+          .then(function (people) {
+            const peopleIdsMap = {};
+            people.forEach(function (person) {
+              peopleIdsMap[person.id] = person;
+            });
+            return relationships
+            // some relations may be invalid after applying scope filtering, remove invalid ones
+              .filter(function (relationship) {
+                let validRel = true;
+                relationship.people = [];
+                relationship.persons.forEach(function (person) {
+                  if (!peopleIdsMap[person.id]) {
+                    validRel = false;
+                  } else {
+                    relationship.people.push(peopleIdsMap[person.id]);
+                  }
+                });
+                return validRel;
+              });
           });
       });
   };
@@ -288,15 +313,15 @@ module.exports = function (Relationship) {
     return app.models.relationship
       .rawFind(
         app.utils.remote.convertLoopbackFilterToMongo(
-        app.utils.remote.mergeFilters({
-          where: {
-            outbreakId: outbreakId,
-            and: [
-              {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'},
-              {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'}
-            ]
-          }
-        }, filter || {})).where
+          app.utils.remote.mergeFilters({
+            where: {
+              outbreakId: outbreakId,
+              and: [
+                {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'},
+                {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'}
+              ]
+            }
+          }, filter || {})).where
       )
       .then(function (relationships) {
 
@@ -514,17 +539,16 @@ module.exports = function (Relationship) {
     const relationshipMap = {};
     // find all relations that were not previously found that match the criteria
     return Relationship
-      .find({
-        fields: ['id', 'persons'],
-        where: {
-          'persons.id': {
-            inq: peopleIds
-          },
-          outbreakId: outbreakId,
-          id: {
-            nin: foundRelationshipIds
-          }
+      .rawFind({
+        'persons.id': {
+          inq: peopleIds
+        },
+        outbreakId: outbreakId,
+        id: {
+          nin: foundRelationshipIds
         }
+      }, {
+        projection: {persons: 1},
       })
       .then(function (relationships) {
         // keep a list of new people

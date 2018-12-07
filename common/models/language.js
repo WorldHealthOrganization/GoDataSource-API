@@ -144,16 +144,14 @@ module.exports = function (Language) {
    * @param callback
    */
   Language.getLanguageDictionary = function (languageId, callback) {
-    app.models.languageToken
-      .find({
-        where: {
-          or: [
-            {languageId: languageId},
-            {languageId: 'english_us'}
-          ]
-        },
-        fields: ['token', 'translation', 'languageId']
-      })
+    app.models.languageToken.rawFind(
+      {
+        or: [
+          {languageId: languageId},
+          {languageId: 'english_us'}
+        ]
+      },
+      {projection: {token: 1, translation: 1, languageId: 1}})
       .then(function (languageTokens) {
         // build a language map for easy referencing language tokens
         const tokensMap = {};

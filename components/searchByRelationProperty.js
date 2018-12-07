@@ -217,6 +217,56 @@ const deletePaginationFilterFromContext = function (context) {
   }
 };
 
+/**
+ * Convert a include query to a filter query
+ * @param filter
+ * @param queryMap
+ */
+function convertIncludeQueryToFilterQuery(filter, queryMap = {}) {
+  // start with an empty list of filters
+  let filters = {};
+  // if relations should be included
+  if (filter.include) {
+    // convert them to array (simplify code)
+    if (!Array.isArray(filter.include)) {
+      filter.include = [filter.include];
+    }
+    // go through the includes
+    filter.include.forEach(function (include, index) {
+      // if relation contains a filter parent rule, transform it into a query
+      if (
+        include &&
+        typeof include === 'object' &&
+        include.relation &&
+        include.scope &&
+        include.scope.filterParent
+      ) {
+        // filter name is relation name, by default
+        let filterName = include.relation;
+        // check if a name override was provided
+        if (queryMap[include.relation]) {
+          filterName = queryMap[include.relation];
+        }
+        // get query, if available
+        filters[filterName] = include.scope.where || {};
+        // continue parsing sub-levels
+        Object.assign(filters, convertIncludeQueryToFilterQuery(include.scope, queryMap));
+        // if the include was provided only for filtering
+        if (include.scope.justFilter) {
+          // clean-up filter
+          filter.include.splice(index, 1);
+        }
+      }
+    });
+    // check if the include is empty
+    if (!filter.include.length) {
+      // remove it entirely
+      delete filter.include;
+    }
+  }
+  return filters;
+}
+
 module.exports = {
   /**
    * Attach the behavior on a list of remotes that belong to a Model
@@ -235,5 +285,6 @@ module.exports = {
   deletePaginationFilterFromContext: deletePaginationFilterFromContext,
   shouldUseDeepCount: function (filter) {
     return shouldUseDeepSearch({args: {filter: filter}});
-  }
+  },
+  convertIncludeQueryToFilterQuery: convertIncludeQueryToFilterQuery
 };
