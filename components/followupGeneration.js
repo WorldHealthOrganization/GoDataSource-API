@@ -6,6 +6,7 @@ const RoundRobin = require('rr');
 const Helpers = require('./helpers');
 const Moment = require('moment');
 const _ = require('lodash');
+const PromiseQueue = require('p-queue');
 
 /**
  *
@@ -224,8 +225,8 @@ module.exports.getContactFollowupEligibleTeams = function (contact, teams) {
 // and follow ups are generated for the passed period no matter what
 // this flag is used for generating follow ups for contacts whose last follow up was inconclusive
 module.exports.generateFollowupsForContact = function (contact, teams, period, freq, freqPerDay, targeted, ignorePeriod) {
-  // list of follow up create promise functions that should be executed
   let followUpsToAdd = [];
+  let followUpsIdsToDelete = [];
 
   if (!ignorePeriod) {
     // if passed period is higher than contact's follow up period
@@ -245,10 +246,32 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     // number of follow ups to be generated per day
     let numberOfFollowUpsPerDay = freqPerDay;
 
-    // check if the number of existing follow ups is the same as the generate frequency per day
-    // if so, do not generate any follow ups
-    let followUpsInThisDay = contact.followUpsList.filter((followUp) => Moment(followUp.date).isSame(followUpDate, 'd'));
-    numberOfFollowUpsPerDay = numberOfFollowUpsPerDay - followUpsInThisDay.length;
+    // get list of follow ups that are on the same day as the day we want to generate
+    let followUpsInThisDay = contact.followUpsList.filter((followUp) => Helpers.getDate(followUp.date).isSame(followUpDate, 'd'));
+    let followUpsInThisDayCount = followUpsInThisDay.length;
+
+    // if there are follow ups on the same day and day is in the future
+    // and frequency per day is less than the count of follow ups in that day
+    // delete follow ups until the length is the same as the frequency
+    if (followUpDate.isAfter(Helpers.getDateEndOfDay())) {
+      // get number of follow ups that should be deleted
+      let dustCount = followUpsInThisDayCount - freqPerDay;
+      if (dustCount > 0) {
+        followUpsIdsToDelete.push(...followUpsInThisDay.splice(0, dustCount).map((f) => f.id));
+        // number of follow ups exceeds the frequency per day
+        // we no longer need to generate any follow ups on this day
+        numberOfFollowUpsPerDay = 0;
+      } else {
+        // doing this so we can covert negative to positive
+        // when frequency per day is bigger than number of follow ups
+        numberOfFollowUpsPerDay = Math.abs(dustCount);
+      }
+    } else {
+      // otherwise if the day is in the past, do not delete any follow ups
+      // just generate until the limit per day is reached
+      // if the result of the operation below is 0 or negative, nothing is generated (limit is reached already)
+      numberOfFollowUpsPerDay -= followUpsInThisDayCount;
+    }
 
     for (let i = 0; i < numberOfFollowUpsPerDay; i++) {
       let followUp = _createFollowUpEntry({
@@ -266,5 +289,86 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     }
   }
 
-  return followUpsToAdd;
+  return {
+    add: followUpsToAdd,
+    remove: followUpsIdsToDelete
+  };
+};
+
+module.exports.createDbQueue = function (reqOpts) {
+  let queue = new PromiseQueue({
+    autoStart: true,
+    concurrency: 10 // we do 10 parallel operation across the entire app
+  });
+
+  // count of inserted items into database
+  let count = 0;
+
+  // we do insert operations in database in batches of 100000
+  const insertBatchSize = 1e5;
+  // for remove operations we need to use at most 1000 operations
+  // otherwise mongodb throw error because $in operator is too long
+  const deleteBatchSize = 900;
+
+  let followUpsToAdd = [];
+  let followUpsToDelete = [];
+
+  const _insert = function (arr) {
+    return () => App.models.followUp
+      .rawBulkInsert(arr, null, reqOpts)
+      .then(result => {
+        count += result.insertedCount;
+        return Promise.resolve();
+      });
+  };
+
+  const _remove = function (arr) {
+    return () => App.models.followUp.rawBulkDelete({
+      _id: {
+        $in: arr
+      }
+    });
+  };
+
+  return {
+    insertedCount() {
+      return count;
+    },
+    internalQueue: queue,
+    addFollowUps(items, ignore) {
+      if (ignore) {
+        queue.add(_insert(items));
+      } else {
+        followUpsToAdd.push(...items);
+        if (followUpsToAdd.length >= insertBatchSize) {
+          queue.add(_insert(followUpsToAdd));
+          followUpsToAdd = [];
+        }
+      }
+    },
+    removeFollowUps(items, ignore) {
+      if (ignore) {
+        queue.add(_remove(items));
+      } else {
+        followUpsToDelete.push(...items);
+        if (followUpsToDelete.length >= deleteBatchSize) {
+          queue.add(_remove(followUpsToDelete));
+          followUpsToDelete = [];
+        }
+      }
+    },
+    settleRemaining() {
+      // make sure there are not left item to process
+      // doing this to avoid case when the number of follow ups didn't reach the treshold
+      // and were never processed
+      if (followUpsToAdd.length) {
+        this.addFollowUps(followUpsToAdd, true);
+      }
+      if (followUpsToDelete.length) {
+        this.removeFollowUps(followUpsToDelete, true);
+      }
+
+      return queue.onIdle();
+    }
+  };
 };
