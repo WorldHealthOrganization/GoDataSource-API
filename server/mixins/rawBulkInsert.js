@@ -66,7 +66,7 @@ module.exports = function (Model) {
     return App.dataSources.mongoDb.connector.collection(collectionName)
       .insertMany(data, opts)
       .then((result) => {
-        App.logger.debug(`[QueryId: ${queryId}] MongoDB bulk insert completed after ${timer.getElapsedMilliseconds()} msec}`);
+        App.logger.debug(`[QueryId: ${queryId}] MongoDB bulk insert completed after ${timer.getElapsedMilliseconds()} msec`);
         return result;
       });
   };
