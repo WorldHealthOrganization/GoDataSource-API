@@ -70,6 +70,12 @@
       "principalId": "write_sys_config",
       "permission": "ALLOW",
       "property": "removeBackup"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "count"
     }
   ],
   "methods": {
@@ -121,6 +127,13 @@
         "verb": "del",
         "path": "/"
       }
+    }
+  },
+  "relations": {
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "userId"
     }
   }
 }
