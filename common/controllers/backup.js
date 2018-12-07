@@ -10,8 +10,7 @@ module.exports = function (Backup) {
   app.utils.remote.disableRemoteMethods(Backup, [
     'create',
     'prototype.patchAttributes',
-    'deleteById',
-    'count'
+    'deleteById'
   ]);
 
 
