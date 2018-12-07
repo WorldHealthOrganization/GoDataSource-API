@@ -223,7 +223,7 @@ module.exports = function (Outbreak) {
   /**
    * Attach before remote (GET outbreaks/{id}/cases) hooks
    */
-  Outbreak.beforeRemote('prototype.__get__cases', function (context, modelInstance, next) {
+  Outbreak.beforeRemote('prototype.findCases', function (context, modelInstance, next) {
     // filter information based on available permissions
     Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context);
     // Enhance events list request to support optional filtering of events that don't have any relations

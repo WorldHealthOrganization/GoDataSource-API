@@ -406,8 +406,7 @@ module.exports = function (Outbreak) {
         if (typeof result === 'undefined') {
           // delete relationship
           return relationshipInstance.destroy(options);
-        }
-        else if (typeof result.count !== 'undefined') {
+        } else if (typeof result.count !== 'undefined') {
           return result;
         } else {
           // result is an array
@@ -499,12 +498,11 @@ module.exports = function (Outbreak) {
       // Retrieve all relationships of requested type for the given outbreak
       // Then filter cases based on relations count
       app.models.relationship
-        .find({
-          fields: ['persons'],
-          where: {
-            outbreakId: context.instance.id,
-            'persons.type': type
-          }
+        .rawFind({
+          outbreakId: context.instance.id,
+          'persons.type': type
+        },{
+          projection: {persons: 1}
         })
         // build list of people that have relationships in the given outbreak
         .then((relations) => [].concat(...relations.map((relation) => relation.persons.map(((person) => person.id)))))

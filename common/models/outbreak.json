@@ -2458,34 +2458,6 @@
         "path": "/contacts/new-by-exposure-type/count"
       }
     },
-    "prototype.filteredCountCases": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts a `noRelationships` flag on the first level of `where`."
-        }
-      ],
-      "returns": [
-        {
-          "arg": "count",
-          "type": "number",
-          "description": "Number of cases that pass the filter",
-          "required": true
-        }
-      ],
-      "description": "Counts the cases that pass a filter (which now can accept relations)",
-      "http": [
-        {
-          "verb": "get",
-          "path": "/cases/filtered-count"
-        },
-        {
-          "verb": "post",
-          "path": "/cases/filtered-count"
-        }
-      ]
-    },
     "prototype.filteredCountContacts": {
       "accepts": [
         {
@@ -6124,7 +6096,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship' MongoDB compatible queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship' MongoDB compatible queries and 'where.noRelationships' query"
         }
       ],
       "returns": [
@@ -6155,7 +6127,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship' MongoDB compatible queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship' MongoDB compatible queries and 'where.noRelationships' query"
         }
       ],
       "returns": [
@@ -6170,11 +6142,11 @@
       "http": [
         {
           "verb": "get",
-          "path": "/cases/filteredCount"
+          "path": "/cases/filtered-count"
         },
         {
-          "verb": "get",
-          "path": "/cases/filteredCount"
+          "verb": "post",
+          "path": "/cases/filtered-count"
         }
       ]
     },
