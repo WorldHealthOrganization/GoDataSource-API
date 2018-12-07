@@ -31,7 +31,7 @@ module.exports = function (Model) {
    * @return {Promise<any>}
    */
   Model.rawFind = function (query, options = {}) {
-
+    query = query || {};
     // set query id and start timer (for logging purposes)
     const queryId = uuid.v4();
     const timer = new Timer();

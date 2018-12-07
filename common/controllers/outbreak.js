@@ -119,87 +119,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Export filtered cases to file
-   * @param filter
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
-   * @param encryptPassword
-   * @param anonymizeFields
-   * @param options
-   * @param callback
-   */
-  Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
-    const self = this;
-    const _filters = app.utils.remote.mergeFilters(
-      {
-        where: {
-          outbreakId: this.id
-        }
-      },
-      filter || {});
-
-    // if encrypt password is not valid, remove it
-    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-      encryptPassword = null;
-    }
-
-    // make sure anonymizeFields is valid
-    if (!Array.isArray(anonymizeFields)) {
-      anonymizeFields = [];
-    }
-
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, _filters, exportType, 'Case List', encryptPassword, anonymizeFields, options, function (results, dictionary) {
-      // Prepare questionnaire answers for printing
-      results.forEach((caseModel) => {
-        if (caseModel.questionnaireAnswers) {
-          caseModel.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.case, caseModel, dictionary);
-        }
-      });
-      return Promise.resolve(results);
-    }, callback);
-  };
-
-  /**
-   * Export a list of follow-ups for a contact
-   * @param filter
-   * @param exportType
-   * @param encryptPassword
-   * @param anonymizeFields
-   * @param options
-   * @param callback
-   * @returns {*}
-   */
-  Outbreak.prototype.exportFilteredFollowups = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
-    let self = this;
-    const _filters = app.utils.remote.mergeFilters(
-      {
-        where: {
-          outbreakId: this.id
-        }
-      },
-      filter || {});
-
-    // if encrypt password is not valid, remove it
-    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-      encryptPassword = null;
-    }
-
-    // make sure anonymizeFields is valid
-    if (!Array.isArray(anonymizeFields)) {
-      anonymizeFields = [];
-    }
-
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, function (results, dictionary) {
-      // Prepare questionnaire answers for printing
-      results.forEach((followUp) => {
-        if (followUp.questionnaireAnswers) {
-          followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
-        }
-      });
-      return Promise.resolve(results);
-    }, callback);
-  };
-
-  /**
    * Attach before remote (GET outbreaks/{id}/cases) hooks
    */
   Outbreak.beforeRemote('prototype.findCases', function (context, modelInstance, next) {
@@ -239,6 +158,13 @@ module.exports = function (Outbreak) {
    * Attach before remote (GET outbreaks/{id}/cases/per-classification/count) hooks
    */
   Outbreak.beforeRemote('prototype.countCasesPerClassification', function (context, modelInstance, next) {
+    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
+  });
+
+  /**
+   * Attach before remote (GET outbreaks/{id}/cases/export) hooks
+   */
+  Outbreak.beforeRemote('prototype.exportFilteredCases', function (context, modelInstance, next) {
     Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
   });
 
@@ -5175,101 +5101,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Export filtered contacts to file
-   * @param filter
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
-   * @param encryptPassword
-   * @param anonymizeFields
-   * @param options
-   * @param callback
-   */
-  Outbreak.prototype.exportFilteredContacts = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
-    const _filters = app.utils.remote.mergeFilters(
-      {
-        where: {
-          outbreakId: this.id
-        }
-      },
-      filter || {});
-
-    // if encrypt password is not valid, remove it
-    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-      encryptPassword = null;
-    }
-
-    // make sure anonymizeFields is valid
-    if (!Array.isArray(anonymizeFields)) {
-      anonymizeFields = [];
-    }
-
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, _filters, exportType, 'Contacts List', encryptPassword, anonymizeFields, options, callback);
-  };
-
-  /**
-   * Export filtered outbreaks to file
-   * @param filter
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
-   * @param encryptPassword
-   * @param anonymizeFields
-   * @param options
-   * @param callback
-   */
-  Outbreak.exportFilteredOutbreaks = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
-
-    /**
-     * Translate the template
-     * @param template
-     * @param dictionary
-     */
-    function translateTemplate(template, dictionary) {
-      // go trough all questions
-      template.forEach(function (question) {
-        // translate text and answer type
-        ['text', 'answerType'].forEach(function (itemToTranslate) {
-          if (question[itemToTranslate]) {
-            question[itemToTranslate] = dictionary.getTranslation(question[itemToTranslate]);
-          }
-        });
-        // translate answers (if present)
-        if (question.answers) {
-          question.answers.forEach(function (answer) {
-            if (answer.label) {
-              answer.label = dictionary.getTranslation(answer.label);
-            }
-            // translate additional questions (if present)
-            if (answer.additionalQuestions) {
-              translateTemplate(answer.additionalQuestions, dictionary);
-            }
-          });
-        }
-      });
-    }
-
-    // if encrypt password is not valid, remove it
-    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-      encryptPassword = null;
-    }
-
-    // make sure anonymizeFields is valid
-    if (!Array.isArray(anonymizeFields)) {
-      anonymizeFields = [];
-    }
-
-    // export outbreaks list
-    app.utils.remote.helpers.exportFilteredModelsList(app, Outbreak, filter, exportType, 'Outbreak List', encryptPassword, anonymizeFields, options, function (results, languageDictionary) {
-      results.forEach(function (result) {
-        // translate templates
-        ['caseInvestigationTemplate', 'labResultsTemplate', 'contactFollowUpTemplate'].forEach(function (template) {
-          if (result[template]) {
-            translateTemplate(result[template], languageDictionary);
-          }
-        });
-      });
-      return Promise.resolve(results);
-    }, callback);
-  };
-
-  /**
    * Export filtered contacts follow-ups to PDF
    * PDF Information: List of contacts with follow-ups table
    * @param filter This request also accepts 'includeContactAddress': boolean, 'includeContactPhoneNumber': boolean, 'groupResultsBy': enum ['case', 'location', 'riskLevel'] on the first level in 'where'
@@ -5590,7 +5421,7 @@ module.exports = function (Outbreak) {
         }
       },
       filter || {});
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, _filters, exportType, 'Reference Data', null, [], options, function (results) {
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, _filters.where, exportType, 'Reference Data', null, [], options, function (results) {
       // translate category, value and description fields
       return new Promise(function (resolve, reject) {
         // load context user
@@ -7434,7 +7265,7 @@ module.exports = function (Outbreak) {
    * @param modelInstance
    * @param next
    */
-  function findAndFilteredCountFollowUpsBackCompat(context, modelInstance, next){
+  function findAndFilteredCountFollowUpsBackCompat(context, modelInstance, next) {
     // get filter
     const filter = _.get(context, 'args.filter', {});
     // convert filters from old format into the new one
@@ -7454,6 +7285,9 @@ module.exports = function (Outbreak) {
     findAndFilteredCountFollowUpsBackCompat(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.filteredCountFollowUps', function (context, modelInstance, next) {
+    findAndFilteredCountFollowUpsBackCompat(context, modelInstance, next);
+  });
+  Outbreak.beforeRemote('prototype.exportFilteredFollowups', function (context, modelInstance, next) {
     findAndFilteredCountFollowUpsBackCompat(context, modelInstance, next);
   });
 
@@ -7496,12 +7330,49 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Export a list of follow-ups for a contact
+   * @param filter
+   * @param exportType
+   * @param encryptPassword
+   * @param anonymizeFields
+   * @param options
+   * @param callback
+   * @returns {*}
+   */
+  Outbreak.prototype.exportFilteredFollowups = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    let self = this;
+    app.models.followUp
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // if encrypt password is not valid, remove it
+        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+          encryptPassword = null;
+        }
+
+        // make sure anonymizeFields is valid
+        if (!Array.isArray(anonymizeFields)) {
+          anonymizeFields = [];
+        }
+
+        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, filter.where, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, function (results, dictionary) {
+          // Prepare questionnaire answers for printing
+          results.forEach((followUp) => {
+            if (followUp.questionnaireAnswers) {
+              followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+            }
+          });
+          return Promise.resolve(results);
+        }, callback);
+      });
+  };
+
+  /**
    * Backwards compatibility for find and filtered count lab results filters
    * @param context
    * @param modelInstance
    * @param next
    */
-  function findAndFilteredCountLabResultsBackCompat(context, modelInstance, next){
+  function findAndFilteredCountLabResultsBackCompat(context, modelInstance, next) {
     // get filter
     const filter = _.get(context, 'args.filter', {});
     // convert filters from old format into the new one
@@ -7568,7 +7439,7 @@ module.exports = function (Outbreak) {
    * @param modelInstance
    * @param next
    */
-  function findAndFilteredCountCasesBackCompat(context, modelInstance, next){
+  function findAndFilteredCountCasesBackCompat(context, modelInstance, next) {
     // get filter
     const filter = _.get(context, 'args.filter', {});
     // convert filters from old format into the new one
@@ -7591,6 +7462,9 @@ module.exports = function (Outbreak) {
     findAndFilteredCountCasesBackCompat(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.countCasesPerClassification', function (context, modelInstance, next) {
+    findAndFilteredCountCasesBackCompat(context, modelInstance, next);
+  });
+  Outbreak.beforeRemote('prototype.exportFilteredCases', function (context, modelInstance, next) {
     findAndFilteredCountCasesBackCompat(context, modelInstance, next);
   });
 
@@ -7669,6 +7543,43 @@ module.exports = function (Outbreak) {
       .catch(callback);
   };
 
+  /**
+   * Export filtered cases to file
+   * @param filter
+   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param encryptPassword
+   * @param anonymizeFields
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    const self = this;
+    app.models.case
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // if encrypt password is not valid, remove it
+        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+          encryptPassword = null;
+        }
+
+        // make sure anonymizeFields is valid
+        if (!Array.isArray(anonymizeFields)) {
+          anonymizeFields = [];
+        }
+
+        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, filter.where, exportType, 'Case List', encryptPassword, anonymizeFields, options, function (results, dictionary) {
+          // Prepare questionnaire answers for printing
+          results.forEach((caseModel) => {
+            if (caseModel.questionnaireAnswers) {
+              caseModel.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.case, caseModel, dictionary);
+            }
+          });
+          return Promise.resolve(results);
+        }, callback);
+      })
+      .catch(callback);
+  };
+
 
   /**
    * Backwards compatibility for find, filtered-count and per-classification count contacts filters
@@ -7676,7 +7587,7 @@ module.exports = function (Outbreak) {
    * @param modelInstance
    * @param next
    */
-  function findAndFilteredCountContactsBackCompat(context, modelInstance, next){
+  function findAndFilteredCountContactsBackCompat(context, modelInstance, next) {
     // get filter
     const filter = _.get(context, 'args.filter', {});
     // convert filters from old format into the new one
@@ -7706,6 +7617,9 @@ module.exports = function (Outbreak) {
     findAndFilteredCountContactsBackCompat(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.countContactsPerRiskLevel', function (context, modelInstance, next) {
+    findAndFilteredCountContactsBackCompat(context, modelInstance, next);
+  });
+  Outbreak.beforeRemote('prototype.exportFilteredContacts', function (context, modelInstance, next) {
     findAndFilteredCountContactsBackCompat(context, modelInstance, next);
   });
 
@@ -7785,6 +7699,36 @@ module.exports = function (Outbreak) {
         });
         // send back the result
         callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Export filtered contacts to file
+   * @param filter
+   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param encryptPassword
+   * @param anonymizeFields
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportFilteredContacts = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    // pre-filter using related data (case, followUps)
+    app.models.contact
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+
+        // if encrypt password is not valid, remove it
+        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+          encryptPassword = null;
+        }
+
+        // make sure anonymizeFields is valid
+        if (!Array.isArray(anonymizeFields)) {
+          anonymizeFields = [];
+        }
+
+        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, filter.where, exportType, 'Contacts List', encryptPassword, anonymizeFields, options, callback);
       })
       .catch(callback);
   };

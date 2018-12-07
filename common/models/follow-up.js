@@ -524,7 +524,7 @@ module.exports = function (FollowUp) {
                   followUpQuery,
                   {
                     personId: {
-                      in: contacts.map(contact => contact.id)
+                      inq: contacts.map(contact => contact.id)
                     }
                   }
                 ]
