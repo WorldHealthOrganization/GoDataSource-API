@@ -269,18 +269,6 @@
       "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
-      "property": "__get__contacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "__get__contacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
       "property": "findContacts"
     },
     {
@@ -2457,7 +2445,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries"
         }
       ],
       "returns": [
@@ -2468,7 +2456,7 @@
           "required": true
         }
       ],
-      "description": "Counts the contacts that pass a filter (which now can accept relations)",
+      "description": "Counts the contacts of an outbreak",
       "http": [
         {
           "verb": "get",
@@ -2479,31 +2467,6 @@
           "path": "/contacts/filtered-count"
         }
       ]
-    },
-    "prototype.__get__contacts": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
-        }
-      ],
-      "returns": [
-        {
-          "arg": "result",
-          "type": [
-            "contact"
-          ],
-          "description": "Contacts of an outbreak",
-          "required": true,
-          "root": true
-        }
-      ],
-      "description": "Queries contacts of an outbreak",
-      "http": {
-        "verb": "post",
-        "path": "/contacts/filter"
-      }
     },
     "prototype.filteredCountEvents": {
       "accepts": [
@@ -6127,10 +6090,16 @@
         }
       ],
       "description": "Queries contacts of outbreak.",
-      "http": {
-        "verb": "get",
-        "path": "/contacts/v2"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/contacts"
+        },
+        {
+          "verb": "post",
+          "path": "/contacts/filter"
+        }
+      ]
     },
     "prototype.countContacts": {
       "accepts": [

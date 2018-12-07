@@ -59,12 +59,12 @@ module.exports = function (Outbreak) {
     'prototype.__count__attachments',
     'prototype.__get__followUps',
     'prototype.__get__labResults',
-    'prototype.__get__cases'
+    'prototype.__get__cases',
+    'prototype.__get__contacts'
   ]);
 
   // attach search by relation property behavior on get contacts
   app.utils.remote.searchByRelationProperty.attachOnRemotes(Outbreak, [
-    'prototype.__get__contacts',
     'prototype.__get__events',
     'prototype.findCaseRelationships',
     'prototype.findContactRelationships',
@@ -94,27 +94,6 @@ module.exports = function (Outbreak) {
       next();
     }
   });
-
-  /**
-   * Allows count requests with advanced filters (like the ones we can use on GET requests)
-   * to be made on outbreak/{id}/contacts.
-   */
-  Outbreak.prototype.filteredCountContacts = function (filter, callback) {
-    // set default filter value
-    filter = filter || {};
-    // check if deep count should be used (this is expensive, should be avoided if possible)
-    if (app.utils.remote.searchByRelationProperty.shouldUseDeepCount(filter)) {
-      this.__get__contacts(filter, function (err, res) {
-        if (err) {
-          return callback(err);
-        }
-        callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
-      });
-    } else {
-      // use native count
-      this.__count__contacts(filter.where, callback);
-    }
-  };
 
   /**
    * Allows count requests with advanced filters (like the ones we can use on GET requests)
@@ -243,7 +222,7 @@ module.exports = function (Outbreak) {
   /**
    * Attach before remote (GET outbreaks/{id}/contacts) hooks
    */
-  Outbreak.beforeRemote('prototype.__get__contacts', function (context, modelInstance, next) {
+  Outbreak.beforeRemote('prototype.findContacts', function (context, modelInstance, next) {
     // filter information based on available permissions
     Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', context);
     next();
@@ -6078,51 +6057,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Count contacts by case risk level
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.countContactsPerRiskLevel = function (filter, callback) {
-    // this is a report, don't allow limit & skip
-    if (filter) {
-      delete filter.limit;
-      delete filter.skip;
-    }
-    // get the list of contacts
-    this.__get__contacts(filter, function (error, contacts) {
-      if (error) {
-        return callback(error);
-      }
-      // add filter parent functionality
-      contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
-      // build a result
-      const result = {
-        riskLevel: {},
-        count: contacts.length
-      };
-      // go through all contact records
-      contacts.forEach(function (contactRecord) {
-        // risk level is optional
-        if (contactRecord.riskLevel == null) {
-          contactRecord.riskLevel = 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED';
-        }
-        // init contact riskLevel group if needed
-        if (!result.riskLevel[contactRecord.riskLevel]) {
-          result.riskLevel[contactRecord.riskLevel] = {
-            count: 0,
-            contactIDs: []
-          };
-        }
-        // classify records by their risk level
-        result.riskLevel[contactRecord.riskLevel].count++;
-        result.riskLevel[contactRecord.riskLevel].contactIDs.push(contactRecord.id);
-      });
-      // send back the result
-      callback(null, result);
-    });
-  };
-
-  /**
    * Count cases stratified by classification over time
    * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
    * @param callback
@@ -7629,7 +7563,7 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Backwards compatibility for find and filtered count lab results filters
+   * Backwards compatibility for find, filtered-count and per-classification count cases filters
    * @param context
    * @param modelInstance
    * @param next
@@ -7735,6 +7669,46 @@ module.exports = function (Outbreak) {
       .catch(callback);
   };
 
+
+  /**
+   * Backwards compatibility for find, filtered-count and per-classification count contacts filters
+   * @param context
+   * @param modelInstance
+   * @param next
+   */
+  function findAndFilteredCountContactsBackCompat(context, modelInstance, next){
+    // get filter
+    const filter = _.get(context, 'args.filter', {});
+    // convert filters from old format into the new one
+    let query = app.utils.remote.searchByRelationProperty
+      .convertIncludeQueryToFilterQuery(filter, {people: 'case'});
+    // get followUp query, if any
+    const queryFollowUp = _.get(filter, 'where.followUp');
+    // if there is no followUp query, but there is an older version of the filter
+    if (!queryFollowUp && query.followUps) {
+      // use that old version
+      _.set(filter, 'where.followUp', query.followUps);
+    }
+    // get case query, if any
+    const queryCase = _.get(filter, 'where.case');
+    // if there is no case query, but there is an older version of the filter
+    if (!queryCase && query.case) {
+      // use that old version
+      _.set(filter, 'where.case', query.case);
+    }
+    next();
+  }
+
+  Outbreak.beforeRemote('prototype.findContacts', function (context, modelInstance, next) {
+    findAndFilteredCountContactsBackCompat(context, modelInstance, next);
+  });
+  Outbreak.beforeRemote('prototype.filteredCountContacts', function (context, modelInstance, next) {
+    findAndFilteredCountContactsBackCompat(context, modelInstance, next);
+  });
+  Outbreak.beforeRemote('prototype.countContactsPerRiskLevel', function (context, modelInstance, next) {
+    findAndFilteredCountContactsBackCompat(context, modelInstance, next);
+  });
+
   /**
    * Find outbreak contacts
    * @param filter Supports 'where.case', 'where.followUp' MongoDB compatible queries
@@ -7759,7 +7733,7 @@ module.exports = function (Outbreak) {
    * @param filter Supports 'where.case', 'where.followUp' MongoDB compatible queries
    * @param callback
    */
-  Outbreak.prototype.countContacts = function (filter, callback) {
+  Outbreak.prototype.filteredCountContacts = function (filter, callback) {
     // pre-filter using related data (case, followUps)
     app.models.contact
       .preFilterForOutbreak(this, filter)
@@ -7778,7 +7752,7 @@ module.exports = function (Outbreak) {
    * @param filter
    * @param callback
    */
-  Outbreak.prototype.countContactsPerRiskLevelV2 = function (filter, callback) {
+  Outbreak.prototype.countContactsPerRiskLevel = function (filter, callback) {
     // pre-filter using related data (case, followUps)
     app.models.contact
       .preFilterForOutbreak(this, filter)
