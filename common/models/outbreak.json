@@ -227,18 +227,6 @@
       "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
-      "property": "__get__cases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "__get__cases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
       "property": "findCases"
     },
     {
@@ -246,18 +234,6 @@
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "findCases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countCases"
     },
     {
       "principalType": "ROLE",
@@ -2510,31 +2486,6 @@
         }
       ]
     },
-    "prototype.__get__cases": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts a `noRelationships` flag on the first level of `where`."
-        }
-      ],
-      "returns": [
-        {
-          "arg": "result",
-          "type": [
-            "case"
-          ],
-          "description": "Cases of an outbreak",
-          "required": true,
-          "root": true
-        }
-      ],
-      "description": "Queries cases of an outbreak",
-      "http": {
-        "verb": "post",
-        "path": "/cases/filter"
-      }
-    },
     "prototype.filteredCountContacts": {
       "accepts": [
         {
@@ -2574,7 +2525,9 @@
       "returns": [
         {
           "arg": "result",
-          "type": ["contact"],
+          "type": [
+            "contact"
+          ],
           "description": "Contacts of an outbreak",
           "required": true,
           "root": true
@@ -2582,9 +2535,9 @@
       ],
       "description": "Queries contacts of an outbreak",
       "http": {
-          "verb": "post",
-          "path": "/contacts/filter"
-        }
+        "verb": "post",
+        "path": "/contacts/filter"
+      }
     },
     "prototype.filteredCountEvents": {
       "accepts": [
@@ -6186,12 +6139,18 @@
         }
       ],
       "description": "Queries cases of outbreak.",
-      "http": {
-        "verb": "get",
-        "path": "/cases/v2"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/cases"
+        },
+        {
+          "verb": "post",
+          "path": "/cases/filter"
+        }
+      ]
     },
-    "prototype.countCases": {
+    "prototype.filteredCountCases": {
       "accepts": [
         {
           "arg": "filter",
@@ -6208,10 +6167,16 @@
         }
       ],
       "description": "Counts cases of outbreak.",
-      "http": {
-        "verb": "get",
-        "path": "/cases/v2/count"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/cases/filteredCount"
+        },
+        {
+          "verb": "get",
+          "path": "/cases/filteredCount"
+        }
+      ]
     },
     "prototype.findContacts": {
       "accepts": [

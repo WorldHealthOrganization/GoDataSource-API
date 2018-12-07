@@ -431,11 +431,11 @@ module.exports = function (Case) {
         if (caseIds) {
           // update cases query to filter based on caseIds
           casesQuery = {
-            $and: [
+            and: [
               casesQuery,
               {
-                _id: {
-                  $in: caseIds
+                id: {
+                  in: caseIds
                 }
               }
             ]
@@ -443,7 +443,7 @@ module.exports = function (Case) {
         }
         // restrict cases query to current outbreak
         casesQuery = {
-          $and: [
+          and: [
             casesQuery,
             {
               outbreakId: outbreak.id

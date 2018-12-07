@@ -58,13 +58,13 @@ module.exports = function (Outbreak) {
     'prototype.__updateById__attachments',
     'prototype.__count__attachments',
     'prototype.__get__followUps',
-    'prototype.__get__labResults'
+    'prototype.__get__labResults',
+    'prototype.__get__cases'
   ]);
 
   // attach search by relation property behavior on get contacts
   app.utils.remote.searchByRelationProperty.attachOnRemotes(Outbreak, [
     'prototype.__get__contacts',
-    'prototype.__get__cases',
     'prototype.__get__events',
     'prototype.findCaseRelationships',
     'prototype.findContactRelationships',
@@ -94,27 +94,6 @@ module.exports = function (Outbreak) {
       next();
     }
   });
-
-  /**
-   * Allows count requests with advanced filters (like the ones we can use on GET requests)
-   * to be made on outbreak/{id}/cases.
-   */
-  Outbreak.prototype.filteredCountCases = function (filter, callback) {
-    // set default filter value
-    filter = filter || {};
-    // check if deep count should be used (this is expensive, should be avoided if possible)
-    if (app.utils.remote.searchByRelationProperty.shouldUseDeepCount(filter)) {
-      this.__get__cases(filter, function (err, res) {
-        if (err) {
-          return callback(err);
-        }
-        callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
-      });
-    } else {
-      // use native count
-      this.__count__cases(filter.where, callback);
-    }
-  };
 
   /**
    * Allows count requests with advanced filters (like the ones we can use on GET requests)
@@ -7684,6 +7663,35 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Backwards compatibility for find and filtered count lab results filters
+   * @param context
+   * @param modelInstance
+   * @param next
+   */
+  function findAndFilteredCountCasesBackCompat(context, modelInstance, next){
+    // get filter
+    const filter = _.get(context, 'args.filter', {});
+    // convert filters from old format into the new one
+    let query = app.utils.remote.searchByRelationProperty
+      .convertIncludeQueryToFilterQuery(filter);
+    // get relationship query, if any
+    const queryCase = _.get(filter, 'where.relationship');
+    // if there is no relationship query, but there is an older version of the filter
+    if (!queryCase && query.relationships) {
+      // use that old version
+      _.set(filter, 'where.relationship', query.relationships);
+    }
+    next();
+  }
+
+  Outbreak.beforeRemote('prototype.findCases', function (context, modelInstance, next) {
+    findAndFilteredCountCasesBackCompat(context, modelInstance, next);
+  });
+  Outbreak.beforeRemote('prototype.filteredCountCases', function (context, modelInstance, next) {
+    findAndFilteredCountCasesBackCompat(context, modelInstance, next);
+  });
+
+  /**
    * Find outbreak cases
    * @param filter Supports 'where.relationship' MongoDB compatible queries
    * @param callback
@@ -7707,7 +7715,7 @@ module.exports = function (Outbreak) {
    * @param filter Supports 'where.relationship' MongoDB compatible queries
    * @param callback
    */
-  Outbreak.prototype.countCases = function (filter, callback) {
+  Outbreak.prototype.filteredCountCases = function (filter, callback) {
     // pre-filter using related data (case)
     app.models.case
       .preFilterForOutbreak(this, filter)
