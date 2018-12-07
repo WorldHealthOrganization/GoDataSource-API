@@ -235,16 +235,15 @@ module.exports = function (Relationship) {
       .rawFind(_filter.where)
       .then(function (relationships) {
         return app.models.person
-          .rawFind(
-            {
-              $and: [
-                _.get(_filter, 'include.0.scope.where'),
-                {
-                  type: {
-                    $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
-                  }
-                }]
-            })
+          .rawFind({
+            $and: [
+              _.get(_filter, 'include.0.scope.where'),
+              {
+                type: {
+                  $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+                }
+              }]
+          })
           .then(function (people) {
             const peopleIdsMap = {};
             people.forEach(function (person) {
