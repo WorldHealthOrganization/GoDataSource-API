@@ -257,6 +257,13 @@ module.exports = function (Outbreak) {
   });
 
   /**
+   * Attach before remote (GET outbreaks/{id}/cases/per-classification/count) hooks
+   */
+  Outbreak.beforeRemote('prototype.countCasesPerClassification', function (context, modelInstance, next) {
+    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
+  });
+
+  /**
    * Attach before remote (GET outbreaks/{id}/events/filtered-count) hooks
    */
   Outbreak.beforeRemote('prototype.filteredCountEvents', function (context, modelInstance, next) {
@@ -6071,47 +6078,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Count cases by case classification
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.countCasesPerClassification = function (filter, callback) {
-    // this is a report, don't allow limit & skip
-    if (filter) {
-      delete filter.limit;
-      delete filter.skip;
-    }
-    // get the list of cases
-    this.__get__cases(filter, function (error, cases) {
-      if (error) {
-        return callback(error);
-      }
-      // add filter parent functionality
-      cases = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(cases, filter);
-      // build a result
-      const result = {
-        classification: {},
-        count: cases.length
-      };
-      // go through all case records
-      cases.forEach(function (caseRecord) {
-        // init case classification group if needed
-        if (!result.classification[caseRecord.classification]) {
-          result.classification[caseRecord.classification] = {
-            count: 0,
-            caseIDs: []
-          };
-        }
-        // classify records by their classification
-        result.classification[caseRecord.classification].count++;
-        result.classification[caseRecord.classification].caseIDs.push(caseRecord.id);
-      });
-      // send back the result
-      callback(null, result);
-    });
-  };
-
-  /**
    * Count contacts by case risk level
    * @param filter
    * @param callback
@@ -7690,6 +7656,9 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.filteredCountCases', function (context, modelInstance, next) {
     findAndFilteredCountCasesBackCompat(context, modelInstance, next);
   });
+  Outbreak.beforeRemote('prototype.countCasesPerClassification', function (context, modelInstance, next) {
+    findAndFilteredCountCasesBackCompat(context, modelInstance, next);
+  });
 
   /**
    * Find outbreak cases
@@ -7734,7 +7703,7 @@ module.exports = function (Outbreak) {
    * @param filter Supports 'where.relationship' MongoDB compatible queries
    * @param callback
    */
-  Outbreak.prototype.countCasesPerClassificationV2 = function (filter, callback) {
+  Outbreak.prototype.countCasesPerClassification = function (filter, callback) {
     app.models.case
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {

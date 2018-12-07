@@ -435,7 +435,7 @@ module.exports = function (Case) {
               casesQuery,
               {
                 id: {
-                  in: caseIds
+                  inq: caseIds
                 }
               }
             ]
