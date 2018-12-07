@@ -55,7 +55,6 @@ const createBackup = function (modules, location, done) {
     models.sync.exportDatabase(
       null,
       collections,
-      null,
       {password: getBackupPassword()},
       (exportError, archivePath) => {
         if (exportError) {

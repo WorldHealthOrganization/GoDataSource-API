@@ -78,20 +78,16 @@ module.exports = function (Sync) {
    * - custom filter { fromDate: Date } to only retrieve records past a given date
    * @param filter
    * @param collections
-   * @param collectionsOpts
    * @param options {{password: '<encryptPassword>'}}
    * @param done
    */
-  Sync.exportDatabase = function (filter, collections, collectionsOpts, options, done) {
+  Sync.exportDatabase = function (filter, collections, options, done) {
+    app.logger.debug(`Started database export for the following collections: ${collections.join(', ')}`);
+
     // defensive checks
     options = options || {};
     filter = filter || {where: {}};
     collections = collections || [];
-    collectionsOpts = collectionsOpts || [];
-    collectionsOpts.map((collectionOpts) => {
-      collectionOpts.excludes = collectionOpts.excludes || [];
-      collectionOpts.shouldEncrypt = collectionOpts.shouldEncrypt || false;
-    });
 
     // cache reference to mongodb connection
     let connection = app.dataSources.mongoDb.connector;
@@ -127,45 +123,61 @@ module.exports = function (Sync) {
       .series(
         Object.keys(allCollections).map((collectionName) => {
           return (callback) => {
-            // look up for any specific options
-            let collectionOpts = collectionsOpts.filter((item) => item.name === collectionName)[0];
-
-            // check if properties should be excluded
-            let excludes = {};
-
-            if (collectionOpts && collectionOpts.excludes.length) {
-              Object.keys(collectionOpts.excludes).forEach((prop) => {
-                excludes[prop] = 0;
-              });
-            }
-
             // get mongoDB filter that will be sent; for some collections we might send additional filters
             let mongoDBFilter = dbSync.collectionsFilterMap[collectionName] ? dbSync.collectionsFilterMap[collectionName](collectionName, customFilter, filter) : customFilter;
 
-            return connection
-              .collection(allCollections[collectionName])
-              .find(mongoDBFilter, excludes, (err, result) => {
-                if (err) {
-                  return callback(err);
-                }
+            app.logger.debug(`Exporting collection: ${collectionName}`);
+
+            exportCollectionInBatches(connection, collectionName, mongoDBFilter, 1000, callback);
+
+            function exportCollectionInBatches(dbConnection, collectionName, filter, batchSize, callback) {
+              getNextBatch();
+
+              function getNextBatch(skip = 0) {
+                let batchNumber = skip ? skip / batchSize : 0;
+
+                let cursor = dbConnection
+                  .collection(allCollections[collectionName])
+                  .find(filter, {
+                    skip: skip,
+                    limit: batchSize
+                  });
 
                 // retrieve
-                result.toArray((err, records) => {
-                  if (err) {
-                    return callback(err);
-                  }
-
-                  // export related files
-                  // if collection is not supported, it will be skipped
-                  dbSync.exportCollectionRelatedFiles(collectionName, records, tmpDirName, (err) => {
-                    if (err) {
-                      return callback(err);
+                cursor
+                  .toArray()
+                  .then(function (records) {
+                    if (records && records.length) {
+                      // export related files
+                      // if collection is not supported, it will be skipped
+                      dbSync.exportCollectionRelatedFiles(collectionName, records, tmpDirName, (err) => {
+                        if (err) {
+                          app.logger.debug(`Collection '${collectionName}' related files export failed. Error: ${err}`);
+                          return callback(err);
+                        }
+                        // create a file with collection name as file name, containing results
+                        fs.writeFile(`${tmpDirName}/${collectionName}_${batchNumber}.json`, JSON.stringify(records, null, 2), function () {
+                          if (records.length < batchSize) {
+                            app.logger.debug(`Collection '${collectionName}' export success.`);
+                            return callback();
+                            // finish
+                          } else {
+                            app.logger.debug(`Exported batch ${batchNumber} of collection '${collectionName}'.`);
+                            getNextBatch(skip + batchSize);
+                          }
+                        });
+                      });
+                    } else {
+                      app.logger.debug(`Collection '${collectionName}' export success.`);
+                      callback();
                     }
-                    // create a file with collection name as file name, containing results
-                    fs.writeFile(`${tmpDirName}/${collectionName}.json`, JSON.stringify(records, null, 2), callback);
+                  })
+                  .catch(function (err) {
+                    app.logger.debug(`Collection '${collectionName}' export failed. Error: ${err}`);
+                    return callback(err);
                   });
-                });
-              });
+              }
+            }
           };
         }),
         (err) => {
@@ -178,6 +190,7 @@ module.exports = function (Sync) {
 
           // compress all collection files from the tmp dir into .zip file
           try {
+            app.logger.debug(`Creating zip file`);
             let zip = new AdmZip();
             zip.addLocalFolder(tmpDirName);
             zip.writeZip(archiveName);
@@ -275,7 +288,7 @@ module.exports = function (Sync) {
               archive.extractAllTo(tmpDirName);
             } catch (zipError) {
               app.logger.error(`Sync ${syncLogEntry.id}: Failed to extract zip archive: ${filePath}. ${zipError}`);
-              return callback(Sync.getFatalError(typeof zipError === 'string' ? { message: zipError } : zipError));
+              return callback(Sync.getFatalError(typeof zipError === 'string' ? {message: zipError} : zipError));
             }
 
             // read all files in the temp dir

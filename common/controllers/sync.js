@@ -184,8 +184,6 @@ module.exports = function (Sync) {
           Sync.exportDatabase(
             filter,
             collections,
-            // no collection specific options
-            [],
             {password: password},
             (err, fileName) => {
               // send the done function as the response needs to be returned
@@ -200,8 +198,6 @@ module.exports = function (Sync) {
           Sync.exportDatabase(
             filter,
             collections,
-            // no collection specific options
-            [],
             {password: password},
             (err, fileName) => {
               // don't send the done function as the response was already sent
@@ -632,8 +628,6 @@ module.exports = function (Sync) {
           Sync.exportDatabase(
             filter,
             collections,
-            // no collection specific options
-            [],
             {password: password},
             (err, fileName) => {
               if (err) {
