@@ -56,7 +56,9 @@ module.exports = function (Outbreak) {
     'prototype.__get__attachments',
     'prototype.__delete__attachments',
     'prototype.__updateById__attachments',
-    'prototype.__count__attachments'
+    'prototype.__count__attachments',
+    'prototype.__get__followUps',
+    'prototype.__get__labResults'
   ]);
 
   // attach search by relation property behavior on get contacts
@@ -64,11 +66,9 @@ module.exports = function (Outbreak) {
     'prototype.__get__contacts',
     'prototype.__get__cases',
     'prototype.__get__events',
-    'prototype.__get__followUps',
     'prototype.findCaseRelationships',
     'prototype.findContactRelationships',
-    'prototype.findEventRelationships',
-    'prototype.__get__labResults',
+    'prototype.findEventRelationships'
   ]);
 
   /**
@@ -178,7 +178,6 @@ module.exports = function (Outbreak) {
         }
       },
       filter || {});
-    // get logged in user
 
     // if encrypt password is not valid, remove it
     if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
@@ -213,40 +212,33 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.exportFilteredFollowups = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
     let self = this;
-    let _filters = {
-      where: {
-        outbreakId: this.id
-      }
-    };
-
-    helpers.buildFollowUpCustomFilter(filter, this.id)
-      .then((customFilter) => {
-        if (customFilter && Object.keys(customFilter).length !== 0) {
-          // Merge submitted filter with custom filter
-          _filters = app.utils.remote.mergeFilters(customFilter, _filters);
+    const _filters = app.utils.remote.mergeFilters(
+      {
+        where: {
+          outbreakId: this.id
         }
+      },
+      filter || {});
 
-        // if encrypt password is not valid, remove it
-        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-          encryptPassword = null;
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+    }
+
+    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, function (results, dictionary) {
+      // Prepare questionnaire answers for printing
+      results.forEach((followUp) => {
+        if (followUp.questionnaireAnswers) {
+          followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
         }
-
-        // make sure anonymizeFields is valid
-        if (!Array.isArray(anonymizeFields)) {
-          anonymizeFields = [];
-        }
-
-        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, _filters, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, function (results, dictionary) {
-          // Prepare questionnaire answers for printing
-          results.forEach((followUp) => {
-            if (followUp.questionnaireAnswers) {
-              followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
-            }
-          });
-          return Promise.resolve(results);
-        }, callback);
-      })
-      .catch(callback);
+      });
+      return Promise.resolve(results);
+    }, callback);
   };
 
   /**
@@ -5796,34 +5788,6 @@ module.exports = function (Outbreak) {
     next();
   });
 
-  /**
-   * Allows count requests with advanced filters (like the ones we can use on GET requests)
-   * to be mode on outbreak/{id}/follow-ups.
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.filteredCountFollowUps = function (filter, callback) {
-    const self = this;
-    helpers.buildFollowUpCustomFilter(filter, this.id)
-      .then((customFilter) => {
-        // Merge custom filter with base filter
-        customFilter = app.utils.remote.mergeFilters(
-          customFilter,
-          filter || {});
-        // check if deep count should be used (this is expensive, should be avoided if possible)
-        if (app.utils.remote.searchByRelationProperty.shouldUseDeepCount(customFilter)) {
-          self.__get__followUps(customFilter, function (err, res) {
-            if (err) {
-              return callback(err);
-            }
-            callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, customFilter).length);
-          });
-        } else {
-          // use native count
-          self.__count__followUps(customFilter.where, callback);
-        }
-      });
-  };
 
   /**
    * Export an empty case investigation for an existing case (has qrCode)
@@ -5919,47 +5883,6 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
-
-  /**
-   * Allows count requests with advanced filters (like the ones we can use on GET requests)
-   * to be made on outbreak/{id}/lab-results.
-   */
-  Outbreak.prototype.filteredCountLabResults = function (filter, callback) {
-    // set default filter value
-    filter = filter || {};
-    // check if deep count should be used (this is expensive, should be avoided if possible)
-    if (app.utils.remote.searchByRelationProperty.shouldUseDeepCount(filter)) {
-      this.__get__labResults(filter, function (err, res) {
-        if (err) {
-          return callback(err);
-        }
-        callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
-      });
-    } else {
-      // use native count
-      this.__count__labResults(filter.where, callback);
-    }
-  };
-
-  /**
-   * Execute additional custom filter before generic GET LIST filter
-   * The additional accepted where clauses are whereCase, whereRelationship and whereContact
-   * The base filter's where property also accepts two additional properties: weekNumber and timeLastSeen
-   */
-  Outbreak.beforeRemote('prototype.__get__followUps', function (context, modelInstance, next) {
-    helpers.buildFollowUpCustomFilter(context.args.filter, context.instance.id)
-      .then((customFilter) => {
-        if (customFilter && Object.keys(customFilter).length !== 0) {
-
-          // Merge submitted filter with custom filter
-          context.args.filter = app.utils.remote.mergeFilters(
-            customFilter,
-            context.args.filter || {});
-        }
-        next();
-      })
-      .catch(next);
-  });
 
   /**
    * Restore a deleted outbreak
@@ -7627,6 +7550,35 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Backwards compatibility for find and filtered count follow-up filters
+   * @param context
+   * @param modelInstance
+   * @param next
+   */
+  function findAndFilteredCountFollowUpsBackCompat(context, modelInstance, next){
+    // get filter
+    const filter = _.get(context, 'args.filter', {});
+    // convert filters from old format into the new one
+    let query = app.utils.remote.searchByRelationProperty
+      .convertIncludeQueryToFilterQuery(filter);
+    // get contact query, if any
+    const queryContact = _.get(filter, 'where.contact');
+    // if there is no contact query, but there is an older version of the filter
+    if (!queryContact && query.contact) {
+      // use that old version
+      _.set(filter, 'where.contact', query.contact);
+    }
+    next();
+  }
+
+  Outbreak.beforeRemote('prototype.findFollowUps', function (context, modelInstance, next) {
+    findAndFilteredCountFollowUpsBackCompat(context, modelInstance, next);
+  });
+  Outbreak.beforeRemote('prototype.filteredCountFollowUps', function (context, modelInstance, next) {
+    findAndFilteredCountFollowUpsBackCompat(context, modelInstance, next);
+  });
+
+  /**
    * Find outbreak follow-ups
    * @param filter Supports 'where.contact', 'where.case' MongoDB compatible queries
    * @param callback
@@ -7650,7 +7602,7 @@ module.exports = function (Outbreak) {
    * @param filter Supports 'where.contact', 'where.case' MongoDB compatible queries
    * @param callback
    */
-  Outbreak.prototype.countFollowUps = function (filter, callback) {
+  Outbreak.prototype.filteredCountFollowUps = function (filter, callback) {
     // pre-filter using related data (case, contact)
     app.models.followUp
       .preFilterForOutbreak(this, filter)
@@ -7663,6 +7615,35 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Backwards compatibility for find and filtered count lab results filters
+   * @param context
+   * @param modelInstance
+   * @param next
+   */
+  function findAndFilteredCountLabResultsBackCompat(context, modelInstance, next){
+    // get filter
+    const filter = _.get(context, 'args.filter', {});
+    // convert filters from old format into the new one
+    let query = app.utils.remote.searchByRelationProperty
+      .convertIncludeQueryToFilterQuery(filter);
+    // get case query, if any
+    const queryCase = _.get(filter, 'where.case');
+    // if there is no case query, but there is an older version of the filter
+    if (!queryCase && query.case) {
+      // use that old version
+      _.set(filter, 'where.case', query.case);
+    }
+    next();
+  }
+
+  Outbreak.beforeRemote('prototype.findLabResults', function (context, modelInstance, next) {
+    findAndFilteredCountLabResultsBackCompat(context, modelInstance, next);
+  });
+  Outbreak.beforeRemote('prototype.filteredCountLabResults', function (context, modelInstance, next) {
+    findAndFilteredCountLabResultsBackCompat(context, modelInstance, next);
+  });
 
   /**
    * Find outbreak lab results
@@ -7688,7 +7669,7 @@ module.exports = function (Outbreak) {
    * @param filter Supports 'where.case' MongoDB compatible queries
    * @param callback
    */
-  Outbreak.prototype.countLabResults = function (filter, callback) {
+  Outbreak.prototype.filteredCountLabResults = function (filter, callback) {
     // pre-filter using related data (case)
     app.models.labResult
       .preFilterForOutbreak(this, filter)
