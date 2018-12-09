@@ -25,12 +25,14 @@ module.exports = function (Cluster) {
 
     // read relationship filter from the main filter
     if (filter) {
-      const _relationshipFilter = _.get(filter, 'relationship');
+      const _relationshipFilter = _.get(filter, 'where.relationship');
       // if a filter was sent
       if (_relationshipFilter) {
+        // remove relationship filter
+        delete filter.where.relationship;
         // merge the default filter with the one that was sent
         relationshipFilter = app.utils.remote
-          .mergeFilters(relationshipFilter, _relationshipFilter);
+          .mergeFilters(relationshipFilter, {where: _relationshipFilter});
       }
     }
 
