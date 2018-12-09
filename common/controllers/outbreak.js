@@ -1222,10 +1222,10 @@ module.exports = function (Outbreak) {
     }
 
     // check if contacts should be included
-    let includeContacts = _.get(filter, 'includeContacts', false);
+    let includeContacts = _.get(filter, 'where.includeContacts', false);
     // if present remove it from the main filter
     if (includeContacts) {
-      delete filter.includeContacts;
+      delete filter.where.includeContacts;
     }
 
     // get active filter
@@ -1243,13 +1243,11 @@ module.exports = function (Outbreak) {
     }
 
     // initialize a person filter (will contain filters applicable on person entity)
-    let personFilter;
+    let personFilter =  _.get(filter, 'where.person');
     // if person filter was sent
-    if (filter.person) {
-      // get it; ask only for IDs
-      personFilter = filter.person;
+    if (personFilter) {
       // remove original filter
-      delete filter.person;
+      delete filter.where.person;
     }
 
     // try and get the end date filter
@@ -1290,7 +1288,7 @@ module.exports = function (Outbreak) {
         if (personFilter) {
           // find people that match the filter
           return app.models.person
-            .rawFind(personFilter.where, {projection: {_id: 1}})
+            .rawFind(personFilter, {projection: {_id: 1}})
             .then(function (people) {
               // return their IDs
               return people.map(person => person.id);
