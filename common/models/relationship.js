@@ -131,21 +131,20 @@ module.exports = function (Relationship) {
             peopleIds.push(person.id);
           });
         });
-
+        // get person query from include filters
+        let personQuery = app.utils.remote.searchByRelationProperty.convertIncludeQueryToFilterQuery(filter).people;
         // use raw queries for related people
         return app.models.person
           .rawFind(
-            app.utils.remote.convertLoopbackFilterToMongo(
-              app.utils.remote.mergeFilters(
-                _.get(filter, 'include.0.scope'),
-                {
-                  where: {
-                    id: {
-                      inq: peopleIds
-                    }
+            app.utils.remote.mergeFilters(
+              personQuery,
+              {
+                where: {
+                  id: {
+                    inq: peopleIds
                   }
-                }).where
-            )
+                }
+              }).where
           )
           .then(function (people) {
             // build a map of people to easily connect them to relations
@@ -155,6 +154,7 @@ module.exports = function (Relationship) {
             });
             // add people to relations
             relationships.forEach(function (relationship) {
+              // add people information to the relationship
               relationship.people = [];
               Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
                 if (peopleMap[person.id]) {
@@ -234,35 +234,55 @@ module.exports = function (Relationship) {
     return Relationship
       .rawFind(_filter.where)
       .then(function (relationships) {
+        // build a list of people ids that are part of found relationships
+        let peopleIds = [];
+        // go through the relationships
+        relationships.forEach(function (relationship) {
+          // go through the people of the relationship
+          Array.isArray(relationship.people) && relationship.people.forEach(function (person) {
+            // store person id
+            peopleIds.push(person.id);
+          });
+        });
+        // get person query from the include filter
+        let personQuery = app.utils.remote.searchByRelationProperty.convertIncludeQueryToFilterQuery(_filter).people;
+        // find people involved in the relationships
         return app.models.person
           .rawFind({
             $and: [
-              _.get(_filter, 'include.0.scope.where'),
+              personQuery,
               {
                 type: {
                   $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+                },
+                _id: {
+                  $in: peopleIds
                 }
               }]
           })
           .then(function (people) {
+            // build a map of people ids to person, to easily reference them in relationships
             const peopleIdsMap = {};
             people.forEach(function (person) {
               peopleIdsMap[person.id] = person;
             });
-            return relationships
-            // some relations may be invalid after applying scope filtering, remove invalid ones
-              .filter(function (relationship) {
-                let validRel = true;
-                relationship.people = [];
-                relationship.persons.forEach(function (person) {
-                  if (!peopleIdsMap[person.id]) {
-                    validRel = false;
-                  } else {
-                    relationship.people.push(peopleIdsMap[person.id]);
-                  }
-                });
-                return validRel;
+            // keep only valid relationships (both people passed the filters)
+            return relationships.filter(function (relationship) {
+              // assume the relationship is valid
+              let isValid = true;
+              // add people information to it
+              relationship.people = [];
+              relationship.persons.forEach(function (person) {
+                // if one of the people is not found
+                if (!peopleIdsMap[person.id]) {
+                  // relationship is invalid
+                  isValid = false;
+                } else {
+                  relationship.people.push(peopleIdsMap[person.id]);
+                }
               });
+              return isValid;
+            });
           });
       });
   };

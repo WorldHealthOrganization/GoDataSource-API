@@ -2629,7 +2629,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a (full) person filter on 'person', 'chainIncludesPerson' properties of the filter and filter.includeContacts (default false). Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a 'where.person', 'where.chainIncludesPerson', 'where.endDate' (used to provide a snapshot of chains until the specified end date) queries and filter.includeContacts (default false)."
         }
       ],
       "returns": [
@@ -2671,7 +2671,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'active' boolean & 'size' number on the first level in 'where' a (full) person filter on 'person', 'chainIncludesPerson' properties of the filter and filter.includeContacts (default false). Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'where.active' boolean, 'where.size' number, 'where.person', 'where.chainIncludesPerson', 'where.endDate' (used to provide a snapshot of chains until the specified end date) queries and filter.includeContacts (default false)."
         }
       ],
       "returns": [
@@ -4527,7 +4527,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a (full) relationship filter on 'relationship' property of the filter."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a 'where.relationship' query."
         }
       ],
       "returns": [
@@ -4557,7 +4557,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a (full) relationship filter on 'relationship' property of the filter."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts 'where.relationship' query."
         }
       ],
       "returns": [
