@@ -221,8 +221,9 @@ const deletePaginationFilterFromContext = function (context) {
  * Convert a include query to a filter query
  * @param filter
  * @param queryMap
+ * @param filterParentOnly
  */
-function convertIncludeQueryToFilterQuery(filter, queryMap = {}) {
+function convertIncludeQueryToFilterQuery(filter, queryMap = {}, filterParentOnly = true) {
   // start with an empty list of filters
   let filters = {};
   // if relations should be included
@@ -239,7 +240,7 @@ function convertIncludeQueryToFilterQuery(filter, queryMap = {}) {
         typeof include === 'object' &&
         include.relation &&
         include.scope &&
-        include.scope.filterParent
+        (filterParentOnly && include.scope.filterParent || !filterParentOnly)
       ) {
         // filter name is relation name, by default
         let filterName = include.relation;

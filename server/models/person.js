@@ -451,6 +451,9 @@ module.exports = function (Person) {
       }
       // Avoid making secondary request to DB by using a collection of locations instead of an array of locationIds
       app.models.location.getSubLocationsWithDetails(outbreakLocations, [], function (error, allLocations) {
+        if (error) {
+          reject(error);
+        }
         let allLocationIds = allLocations.map(location => location.id);
 
         // ReportingGeographicalLevelId should be required in the model schema as well but it is not yet implemented
@@ -462,10 +465,12 @@ module.exports = function (Person) {
           }));
         }
 
+        let _filter;
+
         // Get all locations that are part of the outbreak's location hierarchy and have the
         // same location level as the outbreak
-        app.models.location.find({
-          where: {
+        app.models.location
+          .rawFind({
             and: [
               {
                 id: {
@@ -476,8 +481,7 @@ module.exports = function (Person) {
                 geographicalLevelId: outbreak.reportingGeographicalLevelId
               }
             ]
-          }
-        })
+          })
           .then((reportingLocations) => {
             let reportingLocationIds = reportingLocations.map(location => location.id);
             let locationHierarchy = app.models.location.buildHierarchicalLocationsList(allLocations);
@@ -488,7 +492,7 @@ module.exports = function (Person) {
 
             // Start building the peopleDistribution object by adding all reporting locations
             reportingLocations.forEach((location) => {
-              peopleDistribution[location.id] = {location: location.toJSON(), people: []};
+              peopleDistribution[location.id] = {location: location, people: []};
             });
 
             // Link lower level locations to their reporting location parent
@@ -531,53 +535,81 @@ module.exports = function (Person) {
                       }
                     }
                   }
-                },
-                order: 'followUp.endDate DESC'
+                }
               };
             }
             // Merge the additional filter with the filter provided by the user
-            let _filter = app.utils.remote.mergeFilters(additionalFilter, filter || {});
+            _filter = app.utils.remote.mergeFilters(additionalFilter, filter || {});
 
-            return app.models[personModel].find(_filter)
+            return app.models[personModel].rawFind(_filter.where, {order: {'followUp.endDate': -1}})
               .then(people => [people, locationCorelationMap, peopleDistribution, _filter]);
           })
           .then((results) => {
             let locationCorelationMap = results[1];
             let peopleDistribution = results[2];
-            let people = [];
 
-            // We do not apply filterParent logic to contacts because we are interested in the total number of contacts,
-            // whether they have follow-ups or not.
-            if (personModel === 'case') {
-              people = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(results[0], results[3]);
-            } else {
-              // We force the contacts to be regular objects for easier processing in the future.
-              // Cases does not required this step since "deepSearchByRelationProperty" covers this step
-              people = results[0].map((contact) => {
-                return contact.toJSON();
+            return new Promise(function (resolve) {
+              // We do not apply filterParent logic to contacts because we are interested in the total number of contacts,
+              // whether they have follow-ups or not.
+              if (personModel === 'case') {
+                resolve(app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(results[0], results[3]));
+              } else {
+                // build a map of people
+                let peopleMap = {};
+                results[0].forEach(function (person) {
+                  peopleMap[person.id] = person;
+                  person.followUps = [];
+                });
+
+                // get follow-up query
+                let query = app.utils.remote.searchByRelationProperty
+                  .convertIncludeQueryToFilterQuery(_filter, {}, false);
+
+                // find followUps for those people
+                return app.models.followUp
+                  .rawFind({
+                    and: [
+                      {
+                        personId: {
+                          inq: Object.keys(peopleMap)
+                        },
+                        outbreakId: outbreak.id,
+                      },
+                      query.followUps
+                    ]
+                  })
+                  .then(function (followUps) {
+                    // map follow-ups back to people
+                    followUps.forEach(function (followUp) {
+                      peopleMap[followUp.personId].followUps.push(followUp);
+                    });
+                    // return the list of people
+                    resolve(Object.values(peopleMap));
+                  });
+              }
+            })
+              .then(function (people) {
+                // Add the people that pass the filter to their relevant reporting level location
+                people.forEach((person) => {
+                  // get current person address
+                  const personCurrentAddress = Person.getCurrentAddress(person);
+                  // define current person location
+                  let personCurrentLocation;
+                  // if the person has a current address
+                  if (personCurrentAddress) {
+                    // get it's location
+                    personCurrentLocation = personCurrentAddress.locationId;
+                  }
+                  // if it has a current location, get it's correlated location
+                  if (personCurrentLocation && locationCorelationMap[personCurrentLocation]) {
+                    peopleDistribution[locationCorelationMap[personCurrentLocation]].people.push(person);
+                  }
+                });
+
+                // After the peopleDistribution object is fully populate it, use only it's values from now on.
+                // The keys were used only to easily distribute the locations/people
+                resolve(Object.values(peopleDistribution).filter(entry => entry.people.length));
               });
-            }
-
-            // Add the people that pass the filter to their relevant reporting level location
-            people.forEach((person) => {
-              // get current person address
-              const personCurrentAddress = Person.getCurrentAddress(person);
-              // define current person location
-              let personCurrentLocation;
-              // if the person has a current address
-              if (personCurrentAddress) {
-                // get it's location
-                personCurrentLocation = personCurrentAddress.locationId;
-              }
-              // if it has a current location, get it's correlated location
-              if (personCurrentLocation && locationCorelationMap[personCurrentLocation]) {
-                peopleDistribution[locationCorelationMap[personCurrentLocation]].people.push(person);
-              }
-            });
-
-            // After the peopleDistribution object is fully populate it, use only it's values from now on.
-            // The keys were used only to easily distribute the locations/people
-            resolve(Object.values(peopleDistribution).filter(entry => entry.people.length));
           })
           .catch(error);
       });
