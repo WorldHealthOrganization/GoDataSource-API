@@ -18,7 +18,8 @@
     "ConvertNestedGeoPoints": true,
     "DateProperty": true,
     "RawFind": true,
-    "RawBulkInsert": true
+    "RawBulkInsert": true,
+    "RawBulkDelete": true
   },
   "replaceOnPUT": false,
   "properties": {

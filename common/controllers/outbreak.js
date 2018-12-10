@@ -1034,7 +1034,9 @@ module.exports = function (Outbreak) {
             return FollowupGeneration
               .getContactFollowups(contacts.map(c => c.id))
               .then((followUpGroups) => {
-                let followUpsToAdd = [];
+                // create a promise queue for handling database operations
+                const promiseQueue = FollowupGeneration.createPromiseQueue(options);
+
                 let pool = new PromisePool(
                   contacts.map((contact) => {
                     contact.followUpsList = followUpGroups[contact.id] || [];
@@ -1044,7 +1046,8 @@ module.exports = function (Outbreak) {
                         contact.eligibleTeams = eligibleTeams;
                       })
                       .then(() => {
-                        followUpsToAdd.push(...FollowupGeneration.generateFollowupsForContact(
+                        // it returns a list of follow ups objects to insert and a list of ids to remove
+                        let generateResult = FollowupGeneration.generateFollowupsForContact(
                           contact,
                           contact.eligibleTeams,
                           {
@@ -1055,21 +1058,23 @@ module.exports = function (Outbreak) {
                           outbreakFollowUpPerDay,
                           targeted,
                           contact.inconclusive
-                        ));
+                        );
+
+                        promiseQueue.addFollowUps(generateResult.add);
+                        promiseQueue.removeFollowUps(generateResult.remove);
                       });
                   }),
                   100 // concurrency limit
                 );
+
                 let poolPromise = pool.start();
 
-                return poolPromise.then(() => {
-                  if (followUpsToAdd.length) {
-                    return app.models.followUp
-                      .rawBulkInsert(followUpsToAdd, null, options)
-                      .then(result => result.insertedCount);
-                  }
-                  return 0;
-                });
+                return poolPromise
+                  // make sure the queue has emptied
+                  .then(() => promiseQueue.internalQueue.onIdle())
+                  // settle any remaining items that didn't reach the batch size
+                  .then(() => promiseQueue.settleRemaining())
+                  .then(() => promiseQueue.insertedCount());
               });
           });
       })
@@ -7723,6 +7728,145 @@ module.exports = function (Outbreak) {
 
         app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, filter.where, exportType, 'Contacts List', encryptPassword, anonymizeFields, options, callback);
       })
+      .catch(callback);
+  };
+
+  /**
+   * Count contacts that are on the follow up list when generating
+   * Also custom filtered
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountContactsOnFollowUpList = function (filter = { where: {} }, callback) {
+    // defensive checks
+    let startDate = genericHelpers.getDate().toDate();
+    let endDate = genericHelpers.getDateEndOfDay().toDate();
+    if (filter.where.startDate) {
+      startDate = genericHelpers.getDate(filter.where.startDate).toDate();
+      delete filter.where.startDate;
+    }
+    if (filter.where.endDate) {
+      endDate = genericHelpers.getDateEndOfDay(filter.where.endDate).toDate();
+      delete filter.where.endDate;
+    }
+
+    // merge filter props from request with the built-in filter
+    // there is no way to reuse the filter from follow up generation filter
+    // this is slightly modified to accustom the needs and also inconclusive/valid contacts are merged in one op here
+    const mergedFilter = app.utils.remote.mergeFilters({
+      where: {
+        outbreakId: this.id,
+        followUp: {
+          $ne: null
+        },
+        $or: [
+          {
+            // eligible for follow ups
+            $and: [
+              {
+                $or: [
+                  {
+                    // follow up period is inside contact's follow up period
+                    $and: [
+                      {
+                        'followUp.startDate': {
+                          $lte: startDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          $gte: endDate
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    // period starts before contact's start date but ends before contact's end date
+                    $and: [
+                      {
+                        'followUp.startDate': {
+                          $gte: startDate
+                        }
+                      },
+                      {
+                        'followUp.startDate': {
+                          $lte: endDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          $gte: endDate
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    // period starts before contact's end date and after contact's start date
+                    // but stops after contact's end date
+                    $and: [
+                      {
+                        'followUp.startDate': {
+                          $lte: startDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          $gte: startDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          $lte: endDate
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    // contact's period is inside follow up period
+                    $and: [
+                      {
+                        'followUp.startDate': {
+                          $gte: startDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          $gte: startDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          $lte: endDate
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            // inconclusive follow up period
+            $and: [
+              {
+                'followUp.endDate': {
+                  $lt: startDate
+                }
+              },
+              {
+                'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
+              }
+            ]
+          }
+        ]
+
+      }
+    }, filter);
+
+    // get contacts that are available for follow up generation
+    app.models.contact
+      .rawFind(mergedFilter.where, { projection: { '_id': 1 } })
+      .then((ids) => callback(null, ids.length, ids.map(obj => obj.id)))
       .catch(callback);
   };
 };

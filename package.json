@@ -39,6 +39,7 @@
     "loopback-connector-mongodb": "3.8.0",
     "mkdirp": "0.5.1",
     "moment": "2.22.2",
+    "p-queue": "^3.0.0",
     "parse": "2.1.0",
     "pdfkit": "0.8.3",
     "qr-image": "3.2.0",
