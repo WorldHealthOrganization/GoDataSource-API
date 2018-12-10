@@ -278,7 +278,7 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
         // used to easily trace all follow ups for a given outbreak
         outbreakId: contact.outbreakId,
         personId: contact.id,
-        date: followUpDate.toDate().toISOString(),
+        date: followUpDate.toDate(),
         targeted: targeted,
         // split the follow ups work equally across teams
         teamId: RoundRobin(teams),
