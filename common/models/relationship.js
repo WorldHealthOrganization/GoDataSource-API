@@ -131,21 +131,20 @@ module.exports = function (Relationship) {
             peopleIds.push(person.id);
           });
         });
-
+        // get person query from include filters
+        let personQuery = app.utils.remote.searchByRelationProperty.convertIncludeQueryToFilterQuery(filter).people;
         // use raw queries for related people
         return app.models.person
           .rawFind(
-            app.utils.remote.convertLoopbackFilterToMongo(
-              app.utils.remote.mergeFilters(
-                _.get(filter, 'include.0.scope'),
-                {
-                  where: {
-                    id: {
-                      inq: peopleIds
-                    }
+            app.utils.remote.mergeFilters(
+              personQuery,
+              {
+                where: {
+                  id: {
+                    inq: peopleIds
                   }
-                }).where
-            )
+                }
+              }).where
           )
           .then(function (people) {
             // build a map of people to easily connect them to relations
@@ -155,6 +154,7 @@ module.exports = function (Relationship) {
             });
             // add people to relations
             relationships.forEach(function (relationship) {
+              // add people information to the relationship
               relationship.people = [];
               Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
                 if (peopleMap[person.id]) {
@@ -232,12 +232,57 @@ module.exports = function (Relationship) {
 
     // find relationships
     return Relationship
-      .find(_filter)
+      .rawFind(_filter.where)
       .then(function (relationships) {
-        return app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(relationships, _filter)
-        // some relations may be invalid after applying scope filtering, remove invalid ones
-          .filter(function (relationship) {
-            return relationship.people.length === 2;
+        // build a list of people ids that are part of found relationships
+        let peopleIds = [];
+        // go through the relationships
+        relationships.forEach(function (relationship) {
+          // go through the people of the relationship
+          Array.isArray(relationship.people) && relationship.people.forEach(function (person) {
+            // store person id
+            peopleIds.push(person.id);
+          });
+        });
+        // get person query from the include filter
+        let personQuery = app.utils.remote.searchByRelationProperty.convertIncludeQueryToFilterQuery(_filter).people;
+        // find people involved in the relationships
+        return app.models.person
+          .rawFind({
+            $and: [
+              personQuery,
+              {
+                type: {
+                  $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+                },
+                _id: {
+                  $in: peopleIds
+                }
+              }]
+          })
+          .then(function (people) {
+            // build a map of people ids to person, to easily reference them in relationships
+            const peopleIdsMap = {};
+            people.forEach(function (person) {
+              peopleIdsMap[person.id] = person;
+            });
+            // keep only valid relationships (both people passed the filters)
+            return relationships.filter(function (relationship) {
+              // assume the relationship is valid
+              let isValid = true;
+              // add people information to it
+              relationship.people = [];
+              relationship.persons.forEach(function (person) {
+                // if one of the people is not found
+                if (!peopleIdsMap[person.id]) {
+                  // relationship is invalid
+                  isValid = false;
+                } else {
+                  relationship.people.push(peopleIdsMap[person.id]);
+                }
+              });
+              return isValid;
+            });
           });
       });
   };
@@ -288,15 +333,15 @@ module.exports = function (Relationship) {
     return app.models.relationship
       .rawFind(
         app.utils.remote.convertLoopbackFilterToMongo(
-        app.utils.remote.mergeFilters({
-          where: {
-            outbreakId: outbreakId,
-            and: [
-              {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'},
-              {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'}
-            ]
-          }
-        }, filter || {})).where
+          app.utils.remote.mergeFilters({
+            where: {
+              outbreakId: outbreakId,
+              and: [
+                {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'},
+                {'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'}
+              ]
+            }
+          }, filter || {})).where
       )
       .then(function (relationships) {
 
@@ -499,67 +544,6 @@ module.exports = function (Relationship) {
       })
       .catch(callback);
   });
-
-
-  /**
-   * Find chains of relations that include the specified people ids. Chains of relations mean all relations of the
-   * people specified in the peopleIds, and the relations of their related people, and so on until no more relations found (chain is completed)
-   * @param outbreakId
-   * @param peopleIds
-   * @param foundRelationshipIds
-   * @return {*|PromiseLike<T | never>|Promise<T | never>}
-   */
-  Relationship.findRelationshipChainsForPeopleIds = function (outbreakId, peopleIds, foundRelationshipIds = []) {
-    // define a relationships map (indexed list of relationship ids)
-    const relationshipMap = {};
-    // find all relations that were not previously found that match the criteria
-    return Relationship
-      .find({
-        fields: ['id', 'persons'],
-        where: {
-          'persons.id': {
-            inq: peopleIds
-          },
-          outbreakId: outbreakId,
-          id: {
-            nin: foundRelationshipIds
-          }
-        }
-      })
-      .then(function (relationships) {
-        // keep a list of new people
-        const newPeopleIds = [];
-        // if new relationships found
-        if (relationships.length) {
-          // go through all relationships
-          relationships.forEach(function (relationship) {
-            // map relationship as found
-            relationshipMap[relationship.id] = true;
-            // get people ids
-            if (Array.isArray(relationship.persons)) {
-              relationship.persons.forEach(function (person) {
-                // don't include people already included in previous search
-                if (!peopleIds.includes(person.id)) {
-                  newPeopleIds.push(person.id);
-                }
-              });
-            }
-          });
-          // find all relationships of the related people (that were not found previously)
-          return Relationship
-            .findRelationshipChainsForPeopleIds(outbreakId, newPeopleIds, [...foundRelationshipIds, ...Object.keys(relationshipMap)])
-            .then(function (foundRelationshipMap) {
-              Object.assign(relationshipMap, foundRelationshipMap);
-              // return the complete map of relationships
-              return relationshipMap;
-            });
-          // no more new relationships found
-        } else {
-          // return the list
-          return relationshipMap;
-        }
-      });
-  };
 
   /**
    * Find or count relationship exposures or contacts for a relationship

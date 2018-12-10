@@ -423,11 +423,11 @@ module.exports = function (Contact) {
                   });
                   // update contact query to include contact ids
                   contactQuery = {
-                    $and: [
+                    and: [
                       contactQuery,
                       {
-                        _id: {
-                          $in: contactIds
+                        id: {
+                          inq: contactIds
                         }
                       }
                     ]
@@ -464,11 +464,11 @@ module.exports = function (Contact) {
             .then(function (followUps) {
               // update contact query to include found contacts
               contactQuery = {
-                $and: [
+                and: [
                   contactQuery,
                   {
-                    _id: {
-                      $in: followUps.map(followUp => followUp.personId)
+                    id: {
+                      inq: followUps.map(followUp => followUp.personId)
                     }
                   }
                 ]
@@ -480,7 +480,7 @@ module.exports = function (Contact) {
       .then(function () {
         // restrict contacts query to current outbreak
         contactQuery = {
-          $and: [
+          and: [
             contactQuery,
             {
               outbreakId: outbreak.id

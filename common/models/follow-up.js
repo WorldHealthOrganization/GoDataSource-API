@@ -371,7 +371,7 @@ module.exports = function (FollowUp) {
   /**
    * Pre-filter follow-ups for an outbreak using related models (case, contact)
    * @param outbreak
-   * @param filter Supports 'where.contact', 'where.case' MongoDB compatible queries
+   * @param filter Supports 'where.contact', 'where.case' MongoDB compatible queries, 'where.timeLastSeen', 'where.weekNumber' queries
    * @return {Promise<void | never>}
    */
   FollowUp.preFilterForOutbreak = function (outbreak, filter) {
@@ -388,6 +388,18 @@ module.exports = function (FollowUp) {
     // if found, remove it form main query
     if (contactQuery) {
       delete filter.where.contact;
+    }
+    // get time last seen, if any
+    let timeLastSeen = _.get(filter, 'where.timeLastSeen');
+    // if found, remove it form main query
+    if (timeLastSeen != null) {
+      delete filter.where.timeLastSeen;
+    }
+    // get week number, if any
+    let weekNumber = _.get(filter, 'filter.weekNumber');
+    // if found, remove it form main query
+    if (weekNumber != null) {
+      delete filter.where.weekNumber;
     }
     // get main followUp query
     let followUpQuery = _.get(filter, 'where', {});
@@ -438,6 +450,39 @@ module.exports = function (FollowUp) {
             });
         });
     }
+    // if time last seen filter is present
+    if (timeLastSeen != null) {
+      buildQuery = buildQuery
+        .then(function () {
+          // find people that were seen pass the specified date
+          return app.models.followUp
+            .rawFind({
+              outbreakId: outbreak.id,
+              performed: true,
+              date: {
+                $gt: timeLastSeen
+              }
+            }, {
+              projection: {personId: 1}
+            })
+            .then(function (followUps) {
+              if (!contactQuery) {
+                contactQuery = {};
+              }
+              // update contact query to exclude those people
+              contactQuery = {
+                $and: [
+                  contactQuery,
+                  {
+                    _id: {
+                      $nin: followUps.map(followUp => followUp.personId)
+                    }
+                  }
+                ]
+              };
+            });
+        });
+    }
     return buildQuery
       .then(function () {
         // if contact Ids were specified
@@ -475,11 +520,11 @@ module.exports = function (FollowUp) {
             .then(function (contacts) {
               // update follow-up query, restrict it to the list of contacts found
               followUpQuery = {
-                $and: [
+                and: [
                   followUpQuery,
                   {
                     personId: {
-                      $in: contacts.map(contact => contact.id)
+                      inq: contacts.map(contact => contact.id)
                     }
                   }
                 ]
@@ -490,13 +535,22 @@ module.exports = function (FollowUp) {
       .then(function () {
         // restrict follow-up query to current outbreak
         followUpQuery = {
-          $and: [
+          and: [
             followUpQuery,
             {
               outbreakId: outbreak.id
             }
           ]
         };
+        // if week number was specified
+        if (weekNumber != null) {
+          // restrict follow-ups to be in the specified week range
+          followUpQuery.and.push({
+            index: {
+              between: [(weekNumber - 1) * 7 + 1, weekNumber * 7]
+            }
+          });
+        }
         // return updated filter
         return Object.assign(filter, {where: followUpQuery});
       });

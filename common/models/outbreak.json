@@ -227,18 +227,6 @@
       "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
-      "property": "__get__cases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "__get__cases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
       "property": "findCases"
     },
     {
@@ -246,18 +234,6 @@
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "findCases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countCases"
     },
     {
       "principalType": "ROLE",
@@ -288,18 +264,6 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__count__cases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "__get__contacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "__get__contacts"
     },
     {
       "principalType": "ROLE",
@@ -827,19 +791,7 @@
       "principalType": "ROLE",
       "principalId": "read_followup",
       "permission": "ALLOW",
-      "property": "__get__followUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
       "property": "findFollowUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "countFollowUps"
     },
     {
       "principalType": "ROLE",
@@ -1125,12 +1077,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "importImportableOutbreaksFileUsingMap"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "countContactsPerLocation"
@@ -1140,12 +1086,6 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "exportFilteredContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "exportFilteredOutbreaks"
     },
     {
       "principalType": "ROLE",
@@ -1235,25 +1175,13 @@
       "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
-      "property": "__get__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__count__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
       "property": "findLabResults"
     },
     {
       "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
-      "property": "countLabResults"
+      "property": "__count__labResults"
     },
     {
       "principalType": "ROLE",
@@ -1344,12 +1272,6 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "countCasesPerClassification"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCasesPerClassificationV2"
     },
     {
       "principalType": "ROLE",
@@ -2506,65 +2428,12 @@
         "path": "/contacts/new-by-exposure-type/count"
       }
     },
-    "prototype.filteredCountCases": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts a `noRelationships` flag on the first level of `where`."
-        }
-      ],
-      "returns": [
-        {
-          "arg": "count",
-          "type": "number",
-          "description": "Number of cases that pass the filter",
-          "required": true
-        }
-      ],
-      "description": "Counts the cases that pass a filter (which now can accept relations)",
-      "http": [
-        {
-          "verb": "get",
-          "path": "/cases/filtered-count"
-        },
-        {
-          "verb": "post",
-          "path": "/cases/filtered-count"
-        }
-      ]
-    },
-    "prototype.__get__cases": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts a `noRelationships` flag on the first level of `where`."
-        }
-      ],
-      "returns": [
-        {
-          "arg": "result",
-          "type": [
-            "case"
-          ],
-          "description": "Cases of an outbreak",
-          "required": true,
-          "root": true
-        }
-      ],
-      "description": "Queries cases of an outbreak",
-      "http": {
-        "verb": "post",
-        "path": "/cases/filter"
-      }
-    },
     "prototype.filteredCountContacts": {
       "accepts": [
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries"
         }
       ],
       "returns": [
@@ -2575,7 +2444,7 @@
           "required": true
         }
       ],
-      "description": "Counts the contacts that pass a filter (which now can accept relations)",
+      "description": "Counts the contacts of an outbreak",
       "http": [
         {
           "verb": "get",
@@ -2586,29 +2455,6 @@
           "path": "/contacts/filtered-count"
         }
       ]
-    },
-    "prototype.__get__contacts": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
-        }
-      ],
-      "returns": [
-        {
-          "arg": "result",
-          "type": ["contact"],
-          "description": "Contacts of an outbreak",
-          "required": true,
-          "root": true
-        }
-      ],
-      "description": "Queries contacts of an outbreak",
-      "http": {
-          "verb": "post",
-          "path": "/contacts/filter"
-        }
     },
     "prototype.filteredCountEvents": {
       "accepts": [
@@ -2777,7 +2623,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a (full) person filter on 'person' and 'chainIncludesPerson' properties of the filter. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a 'where.person', 'where.chainIncludesPerson', 'where.endDate' (used to provide a snapshot of chains until the specified end date), where.includeContacts (default false) queries."
         }
       ],
       "returns": [
@@ -2819,7 +2665,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'active' boolean & 'size' number on the first level in 'where' and a (full) person filter on 'person' and 'chainIncludesPerson' properties of the filter. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'where.active' boolean, 'where.size' number, 'where.person', 'where.chainIncludesPerson', 'where.endDate' (used to provide a snapshot of chains until the specified end date), where.includeContacts (default false) queries."
         }
       ],
       "returns": [
@@ -4363,39 +4209,6 @@
         "path": "/contacts/import-importable-file-using-map"
       }
     },
-    "importImportableOutbreaksFileUsingMap": {
-      "accepts": [
-        {
-          "arg": "body",
-          "type": "object",
-          "model": "importableFileWithFieldAndReferenceDataMap",
-          "http": {
-            "source": "body"
-          },
-          "root": true
-        },
-        {
-          "arg": "options",
-          "type": "object",
-          "http": "optionsFromRequest"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "cases",
-          "type": [
-            "case"
-          ],
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Import a list of outbreaks from a file that was previously uploaded as an importable file",
-      "http": {
-        "verb": "post",
-        "path": "/import-importable-file-using-map"
-      }
-    },
     "prototype.countContactsPerLocation": {
       "accepts": [
         {
@@ -4522,73 +4335,6 @@
       "http": {
         "verb": "get",
         "path": "/contacts/export"
-      }
-    },
-    "exportFilteredOutbreaks": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
-        },
-        {
-          "arg": "type",
-          "type": "string",
-          "enum": [
-            "json",
-            "xml",
-            "csv",
-            "xls",
-            "xlsx",
-            "ods",
-            "pdf"
-          ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
-        },
-        {
-          "arg": "encryptPassword",
-          "type": "string",
-          "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
-        },
-        {
-          "arg": "anonymizeFields",
-          "type": [
-            "string"
-          ],
-          "description": "If provided, mentioned fields will be anonymized in the exported file"
-        },
-        {
-          "arg": "options",
-          "type": "object",
-          "http": "optionsFromRequest"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "body",
-          "type": "file",
-          "root": true,
-          "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        }
-      ],
-      "description": "Export filtered list of outbreaks",
-      "http": {
-        "verb": "get",
-        "path": "/export"
       }
     },
     "prototype.exportFilteredContactFollowUps": {
@@ -4742,7 +4488,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a (full) relationship filter on 'relationship' property of the filter."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a 'where.relationship' query."
         }
       ],
       "returns": [
@@ -4772,7 +4518,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a (full) relationship filter on 'relationship' property of the filter."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts 'where.relationship' query."
         }
       ],
       "returns": [
@@ -4789,12 +4535,37 @@
         "path": "/clusters/:fk/people/count"
       }
     },
+    "prototype.findFollowUps": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact', 'where.case' MongoDB compatible queries, where.timeLastSeen', 'where.weekNumber' queries"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "followUps",
+          "type": [
+            "followUp"
+          ],
+          "description": "List of followUps that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries followUps of outbreak.",
+      "http": {
+        "verb": "get",
+        "path": "/followUps"
+      }
+    },
     "prototype.filteredCountFollowUps": {
       "accepts": [
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact', 'where.case' MongoDB compatible queries, where.timeLastSeen', 'where.weekNumber' queries"
         }
       ],
       "returns": [
@@ -5152,12 +4923,37 @@
         "path": "/events/:nk/contacts"
       }
     },
+    "prototype.findLabResults": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "labResults",
+          "type": [
+            "labResult"
+          ],
+          "description": "List of labResults that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries labResults of outbreak.",
+      "http": {
+        "verb": "get",
+        "path": "/labResults"
+      }
+    },
     "prototype.filteredCountLabResults": {
       "accepts": [
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
         }
       ],
       "returns": [
@@ -5168,7 +4964,7 @@
           "required": true
         }
       ],
-      "description": "Counts the lab results that pass a filter (which now can accept relations)",
+      "description": "Counts the lab results that pass a filter",
       "http": {
         "verb": "get",
         "path": "/lab-results/filtered-count"
@@ -5581,43 +5377,6 @@
         "path": "/cases/per-classification/count"
       }
     },
-    "prototype.countCasesPerClassificationV2": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: it supports same filters as GET /outbreak/:id/cases"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "count",
-          "type": {
-            "classification": {
-              "type": {
-                "<caseClassification>": {
-                  "type": {
-                    "count": "number",
-                    "caseIDs": [
-                      "string"
-                    ]
-                  }
-                }
-              }
-            },
-            "count": "number"
-          },
-          "description": "Number of cases grouped by case classification",
-          "required": true,
-          "root": true
-        }
-      ],
-      "description": "Counts the number of cases grouped by case classification",
-      "http": {
-        "verb": "get",
-        "path": "/cases/v2/per-classification/count"
-      }
-    },
     "prototype.countContactsPerRiskLevel": {
       "accepts": [
         {
@@ -5660,7 +5419,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: it supports same filters as GET /outbreak/:id/contacts"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries"
         }
       ],
       "returns": [
@@ -6131,106 +5890,12 @@
         "path": "/people"
       }
     },
-    "prototype.findFollowUps": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact', 'where.case' MongoDB compatible queries"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "followUps",
-          "type": [
-            "followUp"
-          ],
-          "description": "List of followUps that match the search criteria",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Queries followUps of outbreak.",
-      "http": {
-        "verb": "get",
-        "path": "/followUps/v2"
-      }
-    },
-    "prototype.countFollowUps": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact', 'where.case' MongoDB compatible queries"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "count",
-          "type": "number",
-          "description": "Number of followUps that match the search criteria",
-          "required": true
-        }
-      ],
-      "description": "Counts followUps of outbreak.",
-      "http": {
-        "verb": "get",
-        "path": "/followUps/v2/count"
-      }
-    },
-    "prototype.findLabResults": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "labResults",
-          "type": [
-            "labResult"
-          ],
-          "description": "List of labResults that match the search criteria",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Queries labResults of outbreak.",
-      "http": {
-        "verb": "get",
-        "path": "/labResults/v2"
-      }
-    },
-    "prototype.countLabResults": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "count",
-          "type": "number",
-          "description": "Number of lab results that match the search criteria",
-          "required": true
-        }
-      ],
-      "description": "Counts lab results of outbreak.",
-      "http": {
-        "verb": "get",
-        "path": "/labResults/v2/count"
-      }
-    },
     "prototype.findCases": {
       "accepts": [
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship' MongoDB compatible queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship' MongoDB compatible queries and 'where.noRelationships' query"
         }
       ],
       "returns": [
@@ -6245,17 +5910,23 @@
         }
       ],
       "description": "Queries cases of outbreak.",
-      "http": {
-        "verb": "get",
-        "path": "/cases/v2"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/cases"
+        },
+        {
+          "verb": "post",
+          "path": "/cases/filter"
+        }
+      ]
     },
-    "prototype.countCases": {
+    "prototype.filteredCountCases": {
       "accepts": [
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship' MongoDB compatible queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship' MongoDB compatible queries and 'where.noRelationships' query"
         }
       ],
       "returns": [
@@ -6267,10 +5938,16 @@
         }
       ],
       "description": "Counts cases of outbreak.",
-      "http": {
-        "verb": "get",
-        "path": "/cases/v2/count"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/cases/filtered-count"
+        },
+        {
+          "verb": "post",
+          "path": "/cases/filtered-count"
+        }
+      ]
     },
     "prototype.findContacts": {
       "accepts": [
@@ -6292,10 +5969,16 @@
         }
       ],
       "description": "Queries contacts of outbreak.",
-      "http": {
-        "verb": "get",
-        "path": "/contacts/v2"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/contacts"
+        },
+        {
+          "verb": "post",
+          "path": "/contacts/filter"
+        }
+      ]
     },
     "prototype.countContacts": {
       "accepts": [
