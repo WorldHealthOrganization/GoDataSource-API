@@ -11,7 +11,6 @@ const SyncClient = require('../../components/syncClient');
 const syncConfig = require('../../server/config.json').sync;
 const asyncActionsSettings = syncConfig.asyncActionsSettings;
 const _ = require('lodash');
-const Moment = require('moment');
 const syncWorker = require('./../../components/workerRunner').sync;
 
 module.exports = function (Sync) {
@@ -112,33 +111,17 @@ module.exports = function (Sync) {
       });
     }
 
-
-    const dbConfig = require('./../../server/datasources').mongoDb;
-    const MongoClient = require('mongodb').MongoClient;
-
-    /**
-     * Create MongoDB connection and return it
-     * @returns {Promise<Db | never>}
-     */
-    function getMongoDBConnection() {
-      return MongoClient
-        .connect(`mongodb://${dbConfig.host}:${dbConfig.port}`)
-        .then(function (client) {
-          return client
-            .db(dbConfig.database)
-        });
-    }
-
-    getMongoDBConnection()
-      .then(function(client) {
-        let a = 2;
-      })
-      .catch(function(err) {
-        let a = 2;
-      });
+    // add filters to options
+    Object.assign(options, {
+      customFilter: customFilter,
+      filter: filter
+    });
 
     // call worker
-    // syncWorker.exportCollections(allCollections, customFilter, filter, done);
+    syncWorker.exportCollections(allCollections, options, function (err, archiveName) {
+      app.logger.debug(`Exported database at '${archiveName}'`);
+      return done(err, archiveName);
+    });
   };
 
   /**

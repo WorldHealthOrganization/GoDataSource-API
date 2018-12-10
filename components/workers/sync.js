@@ -4,26 +4,81 @@ const MongoClient = require('mongodb').MongoClient;
 const async = require('async');
 const tmp = require('tmp');
 const archiver = require('archiver');
+const fs = require('fs');
+const Moment = require('moment');
+const path = require('path');
 
-const logger = console;//require('./../logger');
-const dbSync = require('../dbSync');
+const logger = require('./../logger');
+const dbSync = require('./../dbSync');
+const workerRunner = require('./../workerRunner');
 const dbConfig = require('./../../server/datasources').mongoDb;
+
+/**
+ * Create ZIP archive of a file/dir
+ * @param fileName
+ * @param archiveName
+ * @param logger
+ * @returns {Promise<any>}
+ */
+function createZipArchive(fileName, archiveName, logger) {
+  return new Promise(function (resolve, reject) {
+    // compress all collection files from the tmp dir into .zip file
+    logger.debug(`Creating zip file`);
+    let output = fs.createWriteStream(archiveName);
+    let archive = archiver('zip');
+
+    // listen for all archive data to be written
+    // 'close' event is fired only when a file descriptor is involved
+    output.on('close', function () {
+      // log archive name location
+      logger.debug(`Archive created at '${archiveName}'. Size: ${archive.pointer()} bytes'`);
+      resolve(archiveName);
+    });
+
+    // good practice to catch warnings (ie stat failures and other non-blocking errors)
+    archive.on('warning', function (err) {
+      logger.debug('Archive warning' + err);
+    });
+
+    // good practice to catch this error explicitly
+    archive.on('error', function (err) {
+      logger.debug('Archive error' + err);
+      reject(err);
+    });
+
+    // pipe archive data to the file
+    archive.pipe(output);
+
+    if (fs.statSync(fileName).isDirectory()) {
+      // append files from a sub-directory, putting its contents at the root of archive
+      archive.directory(fileName, false);
+    } else {
+      // archive given file
+      archive.file(fileName, {name: path.basename(fileName)});
+    }
+
+    // finalize the archive (ie we are done appending files but streams have to finish yet)
+    archive.finalize();
+  });
+}
 
 /**
  * Create MongoDB connection and return it
  * @returns {Promise<Db | never>}
  */
 function getMongoDBConnection() {
-  logger.info('aaaaaa');
-  return MongoClient
-    .connect(`${dbConfig.host}:${dbConfig.port}`, {
+  let mongoOptions = {};
+  if (dbConfig.password) {
+    mongoOptions = {
       auth: {
         user: dbConfig.user,
         password: dbConfig.password
       }
-    })
+    };
+  }
+  return MongoClient
+    .connect(`mongodb://${dbConfig.host}:${dbConfig.port}`, mongoOptions)
     .then(function (client) {
-      logger.info('bbbbb');
       return client
         .db(dbConfig.database)
     });
@@ -37,10 +92,12 @@ function getMongoDBConnection() {
  * @param filter
  * @param batchSize
  * @param tmpDirName
+ * @param archivesDirName
+ * @param options
  * @param callback
  * @returns {Promise<any>}
  */
-function exportCollectionInBatches(dbConnection, mongoCollectionName, collectionName, filter, batchSize, tmpDirName, callback) {
+function exportCollectionInBatches(dbConnection, mongoCollectionName, collectionName, filter, batchSize, tmpDirName, archivesDirName, options, callback) {
   /**
    * Get next batch from collection
    * @param skip
@@ -59,30 +116,58 @@ function exportCollectionInBatches(dbConnection, mongoCollectionName, collection
     cursor
       .toArray()
       .then(function (records) {
-        if (records && records.length) {
-          // export related files
-          // if collection is not supported, it will be skipped
-          dbSync.exportCollectionRelatedFiles(collectionName, records, tmpDirName, logger, (err) => {
-            if (err) {
-              logger.debug(`Collection '${collectionName}' related files export failed. Error: ${err}`);
-              return callback(err);
-            }
-            // create a file with collection name as file name, containing results
-            fs.writeFile(`${tmpDirName}/${collectionName}.${batchNumber}.json`, JSON.stringify(records, null, 2), function () {
-              if (records.length < batchSize) {
-                logger.debug(`Collection '${collectionName}' export success.`);
-                return callback();
-                // finish
-              } else {
-                logger.debug(`Exported batch ${batchNumber} of collection '${collectionName}'.`);
-                getNextBatch(skip + batchSize);
-              }
-            });
-          });
-        } else {
+        // check if records were returned; consider collection finished if no records
+        if (!records || !records.length) {
           logger.debug(`Collection '${collectionName}' export success.`);
-          callback();
+          return callback();
         }
+
+        // export related files
+        // if collection is not supported, it will be skipped
+        dbSync.exportCollectionRelatedFiles(collectionName, records, tmpDirName, logger, (err) => {
+          if (err) {
+            logger.debug(`Collection '${collectionName}' related files export failed. Error: ${err}`);
+            return callback(err);
+          }
+
+          let fileName = `${collectionName}.${batchNumber}.json`;
+          let filePath = `${tmpDirName}/${fileName}`;
+
+          // create a file with collection name as file name, containing results
+          fs.writeFile(filePath, JSON.stringify(records, null, 2), function () {
+            // archive file
+            let archiveFileName = `${archivesDirName}/${fileName}.zip`;
+            createZipArchive(filePath, archiveFileName, logger)
+              .then(function () {
+                // encrypt archived file if needed
+                if (options.password) {
+                  // password provided, encrypt archive
+                  logger.debug(`Encrypting '${archiveFileName}'.`);
+                  return workerRunner
+                    .helpers
+                    .encryptFile(options.password, {}, archiveFileName);
+                } else {
+                  // no password provided, return file path as is
+                  return Promise.resolve()
+                }
+              })
+              .then(function () {
+                if (records.length < batchSize) {
+                  // finish
+                  logger.debug(`Collection '${collectionName}' export success.`);
+                  return callback();
+                } else {
+                  // continue with next batch
+                  logger.debug(`Exported batch ${batchNumber} of collection '${collectionName}'.`);
+                  return getNextBatch(skip + batchSize);
+                }
+              })
+              .catch(function (err) {
+                logger.debug(`Failed to export batch ${batchNumber} of collection '${collectionName}': ${err}`);
+                return callback(err);
+              });
+          });
+        });
       })
       .catch(function (err) {
         logger.debug(`Collection '${collectionName}' export failed. Error: ${err}`);
@@ -98,19 +183,31 @@ const worker = {
   /**
    * Export collections and create ZIP file
    * @param collections
-   * @param customFilter
-   * @param filter
+   * @param options Includes customFilter, filter, password
    * @returns {Promise<any | never>}
    */
-  exportCollections: function (collections, customFilter, filter) {
+  exportCollections: function (collections, options) {
     // initialize mongodb connection
     return getMongoDBConnection()
       .then(function (dbConnection) {
         return new Promise(function (resolve, reject) {
-          // create a temporary directory to store the database files
-          // it always created the folder in the system temporary directory
-          let tmpDir = tmp.dirSync();
-          let tmpDirName = tmpDir.name;
+          let tmpDir, tmpDirName, archivesDirName;
+
+          try {
+            // create a temporary directory to store the database files
+            // it always created the folder in the system temporary directory
+            tmpDir = tmp.dirSync();
+            tmpDirName = tmpDir.name;
+            // also create an archives subdir
+            archivesDirName = `${tmpDirName}/archives`;
+            fs.mkdirSync(archivesDirName);
+          } catch (err) {
+            logger.debug(`Failed creating tmp directories; ${err}`);
+            return reject(err);
+          }
+
+          let customFilter = options.customFilter;
+          let filter = options.filter;
 
           async
             .series(
@@ -122,7 +219,7 @@ const worker = {
                   logger.debug(`Exporting collection: ${collectionName}`);
 
                   // export collection
-                  exportCollectionInBatches(dbConnection, collections[collectionName], collectionName, mongoDBFilter, 1000, tmpDirName, callback);
+                  exportCollectionInBatches(dbConnection, collections[collectionName], collectionName, mongoDBFilter, 1000, tmpDirName, archivesDirName, options, callback);
                 };
               }),
               (err) => {
@@ -133,66 +230,9 @@ const worker = {
                 // archive file name
                 let archiveName = `${tmpDirName}/../snapshot_${Moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
 
-                // compress all collection files from the tmp dir into .zip file
-                logger.debug(`Creating zip file`);
-                let output = fs.createWriteStream(archiveName);
-                let archive = archiver('zip');
-
-                // listen for all archive data to be written
-                // 'close' event is fired only when a file descriptor is involved
-                output.on('close', function () {
-                  logger.debug(archive.pointer() + ' total bytes');
-                  logger.debug('archiver has been finalized and the output file descriptor has closed.');
-                  // log archive name location
-                  logger.debug(`Sync payload created at ${archiveName}`);
-                  resolve();
-                });
-
-                // This event is fired when the data source is drained no matter what was the data source.
-                // It is not part of this library but rather from the NodeJS Stream API.
-                // @see: https://nodejs.org/api/stream.html#stream_event_end
-                output.on('end', function () {
-                  logger.debug('Data has been drained');
-                  reject('err');
-                });
-
-                // good practice to catch warnings (ie stat failures and other non-blocking errors)
-                archive.on('warning', function (err) {
-                  logger.debug('Archive warning' + err);
-                  if (err.code === 'ENOENT') {
-                    // log warning
-                  } else {
-                  }
-                });
-
-                // good practice to catch this error explicitly
-                archive.on('error', function (err) {
-                  logger.debug('Archive error' + err);
-                  reject('err');
-                });
-
-                // pipe archive data to the file
-                archive.pipe(output);
-
-                // append files from a sub-directory, putting its contents at the root of archive
-                archive.directory(tmpDirName, false);
-
-
-                // finalize the archive (ie we are done appending files but streams have to finish yet)
-                // 'close', 'end' or 'finish' may be fired right after calling this method so register to them beforehand
-                archive.finalize();
-
-                // // no password provided, return file path as is
-                // if (!options.password) {
-                //   return done(null, archiveName);
-                // }
-                // // password provided, encrypt archive
-                // return app.utils.fileCrypto
-                //   .encrypt(options.password, {}, archiveName)
-                //   .then(function (archiveName) {
-                //     return done(null, archiveName);
-                //   })
-                //   .catch(done);
+                createZipArchive(archivesDirName, archiveName, logger)
+                  .then(resolve)
+                  .catch(reject);
               }
             );
         });
@@ -202,8 +242,8 @@ const worker = {
 
 process.on('message', function (message) {
   worker[message.fn](...message.args)
-    .then(function () {
-      process.send([null, true]);
+    .then(function (archiveName) {
+      process.send([null, archiveName]);
     })
     .catch(function (error) {
       process.send([error]);

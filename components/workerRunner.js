@@ -28,7 +28,10 @@ function invokeWorkerMethod(workerName, method, args, callback) {
   }
 
   // fork the worker
-  const worker = fork(`${workersPath}/${workerName}`, [], {execArgv: ["--inspect=" + (Math.floor(Math.random()*999 + 9000))], windowsHide: true});
+  const worker = fork(`${workersPath}/${workerName}`, [], {
+    execArgv: [],
+    windowsHide: true
+  });
   // invoke it
   worker.send({fn: method, args});
   // wait for it's response and process it
@@ -108,12 +111,11 @@ module.exports = {
     /**
      * Export collections and create ZIP file
      * @param collections
-     * @param customFilter
-     * @param filter
+     * @param options
      * @returns {Promise<any | never>}
      */
-    exportCollections: function (collections, customFilter, filter, callback) {
-      invokeWorkerMethod('sync', 'exportCollections', [collections, customFilter, filter], callback);
+    exportCollections: function (collections, options, callback) {
+      invokeWorkerMethod('sync', 'exportCollections', [collections, options], callback);
     }
   },
   helpers: {
