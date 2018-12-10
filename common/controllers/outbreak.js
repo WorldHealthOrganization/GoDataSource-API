@@ -1035,7 +1035,7 @@ module.exports = function (Outbreak) {
               .getContactFollowups(contacts.map(c => c.id))
               .then((followUpGroups) => {
                 // create a promise queue for handling database operations
-                const promiseQueue = FollowupGeneration.createDbQueue(options);
+                const promiseQueue = FollowupGeneration.createPromiseQueue(options);
 
                 let pool = new PromisePool(
                   contacts.map((contact) => {

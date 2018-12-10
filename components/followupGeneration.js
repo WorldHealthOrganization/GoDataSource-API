@@ -295,7 +295,13 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
   };
 };
 
-module.exports.createDbQueue = function (reqOpts) {
+/**
+ * Creates a promise queue for handling database operations
+ * This is needed because delete operations with more than 1000 ids in the query will throw an error on the driver
+ * @param reqOpts
+ * @returns {*}
+ */
+module.exports.createPromiseQueue = function (reqOpts) {
   let queue = new PromiseQueue({
     autoStart: true,
     concurrency: 10 // we do 10 parallel operation across the entire app
@@ -331,10 +337,14 @@ module.exports.createDbQueue = function (reqOpts) {
   };
 
   return {
+    // count of follow ups inserted into database
     insertedCount() {
       return count;
     },
+    // internal queue reference, needed to check when the queue is empty
     internalQueue: queue,
+    // adds follow ups into queue to be inserted
+    // if the batch size is not reached it waits
     addFollowUps(items, ignore) {
       if (ignore) {
         queue.add(_insert(items));
@@ -346,6 +356,8 @@ module.exports.createDbQueue = function (reqOpts) {
         }
       }
     },
+    // adds follow ups into remove queue
+    // if the batch size is not reached it waits
     removeFollowUps(items, ignore) {
       if (ignore) {
         queue.add(_remove(items));
@@ -357,6 +369,9 @@ module.exports.createDbQueue = function (reqOpts) {
         }
       }
     },
+    // settle remaining follow ups to be inserted/removed from database
+    // this is needed because at the end there might be follow ups left in the list and the limit is not reached
+    // those should be processed as well
     settleRemaining() {
       // make sure there are not left item to process
       // doing this to avoid case when the number of follow ups didn't reach the treshold
