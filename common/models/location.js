@@ -86,36 +86,51 @@ module.exports = function (Location) {
    * @param callback
    */
   Location.getSubLocationsWithDetails = function (parentLocationsIds, allLocations, callback) {
+    allLocations = allLocations || [];
     // get the location IDs from the allLocations array
     let allLocationsIds = allLocations.map(location => location.id);
 
     // get IDs of the parentLocations that are not in the allLocations array
-    let notRetrievedParentLocationsIds = [];
+    let notRetrievedParentLocationsIds;
     if (Array.isArray(parentLocationsIds)) {
       // get IDs of the parentLocations that are not in the allLocations array
       notRetrievedParentLocationsIds = parentLocationsIds.filter(locationId => allLocationsIds.indexOf(locationId) === -1);
     }
 
+    // do not search for the locations already searched for
+    let query = {
+      id: {
+        nin: allLocationsIds
+      }
+    };
+
+    // include in the search locations that were not already found (if any)
+    if (notRetrievedParentLocationsIds) {
+      if (!query.or) {
+        query.or = [];
+      }
+      query.or.push({
+        id: {
+          inq: notRetrievedParentLocationsIds
+        }
+      });
+    }
+    // include in the search parent locations, if any
+    if (parentLocationsIds) {
+      if (!query.or) {
+        query.or = [];
+      }
+      query.or.push({
+        parentLocationId: {
+          inq: parentLocationsIds
+        }
+      });
+    }
+
     // find not already retrieved parent locations as well as sublocations
     Location
-      .find({
-        where: {
-          or: [
-            {
-              id: {
-                in: notRetrievedParentLocationsIds
-              }
-            },
-            {
-              parentLocationId: {
-                in: parentLocationsIds
-              }
-            }],
-          id: {
-            nin: allLocationsIds
-          }
-        },
-        order: 'name ASC'
+      .rawFind(query, {
+        order: {name: 1}
       })
       .then(function (locations) {
         // if children locations found
@@ -124,7 +139,7 @@ module.exports = function (Location) {
           let foundLocationsIds = [];
           locations.forEach(function (location) {
             // check if the retrieved location is not a searched parent location
-            if (notRetrievedParentLocationsIds.indexOf(location.id) === -1) {
+            if (notRetrievedParentLocationsIds && notRetrievedParentLocationsIds.indexOf(location.id) === -1) {
               // sublocation; avoid loops
               if (allLocationsIds.indexOf(location.id) === -1) {
                 foundLocationsIds.push(location.id);

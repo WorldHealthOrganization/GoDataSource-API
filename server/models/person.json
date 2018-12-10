@@ -124,6 +124,9 @@
       "name": 1,
       "lastName": 1,
       "firstName": 1
+    },
+    "followUp_endDate_index": {
+      "followUp.endDate": 1
     }
   },
   "validations": [],
