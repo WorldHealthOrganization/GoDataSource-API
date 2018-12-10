@@ -7684,6 +7684,8 @@ module.exports = function (Outbreak) {
     }
 
     // merge filter props from request with the built-in filter
+    // there is no way to reuse the filter from follow up generation filter
+    // this is slightly modified to accustom the needs and also inconclusive/valid contacts are merged in one op here
     const mergedFilter = app.utils.remote.mergeFilters({
       where: {
         outbreakId: this.id,
