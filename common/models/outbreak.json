@@ -6227,7 +6227,7 @@
           "required": true
         },
         {
-          "arg": "ids",
+          "arg": "contactIds",
           "type": [
             "string"
           ],
