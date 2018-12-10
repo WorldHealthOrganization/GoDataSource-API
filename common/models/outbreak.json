@@ -6225,12 +6225,20 @@
           "type": "number",
           "description": "Number of contacts (that pass the filter) on the follow up list",
           "required": true
+        },
+        {
+          "arg": "ids",
+          "type": [
+            "string"
+          ],
+          "description": "Ids of contacts (that pass the filter) on the follow up list",
+          "required": true
         }
       ],
       "description": "Counts the contacts that are on the follow up list, that pass a filter.",
       "http": {
         "verb": "get",
-        "path": "/contacts/on-follow-up-list/count"
+        "path": "/contacts/on-follow-up-list"
       }
     }
   }
