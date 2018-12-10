@@ -6225,6 +6225,14 @@
           "type": "number",
           "description": "Number of contacts (that pass the filter) on the follow up list",
           "required": true
+        },
+        {
+          "arg": "contactIds",
+          "type": [
+            "string"
+          ],
+          "description": "Ids of contacts (that pass the filter) on the follow up list",
+          "required": true
         }
       ],
       "description": "Counts the contacts that are on the follow up list, that pass a filter.",

@@ -7684,53 +7684,51 @@ module.exports = function (Outbreak) {
     }
 
     // merge filter props from request with the built-in filter
+    // there is no way to reuse the filter from follow up generation filter
+    // this is slightly modified to accustom the needs and also inconclusive/valid contacts are merged in one op here
     const mergedFilter = app.utils.remote.mergeFilters({
       where: {
-        or: [
+        outbreakId: this.id,
+        followUp: {
+          $ne: null
+        },
+        $or: [
           {
             // eligible for follow ups
-            and: [
+            $and: [
               {
-                outbreakId: this.id
-              },
-              {
-                followUp: {
-                  neq: null
-                }
-              },
-              {
-                or: [
+                $or: [
                   {
                     // follow up period is inside contact's follow up period
-                    and: [
+                    $and: [
                       {
                         'followUp.startDate': {
-                          lte: startDate
+                          $lte: startDate
                         }
                       },
                       {
                         'followUp.endDate': {
-                          gte: endDate
+                          $gte: endDate
                         }
                       }
                     ]
                   },
                   {
                     // period starts before contact's start date but ends before contact's end date
-                    and: [
+                    $and: [
                       {
                         'followUp.startDate': {
-                          gte: startDate
+                          $gte: startDate
                         }
                       },
                       {
                         'followUp.startDate': {
-                          lte: endDate
+                          $lte: endDate
                         }
                       },
                       {
                         'followUp.endDate': {
-                          gte: endDate
+                          $gte: endDate
                         }
                       }
                     ]
@@ -7738,40 +7736,40 @@ module.exports = function (Outbreak) {
                   {
                     // period starts before contact's end date and after contact's start date
                     // but stops after contact's end date
-                    and: [
+                    $and: [
                       {
                         'followUp.startDate': {
-                          lte: startDate
+                          $lte: startDate
                         }
                       },
                       {
                         'followUp.endDate': {
-                          gte: startDate
+                          $gte: startDate
                         }
                       },
                       {
                         'followUp.endDate': {
-                          lte: endDate
+                          $lte: endDate
                         }
                       }
                     ]
                   },
                   {
                     // contact's period is inside follow up period
-                    and: [
+                    $and: [
                       {
                         'followUp.startDate': {
-                          gte: startDate
+                          $gte: startDate
                         }
                       },
                       {
                         'followUp.endDate': {
-                          gte: startDate
+                          $gte: startDate
                         }
                       },
                       {
                         'followUp.endDate': {
-                          lte: endDate
+                          $lte: endDate
                         }
                       }
                     ]
@@ -7782,18 +7780,10 @@ module.exports = function (Outbreak) {
           },
           {
             // inconclusive follow up period
-            and: [
-              {
-                outbreakId: this.id
-              },
-              {
-                followUp: {
-                  neq: null
-                }
-              },
+            $and: [
               {
                 'followUp.endDate': {
-                  lt: startDate
+                  $lt: startDate
                 }
               },
               {
@@ -7808,8 +7798,8 @@ module.exports = function (Outbreak) {
 
     // get contacts that are available for follow up generation
     app.models.contact
-      .count(mergedFilter.where)
-      .then((count) => callback(null, count))
+      .rawFind(mergedFilter.where, { projection: { '_id': 1 } })
+      .then((ids) => callback(null, ids.length, ids.map(obj => obj.id)))
       .catch(callback);
   };
 };
