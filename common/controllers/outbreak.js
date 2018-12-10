@@ -7739,6 +7739,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.filteredCountContactsOnFollowUpList = function (filter = { where: {} }, callback) {
     // defensive checks
+    filter.where = filter.where || {};
     let startDate = genericHelpers.getDate().toDate();
     let endDate = genericHelpers.getDateEndOfDay().toDate();
     if (filter.where.startDate) {
