@@ -501,7 +501,7 @@ module.exports = function (Outbreak) {
         .rawFind({
           outbreakId: context.instance.id,
           'persons.type': type
-        },{
+        }, {
           projection: {persons: 1}
         })
         // build list of people that have relationships in the given outbreak
@@ -730,6 +730,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.helpers.countContactsByFollowUpFilter = function (options, filter, callback) {
+    filter = filter || {};
     // get options
     let resultProperty = options.resultProperty;
 
@@ -740,49 +741,81 @@ module.exports = function (Outbreak) {
       teams: []
     };
 
-    // get all the followups for the filtered period
-    app.models.followUp.find(app.utils.remote
-      .mergeFilters({
-        where: {
-          and: [
-            {
-              outbreakId: options.outbreakId
-            },
-            options.followUpFilter
-          ]
-        }
-      }, filter || {}))
-      .then(function (followups) {
-        // get contact ids (duplicates are removed) from all follow ups
-        results.contactIDs = [...new Set(followups.map((followup) => followup.personId))];
-        results[resultProperty] = results.contactIDs.length;
+    // get contact query, if any
+    let contactQuery = app.utils.remote.searchByRelationProperty
+      .convertIncludeQueryToFilterQuery(filter).contact;
 
-        // initialize map of contacts to not count same contact twice
-        let teams = {};
-
-        followups.forEach(function (followup) {
-          if (teams[followup.teamId]) {
-            if (teams[followup.teamId].contactIDs.indexOf(followup.personId) === -1) {
-              teams[followup.teamId].contactIDs.push(followup.personId);
-            }
-          } else {
-            teams[followup.teamId] = {
-              id: followup.teamId,
-              contactIDs: [followup.personId]
-            };
-          }
+    // by default, find contacts does not perform any action
+    let findContacts = Promise.resolve();
+    // if there is a contact query
+    if (contactQuery) {
+      // find the contacts that match the query
+      findContacts = app.models.contact
+        .rawFind({and:[contactQuery, {outbreakId: options.outbreakId}]}, {projection: {_id: 1}})
+        .then(function (contacts) {
+          // return a list of contact ids
+          return contacts.map(contact => contact.id);
         });
+    }
 
-        // update results.teams; sending array with teams information only for the teams that have contacts
-        results.teams = _.values(teams)
-          .map((teamEntry) => {
-            teamEntry[resultProperty] = teamEntry.contactIDs.length;
-            return teamEntry;
-          })
-          .filter(teamEntry => teamEntry[resultProperty]);
+    // find contacts
+    findContacts
+      .then(function (contactIds) {
+        // build follow-up query
+        let followUpQuery = {
+          where: {
+            and: [
+              {
+                outbreakId: options.outbreakId
+              },
+              options.followUpFilter
+            ]
+          }
+        };
+        // if there were restrictions applied to contacts
+        if (contactIds) {
+          // restrict follow-up query to those contacts
+          followUpQuery.where.and.push({
+            personId: {
+              inq: contactIds
+            }
+          });
+        }
+        // get all the followups for the filtered period
+        return app.models.followUp.rawFind(app.utils.remote
+          .mergeFilters(followUpQuery, filter || {}).where)
+          .then(function (followups) {
+            // get contact ids (duplicates are removed) from all follow ups
+            results.contactIDs = [...new Set(followups.map((followup) => followup.personId))];
+            results[resultProperty] = results.contactIDs.length;
 
-        // send response
-        callback(null, results);
+            // initialize map of contacts to not count same contact twice
+            let teams = {};
+
+            followups.forEach(function (followup) {
+              if (teams[followup.teamId]) {
+                if (teams[followup.teamId].contactIDs.indexOf(followup.personId) === -1) {
+                  teams[followup.teamId].contactIDs.push(followup.personId);
+                }
+              } else {
+                teams[followup.teamId] = {
+                  id: followup.teamId,
+                  contactIDs: [followup.personId]
+                };
+              }
+            });
+
+            // update results.teams; sending array with teams information only for the teams that have contacts
+            results.teams = _.values(teams)
+              .map((teamEntry) => {
+                teamEntry[resultProperty] = teamEntry.contactIDs.length;
+                return teamEntry;
+              })
+              .filter(teamEntry => teamEntry[resultProperty]);
+
+            // send response
+            callback(null, results);
+          });
       })
       .catch(callback);
   };
@@ -800,9 +833,7 @@ module.exports = function (Outbreak) {
       {
         where: {
           outbreakId: outbreak.id,
-          dateBecomeCase: {
-            neq: null
-          }
+          wasContact: true
         },
         fields: ['id', 'relationships', 'dateBecomeCase'],
         include: [
@@ -817,32 +848,56 @@ module.exports = function (Outbreak) {
       };
     // find the cases
     app.models.case
-      .rawFind(_filter.where)
+      .rawFind(_filter.where, {projection: {dateBecomeCase: 1}})
       .then(function (cases) {
-        // remove those without relations
-        cases = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(cases, _filter);
-        // keep a list of relationIds
-        const relationshipIds = [];
-        // go through all the cases
+        // build a case map
+        const caseMap = {};
         cases.forEach(function (caseRecord) {
-          if (Array.isArray(caseRecord.relationships)) {
-            // go trough their relationships
-            caseRecord.relationships.forEach(function (relationship) {
-              // store only the relationships that are newer than their conversion date
-              if ((new Date(relationship.contactDate)) > (new Date(caseRecord.dateBecomeCase))) {
-                relationshipIds.push(relationship.id);
+          caseMap[caseRecord.id] = caseRecord;
+          caseRecord.relationships = [];
+        });
+        // find relationships for those cases
+        return app.models.relationship
+          .rawFind({
+            outbreakId: outbreak.id,
+            'persons.id': {
+              inq: Object.keys(caseMap)
+            }
+          }, {projection: {contactDate: 1}})
+          .then(function (relationships) {
+            // add relationships to cases
+            relationships.forEach(function (relationship) {
+              Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
+                if (caseMap[person.id]) {
+                  caseMap[person.id].relationships.push(relationship);
+                }
+              });
+            });
+            // remove those without relations
+            cases = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(cases, _filter);
+            // keep a list of relationIds
+            const relationshipIds = [];
+            // go through all the cases
+            cases.forEach(function (caseRecord) {
+              if (Array.isArray(caseRecord.relationships)) {
+                // go trough their relationships
+                caseRecord.relationships.forEach(function (relationship) {
+                  // store only the relationships that are newer than their conversion date
+                  if ((new Date(relationship.contactDate)) > (new Date(caseRecord.dateBecomeCase))) {
+                    relationshipIds.push(relationship.id);
+                  }
+                });
               }
             });
-          }
-        });
-        // build/count transmission chains starting from the found relationIds
-        app.models.relationship.buildOrCountTransmissionChains(outbreak.id, outbreak.periodOfFollowup, app.utils.remote.mergeFilters({
-          where: {
-            id: {
-              inq: relationshipIds
-            }
-          }
-        }, filter || {}), countOnly, callback);
+            // build/count transmission chains starting from the found relationIds
+            app.models.relationship.buildOrCountTransmissionChains(outbreak.id, outbreak.periodOfFollowup, app.utils.remote.mergeFilters({
+              where: {
+                id: {
+                  inq: relationshipIds
+                }
+              }
+            }, filter || {}), countOnly, callback);
+          });
       })
       .catch(callback);
   };
