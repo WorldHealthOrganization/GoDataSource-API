@@ -1034,7 +1034,9 @@ module.exports = function (Outbreak) {
             return FollowupGeneration
               .getContactFollowups(contacts.map(c => c.id))
               .then((followUpGroups) => {
-                let followUpsToAdd = [];
+                // create a promise queue for handling database operations
+                const promiseQueue = FollowupGeneration.createPromiseQueue(options);
+
                 let pool = new PromisePool(
                   contacts.map((contact) => {
                     contact.followUpsList = followUpGroups[contact.id] || [];
@@ -1044,7 +1046,8 @@ module.exports = function (Outbreak) {
                         contact.eligibleTeams = eligibleTeams;
                       })
                       .then(() => {
-                        followUpsToAdd.push(...FollowupGeneration.generateFollowupsForContact(
+                        // it returns a list of follow ups objects to insert and a list of ids to remove
+                        let generateResult = FollowupGeneration.generateFollowupsForContact(
                           contact,
                           contact.eligibleTeams,
                           {
@@ -1055,21 +1058,23 @@ module.exports = function (Outbreak) {
                           outbreakFollowUpPerDay,
                           targeted,
                           contact.inconclusive
-                        ));
+                        );
+
+                        promiseQueue.addFollowUps(generateResult.add);
+                        promiseQueue.removeFollowUps(generateResult.remove);
                       });
                   }),
                   100 // concurrency limit
                 );
+
                 let poolPromise = pool.start();
 
-                return poolPromise.then(() => {
-                  if (followUpsToAdd.length) {
-                    return app.models.followUp
-                      .rawBulkInsert(followUpsToAdd, null, options)
-                      .then(result => result.insertedCount);
-                  }
-                  return 0;
-                });
+                return poolPromise
+                  // make sure the queue has emptied
+                  .then(() => promiseQueue.internalQueue.onIdle())
+                  // settle any remaining items that didn't reach the batch size
+                  .then(() => promiseQueue.settleRemaining())
+                  .then(() => promiseQueue.insertedCount());
               });
           });
       })
