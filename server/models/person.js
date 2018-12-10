@@ -558,6 +558,7 @@ module.exports = function (Person) {
                 let peopleMap = {};
                 results[0].forEach(function (person) {
                   peopleMap[person.id] = person;
+                  person.followUps = [];
                 });
 
                 // get follow-up query
@@ -580,9 +581,6 @@ module.exports = function (Person) {
                   .then(function (followUps) {
                     // map follow-ups back to people
                     followUps.forEach(function (followUp) {
-                      if (!peopleMap[followUp.personId].followUps) {
-                        peopleMap[followUp.personId].followUps = [];
-                      }
                       peopleMap[followUp.personId].followUps.push(followUp);
                     });
                     // return the list of people

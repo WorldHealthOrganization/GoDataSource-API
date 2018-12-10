@@ -1243,7 +1243,7 @@ module.exports = function (Outbreak) {
     }
 
     // initialize a person filter (will contain filters applicable on person entity)
-    let personFilter =  _.get(filter, 'where.person');
+    let personFilter = _.get(filter, 'where.person');
     // if person filter was sent
     if (personFilter) {
       // remove original filter
@@ -1775,7 +1775,7 @@ module.exports = function (Outbreak) {
 
     // get all relationships between events and contacts, where the contacts were created sooner than 'noDaysNewContacts' ago
     return app.models.contact
-      .find(_filter)
+      .rawFind(_filter.where)
       .then(function (contacts) {
         return {
           contactsLostToFollowupCount: contacts.length,
@@ -2307,7 +2307,7 @@ module.exports = function (Outbreak) {
     let outbreakId = this.id;
 
     // get all cases that were reported sooner or have 'dateBecomeCase' sooner than 'noDaysAmongContacts' ago
-    app.models.case.find(app.utils.remote
+    app.models.case.rawFind(app.utils.remote
       .mergeFilters({
         where: {
           outbreakId: outbreakId,
@@ -2321,7 +2321,7 @@ module.exports = function (Outbreak) {
             }
           }]
         }
-      }, filter || {})
+      }, filter || {}).where
     )
       .then(function (cases) {
         // initialize result
@@ -2347,6 +2347,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactsNotSeenInXDays = function (filter, callback) {
+    filter = filter || {};
     // initialize noDaysNotSeen filter
     let noDaysNotSeen;
     // check if the noDaysNotSeen filter was sent; accepting it only on the first level
@@ -2367,35 +2368,71 @@ module.exports = function (Outbreak) {
     // get date from noDaysNotSeen days ago
     let xDaysAgo = new Date((new Date()).setHours(0, 0, 0, 0)).setDate(now.getDate() - noDaysNotSeen);
 
-    // get follow-ups
-    app.models.followUp.find(app.utils.remote
-      .mergeFilters({
-        where: {
-          and: [
-            {
-              outbreakId: outbreakId
-            },
-            {
-              // get follow-ups that were scheduled in the past noDaysNotSeen days
-              date: {
-                between: [xDaysAgo, now]
-              }
-            },
-            app.models.followUp.notSeenFilter
-          ]
-        },
-        // order by date as we need to check the follow-ups from the oldest to the most new
-        order: 'date ASC'
-      }, filter || {}))
-      .then(function (followUps) {
-        // get contact ids (duplicates are removed) from all follow ups
-        let contactIDs = [...new Set(followUps.map((followUp) => followUp.personId))];
+    // get contact query
+    let contactQuery = app.utils.remote.searchByRelationProperty
+      .convertIncludeQueryToFilterQuery(filter).contact;
 
-        // send response
-        callback(null, {
-          contactsCount: contactIDs.length,
-          contactIDs: contactIDs
+    // by default, find contacts does not perform any task
+    let findContacts = Promise.resolve();
+    // if a contact query was specified
+    if (contactQuery) {
+      // find the contacts
+      findContacts = app.models.contact
+        .rawFind({
+          and: [
+            {outbreakId: outbreakId},
+            contactQuery
+          ]
+        })
+        .then(function (contacts) {
+          // return a list of contact ids
+          return contacts.map(contact => contact.id);
         });
+    }
+    // find contacts
+    findContacts
+      .then(function (contactIds) {
+        let followUpQuery = {
+          where: {
+            and: [
+              {
+                outbreakId: outbreakId
+              },
+              {
+                // get follow-ups that were scheduled in the past noDaysNotSeen days
+                date: {
+                  between: [xDaysAgo, now]
+                }
+              },
+              app.models.followUp.notSeenFilter
+            ]
+          }
+        };
+        // if a list of contact ids was specified
+        if (contactIds) {
+          // restrict list of follow-ups to the list fo contact ids
+          followUpQuery.where.and.push({
+            personId: {
+              inq: contactIds
+            }
+          });
+        }
+        // get follow-ups
+        return app.models.followUp.rawFind(
+          app.utils.remote.mergeFilters(followUpQuery, filter || {}).where,
+          {
+            // order by date as we need to check the follow-ups from the oldest to the most new
+            order: {date: 1}
+          })
+          .then(function (followUps) {
+            // get contact ids (duplicates are removed) from all follow ups
+            let contactIDs = [...new Set(followUps.map((followUp) => followUp.personId))];
+            // send response
+            callback(null, {
+              contactsCount: contactIDs.length,
+              contactIDs: contactIDs
+            });
+          });
       })
       .catch(callback);
   };
@@ -2406,6 +2443,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactsWithSuccessfulFollowups = function (filter, callback) {
+    filter = filter || {};
     const FollowUp = app.models.followUp;
 
     // initialize result
@@ -2419,144 +2457,174 @@ module.exports = function (Outbreak) {
     // get outbreakId
     let outbreakId = this.id;
 
-    // get all the followups for the filtered period
-    FollowUp.find(app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: outbreakId
-        }
-      }, filter || {}))
-      .then(function (followups) {
-        // filter by relation properties
-        followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
+    // get people query
+    let contactQuery = app.utils.remote.searchByRelationProperty
+      .convertIncludeQueryToFilterQuery(filter).contact;
 
-        // initialize teams map and contacts map as the request needs to count contacts
-        let teamsMap = {};
-        let contactsMap = {};
-        // initialize helper contacts to team map
-        let contactsTeamMap = {};
+    // by default, find contacts does not perform any task
+    let findContacts = Promise.resolve();
 
-        followups.forEach(function (followup) {
-          // get contactId
-          let contactId = followup.personId;
-          // get teamId; there might be no team id, set null
-          let teamId = followup.teamId || null;
-
-          // check if a followup for the same contact was already parsed
-          if (contactsTeamMap[contactId]) {
-            // check if there was another followup for the same team
-            // if so check for the performed flag;
-            // if the previous followup was performed there is no need to update any team contacts counter;
-            // total and successful counters were already updated
-            if (contactsTeamMap[contactId].teams[teamId]) {
-              // new follow-up for the contact from the same team is performed; update flag and increase successful counter
-              if (!contactsTeamMap[contactId].teams[teamId].performed && FollowUp.isPerformed(followup) === true) {
-                // update performed flag
-                contactsTeamMap[contactId].teams[teamId].performed = true;
-                // increase successful counter for team
-                teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
-                // update followedUpContactsIDs/missedContactsIDs lists
-                teamsMap[teamId].followedUpContactsIDs.push(contactId);
-                teamsMap[teamId].missedContactsIDs.splice(teamsMap[teamId].missedContactsIDs.indexOf(contactId), 1);
-              }
-            } else {
-              // new teamId
-              // cache followup performed information for contact in team
-              contactsTeamMap[contactId].teams[teamId] = {
-                performed: FollowUp.isPerformed(followup)
-              };
-
-              // initialize team entry if doesn't already exist
-              if (!teamsMap[teamId]) {
-                teamsMap[teamId] = {
-                  id: teamId,
-                  totalContactsWithFollowupsCount: 0,
-                  contactsWithSuccessfulFollowupsCount: 0,
-                  followedUpContactsIDs: [],
-                  missedContactsIDs: []
-                };
-              }
-
-              // increase team counters
-              teamsMap[teamId].totalContactsWithFollowupsCount++;
-              if (FollowUp.isPerformed(followup)) {
-                teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
-                // keep contactId in the followedUpContactsIDs list
-                teamsMap[teamId].followedUpContactsIDs.push(contactId);
-              } else {
-                // keep contactId in the missedContactsIDs list
-                teamsMap[teamId].missedContactsIDs.push(contactId);
-              }
-            }
-          } else {
-            // first followup for the contact; add it in the contactsMap
-            contactsMap[contactId] = {
-              id: contactId,
-              totalFollowupsCount: 0,
-              successfulFollowupsCount: 0
-            };
-
-            // cache followup performed information for contact in team and overall
-            contactsTeamMap[contactId] = {
-              teams: {
-                [teamId]: {
-                  performed: FollowUp.isPerformed(followup)
-                }
-              },
-              performed: FollowUp.isPerformed(followup),
-            };
-
-            // increase overall counters
-            result.totalContactsWithFollowupsCount++;
-
-            // initialize team entry if doesn't already exist
-            if (!teamsMap[teamId]) {
-              teamsMap[teamId] = {
-                id: teamId,
-                totalContactsWithFollowupsCount: 0,
-                contactsWithSuccessfulFollowupsCount: 0,
-                followedUpContactsIDs: [],
-                missedContactsIDs: []
-              };
-            }
-
-            // increase team counters
-            teamsMap[teamId].totalContactsWithFollowupsCount++;
-            if (FollowUp.isPerformed(followup)) {
-              teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
-              // keep contactId in the followedUpContactsIDs list
-              teamsMap[teamId].followedUpContactsIDs.push(contactId);
-              // increase total successful total counter
-              result.contactsWithSuccessfulFollowupsCount++;
-            } else {
-              // keep contactId in the missedContactsIDs list
-              teamsMap[teamId].missedContactsIDs.push(contactId);
-            }
-          }
-
-          // update total follow-ups counter for contact
-          contactsMap[contactId].totalFollowupsCount++;
-          if (FollowUp.isPerformed(followup)) {
-            // update counter for contact successful follow-ups
-            contactsMap[contactId].successfulFollowupsCount++;
-
-            // check if contact didn't have a succesful followup and the current one was performed
-            // as specified above for teams this is the only case where updates are needed
-            if (!contactsTeamMap[contactId].performed) {
-              // update overall performed flag
-              contactsTeamMap[contactId].performed = true;
-              // increase total successful total counter
-              result.contactsWithSuccessfulFollowupsCount++;
-            }
-          }
+    // if contact query was specified
+    if (contactQuery) {
+      // find contacts that match the query
+      findContacts = app.models.contact
+        .rawFind({and: [contactQuery, {outbreakId: outbreakId}]}, {projection: {_id: 1}})
+        .then(function (contacts) {
+          return contacts.map(contact => contact.id);
         });
+    }
 
-        // update results; sending array with teams and contacts information
-        result.teams = Object.values(teamsMap);
-        result.contacts = Object.values(contactsMap);
+    // find contacts
+    findContacts
+      .then(function (contactIds) {
+        // build follow-up filter
+        let _filter = {
+          where: {
+            outbreakId: outbreakId
+          }
+        };
+        // if contact ids were specified
+        if (contactIds) {
+          // restrict follow-up query to those ids
+          _filter.where.personId = {
+            inq: contactIds
+          };
+        }
+        // get all the followups for the filtered period
+        return FollowUp.rawFind(app.utils.remote
+          .mergeFilters(_filter, filter || {}).where)
+          .then(function (followups) {
+            // filter by relation properties
+            followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
 
-        // send response
-        callback(null, result);
+            // initialize teams map and contacts map as the request needs to count contacts
+            let teamsMap = {};
+            let contactsMap = {};
+            // initialize helper contacts to team map
+            let contactsTeamMap = {};
+
+            followups.forEach(function (followup) {
+              // get contactId
+              let contactId = followup.personId;
+              // get teamId; there might be no team id, set null
+              let teamId = followup.teamId || null;
+
+              // check if a followup for the same contact was already parsed
+              if (contactsTeamMap[contactId]) {
+                // check if there was another followup for the same team
+                // if so check for the performed flag;
+                // if the previous followup was performed there is no need to update any team contacts counter;
+                // total and successful counters were already updated
+                if (contactsTeamMap[contactId].teams[teamId]) {
+                  // new follow-up for the contact from the same team is performed; update flag and increase successful counter
+                  if (!contactsTeamMap[contactId].teams[teamId].performed && FollowUp.isPerformed(followup) === true) {
+                    // update performed flag
+                    contactsTeamMap[contactId].teams[teamId].performed = true;
+                    // increase successful counter for team
+                    teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
+                    // update followedUpContactsIDs/missedContactsIDs lists
+                    teamsMap[teamId].followedUpContactsIDs.push(contactId);
+                    teamsMap[teamId].missedContactsIDs.splice(teamsMap[teamId].missedContactsIDs.indexOf(contactId), 1);
+                  }
+                } else {
+                  // new teamId
+                  // cache followup performed information for contact in team
+                  contactsTeamMap[contactId].teams[teamId] = {
+                    performed: FollowUp.isPerformed(followup)
+                  };
+
+                  // initialize team entry if doesn't already exist
+                  if (!teamsMap[teamId]) {
+                    teamsMap[teamId] = {
+                      id: teamId,
+                      totalContactsWithFollowupsCount: 0,
+                      contactsWithSuccessfulFollowupsCount: 0,
+                      followedUpContactsIDs: [],
+                      missedContactsIDs: []
+                    };
+                  }
+
+                  // increase team counters
+                  teamsMap[teamId].totalContactsWithFollowupsCount++;
+                  if (FollowUp.isPerformed(followup)) {
+                    teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
+                    // keep contactId in the followedUpContactsIDs list
+                    teamsMap[teamId].followedUpContactsIDs.push(contactId);
+                  } else {
+                    // keep contactId in the missedContactsIDs list
+                    teamsMap[teamId].missedContactsIDs.push(contactId);
+                  }
+                }
+              } else {
+                // first followup for the contact; add it in the contactsMap
+                contactsMap[contactId] = {
+                  id: contactId,
+                  totalFollowupsCount: 0,
+                  successfulFollowupsCount: 0
+                };
+
+                // cache followup performed information for contact in team and overall
+                contactsTeamMap[contactId] = {
+                  teams: {
+                    [teamId]: {
+                      performed: FollowUp.isPerformed(followup)
+                    }
+                  },
+                  performed: FollowUp.isPerformed(followup),
+                };
+
+                // increase overall counters
+                result.totalContactsWithFollowupsCount++;
+
+                // initialize team entry if doesn't already exist
+                if (!teamsMap[teamId]) {
+                  teamsMap[teamId] = {
+                    id: teamId,
+                    totalContactsWithFollowupsCount: 0,
+                    contactsWithSuccessfulFollowupsCount: 0,
+                    followedUpContactsIDs: [],
+                    missedContactsIDs: []
+                  };
+                }
+
+                // increase team counters
+                teamsMap[teamId].totalContactsWithFollowupsCount++;
+                if (FollowUp.isPerformed(followup)) {
+                  teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
+                  // keep contactId in the followedUpContactsIDs list
+                  teamsMap[teamId].followedUpContactsIDs.push(contactId);
+                  // increase total successful total counter
+                  result.contactsWithSuccessfulFollowupsCount++;
+                } else {
+                  // keep contactId in the missedContactsIDs list
+                  teamsMap[teamId].missedContactsIDs.push(contactId);
+                }
+              }
+
+              // update total follow-ups counter for contact
+              contactsMap[contactId].totalFollowupsCount++;
+              if (FollowUp.isPerformed(followup)) {
+                // update counter for contact successful follow-ups
+                contactsMap[contactId].successfulFollowupsCount++;
+
+                // check if contact didn't have a successful followup and the current one was performed
+                // as specified above for teams this is the only case where updates are needed
+                if (!contactsTeamMap[contactId].performed) {
+                  // update overall performed flag
+                  contactsTeamMap[contactId].performed = true;
+                  // increase total successful total counter
+                  result.contactsWithSuccessfulFollowupsCount++;
+                }
+              }
+            });
+
+            // update results; sending array with teams and contacts information
+            result.teams = Object.values(teamsMap);
+            result.contacts = Object.values(contactsMap);
+
+            // send response
+            callback(null, result);
+          });
       })
       .catch(callback);
   };
@@ -6822,12 +6890,11 @@ module.exports = function (Outbreak) {
     // get list of contacts
     models.contact
       .getGroupedByDate(
-      this, // outbreak model
-      {
-        startDate: body.startDate,
-        endDate: body.endDate
-      },
-      body.groupBy
+        this, {
+          startDate: body.startDate,
+          endDate: body.endDate
+        },
+        body.groupBy
       )
       .then((contactGroups) => {
         // create a map of group id and corresponding value that should be displayed
