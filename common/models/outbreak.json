@@ -6221,13 +6221,13 @@
       ],
       "returns": [
         {
-          "arg": "count",
+          "arg": "contactsCount",
           "type": "number",
           "description": "Number of contacts (that pass the filter) on the follow up list",
           "required": true
         },
         {
-          "arg": "contactIds",
+          "arg": "contactIDs",
           "type": [
             "string"
           ],
