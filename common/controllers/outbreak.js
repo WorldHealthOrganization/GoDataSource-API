@@ -7737,7 +7737,7 @@ module.exports = function (Outbreak) {
    * @param filter
    * @param callback
    */
-  Outbreak.prototype.filteredCountContactsOnFollowUpList = function (filter = { where: {} }, callback) {
+  Outbreak.prototype.filteredCountContactsOnFollowUpList = function (filter = {}, callback) {
     // defensive checks
     filter.where = filter.where || {};
     let startDate = genericHelpers.getDate().toDate();
