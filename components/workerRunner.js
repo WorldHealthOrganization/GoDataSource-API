@@ -112,10 +112,33 @@ module.exports = {
      * Export collections and create ZIP file
      * @param collections
      * @param options
-     * @returns {Promise<any | never>}
+     * @returns {Promise<any>}
      */
-    exportCollections: function (collections, options, callback) {
-      invokeWorkerMethod('sync', 'exportCollections', [collections, options], callback);
+    exportCollections: function (collections, options) {
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('sync', 'exportCollections', [collections, options], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+          resolve(result);
+        });
+      });
+    },
+    /**
+     * Extract and Decrypt Snapshot archive
+     * @param snapshotFile
+     * @param options
+     * @returns {Promise<any>}
+     */
+    extractAndDecryptSnapshotArchive: function (snapshotFile, options) {
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('sync', 'extractAndDecryptSnapshotArchive', [snapshotFile, options], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+          resolve(result);
+        });
+      });
     }
   },
   helpers: {

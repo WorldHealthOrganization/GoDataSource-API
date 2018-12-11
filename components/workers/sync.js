@@ -7,6 +7,7 @@ const archiver = require('archiver');
 const fs = require('fs');
 const Moment = require('moment');
 const path = require('path');
+const AdmZip = require('adm-zip');
 
 const logger = require('./../logger');
 const dbSync = require('./../dbSync');
@@ -238,13 +239,108 @@ const worker = {
             );
         });
       });
+  },
+
+  /**
+   * Extract and Decrypt Snapshot archive
+   * @param snapshotFile
+   * @param options
+   * @returns {Promise<any>}
+   */
+  extractAndDecryptSnapshotArchive: function (snapshotFile, options) {
+    return new Promise(function (resolve, reject) {
+      let tmpDir, tmpDirName, collectionFilesDirName;
+
+      try {
+        // create a temporary directory to store the database files
+        // it always created the folder in the system temporary directory
+        tmpDir = tmp.dirSync({unsafeCleanup: true});
+        tmpDirName = tmpDir.name;
+        // also create an archives subdir
+        collectionFilesDirName = `${tmpDirName}/archives`;
+        fs.mkdirSync(collectionFilesDirName);
+      } catch (err) {
+        logger.error(`Failed creating tmp directories; ${err}`);
+        return reject(err);
+      }
+
+      // extract snapshot
+      try {
+        let archive = new AdmZip(snapshotFile);
+        archive.extractAllTo(tmpDirName);
+      } catch (zipError) {
+        logger.error(`Failed to extract zip archive: ${snapshotFile}. ${zipError}`);
+        return reject(typeof zipError === 'string' ? {message: zipError} : zipError);
+      }
+
+      // decrypt all collection files archives if needed
+      let collectionArchives;
+      try {
+        collectionArchives = fs.readdirSync(tmpDirName);
+        // remove archives dir from the list
+        collectionArchives.splice(collectionArchives.indexOf('archives'), 1);
+      } catch (err) {
+        logger.error(`Failed to read collection files at : ${tmpDirName}. ${err}`);
+        return reject(err);
+      }
+
+      // define archive decryption action
+      let decryptArchives;
+      // if no password was provided
+      if (!options.password) {
+        // nothing to do, return file path as is
+        decryptArchives = Promise.resolve(collectionArchives);
+      } else {
+        // password provided, decrypt archives
+        let decryptFunctions = collectionArchives.map(function (filePath) {
+          return function (callback) {
+            workerRunner
+              .helpers
+              .decryptFile(options.password, {}, `${tmpDirName}/${filePath}`)
+              .then(function () {
+                callback();
+              })
+              .catch(callback);
+          };
+        });
+
+        decryptArchives = new Promise(function (resolve, reject) {
+          async.parallelLimit(decryptFunctions, 5, function (err) {
+            if (err) {
+              return reject(err);
+            }
+            return resolve();
+          })
+        });
+      }
+
+      decryptArchives
+        .then(function () {
+          // extract collection archives
+          try {
+            collectionArchives.forEach(function (filePath) {
+              let archive = new AdmZip(`${tmpDirName}/${filePath}`);
+              archive.extractAllTo(collectionFilesDirName);
+            });
+          } catch (zipError) {
+            logger.error(`Failed to extract collection archives at: ${tmpDirName}. ${zipError}`);
+            return reject(typeof zipError === 'string' ? {message: zipError} : zipError);
+          }
+          // collection files were decrypted and extracted; return collection files container directory
+          return resolve({
+            collectionFilesDirName: collectionFilesDirName,
+            tmpDirName: tmpDirName
+          });
+        })
+        .catch(reject);
+    });
   }
 };
 
 process.on('message', function (message) {
   worker[message.fn](...message.args)
-    .then(function (archiveName) {
-      process.send([null, archiveName]);
+    .then(function (result) {
+      process.send([null, result]);
     })
     .catch(function (error) {
       process.send([error]);

@@ -6,7 +6,6 @@ const async = require('async');
 const app = require('../../server/server');
 const fs = require('fs');
 const dbSync = require('../../components/dbSync');
-const AdmZip = require('adm-zip');
 const SyncClient = require('../../components/syncClient');
 const syncConfig = require('../../server/config.json').sync;
 const asyncActionsSettings = syncConfig.asyncActionsSettings;
@@ -118,10 +117,12 @@ module.exports = function (Sync) {
     });
 
     // call worker
-    syncWorker.exportCollections(allCollections, options, function (err, archiveName) {
-      app.logger.debug(`Exported database at '${archiveName}'`);
-      return done(err, archiveName);
-    });
+    syncWorker.exportCollections(allCollections, options)
+      .then(function (archiveName) {
+        app.logger.debug(`Exported database at '${archiveName}'`);
+        return done(null, archiveName);
+      })
+      .catch(done);
   };
 
   /**
@@ -166,40 +167,15 @@ module.exports = function (Sync) {
           app.logger.debug(`Sync ${syncLogEntry.id}: Backup process completed successfully. Backup ID: ${backupEntry.id}`);
         }
 
-        // create a temporary directory to store the database files
-        // it always created the folder in the system temporary directory
-        let tmpDir = tmp.dirSync({unsafeCleanup: true});
-        let tmpDirName = tmpDir.name;
-
         app.logger.debug(`Sync ${syncLogEntry.id}: Importing the DB at ${filePath}`);
 
-        // define archive decryption action
-        let decryptArchive;
-        // if no password was provided
-        if (!options.password) {
-          // nothing to do, return file path as is
-          decryptArchive = Promise.resolve(filePath);
-        } else {
-          // password provided, decrypt archive
-          decryptArchive = app.utils.fileCrypto
-            .decrypt(options.password, {}, filePath);
-        }
-
-        return decryptArchive
-          .then(function (filePath) {
-            // log the path of the payload
-            app.logger.debug(`Payload saved at ${filePath}`);
-            // extract the compressed database snapshot into the newly created temporary directory
-            try {
-              let archive = new AdmZip(filePath);
-              archive.extractAllTo(tmpDirName);
-            } catch (zipError) {
-              app.logger.error(`Sync ${syncLogEntry.id}: Failed to extract zip archive: ${filePath}. ${zipError}`);
-              return callback(Sync.getFatalError(typeof zipError === 'string' ? {message: zipError} : zipError));
-            }
+        return syncWorker.extractAndDecryptSnapshotArchive(filePath, options)
+          .then(function (result) {
+            let collectionFilesDirName = result.collectionFilesDirName;
+            let tmpDirName = result.tmpDirName;
 
             // read all files in the temp dir
-            return fs.readdir(tmpDirName, (err, filenames) => {
+            return fs.readdir(collectionFilesDirName, (err, filenames) => {
               if (err) {
                 return callback(Sync.getFatalError(err));
               }
@@ -222,12 +198,14 @@ module.exports = function (Sync) {
               // not syncing in parallel to not load all collections in memory at once
               return async.series(
                 collectionsFiles.map((fileName) => (doneCollection) => {
-                  let filePath = `${tmpDirName}/${fileName}`;
+                  let filePath = `${collectionFilesDirName}/${fileName}`;
 
                   // split filename into 'collection name' and 'extension'
                   let collectionName = fileName.split('.')[0];
-                  // add collection to the list of collections to import
-                  collectionsToImport.push(collectionName);
+                  // add collection to the list of collections to import if not already added
+                  if (collectionsToImport.indexOf(collectionName) === -1) {
+                    collectionsToImport.push(collectionName);
+                  }
 
                   // cache reference to Loopback's model
                   let model = app.models[dbSync.collectionsMap[collectionName]];
@@ -309,9 +287,6 @@ module.exports = function (Sync) {
                 () => {
                   // on debug, keep payload
                   if (!syncConfig.debug) {
-                    // remove temporary directory
-                    tmpDir.removeCallback();
-
                     // remove temporary uploaded file
                     fs.unlink(filePath, () => {
                       app.logger.debug(`Sync ${syncLogEntry.id}: Removed temporary files at ${filePath}`);
