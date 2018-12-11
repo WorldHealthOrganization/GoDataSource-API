@@ -73,7 +73,8 @@ function getMongoDBConnection() {
       auth: {
         user: dbConfig.user,
         password: dbConfig.password
-      }
+      },
+      authSource: dbConfig.authSource
     };
   }
   return MongoClient
