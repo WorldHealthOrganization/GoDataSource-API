@@ -7909,4 +7909,30 @@ module.exports = function (Outbreak) {
       .then((ids) => callback(null, ids.length, ids.map(obj => obj.id)))
       .catch(callback);
   };
+
+  /**
+   * Get all duplicates based on hardcoded rules against a model props
+   * @param filter pagination props (skip, limit)
+   * @param model
+   * @param callback
+   */
+  Outbreak.prototype.getContactPossibleDuplicates = function (filter = {}, model = {}, callback) {
+    app.models.person
+      .findDuplicatesByType(filter, this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', model)
+      .then(duplicates => callback(null, duplicates))
+      .catch(callback);
+  };
+
+  /**
+   * Get all duplicates based on hardcoded rules against a model props
+   * @param filter pagination props (skip, limit)
+   * @param model
+   * @param callback
+   */
+  Outbreak.prototype.getCasePossibleDuplicates = function (filter = {}, model = {}, callback) {
+    app.models.person
+      .findDuplicatesByType(filter, this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', model)
+      .then(duplicates => callback(null, duplicates))
+      .catch(callback);
+  };
 };
