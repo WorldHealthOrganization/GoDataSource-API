@@ -12,6 +12,13 @@
     "order": ["name ASC", "lastName ASC", "firstName ASC"]
   },
   "properties": {
+    "id": {
+      "type": "string",
+      "id": true,
+      "defaultFn": "uuidv4",
+      "unique": true,
+      "safeForImport": true
+    },
     "type": {
       "type": "string"
     },
