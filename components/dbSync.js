@@ -60,7 +60,7 @@ collectionsForExportTypeMap.outbreak = collectionsForExportTypeMap.system.concat
 collectionsForExportTypeMap.full = collectionsForExportTypeMap.outbreak.concat(['person', 'labResult', 'followUp', 'relationship', 'cluster', 'fileAttachment']);
 collectionsForExportTypeMap.mobile = collectionsForExportTypeMap.full.concat(userCollections);
 // mobile export doesn't need to include template, icon, helpCategory, helpItem, fileAttachment
-['template', 'icon', 'helpCategory', 'helpItem', 'fileAttachment'].forEach(function (model) {
+['template', 'icon', 'fileAttachment'].forEach(function (model) {
   collectionsForExportTypeMap.mobile.splice(collectionsForExportTypeMap.mobile.indexOf(model), 1);
 });
 

@@ -36,7 +36,9 @@
     "requestResponse": {
       "trim": true,
       "maxLength": 1024
-    }
+    },
+    "trim": true,
+    "maxLength": 1024
   },
   "updatesServer": {
     "host": "localhost",

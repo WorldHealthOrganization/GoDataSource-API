@@ -82,10 +82,11 @@ module.exports = function (ReferenceData) {
    * @param callback
    */
   ReferenceData.exportFilteredReferenceData = function (filter, exportType, options, callback) {
+    filter = filter || {};
     app.utils.remote.helpers.exportFilteredModelsList(
       app,
       app.models.referenceData,
-      filter,
+      filter.where,
       exportType,
       'Reference Data',
       null,

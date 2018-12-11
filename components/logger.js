@@ -2,6 +2,7 @@
 
 const winston = require('winston');
 const config = require('../server/config.json');
+const _ = require('lodash');
 
 // winston uses 'warn' for 'warning'
 if (config.logging.level === 'warning') {
@@ -39,10 +40,10 @@ let flushHandlerAdded = false;
  * Stop process after logger flushes all messages
  * @param code
  */
-logger.exitProcessAfterFlush = function(code) {
+logger.exitProcessAfterFlush = function (code) {
   // attach flush handler only once
-  if(!flushHandlerAdded) {
-    logger.transports.file.once('flush', function() {
+  if (!flushHandlerAdded) {
+    logger.transports.file.once('flush', function () {
       process.exit(code);
     });
 
@@ -70,6 +71,22 @@ logger.getTransactionLogger = function (transactionId) {
   });
 
   return transactionLogger;
+};
+
+const logFn = logger.log;
+logger.log = function (level, message, ...rest) {
+  // check if message should be trimmed
+  const trimMessage = _.get(config, 'logging.trim', false);
+  // for trimming, it must be a string
+  if (typeof message == 'string' && trimMessage) {
+    // get maximum request body length
+    const maxLength = _.get(config, 'logging.maxLength');
+    // trim request body length to configured one
+    if (message.length > maxLength) {
+      message = message.substring(0, maxLength) + '...(trimmed)';
+    }
+  }
+  logFn.call(logger, level, message, ...rest);
 };
 
 module.exports = logger;

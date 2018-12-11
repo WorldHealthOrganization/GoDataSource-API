@@ -306,50 +306,152 @@ module.exports = function (Case) {
   Case.delayBetweenOnsetAndLabTesting = function (outbreakId, filter) {
     // find all cases that have date of onset defined and include their first lab result
     return Case
-      .find(app.utils.remote
-        .mergeFilters({
-          where: {
-            outbreakId: outbreakId,
-            dateOfOnset: {
-              ne: null
+      .rawFind(
+        app.utils.remote.convertLoopbackFilterToMongo(
+          app.utils.remote.mergeFilters({
+            where: {
+              outbreakId: outbreakId,
+              dateOfOnset: {
+                ne: null
+              }
             }
-          },
-          include: {
-            relation: 'labResults',
-            scope: {
-              order: 'dateSampleTaken ASC',
-              fields: ['dateSampleTaken'],
-              limit: 1
-            }
-          },
-          order: 'dateOfOnset ASC'
-        }, filter || {})
+          }, filter || {})
+        ).where, {
+          order: {
+            dateOfOnset: 1
+          }
+        }
       )
       .then(function (cases) {
-        // build the list of results
-        const results = [];
-        // go through case records
-        cases.forEach(function (caseRecord) {
-          caseRecord = caseRecord.toJSON();
-          // get lab result's dateSampleTaken, if available
-          const labResultDate = caseRecord.labResults.length ? caseRecord.labResults.shift().dateSampleTaken : null;
-          // build each result
-          const result = {
-            dateOfOnset: caseRecord.dateOfOnset,
-            dateOfFirstLabTest: labResultDate,
-            delay: null,
-            case: caseRecord
-          };
-          // calculate delay if both dates are available (onset is ensured by the query)
-          if (labResultDate) {
-            const onset = moment(result.dateOfOnset);
-            const labTest = moment(result.dateOfFirstLabTest);
-            result.delay = labTest.diff(onset, 'days');
+        // build a list of caseIds to get their lab results
+        const caseIds = cases.map(caseRecord => caseRecord.id);
+        // do a raw find for lab results
+        return app.models.labResult.rawFind(
+          {
+            personId: {
+              inq: caseIds
+            }
+          },
+          {
+            order: {dateSampleTaken: 1},
+            projection: {personId: 1, dateSampleTaken: 1}
+          })
+          .then(function (labResults) {
+            // build a map of personId to oldest lab result
+            const labResultsMap = {};
+            // go through all lab results
+            labResults.forEach(function (labResult) {
+              // only keep the first one for each person
+              if (!labResultsMap[labResult.personId]) {
+                labResultsMap[labResult.personId] = labResult;
+              }
+            });
+
+            // build the list of results
+            const results = [];
+            // go through case records
+            cases.forEach(function (caseRecord) {
+
+              // get lab result's dateSampleTaken, if available
+              const labResultDate = labResultsMap[caseRecord.id] ? labResultsMap[caseRecord.id].dateSampleTaken : null;
+              // build each result
+              const result = {
+                dateOfOnset: caseRecord.dateOfOnset,
+                dateOfFirstLabTest: labResultDate,
+                delay: null,
+                case: caseRecord
+              };
+              // calculate delay if both dates are available (onset is ensured by the query)
+              if (labResultDate) {
+                const onset = moment(result.dateOfOnset);
+                const labTest = moment(result.dateOfFirstLabTest);
+                result.delay = labTest.diff(onset, 'days');
+              }
+              results.push(result);
+            });
+            // return the list of results
+            return results;
+          });
+      });
+  };
+
+
+  /**
+   * Pre-filter cases for an outbreak using related models (relationship)
+   * @param outbreak
+   * @param filter Supports 'where.relationship' MongoDB compatible queries
+   * @return {Promise<void | never>}
+   */
+  Case.preFilterForOutbreak = function (outbreak, filter) {
+    // set a default filter
+    filter = filter || {};
+    // get relationship query, if any
+    let relationshipQuery = _.get(filter, 'where.relationship');
+    // if found, remove it form main query
+    if (relationshipQuery) {
+      delete filter.where.relationship;
+    }
+    // get main cases query
+    let casesQuery = _.get(filter, 'where', {});
+    // start with a resolved promise (so we can link others)
+    let buildQuery = Promise.resolve();
+    // if a relationship query is present
+    if (relationshipQuery) {
+      // restrict query to current outbreak
+      relationshipQuery = {
+        $and: [
+          relationshipQuery,
+          {
+            outbreakId: outbreak.id
           }
-          results.push(result);
+        ]
+      };
+      // filter cases based on query
+      buildQuery = buildQuery
+        .then(function () {
+          return app.models.relationship
+            .rawFind(relationshipQuery, {projection: {persons: 1}})
+            .then(function (relationships) {
+              let caseIds = [];
+              // build a list of caseIds that passed the filter
+              relationships.forEach(function (relation) {
+                relation.persons.forEach(function (person) {
+                  if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
+                    caseIds.push(person.id);
+                  }
+                });
+              });
+              return caseIds;
+            });
         });
-        // return the list of results
-        return results;
+    }
+    return buildQuery
+      .then(function (caseIds) {
+        // if caseIds filter present
+        if (caseIds) {
+          // update cases query to filter based on caseIds
+          casesQuery = {
+            and: [
+              casesQuery,
+              {
+                id: {
+                  inq: caseIds
+                }
+              }
+            ]
+          };
+        }
+        // restrict cases query to current outbreak
+        casesQuery = {
+          and: [
+            casesQuery,
+            {
+              outbreakId: outbreak.id
+            }
+          ]
+        };
+        // return updated filter
+        return Object.assign(filter, {where: casesQuery});
       });
   };
 };

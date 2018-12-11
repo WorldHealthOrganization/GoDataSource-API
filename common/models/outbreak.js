@@ -61,7 +61,7 @@ module.exports = function (Outbreak) {
   // initialize model helpers
   Outbreak.helpers = {};
   // set a higher limit for event listeners to avoid warnings (we have quite a few listeners)
-  Outbreak.setMaxListeners(60);
+  Outbreak.setMaxListeners(70);
 
   // The permissions that influence an user's ability to see a person's data
   Outbreak.personReadPermissions = [
@@ -406,8 +406,7 @@ module.exports = function (Outbreak) {
         if (typeof result === 'undefined') {
           // delete relationship
           return relationshipInstance.destroy(options);
-        }
-        else if (typeof result.count !== 'undefined') {
+        } else if (typeof result.count !== 'undefined') {
           return result;
         } else {
           // result is an array
@@ -499,12 +498,11 @@ module.exports = function (Outbreak) {
       // Retrieve all relationships of requested type for the given outbreak
       // Then filter cases based on relations count
       app.models.relationship
-        .find({
-          fields: ['persons'],
-          where: {
-            outbreakId: context.instance.id,
-            'persons.type': type
-          }
+        .rawFind({
+          outbreakId: context.instance.id,
+          'persons.type': type
+        }, {
+          projection: {persons: 1}
         })
         // build list of people that have relationships in the given outbreak
         .then((relations) => [].concat(...relations.map((relation) => relation.persons.map(((person) => person.id)))))
@@ -732,6 +730,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.helpers.countContactsByFollowUpFilter = function (options, filter, callback) {
+    filter = filter || {};
     // get options
     let resultProperty = options.resultProperty;
 
@@ -742,49 +741,81 @@ module.exports = function (Outbreak) {
       teams: []
     };
 
-    // get all the followups for the filtered period
-    app.models.followUp.find(app.utils.remote
-      .mergeFilters({
-        where: {
-          and: [
-            {
-              outbreakId: options.outbreakId
-            },
-            options.followUpFilter
-          ]
-        }
-      }, filter || {}))
-      .then(function (followups) {
-        // get contact ids (duplicates are removed) from all follow ups
-        results.contactIDs = [...new Set(followups.map((followup) => followup.personId))];
-        results[resultProperty] = results.contactIDs.length;
+    // get contact query, if any
+    let contactQuery = app.utils.remote.searchByRelationProperty
+      .convertIncludeQueryToFilterQuery(filter).contact;
 
-        // initialize map of contacts to not count same contact twice
-        let teams = {};
-
-        followups.forEach(function (followup) {
-          if (teams[followup.teamId]) {
-            if (teams[followup.teamId].contactIDs.indexOf(followup.personId) === -1) {
-              teams[followup.teamId].contactIDs.push(followup.personId);
-            }
-          } else {
-            teams[followup.teamId] = {
-              id: followup.teamId,
-              contactIDs: [followup.personId]
-            };
-          }
+    // by default, find contacts does not perform any action
+    let findContacts = Promise.resolve();
+    // if there is a contact query
+    if (contactQuery) {
+      // find the contacts that match the query
+      findContacts = app.models.contact
+        .rawFind({and:[contactQuery, {outbreakId: options.outbreakId}]}, {projection: {_id: 1}})
+        .then(function (contacts) {
+          // return a list of contact ids
+          return contacts.map(contact => contact.id);
         });
+    }
 
-        // update results.teams; sending array with teams information only for the teams that have contacts
-        results.teams = _.values(teams)
-          .map((teamEntry) => {
-            teamEntry[resultProperty] = teamEntry.contactIDs.length;
-            return teamEntry;
-          })
-          .filter(teamEntry => teamEntry[resultProperty]);
+    // find contacts
+    findContacts
+      .then(function (contactIds) {
+        // build follow-up query
+        let followUpQuery = {
+          where: {
+            and: [
+              {
+                outbreakId: options.outbreakId
+              },
+              options.followUpFilter
+            ]
+          }
+        };
+        // if there were restrictions applied to contacts
+        if (contactIds) {
+          // restrict follow-up query to those contacts
+          followUpQuery.where.and.push({
+            personId: {
+              inq: contactIds
+            }
+          });
+        }
+        // get all the followups for the filtered period
+        return app.models.followUp.rawFind(app.utils.remote
+          .mergeFilters(followUpQuery, filter || {}).where)
+          .then(function (followups) {
+            // get contact ids (duplicates are removed) from all follow ups
+            results.contactIDs = [...new Set(followups.map((followup) => followup.personId))];
+            results[resultProperty] = results.contactIDs.length;
 
-        // send response
-        callback(null, results);
+            // initialize map of contacts to not count same contact twice
+            let teams = {};
+
+            followups.forEach(function (followup) {
+              if (teams[followup.teamId]) {
+                if (teams[followup.teamId].contactIDs.indexOf(followup.personId) === -1) {
+                  teams[followup.teamId].contactIDs.push(followup.personId);
+                }
+              } else {
+                teams[followup.teamId] = {
+                  id: followup.teamId,
+                  contactIDs: [followup.personId]
+                };
+              }
+            });
+
+            // update results.teams; sending array with teams information only for the teams that have contacts
+            results.teams = _.values(teams)
+              .map((teamEntry) => {
+                teamEntry[resultProperty] = teamEntry.contactIDs.length;
+                return teamEntry;
+              })
+              .filter(teamEntry => teamEntry[resultProperty]);
+
+            // send response
+            callback(null, results);
+          });
       })
       .catch(callback);
   };
@@ -802,9 +833,7 @@ module.exports = function (Outbreak) {
       {
         where: {
           outbreakId: outbreak.id,
-          dateBecomeCase: {
-            neq: null
-          }
+          wasContact: true
         },
         fields: ['id', 'relationships', 'dateBecomeCase'],
         include: [
@@ -819,32 +848,56 @@ module.exports = function (Outbreak) {
       };
     // find the cases
     app.models.case
-      .find(_filter)
+      .rawFind(_filter.where, {projection: {dateBecomeCase: 1}})
       .then(function (cases) {
-        // remove those without relations
-        cases = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(cases, _filter);
-        // keep a list of relationIds
-        const relationshipIds = [];
-        // go through all the cases
+        // build a case map
+        const caseMap = {};
         cases.forEach(function (caseRecord) {
-          if (Array.isArray(caseRecord.relationships)) {
-            // go trough their relationships
-            caseRecord.relationships.forEach(function (relationship) {
-              // store only the relationships that are newer than their conversion date
-              if ((new Date(relationship.contactDate)) > (new Date(caseRecord.dateBecomeCase))) {
-                relationshipIds.push(relationship.id);
+          caseMap[caseRecord.id] = caseRecord;
+          caseRecord.relationships = [];
+        });
+        // find relationships for those cases
+        return app.models.relationship
+          .rawFind({
+            outbreakId: outbreak.id,
+            'persons.id': {
+              inq: Object.keys(caseMap)
+            }
+          }, {projection: {contactDate: 1}})
+          .then(function (relationships) {
+            // add relationships to cases
+            relationships.forEach(function (relationship) {
+              Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
+                if (caseMap[person.id]) {
+                  caseMap[person.id].relationships.push(relationship);
+                }
+              });
+            });
+            // remove those without relations
+            cases = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(cases, _filter);
+            // keep a list of relationIds
+            const relationshipIds = [];
+            // go through all the cases
+            cases.forEach(function (caseRecord) {
+              if (Array.isArray(caseRecord.relationships)) {
+                // go trough their relationships
+                caseRecord.relationships.forEach(function (relationship) {
+                  // store only the relationships that are newer than their conversion date
+                  if ((new Date(relationship.contactDate)) > (new Date(caseRecord.dateBecomeCase))) {
+                    relationshipIds.push(relationship.id);
+                  }
+                });
               }
             });
-          }
-        });
-        // build/count transmission chains starting from the found relationIds
-        app.models.relationship.buildOrCountTransmissionChains(outbreak.id, outbreak.periodOfFollowup, app.utils.remote.mergeFilters({
-          where: {
-            id: {
-              inq: relationshipIds
-            }
-          }
-        }, filter || {}), countOnly, callback);
+            // build/count transmission chains starting from the found relationIds
+            app.models.relationship.buildOrCountTransmissionChains(outbreak.id, outbreak.periodOfFollowup, app.utils.remote.mergeFilters({
+              where: {
+                id: {
+                  inq: relationshipIds
+                }
+              }
+            }, filter || {}), countOnly, callback);
+          });
       })
       .catch(callback);
   };
@@ -1372,155 +1425,6 @@ module.exports = function (Outbreak) {
       })
       .catch(next);
   });
-
-  /**
-   * Query contacts using a series of custom filters and return their ids as an array
-   * @param filter
-   * @param outbreakId
-   * @returns {Promise.<TResult>}
-   */
-  Outbreak.helpers.buildFollowUpCustomFilter = function (filter, outbreakId) {
-    if (filter && typeof(filter) === 'object' && Object.keys(filter).length !== 0) {
-      filter.where = filter.where || {};
-
-      let caseFilter, relationshipFilter, contactFilter;
-
-      let weekNumber = 0;
-      let timeLastSeen = '';
-
-      if (filter.whereCase && Object.keys(filter.whereCase).length !== 0) {
-        // Build the case filter
-        caseFilter = app.utils.remote.mergeFilters({
-          where: {
-            'type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
-          },
-          filterParent: true
-        }, {where: filter.whereCase});
-        delete filter.whereCase;
-      }
-
-      if ((filter.whereRelationship && Object.keys(filter.whereRelationships)) || caseFilter) {
-        // Build the relationship filter
-        if (caseFilter) {
-          relationshipFilter = app.utils.remote.mergeFilters({
-            where: {
-              'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
-            },
-            include: {
-              relation: 'people',
-              scope: caseFilter
-            },
-            filterParent: true
-          }, filter.whereRelationship ? {where: filter.whereRelationship} : {});
-        } else {
-          relationshipFilter = filter.whereRelationship;
-        }
-        delete filter.whereRelationship;
-      }
-
-      // Start building the contact filter
-      let additionalContactFilter = {
-        where: {
-          outbreakId: outbreakId
-        }
-      };
-
-      // If there is a time filter, get the contact's latest performed follow-up
-      if (filter.where.timeLastSeen) {
-        // Cache timeLastSeen filter
-        timeLastSeen = filter.where.timeLastSeen;
-
-        additionalContactFilter.include = {
-          relation: 'followUps',
-          scope: {
-            where: {
-              performed: true
-            },
-            order: 'date DESC',
-            limit: 1
-          }
-        };
-        delete filter.where.timeLastSeen;
-      }
-
-      // Build the contact filter
-      if (filter.whereContact && Object.keys(filter.whereContact).length !== 0) {
-        contactFilter = app.utils.remote.mergeFilters(additionalContactFilter, filter.whereContact ? {where: filter.whereContact} : {});
-        delete filter.whereContact;
-      }
-
-      if (filter.where.weekNumber) {
-        // Cache the week filter
-        weekNumber = filter.where.weekNumber;
-        delete filter.where.weekNumber;
-      }
-
-      // Include relationships only if necessary
-      if (caseFilter || relationshipFilter) {
-        contactFilter = app.utils.remote.mergeFilters({
-          include: {
-            relation: 'relationships',
-            scope: relationshipFilter,
-          }
-        }, contactFilter);
-      }
-
-      // If any custom filters have been mentioned
-      if (contactFilter) {
-        return app.models.contact.find(contactFilter)
-          .then((contacts) => {
-            // Remove any contacts that have empty relations
-            contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, contactFilter);
-
-            // If necessary, get only contacts that have last been seen before the specified date.
-            if (timeLastSeen && moment(timeLastSeen).isValid()) {
-              contacts = _.filter(contacts, function (contact) {
-                if (contact.followUps) {
-                  return moment(contact.followUps[0].date).isBefore(timeLastSeen, 'day');
-                } else {
-                  return false;
-                }
-              });
-            }
-
-            let contactIds = contacts.map(contact => contact.id);
-
-            let finalFilter = {
-              where: {
-                personId: {
-                  inq: contactIds
-                }
-              }
-            };
-
-            // If there was a week filter, make sure to request only follow-ups that are happening in
-            // the requested week of the follow-up period
-            if (weekNumber > 0) {
-              finalFilter.where.index = {
-                between: [(weekNumber - 1) * 7 + 1, weekNumber * 7]
-              };
-            }
-
-            // If we have a time filter, make sure to request follow-ups that are scheduled after the requested
-            // date. The other requirements of the filter (having a last seen date before the one in the filter)
-            // has been handled in the getContactIdsFromCustomFilters function
-            if (timeLastSeen) {
-              finalFilter.where.date = {
-                gt: timeLastSeen
-              };
-            }
-
-            return finalFilter;
-          });
-      } else {
-        // If the filter is only follow-up related
-        return Promise.resolve(filter);
-      }
-    } else {
-      // If no filter is mentioned
-      return Promise.resolve(filter);
-    }
-  };
 
   /**
    * Create multiple contacts for case/event

@@ -367,4 +367,192 @@ module.exports = function (FollowUp) {
         return result;
       });
   };
+
+  /**
+   * Pre-filter follow-ups for an outbreak using related models (case, contact)
+   * @param outbreak
+   * @param filter Supports 'where.contact', 'where.case' MongoDB compatible queries, 'where.timeLastSeen', 'where.weekNumber' queries
+   * @return {Promise<void | never>}
+   */
+  FollowUp.preFilterForOutbreak = function (outbreak, filter) {
+    // set a default filter
+    filter = filter || {};
+    // get case query, if any
+    let caseQuery = _.get(filter, 'where.case');
+    // if found, remove it form main query
+    if (caseQuery) {
+      delete filter.where.case;
+    }
+    // get contact query, if any
+    let contactQuery = _.get(filter, 'where.contact');
+    // if found, remove it form main query
+    if (contactQuery) {
+      delete filter.where.contact;
+    }
+    // get time last seen, if any
+    let timeLastSeen = _.get(filter, 'where.timeLastSeen');
+    // if found, remove it form main query
+    if (timeLastSeen != null) {
+      delete filter.where.timeLastSeen;
+    }
+    // get week number, if any
+    let weekNumber = _.get(filter, 'filter.weekNumber');
+    // if found, remove it form main query
+    if (weekNumber != null) {
+      delete filter.where.weekNumber;
+    }
+    // get main followUp query
+    let followUpQuery = _.get(filter, 'where', {});
+    let contactIds;
+    // start with a resolved promise (so we can link others)
+    let buildQuery = Promise.resolve();
+    // if a case query is present
+    if (caseQuery) {
+      // restrict query to current outbreak
+      caseQuery = {
+        $and: [
+          caseQuery,
+          {
+            outbreakId: outbreak.id
+          }
+        ]
+      };
+      // filter cases based on query
+      buildQuery = buildQuery
+        .then(function () {
+          return app.models.case
+            .rawFind(caseQuery, {projection: {_id: 1}})
+            .then(function (cases) {
+              // build a list of case ids that passed the filter
+              const caseIds = cases.map(caseRecord => caseRecord.id);
+              // find relations with contacts for those cases
+              return app.models.relationship
+                .rawFind({
+                  outbreakId: outbreak.id,
+                  'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                  'persons.id': {
+                    $in: caseIds
+                  }
+                }, {
+                  projection: {persons: 1}
+                });
+            })
+            .then(function (relationships) {
+              // build a list of contact ids from the found relations
+              contactIds = [];
+              relationships.forEach(function (relation) {
+                relation.persons.forEach(function (person) {
+                  if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                    contactIds.push(person.id);
+                  }
+                });
+              });
+            });
+        });
+    }
+    // if time last seen filter is present
+    if (timeLastSeen != null) {
+      buildQuery = buildQuery
+        .then(function () {
+          // find people that were seen pass the specified date
+          return app.models.followUp
+            .rawFind({
+              outbreakId: outbreak.id,
+              performed: true,
+              date: {
+                $gt: timeLastSeen
+              }
+            }, {
+              projection: {personId: 1}
+            })
+            .then(function (followUps) {
+              if (!contactQuery) {
+                contactQuery = {};
+              }
+              // update contact query to exclude those people
+              contactQuery = {
+                $and: [
+                  contactQuery,
+                  {
+                    _id: {
+                      $nin: followUps.map(followUp => followUp.personId)
+                    }
+                  }
+                ]
+              };
+            });
+        });
+    }
+    return buildQuery
+      .then(function () {
+        // if contact Ids were specified
+        if (contactIds) {
+          // make sure there is a contact query
+          if (!contactQuery) {
+            contactQuery = {};
+          }
+          // update contact query to filter based on contactIds
+          contactQuery = {
+            $and: [
+              contactQuery,
+              {
+                _id: {
+                  $in: contactIds
+                }
+              }
+            ]
+          };
+        }
+        // if there is a contact query
+        if (contactQuery) {
+          // restrict it to current outbreak
+          contactQuery = {
+            $and: [
+              contactQuery,
+              {
+                outbreakId: outbreak.id
+              }
+            ]
+          };
+          // query contacts
+          return app.models.contact
+            .rawFind(contactQuery, {projection: {_id: 1}})
+            .then(function (contacts) {
+              // update follow-up query, restrict it to the list of contacts found
+              followUpQuery = {
+                and: [
+                  followUpQuery,
+                  {
+                    personId: {
+                      inq: contacts.map(contact => contact.id)
+                    }
+                  }
+                ]
+              };
+            });
+        }
+      })
+      .then(function () {
+        // restrict follow-up query to current outbreak
+        followUpQuery = {
+          and: [
+            followUpQuery,
+            {
+              outbreakId: outbreak.id
+            }
+          ]
+        };
+        // if week number was specified
+        if (weekNumber != null) {
+          // restrict follow-ups to be in the specified week range
+          followUpQuery.and.push({
+            index: {
+              between: [(weekNumber - 1) * 7 + 1, weekNumber * 7]
+            }
+          });
+        }
+        // return updated filter
+        return Object.assign(filter, {where: followUpQuery});
+      });
+  };
 };

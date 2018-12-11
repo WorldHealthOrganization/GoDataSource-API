@@ -328,7 +328,7 @@ module.exports = function (Contact) {
     }
 
     // check if we need to send an interval of dates or a single date
-    let dateFilter =  { dateOfFollowUp: date };
+    let dateFilter = {dateOfFollowUp: date};
     if (typeof date === 'object') {
       dateFilter = {
         startDate: date.startDate,
@@ -351,6 +351,144 @@ module.exports = function (Contact) {
         });
 
         return contactGroups;
+      });
+  };
+
+  /**
+   * Pre-filter contact for an outbreak using related models (case, followUp)
+   * @param outbreak
+   * @param filter Supports 'where.case', 'where.followUp' MongoDB compatible queries
+   * @return {Promise<void | never>}
+   */
+  Contact.preFilterForOutbreak = function (outbreak, filter) {
+    // set a default filter
+    filter = filter || {};
+    // get cases query, if any
+    let casesQuery = _.get(filter, 'where.case');
+    // if found, remove it form main query
+    if (casesQuery) {
+      delete filter.where.case;
+    }
+    // get followUp query, if any
+    let followUpQuery = _.get(filter, 'where.followUp');
+    // if found, remove it form main query
+    if (followUpQuery) {
+      delete filter.where.followUp;
+    }
+    // get main contact query
+    let contactQuery = _.get(filter, 'where', {});
+    // start with a resolved promise (so we can link others)
+    let buildQuery = Promise.resolve();
+    // if a cases query is present
+    if (casesQuery) {
+      // restrict query to current outbreak
+      casesQuery = {
+        $and: [
+          casesQuery,
+          {
+            outbreakId: outbreak.id
+          }
+        ]
+      };
+      // filter cases based on query
+      buildQuery = buildQuery
+        .then(function () {
+          // find cases that match the query
+          return app.models.case
+            .rawFind(casesQuery, {projection: {_id: 1}})
+            .then(function (cases) {
+              // find relationships with contacts for the matched cases
+              return app.models.relationship
+                .rawFind({
+                  outbreakId: outbreak.id,
+                  'persons.id': {
+                    $in: cases.map(caseRecord => caseRecord.id)
+                  },
+                  'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+                }, {
+                  projection: {persons: 1}
+                })
+                .then(function (relationships) {
+                  // gather contact ids from the found relationships
+                  let contactIds = [];
+                  // go through the relationships
+                  relationships.forEach(function (relationship) {
+                    // go through the people
+                    Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
+                      // store contact ids
+                      if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                        contactIds.push(person.id);
+                      }
+                    });
+                  });
+                  // update contact query to include contact ids
+                  contactQuery = {
+                    and: [
+                      contactQuery,
+                      {
+                        id: {
+                          inq: contactIds
+                        }
+                      }
+                    ]
+                  };
+                  return contactIds;
+                });
+            });
+        });
+    }
+    // if there is a followUp query
+    if (followUpQuery) {
+      buildQuery = buildQuery
+        .then(function (contactIds) {
+          // restrict followUp query to current outbreak
+          followUpQuery = {
+            $and: [
+              followUpQuery,
+              {
+                outbreakId: outbreak.id
+              }
+            ]
+          };
+          // if contact ids were provided, restrict the query to those contactIds
+          if (contactIds) {
+            followUpQuery.$and.push({
+              personId: {
+                $in: contactIds
+              }
+            });
+          }
+          // find followUps that match the query
+          return app.models.followUp
+            .rawFind(followUpQuery, {projection: {personId: 1}})
+            .then(function (followUps) {
+              // update contact query to include found contacts
+              contactQuery = {
+                and: [
+                  contactQuery,
+                  {
+                    id: {
+                      inq: followUps.map(followUp => followUp.personId)
+                    }
+                  }
+                ]
+              };
+            });
+        });
+    }
+    return buildQuery
+      .then(function () {
+        // restrict contacts query to current outbreak
+        contactQuery = {
+          and: [
+            contactQuery,
+            {
+              outbreakId: outbreak.id
+            }
+          ]
+        };
+        // return updated filter
+        return Object.assign(filter, {where: contactQuery});
       });
   };
 };

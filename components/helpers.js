@@ -736,11 +736,9 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
         // add query operation (per model name)
         queryForeignKeys[modelName] = function (callback) {
           app.models[modelName]
-            .find({
-              where: {
-                id: {
-                  inq: foreignKeyQueryMap[modelName]
-                }
+            .rawFind({
+              id: {
+                inq: foreignKeyQueryMap[modelName]
               }
             })
             .then(function (results) {
@@ -751,7 +749,7 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
       });
 
       // query models to resolve foreign keys
-      async.parallel(queryForeignKeys, function (error, foreignKeyQueryResults) {
+      async.parallelLimit(queryForeignKeys, 10,function (error, foreignKeyQueryResults) {
         // handle error
         if (error) {
           return reject(error);
@@ -763,7 +761,7 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
           foreignKeyResultsMap[modelName] = {};
           // index each instance using record Id
           foreignKeyQueryResults[modelName].forEach(function (modelInstance) {
-            foreignKeyResultsMap[modelName][modelInstance.id] = modelInstance.toJSON();
+            foreignKeyResultsMap[modelName][modelInstance.id] = modelInstance;
           });
         });
 
