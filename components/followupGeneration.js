@@ -160,11 +160,29 @@ module.exports.getContactsEligibleForFollowup = function (startDate, endDate, ou
 };
 
 // get list of follow ups ordered by created date for a given contact
-module.exports.getContactFollowups = function (contactIds) {
+module.exports.getContactFollowups = function (startDate, endDate, contactIds) {
   return App.models.followUp
     .rawFind({
       personId: {
         $in: contactIds
+      },
+      $and: [
+        {
+          date: {
+            $gte: startDate
+          }
+        },
+        {
+          date: {
+            $lte: endDate
+          }
+        }
+      ]
+    }, {
+      projection: {
+        _id: 1,
+        date: 1,
+        personId: 1
       }
     })
     .then((followUps) => _.groupBy(followUps, (f) => f.personId));

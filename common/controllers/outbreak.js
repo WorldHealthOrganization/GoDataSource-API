@@ -1032,7 +1032,7 @@ module.exports = function (Outbreak) {
           .then((teams) => {
             // get follow ups list for all contacts
             return FollowupGeneration
-              .getContactFollowups(contacts.map(c => c.id))
+              .getContactFollowups(followupStartDate.toDate(), followupEndDate.toDate(), contacts.map(c => c.id))
               .then((followUpGroups) => {
                 // create a promise queue for handling database operations
                 const promiseQueue = FollowupGeneration.createPromiseQueue(options);
