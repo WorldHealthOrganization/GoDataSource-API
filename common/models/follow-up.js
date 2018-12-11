@@ -396,7 +396,7 @@ module.exports = function (FollowUp) {
       delete filter.where.timeLastSeen;
     }
     // get week number, if any
-    let weekNumber = _.get(filter, 'filter.weekNumber');
+    let weekNumber = _.get(filter, 'where.weekNumber');
     // if found, remove it form main query
     if (weekNumber != null) {
       delete filter.where.weekNumber;
