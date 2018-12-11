@@ -749,7 +749,7 @@ module.exports = function (Person) {
         buildRuleFilterPart({
           firstName: targetBody.middleName,
           middleName: targetBody.firstName
-        }),
+        })
       );
     }
 
