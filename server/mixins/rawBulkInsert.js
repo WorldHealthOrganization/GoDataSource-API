@@ -60,7 +60,7 @@ module.exports = function (Model) {
     timer.start();
 
     // log usage
-    App.logger.debug(`[Id: ${queryId}] Performing MongoDB insert on collection '${collectionName}'}`);
+    App.logger.debug(`[QueryId: ${queryId}] Performing MongoDB insert on collection '${collectionName}'}`);
 
     // perform insert using mongodb native driver
     return App.dataSources.mongoDb.connector.collection(collectionName)
