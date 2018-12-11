@@ -126,7 +126,7 @@ function exportCollectionInBatches(dbConnection, mongoCollectionName, collection
 
         // export related files
         // if collection is not supported, it will be skipped
-        dbSync.exportCollectionRelatedFiles(collectionName, records, tmpDirName, logger, (err) => {
+        dbSync.exportCollectionRelatedFiles(collectionName, records, archivesDirName, logger, (err) => {
           if (err) {
             logger.debug(`Collection '${collectionName}' related files export failed. Error: ${err}`);
             return callback(err);
@@ -252,12 +252,13 @@ const worker = {
       let tmpDir, tmpDirName, collectionFilesDirName;
 
       try {
+        logger.debug('Creating tmp directories');
         // create a temporary directory to store the database files
         // it always created the folder in the system temporary directory
         tmpDir = tmp.dirSync({unsafeCleanup: true});
         tmpDirName = tmpDir.name;
         // also create an archives subdir
-        collectionFilesDirName = `${tmpDirName}/archives`;
+        collectionFilesDirName = `${tmpDirName}/collections`;
         fs.mkdirSync(collectionFilesDirName);
       } catch (err) {
         logger.error(`Failed creating tmp directories; ${err}`);
@@ -266,6 +267,7 @@ const worker = {
 
       // extract snapshot
       try {
+        logger.debug(`Extracting zip archive: ${snapshotFile}`);
         let archive = new AdmZip(snapshotFile);
         archive.extractAllTo(tmpDirName);
       } catch (zipError) {
@@ -276,11 +278,13 @@ const worker = {
       // decrypt all collection files archives if needed
       let collectionArchives;
       try {
+        // get only zip files
         collectionArchives = fs.readdirSync(tmpDirName);
-        // remove archives dir from the list
-        collectionArchives.splice(collectionArchives.indexOf('archives'), 1);
+        collectionArchives = collectionArchives.filter(function(fileName) {
+          return !fs.statSync(`${tmpDirName}/${fileName}`).isDirectory() && path.extname(fileName) === '.zip';
+        });
       } catch (err) {
-        logger.error(`Failed to read collection files at : ${tmpDirName}. ${err}`);
+        logger.error(`Failed to read collection archive files at : ${tmpDirName}. ${err}`);
         return reject(err);
       }
 
@@ -305,8 +309,10 @@ const worker = {
         });
 
         decryptArchives = new Promise(function (resolve, reject) {
+          logger.debug(`Decripting archives from: ${tmpDirName}`);
           async.parallelLimit(decryptFunctions, 5, function (err) {
             if (err) {
+              logger.error(`Failed to decrypt archive files from : ${tmpDirName}. ${err}`);
               return reject(err);
             }
             return resolve();
@@ -318,6 +324,7 @@ const worker = {
         .then(function () {
           // extract collection archives
           try {
+            logger.debug(`Extracting archives from: ${tmpDirName}`);
             collectionArchives.forEach(function (filePath) {
               let archive = new AdmZip(`${tmpDirName}/${filePath}`);
               archive.extractAllTo(collectionFilesDirName);
