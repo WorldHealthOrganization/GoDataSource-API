@@ -2306,7 +2306,8 @@ module.exports = function (Outbreak) {
     let now = new Date();
 
     // get from noDaysAmongContacts ago
-    let xDaysAgo = new Date((new Date()).setHours(0, 0, 0, 0)).setDate(now.getDate() - noDaysAmongContacts);
+    let xDaysAgo = new Date((new Date()).setHours(0, 0, 0, 0));
+    xDaysAgo.setDate(now.getDate() - noDaysAmongContacts);
 
     // get outbreakId
     let outbreakId = this.id;
@@ -2371,7 +2372,8 @@ module.exports = function (Outbreak) {
     // get current date
     let now = new Date();
     // get date from noDaysNotSeen days ago
-    let xDaysAgo = new Date((new Date()).setHours(0, 0, 0, 0)).setDate(now.getDate() - noDaysNotSeen);
+    let xDaysAgo = new Date((new Date()).setHours(0, 0, 0, 0));
+    xDaysAgo.setDate(now.getDate() - noDaysNotSeen);
 
     // get contact query
     let contactQuery = app.utils.remote.searchByRelationProperty
