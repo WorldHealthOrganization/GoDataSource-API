@@ -863,7 +863,7 @@ module.exports = function (Outbreak) {
             'persons.id': {
               inq: Object.keys(caseMap)
             }
-          }, {projection: {contactDate: 1}})
+          }, {projection: {contactDate: 1, persons: 1}})
           .then(function (relationships) {
             // add relationships to cases
             relationships.forEach(function (relationship) {
@@ -883,7 +883,7 @@ module.exports = function (Outbreak) {
                 // go trough their relationships
                 caseRecord.relationships.forEach(function (relationship) {
                   // store only the relationships that are newer than their conversion date
-                  if ((new Date(relationship.contactDate)) > (new Date(caseRecord.dateBecomeCase))) {
+                  if (app.utils.helpers.getDate(relationship.contactDate) >= app.utils.helpers.getDate(caseRecord.dateBecomeCase)) {
                     relationshipIds.push(relationship.id);
                   }
                 });
