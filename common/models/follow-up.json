@@ -70,6 +70,9 @@
     },
     "fillGeoLocation_index": {
       "fillGeoLocation": "2dsphere"
+    },
+    "date_index": {
+      "date": 1
     }
   },
   "validations": [],

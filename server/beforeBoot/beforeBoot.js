@@ -8,7 +8,6 @@ const searchByRelationProperty = require('../../components/searchByRelationPrope
 const mergeFilters = require('../../components/mergeFilters');
 const convertLoopbackFilterToMongo = require('../../components/convertLoopbackFilterToMongo');
 const apiError = require('../../components/apiError');
-const aesCrypto = require('../../components/aesCrypto');
 const anonymizeDatasetFields = require('../../components/anonymizeDatasetFields');
 const maskField = require('../../components/maskField');
 const qrCode = require('../../components/qrCode');
@@ -45,7 +44,10 @@ function init(app, callback) {
       }
     },
     apiError: apiError,
-    aesCrypto: aesCrypto,
+    aesCrypto: {
+      encrypt: worker.helpers.encrypt,
+      decrypt: worker.helpers.decrypt
+    },
     anonymizeDatasetFields: anonymizeDatasetFields,
     maskField: maskField,
     qrCode: qrCode,

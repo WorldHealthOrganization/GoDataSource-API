@@ -2,6 +2,7 @@
 
 const helpers = require('../helpers');
 const fileCrypto = require('../fileCrypto');
+const aesCrypto = require('../aesCrypto');
 const pdfDoc = require('../pdfDoc');
 
 const worker = {
@@ -29,6 +30,20 @@ const worker = {
    * @return {Promise<any>}
    */
   decryptFile: fileCrypto.decryptSync,
+  /**
+   * Encrypts data
+   * @param password
+   * @param data
+   * @return {Promise<any>}
+   */
+  encrypt: aesCrypto.encrypt,
+  /**
+   * Decrypts data
+   * @param password
+   * @param data
+   * @return {Promise<any>}
+   */
+  decrypt: aesCrypto.decrypt,
   /**
    * Create a PDF file containing PNG images
    * @param imageData

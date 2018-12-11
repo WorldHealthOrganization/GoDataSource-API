@@ -178,6 +178,52 @@ module.exports = {
       });
     },
     /**
+     * Encrypts data
+     * @param password
+     * @param data
+     * @return {Promise<any>}
+     */
+    encrypt: function (password, data) {
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('helpers', 'encrypt', [password, data], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+          // if data was buffer, transform it back to buffer
+          if (
+            result &&
+            result.data &&
+            result.type === 'Buffer') {
+            result = Buffer.from(result.data);
+          }
+          resolve(result);
+        });
+      });
+    },
+    /**
+     * Decrypts data
+     * @param password
+     * @param data
+     * @return {Promise<any>}
+     */
+    decrypt: function (password, data) {
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('helpers', 'decrypt', [password, data], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+          // if data was buffer, transform it back to buffer
+          if (
+            result &&
+            result.data &&
+            result.type === 'Buffer') {
+            result = Buffer.from(result.data);
+          }
+          resolve(result);
+        });
+      });
+    },
+    /**
      * Create a PDF file containing PNG images
      * @param imageData
      * @param splitFactor Split the image into:
