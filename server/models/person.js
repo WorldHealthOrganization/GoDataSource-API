@@ -688,4 +688,139 @@ module.exports = function (Person) {
         return movement;
       });
   };
+
+  /**
+   * Find duplicates entries in database based on hardcoded rules
+   * @param filter Pagination props (skip, limit)
+   * @param outbreakId Outbreak id, used to narrow the searches
+   * @param type Contact/Case
+   * @param targetBody Target body properties (this is used for checking duplicates)
+   */
+  Person.findDuplicatesByType = function (filter, outbreakId, type, targetBody) {
+    const buildRuleFilterPart = function (opts) {
+      let filter = {
+        $and: []
+      };
+      for (let prop in opts) {
+        filter.$and.push({
+          $and: [
+            {
+              // we don't do non-exist values
+              [prop]: {
+                $ne: null
+              }
+            },
+            {
+              // we do exact matches for now
+              [prop]: opts[prop]
+            }
+          ]
+        });
+      }
+      return filter;
+    };
+    const query = {
+      outbreakId: outbreakId,
+      type: type,
+      $or: []
+    };
+
+    if (targetBody.firstName && targetBody.lastName) {
+      query.$or.push(
+        buildRuleFilterPart({
+          firstName: targetBody.firstName,
+          lastName: targetBody.lastName
+        }),
+        // also do reverse checks
+        buildRuleFilterPart({
+          firstName: targetBody.lastName,
+          lastName: targetBody.firstName
+        })
+      );
+    }
+
+    if (targetBody.firstName && targetBody.middleName) {
+      query.$or.push(
+        buildRuleFilterPart({
+          firstName: targetBody.firstName,
+          middleName: targetBody.middleName
+        }),
+        // reverse checks
+        buildRuleFilterPart({
+          firstName: targetBody.middleName,
+          middleName: targetBody.firstName
+        })
+      );
+    }
+
+    if (targetBody.middleName && targetBody.lastName) {
+      query.$or.push(
+        buildRuleFilterPart({
+          middleName: targetBody.middleName,
+          lastName: targetBody.lastName
+        }),
+        // reverse checks
+        buildRuleFilterPart({
+          middleName: targetBody.lastName,
+          lastName: targetBody.middleName
+        })
+      );
+    }
+
+    // we check this only if phone number exists in the target
+    if (targetBody.phoneNumber && targetBody.gender) {
+      query.$or.push(buildRuleFilterPart({
+        phoneNumber: targetBody.phoneNumber,
+        gender: targetBody.gender
+      }));
+    }
+
+    // check against each document in the target body
+    if (targetBody.documents) {
+      targetBody.documents.forEach((doc) => {
+        // we only search the documents that have both target properties with values
+        if (doc.type && doc.number) {
+          query.$or.push({
+            documents: {
+              $elemMatch: {
+                $and: [
+                  {
+                    $and: [
+                      {
+                        type: {
+                          $ne: null
+                        }
+                      },
+                      {
+                        type: doc.type
+                      }
+                    ]
+                  },
+                  {
+                    $and: [
+                      {
+                        number: {
+                          $ne: null
+                        }
+                      },
+                      {
+                        number: doc.number
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          });
+        }
+      });
+    }
+
+    // exclude target instance from the checks
+    if (targetBody.id) {
+      query._id = { $ne: targetBody.id };
+    }
+
+    return app.models.person.rawFind(query, { skip: filter.skip, limit: filter.limit });
+  };
 };

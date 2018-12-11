@@ -1428,6 +1428,18 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "filteredCountContactsOnFollowUpList"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "getContactPossibleDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "getCasePossibleDuplicates"
     }
   ],
   "methods": {
@@ -6239,6 +6251,80 @@
       "http": {
         "verb": "get",
         "path": "/contacts/on-follow-up-list/count"
+      }
+    },
+    "prototype.getContactPossibleDuplicates": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter offset and limit - must be a JSON-encoded string ({\"something\":\"value\"}).",
+          "http": {
+            "source": "query"
+          },
+          "required": true
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "contact",
+          "description": "Model instance data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "duplicates",
+          "type": ["contact"],
+          "description": "List of contacts that are duplicates",
+          "required": true
+        }
+      ],
+      "description": "Get list of contacts that are possible duplicates",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/duplicates/find"
+      }
+    },
+    "prototype.getCasePossibleDuplicates": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter offset and limit - must be a JSON-encoded string ({\"something\":\"value\"}).",
+          "http": {
+            "source": "query"
+          },
+          "required": true
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "case",
+          "description": "Model instance data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "duplicates",
+          "type": ["case"],
+          "description": "List of cases that are duplicates",
+          "required": true
+        }
+      ],
+      "description": "Get list of cases that are possible duplicates",
+      "http": {
+        "verb": "post",
+        "path": "/cases/duplicates/find"
       }
     }
   }
