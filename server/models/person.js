@@ -726,24 +726,45 @@ module.exports = function (Person) {
     };
 
     if (targetBody.firstName && targetBody.lastName) {
-      query.$or.push(buildRuleFilterPart({
-        firstName: targetBody.firstName,
-        lastName: targetBody.lastName
-      }));
+      query.$or.push(
+        buildRuleFilterPart({
+          firstName: targetBody.firstName,
+          lastName: targetBody.lastName
+        }),
+        // also do reverse checks
+        buildRuleFilterPart({
+          firstName: targetBody.lastName,
+          lastName: targetBody.firstName
+        })
+      );
     }
 
     if (targetBody.firstName && targetBody.middleName) {
-      query.$or.push(buildRuleFilterPart({
-        firstName: targetBody.firstName,
-        middleName: targetBody.middleName
-      }));
+      query.$or.push(
+        buildRuleFilterPart({
+          firstName: targetBody.firstName,
+          middleName: targetBody.middleName
+        }),
+        // reverse checks
+        buildRuleFilterPart({
+          firstName: targetBody.middleName,
+          middleName: targetBody.firstName
+        }),
+      );
     }
 
     if (targetBody.middleName && targetBody.lastName) {
-      query.$or.push(buildRuleFilterPart({
-        middleName: targetBody.middleName,
-        lastName: targetBody.lastName
-      }));
+      query.$or.push(
+        buildRuleFilterPart({
+          middleName: targetBody.middleName,
+          lastName: targetBody.lastName
+        }),
+        // reverse checks
+        buildRuleFilterPart({
+          middleName: targetBody.lastName,
+          lastName: targetBody.middleName
+        })
+      );
     }
 
     // we check this only if phone number exists in the target

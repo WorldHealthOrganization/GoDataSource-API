@@ -6287,7 +6287,7 @@
       "description": "Get list of contacts that are possible duplicates",
       "http": {
         "verb": "post",
-        "path": "/contacts/duplicates"
+        "path": "/contacts/duplicates/find"
       }
     },
     "prototype.getCasePossibleDuplicates": {
@@ -6324,7 +6324,7 @@
       "description": "Get list of cases that are possible duplicates",
       "http": {
         "verb": "post",
-        "path": "/cases/duplicates"
+        "path": "/cases/duplicates/find"
       }
     }
   }
