@@ -584,7 +584,7 @@ module.exports = function (Outbreak) {
     // parse case specific params, if not available fallback on default values
     params = params || {};
     params.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
-    params.dateBecomeCase = params.dateBecomeCase || new Date();
+    params.dateBecomeCase = params.dateBecomeCase || app.utils.helpers.getDate().toDate();
     params.wasContact = true;
     params.classification = params.classification || 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT';
 
@@ -702,7 +702,7 @@ module.exports = function (Outbreak) {
 
         // the case has relations with other cases; proceed with the conversion
         return caseInstance.updateAttributes({
-          dateBecomeContact: new Date(),
+          dateBecomeContact: app.utils.helpers.getDate().toDate(),
           wasCase: true,
           type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
         }, options);
