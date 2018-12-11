@@ -3,15 +3,31 @@
 const helpers = require('./helpers');
 const moment = require('moment');
 
+/**
+ * Check if a property is in date format, if so, convert it to date object
+ * @param prop
+ * @returns {*}
+ */
+const checkIfDateAndConvert = function (prop) {
+  // check if the property is in date format
+  if (typeof prop === 'string' && helpers.isValidDate(prop)) {
+    // try to convert the string value to date, if valid, replace the old value
+    let convertedDate = moment(prop);
+    if (convertedDate.isValid()) {
+      prop = convertedDate.toDate();
+    }
+  }
+  // return prop
+  return prop;
+};
+
 const convertProps = function (obj) {
   for (let prop in obj) {
     if (obj.hasOwnProperty(prop)) {
       if (prop === 'between') {
         if (Array.isArray(obj[prop])) {
-          obj.$gte = obj[prop][0];
-          obj.$lte = obj[prop][1];
-          convertProps(obj.$gte);
-          convertProps(obj.$lte);
+          obj.$gte = checkIfDateAndConvert(obj[prop][0]);
+          obj.$lte = checkIfDateAndConvert(obj[prop][1]);
         }
         delete obj[prop];
       } else if (prop === '$regex') {
@@ -22,14 +38,7 @@ const convertProps = function (obj) {
       } else if (typeof obj[prop] == 'object' && obj[prop] !== null) {
         convertProps(obj[prop]);
       } else {
-        // we're only looking for strings properties that have a date format to convert
-        if (typeof obj[prop] === 'string' && helpers.isValidDate(obj[prop])) {
-          // try to convert the string value to date, if valid, replace the old value
-          let convertedDate = moment(obj[prop]);
-          if (convertedDate.isValid()) {
-            obj[prop] = convertedDate.toDate();
-          }
-        }
+        obj[prop] = checkIfDateAndConvert(obj[prop]);
       }
     }
   }
