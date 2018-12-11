@@ -800,6 +800,6 @@ module.exports = function (Person) {
       query._id = { $ne: targetBody.id };
     }
 
-    return app.models.person.rawFind(query, { skip: filter.offset, limit: filter.limit });
+    return app.models.person.rawFind(query, { skip: filter.skip, limit: filter.limit });
   };
 };
