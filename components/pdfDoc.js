@@ -18,7 +18,8 @@ const defaultDocumentConfiguration = {
   widthForPageSize: 841,
   margin: 30,
   fontSize: 8,
-  lineWidth: 1
+  lineWidth: 1,
+  compress: false
 };
 
 /**
