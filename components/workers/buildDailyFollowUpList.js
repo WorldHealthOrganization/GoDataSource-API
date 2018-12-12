@@ -107,6 +107,7 @@ doc.on('end', function () {
   end = true;
 });
 
+// handle client messages
 process.on('message', function (message) {
   worker[message.fn](...message.args);
 });
