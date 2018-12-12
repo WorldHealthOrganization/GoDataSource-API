@@ -150,6 +150,23 @@ const restoreBackupFromFile = function (filePath, done) {
             return filename[0] && dbSync.collectionsMap.hasOwnProperty(filename[0]);
           });
 
+          // sort collectionFiles by batch number
+          collectionsFiles.sort(function (a, b) {
+            let aFileParts = a.split('.');
+            let bFileParts = b.split('.');
+            if (aFileParts[0] !== bFileParts[0]) {
+              // sort by collection name;
+              // Note: we are currently relying on the fact that alphabetical order is the correct order
+              return aFileParts[0] < bFileParts[0] ? -1 : 1;
+            } else {
+              // sort
+              return parseInt(aFileParts[1]) < parseInt(bFileParts[1]) ? -1 : 1;
+            }
+          });
+
+          // initialize collection started map; needed to only try and remove existing records once
+          let collectionStartedMap = {};
+
           // start restoring the database using provided collection files
           return async.series(
             collectionsFiles.map((fileName) => (doneCollection) => {
@@ -232,14 +249,8 @@ const restoreBackupFromFile = function (filePath, done) {
 
                     // restore a collection's record using raw mongodb connector
                     const restoreCollection = function () {
-                      // remove all the documents from the collection, then bulk insert the ones from the file
-                      collectionRef.deleteMany({}, (err) => {
-                        // if delete fails, don't continue
-                        if (err) {
-                          app.logger.error(`Failed to delete database records of collection: ${collectionName}`);
-                          return doneCollection(err);
-                        }
-
+                      // bulk insert records
+                      const insertRecords = function () {
                         // if there are no records in the files just
                         // skip it
                         if (!collectionRecords.length) {
@@ -265,12 +276,34 @@ const restoreBackupFromFile = function (filePath, done) {
                           app.logger.debug(`Restoring Collection ${collectionName} complete.`);
                           return doneCollection();
                         });
-                      });
+                      };
+
+                      // check if collection restore already started
+                      // removing existing records only if the collection restore didn't already start
+                      if (!collectionStartedMap[collectionName]) {
+                        // update collection started flag
+                        collectionStartedMap[collectionName] = true;
+
+                        // remove all the documents from the collection, then bulk insert the ones from the file
+                        collectionRef.deleteMany({}, (err) => {
+                          // if delete fails, don't continue
+                          if (err) {
+                            app.logger.error(`Failed to delete database records of collection: ${collectionName}`);
+                            return doneCollection(err);
+                          }
+
+                          // insert records
+                          insertRecords();
+                        });
+                      } else {
+                        // no need to remove documents; just insert
+                        insertRecords();
+                      }
                     };
 
                     // copy collection linked files
                     if (dbSync.collectionsWithFiles.hasOwnProperty(collectionName)) {
-                      dbSync.importCollectionRelatedFiles(collectionName, tmpDirName, (err) => {
+                      dbSync.importCollectionRelatedFiles(collectionName, tmpDirName, app.logger, options.password, (err) => {
                         if (err) {
                           return doneCollection();
                         }

@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const async = require('async');
 const fsExtra = require('fs-extra');
+const workerRunner = require('./workerRunner');
 
 // map of collection names and property name that matches a file on the disk
 // also directory path (relative to the project) that holds the files should be left unchanged
@@ -382,9 +383,10 @@ const syncRecord = function (logger, model, record, options, done) {
  * @param records
  * @param tmpDir
  * @param logger
+ * @param password Encrypt password
  * @param done
  */
-const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, logger, done) {
+const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, logger, password, done) {
   let storageModel = {};
   require('./../server/models/storage')(storageModel);
 
@@ -415,15 +417,33 @@ const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, 
           // make sure the source file is okay
           return fs.lstat(filePath, function (err) {
             if (err) {
-              logger.warn(`Failed to export file: ${filePath}. Related record: ${record}.`, err);
+              logger.warn(`Failed to export file: ${filePath}. Related record: ${record.id}.`, err);
               return doneRecord();
             }
 
             // copy file in temporary directory
+            let tmpFilePath = path.join(tmpDir, collectionOpts.targetDir, path.basename(record[collectionOpts.prop]));
             return fs.copyFile(
               filePath,
-              path.join(tmpDir, collectionOpts.targetDir, path.basename(record[collectionOpts.prop])),
-              doneRecord
+              tmpFilePath,
+              function () {
+                if (!password) {
+                  return doneRecord();
+                }
+
+                // password is sent; encrypt file
+                return workerRunner
+                  .helpers
+                  .encryptFile(password, {}, tmpFilePath)
+                  .then(function () {
+                    logger.debug(`Encrypted file: ${tmpFilePath}. Related record: ${record.id}.`);
+                    doneRecord();
+                  })
+                  .catch(function (err) {
+                    logger.warn(`Failed to encrypt file: ${tmpFilePath}. Related record: ${record.id}.`, err);
+                    doneRecord();
+                  });
+              }
             );
           });
         };
@@ -435,8 +455,15 @@ const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, 
   });
 };
 
-// import related files from temporary directory to local storage
-const importCollectionRelatedFiles = function (collectionName, tmpDir, done) {
+/**
+ * Import related files from temporary directory to local storage
+ * @param collectionName
+ * @param tmpDir
+ * @param logger
+ * @param password
+ * @param done
+ */
+const importCollectionRelatedFiles = function (collectionName, tmpDir, logger, password, done) {
   // if collection has no related files, stop
   if (!collectionsWithFiles.hasOwnProperty(collectionName)) {
     return done();
@@ -445,11 +472,71 @@ const importCollectionRelatedFiles = function (collectionName, tmpDir, done) {
   // get the property, directory names from the mapping
   const collectionOpts = collectionsWithFiles[collectionName];
 
-  fsExtra.copy(
-    path.join(tmpDir, collectionOpts.targetDir),
-    path.join(__dirname, '..', collectionOpts.srcDir),
-    done
-  );
+  let collectionFilesTmpDir = path.join(tmpDir, collectionOpts.targetDir);
+  let collectionFilesDir = path.join(__dirname, '..', collectionOpts.srcDir);
+
+  logger.debug(`Importing related files for collection '${collectionName}'`);
+
+  /**
+   * Copy files from tmp dir to target dir
+   */
+  function copyFiles() {
+    fsExtra.copy(
+      collectionFilesTmpDir,
+      collectionFilesDir,
+      function (err) {
+        if (err) {
+          logger.warn(`Failed to copy files from tmp dir '${collectionFilesTmpDir}' to '${collectionFilesDir}'`);
+          return done(err);
+        }
+
+        return done();
+      }
+    );
+  }
+
+  // check if the files need to be decrypted
+  if (!password) {
+    return copyFiles();
+  }
+
+  // decrypt files
+  // read all files in the temp dir
+  return fs.readdir(collectionFilesTmpDir, (err, filenames) => {
+    if (err) {
+      logger.warn(`Failed to read files from tmp dir '${collectionFilesTmpDir}'.`);
+      return done(err);
+    }
+
+    logger.debug(`Decrypting files at '${collectionFilesTmpDir}'`);
+
+    return async.parallelLimit(
+      filenames.map((fileName) => (doneFile) => {
+        let filePath = `${collectionFilesTmpDir}/${fileName}`;
+
+        // decrypt file
+        workerRunner
+          .helpers
+          .decryptFile(password, {}, filePath)
+          .then(function () {
+            doneFile();
+          })
+          .catch(function (err) {
+            logger.warn(`Failed to decrypt file '${filePath}'. Error: ${err}. Removing file.`);
+
+            // remove file; waiting for remove action to finish to not copy encrypted files to target dir
+            fs.unlink(filePath, function (err) {
+              logger.warn(`Failed to remove file '${filePath}'. Error: ${err}.`);
+              doneFile();
+            });
+          });
+      }),
+      5,
+      function () {
+        // decrypt finished; copy files to target dir
+        return copyFiles();
+      });
+  });
 };
 
 module.exports = {

@@ -126,7 +126,7 @@ function exportCollectionInBatches(dbConnection, mongoCollectionName, collection
 
         // export related files
         // if collection is not supported, it will be skipped
-        dbSync.exportCollectionRelatedFiles(collectionName, records, archivesDirName, logger, (err) => {
+        dbSync.exportCollectionRelatedFiles(collectionName, records, archivesDirName, logger, options.password, (err) => {
           if (err) {
             logger.debug(`Collection '${collectionName}' related files export failed. Error: ${err}`);
             return callback(err);
@@ -280,7 +280,7 @@ const worker = {
       try {
         // get only zip files
         collectionArchives = fs.readdirSync(tmpDirName);
-        collectionArchives = collectionArchives.filter(function(fileName) {
+        collectionArchives = collectionArchives.filter(function (fileName) {
           return !fs.statSync(`${tmpDirName}/${fileName}`).isDirectory() && path.extname(fileName) === '.zip';
         });
       } catch (err) {

@@ -187,6 +187,20 @@ module.exports = function (Sync) {
                 return filename[0] && dbSync.collectionsMap.hasOwnProperty(filename[0]);
               });
 
+              // sort collectionFiles by batch number
+              collectionsFiles.sort(function (a, b) {
+                let aFileParts = a.split('.');
+                let bFileParts = b.split('.');
+                if (aFileParts[0] !== bFileParts[0]) {
+                  // sort by collection name;
+                  // Note: we are currently relying on the fact that alphabetical order is the correct order
+                  return aFileParts[0] < bFileParts[0] ? -1 : 1;
+                } else {
+                  // sort
+                  return parseInt(aFileParts[1]) < parseInt(bFileParts[1]) ? -1 : 1;
+                }
+              });
+
               // create a list that will contain list of collection with failed records
               let failedIds = {};
               // initialize array containing collections that need to be imported and map of collections that entirely fail on import
@@ -273,7 +287,7 @@ module.exports = function (Sync) {
 
                       // sync collection related files, if necessary
                       if (dbSync.collectionsWithFiles.hasOwnProperty(collectionName)) {
-                        dbSync.importCollectionRelatedFiles(collectionName, tmpDirName, (err) => {
+                        dbSync.importCollectionRelatedFiles(collectionName, tmpDirName, app.logger, options.password, (err) => {
                           if (err) {
                             failedCollectionsRelatedFiles[collectionName] = `Failed to copy related files. ${err}`;
                           }
