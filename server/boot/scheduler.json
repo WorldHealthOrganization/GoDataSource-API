@@ -1,1 +1,1 @@
-{"sync":{"http://who-uat-consolidation.clarisoft.com/api":{"startTime":"2018-12-05T16:00:58.429Z","lastExecutedTime":"2018-12-06T13:22:48.724Z","timeUnit":"h","interval":1}}}
+{"sync":{"http://who-uat-consolidation.clarisoft.com/api":{"startTime":"2018-12-05T16:00:58.429Z","lastExecutedTime":"2018-12-06T13:22:48.724Z","timeUnit":"h","interval":1},"http://whoapicd.clarisoft.com:3123/api":{"startTime":"2018-12-11T16:22:13.072Z","lastExecutedTime":null,"timeUnit":"h","interval":10}}}

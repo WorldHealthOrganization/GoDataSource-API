@@ -6058,6 +6058,13 @@
     "prototype.exportDailyContactFollowUpForm": {
       "accepts": [
         {
+          "arg": "res",
+          "type": "object",
+          "http": {
+            "source": "res"
+          }
+        },
+        {
           "arg": "date",
           "type": "date",
           "required": "true"

@@ -14,6 +14,7 @@ const tmp = require('tmp');
 const Uuid = require('uuid');
 const templateParser = require('./../../components/templateParser');
 const PromisePool = require('es6-promise-pool');
+const fork = require('child_process').fork;
 
 module.exports = function (Outbreak) {
 
@@ -1070,7 +1071,7 @@ module.exports = function (Outbreak) {
                 let poolPromise = pool.start();
 
                 return poolPromise
-                  // make sure the queue has emptied
+                // make sure the queue has emptied
                   .then(() => promiseQueue.internalQueue.onIdle())
                   // settle any remaining items that didn't reach the batch size
                   .then(() => promiseQueue.settleRemaining())
@@ -7230,7 +7231,21 @@ module.exports = function (Outbreak) {
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportDailyContactFollowUpForm = function (date, options, callback) {
+  Outbreak.prototype.exportDailyContactFollowUpForm = function (res, date, options, callback) {
+
+    /**
+     * Flow control, make sure callback is not called multiple times
+     * @param error
+     * @param result
+     */
+    function cb(error, result) {
+      // execute callback
+      callback(error, result);
+      // replace callback with no-op to prevent calling it multiple times
+      callback = function noOp() {
+      };
+    }
+
     const self = this;
     const languageId = options.remotingContext.req.authData.user.languageId;
     let startDate = genericHelpers.getDate(date);
@@ -7258,148 +7273,244 @@ module.exports = function (Outbreak) {
     };
     // get language dictionary
     app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
-      // find contacts
-      app.models.contact.rawFind(filter.where)
-        .then((contacts) => {
-          // build a map of contacts
-          const contactsMap = {};
-          contacts.forEach(function (contact) {
-            contactsMap[contact.id] = contact;
-            contact.followUps = [];
+      if (error) {
+        return cb(error);
+      }
+      // start the builder
+      const dailyFollowUpListBuilder = fork(`${__dirname}../../../components/workers/buildDailyFollowUpList`,
+        [], {
+          execArgv: [],
+          windowsHide: true
+        }
+      );
+
+      /**
+       * Event listener handler
+       */
+      function eventListener() {
+        const error = new Error(`Processing failed. Worker stopped. Event Details: ${JSON.stringify(arguments)}`);
+        res.req.logger.error(JSON.stringify(error));
+        cb(error);
+      }
+
+      // listen to exit events
+      ['error', 'exit'].forEach(function (event) {
+        dailyFollowUpListBuilder.on(event, eventListener);
+      });
+
+      // listen to builder messages
+      dailyFollowUpListBuilder.on('message', function (args) {
+        // first argument is an error
+        if (args[0]) {
+          // handle it
+          cb(args[0]);
+        }
+        // if the message is a chunk
+        if (args[1] && args[1].chunk) {
+          // write it on the response
+          res.write(Buffer.from(args[1].chunk.data));
+        }
+        // if the worker finished
+        if (args[1] && args[1].end) {
+          // end the response
+          res.end();
+          // process will be closed gracefully, remove listeners
+          ['error', 'exit'].forEach(function (event) {
+            dailyFollowUpListBuilder.removeListener(event, eventListener);
           });
+          // stop the builder
+          dailyFollowUpListBuilder.kill();
+        }
+      });
 
-          // find followups filters
-          let followUpsQuery = app.utils.remote.searchByRelationProperty
-            .convertIncludeQueryToFilterQuery(filter).followUps;
+      // set appropriate headers
+      res.set('Content-type', 'application/pdf');
+      res.set('Content-disposition', 'attachment;filename=Daily Contact Follow-up.pdf');
 
-          // build followUps query
-          followUpsQuery = {
-            and: [
-              followUpsQuery,
-              {outbreakId: self.id},
-              {
-                personId: {
-                  inq: Object.keys(contactsMap)
-                }
-              }
-            ]
-          };
+      /**
+       * Process follow-ups in batches (avoid OOM situations)
+       * @param skip
+       * @param limit
+       * @param maxCount
+       * @returns {Promise<any | never>}
+       */
+      function processInBatches(skip, limit, maxCount) {
+        // find contacts in batches
+        return app.models.contact.rawFind(filter.where, {
+          projection: {
+            firstName: 1,
+            middleName: 1,
+            lastName: 1,
+            gender: 1,
+            age: 1,
+            dateOfLastContact: 1,
+            addresses: 1,
+            phoneNumber: 1
+          },
+          skip: skip,
+          limit: limit
+        })
+          .then((contacts) => {
+            // build a map of contacts
+            const contactsMap = {};
+            contacts.forEach(function (contact) {
+              contactsMap[contact.id] = contact;
+              contact.followUps = [];
+            });
 
-          // find followUps that match the query
-          app.models.followUp
-            .rawFind(followUpsQuery)
-            .then(function (followUps) {
-              // add followUps to the list of contacts
-              followUps.forEach(function (followUp) {
-                contactsMap[followUp.personId].followUps.push(followUp);
-              });
-              // Filter contacts with no follow-ups
-              contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
+            // find followups filters
+            let followUpsQuery = app.utils.remote.searchByRelationProperty
+              .convertIncludeQueryToFilterQuery(filter).followUps;
 
-              // Create the document
-              const doc = pdfUtils.createPdfDoc({
-                fontSize: 6,
-                layout: 'landscape',
-                margin: 20,
-                lineGap: 0,
-                wordSpacing: 0,
-                characterSpacing: 0,
-                paragraphGap: 0
-              });
-
-              // add a top margin of 2 lines for each page
-              doc.on('pageAdded', () => {
-                doc.moveDown(2);
-              });
-
-              // set margin top for first page here, to not change the entire createPdfDoc functionality
-              doc.moveDown(2);
-
-              contacts.forEach((contact, index) => {
-                // Initiate the data
-                let data = [{
-                  description: 'Date'
-                }];
-
-                // Initiate the headers
-                let headers = [{
-                  id: 'description',
-                  header: ''
-                }];
-
-                // add follow-up status row
-                data.push({description: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_STATUSID')});
-
-                // go through all follow-usp
-                contact.followUps.forEach((followUp, i) => {
-                  headers.push({
-                    id: 'index' + i,
-                    header: followUp.index
-                  });
-                  // add follow-up date
-                  data[0]['index' + i] = moment(followUp.date).format('YYYY-MM-DD');
-                  // add follow-up status
-                  data[data.length - 1]['index' + i] = dictionary.getTranslation(app.models.followUp.statusAcronymMap[followUp.statusId]);
-                });
-
-                // Add all questions as rows
-                templateParser.extractVariablesAndAnswerOptions(self.contactFollowUpTemplate).forEach((question) => {
-                  data.push({description: dictionary.getTranslation(question.text)});
-                  contact.followUps.forEach((followUp, i) => {
-                    data[data.length - 1]['index' + i] = genericHelpers.translateQuestionAnswers(question, _.get(followUp, `questionnaireAnswers[${question.name}]`), dictionary);
-                  });
-                });
-
-                // store reset locations (x,y before adding contact info)
-                const resetY = doc.y;
-                const resetX = doc.x;
-
-                // Add additional information at the start of each page
-                pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'), 14);
-                doc.text(app.models.person.getDisplayName(contact));
-                doc.text(`${dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_GENDER')}: ${pdfUtils.displayValue(dictionary.getTranslation(contact.gender))}`);
-                doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')}: ${_.get(contact, 'age.years')} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(contact, 'age.months')} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`);
-                doc.text(`${dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE')}: ${moment(contact.dateOfLastContact).format('YYYY-MM-DD')}`);
-                doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_ADDRESSES')}: ${app.models.address.getHumanReadableAddress(app.models.person.getCurrentAddress(contact))}`);
-                doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER')}: ${pdfUtils.displayValue(contact.phoneNumber)}`);
-
-                // add follow up status legend to the right side of the page (reduce whitespace)
-                doc.x = parseInt(doc.page.width / 2);
-                doc.y = resetY;
-                // add legend
-                pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_FOLLOW_UP_STATUS_LEGEND'), 14);
-                for (let statusId in app.models.followUp.statusAcronymMap) {
-                  if (app.models.followUp.statusAcronymMap.hasOwnProperty(statusId)) {
-                    doc.text(`${dictionary.getTranslation(statusId)} = ${dictionary.getTranslation(app.models.followUp.statusAcronymMap[statusId])}`);
+            // build followUps query
+            followUpsQuery = {
+              and: [
+                followUpsQuery,
+                {outbreakId: self.id},
+                {
+                  personId: {
+                    inq: Object.keys(contactsMap)
                   }
                 }
+              ]
+            };
 
-                // reset x
-                doc.x = resetX;
-                doc.moveDown(3);
-
-                // Add the symptoms/follow-up table
-                pdfUtils.createTableInPDFDocument(headers, data, doc);
-
-                // Add a new page for every contact
-                if (index < contacts.length - 1) {
-                  doc.addPage();
+            // find followUps that match the query
+            return app.models.followUp
+              .rawFind(followUpsQuery, {
+                projection: {
+                  personId: 1,
+                  date: 1,
+                  statusId: 1,
+                  questionnaireAnswers: 1
                 }
-              });
+              })
+              .then(function (followUps) {
 
-              // Finish the document
-              doc.end();
+                // add followUps to the list of contacts
+                followUps.forEach(function (followUp) {
+                  contactsMap[followUp.personId].followUps.push(followUp);
+                });
+                // Filter contacts with no follow-ups
+                contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
 
-              // Export the file
-              genericHelpers.streamToBuffer(doc, (err, buffer) => {
-                if (err) {
-                  callback(err);
-                } else {
-                  app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'Daily Contact Follow-up.pdf', callback);
-                }
+                // build data for the worker thread;
+                let _data = [];
+                // go through all the contacts
+                contacts.forEach((contact, index) => {
+                  // build data entry
+                  _data[index] = {};
+                  // Initiate the data
+                  let data = [{
+                    description: 'Date'
+                  }];
+
+                  // Initiate the headers
+                  let headers = [{
+                    id: 'description',
+                    header: ''
+                  }];
+
+                  // add follow-up status row
+                  data.push({description: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_STATUSID')});
+
+                  // go through all follow-usp
+                  contact.followUps.forEach((followUp, i) => {
+                    headers.push({
+                      id: 'index' + i,
+                      header: followUp.index
+                    });
+                    // add follow-up date
+                    data[0]['index' + i] = moment(followUp.date).format('YYYY-MM-DD');
+                    // add follow-up status
+                    data[data.length - 1]['index' + i] = dictionary.getTranslation(app.models.followUp.statusAcronymMap[followUp.statusId]);
+                  });
+
+                  // Add all questions as rows
+                  templateParser.extractVariablesAndAnswerOptions(self.contactFollowUpTemplate).forEach((question) => {
+                    data.push({description: dictionary.getTranslation(question.text)});
+                    contact.followUps.forEach((followUp, i) => {
+                      data[data.length - 1]['index' + i] = genericHelpers.translateQuestionAnswers(question, _.get(followUp, `questionnaireAnswers[${question.name}]`), dictionary);
+                    });
+                  });
+
+                  // add contact information
+                  _data[index].contactInformation = {
+                    title: dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'),
+                    rows: [
+                      app.models.person.getDisplayName(contact),
+                      `${dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_GENDER')}: ${pdfUtils.displayValue(dictionary.getTranslation(contact.gender))}`,
+                      `${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')}: ${_.get(contact, 'age.years')} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(contact, 'age.months')} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
+                      `${dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE')}: ${moment(contact.dateOfLastContact).format('YYYY-MM-DD')}`,
+                      `${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_ADDRESSES')}: ${app.models.address.getHumanReadableAddress(app.models.person.getCurrentAddress(contact))}`,
+                      `${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER')}: ${pdfUtils.displayValue(contact.phoneNumber)}`
+                    ]
+                  };
+
+                  // add legend
+                  _data[index].legend = {
+                    title: dictionary.getTranslation('LNG_FOLLOW_UP_STATUS_LEGEND'),
+                    rows: []
+                  };
+                  for (let statusId in app.models.followUp.statusAcronymMap) {
+                    if (app.models.followUp.statusAcronymMap.hasOwnProperty(statusId)) {
+                      _data[index].legend.rows.push(`${dictionary.getTranslation(statusId)} = ${dictionary.getTranslation(app.models.followUp.statusAcronymMap[statusId])}`);
+                    }
+                  }
+                  // add data & headers
+                  _data[index].data = data;
+                  _data[index].headers = headers;
+
+                });
+                // process data using workers
+                return new Promise(function (resolve, reject) {
+                  // send data to the worker
+                  dailyFollowUpListBuilder.send({fn: 'sendData', args: [_data, skip + limit >= maxCount]});
+
+                  // worker communicates via messages, listen to them
+                  function listener(args) {
+                    // first argument is an error
+                    if (args[0]) {
+                      // handle it
+                      return reject(args[0]);
+                    }
+                    // if the worker is ready for the next batch
+                    if (args[1] && args[1].readyForNextBatch) {
+                      // remove current listener
+                      dailyFollowUpListBuilder.removeListener('message', listener);
+                      // send move to next step
+                      return resolve();
+                    }
+                  }
+
+                  // listen to worker messages
+                  dailyFollowUpListBuilder.on('message', listener);
+                });
               });
-            });
-        });
+          })
+          .then(function () {
+            // update skip for the next
+            skip += limit;
+            // if there is a next batch
+            if (skip < maxCount) {
+              // process it
+              return processInBatches(skip, limit, maxCount);
+            }
+          });
+      }
+
+      // count the contacts that match the query
+      return app.models.contact
+        .count(filter.where)
+        .then(function (contactsNo) {
+          // process contacts in batches
+          return processInBatches(0, 100, contactsNo);
+        })
+        .then(function () {
+          // all records processed, inform the worker that is time to finish
+          dailyFollowUpListBuilder.send({fn: 'finish', args: []});
+        })
+        .catch(cb);
     });
   };
 
