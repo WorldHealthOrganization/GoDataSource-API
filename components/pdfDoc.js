@@ -561,6 +561,8 @@ const displayPersonSectionsWithQuestionnaire = function (doc, sections, title, q
  * @param noHeaderOnNewPage
  */
 function createTableInPDFDocument(headers, data, document, documentConfig, noHeaderOnNewPage) {
+  // sanitize data
+  data = data.filter(row => row != null);
   documentConfig = documentConfig || defaultDocumentConfiguration;
 
   const pdfTable = new PdfTable(document);
