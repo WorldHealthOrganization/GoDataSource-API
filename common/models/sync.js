@@ -390,7 +390,7 @@ module.exports = function (Sync) {
     if (asynchronous === 'true') {
       // import is async
       app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import is being done in async mode`);
-      return client.sendDBSnapshotForImport(DBSnapshotFileName, asynchronous)
+      return client.sendDBSnapshotForImport(DBSnapshotFileName, asynchronous, upstreamServer.autoEncrypt ? 'true' : 'false')
         .then(function (syncLogId) {
           app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import: received upstream server sync log id: ${syncLogId}`);
           // initialize container for server sync log entry status check connection error
@@ -494,7 +494,7 @@ module.exports = function (Sync) {
     } else {
       // import is sync; nothing else to do
       app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import is being done in sync mode`);
-      return client.sendDBSnapshotForImport(DBSnapshotFileName, asynchronous)
+      return client.sendDBSnapshotForImport(DBSnapshotFileName, asynchronous, upstreamServer.autoEncrypt ? 'true' : 'false')
         .then(function (syncLogId) {
           app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import success. Received upstream server sync log id: ${syncLogId}`);
           return syncLogId;
