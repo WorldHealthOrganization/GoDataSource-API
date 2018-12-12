@@ -1,7 +1,6 @@
 'use strict';
 
 // requires
-const tmp = require('tmp');
 const async = require('async');
 const app = require('../../server/server');
 const fs = require('fs');

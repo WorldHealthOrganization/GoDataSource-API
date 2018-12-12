@@ -1,12 +1,10 @@
 'use strict';
 
 // requires
-const AdmZip = require('adm-zip');
 const app = require('../server/server');
 const fs = require('fs');
 const path = require('path');
 const async = require('async');
-const tmp = require('tmp');
 const dbSync = require('./dbSync');
 const helpers = require('../components/helpers');
 const _ = require('lodash');

@@ -24,7 +24,7 @@ const dbConfig = require('./../../server/datasources').mongoDb;
 function createZipArchive(fileName, archiveName, logger) {
   return new Promise(function (resolve, reject) {
     // compress all collection files from the tmp dir into .zip file
-    logger.debug(`Creating zip file`);
+    logger.debug('Creating zip file');
     let output = fs.createWriteStream(archiveName);
     let archive = archiver('zip');
 
@@ -82,7 +82,7 @@ function getMongoDBConnection() {
     .connect(`mongodb://${dbConfig.host}:${dbConfig.port}`, mongoOptions)
     .then(function (client) {
       return client
-        .db(dbConfig.database)
+        .db(dbConfig.database);
     });
 }
 
@@ -150,7 +150,7 @@ function exportCollectionInBatches(dbConnection, mongoCollectionName, collection
                     .encryptFile(options.password, {}, archiveFileName);
                 } else {
                   // no password provided, return file path as is
-                  return Promise.resolve()
+                  return Promise.resolve();
                 }
               })
               .then(function () {
@@ -316,7 +316,7 @@ const worker = {
               return reject(err);
             }
             return resolve();
-          })
+          });
         });
       }
 
