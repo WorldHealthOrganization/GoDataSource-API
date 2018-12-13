@@ -35,8 +35,8 @@ function run(callback) {
                 description: `${referenceDataItemKey}_DESCRIPTION`,
                 categoryId: referenceDataCategory,
                 readOnly: defaultReferenceData[referenceDataCategory][referenceDataItem].readOnly,
-                color: defaultReferenceData[referenceDataCategory][referenceDataItem].color,
-                icon: defaultReferenceData[referenceDataCategory][referenceDataItem].icon
+                colorCode: defaultReferenceData[referenceDataCategory][referenceDataItem].colorCode,
+                iconId: defaultReferenceData[referenceDataCategory][referenceDataItem].iconId
               }, options);
             }
             return foundReferenceData;
