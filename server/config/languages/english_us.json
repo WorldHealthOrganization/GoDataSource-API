@@ -2760,7 +2760,7 @@
       "LNG_HUB_CONFIGURATION_SCREEN_ERROR_GET_CURRENT_HUB": "Error get current HUB",
       "LNG_HUB_CONFIGURATION_SCREEN_ERROR_WHILE_GETTING_CURRENT_HUB_CONFIG": "An error occurred while getting current HUB configuration",
       "LNG_HUB_CONFIGURATION_SCREEN_ERROR_GET_LAST_SYNC_DATE": "Error get last sync date",
-      "LNG_HUB_CONFIGURATION_SCREEN_ERROR_WHILE_GETTING_CURRENT_HUBS_LAST_SYNC_DATE": "An error occurred while getting current HUB\\'s last sync date",
+      "LNG_HUB_CONFIGURATION_SCREEN_ERROR_WHILE_GETTING_CURRENT_HUBS_LAST_SYNC_DATE": "An error occurred while getting current HUB's last sync date",
       "LNG_HUB_CONFIGURATION_SCREEN_ERROR_YOU_HAVE_UNSAVED_DATA_SURE_LEAVE_PAGE": "You have unsaved data. Are you sure you want to leave this page and lose all changes?",
       "LNG_HUB_CONFIGURATION_SCREEN_SUCCESS_UPDATING_HUB": "Success updating hub",
       "LNG_HUB_CONFIGURATION_SCREEN_HUB_CREDENTIALS_SUCCESS_UPDATED": "HUB credentials were successfully updated",
