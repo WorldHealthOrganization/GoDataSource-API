@@ -20,7 +20,7 @@ function run(callback) {
   // go through all reference data categories
   Object.keys(defaultReferenceData).forEach(function (referenceDataCategory) {
     // go through all reference data items
-    defaultReferenceData[referenceDataCategory].forEach(function (referenceDataItem) {
+    Object.keys(defaultReferenceData[referenceDataCategory]).forEach(function (referenceDataItem) {
       // build item key
       let referenceDataItemKey = referenceData.getTranslatableIdentifierForValue(referenceDataCategory, referenceDataItem);
       // create reference data item (if not already there
@@ -34,7 +34,9 @@ function run(callback) {
                 value: referenceDataItemKey,
                 description: `${referenceDataItemKey}_DESCRIPTION`,
                 categoryId: referenceDataCategory,
-                readOnly: true
+                readOnly: defaultReferenceData[referenceDataCategory][referenceDataItem].readOnly,
+                color: defaultReferenceData[referenceDataCategory][referenceDataItem].color,
+                icon: defaultReferenceData[referenceDataCategory][referenceDataItem].icon
               }, options);
             }
             return foundReferenceData;
