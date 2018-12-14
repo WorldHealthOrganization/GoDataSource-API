@@ -5913,7 +5913,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship' MongoDB compatible queries and 'where.noRelationships' query"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship', 'where.labResult' MongoDB compatible queries and 'where.noRelationships' query"
         }
       ],
       "returns": [
@@ -5944,7 +5944,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship' MongoDB compatible queries and 'where.noRelationships' query"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship', 'where.labResult' MongoDB compatible queries and 'where.noRelationships' query"
         }
       ],
       "returns": [
