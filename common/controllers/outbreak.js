@@ -4296,7 +4296,7 @@ module.exports = function (Outbreak) {
             });
           });
           // start importing cases
-          async.parallelLimit(createCases, 10, function (error, results) {
+          async.series(createCases, function (error, results) {
             // handle errors (should not be any)
             if (error) {
               return callback(error);
@@ -4412,7 +4412,7 @@ module.exports = function (Outbreak) {
             });
           });
           // start importing contacts
-          async.parallelLimit(createContacts, 10, function (error, results) {
+          async.series(createContacts, function (error, results) {
             // handle errors (should not be any)
             if (error) {
               return callback(error);
