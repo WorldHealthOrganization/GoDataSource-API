@@ -327,6 +327,52 @@ module.exports = function (Contact) {
         });
     }
 
+    if (groupBy === 'riskLevel') {
+      let dateInterval = [];
+      if (typeof date === 'object' && date.startDate && date.endDate) {
+        dateInterval = [moment(date.startDate).startOf('day'), moment(date.endDate).endOf('day')];
+      } else if (typeof date === 'string') {
+        dateInterval = [moment(date).startOf('day'), moment(date).endOf('day')];
+      } else {
+        dateInterval = [moment(new Date()).startOf('day'), moment(new Date()).endOf('day')];
+      }
+      return app.models.followUp
+        .rawFind({
+          date: {
+            between: dateInterval
+          }
+        })
+        .then(function (followUps) {
+          const followUpMap = {};
+          followUps.forEach(function (followUp) {
+            if(!followUpMap[followUp.personId]){
+              followUpMap[followUp.personId] = [];
+            }
+            followUpMap[followUp.personId].push(followUps);
+          });
+          return app.models.contact.rawFind({
+            _id: {
+              inq: Array.from(new Set(Object.keys(followUpMap)))
+            }
+          })
+            .then(function (contacts) {
+              const contactGroups = {};
+              contacts.forEach(function (contact) {
+                contact.followUps = followUpMap[contact.id];
+                // risk level is optional
+                if (contact.riskLevel == null) {
+                  contact.riskLevel = 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED';
+                }
+                if(!contactGroups[contact.riskLevel]){
+                  contactGroups[contact.riskLevel] = [];
+                }
+                contactGroups[contact.riskLevel].push(contact);
+              });
+              return contactGroups;
+            });
+        });
+    }
+
     // check if we need to send an interval of dates or a single date
     let dateFilter = {dateOfFollowUp: date};
     if (typeof date === 'object') {

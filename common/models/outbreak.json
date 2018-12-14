@@ -1281,12 +1281,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactsPerRiskLevelV2"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "countCasesStratifiedByClassificationOverTime"
@@ -5432,43 +5426,6 @@
         "path": "/contacts/per-risk-level/count"
       }
     },
-    "prototype.countContactsPerRiskLevelV2": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "count",
-          "type": {
-            "riskLevel": {
-              "type": {
-                "<riskLevel>": {
-                  "type": {
-                    "count": "number",
-                    "contactIDs": [
-                      "string"
-                    ]
-                  }
-                }
-              }
-            },
-            "count": "number"
-          },
-          "description": "Number of contacts grouped by case risk level",
-          "required": true,
-          "root": true
-        }
-      ],
-      "description": "Counts the number of contacts grouped by case risk level",
-      "http": {
-        "verb": "get",
-        "path": "/contacts/v2/per-risk-level/count"
-      }
-    },
     "prototype.countCasesStratifiedByClassificationOverTime": {
       "accepts": [
         {
@@ -5997,28 +5954,6 @@
           "path": "/contacts/filter"
         }
       ]
-    },
-    "prototype.countContacts": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "count",
-          "type": "number",
-          "description": "Number of contacts that match the search criteria",
-          "required": true
-        }
-      ],
-      "description": "Counts contacts of outbreak.",
-      "http": {
-        "verb": "get",
-        "path": "/contacts/v2/count"
-      }
     },
     "prototype.caseDelayBetweenOnsetAndLabTesting": {
       "accepts": [
