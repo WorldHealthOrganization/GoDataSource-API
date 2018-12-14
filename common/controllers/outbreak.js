@@ -7594,11 +7594,18 @@ module.exports = function (Outbreak) {
     let query = app.utils.remote.searchByRelationProperty
       .convertIncludeQueryToFilterQuery(filter);
     // get relationship query, if any
-    const queryCase = _.get(filter, 'where.relationship');
+    const queryRelationship = _.get(filter, 'where.relationship');
     // if there is no relationship query, but there is an older version of the filter
-    if (!queryCase && query.relationships) {
+    if (!queryRelationship && query.relationships) {
       // use that old version
       _.set(filter, 'where.relationship', query.relationships);
+    }
+    // get relationship query, if any
+    const queryLabResults = _.get(filter, 'where.labResult');
+    // if there is no relationship query, but there is an older version of the filter
+    if (!queryLabResults && query.labResults) {
+      // use that old version
+      _.set(filter, 'where.labResult', query.labResults);
     }
     next();
   }
@@ -7618,7 +7625,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Find outbreak cases
-   * @param filter Supports 'where.relationship' MongoDB compatible queries
+   * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
    * @param callback
    */
   Outbreak.prototype.findCases = function (filter, callback) {
@@ -7637,7 +7644,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Count outbreak cases
-   * @param filter Supports 'where.relationship' MongoDB compatible queries
+   * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
    * @param callback
    */
   Outbreak.prototype.filteredCountCases = function (filter, callback) {
@@ -7656,7 +7663,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Count cases by case classification
-   * @param filter Supports 'where.relationship' MongoDB compatible queries
+   * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
    * @param callback
    */
   Outbreak.prototype.countCasesPerClassification = function (filter, callback) {
@@ -7693,7 +7700,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Export filtered cases to file
-   * @param filter
+   * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
