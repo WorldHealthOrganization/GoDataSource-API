@@ -227,23 +227,25 @@ module.exports = function (Contact) {
 
   /**
    * Retrieve all contact's that have follow ups on the given date
-   * Group them by place/case
+   * Group them by place/case/riskLevel
    * If group by place is set, placeLevel property is required
    * @param outbreak
    * @param date
    * @param groupBy
    */
   Contact.getGroupedByDate = function (outbreak, date, groupBy) {
-    if (groupBy === 'case') {
-      let dateInterval = [];
-      if (typeof date === 'object' && date.startDate && date.endDate) {
-        dateInterval = [moment(date.startDate).startOf('day'), moment(date.endDate).endOf('day')];
-      } else if (typeof date === 'string') {
-        dateInterval = [moment(date).startOf('day'), moment(date).endOf('day')];
-      } else {
-        dateInterval = [moment(new Date()).startOf('day'), moment(new Date()).endOf('day')];
-      }
 
+    // process date interval
+    let dateInterval = [];
+    if (typeof date === 'object' && date.startDate && date.endDate) {
+      dateInterval = [moment(date.startDate).startOf('day'), moment(date.endDate).endOf('day')];
+    } else if (typeof date === 'string') {
+      dateInterval = [moment(date).startOf('day'), moment(date).endOf('day')];
+    } else {
+      dateInterval = [moment(new Date()).startOf('day'), moment(new Date()).endOf('day')];
+    }
+
+    if (groupBy === 'case') {
       let filter = {
         where: {
           outbreakId: outbreak.id
@@ -323,6 +325,55 @@ module.exports = function (Contact) {
             .then((contacts) => {
               // group them by case id
               return _.groupBy(contacts, (c) => c.caseId);
+            });
+        });
+    }
+
+    // group by risk level
+    if (groupBy === 'riskLevel') {
+      // find follow-ups for specified date interval
+      return app.models.followUp
+        .rawFind({
+          date: {
+            between: dateInterval
+          }
+        })
+        .then(function (followUps) {
+          // build a followUp map, to easily link them to contacts later
+          const followUpMap = {};
+          // go through the follow-ups
+          followUps.forEach(function (followUp) {
+            // add follow-ups to the map
+            if (!followUpMap[followUp.personId]) {
+              followUpMap[followUp.personId] = [];
+            }
+            followUpMap[followUp.personId].push(followUps);
+          });
+          // find the contacts associated with the follow-ups
+          return app.models.contact
+            .rawFind({
+              _id: {
+                inq: Array.from(new Set(Object.keys(followUpMap)))
+              }
+            })
+            .then(function (contacts) {
+              // build contact groups
+              const contactGroups = {};
+              // go through the contacts
+              contacts.forEach(function (contact) {
+                // add their follow-ups
+                contact.followUps = followUpMap[contact.id];
+                // risk level is optional
+                if (contact.riskLevel == null) {
+                  contact.riskLevel = 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED';
+                }
+                // group contacts by risk level
+                if (!contactGroups[contact.riskLevel]) {
+                  contactGroups[contact.riskLevel] = [];
+                }
+                contactGroups[contact.riskLevel].push(contact);
+              });
+              return contactGroups;
             });
         });
     }
