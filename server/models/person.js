@@ -818,9 +818,14 @@ module.exports = function (Person) {
 
     // exclude target instance from the checks
     if (targetBody.id) {
-      query._id = { $ne: targetBody.id };
+      query._id = {$ne: targetBody.id};
     }
 
-    return app.models.person.rawFind(query, { skip: filter.skip, limit: filter.limit });
+    // remove empty queries
+    if (!query.$or.length) {
+      delete query.$or;
+    }
+
+    return app.models.person.rawFind(query, {skip: filter.skip, limit: filter.limit});
   };
 };
