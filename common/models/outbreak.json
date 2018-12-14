@@ -6124,7 +6124,7 @@
           "arg": "data",
           "type": "object",
           "model": "exportRangeContacts",
-          "description": "Group By, Range Date properties",
+          "description": "Group By (case, place, risk level), Range Date properties",
           "http": {
             "source": "body"
           },

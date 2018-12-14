@@ -6895,9 +6895,11 @@ module.exports = function (Outbreak) {
                   if (body.groupBy === 'case') {
                     groupTitle = caseIdValueMap[groupName];
                   }
+                  // risk level title is a token, should be translated
                   if (body.groupBy === 'riskLevel') {
                     groupTitle = dictionary.getTranslation(groupName);
                   }
+
                   pdfUtils.addTitle(doc, groupTitle, 12);
 
                   // common headers
