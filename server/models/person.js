@@ -4,6 +4,7 @@
 const app = require('../server');
 const personDuplicate = require('../../components/workerRunner').personDuplicate;
 const helpers = require('../../components/helpers');
+const _ = require('lodash');
 
 module.exports = function (Person) {
 
@@ -232,28 +233,37 @@ module.exports = function (Person) {
       context.options.triggerRelationshipUpdates = true;
     }
 
-    // validate visual ID template
-    // get outbreak
-    app.models.outbreak
-      .findById(data.source.existing.outbreakId)
-      .then(function (outbreak) {
-        // check for outbreak; should always exist
-        if (!outbreak) {
-          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
-            model: app.models.outbreak.modelName,
-            id: data.source.existing.outbreakId
-          });
-        }
+    // check if visual id should be validated (validation can be disabled under certain conditions)
+    const validateVisualId = !_.get(context, 'options._disableVisualIdValidation', false);
 
-        // resolve visual ID
-        return app.models.outbreak.helpers
-          .resolvePersonVisualIdTemplate(outbreak, data.target.visualId, context.isNewInstance ? null : data.source.existing.id);
-      })
-      .then(function (resolvedVisualId) {
-        data.target.visualId = resolvedVisualId;
-        next();
-      })
-      .catch(next);
+    // if validation is enabled
+    if (validateVisualId) {
+      // validate visual ID template
+      // get outbreak
+      app.models.outbreak
+        .findById(data.source.existing.outbreakId)
+        .then(function (outbreak) {
+          // check for outbreak; should always exist
+          if (!outbreak) {
+            throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+              model: app.models.outbreak.modelName,
+              id: data.source.existing.outbreakId
+            });
+          }
+
+          // resolve visual ID
+          return app.models.outbreak.helpers
+            .resolvePersonVisualIdTemplate(outbreak, data.target.visualId, context.isNewInstance ? null : data.source.existing.id);
+        })
+        .then(function (resolvedVisualId) {
+          data.target.visualId = resolvedVisualId;
+          next();
+        })
+        .catch(next);
+    } else {
+      // validation disabled
+      next();
+    }
   });
 
   /**

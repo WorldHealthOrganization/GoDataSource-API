@@ -3252,6 +3252,8 @@ module.exports = function (Outbreak) {
     }
     // execute same hooks as for sync (data should already exist)
     options._sync = true;
+    // disable visual id validation for record merging
+    options._disableVisualIdValidation = true;
     // defensive checks
     data = data || {};
     data.ids = data.ids || [];
