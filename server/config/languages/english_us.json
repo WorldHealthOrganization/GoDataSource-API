@@ -2965,7 +2965,23 @@
       "LNG_HUB_CONFIGURATION_SCREEN_HUB_CREDENTIALS_SUCCESS_UPDATED": "HUB credentials were successfully updated",
       "LNG_HUB_CONFIGURATION_SCREEN_SUCCES_SET_HUB_AS_ACTIVE_AND_YOU_WILL_BE_LOGGED_OUT_MESSAGE": "The HUB was successfully made as active. You will be logged out and can log in with the credentials for the new HUB configuration",
       "LNG_COMMON_BUTTON_DELETE": "Delete",
-      "LNG_COMMON_BUTTON_APPLY_FILTERS": "Apply filters"
+      "LNG_COMMON_BUTTON_APPLY_FILTERS": "Apply filters",
+      "LNG_HELP_ITEMS_ADD_MESSAGE": "Add",
+      "LNG_HELP_ITEMS_EDIT_MESSAGE": "Edit",
+      "LNG_HELP_ITEMS_EMPTY_LIST_MESSAGE": "There are not help items to display",
+      "LNG_HELP_ITEMS_FIELD_LABEL_CATEGORY": "Category",
+      "LNG_HELP_ITEMS_FIELD_LABEL_COMMENT": "Comment",
+      "LNG_HELP_ITEMS_FIELD_LABEL_DESCRIPTION": "Description",
+      "LNG_HELP_ITEMS_FIELD_LABEL_PAGE": "Page",
+      "LNG_HELP_ITEMS_FIELD_LABEL_TITLE": "Title",
+      "LNG_HELP_ITEMS_FILTER_CATEGORY_LABEL": "Category",
+      "LNG_HELP_ITEMS_FILTER_CATEGORY_MESSAGE_LABEL": "Choose one or more categories",
+      "LNG_HELP_ITEMS_FILTER_SCREEN_TITLE": "Help filters",
+      "LNG_HELP_ITEMS_ITEMS_FOR_MESSAGE": "items for",
+      "LNG_HELP_ITEMS_LIST_TITLE": "Help",
+      "LNG_HELP_ITEMS_SINGLE_SCREEN_VIEW_TITLE_LABEL": "View Help Item",
+      "LNG_HELP_ITEMS_VIEW_ACTION_LABEL": "View",
+      "LNG_HELP_ITEMS_VIEW_MESSAGE": "View"
     }
   }
 }
