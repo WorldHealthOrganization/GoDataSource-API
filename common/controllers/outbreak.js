@@ -7254,7 +7254,7 @@ module.exports = function (Outbreak) {
     // set them according to date
     if (date) {
       startDate = genericHelpers.getDate(date);
-      endDate = genericHelpers.getDate(date);
+      endDate = genericHelpers.getDateEndOfDay(date);
     }
 
     // Filter to get all of the outbreak's contacts that are under follow-up, and all their follow-ups, from the specified date
@@ -7407,7 +7407,7 @@ module.exports = function (Outbreak) {
                   contactsMap[followUp.personId].followUps.push(followUp);
                 });
                 // Filter contacts with no follow-ups
-                contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
+                contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, _filter);
 
                 // build data for the worker thread;
                 let _data = [];
@@ -8059,6 +8059,7 @@ module.exports = function (Outbreak) {
     app.models.contact
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
+        // export contact followUp list according to the specified filter (matched contacts) for all days
         self.exportContactFollowUpListPerDay(res, null, filter, options, callback);
       });
   };
