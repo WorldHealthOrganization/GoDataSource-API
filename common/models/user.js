@@ -66,9 +66,8 @@ module.exports = function (User) {
    */
   User.helpers.validatePassword = function (password, callback) {
     if (password) {
-      const regExp = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).+$/;
-      if (password.length < 6 || !(regExp.exec(password))) {
-        return callback(app.utils.apiError.getError('INVALID_PASSWORD', {length: 6}));
+      if (password.length < 12) {
+        return callback(app.utils.apiError.getError('INVALID_PASSWORD', {length: 12}));
       }
     }
     return callback();
