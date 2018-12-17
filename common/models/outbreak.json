@@ -1397,7 +1397,7 @@
       "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
-      "property": "exportDailyContactFollowUpForm"
+      "property": "exportContactFollowUpListPerDay"
     },
     {
       "principalType": "ROLE",
@@ -1409,7 +1409,7 @@
       "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
-      "property": "exportDailyListOfContacts"
+      "property": "exportDailyContactFollowUpList"
     },
     {
       "principalType": "ROLE",
@@ -5990,7 +5990,7 @@
         "path": "/cases/delay-onset-lab-testing"
       }
     },
-    "prototype.exportDailyContactFollowUpForm": {
+    "prototype.exportContactFollowUpListPerDay": {
       "accepts": [
         {
           "arg": "res",
@@ -6002,7 +6002,12 @@
         {
           "arg": "date",
           "type": "date",
-          "required": "true"
+          "required": true
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries"
         },
         {
           "arg": "options",
@@ -6071,18 +6076,19 @@
         "path": "/cases/:nk/lab-results/:fk/restore"
       }
     },
-    "prototype.exportDailyListOfContacts": {
+    "prototype.exportDailyContactFollowUpList": {
       "accepts": [
         {
-          "arg": "data",
+          "arg": "res",
           "type": "object",
-          "model": "exportContacts",
-          "description": "Group By, Date properties",
           "http": {
-            "source": "body"
-          },
-          "root": true,
-          "required": true
+            "source": "res"
+          }
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries"
         },
         {
           "arg": "options",
