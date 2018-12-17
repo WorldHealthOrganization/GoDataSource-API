@@ -7226,6 +7226,7 @@ module.exports = function (Outbreak) {
    * Export a daily contact follow-up form for every contact from a specified date.
    * @param res
    * @param date
+   * @param filter
    * @param options
    * @param callback
    */

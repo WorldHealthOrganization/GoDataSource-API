@@ -66,6 +66,10 @@ function init(app, callback) {
     }
   };
   app.ROOT_PATH = path.resolve(__dirname, '../..');
+  // add toJSON functionality for RegExp
+  if (!RegExp.prototype.toJSON) {
+    RegExp.prototype.toJSON = RegExp.prototype.toString;
+  }
   callback();
 }
 
