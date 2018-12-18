@@ -417,8 +417,20 @@ module.exports = function (Sync) {
         outbreakIDs = [];
       }
 
+      // auto-encrypt if not specified otherwise
+      let autoEncrypt = true;
+      // if auto-encrypt flag was sent
+      if (fields.autoEncrypt != null) {
+        if (
+          fields.autoEncrypt === 'false' ||
+          fields.autoEncrypt === '0'
+        ) {
+          autoEncrypt = false;
+        }
+      }
+
       // get password
-      const password = getSyncEncryptPassword(fields.password, _.get(requestOptions, 'remotingContext.req.authData.credentials'), fields.autoEncrypt === 'true');
+      const password = getSyncEncryptPassword(fields.password, _.get(requestOptions, 'remotingContext.req.authData.credentials'), autoEncrypt);
 
       // create sync log entry
       app.models.syncLog
