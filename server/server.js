@@ -1,5 +1,10 @@
 'use strict';
 
+// load dependencies
+const ip = require('ip');
+const request = require('request');
+const config = require('./config');
+
 let app;
 
 // catch exceptions on startup
@@ -35,12 +40,39 @@ app.start = function () {
   // start the web server
   return app.listen(function () {
     app.emit('started');
-    const baseUrl = app.get('url').replace(/\/$/, '');
-    app.logger.info('Web server listening at: %s', baseUrl);
-    if (app.get('loopback-component-explorer')) {
-      const explorerPath = app.get('loopback-component-explorer').mountPath;
-      app.logger.info('Browse your REST API at %s%s', baseUrl, explorerPath);
-    }
+
+    // try and figure out IP address
+    let baseUrl = `http://${ip.address()}:${config.port}`;
+
+    app.logger.debug(`Trying to find server address. Testing: ${baseUrl}`);
+    // test if that IP address is actually the correct one by making a status request
+    request({
+      uri: `${baseUrl}/status`,
+      json: true,
+      // do not wait a lot of time for the server to respond
+      timeout: 3000
+    }, function (error, response, body) {
+      // if an error occurred
+      if (error) {
+        // log it
+        app.logger.error(error);
+        // fallback to standard loopback address
+        baseUrl = app.get('url').replace(/\/$/, '');
+      }
+      // no error, but unexpected response
+      if (!body || !body.started) {
+        // log unexpected response
+        app.logger.debug('Unexpected response from /status endpoint. Falling back to default address');
+        // fallback to standard loopback address
+        baseUrl = app.get('url').replace(/\/$/, '');
+      }
+
+      app.logger.info('Web server listening at: %s', baseUrl);
+      if (app.get('loopback-component-explorer')) {
+        const explorerPath = app.get('loopback-component-explorer').mountPath;
+        app.logger.info('Browse your REST API at %s%s', baseUrl, explorerPath);
+      }
+    });
   });
 };
 

@@ -30,7 +30,8 @@ const defaultSettings = {
       'lastName',
       'addresses[].addressLine1'
     ]
-  }
+  },
+  'dbVersion': '1.0.0'
 };
 
 // initialize action options; set _init flag to prevent execution of some after save scripts

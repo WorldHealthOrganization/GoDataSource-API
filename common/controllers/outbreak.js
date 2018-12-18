@@ -3252,6 +3252,8 @@ module.exports = function (Outbreak) {
     }
     // execute same hooks as for sync (data should already exist)
     options._sync = true;
+    // disable visual id validation for record merging
+    options._disableVisualIdValidation = true;
     // defensive checks
     data = data || {};
     data.ids = data.ids || [];
@@ -4296,7 +4298,7 @@ module.exports = function (Outbreak) {
             });
           });
           // start importing cases
-          async.parallelLimit(createCases, 10, function (error, results) {
+          async.series(createCases, function (error, results) {
             // handle errors (should not be any)
             if (error) {
               return callback(error);
@@ -4412,7 +4414,7 @@ module.exports = function (Outbreak) {
             });
           });
           // start importing contacts
-          async.parallelLimit(createContacts, 10, function (error, results) {
+          async.series(createContacts, function (error, results) {
             // handle errors (should not be any)
             if (error) {
               return callback(error);
@@ -6423,7 +6425,10 @@ module.exports = function (Outbreak) {
     let standardFormat = 'YYYY-MM-DD';
 
     // get list of questions for contacts from outbreak
-    let questions = this.contactFollowUpTemplate.sort((a, b) => a.order > b.order);
+    let questions = templateParser.extractVariablesAndAnswerOptions(this.contactFollowUpTemplate);
+    questions.forEach(function (question) {
+      question.variable = question.name;
+    });
 
     // case id value maps
     // mainly used to know which value should be set into document for each case id
@@ -6472,9 +6477,19 @@ module.exports = function (Outbreak) {
               pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_DAILY_CONTACTS_LIST'));
               doc.moveDown();
 
+              let firstPage = true;
+
               // build tables for each group item
               for (let groupName in contactGroups) {
                 if (contactGroups.hasOwnProperty(groupName)) {
+
+                  // first page is added automatically
+                  if (firstPage) {
+                    firstPage = false;
+                  } else {
+                    doc.addPage();
+                  }
+
                   // if contacts are grouped by case search the group name in the configured map
                   // otherwise use group id as title
                   let groupTitle = groupName;
@@ -6542,32 +6557,8 @@ module.exports = function (Outbreak) {
                     });
                   };
 
-                  // go through each question and make sure you get the additional questions on first level as well
-                  let questionsClone = [];
-
-                  questions.forEach((question) => {
-                    (function parseAdditionalQuestions(question) {
-                      if (question) {
-                        // make sure the question is in the main questions list
-                        if (questionsClone.findIndex((q) => q.variable === question.variable) === -1) {
-                          questionsClone.push(question);
-                        }
-
-                        if (question.answers) {
-                          question.answers.forEach((answer) => {
-                            if (answer.additionalQuestions && answer.additionalQuestions.length) {
-                              answer.additionalQuestions.forEach((additionalQuestion) => {
-                                parseAdditionalQuestions(additionalQuestion);
-                              });
-                            }
-                          });
-                        }
-                      }
-                    })(question);
-                  });
-
                   // include contact questions into the table
-                  questionsClone.forEach((item) => {
+                  questions.forEach((item) => {
                     if (item.variable) {
                       if (counter <= mainTableMaxQuestionsCount && !isMainTableFull) {
                         headers.push({
@@ -6610,13 +6601,13 @@ module.exports = function (Outbreak) {
 
                   // start building table data
                   let tableData = [];
+                  let rowIndex = 0;
                   contactGroups[groupName].forEach((contact) => {
-                    let rowIndex = 0;
                     contact.followUps.forEach((followUp) => {
                       let row = {
                         contact: `${display(contact.firstName)} ${display(contact.middleName)} ${display(contact.lastName)}`,
                         status: dictionary.getTranslation(followUp.statusId) || '',
-                        gender: display(contact.gender)
+                        gender: display(dictionary.getTranslation(contact.gender))
                       };
 
                       let age = '';
@@ -6653,23 +6644,29 @@ module.exports = function (Outbreak) {
                       }
 
                       // defensive check
-                      let questions = followUp.questionnaireAnswers || {};
+                      let answers = followUp.questionnaireAnswers || {};
+
+                      // build list of questions/answers
+                      let questionsAnswers = {};
+                      questions.forEach(function (question) {
+                        questionsAnswers[question.name] = answers[question.name];
+                      });
 
                       // add questionnaire answers into the table if any
-                      for (let questionId in questions) {
-                        if (questions.hasOwnProperty(questionId)) {
+                      for (let questionId in questionsAnswers) {
+                        if (questionsAnswers.hasOwnProperty(questionId)) {
                           // filter the question answer through display function
                           // to be sure it will not display unwanted values like undefined/null in the document
 
                           // if its array all the things commented above for each item in the array
                           // then the result is joined with comma
                           let answer = '';
-                          if (Array.isArray(questions[questionId])) {
-                            answer = questions[questionId]
+                          if (Array.isArray(questionsAnswers[questionId])) {
+                            answer = questionsAnswers[questionId]
                               .map((q) => display(dictionary.getTranslation(q)))
                               .join();
                           } else {
-                            answer = display(dictionary.getTranslation(questions[questionId]));
+                            answer = display(dictionary.getTranslation(questionsAnswers[questionId]));
                           }
 
                           // first check if its in the main table
@@ -6701,11 +6698,11 @@ module.exports = function (Outbreak) {
                   // insert table into the document
                   pdfUtils.createTableInPDFDocument(headers, tableData, doc, null, true);
 
+                  doc.moveDown(2);
+
                   additionalTables.forEach((tableDef) => {
                     pdfUtils.createTableInPDFDocument(tableDef.headers, tableDef.values, doc, null, true);
                   });
-
-                  doc.moveDown();
                 }
               }
 
@@ -6895,6 +6892,11 @@ module.exports = function (Outbreak) {
                   if (body.groupBy === 'case') {
                     groupTitle = caseIdValueMap[groupName];
                   }
+                  // risk level title is a token, should be translated
+                  if (body.groupBy === 'riskLevel') {
+                    groupTitle = dictionary.getTranslation(groupName);
+                  }
+
                   pdfUtils.addTitle(doc, groupTitle, 12);
 
                   // common headers
@@ -6995,7 +6997,7 @@ module.exports = function (Outbreak) {
 
                     let row = {
                       contact: contactInfo,
-                      gender: display(contact.gender)
+                      gender: display(dictionary.getTranslation(contact.gender))
                     };
 
                     let age = '';
@@ -7051,12 +7053,10 @@ module.exports = function (Outbreak) {
                     if (contact.followUps.length) {
                       contact.followUps.forEach((followUp) => {
                         let rowId = moment(followUp.date).format(standardFormat);
-                        if (!row[rowId]) {
-                          row[rowId] = {
-                            value: dictionary.getTranslation(followUpStatusMap[followUp.statusId]) || '',
-                            isDate: true
-                          };
-                        }
+                        row[rowId] = {
+                          value: dictionary.getTranslation(followUpStatusMap[followUp.statusId]) || '',
+                          isDate: true
+                        };
                       });
                     }
 
@@ -7146,9 +7146,6 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.exportFilteredFollowups', function (context, modelInstance, next) {
     findAndFilteredCountFollowUpsBackCompat(context, modelInstance, next);
   });
-  Outbreak.beforeRemote('prototype.exportDailyContactFollowUpForm', function (context, modelInstance, next) {
-    findAndFilteredCountFollowUpsBackCompat(context, modelInstance, next);
-  });
 
   /**
    * Find outbreak follow-ups
@@ -7227,11 +7224,14 @@ module.exports = function (Outbreak) {
 
   /**
    * Export a daily contact follow-up form for every contact from a specified date.
+   * @param res
    * @param date
+   * @param filter
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportDailyContactFollowUpForm = function (res, date, options, callback) {
+  Outbreak.prototype.exportContactFollowUpListPerDay = function (res, date, filter, options, callback) {
+    filter = filter || {};
 
     /**
      * Flow control, make sure callback is not called multiple times
@@ -7248,10 +7248,18 @@ module.exports = function (Outbreak) {
 
     const self = this;
     const languageId = options.remotingContext.req.authData.user.languageId;
-    let startDate = genericHelpers.getDate(date);
+
+    // define start date, end date for follow-ups
+    let startDate;
+    let endDate;
+    // set them according to date
+    if (date) {
+      startDate = genericHelpers.getDate(date);
+      endDate = genericHelpers.getDateEndOfDay(date);
+    }
 
     // Filter to get all of the outbreak's contacts that are under follow-up, and all their follow-ups, from the specified date
-    let filter = {
+    let _filter = {
       where: {
         and: [
           {outbreakId: this.id},
@@ -7261,16 +7269,24 @@ module.exports = function (Outbreak) {
       include: {
         relation: 'followUps',
         scope: {
-          where: {
-            date: {
-              gte: new Date(startDate)
-            }
-          },
           order: 'date ASC',
           filterParent: true
         }
       }
     };
+
+    // include startDate and endDate
+    if (startDate && endDate) {
+      _filter.include.scope.where = {
+        date: {
+          gte: new Date(startDate),
+          lte: new Date(endDate)
+        }
+      };
+    }
+
+    // merge filters
+    _filter = app.utils.remote.mergeFilters(_filter, filter);
     // get language dictionary
     app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
       if (error) {
@@ -7336,7 +7352,7 @@ module.exports = function (Outbreak) {
        */
       function processInBatches(skip, limit, maxCount) {
         // find contacts in batches
-        return app.models.contact.rawFind(filter.where, {
+        return app.models.contact.rawFind(_filter.where, {
           projection: {
             firstName: 1,
             middleName: 1,
@@ -7360,7 +7376,7 @@ module.exports = function (Outbreak) {
 
             // find followups filters
             let followUpsQuery = app.utils.remote.searchByRelationProperty
-              .convertIncludeQueryToFilterQuery(filter).followUps;
+              .convertIncludeQueryToFilterQuery(_filter).followUps;
 
             // build followUps query
             followUpsQuery = {
@@ -7392,7 +7408,7 @@ module.exports = function (Outbreak) {
                   contactsMap[followUp.personId].followUps.push(followUp);
                 });
                 // Filter contacts with no follow-ups
-                contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
+                contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, _filter);
 
                 // build data for the worker thread;
                 let _data = [];
@@ -7501,7 +7517,7 @@ module.exports = function (Outbreak) {
 
       // count the contacts that match the query
       return app.models.contact
-        .count(filter.where)
+        .count(_filter.where)
         .then(function (contactsNo) {
           // process contacts in batches
           return processInBatches(0, 100, contactsNo);
@@ -7594,11 +7610,18 @@ module.exports = function (Outbreak) {
     let query = app.utils.remote.searchByRelationProperty
       .convertIncludeQueryToFilterQuery(filter);
     // get relationship query, if any
-    const queryCase = _.get(filter, 'where.relationship');
+    const queryRelationship = _.get(filter, 'where.relationship');
     // if there is no relationship query, but there is an older version of the filter
-    if (!queryCase && query.relationships) {
+    if (!queryRelationship && query.relationships) {
       // use that old version
       _.set(filter, 'where.relationship', query.relationships);
+    }
+    // get relationship query, if any
+    const queryLabResults = _.get(filter, 'where.labResult');
+    // if there is no relationship query, but there is an older version of the filter
+    if (!queryLabResults && query.labResults) {
+      // use that old version
+      _.set(filter, 'where.labResult', query.labResults);
     }
     next();
   }
@@ -7618,7 +7641,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Find outbreak cases
-   * @param filter Supports 'where.relationship' MongoDB compatible queries
+   * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
    * @param callback
    */
   Outbreak.prototype.findCases = function (filter, callback) {
@@ -7637,7 +7660,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Count outbreak cases
-   * @param filter Supports 'where.relationship' MongoDB compatible queries
+   * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
    * @param callback
    */
   Outbreak.prototype.filteredCountCases = function (filter, callback) {
@@ -7656,7 +7679,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Count cases by case classification
-   * @param filter Supports 'where.relationship' MongoDB compatible queries
+   * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
    * @param callback
    */
   Outbreak.prototype.countCasesPerClassification = function (filter, callback) {
@@ -7693,7 +7716,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Export filtered cases to file
-   * @param filter
+   * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
@@ -7768,6 +7791,9 @@ module.exports = function (Outbreak) {
     findAndFilteredCountContactsBackCompat(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.exportFilteredContacts', function (context, modelInstance, next) {
+    findAndFilteredCountContactsBackCompat(context, modelInstance, next);
+  });
+  Outbreak.beforeRemote('prototype.exportDailyContactFollowUpList', function (context, modelInstance, next) {
     findAndFilteredCountContactsBackCompat(context, modelInstance, next);
   });
 
@@ -8019,6 +8045,24 @@ module.exports = function (Outbreak) {
       .rawFind(mergedFilter.where, {projection: {'_id': 1}})
       .then((ids) => callback(null, ids.length, ids.map(obj => obj.id)))
       .catch(callback);
+  };
+
+
+  /**
+   * Export a daily contact follow-up form for every contact.
+   * @param res
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportDailyContactFollowUpList = function (res, filter, options, callback) {
+    let self = this;
+    app.models.contact
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // export contact followUp list according to the specified filter (matched contacts) for all days
+        self.exportContactFollowUpListPerDay(res, null, filter, options, callback);
+      });
   };
 
   /**

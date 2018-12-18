@@ -41,9 +41,8 @@ module.exports = function (Model) {
             }
             // get next level of importable properties and merge the results
             importableProperties = importableProperties.concat(getImportableProperties(Model.definition.properties[propertyName].type, propertyName));
-          }
-          // array of types
-          if (Array.isArray(Model.definition.properties[propertyName].type)) {
+            // array of types
+          } else if (Array.isArray(Model.definition.properties[propertyName].type)) {
             // array of complex model types
             if (Model.definition.properties[propertyName].type[0].definition) {
               // do not parse more than 2 levels (we don't need that level of granularity when importing flat files)

@@ -21,12 +21,12 @@
     "transports": [
       {
         "type": "SMTP",
-        "host": "smtp.gmail.com",
+        "host": "smtp.example.com",
         "secure": true,
         "port": 465,
         "auth": {
-          "user": "smtp@clarisoft.com",
-          "pass": "Tdp8$94#as"
+          "user": "user",
+          "pass": "password"
         }
       }
     ]

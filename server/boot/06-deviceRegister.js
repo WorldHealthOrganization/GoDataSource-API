@@ -10,8 +10,9 @@ module.exports = function (app) {
   app.remotes().phases
     .addAfter('authentication-context', 'device-register')
     .use(function (context, next) {
-      // get client Id (if any)
+      // get client id/client info (if any)
       const clientId = _.get(context, 'req.authData.credentials.clientId');
+      const clientInfo = _.get(context, 'req.authData.client');
       // get device info (if any)
       let deviceInfo = _.get(context, 'req.headers.device-info');
       // if there is no client id or no device id
@@ -47,7 +48,9 @@ module.exports = function (app) {
                 physicalDeviceId: deviceId,
                 os: deviceInfo.os,
                 manufacturer: deviceInfo.manufacturer,
-                model: deviceInfo.model
+                model: deviceInfo.model,
+                name: deviceInfo.name || clientInfo.name,
+                description: deviceInfo.description || `${clientInfo.credentials.clientId}/${clientInfo.credentials.clientSecret}`
               });
           }
           // otherwise update its last seen date

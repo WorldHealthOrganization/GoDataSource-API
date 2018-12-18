@@ -1869,6 +1869,11 @@
       "resolved": "http://registry.npmjs.org/es6-promise/-/es6-promise-3.3.1.tgz",
       "integrity": "sha1-oIzd6EzNvzTQJ6FFG8kdS80ophM="
     },
+    "es6-promise-pool": {
+      "version": "2.5.0",
+      "resolved": "https://registry.npmjs.org/es6-promise-pool/-/es6-promise-pool-2.5.0.tgz",
+      "integrity": "sha1-FHxhKza0fxBQJ/nSv1SlmKmdnMs="
+    },
     "es6-promisify": {
       "version": "5.0.0",
       "resolved": "http://registry.npmjs.org/es6-promisify/-/es6-promisify-5.0.0.tgz",
@@ -3413,6 +3418,11 @@
       "version": "2.0.0",
       "resolved": "https://registry.npmjs.org/invert-kv/-/invert-kv-2.0.0.tgz",
       "integrity": "sha512-wPVv/y/QQ/Uiirj/vh3oP+1Ww+AWehmi1g5fFWGPF6IpCBCDVrhgHRMvrLfdYcwDh3QJbGXDW4JAuzxElLSqKA=="
+    },
+    "ip": {
+      "version": "1.1.5",
+      "resolved": "https://registry.npmjs.org/ip/-/ip-1.1.5.tgz",
+      "integrity": "sha1-vd7XARQpCCjAoDnnLvJfWq7ENUo="
     },
     "ip-regex": {
       "version": "1.0.3",
@@ -5351,6 +5361,11 @@
       "version": "1.1.0",
       "resolved": "http://registry.npmjs.org/p-is-promise/-/p-is-promise-1.1.0.tgz",
       "integrity": "sha1-nJRWmJ6fZYgBewQ01WCXZ1w9oF4="
+    },
+    "p-queue": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/p-queue/-/p-queue-3.0.0.tgz",
+      "integrity": "sha512-2tv/MRmPXfmfnjLLJAHl+DdU8p2DhZafAnlpm/C/T5BpF5L9wKz5tMin4A4N2zVpJL2YMhPlRmtO7s5EtNrjfA=="
     },
     "pako": {
       "version": "0.2.9",

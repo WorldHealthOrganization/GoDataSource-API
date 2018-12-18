@@ -379,7 +379,7 @@ module.exports = function (Case) {
   /**
    * Pre-filter cases for an outbreak using related models (relationship)
    * @param outbreak
-   * @param filter Supports 'where.relationship' MongoDB compatible queries
+   * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
    * @return {Promise<void | never>}
    */
   Case.preFilterForOutbreak = function (outbreak, filter) {
@@ -390,6 +390,12 @@ module.exports = function (Case) {
     // if found, remove it form main query
     if (relationshipQuery) {
       delete filter.where.relationship;
+    }
+    // get labResults query, if any
+    let labResultsQuery = _.get(filter, 'where.labResult');
+    // if found, remove it form main query
+    if (labResultsQuery) {
+      delete filter.where.labResult;
     }
     // get main cases query
     let casesQuery = _.get(filter, 'where', {});
@@ -406,7 +412,7 @@ module.exports = function (Case) {
           }
         ]
       };
-      // filter cases based on query
+      // filter relationships based on query
       buildQuery = buildQuery
         .then(function () {
           return app.models.relationship
@@ -421,7 +427,41 @@ module.exports = function (Case) {
                   }
                 });
               });
-              return caseIds;
+              return Array.from(new Set(caseIds));
+            });
+        });
+    }
+    // if lab results query is present
+    if (labResultsQuery) {
+      // filter lab results based on query
+      buildQuery = buildQuery
+        .then(function (caseIds) {
+          // restrict lab results to current outbreak
+          labResultsQuery = {
+            and: [
+              labResultsQuery,
+              {
+                outbreakId: outbreak.id
+              }
+            ]
+          };
+          // if case ids were found at previous step
+          if (caseIds) {
+            // restrict to only those people
+            labResultsQuery.and.push(
+              {
+                personId: {
+                  inq: caseIds
+                }
+              }
+            );
+          }
+          // find lab results based on the query
+          return app.models.labResult
+            .rawFind(labResultsQuery, {projection: {personId: 1}})
+            .then(function (labResults) {
+              // return the list of caseIds associated with the found lab results
+              return Array.from(new Set(labResults.map(labResult => labResult.personId)));
             });
         });
     }
