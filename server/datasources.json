@@ -12,7 +12,8 @@
     "enableGeoIndexing": true,
     "ignoreUndefined": true,
     "maxDepthOfQuery": 24,
-    "lazyConnect": true
+    "lazyConnect": true,
+    "authSource": "admin"
   },
   "email": {
     "name": "email",

@@ -42,6 +42,11 @@
       "type": "boolean",
       "required": true,
       "description": "Enable/disable sync with this server"
+    },
+    "autoEncrypt": {
+      "type": "boolean",
+      "default": true,
+      "description": "Auto Encrypt; Default 'true'"
     }
   },
   "validations": [],

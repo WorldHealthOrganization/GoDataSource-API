@@ -1,17 +1,15 @@
 'use strict';
 
 // requires
-const tmp = require('tmp');
 const async = require('async');
 const app = require('../../server/server');
 const fs = require('fs');
 const dbSync = require('../../components/dbSync');
-const AdmZip = require('adm-zip');
 const SyncClient = require('../../components/syncClient');
 const syncConfig = require('../../server/config.json').sync;
 const asyncActionsSettings = syncConfig.asyncActionsSettings;
 const _ = require('lodash');
-const Moment = require('moment');
+const syncWorker = require('./../../components/workerRunner').sync;
 
 module.exports = function (Sync) {
   Sync.hasController = true;
@@ -78,23 +76,16 @@ module.exports = function (Sync) {
    * - custom filter { fromDate: Date } to only retrieve records past a given date
    * @param filter
    * @param collections
-   * @param collectionsOpts
    * @param options {{password: '<encryptPassword>'}}
    * @param done
    */
-  Sync.exportDatabase = function (filter, collections, collectionsOpts, options, done) {
+  Sync.exportDatabase = function (filter, collections, options, done) {
+    app.logger.debug(`Started database export for the following collections: ${collections.join(', ')}`);
+
     // defensive checks
     options = options || {};
     filter = filter || {where: {}};
     collections = collections || [];
-    collectionsOpts = collectionsOpts || [];
-    collectionsOpts.map((collectionOpts) => {
-      collectionOpts.excludes = collectionOpts.excludes || [];
-      collectionOpts.shouldEncrypt = collectionOpts.shouldEncrypt || false;
-    });
-
-    // cache reference to mongodb connection
-    let connection = app.dataSources.mongoDb.connector;
 
     // parse from date filter
     let customFilter = null;
@@ -118,90 +109,19 @@ module.exports = function (Sync) {
       });
     }
 
-    // create a temporary directory to store the database files
-    // it always created the folder in the system temporary directory
-    let tmpDir = tmp.dirSync();
-    let tmpDirName = tmpDir.name;
+    // add filters to options
+    Object.assign(options, {
+      customFilter: customFilter,
+      filter: filter
+    });
 
-    return async
-      .series(
-        Object.keys(allCollections).map((collectionName) => {
-          return (callback) => {
-            // look up for any specific options
-            let collectionOpts = collectionsOpts.filter((item) => item.name === collectionName)[0];
-
-            // check if properties should be excluded
-            let excludes = {};
-
-            if (collectionOpts && collectionOpts.excludes.length) {
-              Object.keys(collectionOpts.excludes).forEach((prop) => {
-                excludes[prop] = 0;
-              });
-            }
-
-            // get mongoDB filter that will be sent; for some collections we might send additional filters
-            let mongoDBFilter = dbSync.collectionsFilterMap[collectionName] ? dbSync.collectionsFilterMap[collectionName](collectionName, customFilter, filter) : customFilter;
-
-            return connection
-              .collection(allCollections[collectionName])
-              .find(mongoDBFilter, excludes, (err, result) => {
-                if (err) {
-                  return callback(err);
-                }
-
-                // retrieve
-                result.toArray((err, records) => {
-                  if (err) {
-                    return callback(err);
-                  }
-
-                  // export related files
-                  // if collection is not supported, it will be skipped
-                  dbSync.exportCollectionRelatedFiles(collectionName, records, tmpDirName, (err) => {
-                    if (err) {
-                      return callback(err);
-                    }
-                    // create a file with collection name as file name, containing results
-                    fs.writeFile(`${tmpDirName}/${collectionName}.json`, JSON.stringify(records, null, 2), callback);
-                  });
-                });
-              });
-          };
-        }),
-        (err) => {
-          if (err) {
-            return done(err);
-          }
-
-          // archive file name
-          let archiveName = `${tmpDirName}/snapshot_${Moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
-
-          // compress all collection files from the tmp dir into .zip file
-          try {
-            let zip = new AdmZip();
-            zip.addLocalFolder(tmpDirName);
-            zip.writeZip(archiveName);
-          } catch (zipError) {
-            app.logger.error(`Failed to create zip file. ${zipError}`);
-            return done(zipError);
-          }
-
-          // log archive name location
-          app.logger.debug(`Sync payload created at ${archiveName}`);
-
-          // no password provided, return file path as is
-          if (!options.password) {
-            return done(null, archiveName);
-          }
-          // password provided, encrypt archive
-          return app.utils.fileCrypto
-            .encrypt(options.password, {}, archiveName)
-            .then(function (archiveName) {
-              return done(null, archiveName);
-            })
-            .catch(done);
-        }
-      );
+    // call worker
+    syncWorker.exportCollections(allCollections, options)
+      .then(function (archiveName) {
+        app.logger.debug(`Exported database at '${archiveName}'`);
+        return done(null, archiveName);
+      })
+      .catch(done);
   };
 
   /**
@@ -246,40 +166,15 @@ module.exports = function (Sync) {
           app.logger.debug(`Sync ${syncLogEntry.id}: Backup process completed successfully. Backup ID: ${backupEntry.id}`);
         }
 
-        // create a temporary directory to store the database files
-        // it always created the folder in the system temporary directory
-        let tmpDir = tmp.dirSync({unsafeCleanup: true});
-        let tmpDirName = tmpDir.name;
-
         app.logger.debug(`Sync ${syncLogEntry.id}: Importing the DB at ${filePath}`);
 
-        // define archive decryption action
-        let decryptArchive;
-        // if no password was provided
-        if (!options.password) {
-          // nothing to do, return file path as is
-          decryptArchive = Promise.resolve(filePath);
-        } else {
-          // password provided, decrypt archive
-          decryptArchive = app.utils.fileCrypto
-            .decrypt(options.password, {}, filePath);
-        }
-
-        return decryptArchive
-          .then(function (filePath) {
-            // log the path of the payload
-            app.logger.debug(`Payload saved at ${filePath}`);
-            // extract the compressed database snapshot into the newly created temporary directory
-            try {
-              let archive = new AdmZip(filePath);
-              archive.extractAllTo(tmpDirName);
-            } catch (zipError) {
-              app.logger.error(`Sync ${syncLogEntry.id}: Failed to extract zip archive: ${filePath}. ${zipError}`);
-              return callback(Sync.getFatalError(typeof zipError === 'string' ? { message: zipError } : zipError));
-            }
+        return syncWorker.extractAndDecryptSnapshotArchive(filePath, options)
+          .then(function (result) {
+            let collectionFilesDirName = result.collectionFilesDirName;
+            let tmpDirName = result.tmpDirName;
 
             // read all files in the temp dir
-            return fs.readdir(tmpDirName, (err, filenames) => {
+            return fs.readdir(collectionFilesDirName, (err, filenames) => {
               if (err) {
                 return callback(Sync.getFatalError(err));
               }
@@ -289,6 +184,20 @@ module.exports = function (Sync) {
                 // split filename into 'collection name' and 'extension'
                 filename = filename.split('.');
                 return filename[0] && dbSync.collectionsMap.hasOwnProperty(filename[0]);
+              });
+
+              // sort collectionFiles by batch number
+              collectionsFiles.sort(function (a, b) {
+                let aFileParts = a.split('.');
+                let bFileParts = b.split('.');
+                if (aFileParts[0] !== bFileParts[0]) {
+                  // sort by collection name;
+                  // Note: we are currently relying on the fact that alphabetical order is the correct order
+                  return aFileParts[0] < bFileParts[0] ? -1 : 1;
+                } else {
+                  // sort
+                  return parseInt(aFileParts[1]) < parseInt(bFileParts[1]) ? -1 : 1;
+                }
               });
 
               // create a list that will contain list of collection with failed records
@@ -302,12 +211,14 @@ module.exports = function (Sync) {
               // not syncing in parallel to not load all collections in memory at once
               return async.series(
                 collectionsFiles.map((fileName) => (doneCollection) => {
-                  let filePath = `${tmpDirName}/${fileName}`;
+                  let filePath = `${collectionFilesDirName}/${fileName}`;
 
                   // split filename into 'collection name' and 'extension'
                   let collectionName = fileName.split('.')[0];
-                  // add collection to the list of collections to import
-                  collectionsToImport.push(collectionName);
+                  // add collection to the list of collections to import if not already added
+                  if (collectionsToImport.indexOf(collectionName) === -1) {
+                    collectionsToImport.push(collectionName);
+                  }
 
                   // cache reference to Loopback's model
                   let model = app.models[dbSync.collectionsMap[collectionName]];
@@ -375,7 +286,7 @@ module.exports = function (Sync) {
 
                       // sync collection related files, if necessary
                       if (dbSync.collectionsWithFiles.hasOwnProperty(collectionName)) {
-                        dbSync.importCollectionRelatedFiles(collectionName, tmpDirName, (err) => {
+                        dbSync.importCollectionRelatedFiles(collectionName, tmpDirName, app.logger, options.password, (err) => {
                           if (err) {
                             failedCollectionsRelatedFiles[collectionName] = `Failed to copy related files. ${err}`;
                           }
@@ -389,9 +300,6 @@ module.exports = function (Sync) {
                 () => {
                   // on debug, keep payload
                   if (!syncConfig.debug) {
-                    // remove temporary directory
-                    tmpDir.removeCallback();
-
                     // remove temporary uploaded file
                     fs.unlink(filePath, () => {
                       app.logger.debug(`Sync ${syncLogEntry.id}: Removed temporary files at ${filePath}`);
@@ -482,7 +390,7 @@ module.exports = function (Sync) {
     if (asynchronous === 'true') {
       // import is async
       app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import is being done in async mode`);
-      return client.sendDBSnapshotForImport(DBSnapshotFileName, asynchronous)
+      return client.sendDBSnapshotForImport(DBSnapshotFileName, asynchronous, upstreamServer.autoEncrypt ? 'true' : 'false')
         .then(function (syncLogId) {
           app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import: received upstream server sync log id: ${syncLogId}`);
           // initialize container for server sync log entry status check connection error
@@ -586,7 +494,7 @@ module.exports = function (Sync) {
     } else {
       // import is sync; nothing else to do
       app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import is being done in sync mode`);
-      return client.sendDBSnapshotForImport(DBSnapshotFileName, asynchronous)
+      return client.sendDBSnapshotForImport(DBSnapshotFileName, asynchronous, upstreamServer.autoEncrypt ? 'true' : 'false')
         .then(function (syncLogId) {
           app.logger.debug(`Sync ${syncLogEntry.id}: Upstream server import success. Received upstream server sync log id: ${syncLogId}`);
           return syncLogId;

@@ -6,7 +6,6 @@ const app = require('../../server/server');
 const dbSync = require('../../components/dbSync');
 const _ = require('lodash');
 const moment = require('moment');
-const config = require('../../server/config');
 
 module.exports = function (Sync) {
 
@@ -14,13 +13,12 @@ module.exports = function (Sync) {
    * Get encrypt/decrypt password for sync process
    * @param password
    * @param clientCredentials
+   * @param autoEncrypt
    * @return {*}
    */
-  function getSyncEncryptPassword(password, clientCredentials) {
-    // get auto-encrypt setting from config
-    const autoEncrypt = _.get(config, 'sync.encrypt', false);
+  function getSyncEncryptPassword(password, clientCredentials, autoEncrypt = true) {
     // if a password was not provided, auto-encrypt is enabled and client credentials were provided
-    if (password == null && autoEncrypt && clientCredentials) {
+    if (password == null && autoEncrypt === true && clientCredentials) {
       // build the password by concatenating clientId and clientSecret
       password = clientCredentials.clientId + clientCredentials.clientSecret;
     }
@@ -37,11 +35,12 @@ module.exports = function (Sync) {
    * @param filter
    * @param asynchronous
    * @param password Encryption password
+   * @param autoEncrypt Auto Encrypt
    * @param options
    * @param done
    * @returns {*}
    */
-  function getDatabaseSnapshot(filter, asynchronous, password, options, done) {
+  function getDatabaseSnapshot(filter, asynchronous, password, autoEncrypt, options, done) {
     /**
      * Update export log entry and offer file for download if needed
      * @param err
@@ -171,6 +170,9 @@ module.exports = function (Sync) {
       collections = collections.concat(dbSync.userCollections);
     }
 
+    // get password
+    password = getSyncEncryptPassword(password, _.get(options, 'remotingContext.req.authData.credentials'), autoEncrypt);
+
     // create export log entry
     app.models.databaseExportLog
       .create({
@@ -184,8 +186,6 @@ module.exports = function (Sync) {
           Sync.exportDatabase(
             filter,
             collections,
-            // no collection specific options
-            [],
             {password: password},
             (err, fileName) => {
               // send the done function as the response needs to be returned
@@ -200,8 +200,6 @@ module.exports = function (Sync) {
           Sync.exportDatabase(
             filter,
             collections,
-            // no collection specific options
-            [],
             {password: password},
             (err, fileName) => {
               // don't send the done function as the response was already sent
@@ -224,11 +222,12 @@ module.exports = function (Sync) {
    * Note: when exportType is present 'collections' is ignored. If both collections and exportType are not present default 'mobile' export type is used
    * @param filter
    * @param password Encryption password
+   * @param autoEncrypt Auto Encrypt
    * @param options Options from request
    * @param done
    */
-  Sync.getDatabaseSnapshot = function (filter, password, options, done) {
-    getDatabaseSnapshot(filter, false, getSyncEncryptPassword(password, _.get(options, 'remotingContext.req.authData.credentials')), options, done);
+  Sync.getDatabaseSnapshot = function (filter, password, autoEncrypt, options, done) {
+    getDatabaseSnapshot(filter, false, password, autoEncrypt, options, done);
   };
 
   /**
@@ -244,11 +243,12 @@ module.exports = function (Sync) {
    * Note: when exportType is present 'collections' is ignored. If both collections and exportType are not present default 'mobile' export type is used
    * @param filter
    * @param password Encryption password
+   * @param autoEncrypt Auto Encrypt
    * @param options Options from request
    * @param done
    */
-  Sync.getDatabaseSnapshotAsynchronous = function (filter, password, options, done) {
-    getDatabaseSnapshot(filter, true, getSyncEncryptPassword(password, _.get(options, 'remotingContext.req.authData.credentials')), options, done);
+  Sync.getDatabaseSnapshotAsynchronous = function (filter, password, autoEncrypt, options, done) {
+    getDatabaseSnapshot(filter, true, password, autoEncrypt, options, done);
   };
 
   /**
@@ -312,9 +312,10 @@ module.exports = function (Sync) {
    * @param asynchronous Flag to specify whether the import is sync or async. Default: sync (false)
    * @param triggerBackupBeforeSync Flag to specify whether before the import a backup should be triggered. If the flag is not sent the System settings triggerBackupBeforeSync flag will be used
    * @param password Encryption password
+   * @param autoEncrypt Auto Encrypt
    * @param done
    */
-  Sync.importDatabaseSnapshot = function (req, snapshot, asynchronous, triggerBackupBeforeSync, password, done) {
+  Sync.importDatabaseSnapshot = function (req, snapshot, asynchronous, triggerBackupBeforeSync, password, autoEncrypt, done) {
     const buildError = app.utils.apiError.getError;
 
     /**
@@ -416,8 +417,20 @@ module.exports = function (Sync) {
         outbreakIDs = [];
       }
 
+      // auto-encrypt if not specified otherwise
+      let autoEncrypt = true;
+      // if auto-encrypt flag was sent
+      if (fields.autoEncrypt != null) {
+        if (
+          fields.autoEncrypt === 'false' ||
+          fields.autoEncrypt === '0'
+        ) {
+          autoEncrypt = false;
+        }
+      }
+
       // get password
-      const password = getSyncEncryptPassword(fields.password, _.get(requestOptions, 'remotingContext.req.authData.credentials'));
+      const password = getSyncEncryptPassword(fields.password, _.get(requestOptions, 'remotingContext.req.authData.credentials'), autoEncrypt);
 
       // create sync log entry
       app.models.syncLog
@@ -625,15 +638,13 @@ module.exports = function (Sync) {
         let collections = dbSync.syncCollections;
 
         // get password
-        const password = getSyncEncryptPassword(null, upstreamServerEntry.credentials);
+        const password = getSyncEncryptPassword(null, upstreamServerEntry.credentials, upstreamServerEntry.autoEncrypt);
 
         app.logger.debug(`Sync ${syncLogEntry.id}: Exporting DB.`);
         return new Promise(function (resolve, reject) {
           Sync.exportDatabase(
             filter,
             collections,
-            // no collection specific options
-            [],
             {password: password},
             (err, fileName) => {
               if (err) {
@@ -657,8 +668,7 @@ module.exports = function (Sync) {
         if (syncLogEntry.error) {
           app.logger.debug(`Sync ${syncLogEntry.id}: Success with warnings; ${syncLogEntry.error}`);
           syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS';
-        }
-        else {
+        } else {
           // success
           app.logger.debug(`Sync ${syncLogEntry.id}: Success`);
           syncLogEntry.status = 'LNG_SYNC_STATUS_SUCCESS';

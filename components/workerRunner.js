@@ -28,7 +28,10 @@ function invokeWorkerMethod(workerName, method, args, callback) {
   }
 
   // fork the worker
-  const worker = fork(`${workersPath}/${workerName}`, [], {execArgv: [], windowsHide: true});
+  const worker = fork(`${workersPath}/${workerName}`, [], {
+    execArgv: [],
+    windowsHide: true
+  });
   // invoke it
   worker.send({fn: method, args});
   // wait for it's response and process it
@@ -102,6 +105,40 @@ module.exports = {
      */
     countStratifiedByClassificationOverTime: function (cases, periodInterval, periodType, periodMap, caseClassifications, callback) {
       invokeWorkerMethod('cases', 'countStratifiedByClassificationOverTime', [cases, periodInterval, periodType, periodMap, caseClassifications], callback);
+    }
+  },
+  sync: {
+    /**
+     * Export collections and create ZIP file
+     * @param collections
+     * @param options
+     * @returns {Promise<any>}
+     */
+    exportCollections: function (collections, options) {
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('sync', 'exportCollections', [collections, options], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+          resolve(result);
+        });
+      });
+    },
+    /**
+     * Extract and Decrypt Snapshot archive
+     * @param snapshotFile
+     * @param options
+     * @returns {Promise<any>}
+     */
+    extractAndDecryptSnapshotArchive: function (snapshotFile, options) {
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('sync', 'extractAndDecryptSnapshotArchive', [snapshotFile, options], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+          resolve(result);
+        });
+      });
     }
   },
   helpers: {

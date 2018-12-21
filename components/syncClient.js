@@ -121,15 +121,17 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
    * Send database to server for import
    * @param DBSnapshotFileName
    * @param asynchronous
+   * @param autoEncrypt
    * @returns {Promise}
    */
-  this.sendDBSnapshotForImport = function (DBSnapshotFileName, asynchronous) {
+  this.sendDBSnapshotForImport = function (DBSnapshotFileName, asynchronous, autoEncrypt) {
     let requestOptions = Object.assign({}, this.options, {
       method: 'POST',
       uri: 'sync/import-database-snapshot',
       formData: {
         snapshot: fs.createReadStream(DBSnapshotFileName),
-        asynchronous: asynchronous
+        asynchronous: asynchronous,
+        autoEncrypt: autoEncrypt
       }
     });
 

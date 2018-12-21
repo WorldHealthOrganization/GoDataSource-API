@@ -81,6 +81,11 @@
           "description": "Snapshot Encryption Password"
         },
         {
+          "arg": "autoEncrypt",
+          "type": "boolean",
+          "description": "Auto Encrypt; Default 'true'"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -125,6 +130,11 @@
           "arg": "password",
           "type": "string",
           "description": "Snapshot Encryption Password"
+        },
+        {
+          "arg": "autoEncrypt",
+          "type": "boolean",
+          "description": "Auto Encrypt; Default 'true'"
         },
         {
           "arg": "options",
@@ -212,6 +222,11 @@
           "arg": "password",
           "type": "string",
           "description": "Snapshot Encryption Password"
+        },
+        {
+          "arg": "autoEncrypt",
+          "type": "boolean",
+          "description": "Auto Encrypt; Default 'true'"
         }
       ],
       "returns": [

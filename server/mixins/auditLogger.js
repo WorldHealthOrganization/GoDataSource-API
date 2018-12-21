@@ -2,6 +2,7 @@
 
 const app = require('../server');
 const _ = require('lodash');
+const moment = require('moment');
 
 /**
  * Extract request form options (if available)
@@ -104,16 +105,22 @@ module.exports = function (Model) {
      */
     Model.observe('before save', function (context, callback) {
       let changedFields = [];
-      // check if current action is monitored by audit log
       if (isMonitoredAction(context)) {
         if (context.data) {
           if (context.currentInstance) {
             Object.keys(context.data).forEach(function (field) {
               if (isMonitoredField(field) && context.data[field] !== undefined && (context.currentInstance[field] !== context.data[field])) {
+                // parse new value as for Moment instances Loopback doesn't parse them to date
+                let newValue = _.cloneDeepWith(context.data[field], function (value) {
+                  if (value instanceof moment) {
+                    return value.toDate();
+                  }
+                });
+
                 changedFields.push({
                   field: field,
                   oldValue: context.currentInstance[field],
-                  newValue: context.data[field]
+                  newValue: newValue
                 });
               }
             });

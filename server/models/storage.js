@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * Warning: Do not include app in this model
+ */
+
 const fs = require('fs');
 const path = require('path');
 
