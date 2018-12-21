@@ -749,7 +749,7 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
       });
 
       // query models to resolve foreign keys
-      async.parallelLimit(queryForeignKeys, 10,function (error, foreignKeyQueryResults) {
+      async.parallelLimit(queryForeignKeys, 10, function (error, foreignKeyQueryResults) {
         // handle error
         if (error) {
           return reject(error);
@@ -1457,6 +1457,49 @@ function convertToDate(date) {
   return moment(date).startOf('day');
 }
 
+/**
+ * Check for address/addresses properties and if GeoPoint is found convert it to Loopback format
+ * Note: This function affect the received model instance
+ * Converts {
+ *   coordinates: [number, number],
+ *   type: "Point"
+ * } to {
+ *   lat: number,
+ *   lng: number
+ * }
+ * @param modelInstance
+ */
+function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}) {
+  // check if modelInstance has address/addresses; nothing to do in case an address is not set
+  if (!modelInstance.address && !modelInstance.addresses) {
+    return;
+  }
+
+  // always works with same data type (simplify logic)
+  let addressesToUpdate;
+  if (modelInstance.address) {
+    addressesToUpdate = [modelInstance.address];
+  } else {
+    addressesToUpdate = modelInstance.addresses;
+  }
+
+  // loop through the addresses and update then if needed
+  addressesToUpdate.forEach(function (address) {
+    // if the GeoPoint exists and is not in the desired format
+    if (address.geoLocation &&
+      typeof address.geoLocation === 'object' &&
+      address.geoLocation.coordinates &&
+      address.geoLocation.lng === undefined &&
+      address.geoLocation.lat === undefined) {
+      // convert it
+      _.set(address, 'geoLocation', {
+        lat: address.geoLocation.coordinates[1],
+        lng: address.geoLocation.coordinates[0]
+      });
+    }
+  });
+}
+
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1494,5 +1537,6 @@ module.exports = {
   getPeriodIntervalForDate: getPeriodIntervalForDate,
   sha256: sha256,
   createImageDoc: createImageDoc,
-  convertToDate: convertToDate
+  convertToDate: convertToDate,
+  covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat
 };
