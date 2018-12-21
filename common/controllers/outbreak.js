@@ -1722,6 +1722,9 @@ module.exports = function (Outbreak) {
 
     Object.keys(modelInstance.nodes).forEach((key) => {
       Outbreak.helpers.limitPersonInformation(modelInstance.nodes[key], personTypesWithReadAccess);
+
+      // transform Mongo geolocation to Loopback geolocation
+      genericHelpers.covertAddressesGeoPointToLoopbackFormat(modelInstance.nodes[key]);
     });
     next();
   });
