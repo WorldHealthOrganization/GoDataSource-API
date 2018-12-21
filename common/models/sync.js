@@ -87,17 +87,6 @@ module.exports = function (Sync) {
     filter = filter || {where: {}};
     collections = collections || [];
 
-    // parse from date filter
-    let customFilter = null;
-    if (filter.where.hasOwnProperty('fromDate')) {
-      // doing this because createdAt and updatedAt are equal when a record is created
-      customFilter = {
-        updatedAt: {
-          $gte: new Date(filter.where.fromDate)
-        }
-      };
-    }
-
     // create a copy of the collections map and keep only the ones from the collection list given
     // if passed collection is empty, continue with all the collections
     let allCollections = Object.assign({}, dbSync.collectionsMap);
@@ -111,7 +100,6 @@ module.exports = function (Sync) {
 
     // add filters to options
     Object.assign(options, {
-      customFilter: customFilter,
       filter: filter
     });
 

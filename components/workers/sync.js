@@ -208,8 +208,17 @@ const worker = {
             return reject(err);
           }
 
-          let customFilter = options.customFilter;
+          // parse from date filter
           let filter = options.filter;
+          let customFilter = null;
+          if (filter.where.hasOwnProperty('fromDate')) {
+            // doing this because createdAt and updatedAt are equal when a record is created
+            customFilter = {
+              updatedAt: {
+                $gte: new Date(filter.where.fromDate)
+              }
+            };
+          }
 
           async
             .series(
