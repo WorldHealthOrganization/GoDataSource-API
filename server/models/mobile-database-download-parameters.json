@@ -1,0 +1,23 @@
+{
+  "name": "mobileDatabaseDownloadParameters",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "languageTokens": {
+      "type": [
+        "string"
+      ],
+      "description": "Language tokens that need to be exported"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

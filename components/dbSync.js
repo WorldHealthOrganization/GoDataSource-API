@@ -126,6 +126,62 @@ function addOutbreakIdMongoFilter(collectionName, baseFilter, filter) {
 }
 
 /**
+ * Add language token filter if found to a mongoDB filter;
+ * Note: the base mongoDB filter is not affected
+ * @param collectionName Collection name; Currently not used however the function is automatically called with this param
+ * @param baseFilter MongoDB Base filter on which to add the language token filter
+ * @param filter Filter from request in which to check for language token filter
+ * @returns {*}
+ */
+function addLanguageTokenMongoFilter(collectionName, baseFilter, filter) {
+  // initialize resulting filter
+  // start from base filter; Note that it can be null
+  let result = Object.assign({}, baseFilter || {});
+
+  // check for language token filter
+  let languageTokenFilter = _.get(filter, 'where.languageTokens');
+
+  // update filter only if languageTokenFilter is an array
+  if (Array.isArray(languageTokenFilter)) {
+    // Note: should be in sync with the subTemplates names from templateParser.js
+    const subTemplates = ['caseInvestigationTemplate', 'contactFollowUpTemplate', 'labResultsTemplate'];
+
+    // create language token mongo filter; creating it as an '$or' filter
+    let languageTokenMongoFilter = {
+      '$or': [
+        {
+          // get required tokens
+          'token': {
+            '$in': languageTokenFilter
+          }
+        },
+        {
+          // get all reference data and templates/questionnaires tokens
+          'token': {
+            '$regex': `${subTemplates.reduce(function (result, subTemplateName) {
+                result += '|' + subTemplateName.toUpperCase();
+                return result;
+              },
+              // start the regex with reference data identifier
+              'LNG_REFERENCE_DATA')}`
+          }
+        }
+      ]
+    };
+
+    // update result filter
+    result = {
+      '$and': [
+        result,
+        languageTokenMongoFilter
+      ]
+    };
+  }
+
+  return result;
+}
+
+/**
  * Filter record by outbreakId
  * @param collectionName Collection name; Depending on collection name the filter might be different
  * @param record Record; JSON model instance
@@ -157,7 +213,8 @@ const collectionsFilterMap = {
   followUp: addOutbreakIdMongoFilter,
   relationship: addOutbreakIdMongoFilter,
   cluster: addOutbreakIdMongoFilter,
-  fileAttachment: addOutbreakIdMongoFilter
+  fileAttachment: addOutbreakIdMongoFilter,
+  languageToken: addLanguageTokenMongoFilter
 };
 
 // on import some additional filters might be applied on different collections

@@ -34,6 +34,18 @@
       "principalType": "ROLE",
       "principalId": "$client_application",
       "permissions": "ALLOW",
+      "property": "getDatabaseSnapshotForMobile"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permissions": "ALLOW",
+      "property": "getDatabaseSnapshotForMobile"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
       "property": "importDatabaseSnapshot"
     },
     {
@@ -297,6 +309,85 @@
       "http": {
         "verb": "post",
         "path": "/"
+      }
+    },
+    "getDatabaseSnapshotForMobile": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "http": {
+            "source": "query"
+          },
+          "description": "This request accepts 'fromDate': date, 'outbreakId': 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}, 'collections': ['modelName'], 'exportType': mobile/system/outbreak/full (Note: when exportType is present 'collections' is ignored), 'includeUsers': boolean on the first level in 'where'"
+        },
+        {
+          "arg": "password",
+          "type": "string",
+          "http": {
+            "source": "query"
+          },
+          "description": "Snapshot Encryption Password"
+        },
+        {
+          "arg": "autoEncrypt",
+          "type": "boolean",
+          "http": {
+            "source": "query"
+          },
+          "description": "Auto Encrypt; Default 'true'"
+        },
+        {
+          "arg": "chunkSize",
+          "type": "number",
+          "http": {
+            "source": "query"
+          },
+          "description": "Number of elements to be included in an archive. Default: 10000"
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "mobileDatabaseDownloadParameters",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true,
+          "description": "Can contain languageTokens array; if present only those language tokens and the reference data related ones will be exported"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Retrieve a compressed snapshot of the database. Language tokens might be filtered",
+      "http": {
+        "verb": "post",
+        "path": "/get-mobile-database-snapshot"
       }
     }
   }
