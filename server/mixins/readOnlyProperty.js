@@ -41,6 +41,14 @@ module.exports = function (Model) {
             }
             // get next level of importable properties and merge the results
             importableProperties = importableProperties.concat(getImportableProperties(Model.definition.properties[propertyName].type, propertyName));
+            // GeoPoint (special built-in type)
+          } else if (Model.definition.properties[propertyName].type && Model.definition.properties[propertyName].type.name === 'GeoPoint') {
+            if (prefix) {
+              propertyName = `${prefix}.${propertyName}`;
+            }
+            // add geolocation properties
+            importableProperties.push(`${propertyName}.lat`);
+            importableProperties.push(`${propertyName}.lng`);
             // array of types
           } else if (Array.isArray(Model.definition.properties[propertyName].type)) {
             // array of complex model types
