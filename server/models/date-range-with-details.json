@@ -17,7 +17,7 @@
       "type": "date",
       "required": true
     },
-    "hospitalName": {
+    "centerName": {
       "type": "string"
     },
     "locationId": {
