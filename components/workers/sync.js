@@ -230,7 +230,7 @@ const worker = {
                   logger.debug(`Exporting collection: ${collectionName}`);
 
                   // export collection
-                  exportCollectionInBatches(dbConnection, collections[collectionName], collectionName, mongoDBFilter, 1000, tmpDirName, archivesDirName, options, callback);
+                  exportCollectionInBatches(dbConnection, collections[collectionName], collectionName, mongoDBFilter, options.chunkSize, tmpDirName, archivesDirName, options, callback);
                 };
               }),
               (err) => {

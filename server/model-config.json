@@ -303,5 +303,9 @@
   "mergePeopleProps": {
     "dataSource": null,
     "public": false
+  },
+  "mobileDatabaseDownloadParameters": {
+    "dataSource": null,
+    "public": false
   }
 }
