@@ -36,11 +36,12 @@ module.exports = function (Sync) {
    * @param asynchronous
    * @param password Encryption password
    * @param autoEncrypt Auto Encrypt
+   * @param chunkSize Number of elements to be included in an archive. Default: 10000
    * @param options
    * @param done
    * @returns {*}
    */
-  function getDatabaseSnapshot(filter, asynchronous, password, autoEncrypt, options, done) {
+  function getDatabaseSnapshot(filter, asynchronous, password, autoEncrypt, chunkSize, options, done) {
     /**
      * Update export log entry and offer file for download if needed
      * @param err
@@ -92,6 +93,9 @@ module.exports = function (Sync) {
 
     filter = filter || {};
     filter.where = filter.where || {};
+
+    // get chunkSize; default: 10000
+    chunkSize = chunkSize || 10000;
 
     // check for received outbreakIDs in filter
     let outbreakIDFilter = _.get(filter, 'where.outbreakId');
@@ -186,7 +190,10 @@ module.exports = function (Sync) {
           Sync.exportDatabase(
             filter,
             collections,
-            {password: password},
+            {
+              password: password,
+              chunkSize: chunkSize
+            },
             (err, fileName) => {
               // send the done function as the response needs to be returned
               exportCallback(err, fileName, exportLogEntry, options, done);
@@ -200,7 +207,10 @@ module.exports = function (Sync) {
           Sync.exportDatabase(
             filter,
             collections,
-            {password: password},
+            {
+              password: password,
+              chunkSize: chunkSize
+            },
             (err, fileName) => {
               // don't send the done function as the response was already sent
               exportCallback(err, fileName, exportLogEntry, options);
@@ -227,7 +237,7 @@ module.exports = function (Sync) {
    * @param done
    */
   Sync.getDatabaseSnapshot = function (filter, password, autoEncrypt, options, done) {
-    getDatabaseSnapshot(filter, false, password, autoEncrypt, options, done);
+    getDatabaseSnapshot(filter, false, password, autoEncrypt, null, options, done);
   };
 
   /**
@@ -248,7 +258,36 @@ module.exports = function (Sync) {
    * @param done
    */
   Sync.getDatabaseSnapshotAsynchronous = function (filter, password, autoEncrypt, options, done) {
-    getDatabaseSnapshot(filter, true, password, autoEncrypt, options, done);
+    getDatabaseSnapshot(filter, true, password, autoEncrypt, null, options, done);
+  };
+
+  /**
+   * Retrieve a compressed snapshot of the database
+   * Supported filters:
+   * fromDate: Date
+   * outbreakId: 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}
+   * collections: ['modelName']
+   * exportType: enum [mobile, system, outbreak, full]
+   * includeUsers: boolean
+   * Eg filter: {"where": {"fromDate": "dateString", "outbreakId": "outbreak ID", "collections": ["person", "outbreak", ...], "exportType": "mobile", "includeUsers": true}}
+   * Note: when exportType is present 'collections' is ignored. If both collections and exportType are not present default 'mobile' export type is used
+   * @param filter
+   * @param password Encryption password
+   * @param autoEncrypt Auto Encrypt
+   * @param chunkSize Number of elements to be included in an archive. Default: 10000
+   * @param data Object; Can contain languageTokens array; if present only those language tokens and the reference data related ones will be exported
+   * @param options Options from request
+   * @param done
+   */
+  Sync.getDatabaseSnapshotForMobile = function (filter, password, autoEncrypt, chunkSize, data, options, done) {
+    // check for data.languageTokens; if present, update filter
+    if (Array.isArray(data.languageTokens)) {
+      filter = filter || {};
+      filter.where = filter.where || {};
+      // add languageTokens filter; will be further processed before it reaches DB
+      filter.where.languageTokens = data.languageTokens;
+    }
+    getDatabaseSnapshot(filter, false, password, autoEncrypt, chunkSize, options, done);
   };
 
   /**
