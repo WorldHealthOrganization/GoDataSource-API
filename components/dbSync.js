@@ -158,7 +158,8 @@ function addLanguageTokenMongoFilter(collectionName, baseFilter, filter) {
         {
           // get all reference data and templates/questionnaires tokens
           'token': {
-            '$regex': `${subTemplates.reduce(function (result, subTemplateName) {
+            '$regex': `${subTemplates.reduce(
+              function (result, subTemplateName) {
                 result += '|' + subTemplateName.toUpperCase();
                 return result;
               },
