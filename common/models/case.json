@@ -62,10 +62,10 @@
       "type": "date"
     },
     "isolationDates": [
-      "dateRange"
+      "dateRangeWithDetails"
     ],
     "hospitalizationDates": [
-      "dateRange"
+      "dateRangeWithDetails"
     ],
     "incubationDates": [
       "dateRange"

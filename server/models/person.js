@@ -29,6 +29,20 @@ module.exports = function (Person) {
       type: 'belongsToEmbedded',
       model: 'location',
       foreignKey: 'address.locationId'
+    },
+    // hospitalization locations
+    hospitalizationLocations: {
+      type: 'belongsToManyComplex',
+      model: 'location',
+      foreignKeyContainer: 'hospitalizationDates',
+      foreignKey: 'locationId'
+    },
+    // isolation locations
+    isolationLocations: {
+      type: 'belongsToManyComplex',
+      model: 'location',
+      foreignKeyContainer: 'isolationDates',
+      foreignKey: 'locationId'
     }
   };
 
