@@ -224,6 +224,10 @@
     "dataSource": null,
     "public": false
   },
+  "dateRangeWithDetails": {
+    "dataSource": null,
+    "public": false
+  },
   "importableFileWithFieldAndReferenceDataMap": {
     "dataSource": null,
     "public": false
