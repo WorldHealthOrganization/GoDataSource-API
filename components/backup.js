@@ -53,7 +53,10 @@ const createBackup = function (modules, location, done) {
     models.sync.exportDatabase(
       null,
       collections,
-      {password: getBackupPassword()},
+      {
+        password: getBackupPassword(),
+        chunkSize: 10000
+      },
       (exportError, archivePath) => {
         if (exportError) {
           app.logger.error(`Backup process failed. ${exportError}`);
