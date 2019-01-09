@@ -37,6 +37,9 @@ const worker = {
       // get record set
       const recordSet = dataSet[recordSetId];
 
+      // store reset x
+      const resetX = doc.x;
+
       // Add group title
       pdfUtils.addTitle(doc, `${commonLabels.groupTitle}: ${recordSet.name}`, 12);
 
@@ -44,6 +47,9 @@ const worker = {
 
       // Add the follow-up table
       pdfUtils.createTableInPDFDocument(headers, recordSet.records, doc);
+
+      // reset doc.x to initial x (when adding tables the x changes)
+      doc.x = resetX;
 
       // Add group total
       pdfUtils.addTitle(doc, `${commonLabels.total}: ${recordSet.records.length}`, 12);
