@@ -7299,7 +7299,7 @@ module.exports = function (Outbreak) {
         return cb(error);
       }
       // start the builder
-      const dailyFollowUpListBuilder = fork(`${__dirname}../../../components/workers/buildDailyFollowUpList`,
+      const dailyFollowUpListBuilder = fork(`${__dirname}../../../components/workers/buildFullDailyFollowUpList`,
         [], {
           execArgv: [],
           windowsHide: true
@@ -7538,152 +7538,355 @@ module.exports = function (Outbreak) {
 
   Outbreak.prototype.exportContactFollowUpListPerDay = function (res, date, groupBy, filter, options, callback) {
     const self = this;
+    const languageId = options.remotingContext.req.authData.user.languageId;
     if (!['place', 'case'].includes(groupBy)) {
       groupBy = 'place';
     }
 
-    // pre-filter using related data (case, contact)
-    app.models.followUp
-      .preFilterForOutbreak(this, filter)
-      .then(function (filter) {
+    /**
+     * Flow control, make sure callback is not called multiple times
+     * @param error
+     * @param result
+     */
+    function cb(error, result) {
+      // execute callback
+      callback(error, result);
+      // replace callback with no-op to prevent calling it multiple times
+      callback = function noOp() {
+      };
+    }
 
-        // define start date, end date for follow-ups
-        let startDate;
-        let endDate;
-        // set them according to date
-        if (date) {
-          startDate = genericHelpers.getDate(date);
-          endDate = genericHelpers.getDateEndOfDay(date);
+
+    app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
+      if (error) {
+        return cb(error);
+      }
+
+      // start the builder
+      const dailyFollowUpListBuilder = fork(`${__dirname}../../../components/workers/buildDailyFollowUpList`,
+        [], {
+          execArgv: [],
+          windowsHide: true
         }
-        // find follow-ups using filter
-        return app.models.followUp.rawFind({
-          $and: [
-            filter.where, {
-              date: {
-                gte: new Date(startDate),
-                lte: new Date(endDate)
+      );
+
+      /**
+       * Event listener handler
+       */
+      function eventListener() {
+        const error = new Error(`Processing failed. Worker stopped. Event Details: ${JSON.stringify(arguments)}`);
+        res.req.logger.error(JSON.stringify(error));
+        cb(error);
+      }
+
+      // listen to exit events
+      ['error', 'exit'].forEach(function (event) {
+        dailyFollowUpListBuilder.on(event, eventListener);
+      });
+
+      // listen to builder messages
+      dailyFollowUpListBuilder.on('message', function (args) {
+        // first argument is an error
+        if (args[0]) {
+          // handle it
+          cb(args[0]);
+        }
+        // if the message is a chunk
+        if (args[1] && args[1].chunk) {
+          // write it on the response
+          res.write(Buffer.from(args[1].chunk.data));
+        }
+        // if the worker finished
+        if (args[1] && args[1].end) {
+          // end the response
+          res.end();
+          // process will be closed gracefully, remove listeners
+          ['error', 'exit'].forEach(function (event) {
+            dailyFollowUpListBuilder.removeListener(event, eventListener);
+          });
+          // stop the builder
+          dailyFollowUpListBuilder.kill();
+        }
+      });
+
+      // set appropriate headers
+      res.set('Content-type', 'application/pdf');
+      res.set('Content-disposition', 'attachment;filename=Daily Contact Follow-up.pdf');
+
+      // define start date, end date for follow-ups
+      let startDate;
+      let endDate;
+      // set them according to date
+      if (date) {
+        startDate = genericHelpers.getDate(date);
+        endDate = genericHelpers.getDateEndOfDay(date);
+      }
+
+      const locationsToResolve = [];
+      // pre-filter using related data (case, contact)
+      app.models.followUp
+        .preFilterForOutbreak(self, filter)
+        .then(function (filter) {
+
+          // find follow-ups using filter
+          return app.models.followUp.rawFind({
+            $and: [
+              filter.where, {
+                date: {
+                  gte: new Date(startDate),
+                  lte: new Date(endDate)
+                },
+                outbreakId: self.id
               }
-            }
-          ]
-        });
-      })
-      .then(function (followUps) {
-        return app.models.contact
-          .rawFind({
-            _id: {
-              inq: followUps.map(followUp => followUp.personId)
-            }
+            ]
           }, {
             projection: {
-              followUp: 1,
-              firstName: 1,
-              middleName: 1,
-              lastName: 1,
-              gender: 1,
-              age: 1,
-              dateOfLastContact: 1,
-              addresses: 1,
-              phoneNumber: 1
+              personId: 1,
+              statusId: 1,
+              date: 1,
+              address: 1,
+              index: 1
             }
-          })
-          .then(function (contacts) {
-            const contactsMap = {};
-            contacts.forEach(function (contact) {
-              contactsMap[contact.id] = contact;
-            });
-            followUps.forEach(function (followUp) {
-              followUp.contact = contactsMap[followUp.personId];
-            });
-            let groups = {};
-            switch (groupBy) {
-              case 'place':
-                followUps.forEach(function (followUp) {
-                  let locationId = 'UNKNOWN_LOCATION';
-                  if (followUp.address && followUp.address.locationId) {
-                    locationId = followUp.address.locationId;
-                  }
-                  if (locationId === 'UNKNOWN_LOCATION') {
-                    let currentAddress = app.models.person.getCurrentAddress(followUp.contact || {});
-                    if (currentAddress) {
-                      locationId = currentAddress.locationId;
-                      followUp.address = currentAddress;
+          });
+        })
+        .then(function (followUps) {
+          return app.models.contact
+            .rawFind({
+              _id: {
+                inq: followUps.map(followUp => followUp.personId)
+              },
+              outbreakId: self.id
+            }, {
+              projection: {
+                followUp: 1,
+                firstName: 1,
+                middleName: 1,
+                lastName: 1,
+                gender: 1,
+                age: 1,
+                dateOfLastContact: 1,
+                addresses: 1,
+                phoneNumber: 1
+              }
+            })
+            .then(function (contacts) {
+              const contactsMap = {};
+              contacts.forEach(function (contact) {
+                contactsMap[contact.id] = contact;
+              });
+              followUps.forEach(function (followUp) {
+                followUp.contact = contactsMap[followUp.personId];
+                if (followUp.address && followUp.address.locationId) {
+                  locationsToResolve.push(followUp.address.locationId);
+                }
+              });
+              let groups = {};
+              switch (groupBy) {
+                case 'place':
+                  followUps.forEach(function (followUp) {
+                    let locationId = 'UNKNOWN_LOCATION';
+                    if (followUp.address && followUp.address.locationId) {
+                      locationId = followUp.address.locationId;
                     }
-                  }
-                  if (!groups[locationId]) {
-                    groups[locationId] = [];
-                  }
-                  groups[locationId].push(followUp);
-                });
-                return app.models.location
-                  .resolveLocationsWithLevel(Object.keys(groups),self)
-                  .then(function (locationCorelationMap) {
-                    const _groups = {};
-                    Object.keys(groups).forEach(function (location) {
-                      _groups[locationCorelationMap[location] || 'UNKNOWN_LOCATION'] = groups[location];
-                    });
-                    return _groups;
-                  });
-              case 'case':
-                return app.models.relationship
-                  .rawFind({
-                    'persons.id': {
-                      inq: Object.keys(contactsMap)
-                    }
-                  }, {
-                    projection: {
-                      persons: 1
-                    },
-                    order: {contactDate: 1}
-                  }).then(function (relationships) {
-                    const contactToCaseMap = {};
-                    relationships.forEach(function (relationship) {
-                      let contactId;
-                      let caseId;
-                      Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
-                        if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-                          contactId = person.id;
-                        } else {
-                          caseId = person.id;
-                        }
-                      });
-                      if (contactId && caseId) {
-                        contactToCaseMap[contactId] = caseId;
+                    if (locationId === 'UNKNOWN_LOCATION') {
+                      let currentAddress = app.models.person.getCurrentAddress(followUp.contact || {});
+                      if (currentAddress) {
+                        locationId = currentAddress.locationId;
+                        followUp.address = currentAddress;
                       }
-                    });
-                    return app.models.person
-                      .rawFind({
-                        _id: {
-                          inq: Object.values(contactToCaseMap)
-                        }
-                      }, {
-                        projection: {
-                          type: 1,
-                          firstName: 1,
-                          middleName: 1,
-                          lastName: 1
-                        }
-                      })
-                      .then(function (people) {
-                        const peopleMap = {};
-                        people.forEach(function (person) {
-                          peopleMap[person.id] = person;
-                        });
-                        followUps.forEach(function (followUp) {
-                          if (!groups[contactToCaseMap[followUp.personId]]) {
-                            groups[contactToCaseMap[followUp.personId]] = [];
-                          }
-                          groups[contactToCaseMap[followUp.personId]].push(followUp);
-                        });
-                        return groups;
-                      });
+                    }
+                    if (!groups[locationId]) {
+                      groups[locationId] = {
+                        records: []
+                      };
+                    }
+                    groups[locationId].records.push(followUp);
                   });
-            }
-          })
-          .then(function (groups) {
-            let a = groups;
-          })
-      })
-      .catch(callback);
+                  return app.models.location
+                    .resolveLocationsWithLevel(Object.keys(groups), self)
+                    .then(function (locationMap) {
+                      const _groups = {};
+                      Object.keys(groups).forEach(function (location) {
+                        _groups[locationMap[location] || 'UNKNOWN_LOCATION'] = groups[location];
+                      });
+                      return _groups;
+                    });
+                case 'case':
+                  return app.models.relationship
+                    .rawFind({
+                      outbreakId: self.id,
+                      'persons.id': {
+                        inq: Object.keys(contactsMap)
+                      }
+                    }, {
+                      projection: {
+                        persons: 1
+                      },
+                      order: {contactDate: 1}
+                    }).then(function (relationships) {
+                      const contactToCaseMap = {};
+                      relationships.forEach(function (relationship) {
+                        let contactId;
+                        let caseId;
+                        Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
+                          if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                            contactId = person.id;
+                          } else {
+                            caseId = person.id;
+                          }
+                        });
+                        if (contactId && caseId) {
+                          contactToCaseMap[contactId] = caseId;
+                        }
+                      });
+                      return app.models.person
+                        .rawFind({
+                          _id: {
+                            inq: Object.values(contactToCaseMap)
+                          },
+                          outbreakId: self.id,
+                        }, {
+                          projection: {
+                            type: 1,
+                            firstName: 1,
+                            middleName: 1,
+                            lastName: 1
+                          }
+                        })
+                        .then(function (people) {
+                          const peopleMap = {};
+                          people.forEach(function (person) {
+                            peopleMap[person.id] = person;
+                          });
+                          followUps.forEach(function (followUp) {
+                            if (!groups[contactToCaseMap[followUp.personId]]) {
+                              const person = peopleMap[contactToCaseMap[followUp.personId]] || {};
+                              groups[contactToCaseMap[followUp.personId]] = {
+                                name: `${person.firstName || ''} ${person.middleName || ''} ${person.lastName || ''}`.trim(),
+                                records: []
+                              };
+                            }
+                            groups[contactToCaseMap[followUp.personId]].records.push(followUp);
+                          });
+                          return groups;
+                        });
+                    });
+              }
+            })
+            .then(function (groups) {
+              if (groupBy === 'place') {
+                locationsToResolve.push(...Object.keys(groups));
+              }
+              return app.models.location
+                .rawFind({
+                  id: {
+                    inq: locationsToResolve,
+                  }
+                }, {
+                  projection: {
+                    name: 1
+                  }
+                })
+                .then(function (locations) {
+                  const locationsMap = {};
+                  const data = {};
+                  locations.forEach(function (location) {
+                    locationsMap[location.id] = location;
+                  });
+                  Object.keys(groups).forEach(function (groupId) {
+                    data[groupId] = {
+                      name: groups[groupId].name,
+                      records: [],
+                    };
+                    if (groupBy === 'place') {
+                      data[groupId].name = _.get(locationsMap, `${groupId}.name`);
+                    }
+                    groups[groupId].records.forEach(function (record) {
+                      if (record.address && record.address.locationId) {
+                        record.location = locationsMap[record.address.locationId];
+                      }
+                      record.gender = dictionary.getTranslation(_.get(record, 'contact.gender'));
+                      const recordEntry = {
+                        lastName: _.get(record, 'contact.lastName', ''),
+                        firstName: _.get(record, 'contact.firstName', ''),
+                        middleName: _.get(record, 'contact.middleName', ''),
+                        age: `${_.get(record, 'contact.age.years', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(record, 'contact.age.months', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
+                        gender: record.gender,
+                        location: _.get(record, 'location.name', ''),
+                        address: app.models.address.getHumanReadableAddress(record.address),
+                        day: record.index,
+                        from: moment(_.get(record, 'contact.followUp.startDate')).format('YYYY-MM-DD'),
+                        to: moment(_.get(record, 'contact.followUp.endDate')).format('YYYY-MM-DD')
+                      };
+                      recordEntry[record.statusId] = 'X';
+                      data[groupId].records.push(recordEntry);
+                    });
+                  });
+                  return data;
+                });
+            });
+        })
+        .then(function (data) {
+          return app.models.referenceData
+            .rawFind({
+              categoryId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE',
+              value: {
+                neq: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
+              }
+            }, {
+              projection: {
+                value: 1
+              }
+            })
+            .then(function (referenceData) {
+              const headers = [{
+                id: 'firstName',
+                header: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_FIRST_NAME')
+              }, {
+                id: 'lastName',
+                header: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_LAST_NAME')
+              }, {
+                id: 'middleName',
+                header: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_MIDDLE_NAME')
+              }, {
+                id: 'age',
+                header: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')
+              }, {
+                id: 'gender',
+                header: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_GENDER')
+              }, {
+                id: 'location',
+                header: dictionary.getTranslation('LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID')
+              }, {
+                id: 'address',
+                header: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_ADDRESS')
+              }, {
+                id: 'day',
+                header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_LOCATION_ID')
+              }, {
+                id: 'from',
+                header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_LOCATION_ID')
+              }, {
+                id: 'to',
+                header: dictionary.getTranslation('LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_LOCATION_ID')
+              }];
+              referenceData.forEach(function (referenceDataItem) {
+                headers.push({
+                  id: referenceDataItem.value,
+                  header: dictionary.getTranslation(referenceDataItem.value)
+                });
+              });
+
+              const commonLabels = {
+                title: 'Daily Followup For: ' + moment(startDate).format('YYYY-MM-DD'),
+                groupTitle: groupBy === 'place' ? 'Location Name' : 'Case Name'
+              };
+
+              dailyFollowUpListBuilder.send({fn: 'sendData', args: [commonLabels, headers, data]});
+            });
+        })
+        .catch(cb);
+    });
   };
 
   /**
