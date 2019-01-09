@@ -8658,6 +8658,10 @@ module.exports = function (Outbreak) {
                 .then((followUps) => {
                   const groupedFollowups = _.groupBy(followUps, (f) => f.personId);
 
+                  contacts = contacts.map((contact) => {
+                    contacts.followUps = groupedFollowups[contact.id] || [];
+                  });
+
                   // build groups (grouped by place/case)
                   const groups = {};
                   switch (groupBy) {
@@ -8682,6 +8686,11 @@ module.exports = function (Outbreak) {
                             records: []
                           };
                         }
+
+                        // to easily resolve it
+                        contact.currentAddress = currentAddress || {
+                          locationId: locationId
+                        };
 
                         // add contact to the group
                         groups[locationId].records.push(contact);
@@ -8829,26 +8838,24 @@ module.exports = function (Outbreak) {
                     // go through all records
                     groups[groupId].records.forEach(function (record) {
                       // add record location information (from the resolved locations)
-                      if (record.address && record.address.locationId) {
-                        record.location = locationsMap[record.address.locationId];
-                      }
+                      record.location = locationsMap[record.currentAddress.locationId];
+
                       // translate gender
                       record.gender = dictionary.getTranslation(_.get(record, 'contact.gender'));
                       // build record entry
                       const recordEntry = {
-                        lastName: _.get(record, 'contact.lastName', ''),
-                        firstName: _.get(record, 'contact.firstName', ''),
-                        middleName: _.get(record, 'contact.middleName', ''),
-                        age: `${_.get(record, 'contact.age.years', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(record, 'contact.age.months', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
+                        lastName: _.get(record, 'lastName', ''),
+                        firstName: _.get(record, 'firstName', ''),
+                        middleName: _.get(record, 'middleName', ''),
+                        age: `${_.get(record, 'age.years', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(record, 'contact.age.months', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
                         gender: record.gender,
                         location: _.get(record, 'location.name', ''),
-                        address: app.models.address.getHumanReadableAddress(record.address),
-                        day: record.index,
-                        from: moment(_.get(record, 'contact.followUp.startDate')).format('YYYY-MM-DD'),
-                        to: moment(_.get(record, 'contact.followUp.endDate')).format('YYYY-MM-DD')
+                        address: app.models.address.getHumanReadableAddress(record.currentAddress),
+                        from: moment(_.get(record, 'followUp.startDate')).format('YYYY-MM-DD'),
+                        to: moment(_.get(record, 'followUp.endDate')).format('YYYY-MM-DD'),
+                        followUps: record.followUps
                       };
-                      // mark appropriate status as done
-                      recordEntry[record.statusId] = 'X';
+
                       // add record entry to dataset
                       data[groupId].records.push(recordEntry);
                     });
