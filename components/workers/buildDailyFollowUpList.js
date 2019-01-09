@@ -24,28 +24,43 @@ const worker = {
    * @param commonLabels
    * @param headers
    * @param dataSet
+   * @param lastSet
    */
-  sendData: function (commonLabels, headers, dataSet) {
+  sendData: function (commonLabels, headers, dataSet, lastSet = false) {
+    // add doc title
     pdfUtils.addTitle(doc, commonLabels.title, 14);
+
     doc.moveDown(2);
 
     // add dataSets to doc
     Object.keys(dataSet).forEach(function (recordSetId, index) {
-
+      // get record set
       const recordSet = dataSet[recordSetId];
-      // Add contact information at the start of each page
-      pdfUtils.addTitle(doc, `${commonLabels.groupTitle}: ${recordSet.name}`, 14);
+
+      // Add group title
+      pdfUtils.addTitle(doc, `${commonLabels.groupTitle}: ${recordSet.name}`, 12);
+
       doc.moveDown(3);
 
       // Add the follow-up table
       pdfUtils.createTableInPDFDocument(headers, recordSet.records, doc);
 
+      // Add group total
+      pdfUtils.addTitle(doc, `${commonLabels.total}: ${recordSet.records.length}`, 12);
+
       // if this is not the last record on in the last dataSet, add a new page for the next record
-      if (index < Object.keys(dataSet).length - 1) {
+      if (!lastSet || index < Object.keys(dataSet).length - 1) {
         // Add a new page for every contact
         doc.addPage();
       }
     });
+    // after finishing adding data to the doc, inform client that the worker is ready for the next batch
+    process.send([null, {readyForNextBatch: true}]);
+  },
+  /**
+   * Inform the worker that there is no more data to be added
+   */
+  finish: function () {
     doc.end();
   }
 };
