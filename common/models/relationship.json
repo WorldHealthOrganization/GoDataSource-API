@@ -73,6 +73,9 @@
     },
     "clusterId_index": {
       "clusterId": 1
+    },
+    "contactDate_index": {
+      "contactDate": 1
     }
   },
   "validations": [],

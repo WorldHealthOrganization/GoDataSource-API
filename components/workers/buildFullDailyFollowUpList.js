@@ -21,41 +21,43 @@ doc.on('pageAdded', () => {
 const worker = {
   /**
    * Send data to worker
-   * @param commonLabels
-   * @param headers
    * @param dataSet
    * @param lastSet
    */
-  sendData: function (commonLabels, headers, dataSet, lastSet = false) {
-    // add doc title
-    pdfUtils.addTitle(doc, commonLabels.title, 14);
-
+  sendData: function (dataSet, lastSet = false) {
+    // set margin top for first page here, to not change the entire createPdfDoc functionality
     doc.moveDown(2);
 
     // add dataSets to doc
-    Object.keys(dataSet).forEach(function (recordSetId, index) {
-      // get record set
-      const recordSet = dataSet[recordSetId];
-
-      // store reset x
+    dataSet.forEach(function (recordSet, index) {
+      // store reset locations (x,y before adding contact info)
+      const resetY = doc.y;
       const resetX = doc.x;
 
-      // Add group title
-      pdfUtils.addTitle(doc, `${commonLabels.groupTitle}: ${recordSet.name}`, 12);
+      // Add contact information at the start of each page
+      pdfUtils.addTitle(doc, recordSet.contactInformation.title, 14);
+      recordSet.contactInformation.rows.forEach(function (row) {
+        doc.text(row);
+      });
 
+      // add follow up status legend to the right side of the page (reduce whitespace)
+      doc.x = parseInt(doc.page.width / 2);
+      doc.y = resetY;
+
+      pdfUtils.addTitle(doc, recordSet.legend.title, 14);
+      recordSet.legend.rows.forEach(function (row) {
+        doc.text(row);
+      });
+
+      // reset x
+      doc.x = resetX;
       doc.moveDown(3);
 
       // Add the follow-up table
-      pdfUtils.createTableInPDFDocument(headers, recordSet.records, doc);
-
-      // reset doc.x to initial x (when adding tables the x changes)
-      doc.x = resetX;
-
-      // Add group total
-      pdfUtils.addTitle(doc, `${commonLabels.total}: ${recordSet.records.length}`, 12);
+      pdfUtils.createTableInPDFDocument(recordSet.headers, recordSet.data, doc);
 
       // if this is not the last record on in the last dataSet, add a new page for the next record
-      if (!lastSet || index < Object.keys(dataSet).length - 1) {
+      if (!lastSet || index < dataSet.length - 1) {
         // Add a new page for every contact
         doc.addPage();
       }
