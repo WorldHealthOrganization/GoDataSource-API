@@ -684,7 +684,10 @@ module.exports = function (Sync) {
           Sync.exportDatabase(
             filter,
             collections,
-            {password: password},
+            {
+              password: password,
+              chunkSize: 10000
+            },
             (err, fileName) => {
               if (err) {
                 return reject(err);
