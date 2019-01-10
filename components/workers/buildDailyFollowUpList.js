@@ -32,10 +32,25 @@ const worker = {
 
     doc.moveDown(2);
 
-    // add dataSets to doc
-    Object.keys(dataSet).forEach(function (recordSetId, index) {
+    // remember initial dataSet size and keep an index in order to know when to stop
+    const initialDataSetLength = Object.keys(dataSet).length;
+    let index = 0;
+
+    // write rows to table in an async manner (in batches) to allow streaming to happen
+    (function writeInBatches(dataSet) {
+      // get dataset keys
+      const dataSetKeys = Object.keys(dataSet);
+      // if there is nothing left to process
+      if (!dataSetKeys.length) {
+        // inform the client that the worker is ready for the next batch
+        return process.send([null, {readyForNextBatch: true}]);
+      }
+      // get recordSet id
+      const recordSetId = dataSetKeys.pop();
       // get record set
       const recordSet = dataSet[recordSetId];
+      // remove record that is to be processed from the recordSet
+      delete dataSet[recordSetId];
 
       // store reset x
       const resetX = doc.x;
@@ -45,23 +60,24 @@ const worker = {
 
       doc.moveDown(3);
 
-      // Add the follow-up table
-      pdfUtils.createTableInPDFDocument(headers, recordSet.records, doc);
+      // Add the follow-up table (add data in batches)
+      pdfUtils.createTableInPDFDocument(headers, recordSet.records, doc, null, null, function () {
+        // reset doc.x to initial x (when adding tables the x changes)
+        doc.x = resetX;
 
-      // reset doc.x to initial x (when adding tables the x changes)
-      doc.x = resetX;
+        // Add group total
+        pdfUtils.addTitle(doc, `${commonLabels.total}: ${recordSet.records.length}`, 12);
 
-      // Add group total
-      pdfUtils.addTitle(doc, `${commonLabels.total}: ${recordSet.records.length}`, 12);
-
-      // if this is not the last record on in the last dataSet, add a new page for the next record
-      if (!lastSet || index < Object.keys(dataSet).length - 1) {
-        // Add a new page for every contact
-        doc.addPage();
-      }
-    });
-    // after finishing adding data to the doc, inform client that the worker is ready for the next batch
-    process.send([null, {readyForNextBatch: true}]);
+        // if this is not the last record on in the last dataSet, add a new page for the next record
+        if (!lastSet || index < Object.keys(initialDataSetLength).length - 1) {
+          // Add a new page for every contact
+          doc.addPage();
+        }
+        index++;
+        // keep adding in batches until nothing left
+        writeInBatches(dataSet);
+      });
+    })(dataSet);
   },
   /**
    * Inform the worker that there is no more data to be added
