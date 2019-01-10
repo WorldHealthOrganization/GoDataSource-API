@@ -336,7 +336,10 @@ module.exports = function (Contact) {
         .rawFind({
           date: {
             between: dateInterval
-          }
+          },
+          outbreakId: outbreak.id,
+        }, {
+          order: {date: 1}
         })
         .then(function (followUps) {
           // build a followUp map, to easily link them to contacts later
@@ -347,14 +350,15 @@ module.exports = function (Contact) {
             if (!followUpMap[followUp.personId]) {
               followUpMap[followUp.personId] = [];
             }
-            followUpMap[followUp.personId].push(followUps);
+            followUpMap[followUp.personId].push(followUp);
           });
           // find the contacts associated with the follow-ups
           return app.models.contact
             .rawFind({
               _id: {
                 inq: Array.from(new Set(Object.keys(followUpMap)))
-              }
+              },
+              outbreakId: outbreak.id,
             })
             .then(function (contacts) {
               // build contact groups
@@ -373,7 +377,12 @@ module.exports = function (Contact) {
                 }
                 contactGroups[contact.riskLevel].push(contact);
               });
-              return contactGroups;
+              // sort groups by risk level
+              const _contactGroups = {};
+              Object.keys(contactGroups).sort().forEach(function (key) {
+                _contactGroups[key] = contactGroups[key];
+              });
+              return _contactGroups;
             });
         });
     }

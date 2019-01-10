@@ -6881,11 +6881,11 @@ module.exports = function (Outbreak) {
               pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_FOLLOW_UP_STATUS_LEGEND'), 12);
               for (let statusId in followUpStatusMap) {
                 if (followUpStatusMap.hasOwnProperty(statusId)) {
-                  pdfUtils.addTitle(doc, `${dictionary.getTranslation(statusId)} = ${dictionary.getTranslation(followUpStatusMap[statusId])}`, 9);
+                  pdfUtils.addTitle(doc, `${dictionary.getTranslation(statusId)} = ${dictionary.getTranslation(followUpStatusMap[statusId])}`, 8);
                 }
               }
               doc.moveDown();
-
+              let groupIndex = 0;
               // build tables for each group item
               for (let groupName in contactGroups) {
                 if (contactGroups.hasOwnProperty(groupName)) {
@@ -6898,6 +6898,12 @@ module.exports = function (Outbreak) {
                   // risk level title is a token, should be translated
                   if (body.groupBy === 'riskLevel') {
                     groupTitle = dictionary.getTranslation(groupName);
+                  }
+
+                  // after first group, each group goes on different page
+                  if (groupIndex > 0) {
+                    doc.addPage();
+                    doc.moveDown(2);
                   }
 
                   pdfUtils.addTitle(doc, groupTitle, 12);
@@ -7103,7 +7109,7 @@ module.exports = function (Outbreak) {
                     pdfUtils.createTableInPDFDocument(tableDef.headers, tableDef.values, doc, null, true);
                   });
 
-                  doc.moveDown();
+                  groupIndex++;
                 }
               }
 
@@ -7995,10 +8001,14 @@ module.exports = function (Outbreak) {
                     processInBatches(commonLabels, headers, dataSet);
                   }
                 }
+
                 // listen to worker messages
                 dailyFollowUpListBuilder.on('message', listener);
                 // build follow-up list
-                dailyFollowUpListBuilder.send({fn: 'sendData', args: [commonLabels, headers, dataSubSet, Object.keys(dataSet).length === 0]});
+                dailyFollowUpListBuilder.send({
+                  fn: 'sendData',
+                  args: [commonLabels, headers, dataSubSet, Object.keys(dataSet).length === 0]
+                });
               })(commonLabels, headers, data);
             });
         })
