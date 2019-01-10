@@ -6091,6 +6091,10 @@
           }
         },
         {
+          "arg": "groupBy",
+          "type": "string"
+        },
+        {
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries"
@@ -6125,7 +6129,7 @@
       ],
       "description": "Export pdf containing contacts to be seen by place/case",
       "http": {
-        "verb": "post",
+        "verb": "get",
         "path": "/contacts/daily-list/export"
       }
     },

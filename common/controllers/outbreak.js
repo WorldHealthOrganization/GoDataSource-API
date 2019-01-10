@@ -8574,7 +8574,7 @@ module.exports = function (Outbreak) {
           }
 
           // start the builder
-          const dailyFollowUpListBuilder = fork(`${__dirname}../../../components/workers/buildDailyFollowUpList`,
+          const dailyFollowUpListBuilder = fork(`${__dirname}../../../components/workers/buildDailyContactList`,
             [], {
               execArgv: [],
               windowsHide: true
@@ -8622,13 +8622,13 @@ module.exports = function (Outbreak) {
 
           // set appropriate headers
           res.set('Content-type', 'application/pdf');
-          res.set('Content-disposition', 'attachment;filename=Daily Contact Follow-up.pdf');
+          res.set('Content-disposition', 'attachment;filename=Daily Contact List.pdf');
 
           // keep a list of locations to resolve
           const locationsToResolve = [];
           // find contacts for the found follow-ups
           return app.models.contact
-            .rawFind(filter, {
+            .rawFind(filter.where, {
               projection: {
                 followUp: 1,
                 firstName: 1,
@@ -8649,7 +8649,7 @@ module.exports = function (Outbreak) {
               });
 
               // find all follow ups for all contacts and group them by contact
-              app.models.followUp
+              return app.models.followUp
                 .rawFind({
                   personId: {
                     $in: Object.keys(contactsMap)
@@ -8659,317 +8659,358 @@ module.exports = function (Outbreak) {
                   const groupedFollowups = _.groupBy(followUps, (f) => f.personId);
 
                   contacts = contacts.map((contact) => {
-                    contacts.followUps = groupedFollowups[contact.id] || [];
+                    // sort by index and remove duplicates from the same day
+                    let contactFollowUps = groupedFollowups[contact.id] || [];
+                    contactFollowUps = _.uniqBy(contactFollowUps, 'index').sort((a, b) => a.index - b.index);
+
+                    contact.followUps = contactFollowUps;
+
+                    return contact;
                   });
 
                   // build groups (grouped by place/case)
                   const groups = {};
-                  switch (groupBy) {
-                    case 'place':
-                      // group contacts by place (location)
-                      contacts.forEach((contact) => {
-                        // assume unknown location
-                        let locationId = 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION';
+                  if (groupBy === 'place') {
+                    // group contacts by place (location)
+                    contacts.forEach((contact) => {
+                      // assume unknown location
+                      let locationId = 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION';
 
-                        // try to get location from the contact
-                        let currentAddress = app.models.person.getCurrentAddress(contact);
+                      // try to get location from the contact
+                      let currentAddress = app.models.person.getCurrentAddress(contact);
 
-                        // if location was found
-                        if (currentAddress) {
-                          // use it
-                          locationId = currentAddress.locationId;
+                      // if location was found
+                      if (currentAddress) {
+                        // use it
+                        locationId = currentAddress.locationId;
+                      }
+
+                      // init group (if not present)
+                      if (!groups[locationId]) {
+                        groups[locationId] = {
+                          records: []
+                        };
+                      }
+
+                      // to easily resolve it
+                      contact.currentAddress = currentAddress || {
+                        locationId: locationId
+                      };
+
+                      // add contact to the group
+                      groups[locationId].records.push(contact);
+                    });
+
+                    // exported locations should match the reporting level set for outbreak
+                    return app.models.location
+                      .resolveLocationsWithLevel(Object.keys(groups), self)
+                      .then(function (locationMap) {
+                        // remap groups to use outbreak reporting level
+                        const _groups = {};
+                        Object.keys(groups).forEach(function (location) {
+                          // get group id
+                          const groupId = locationMap[location] || 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION';
+                          // if the group does not exist
+                          if (!_groups[groupId]) {
+                            // copy existing group
+                            _groups[groupId] = groups[location];
+                          } else {
+                            // otherwise update group with new records
+                            _groups[groupId].records.push(...groups[location].records);
+                          }
+                        });
+                        return _groups;
+                      });
+                  } else {
+                    // group by case, first find relationships
+                    return app.models.relationship
+                      .rawFind({
+                        outbreakId: self.id,
+                        'persons.id': {
+                          inq: Object.keys(contactsMap)
+                        }
+                      }, {
+                        projection: {
+                          persons: 1
+                        },
+                        order: {contactDate: 1}
+                      })
+                      .then(function (relationships) {
+                        // map contacts to cases
+                        const contactToCaseMap = {};
+                        relationships.forEach(function (relationship) {
+                          let contactId;
+                          let caseId;
+                          // find contact and case
+                          Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
+                            if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                              contactId = person.id;
+                            } else {
+                              caseId = person.id;
+                            }
+                          });
+                          // if found, add them to the map
+                          if (contactId && caseId) {
+                            contactToCaseMap[contactId] = caseId;
+                          }
+                        });
+                        // find people (cases)
+                        return app.models.person
+                          .rawFind({
+                            _id: {
+                              inq: Object.values(contactToCaseMap)
+                            },
+                            outbreakId: self.id,
+                          }, {
+                            projection: {
+                              type: 1,
+                              firstName: 1,
+                              middleName: 1,
+                              lastName: 1,
+                              name: 1
+                            }
+                          })
+                          .then(function (cases) {
+                            // build people map to easily reference people by id
+                            const casesMap = {};
+                            cases.forEach(function (caseItem) {
+                              casesMap[caseItem.id] = caseItem;
+                            });
+
+                            // go through all contacts
+                            contacts.forEach((contact) => {
+                              // init group if not already initiated
+                              if (!groups[contactToCaseMap[contact.id]]) {
+                                // get person information from the map
+                                const person = casesMap[contactToCaseMap[contact.id]] || {};
+                                // add group information
+                                groups[contactToCaseMap[contact.id]] = {
+                                  name: `${person.firstName || ''} ${person.middleName || ''} ${person.lastName || ''}`.trim(),
+                                  records: []
+                                };
+                              }
+                              // add follow-up to the group
+                              groups[contactToCaseMap[contact.id]].records.push(contact);
+                            });
+                            return groups;
+                          });
+                      });
+                  }
+                })
+                .then(function (groups) {
+                  // if the grouping is done by place
+                  if (groupBy === 'place') {
+                    // add group ids to the list of locations that need to be resolved
+                    locationsToResolve.push(...Object.keys(groups));
+                  }
+                  // find locations
+                  return app.models.location
+                    .rawFind({
+                      id: {
+                        inq: locationsToResolve,
+                      }
+                    }, {
+                      projection: {
+                        name: 1
+                      }
+                    })
+                    .then(function (locations) {
+                      // build a map of locations to easily reference them by id
+                      const locationsMap = {};
+                      const data = {};
+                      locations.forEach(function (location) {
+                        locationsMap[location.id] = location;
+                      });
+
+                      // store unknown location translation
+                      const unknownLocationTranslation = dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION');
+
+                      // go through the groups
+                      Object.keys(groups).forEach(function (groupId) {
+                        // build data sets
+                        data[groupId] = {
+                          name: groups[groupId].name,
+                          records: [],
+                        };
+                        // if the grouping is by place
+                        if (groupBy === 'place') {
+                          // and group id contains a location id
+                          if (groupId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION') {
+                            // resolve group name
+                            data[groupId].name = _.get(locationsMap, `${groupId}.name`);
+                          } else {
+                            // otherwise add Unknown Location label
+                            data[groupId].name = unknownLocationTranslation;
+                          }
+                        }
+                        // go through all records
+                        groups[groupId].records.forEach(function (record) {
+                          if (!record.currentAddress) {
+                            record.currentAddress = app.models.person.getCurrentAddress(record) || {
+                              locationId: 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION'
+                            };
+                          }
+
+                          // add record location information (from the resolved locations)
+                          record.location = locationsMap[record.currentAddress.locationId];
+
+                          // build record entry
+                          const recordEntry = {
+                            lastName: _.get(record, 'lastName', ''),
+                            firstName: _.get(record, 'firstName', ''),
+                            middleName: _.get(record, 'middleName', ''),
+                            age: `${_.get(record, 'age.years', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(record, 'contact.age.months', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
+                            gender: dictionary.getTranslation(_.get(record, 'gender')),
+                            location: _.get(record, 'location.name', ''),
+                            address: app.models.address.getHumanReadableAddress(record.currentAddress),
+                            from: moment(_.get(record, 'followUp.startDate')).format('YYYY-MM-DD'),
+                            to: moment(_.get(record, 'followUp.endDate')).format('YYYY-MM-DD'),
+                            // needed for building tables
+                            followUps: record.followUps,
+                            followUp: record.followUp
+                          };
+
+                          // add record entry to dataset
+                          data[groupId].records.push(recordEntry);
+                        });
+                      });
+                      return data;
+                    });
+                })
+                .then(function (groups) {
+                  // get available follow-up statuses from reference data
+                  return app.models.referenceData
+                    .rawFind({
+                      categoryId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE',
+                      value: {
+                        neq: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
+                      }
+                    }, {
+                      projection: {
+                        value: 1
+                      }
+                    })
+                    .then(function () {
+                      // translate follow ups status acronyms here
+                      // to pass it to the worker
+                      const followUpStatusAcronyms = app.models.followUp.statusAcronymMap;
+                      const translatedFollowUpAcronyms = {};
+                      const translatedFollowUpAcronymsAndIds = {};
+                      for (let prop in followUpStatusAcronyms) {
+                        const translatedProp = dictionary.getTranslation(prop);
+                        const translatedValue = dictionary.getTranslation(followUpStatusAcronyms[prop]);
+                        translatedFollowUpAcronyms[prop] = translatedValue;
+                        translatedFollowUpAcronymsAndIds[translatedProp] = translatedValue;
+                      }
+
+                      // build table headers
+                      const headers = [{
+                        id: 'firstName',
+                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME')
+                      }, {
+                        id: 'lastName',
+                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME')
+                      }, {
+                        id: 'middleName',
+                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME')
+                      }, {
+                        id: 'age',
+                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE')
+                      }, {
+                        id: 'gender',
+                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER')
+                      }, {
+                        id: 'location',
+                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION')
+                      }, {
+                        id: 'address',
+                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS')
+                      }, {
+                        id: 'from',
+                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM')
+                      }, {
+                        id: 'to',
+                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO')
+                      }];
+
+
+                      // group by title translation
+                      const groupTitle = dictionary.getTranslation(groupBy === 'place' ?
+                        'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_LOCATION' :
+                        'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_CASE');
+
+                      // start document title
+                      const pdfTitle = dictionary.getTranslation('LNG_PAGE_TITLE_DAILY_CONTACTS_LIST');
+                      const legendTitle = dictionary.getTranslation('LNG_FOLLOW_UP_STATUS_LEGEND');
+
+                      // flag that indicates that start document props were added
+                      let startDocumentAdded = false;
+
+                      // process groups in batches
+                      (function processInBatches(defaultHeaders, groups) {
+                        // we process the first group always
+                        const groupsKeys = Object.keys(groups);
+                        if (!groupsKeys.length) {
+                          // all records processed, inform the worker that is time to finish
+                          return dailyFollowUpListBuilder.send({fn: 'finish', args: []});
                         }
 
-                        // init group (if not present)
-                        if (!groups[locationId]) {
-                          groups[locationId] = {
-                            records: []
+                        const targetGroup = groups[groupsKeys[0]];
+                        delete groups[groupsKeys[0]];
+
+                        const listener = function (args) {
+                          // first argument is an error
+                          if (args[0]) {
+                            // handle it
+                            return cb(args[0]);
+                          }
+                          // if the worker is ready for the next batch
+                          if (args[1] && args[1].readyForNextBatch) {
+                            // remove current listener
+                            dailyFollowUpListBuilder.removeListener('message', listener);
+                            // send move to next step
+                            processInBatches(headers, groups);
+                          }
+                        };
+
+                        // listen to worker messages
+                        dailyFollowUpListBuilder.on('message', listener);
+
+                        // custom options to be sent over to the worker
+                        const customOpts = {
+                          groupTitle: groupTitle
+                        };
+
+                        if (!startDocumentAdded) {
+                          customOpts.startDocument = {
+                            title: pdfTitle,
+                            legend: {
+                              title: legendTitle,
+                              values: translatedFollowUpAcronymsAndIds
+                            }
                           };
                         }
 
-                        // to easily resolve it
-                        contact.currentAddress = currentAddress || {
-                          locationId: locationId
-                        };
-
-                        // add contact to the group
-                        groups[locationId].records.push(contact);
-                      });
-
-                      // exported locations should match the reporting level set for outbreak
-                      return app.models.location
-                        .resolveLocationsWithLevel(Object.keys(groups), self)
-                        .then(function (locationMap) {
-                          // remap groups to use outbreak reporting level
-                          const _groups = {};
-                          Object.keys(groups).forEach(function (location) {
-                            // get group id
-                            const groupId = locationMap[location] || 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION';
-                            // if the group does not exist
-                            if (!_groups[groupId]) {
-                              // copy existing group
-                              _groups[groupId] = groups[location];
-                            } else {
-                              // otherwise update group with new records
-                              _groups[groupId].records.push(...groups[location].records);
-                            }
-                          });
-                          return _groups;
+                        // build the group
+                        dailyFollowUpListBuilder.send({
+                          fn: 'sendData',
+                          args: [
+                            customOpts,
+                            defaultHeaders,
+                            targetGroup,
+                            translatedFollowUpAcronyms
+                          ]
                         });
-                    case 'case':
-                      // group by case, first find relationships
-                      return app.models.relationship
-                        .rawFind({
-                          outbreakId: self.id,
-                          'persons.id': {
-                            inq: Object.keys(contactsMap)
-                          }
-                        }, {
-                          projection: {
-                            persons: 1
-                          },
-                          order: {contactDate: 1}
-                        })
-                        .then(function (relationships) {
-                          // map contacts to cases
-                          const contactToCaseMap = {};
-                          relationships.forEach(function (relationship) {
-                            let contactId;
-                            let caseId;
-                            // find contact and case
-                            Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
-                              if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-                                contactId = person.id;
-                              } else {
-                                caseId = person.id;
-                              }
-                            });
-                            // if found, add them to the map
-                            if (contactId && caseId) {
-                              contactToCaseMap[contactId] = caseId;
-                            }
-                          });
-                          // find people (cases)
-                          return app.models.person
-                            .rawFind({
-                              _id: {
-                                inq: Object.values(contactToCaseMap)
-                              },
-                              outbreakId: self.id,
-                            }, {
-                              projection: {
-                                type: 1,
-                                firstName: 1,
-                                middleName: 1,
-                                lastName: 1,
-                                name: 1
-                              }
-                            })
-                            .then(function (cases) {
-                              // build people map to easily reference people by id
-                              const casesMap = {};
-                              cases.forEach(function (caseItem) {
-                                casesMap[caseItem.id] = caseItem;
-                              });
 
-                              // go through all contacts
-                              contacts.forEach((contact) => {
-                                // init group if not already initiated
-                                if (!groups[contactToCaseMap[contact.id]]) {
-                                  // get person information from the map
-                                  const person = casesMap[contactToCaseMap[contact.id]] || {};
-                                  // add group information
-                                  groups[contactToCaseMap[contact.id]] = {
-                                    name: `${person.firstName || ''} ${person.middleName || ''} ${person.lastName || ''}`.trim(),
-                                    records: []
-                                  };
-                                }
-                                // add follow-up to the group
-                                groups[contactToCaseMap[contact.id]].records.push(contact);
-                              });
-                              return groups;
-                            });
-                        });
-                  }
+                        // do not add start document opts on next call
+                        startDocumentAdded = true;
+
+                      })(headers, groups);
+                    });
                 });
             })
-            .then(function (groups) {
-              // if the grouping is done by place
-              if (groupBy === 'place') {
-                // add group ids to the list of locations that need to be resolved
-                locationsToResolve.push(...Object.keys(groups));
-              }
-              // find locations
-              return app.models.location
-                .rawFind({
-                  id: {
-                    inq: locationsToResolve,
-                  }
-                }, {
-                  projection: {
-                    name: 1
-                  }
-                })
-                .then(function (locations) {
-                  // build a map of locations to easily reference them by id
-                  const locationsMap = {};
-                  const data = {};
-                  locations.forEach(function (location) {
-                    locationsMap[location.id] = location;
-                  });
-                  // go through the groups
-                  Object.keys(groups).forEach(function (groupId) {
-                    // build data sets
-                    data[groupId] = {
-                      name: groups[groupId].name,
-                      records: [],
-                    };
-                    // if the grouping is by place
-                    if (groupBy === 'place') {
-                      // and group id contains a location id
-                      if (groupId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION') {
-                        // resolve group name
-                        data[groupId].name = _.get(locationsMap, `${groupId}.name`);
-                      } else {
-                        // otherwise add Unknown Location label
-                        data[groupId].name = dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION');
-                      }
-                    }
-                    // go through all records
-                    groups[groupId].records.forEach(function (record) {
-                      // add record location information (from the resolved locations)
-                      record.location = locationsMap[record.currentAddress.locationId];
-
-                      // translate gender
-                      record.gender = dictionary.getTranslation(_.get(record, 'contact.gender'));
-                      // build record entry
-                      const recordEntry = {
-                        lastName: _.get(record, 'lastName', ''),
-                        firstName: _.get(record, 'firstName', ''),
-                        middleName: _.get(record, 'middleName', ''),
-                        age: `${_.get(record, 'age.years', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(record, 'contact.age.months', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
-                        gender: record.gender,
-                        location: _.get(record, 'location.name', ''),
-                        address: app.models.address.getHumanReadableAddress(record.currentAddress),
-                        from: moment(_.get(record, 'followUp.startDate')).format('YYYY-MM-DD'),
-                        to: moment(_.get(record, 'followUp.endDate')).format('YYYY-MM-DD'),
-                        followUps: record.followUps
-                      };
-
-                      // add record entry to dataset
-                      data[groupId].records.push(recordEntry);
-                    });
-                  });
-                  return data;
-                });
-            });
-        })
-          .then(function (data) {
-            // get available follow-up statuses from reference data
-            return app.models.referenceData
-              .rawFind({
-                categoryId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE',
-                value: {
-                  neq: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
-                }
-              }, {
-                projection: {
-                  value: 1
-                }
-              })
-              .then(function (referenceData) {
-                // build table headers
-                const headers = [{
-                  id: 'firstName',
-                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME')
-                }, {
-                  id: 'lastName',
-                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME')
-                }, {
-                  id: 'middleName',
-                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME')
-                }, {
-                  id: 'age',
-                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE')
-                }, {
-                  id: 'gender',
-                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER')
-                }, {
-                  id: 'location',
-                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION')
-                }, {
-                  id: 'address',
-                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS')
-                }, {
-                  id: 'day',
-                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_DAY')
-                }, {
-                  id: 'from',
-                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM')
-                }, {
-                  id: 'to',
-                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO')
-                }];
-
-                // also add follow-up statuses to table headers
-                referenceData.forEach(function (referenceDataItem) {
-                  headers.push({
-                    id: referenceDataItem.value,
-                    header: dictionary.getTranslation(referenceDataItem.value)
-                  });
-                });
-                // define a list of common labels
-                const commonLabels = {
-                  title: `${dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TITLE')}: ${moment(startDate).format('YYYY-MM-DD')}`,
-                  groupTitle: dictionary.getTranslation(groupBy === 'place' ? 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_LOCATION' : 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_CASE'),
-                  total: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TOTAL')
-                };
-
-                // process groups in batches
-                (function processInBatches(commonLabels, headers, dataSet) {
-                  // get the list of keys
-                  const setKeys = Object.keys(dataSet);
-                  // get max batch size
-                  let maxBatchSize = setKeys.length;
-                  // no records left to be processed
-                  if (maxBatchSize === 0) {
-                    // all records processed, inform the worker that is time to finish
-                    return dailyFollowUpListBuilder.send({fn: 'finish', args: []});
-                  } else if (maxBatchSize > 100) {
-                    // too many records left, limit batch size to 1000
-                    maxBatchSize = 100;
-                  }
-                  // build a subset of data
-                  const dataSubSet = {};
-                  // add data to the subset until the sub-set is full
-                  for (let i = 0; i < maxBatchSize; i++) {
-                    dataSubSet[setKeys[i]] = dataSet[setKeys[i]];
-                    delete dataSet[setKeys[i]];
-                  }
-
-                  // worker communicates via messages, listen to them
-                  function listener(args) {
-                    // first argument is an error
-                    if (args[0]) {
-                      // handle it
-                      return cb(args[0]);
-                    }
-                    // if the worker is ready for the next batch
-                    if (args[1] && args[1].readyForNextBatch) {
-                      // remove current listener
-                      dailyFollowUpListBuilder.removeListener('message', listener);
-                      // send move to next step
-                      processInBatches(commonLabels, headers, dataSet);
-                    }
-                  }
-                  // listen to worker messages
-                  dailyFollowUpListBuilder.on('message', listener);
-                  // build follow-up list
-                  dailyFollowUpListBuilder.send({fn: 'sendData', args: [commonLabels, headers, dataSubSet, Object.keys(dataSet).length === 0]});
-                })(commonLabels, headers, data);
-              });
-          })
-          .catch(cb);
+            .catch(cb);
+        });
       });
   };
 
