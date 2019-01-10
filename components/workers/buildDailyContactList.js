@@ -178,7 +178,7 @@ const worker = {
       // follow up status legend
       PdfUtils.addTitle(doc, options.startDocument.legend.title, 12);
       for (let statusId in options.startDocument.legend.values) {
-        PdfUtils.addTitle(doc, `${statusId} = ${options.startDocument.legend.values[statusId]}`, 9);
+        PdfUtils.addTitle(doc, `${statusId} = ${options.startDocument.legend.values[statusId]}`, 8);
       }
 
       // set margin top for first page here, to not change the entire createPdfDoc functionality
