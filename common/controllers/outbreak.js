@@ -8662,9 +8662,7 @@ module.exports = function (Outbreak) {
                     // sort by index and remove duplicates from the same day
                     let contactFollowUps = groupedFollowups[contact.id] || [];
                     contactFollowUps = _.uniqBy(contactFollowUps, 'index').sort((a, b) => a.index - b.index);
-
                     contact.followUps = contactFollowUps;
-
                     return contact;
                   });
 
