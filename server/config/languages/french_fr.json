@@ -984,7 +984,8 @@
       "LNG_PAGE_LIST_CONTACTS_EXPORT_DAILY_FOLLOW_UP_LIST_BUTTON": "Print Daily Contact Follow-up Form",
       "LNG_PAGE_LIST_CONTACTS_EXPORT_DAILY_FOLLOW_UP_LIST_TITLE": "Daily Contact Follow-up Form",
       "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_EXPORT_SELECTED_CONTACTS_DOSSIER": "Export dossier for selected contacts",
-      "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_EXPORT_SELECTED_CONTACTS_DOSSIER_DIALOG_TITLE": "Contacts dossier"
+      "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_EXPORT_SELECTED_CONTACTS_DOSSIER_DIALOG_TITLE": "Contacts dossier",
+      "LNG_PAGE_LIST_CONTACTS_EXPORT_FOLLOW_UPS_GROUP_BY_BUTTON": "Group by"
     },
     "uiCreateContactPage": {
       "LNG_PAGE_CREATE_CONTACT_ACTION_CREATE_CONTACT_BUTTON": "Créer contact",
@@ -1099,7 +1100,9 @@
       "LNG_PAGE_LIST_FOLLOW_UPS_PRINT_DAILY_FORM_BUTTON": "Print Follow-up List",
       "LNG_PAGE_LIST_FOLLOW_UPS_PRINT_DAILY_FORM_FILE_NAME": "Daily Follow-up List",
       "LNG_PAGE_LIST_FOLLOW_UPS_PRINT_DAILY_FORM_NO_DATE_ERROR": "Please select follow-up date",
-      "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_CHANGE_FOLLOW_UP_TEAM_SUCCESS_MESSAGE": "Team changed!"
+      "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_CHANGE_FOLLOW_UP_TEAM_SUCCESS_MESSAGE": "Team changed!",
+      "LNG_PAGE_LIST_FOLLOW_UPS_PRINT_DAILY_FORM_TITLE": "Print Follow-up List",
+      "LNG_PAGE_LIST_FOLLOW_UPS_EXPORT_GROUP_BY_BUTTON": "Group by"
     },
     "uiCreateFollowUpPage": {
       "LNG_PAGE_CREATE_FOLLOW_UP_ACTION_CREATE_FOLLOW_UP_BUTTON": "Créer suivi",
@@ -2616,7 +2619,9 @@
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ONSET_LABEL": "Onset:",
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ONSET_APRROXIMATE_LABEL": "(approximate)",
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SHOW_EVENTS_LABEL": "Show Events",
-      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SHOW_CONTACTS_LABEL": "Show Contacts"
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SHOW_CONTACTS_LABEL": "Show Contacts",
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_VIEW_CHAIN_OF_TRANSMISSION": "View Person Chain of Transmission",
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_TOGGLE_EDIT_MODE_LABEL": "Edit Mode"
     },
     "uiInconsistencyLabels": {
       "LNG_PAGE_INCONSISTENCY_LABEL_BIGGER": "\"{{date1}}\" is bigger than \"{{date2}}\"",
@@ -2747,7 +2752,9 @@
       "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_EXPORT_TITLE": "Export Data",
       "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_NO_DATA_LABEL": "* If a date is missing from header columns, it means that there is no data for that date",
       "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_TITLE": "Range Follow-ups",
-      "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_FIELD_LABEL_DATE_END_FOLLOW_UP": "Date of the end of the follow-up"
+      "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_FIELD_LABEL_DATE_END_FOLLOW_UP": "Date of the end of the follow-up",
+      "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_CLICK_TO_VIEW_FOLLOW_UP_LABEL": "* Click on a follow-up to view it",
+      "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_QUESTIONNAIRE_ALERT_LABEL": "* Bell icon means that at least one questionnaire answer marked with alert flag was selected for that follow-up"
     },
     "uiLanguageFields": {
       "LNG_LANGUAGE_FIELD_LABEL_NAME": "Name",
