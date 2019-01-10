@@ -8924,6 +8924,9 @@ module.exports = function (Outbreak) {
                     'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_LOCATION' :
                     'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_CASE');
 
+                  // total title translation
+                  const totalTitle = dictionary.getTranslation('LNG_LIST_HEADER_TOTAL');
+
                   // start document title
                   const pdfTitle = dictionary.getTranslation('LNG_PAGE_TITLE_DAILY_CONTACTS_LIST');
                   const legendTitle = dictionary.getTranslation('LNG_FOLLOW_UP_STATUS_LEGEND');
@@ -8963,7 +8966,8 @@ module.exports = function (Outbreak) {
 
                     // custom options to be sent over to the worker
                     const customOpts = {
-                      groupTitle: groupTitle
+                      groupTitle: groupTitle,
+                      totalTitle: totalTitle
                     };
 
                     if (!startDocumentAdded) {

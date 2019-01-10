@@ -4,7 +4,7 @@
 const PdfUtils = require('../pdfDoc');
 const Moment = require('moment');
 const GenericHelpers = require('../helpers');
-const PromisePool = require('es6-promise-pool');
+const Async = require('async');
 
 // format for follow up column dates ids
 const FOLLOWUP_DATE_ID_FORMAT = 'YYYY-MM-DD';
@@ -14,7 +14,7 @@ const FOLLOWUP_DATE_ID_FORMAT = 'YYYY-MM-DD';
  * @param headers
  * @param partialRecord
  * @param followUpStatusMap
- * @returns {{headers: *, data: [null]}}
+ @returns {{headers: , data: [null]}}
  */
 const buildTableForContact = function (headers, partialRecord, followUpStatusMap) {
   // additional tables for many days
@@ -195,38 +195,37 @@ const worker = {
     // hold the initial X value, used to reset tables
     const resetX = doc.x;
 
-    // run the table creation async
-    const pool = new PromisePool(
-      data.records.map((contact) => {
-        return new Promise((resolve) => {
-          setImmediate(() => {
-            // build table for the contact
-            const tables = buildTableForContact(defaultHeaders.slice(), contact, followUpStatusMap);
+    const asyncFunctions = data.records.map((contact) => {
+      return function (cb) {
+        setImmediate(() => {
+          // build table for the contact
+          const tables = buildTableForContact(defaultHeaders.slice(), contact, followUpStatusMap);
 
-            // add tables
-            PdfUtils.createTableInPDFDocument(tables.main.headers, tables.main.data, doc, null, true);
+          // add tables
+          PdfUtils.createTableInPDFDocument(tables.main.headers, tables.main.data, doc, null, true);
+          doc.x = resetX;
+
+          tables.additional.forEach((tableDef) => {
+            PdfUtils.createTableInPDFDocument(tableDef.headers, tableDef.values, doc, null, true);
             doc.x = resetX;
+          });
+          doc.x = resetX;
 
-            tables.additional.forEach((tableDef) => {
-              PdfUtils.createTableInPDFDocument(tableDef.headers, tableDef.values, doc, null, true);
-              doc.x = resetX;
-            });
-            doc.x = resetX;
-
-            doc.moveDown();
-
-            return resolve();
-          })
+          doc.moveDown();
+          cb();
         });
-      }), 100 /* concurrency limit */);
+      };
+    });
 
-    // start the pool
-    pool
-      .start()
-      .then(() => {
-        // after finishing adding data to the doc, inform client that the worker is ready for the next batch
-        process.send([null, {readyForNextBatch: true}]);
-      });
+    // run the table creation async
+    Async.parallelLimit(asyncFunctions, 100, function () {
+      // add total records information
+      doc.moveDown();
+      PdfUtils.addTitle(doc, `${options.totalTitle}: ${data.records.length}`, 12);
+
+      // after finishing adding data to the doc, inform client that the worker is ready for the next batch
+      process.send([null, {readyForNextBatch: true}]);
+    });
   },
   /**
    * Inform the worker that there is no more data to be added
