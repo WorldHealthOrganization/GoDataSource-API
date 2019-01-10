@@ -623,7 +623,7 @@
       "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_NAME_DESCRIPTION": "",
       "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_URL": "Map url",
       "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_URL_DESCRIPTION": "",
-      "LNG_OUTBREAK_FIELD_LABEL_NAME": "Nom",
+      "LNG_OUTBREAK_FIELD_LABEL_NAME": "Épidémie nom",
       "LNG_OUTBREAK_FIELD_LABEL_NAME_DESCRIPTION": "",
       "LNG_OUTBREAK_FIELD_LABEL_START_DATE": "Date de début",
       "LNG_OUTBREAK_FIELD_LABEL_START_DATE_DESCRIPTION": "For info only"
@@ -1256,7 +1256,7 @@
       "LNG_PAGE_CREATE_OUTBREAK_TAB_DONE": "Terminé",
       "LNG_PAGE_CREATE_OUTBREAK_TAB_LAB_RESULTS": "Résultats de laboratoire",
       "LNG_PAGE_CREATE_OUTBREAK_TAB_MAP_SERVERS": "Map Servers",
-      "LNG_PAGE_CREATE_OUTBREAK_TITLE": "Épidémie créée",
+      "LNG_PAGE_CREATE_OUTBREAK_TITLE": "Créer épidémie",
       "LNG_PAGE_CREATE_OUTBREAK_TAB_MAP_SERVERS_DETAILS": "*If no map server is provided, then the default ones will be used"
     },
     "uiModifyOutbreakPage": {
