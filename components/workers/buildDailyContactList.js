@@ -4,6 +4,7 @@
 const PdfUtils = require('../pdfDoc');
 const Moment = require('moment');
 const GenericHelpers = require('../helpers');
+const PromisePool = require('es6-promise-pool');
 
 // format for follow up column dates ids
 const FOLLOWUP_DATE_ID_FORMAT = 'YYYY-MM-DD';
@@ -187,8 +188,6 @@ const worker = {
       doc.addPage();
     }
 
-
-
     // add group title
     PdfUtils.addTitle(doc, `${options.groupTitle}: ${data.name}`, 14);
     doc.moveDown();
@@ -196,26 +195,38 @@ const worker = {
     // hold the initial X value, used to reset tables
     const resetX = doc.x;
 
-    // create a table for each contact plus additional if number of columns exceeds the limit
-    data.records.forEach((contact) => {
-      // build table for the contact
-      const tables = buildTableForContact(defaultHeaders.slice(), contact, followUpStatusMap);
+    // run the table creation async
+    const pool = new PromisePool(
+      data.records.map((contact) => {
+        return new Promise((resolve) => {
+          setImmediate(() => {
+            // build table for the contact
+            const tables = buildTableForContact(defaultHeaders.slice(), contact, followUpStatusMap);
 
-      // add tables
-      PdfUtils.createTableInPDFDocument(tables.main.headers, tables.main.data, doc, null, true);
-      doc.x = resetX;
+            // add tables
+            PdfUtils.createTableInPDFDocument(tables.main.headers, tables.main.data, doc, null, true);
+            doc.x = resetX;
 
-      tables.additional.forEach((tableDef) => {
-        PdfUtils.createTableInPDFDocument(tableDef.headers, tableDef.values, doc, null, true);
-        doc.x = resetX;
+            tables.additional.forEach((tableDef) => {
+              PdfUtils.createTableInPDFDocument(tableDef.headers, tableDef.values, doc, null, true);
+              doc.x = resetX;
+            });
+            doc.x = resetX;
+
+            doc.moveDown();
+
+            return resolve();
+          })
+        });
+      }), 100 /* concurrency limit */);
+
+    // start the pool
+    pool
+      .start()
+      .then(() => {
+        // after finishing adding data to the doc, inform client that the worker is ready for the next batch
+        process.send([null, {readyForNextBatch: true}]);
       });
-      doc.x = resetX;
-
-      doc.moveDown();
-    });
-
-    // after finishing adding data to the doc, inform client that the worker is ready for the next batch
-    process.send([null, {readyForNextBatch: true}]);
   },
   /**
    * Inform the worker that there is no more data to be added
