@@ -487,7 +487,7 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
                 displayModelDetails(doc, subItem, true);
                 doc.x = initialXMargin + 20;
               });
-            } else if (typeof(item[prop]) === 'object' && item[prop] !== null) {
+            } else if (typeof (item[prop]) === 'object' && item[prop] !== null) {
               doc.text(prop, initialXMargin + 20).moveDown();
               doc.x += 20;
               displayModelDetails(doc, item[prop], true);
@@ -506,7 +506,7 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
 
       // reset margin
       doc.x = initialXMargin;
-    } else if (typeof(model[fieldName]) === 'object' && model[fieldName] !== null && Object.keys(model[fieldName]).length) {
+    } else if (typeof (model[fieldName]) === 'object' && model[fieldName] !== null && Object.keys(model[fieldName]).length) {
       doc.text(fieldName, initialXMargin).moveDown();
       doc.x += 20;
       displayModelDetails(doc, model[fieldName], true);
@@ -559,8 +559,9 @@ const displayPersonSectionsWithQuestionnaire = function (doc, sections, title, q
  * @param document PDF document in which to add table
  * @param documentConfig Optional configuration
  * @param noHeaderOnNewPage
+ * @param [callback] If provided, data will be added in chunks
  */
-function createTableInPDFDocument(headers, data, document, documentConfig, noHeaderOnNewPage) {
+function createTableInPDFDocument(headers, data, document, documentConfig, noHeaderOnNewPage, callback) {
   // sanitize data
   data = data.filter(row => row != null);
   documentConfig = documentConfig || defaultDocumentConfiguration;
@@ -625,7 +626,7 @@ function createTableInPDFDocument(headers, data, document, documentConfig, noHea
   // Transform boolean values into string, otherwise false does not get printed
   data.forEach((model, index) => {
     data[index] = _.mapValues(model, (value) => {
-      if (typeof(value) === 'boolean') {
+      if (typeof (value) === 'boolean') {
         return value.toString();
       } else {
         return value;
@@ -633,11 +634,34 @@ function createTableInPDFDocument(headers, data, document, documentConfig, noHea
     });
   });
 
-  // add table data
-  pdfTable.addBody(data);
-  // move cursor to next line and set margin
-  document.moveDown();
-  document.x = document.options.margin;
+  // no callback provided, add data synchronously
+  if (!callback) {
+    // add table data
+    pdfTable.addBody(data);
+    // move cursor to next line and set margin
+    document.moveDown();
+    document.x = document.options.margin;
+  } else {
+    // callback provided, add data in chunks
+    (function addDataInBatches(data, showHeaders = true) {
+      // give the processor time between writes
+      setImmediate(function () {
+        // last chunk
+        if (data.length === 0) {
+          document.moveDown();
+          document.x = document.options.margin;
+          callback();
+        } else {
+          // data still left to be added
+          pdfTable.showHeaders = showHeaders;
+          // add 100 rows at a time
+          pdfTable.addBody(data.slice(0, 100));
+          // after first chunk, don't show headers
+          addDataInBatches(data.slice(100), false);
+        }
+      });
+    })(data);
+  }
 }
 
 /**
