@@ -8878,135 +8878,121 @@ module.exports = function (Outbreak) {
                     });
                 })
                 .then(function (groups) {
-                  // get available follow-up statuses from reference data
-                  return app.models.referenceData
-                    .rawFind({
-                      categoryId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE',
-                      value: {
-                        neq: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
+                  // translate follow ups status acronyms here
+                  // to pass it to the worker
+                  const followUpStatusAcronyms = app.models.followUp.statusAcronymMap;
+                  const translatedFollowUpAcronyms = {};
+                  const translatedFollowUpAcronymsAndIds = {};
+                  for (let prop in followUpStatusAcronyms) {
+                    const translatedProp = dictionary.getTranslation(prop);
+                    const translatedValue = dictionary.getTranslation(followUpStatusAcronyms[prop]);
+                    translatedFollowUpAcronyms[prop] = translatedValue;
+                    translatedFollowUpAcronymsAndIds[translatedProp] = translatedValue;
+                  }
+
+                  // build table headers
+                  const headers = [{
+                    id: 'firstName',
+                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME')
+                  }, {
+                    id: 'lastName',
+                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME')
+                  }, {
+                    id: 'middleName',
+                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME')
+                  }, {
+                    id: 'age',
+                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE')
+                  }, {
+                    id: 'gender',
+                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER')
+                  }, {
+                    id: 'location',
+                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION')
+                  }, {
+                    id: 'address',
+                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS')
+                  }, {
+                    id: 'from',
+                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM')
+                  }, {
+                    id: 'to',
+                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO')
+                  }];
+
+
+                  // group by title translation
+                  const groupTitle = dictionary.getTranslation(groupBy === 'place' ?
+                    'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_LOCATION' :
+                    'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_CASE');
+
+                  // start document title
+                  const pdfTitle = dictionary.getTranslation('LNG_PAGE_TITLE_DAILY_CONTACTS_LIST');
+                  const legendTitle = dictionary.getTranslation('LNG_FOLLOW_UP_STATUS_LEGEND');
+
+                  // flag that indicates that start document props were added
+                  let startDocumentAdded = false;
+
+                  // process groups in batches
+                  (function processInBatches(defaultHeaders, groups) {
+                    // we process the first group always
+                    const groupsKeys = Object.keys(groups);
+                    if (!groupsKeys.length) {
+                      // all records processed, inform the worker that is time to finish
+                      return dailyFollowUpListBuilder.send({fn: 'finish', args: []});
+                    }
+
+                    const targetGroup = groups[groupsKeys[0]];
+                    delete groups[groupsKeys[0]];
+
+                    const listener = function (args) {
+                      // first argument is an error
+                      if (args[0]) {
+                        // handle it
+                        return cb(args[0]);
                       }
-                    }, {
-                      projection: {
-                        value: 1
+                      // if the worker is ready for the next batch
+                      if (args[1] && args[1].readyForNextBatch) {
+                        // remove current listener
+                        dailyFollowUpListBuilder.removeListener('message', listener);
+                        // send move to next step
+                        processInBatches(headers, groups);
                       }
-                    })
-                    .then(function () {
-                      // translate follow ups status acronyms here
-                      // to pass it to the worker
-                      const followUpStatusAcronyms = app.models.followUp.statusAcronymMap;
-                      const translatedFollowUpAcronyms = {};
-                      const translatedFollowUpAcronymsAndIds = {};
-                      for (let prop in followUpStatusAcronyms) {
-                        const translatedProp = dictionary.getTranslation(prop);
-                        const translatedValue = dictionary.getTranslation(followUpStatusAcronyms[prop]);
-                        translatedFollowUpAcronyms[prop] = translatedValue;
-                        translatedFollowUpAcronymsAndIds[translatedProp] = translatedValue;
-                      }
+                    };
 
-                      // build table headers
-                      const headers = [{
-                        id: 'firstName',
-                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME')
-                      }, {
-                        id: 'lastName',
-                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME')
-                      }, {
-                        id: 'middleName',
-                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME')
-                      }, {
-                        id: 'age',
-                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE')
-                      }, {
-                        id: 'gender',
-                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER')
-                      }, {
-                        id: 'location',
-                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION')
-                      }, {
-                        id: 'address',
-                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS')
-                      }, {
-                        id: 'from',
-                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM')
-                      }, {
-                        id: 'to',
-                        header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO')
-                      }];
+                    // listen to worker messages
+                    dailyFollowUpListBuilder.on('message', listener);
 
+                    // custom options to be sent over to the worker
+                    const customOpts = {
+                      groupTitle: groupTitle
+                    };
 
-                      // group by title translation
-                      const groupTitle = dictionary.getTranslation(groupBy === 'place' ?
-                        'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_LOCATION' :
-                        'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_CASE');
-
-                      // start document title
-                      const pdfTitle = dictionary.getTranslation('LNG_PAGE_TITLE_DAILY_CONTACTS_LIST');
-                      const legendTitle = dictionary.getTranslation('LNG_FOLLOW_UP_STATUS_LEGEND');
-
-                      // flag that indicates that start document props were added
-                      let startDocumentAdded = false;
-
-                      // process groups in batches
-                      (function processInBatches(defaultHeaders, groups) {
-                        // we process the first group always
-                        const groupsKeys = Object.keys(groups);
-                        if (!groupsKeys.length) {
-                          // all records processed, inform the worker that is time to finish
-                          return dailyFollowUpListBuilder.send({fn: 'finish', args: []});
+                    if (!startDocumentAdded) {
+                      customOpts.startDocument = {
+                        title: pdfTitle,
+                        legend: {
+                          title: legendTitle,
+                          values: translatedFollowUpAcronymsAndIds
                         }
+                      };
+                    }
 
-                        const targetGroup = groups[groupsKeys[0]];
-                        delete groups[groupsKeys[0]];
-
-                        const listener = function (args) {
-                          // first argument is an error
-                          if (args[0]) {
-                            // handle it
-                            return cb(args[0]);
-                          }
-                          // if the worker is ready for the next batch
-                          if (args[1] && args[1].readyForNextBatch) {
-                            // remove current listener
-                            dailyFollowUpListBuilder.removeListener('message', listener);
-                            // send move to next step
-                            processInBatches(headers, groups);
-                          }
-                        };
-
-                        // listen to worker messages
-                        dailyFollowUpListBuilder.on('message', listener);
-
-                        // custom options to be sent over to the worker
-                        const customOpts = {
-                          groupTitle: groupTitle
-                        };
-
-                        if (!startDocumentAdded) {
-                          customOpts.startDocument = {
-                            title: pdfTitle,
-                            legend: {
-                              title: legendTitle,
-                              values: translatedFollowUpAcronymsAndIds
-                            }
-                          };
-                        }
-
-                        // build the group
-                        dailyFollowUpListBuilder.send({
-                          fn: 'sendData',
-                          args: [
-                            customOpts,
-                            defaultHeaders,
-                            targetGroup,
-                            translatedFollowUpAcronyms
-                          ]
-                        });
-
-                        // do not add start document opts on next call
-                        startDocumentAdded = true;
-
-                      })(headers, groups);
+                    // build the group
+                    dailyFollowUpListBuilder.send({
+                      fn: 'sendData',
+                      args: [
+                        customOpts,
+                        defaultHeaders,
+                        targetGroup,
+                        translatedFollowUpAcronyms
+                      ]
                     });
+
+                    // do not add start document opts on next call
+                    startDocumentAdded = true;
+
+                  })(headers, groups);
                 });
             })
             .catch(cb);
