@@ -825,7 +825,8 @@
       "LNG_PAGE_VIEW_CASE_TITLE": "View {{name}}",
       "LNG_PAGE_MODIFY_CASE_DUPLICATES_DIALOG_CONFIRM_MSG": "This case might already be in the system ( see possible matches bellow ). Do you still want to update this case or merge possible matches?",
       "LNG_PAGE_MODIFY_CASE_DUPLICATES_DIALOG_LABEL_MERGE_WITH": "Merge with?",
-      "LNG_PAGE_MODIFY_CASE_DUPLICATES_DIALOG_ACTION_MERGE_AT_LEAST_ONE_ERROR_MESSAGE": "Please select at least one record to merge with"
+      "LNG_PAGE_MODIFY_CASE_DUPLICATES_DIALOG_ACTION_MERGE_AT_LEAST_ONE_ERROR_MESSAGE": "Please select at least one record to merge with",
+      "LNG_PAGE_MODIFY_CASE_TAB_INFECTION_TITLE": "Epidemiology"
     },
     "uiCaseLabResultsFields": {
       "LNG_CASE_LAB_RESULT_FIELD_LABEL_CASE_FIRST_NAME": "Case first name",
