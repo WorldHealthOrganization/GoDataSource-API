@@ -19,10 +19,6 @@ module.exports = function (Language) {
     Language.checkIfEditable(context.instance, next);
   });
 
-  Language.beforeRemote('prototype.importLanguageTokensFile', function (context, modelInstance, next) {
-    Language.checkIfEditable(context.instance, next);
-  });
-
   Language.beforeRemote('deleteById', function (context, modelInstance, next) {
     Language.checkIfEditable(context.args.id, next);
   });
