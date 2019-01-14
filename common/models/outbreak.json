@@ -5020,7 +5020,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
         }
       ],
       "returns": [
@@ -5050,7 +5050,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
         }
       ],
       "returns": [
@@ -5077,7 +5077,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
         }
       ],
       "returns": [
@@ -5107,7 +5107,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
         }
       ],
       "returns": [
@@ -5134,7 +5134,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
         }
       ],
       "returns": [
@@ -5164,7 +5164,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
         }
       ],
       "returns": [
@@ -5191,7 +5191,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
         }
       ],
       "returns": [
@@ -5221,7 +5221,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
         }
       ],
       "returns": [
@@ -5248,7 +5248,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
         }
       ],
       "returns": [
@@ -5278,7 +5278,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
         }
       ],
       "returns": [
@@ -5305,7 +5305,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
         }
       ],
       "returns": [
@@ -5335,7 +5335,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.relationships filter applies on relationship"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
         }
       ],
       "returns": [
