@@ -650,7 +650,7 @@ module.exports = function (Relationship) {
 
         // find other people
         return app.models.person
-          .rawFind(peopleFilter.where)
+          .find({where: peopleFilter.where})
           .then(function (people) {
             // build result
             let result = [];
