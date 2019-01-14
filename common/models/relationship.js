@@ -586,119 +586,106 @@ module.exports = function (Relationship) {
    * @param [onlyCount]
    */
   Relationship.findOrCountPersonRelationshipExposuresOrContacts = function (outbreakId, personId, filter = {}, findContacts = true, onlyCount = false) {
-    // assume there is no pre-filter
-    let preFilter = Promise.resolve();
-    // get person query, if any
-    let personQuery = _.get(filter, 'where.person');
+    // get relationship query
+    const _relationshipQuery = _.get(filter, 'where.relationship');
 
-    // if there's a filter on person
-    if (personQuery) {
-      delete filter.where.person;
-      // pre-filter person
-      preFilter = app.models.person
-        .rawFind(personQuery, {
-          projection: {
-            _id: 1
-          }
-        })
-        .then(function (people) {
-          // return person ids
-          return people.map(person => person.id);
-        });
+    // build default relationship query
+    let relationshipQuery = {
+      outbreakId: outbreakId,
+      persons: {
+        elemMatch: {
+          id: personId,
+          [findContacts ? 'source' : 'target']: true
+        }
+      }
+    };
+
+    // if a relationship query was sent by user
+    if (_relationshipQuery) {
+      // remove relationship query from the main one
+      delete filter.where.relationship;
+      // update default relationship query
+      relationshipQuery = {
+        and: [
+          _relationshipQuery,
+          relationshipQuery
+        ]
+      };
     }
-
-    // pre-filter
-    return preFilter
-      .then(function (personIds) {
-        // define relationship filter
-        const relationshipFilter = app.utils.remote
+    // find all relationships of the specified person where the person is source/target
+    return app.models.relationship
+      .find({where: relationshipQuery})
+      .then(function (relationships) {
+        // keep a map of people and their relationships
+        const personRelationshipMap = {};
+        // build a list of other people (in the relationship) IDs
+        const otherPeopleIds = [];
+        // go through all relationships
+        relationships.forEach(function (relationship) {
+          // go trough all the people in the relationships
+          Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
+            // store other person's ID
+            if (person.id !== personId) {
+              otherPeopleIds.push(person.id);
+              // init the map for current person, if not already inited
+              if (!personRelationshipMap[person.id]) {
+                personRelationshipMap[person.id] = [];
+              }
+              // map relationship to current person
+              personRelationshipMap[person.id].push(relationship);
+            }
+          });
+        });
+        // build a filer for the other people
+        const peopleFilter = app.utils.remote
           .mergeFilters({
             where: {
               outbreakId: outbreakId,
-              persons: {
-                elemMatch: {
-                  id: personId,
-                  [findContacts ? 'source' : 'target']: true
-                }
+              id: {
+                inq: otherPeopleIds
               }
             },
-          }, filter);
+          }, filter || {});
 
-        // if person restrictions were provided, use them
-        if (personIds) {
-          relationshipFilter.and.push({
-            'persons.id': {
-              inq: personIds
-            }
-          });
-        }
 
-        // find all relationships of the specified person where the person is source/target
-        return app.models.relationship
-          .find(relationshipFilter)
-          .then(function (relationships) {
-            // build a list of other people (in the relationship) IDs
-            const otherPeopleIds = [];
-            // go through all relationships
-            relationships.forEach(function (relationship) {
-              // go trough all the people in the relationships
-              Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
-                // store other person's ID
-                if (person.id !== personId) {
-                  otherPeopleIds.push(person.id);
-                }
-              });
+        // find other people
+        return app.models.person
+          .rawFind(peopleFilter.where)
+          .then(function (people) {
+            // build result
+            let result = [];
+            // go through all the people
+            people.forEach(function (person) {
+              // go through all their relations
+              if (Array.isArray(personRelationshipMap[person.id])) {
+                personRelationshipMap[person.id].forEach(function (relationship) {
+                  // clone person record
+                  const record = JSON.parse(JSON.stringify(person));
+                  // attach relationship info
+                  record.relationship = relationship;
+                  // add record to the result
+                  result.push(record);
+                });
+              }
             });
 
-            // build a filter for the other people
-            const _personQuery = {
-              $and: [
-                {
-                  outbreakId: outbreakId,
-                  id: {
-                    inq: otherPeopleIds
-                  }
-                }
-              ]
-            };
-
-            // include initial query as well
-            if (personQuery) {
-              _personQuery.$and.push(personQuery);
+            if (onlyCount) {
+              return result.length;
             }
 
-            // find other people
-            return app.models.person
-              .rawFind(personQuery)
-              .then(function (people) {
-                // build a map of people (for easy referencing)
-                const peopleMap = {};
-                people.forEach(function (person) {
-                  peopleMap[person.id] = person;
-                });
-                // build the result
-                const result = [];
-                // go through relationships
-                relationships.forEach(function (relationship) {
-                  // go trough all the people in the relationships
-                  Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
-                    // find other person's ID and check if it passed person filter
-                    if (person.id !== personId && peopleMap[personId]) {
-                      // link related person to the relationship
-                      relationship.relatedPerson = peopleMap[personId];
-                      // add relationship to the result
-                      result.push(relationship);
-                    }
-                  });
-                });
-                // check if only need to count
-                if (onlyCount) {
-                  // return number of results
-                  result.length;
-                }
-                // return results
-                return result;
-              });
+            // custom pagination
+            const skip = _.get(filter, 'skip', 0);
+            let limit = _.get(filter, 'limit');
+            // update limit
+            if (limit !== undefined) {
+              limit = limit + skip;
+            }
+            // apply pagination if needed
+            if (skip !== undefined || limit !== undefined) {
+              result = result.slice(skip, limit);
+            }
+            // return result
+            return result;
           });
       });
   };
