@@ -5721,7 +5721,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.findCaseRelationshipExposures = function (caseId, filter, callback) {
     app.models.relationship
-      .findPersonRelationshipExposures(caseId, filter)
+      .findPersonRelationshipExposures(this.id, caseId, filter)
       .then(function (exposures) {
         callback(null, exposures);
       })
@@ -5736,7 +5736,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countCaseRelationshipExposures = function (caseId, filter, callback) {
     app.models.relationship
-      .countPersonRelationshipExposures(caseId, filter)
+      .countPersonRelationshipExposures(this.id, caseId, filter)
       .then(function (exposures) {
         callback(null, exposures);
       })
@@ -5751,7 +5751,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.findCaseRelationshipContacts = function (caseId, filter, callback) {
     app.models.relationship
-      .findPersonRelationshipContacts(caseId, filter)
+      .findPersonRelationshipContacts(this.id, caseId, filter)
       .then(function (contacts) {
         callback(null, contacts);
       })
@@ -5766,7 +5766,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countCaseRelationshipContacts = function (caseId, filter, callback) {
     app.models.relationship
-      .countPersonRelationshipContacts(caseId, filter)
+      .countPersonRelationshipContacts(this.id, caseId, filter)
       .then(function (contacts) {
         callback(null, contacts);
       })
@@ -5781,7 +5781,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.findContactRelationshipExposures = function (contactId, filter, callback) {
     app.models.relationship
-      .findPersonRelationshipExposures(contactId, filter)
+      .findPersonRelationshipExposures(this.id, contactId, filter)
       .then(function (exposures) {
         callback(null, exposures);
       })
@@ -5796,7 +5796,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countContactRelationshipExposures = function (caseId, filter, callback) {
     app.models.relationship
-      .countPersonRelationshipExposures(caseId, filter)
+      .countPersonRelationshipExposures(this.id, caseId, filter)
       .then(function (exposures) {
         callback(null, exposures);
       })
@@ -5811,7 +5811,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.findContactRelationshipContacts = function (contactId, filter, callback) {
     app.models.relationship
-      .findPersonRelationshipContacts(contactId, filter)
+      .findPersonRelationshipContacts(this.id, contactId, filter)
       .then(function (contacts) {
         callback(null, contacts);
       })
@@ -5826,7 +5826,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countContactRelationshipContacts = function (contactId, filter, callback) {
     app.models.relationship
-      .countPersonRelationshipContacts(contactId, filter)
+      .countPersonRelationshipContacts(this.id, contactId, filter)
       .then(function (contacts) {
         callback(null, contacts);
       })
@@ -5841,7 +5841,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.findEventRelationshipExposures = function (eventId, filter, callback) {
     app.models.relationship
-      .findPersonRelationshipExposures(eventId, filter)
+      .findPersonRelationshipExposures(this.id, eventId, filter)
       .then(function (exposures) {
         callback(null, exposures);
       })
@@ -5856,7 +5856,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countEventRelationshipExposures = function (eventId, filter, callback) {
     app.models.relationship
-      .countPersonRelationshipExposures(eventId, filter)
+      .countPersonRelationshipExposures(this.id, eventId, filter)
       .then(function (exposures) {
         callback(null, exposures);
       })
@@ -5871,7 +5871,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.findEventRelationshipContacts = function (eventId, filter, callback) {
     app.models.relationship
-      .findPersonRelationshipContacts(eventId, filter)
+      .findPersonRelationshipContacts(this.id, eventId, filter)
       .then(function (contacts) {
         callback(null, contacts);
       })
@@ -5887,7 +5887,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countEventRelationshipContacts = function (eventId, filter, callback) {
     app.models.relationship
-      .countPersonRelationshipContacts(eventId, filter)
+      .countPersonRelationshipContacts(this.id, eventId, filter)
       .then(function (contacts) {
         callback(null, contacts);
       })

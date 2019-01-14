@@ -66,9 +66,7 @@
     "dateOfLastContact": {
       "type": "date"
     },
-    "relationships": [
-      "relationship"
-    ]
+    "relationship": "relationship"
   },
   "validations": [],
   "relations": {},

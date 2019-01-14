@@ -579,26 +579,42 @@ module.exports = function (Relationship) {
 
   /**
    * Find or count relationship exposures or contacts for a relationship
+   * @param outbreakId
    * @param personId
    * @param [filter]
    * @param [findContacts]
    * @param [onlyCount]
    */
-  Relationship.findOrCountPersonRelationshipExposuresOrContacts = function (personId, filter = {}, findContacts = true, onlyCount = false) {
+  Relationship.findOrCountPersonRelationshipExposuresOrContacts = function (outbreakId, personId, filter = {}, findContacts = true, onlyCount = false) {
+    // get relationship query
+    const _relationshipQuery = _.get(filter, 'where.relationship');
+
+    // build default relationship query
+    let relationshipQuery = {
+      outbreakId: outbreakId,
+      persons: {
+        elemMatch: {
+          id: personId,
+          [findContacts ? 'source' : 'target']: true
+        }
+      }
+    };
+
+    // if a relationship query was sent by user
+    if (_relationshipQuery) {
+      // remove relationship query from the main one
+      delete filter.where.relationship;
+      // update default relationship query
+      relationshipQuery = {
+        and: [
+          _relationshipQuery,
+          relationshipQuery
+        ]
+      };
+    }
     // find all relationships of the specified person where the person is source/target
     return app.models.relationship
-      .find(app.utils.remote
-        .mergeFilters({
-          where: {
-            persons: {
-              elemMatch: {
-                id: personId,
-                [findContacts ? 'source' : 'target']: true
-              }
-            }
-          },
-        }, filter.relationships || {})
-      )
+      .find({where: relationshipQuery})
       .then(function (relationships) {
         // keep a map of people and their relationships
         const personRelationshipMap = {};
@@ -624,70 +640,98 @@ module.exports = function (Relationship) {
         const peopleFilter = app.utils.remote
           .mergeFilters({
             where: {
+              outbreakId: outbreakId,
               id: {
                 inq: otherPeopleIds
               }
             },
           }, filter || {});
 
-        // check if only need to count
-        if (onlyCount) {
-          return app.models.person
-            .count(peopleFilter.where);
-        }
 
         // find other people
         return app.models.person
-          .find(peopleFilter)
+          .find({where: peopleFilter.where})
           .then(function (people) {
+            // build result
+            let result = [];
             // go through all the people
             people.forEach(function (person) {
-              // attach relationships information to every person
-              person.relationships = personRelationshipMap[person.id];
+              // go through all their relations
+              if (Array.isArray(personRelationshipMap[person.id])) {
+                personRelationshipMap[person.id].forEach(function (relationship) {
+                  // clone person record
+                  const record = JSON.parse(JSON.stringify(person));
+                  // attach relationship info
+                  record.relationship = relationship;
+                  // add record to the result
+                  result.push(record);
+                });
+              }
             });
-            return people;
+
+            if (onlyCount) {
+              return result.length;
+            }
+
+            // custom pagination
+            const skip = _.get(filter, 'skip', 0);
+            let limit = _.get(filter, 'limit');
+            // update limit
+            if (limit !== undefined) {
+              limit = limit + skip;
+            }
+            // apply pagination if needed
+            if (skip !== undefined || limit !== undefined) {
+              result = result.slice(skip, limit);
+            }
+            // return result
+            return result;
           });
       });
   };
 
   /**
    * Find relationship exposures for a person
+   * @param outbreakId
    * @param personId
    * @param filter
    * @return {*}
    */
-  Relationship.findPersonRelationshipExposures = function (personId, filter) {
-    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter, false);
+  Relationship.findPersonRelationshipExposures = function (outbreakId, personId, filter) {
+    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(outbreakId, personId, filter, false);
   };
 
   /**
    * Count relationship exposures for a person
+   * @param outbreakId
    * @param personId
    * @param filter
    * @return {*}
    */
-  Relationship.countPersonRelationshipExposures = function (personId, filter) {
-    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter, false, true);
+  Relationship.countPersonRelationshipExposures = function (outbreakId, personId, filter) {
+    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(outbreakId, personId, filter, false, true);
   };
 
   /**
    * Find relationship contacts for a person
+   * @param outbreakId
    * @param personId
    * @param filter
    * @return {*}
    */
-  Relationship.findPersonRelationshipContacts = function (personId, filter) {
-    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter);
+  Relationship.findPersonRelationshipContacts = function (outbreakId, personId, filter) {
+    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(outbreakId, personId, filter);
   };
 
   /**
    * Count relationship contacts for a person
+   * @param outbreakId
    * @param personId
    * @param filter
    * @return {*}
    */
-  Relationship.countPersonRelationshipContacts = function (personId, filter) {
-    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(personId, filter, true, true);
+  Relationship.countPersonRelationshipContacts = function (outbreakId, personId, filter) {
+    return Relationship.findOrCountPersonRelationshipExposuresOrContacts(outbreakId, personId, filter, true, true);
   };
 
   /**
