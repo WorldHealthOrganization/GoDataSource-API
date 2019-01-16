@@ -28,6 +28,7 @@ module.exports = function (Contact) {
     'phoneNumber': 'LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER',
     'riskLevel': 'LNG_CONTACT_FIELD_LABEL_RISK_LEVEL',
     'riskReason': 'LNG_CONTACT_FIELD_LABEL_RISK_REASON',
+    'outcomeId': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME',
     'dateOfOutcome': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME',
     'visualId': 'LNG_CONTACT_FIELD_LABEL_VISUAL_ID',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
@@ -42,13 +43,15 @@ module.exports = function (Contact) {
     'addresses[].date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
     'fillGeoLocation': 'LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION',
     'isDateOfReportingApproximate': 'LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
-    'safeBurial': 'LNG_CONTACT_FIELD_LABEL_SAFE_BURIAL'
+    'safeBurial': 'LNG_CONTACT_FIELD_LABEL_SAFE_BURIAL',
+    'dateOfBurial': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_BURIAL'
   });
 
   Contact.referenceDataFieldsToCategoryMap = {
     riskLevel: 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL',
     gender: 'LNG_REFERENCE_DATA_CATEGORY_GENDER',
     occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
+    outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
     'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
     'addresses[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE'
   };
@@ -58,6 +61,8 @@ module.exports = function (Contact) {
   // add parsers for field values that require parsing when displayed (eg. in pdf)
   Contact.fieldToValueParsersMap = {
     dob: dateParser,
+    dateOfOutcome: dateParser,
+    dateOfBurial: dateParser,
     'addresses[].date': dateParser,
     'followUps[].date': dateParser
   };
@@ -78,8 +83,11 @@ module.exports = function (Contact) {
     'riskLevel',
     'riskReason',
     'wasCase',
+    'outcomeId',
+    'dateOfOutcome',
     'dateBecomeContact',
-    'safeBurial'
+    'safeBurial',
+    'dateOfBurial'
   ];
 
   Contact.foreignKeyResolverMap = {

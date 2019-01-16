@@ -71,7 +71,8 @@ module.exports = function (Case) {
     'fillGeoLocation': 'LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION',
     'isDateOfReportingApproximate': 'LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
     'questionnaireAnswers': 'LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE',
-    'safeBurial': 'LNG_CASE_FIELD_LABEL_SAFE_BURIAL'
+    'safeBurial': 'LNG_CASE_FIELD_LABEL_SAFE_BURIAL',
+    'dateOfBurial': 'LNG_CASE_FIELD_LABEL_DATE_OF_BURIAL'
   });
 
   Case.referenceDataFieldsToCategoryMap = {
@@ -110,12 +111,14 @@ module.exports = function (Case) {
     'dateBecomeCase',
     'dateOfInfection',
     'dateOfOnset',
+    'outcomeId',
     'dateOfOutcome',
     'hospitalizationDates',
     'incubationDates',
     'isolationDates',
     'transferRefused',
-    'safeBurial'
+    'safeBurial',
+    'dateOfBurial'
   ];
 
   Case.foreignKeyResolverMap = {
