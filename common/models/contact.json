@@ -42,16 +42,18 @@
     "riskReason": {
       "type": "string"
     },
-    "deceased": {
-      "type": "boolean",
-      "default": false
+    "outcomeId": {
+      "type": "string"
     },
-    "dateDeceased": {
+    "dateOfOutcome": {
       "type": "date"
     },
     "safeBurial": {
       "type": "boolean",
       "default": false
+    },
+    "dateOfBurial": {
+      "type": "date"
     },
     "followUp": {
       "description": "Object containing start/end dates for the contact's follow-up period. The dates are automatically calculated based on contact relationships dates and outbreak.periodOfFollowup",

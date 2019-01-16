@@ -955,8 +955,6 @@ module.exports = function (Outbreak) {
       'wasContact',
       'dateBecomeCase',
       'dateOfOutcome',
-      'deceased',
-      'dateDeceased',
       'safeBurial',
       'classification',
       'riskLevel',

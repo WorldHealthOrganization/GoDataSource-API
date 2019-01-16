@@ -70,16 +70,12 @@
     "incubationDates": [
       "dateRange"
     ],
-    "deceased": {
-      "type": "boolean",
-      "default": false
-    },
-    "dateDeceased": {
-      "type": "date"
-    },
     "safeBurial": {
       "type": "boolean",
       "default": false
+    },
+    "dateOfBurial": {
+      "type": "date"
     },
     "classification": {
       "type": "string",

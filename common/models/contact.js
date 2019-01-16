@@ -22,7 +22,6 @@ module.exports = function (Contact) {
     'documents': 'LNG_CONTACT_FIELD_LABEL_DOCUMENTS',
     'documents[].type': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE',
     'documents[].number': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER',
-    'dateDeceased': 'LNG_CONTACT_FIELD_LABEL_DATE_DECEASED',
     'wasCase': 'LNG_CONTACT_FIELD_LABEL_WAS_CASE',
     'dateBecomeContact': 'LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT',
     'dateOfReporting': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING',
@@ -30,7 +29,6 @@ module.exports = function (Contact) {
     'riskLevel': 'LNG_CONTACT_FIELD_LABEL_RISK_LEVEL',
     'riskReason': 'LNG_CONTACT_FIELD_LABEL_RISK_REASON',
     'dateOfOutcome': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME',
-    'deceased': 'LNG_CONTACT_FIELD_LABEL_DECEASED',
     'visualId': 'LNG_CONTACT_FIELD_LABEL_VISUAL_ID',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
     'addresses[].typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
@@ -60,7 +58,6 @@ module.exports = function (Contact) {
   // add parsers for field values that require parsing when displayed (eg. in pdf)
   Contact.fieldToValueParsersMap = {
     dob: dateParser,
-    dateDeceased: dateParser,
     'addresses[].date': dateParser,
     'followUps[].date': dateParser
   };
@@ -82,8 +79,6 @@ module.exports = function (Contact) {
     'riskReason',
     'wasCase',
     'dateBecomeContact',
-    'dateDeceased',
-    'deceased',
     'safeBurial'
   ];
 

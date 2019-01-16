@@ -30,7 +30,6 @@ module.exports = function (Case) {
     'documents[].number': 'LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER',
     'dateBecomeCase': 'LNG_CASE_FIELD_LABEL_DATE_BECOME_CASE',
     'wasContact': 'LNG_CASE_FIELD_LABEL_WAS_CONTACT',
-    'dateDeceased': 'LNG_CASE_FIELD_LABEL_DATE_DECEASED',
     'dateOfInfection': 'LNG_CASE_FIELD_LABEL_DATE_OF_INFECTION',
     'dateOfOnset': 'LNG_CASE_FIELD_LABEL_DATE_OF_ONSET',
     'isDateOfOnsetApproximate': 'LNG_CASE_FIELD_LABEL_DATE_OF_ONSET_APPROXIMATE',
@@ -40,7 +39,6 @@ module.exports = function (Case) {
     'riskReason': 'LNG_CASE_FIELD_LABEL_RISK_REASON',
     'outcomeId': 'LNG_CASE_FIELD_LABEL_OUTCOME_ID',
     'dateOfOutcome': 'LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME',
-    'deceased': 'LNG_CASE_FIELD_LABEL_DECEASED',
     'type': 'LNG_CASE_FIELD_LABEL_TYPE',
     'isolationDates': 'LNG_CASE_FIELD_LABEL_ISOLATION_DATES',
     'hospitalizationDates': 'LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES',
@@ -110,7 +108,6 @@ module.exports = function (Case) {
     'riskReason',
     'wasContact',
     'dateBecomeCase',
-    'dateDeceased',
     'dateOfInfection',
     'dateOfOnset',
     'dateOfOutcome',
@@ -118,7 +115,6 @@ module.exports = function (Case) {
     'incubationDates',
     'isolationDates',
     'transferRefused',
-    'deceased',
     'safeBurial'
   ];
 
