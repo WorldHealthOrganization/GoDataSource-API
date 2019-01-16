@@ -225,6 +225,7 @@ module.exports = function (app) {
         .then(function (systemSettings) {
           // initialize routinesConfig entry for sync if not already initialize
           routinesConfig.sync = routinesConfig.sync || {};
+          systemSettings.upstreamServers = systemSettings.upstreamServers || [];
 
           // get upstream servers that have sync enabled and syncInterval configured (!==0)
           let serversToSync = systemSettings.upstreamServers.filter(function (server) {
@@ -270,6 +271,7 @@ module.exports = function (app) {
       app.models.systemSettings
         .getCache()
         .then(function (systemSettings) {
+          systemSettings.upstreamServers = systemSettings.upstreamServers || [];
           // get upstream servers that have sync enabled and syncInterval configured (!==0)
           let serversToSync = systemSettings.upstreamServers.filter(function (server) {
             return server.syncEnabled && server.syncInterval > 0;

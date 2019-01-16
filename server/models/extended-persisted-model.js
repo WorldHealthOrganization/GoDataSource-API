@@ -150,7 +150,7 @@ module.exports = function (ExtendedPersistedModel) {
     app.models.systemSettings
       .getCache()
       .then(function (systemSettings) {
-        let upstreamServers = systemSettings.upstreamServers;
+        let upstreamServers = systemSettings.upstreamServers || [];
         // get servers which have sync enabled and syncOnEveryChange flag set as true
         let serversToSync = upstreamServers.filter(function (server) {
           return server.syncEnabled && server.syncOnEveryChange;

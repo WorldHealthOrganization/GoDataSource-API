@@ -5908,20 +5908,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Count follow-ups grouped by associated team
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.countFollowUpsByTeam = function (filter, callback) {
-    app.models.followUp
-      .countByTeam(this.id, filter)
-      .then(function (results) {
-        callback(null, results);
-      })
-      .catch(callback);
-  };
-
-  /**
    * Create (upload) a new file
    * @param req
    * @param name
@@ -7158,6 +7144,9 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.exportContactFollowUpListPerDay', function (context, modelInstance, next) {
     findAndFilteredCountFollowUpsBackCompat(context, modelInstance, next);
   });
+  Outbreak.beforeRemote('prototype.countFollowUpsByTeam', function (context, modelInstance, next) {
+    findAndFilteredCountFollowUpsBackCompat(context, modelInstance, next);
+  });
 
   /**
    * Find outbreak follow-ups
@@ -8014,6 +8003,27 @@ module.exports = function (Outbreak) {
         })
         .catch(cb);
     });
+  };
+
+  /**
+   * Count follow-ups grouped by associated team. Supports 'where.contact', 'where.case' MongoDB compatible queries
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countFollowUpsByTeam = function (filter, callback) {
+    const self = this;
+    // pre-filter using related data (case, contact)
+    app.models.followUp
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // find follow-ups using filter
+        return app.models.followUp
+          .countByTeam(self.id, filter);
+      })
+      .then(function (results) {
+        callback(null, results);
+      })
+      .catch(callback);
   };
 
   /**

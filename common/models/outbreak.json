@@ -5484,6 +5484,7 @@
               "type": {
                 "<teamId>": {
                   "type": {
+                    "team": "team",
                     "followUpIds": [
                       "string"
                     ],
