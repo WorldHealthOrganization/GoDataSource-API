@@ -330,16 +330,14 @@ module.exports = function (FollowUp) {
   FollowUp.countByTeam = function (outbreakId, filter) {
     // find follow-ups for current outbreak
     return FollowUp
-      .find(app.utils.remote
+      .rawFind(app.utils.remote
         .mergeFilters({
           where: {
             outbreakId: outbreakId
           }
-        }, filter || {})
+        }, filter || {}).where
       )
       .then(function (followUps) {
-        // filter by relation properties
-        followUps = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followUps, filter);
         // define result
         const result = {
           team: {},
@@ -363,8 +361,21 @@ module.exports = function (FollowUp) {
           // increment the number of follow-ups per team
           result.team[followUp.teamId].count++;
         });
-        // return built result
-        return result;
+        // find the teams for for the follow-ups
+        return app.models.team
+          .rawFind({
+            id: {
+              inq: Object.keys(result.team)
+            }
+          })
+          .then(function (teams) {
+            // add team information to each section
+            teams.forEach(function (team) {
+              result.team[team.id].team = team;
+            });
+            // return built result
+            return result;
+          });
       });
   };
 
