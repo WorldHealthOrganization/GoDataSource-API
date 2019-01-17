@@ -850,6 +850,12 @@ module.exports = function (Person) {
       delete query.$or;
     }
 
-    return app.models.person.rawFind(query, {skip: filter.skip, limit: filter.limit});
+    // find duplicates only if there is something to look for
+    if (query.$or) {
+      return app.models.person.rawFind(query, {skip: filter.skip, limit: filter.limit});
+    } else {
+      // otherwise return empty list
+      return Promise.resolve([]);
+    }
   };
 };
