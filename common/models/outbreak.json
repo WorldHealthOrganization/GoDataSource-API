@@ -2272,6 +2272,7 @@
         {
           "arg": "visualIdMask",
           "type": "string",
+          "required": true,
           "description": "Visual ID mask partially resolved (except for the sequence no.)"
         },
         {
@@ -2300,6 +2301,7 @@
         {
           "arg": "visualIdMask",
           "type": "string",
+          "required": true,
           "description": "Visual ID mask partially resolved (except for the sequence no.)"
         },
         {

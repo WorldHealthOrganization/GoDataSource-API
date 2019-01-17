@@ -530,20 +530,22 @@ module.exports = function (Outbreak) {
    * Get the next available case visual id
    * @param outbreak
    * @param visualId
-   * @param personId
+   * @param [personId]
+   * @return {*}
    */
   Outbreak.helpers.getAvailableCaseVisualId = function (outbreak, visualId, personId) {
-    Outbreak.helpers.getAvailableVisualId(outbreak, 'caseIdMask', visualId, personId);
+    return Outbreak.helpers.getAvailableVisualId(outbreak, 'caseIdMask', visualId, personId);
   };
 
   /**
    * Get the next available contact visual id
    * @param outbreak
    * @param visualId
-   * @param personId
+   * @param [personId]
+   * @return {*}
    */
   Outbreak.helpers.getAvailableContactVisualId = function (outbreak, visualId, personId) {
-    Outbreak.helpers.getAvailableVisualId(outbreak, 'contactIdMask', visualId, personId);
+    return Outbreak.helpers.getAvailableVisualId(outbreak, 'contactIdMask', visualId, personId);
   };
 
   /**

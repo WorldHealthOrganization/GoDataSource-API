@@ -94,6 +94,7 @@ module.exports = function (Case) {
   };
 
   Case.printFieldsinOrder = [
+    'visualId',
     'firstName',
     'middleName',
     'lastName',
