@@ -1090,7 +1090,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.generateVisualId = function (visualIdMask, personId, callback) {
-    Outbreak.helpers.getAvailableVisualId(this, visualIdMask, personId)
+    Outbreak.helpers.getAvailableVisualId(this, 'caseIdMask', visualIdMask, personId)
       .then(function (visualId) {
         callback(null, visualId);
       })

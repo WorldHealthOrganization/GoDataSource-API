@@ -267,7 +267,7 @@ module.exports = function (Person) {
 
           // resolve visual ID
           return app.models.outbreak.helpers
-            .resolvePersonVisualIdTemplate(outbreak, data.target.visualId, context.isNewInstance ? null : data.source.existing.id);
+            .resolvePersonVisualIdTemplate(outbreak, data.source.all.visualId, data.source.existingRaw.type, context.isNewInstance ? null : data.source.existing.id);
         })
         .then(function (resolvedVisualId) {
           data.target.visualId = resolvedVisualId;

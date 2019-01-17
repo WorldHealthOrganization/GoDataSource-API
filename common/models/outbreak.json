@@ -114,6 +114,12 @@
       "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
       "default": "9999999999"
     },
+    "contactIdMask": {
+      "type": "string",
+      "required": true,
+      "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
+      "default": "9999999999"
+    },
     "arcGisServers": [
       "arcGisServer"
     ],
