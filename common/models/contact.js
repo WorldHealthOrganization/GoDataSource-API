@@ -28,7 +28,7 @@ module.exports = function (Contact) {
     'phoneNumber': 'LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER',
     'riskLevel': 'LNG_CONTACT_FIELD_LABEL_RISK_LEVEL',
     'riskReason': 'LNG_CONTACT_FIELD_LABEL_RISK_REASON',
-    'outcomeId': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME',
+    'outcomeId': 'LNG_CONTACT_FIELD_LABEL_OUTCOME_ID',
     'dateOfOutcome': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME',
     'visualId': 'LNG_CONTACT_FIELD_LABEL_VISUAL_ID',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
