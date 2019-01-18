@@ -215,7 +215,7 @@ function getLocationAvailableValuesForModel(outbreakId, modelName) {
             return reject(error);
           }
           // build a formatted list of locations
-          const locationList = [];
+          let locationList = [];
           // go through all location entries
           allLocations.forEach(function (location) {
             // format each location entry
@@ -224,6 +224,10 @@ function getLocationAvailableValuesForModel(outbreakId, modelName) {
               label: location.name,
               value: location.id
             });
+          });
+          // make sure locations are sorted
+          locationList = locationList.sort(function (a, b) {
+            return a.label.localeCompare(b.label);
           });
           const locationValues = {};
           // keep a list of available values for each location related property
