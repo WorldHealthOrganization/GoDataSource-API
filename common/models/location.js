@@ -519,25 +519,27 @@ module.exports = function (Location) {
     }
 
     // build a list of create operations
-    const createLocationOperations = [];
+    const syncLocationOperations = [];
     locationsList.forEach(
       function (location) {
         // build current location
         let _location = Object.assign({parentLocationId: parentLocationId}, location.location);
-        // add create location operation
-        createLocationOperations.push(function (cb) {
-          Location
-            .create(_location, options)
-            .then(function (createdLocation) {
+        // force update on file import
+        _location.updatedAt = new Date();
+        // add sync location operation
+        syncLocationOperations.push(function (cb) {
+          app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.location, _location, options)
+            .then(function (syncedLocationResult) {
+              const syncedLocation = syncedLocationResult.record;
               // store result
-              options.resultAccumulator.push(createdLocation);
+              options.resultAccumulator.push(syncedLocation);
               // when done, if there are other sub-locations
               if (location.children && location.children.length) {
                 // create them recursively
-                Location.createLocationsFromHierarchicalLocationsList(createdLocation.id, location.children, options, cb);
+                Location.createLocationsFromHierarchicalLocationsList(syncedLocation.id, location.children, options, cb);
               } else {
                 // otherwise just stop
-                cb(null, createdLocation);
+                cb(null, syncedLocation);
               }
             })
             .catch(cb);
@@ -545,7 +547,7 @@ module.exports = function (Location) {
       }
     );
     // run create operations
-    async.series(createLocationOperations, function (error) {
+    async.series(syncLocationOperations, function (error) {
       if (error) {
         return callback(error);
       }
