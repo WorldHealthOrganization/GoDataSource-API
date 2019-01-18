@@ -45,7 +45,9 @@ function getMaskRegExpStringForSearch(mask, propertyTemplate) {
     // letter
     '@': '[a-zA-Z]',
     // any char
-    '&': '.'
+    '&': '.',
+    // any string
+    '\\*': '\\?.+'
   };
   // build regex string from mask by replacing chars with special meaning
   Object.keys(replaceMap).forEach(function (supportedPlaceholder) {
