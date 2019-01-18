@@ -3,7 +3,7 @@
 const app = require('../../server');
 const referenceData = app.models.referenceData;
 const defaultReferenceData = require('./defaultReferenceData.json');
-const common = require('./_common')
+const common = require('./_common');
 
 // initialize action options; set _init, _sync flags to prevent execution of some after save scripts
 let options = {
