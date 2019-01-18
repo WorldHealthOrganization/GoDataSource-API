@@ -185,6 +185,76 @@ function getReferenceDataAvailableValuesForModel(outbreakId, modelName) {
     });
 }
 
+/**
+ * Get the list of available locations for for model properties that use locations
+ * @param outbreakId
+ * @param modelName
+ * @returns {PromiseLike<any | never> | Promise<any | never> | *}
+ */
+function getLocationAvailableValuesForModel(outbreakId, modelName) {
+  // get outbreak details
+  return app.models.outbreak
+    .findById(outbreakId)
+    .then(function (outbreak) {
+      if (!outbreak) {
+        throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.outbreak.modelName, id: outbreakId});
+      }
+      // get outbreak locations
+      let outbreakLocations;
+      // update filter only if outbreak has locations ids defined (otherwise leave it as undefined)
+      if (Array.isArray(outbreak.locationIds) && outbreak.locationIds.length) {
+        // get outbreak location Ids
+        outbreakLocations = outbreak.locationIds;
+      }
+      // promisify the result
+      return new Promise(function (resolve, reject) {
+        // get the list of locations
+        app.models.location.getSubLocationsWithDetails(outbreakLocations, [], function (error, allLocations) {
+          // handle eventual errors
+          if (error) {
+            return reject(error);
+          }
+          // build a formatted list of locations
+          let locationList = [];
+          // go through all location entries
+          allLocations.forEach(function (location) {
+            // format each location entry
+            locationList.push({
+              id: location.id,
+              label: location.name,
+              value: location.id
+            });
+          });
+          // make sure locations are sorted
+          locationList = locationList.sort(function (a, b) {
+            return a.label.localeCompare(b.label);
+          });
+          const locationValues = {};
+          // keep a list of available values for each location related property
+          app.models[modelName].locationFields.forEach(function (modelProperty) {
+            // split the property in sub components
+            const propertyComponents = modelProperty.split('.');
+            // if there are sub components
+            if (propertyComponents.length > 1) {
+              // define parent component
+              if (!locationValues[propertyComponents[0]]) {
+                locationValues[propertyComponents[0]] = {};
+              }
+              // store the sub component under parent component
+              if (!locationValues[propertyComponents[0]][propertyComponents[1]]) {
+                locationValues[propertyComponents[0]][propertyComponents[1]] = locationList;
+              }
+            } else {
+              // no sub components, store property directly
+              locationValues[modelProperty] = locationList;
+            }
+          });
+          resolve(locationValues);
+        });
+      });
+    });
+}
+
 module.exports = function (ImportableFile) {
 
   /**
@@ -334,7 +404,24 @@ module.exports = function (ImportableFile) {
                 getReferenceDataAvailableValuesForModel(outbreakId, modelName)
                   .then(function (referenceDataValues) {
                     // update result
-                    results[modelName] = Object.assign({}, results[modelName], {modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, referenceDataValues)});
+                    results[modelName] = Object.assign({}, results[modelName], {modelPropertyValues: _.merge(results[modelName].modelPropertyValues, referenceDataValues)});
+                    callback(null, results[modelName]);
+                  })
+                  .catch(callback);
+              });
+            }
+            // if the model uses locations for its properties
+            if (app.models[modelName].locationFields) {
+              // get distinct property values (if not taken already)
+              if (!Object.keys(result.distinctFileColumnValues).length) {
+                result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
+              }
+              steps.push(function (callback) {
+                // get location values
+                getLocationAvailableValuesForModel(outbreakId, modelName)
+                  .then(function (locationValues) {
+                    // update result
+                    results[modelName] = Object.assign({}, results[modelName], {modelPropertyValues: _.merge(results[modelName].modelPropertyValues, locationValues)});
                     callback(null, results[modelName]);
                   })
                   .catch(callback);
@@ -439,8 +526,7 @@ module.exports = function (ImportableFile) {
       try {
         // send back JSON file
         callback(null, JSON.parse(buffer));
-      }
-      catch (error) {
+      } catch (error) {
         // handle JSON.parse errors
         callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
           contentType: 'JSON',
