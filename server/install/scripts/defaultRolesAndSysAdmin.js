@@ -1,6 +1,7 @@
 'use strict';
 
 const app = require('../../server');
+const common = require('./_common');
 const Role = app.models.role;
 const User = app.models.user;
 const rewrite = false;
@@ -113,11 +114,11 @@ function initRolesCreation() {
         .then(function (role) {
           if (!role) {
             return Role
-              .create({
+              .create(Object.assign({
                 name: roleName,
                 description: rolesMap[roleName].description,
                 permissionIds: rolesMap[roleName].permissionIds
-              }, options)
+              }, common.install.timestamps), options)
               .then(function (role) {
                 if (roleName === 'System Administrator') {
                   defaultAdmin.roleIds = [role.id];
@@ -173,7 +174,7 @@ function run(callback) {
         .then(function (user) {
           if (!user) {
             return User
-              .create(defaultAdmin, options)
+              .create(Object.assign(defaultAdmin, common.install.timestamps), options)
               .then(function () {
                 return 'created.';
               });

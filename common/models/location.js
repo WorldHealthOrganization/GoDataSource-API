@@ -524,8 +524,10 @@ module.exports = function (Location) {
       function (location) {
         // build current location
         let _location = Object.assign({parentLocationId: parentLocationId}, location.location);
-        // force update on file import
-        _location.updatedAt = new Date();
+        // updatedAt is required for syncs
+        if (!_location.updatedAt) {
+          _location.updatedAt = new Date();
+        }
         // add sync location operation
         syncLocationOperations.push(function (cb) {
           app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.location, _location, options)
