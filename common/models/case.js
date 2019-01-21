@@ -69,6 +69,7 @@ module.exports = function (Case) {
   });
 
   Case.referenceDataFieldsToCategoryMap = {
+    type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE',
     classification: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION',
     riskLevel: 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL',
     gender: 'LNG_REFERENCE_DATA_CATEGORY_GENDER',

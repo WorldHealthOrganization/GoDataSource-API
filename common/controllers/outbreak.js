@@ -4569,7 +4569,7 @@ module.exports = function (Outbreak) {
                   return;
                 }
                 // Translate the values of the fields marked as reference data fields on the case/contact model
-                app.utils.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models.person.typeToModelMap[relationshipMember.type], dictionary);
+                app.utils.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models[app.models.person.typeToModelMap[relationshipMember.type]], dictionary);
 
                 // Assign the person to the relationship to be displayed as part of it
                 relationship.person = relationshipMember;
@@ -4801,7 +4801,7 @@ module.exports = function (Outbreak) {
                 });
 
                 // Translate the values of the fields marked as reference data fields on the case/contact model
-                app.utils.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models.person.typeToModelMap[relationshipMember.type], dictionary);
+                app.utils.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models[app.models.person.typeToModelMap[relationshipMember.type]], dictionary);
 
                 // Assign the person to the relationship to be displayed as part of it
                 relationship.person = relationshipMember;
