@@ -967,9 +967,7 @@ module.exports = function (Outbreak) {
     ];
     // the following case props are array and should be treated differently
     const caseArrayProps = [
-      'isolationDates',
-      'hospitalizationDates',
-      'incubationDates',
+      'dateRanges',
     ];
 
     // decide which type of properties map to use, based on given type

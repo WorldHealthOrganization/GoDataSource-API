@@ -9,6 +9,10 @@
     "id"
   ],
   "properties": {
+    "typeId": {
+      "type": "string",
+      "required": true
+    },
     "startDate": {
       "type": "date",
       "required": true

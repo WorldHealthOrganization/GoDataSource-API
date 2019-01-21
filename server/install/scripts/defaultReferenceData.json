@@ -274,6 +274,17 @@
       "readOnly": false
     }
   },
+  "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE": {
+    "Hospitalization": {
+      "readOnly": true
+    },
+    "Isolation": {
+      "readOnly": true
+    },
+    "Incubation": {
+      "readOnly": true
+    }
+  },
   "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE": {
     "Case": {
       "readOnly": true
