@@ -68,6 +68,7 @@ module.exports = function (Contact) {
 
   // contact fields to print
   Contact.printFieldsinOrder = [
+    'visualId',
     'firstName',
     'middleName',
     'lastName',

@@ -114,6 +114,12 @@
       "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
       "default": "9999999999"
     },
+    "contactIdMask": {
+      "type": "string",
+      "required": true,
+      "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
+      "default": "9999999999"
+    },
     "arcGisServers": [
       "arcGisServer"
     ],
@@ -635,13 +641,13 @@
       "principalType": "ROLE",
       "principalId": "write_case",
       "permission": "ALLOW",
-      "property": "generateVisualId"
+      "property": "generateCaseVisualId"
     },
     {
       "principalType": "ROLE",
       "principalId": "write_contact",
       "permission": "ALLOW",
-      "property": "generateVisualId"
+      "property": "generateContactVisualId"
     },
     {
       "principalType": "ROLE",
@@ -2261,17 +2267,18 @@
         "path": "/reference-data"
       }
     },
-    "prototype.generateVisualId": {
+    "prototype.generateCaseVisualId": {
       "accepts": [
         {
           "arg": "visualIdMask",
           "type": "string",
+          "required": true,
           "description": "Visual ID mask partially resolved (except for the sequence no.)"
         },
         {
           "arg": "personId",
           "type": "string",
-          "description": "Case/Contact/Event ID for validating existing visual ID (optional)"
+          "description": "Case ID for validating existing visual ID (optional)"
         }
       ],
       "returns": [
@@ -2286,7 +2293,36 @@
       "description": "Generates the next (available) visual ID based on the outbreak mask.",
       "http": {
         "verb": "post",
-        "path": "/generate-visual-id"
+        "path": "/cases/generate-visual-id"
+      }
+    },
+    "prototype.generateContactVisualId": {
+      "accepts": [
+        {
+          "arg": "visualIdMask",
+          "type": "string",
+          "required": true,
+          "description": "Visual ID mask partially resolved (except for the sequence no.)"
+        },
+        {
+          "arg": "personId",
+          "type": "string",
+          "description": "Contact ID for validating existing visual ID (optional)"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "visualId",
+          "type": "string",
+          "description": "Visual ID",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Generates the next (available) visual ID based on the outbreak mask.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/generate-visual-id"
       }
     },
     "prototype.getCaseQRResourceLink": {

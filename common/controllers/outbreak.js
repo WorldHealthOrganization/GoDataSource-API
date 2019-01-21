@@ -1084,13 +1084,27 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Generate (next available) visual id
+   * Generate (next available) case visual id
    * @param visualIdMask
    * @param personId
    * @param callback
    */
-  Outbreak.prototype.generateVisualId = function (visualIdMask, personId, callback) {
-    Outbreak.helpers.getAvailableVisualId(this, visualIdMask, personId)
+  Outbreak.prototype.generateCaseVisualId = function (visualIdMask, personId, callback) {
+    Outbreak.helpers.getAvailableCaseVisualId(this, visualIdMask, personId)
+      .then(function (visualId) {
+        callback(null, visualId);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Generate (next available) contact visual id
+   * @param visualIdMask
+   * @param personId
+   * @param callback
+   */
+  Outbreak.prototype.generateContactVisualId = function (visualIdMask, personId, callback) {
+    Outbreak.helpers.getAvailableContactVisualId(this, visualIdMask, personId)
       .then(function (visualId) {
         callback(null, visualId);
       })
