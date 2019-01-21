@@ -3622,7 +3622,7 @@ module.exports = function (Outbreak) {
     let outbreakId = this.id;
 
     // get all the followups for the filtered period
-    app.models.person.find(app.utils.remote
+    app.models.person.rawFind(app.utils.remote
       .mergeFilters({
         where: {
           outbreakId: outbreakId,
@@ -3747,7 +3747,7 @@ module.exports = function (Outbreak) {
             }`
           }]
         }
-      }, filter || {}), {disableSanitization: true})
+      }, filter || {}).where)
       .then(function (people) {
         // get case fields label map
         let caseFieldsLabelMap = app.models.case.fieldLabelsMap;
@@ -4008,10 +4008,12 @@ module.exports = function (Outbreak) {
                     inconsistencies.push({
                       dates: [{
                         field: `${datesContainer}.${dateEntryIndex}.startDate`,
-                        label: caseFieldsLabelMap[`${datesContainer}[].startDate`]
+                        label: caseFieldsLabelMap[`${datesContainer}[].startDate`],
+                        dateRangeType: dateEntry.typeId
                       }, {
                         field: `${datesContainer}.${dateEntryIndex}.endDate`,
-                        label: caseFieldsLabelMap[`${datesContainer}[].endDate`]
+                        label: caseFieldsLabelMap[`${datesContainer}[].endDate`],
+                        dateRangeType: dateEntry.typeId
                       }],
                       issue: inconsistenciesOperators.greaterThan
                     });
@@ -4026,7 +4028,8 @@ module.exports = function (Outbreak) {
                           label: caseFieldsLabelMap.dob
                         }, {
                           field: `${datesContainer}.${dateEntryIndex}.startDate`,
-                          label: caseFieldsLabelMap[`${datesContainer}[].startDate`]
+                          label: caseFieldsLabelMap[`${datesContainer}[].startDate`],
+                          dateRangeType: dateEntry.typeId
                         }],
                         issue: inconsistenciesOperators.greaterThan
                       });
@@ -4039,7 +4042,8 @@ module.exports = function (Outbreak) {
                           label: caseFieldsLabelMap.dob
                         }, {
                           field: `${datesContainer}.${dateEntryIndex}.endDate`,
-                          label: caseFieldsLabelMap[`${datesContainer}[].endDate`]
+                          label: caseFieldsLabelMap[`${datesContainer}[].endDate`],
+                          dateRangeType: dateEntry.typeId
                         }],
                         issue: inconsistenciesOperators.greaterThan
                       });
@@ -4055,7 +4059,8 @@ module.exports = function (Outbreak) {
                           label: caseFieldsLabelMap.dateDeceased
                         }, {
                           field: `${datesContainer}.${dateEntryIndex}.startDate`,
-                          label: caseFieldsLabelMap[`${datesContainer}[].startDate`]
+                          label: caseFieldsLabelMap[`${datesContainer}[].startDate`],
+                          dateRangeType: dateEntry.typeId
                         }],
                         issue: inconsistenciesOperators.lessThan
                       });
@@ -4068,7 +4073,8 @@ module.exports = function (Outbreak) {
                           label: caseFieldsLabelMap.dateDeceased
                         }, {
                           field: `${datesContainer}.${dateEntryIndex}.endDate`,
-                          label: caseFieldsLabelMap[`${datesContainer}[].endDate`]
+                          label: caseFieldsLabelMap[`${datesContainer}[].endDate`],
+                          dateRangeType: dateEntry.typeId
                         }],
                         issue: inconsistenciesOperators.lessThan
                       });
