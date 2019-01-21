@@ -97,20 +97,20 @@ module.exports = function (Model) {
     let user = getUserContextInformation(context);
     if (context.instance) {
       if (context.isNewInstance) {
-        // update createdAt property if it's not a sync or the property is missing from the instance
-        if (!context.options._sync || !context.instance.createdAt) {
+        // update createdAt property if it's not a init, sync or the property is missing from the instance
+        if (!context.instance.createdAt || (!context.options._init && !context.options._sync)) {
           context.instance.createdAt = new Date();
         }
         context.instance.createdBy = user.id;
       }
-      // update updatedAt property if it's not a sync or the property is missing from the instance
-      if (!context.options._sync || !context.instance.updatedAt) {
+      // update updatedAt property if it's not a init, sync or the property is missing from the instance
+      if (!context.instance.updatedAt || (!context.options._init && !context.options._sync)) {
         context.instance.updatedAt = new Date();
       }
       context.instance.updatedBy = user.id;
     } else {
-      // update updatedAt property if it's not a sync or the property is missing from the instance
-      if (!context.options._sync || !context.data.updatedAt) {
+      // update updatedAt property if it's not a init, sync or the property is missing from the instance
+      if (!context.data.updatedAt || (!context.options._init && !context.options._sync)) {
         context.data.updatedAt = new Date();
       }
       context.data.updatedBy = user.id;

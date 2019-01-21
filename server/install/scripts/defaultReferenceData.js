@@ -3,6 +3,7 @@
 const app = require('../../server');
 const referenceData = app.models.referenceData;
 const defaultReferenceData = require('./defaultReferenceData.json');
+const common = require('./_common');
 
 // initialize action options; set _init, _sync flags to prevent execution of some after save scripts
 let options = {
@@ -29,7 +30,7 @@ function run(callback) {
           .findById(referenceDataItemKey)
           .then(function (foundReferenceData) {
             if (!foundReferenceData) {
-              return referenceData.create({
+              return referenceData.create(Object.assign({
                 id: referenceDataItemKey,
                 value: referenceDataItemKey,
                 description: `${referenceDataItemKey}_DESCRIPTION`,
@@ -37,7 +38,7 @@ function run(callback) {
                 readOnly: defaultReferenceData[referenceDataCategory][referenceDataItem].readOnly,
                 colorCode: defaultReferenceData[referenceDataCategory][referenceDataItem].colorCode,
                 iconId: defaultReferenceData[referenceDataCategory][referenceDataItem].iconId
-              }, options);
+              }, common.install.timestamps), options);
             }
             return foundReferenceData;
           })
