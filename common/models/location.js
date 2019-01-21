@@ -13,6 +13,9 @@ module.exports = function (Location) {
   Location.fieldLabelsMap = Object.assign({}, Location.fieldLabelsMap, {
     name: 'LNG_LOCATION_FIELD_LABEL_NAME',
     synonyms: 'LNG_LOCATION_FIELD_LABEL_SYNONYMS',
+    identifiers: 'LNG_LOCATION_FIELD_LABEL_IDENTIFIERS',
+    'identifiers[].code': 'LNG_LOCATION_FIELD_LABEL_IDENTIFIERS_CODE',
+    'identifiers[].description': 'LNG_LOCATION_FIELD_LABEL_IDENTIFIERS_DESC',
     active: 'LNG_LOCATION_FIELD_LABEL_ACTIVE',
     populationDensity: 'LNG_LOCATION_FIELD_LABEL_POPULATION_DENSITY',
     parentLocationId: 'LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION_ID',

@@ -6,7 +6,9 @@
     "validateUpsert": true
   },
   "scope": {
-    "order": ["name ASC"]
+    "order": [
+      "name ASC"
+    ]
   },
   "properties": {
     "name": {
@@ -16,6 +18,16 @@
     "synonyms": {
       "type": [
         "string"
+      ]
+    },
+    "identifiers": {
+      "type": [
+        {
+          "type": {
+            "code": "string",
+            "description": "string"
+          }
+        }
       ]
     },
     "active": {
@@ -40,6 +52,18 @@
   "indexes": {
     "geoLocation_index": {
       "geoLocation": "2dsphere"
+    },
+    "name_index": {
+      "name": 1
+    },
+    "synonyms_index": {
+      "synonyms": 1
+    },
+    "identifiers_index": {
+      "identifiers": 1
+    },
+    "identifiers_code_index": {
+      "identifiers.code": 1
     }
   },
   "validations": [],
