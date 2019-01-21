@@ -8,7 +8,12 @@ const locations = require('../../config/locations/locations');
 
 // initialize action options; set _init flag to prevent execution of some after save scripts
 let options = {
-  _init: true
+  _init: true,
+  remotingContext: {
+    req: {
+      logger: app.logger
+    }
+  }
 };
 
 // set default timestamps
