@@ -64,7 +64,7 @@ module.exports = function (Person) {
     'deceased': 'LNG_CASE_FIELD_LABEL_DECEASED',
     'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
     'type': 'LNG_CASE_FIELD_LABEL_TYPE',
-    'dateRanges': 'LNG_CASE_FIELD_LABEL_ISOLATION_DATES',//
+    'dateRanges': 'LNG_CASE_FIELD_LABEL_DATE_RANGES',
     'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
     'safeBurial': 'LNG_CASE_FIELD_LABEL_SAFE_BURIAL'
