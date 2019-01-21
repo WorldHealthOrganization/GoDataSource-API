@@ -61,6 +61,9 @@
     },
     "identifiers_index": {
       "identifiers": 1
+    },
+    "identifiers_code_index": {
+      "identifiers.code": 1
     }
   },
   "validations": [],
