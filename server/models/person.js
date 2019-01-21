@@ -267,7 +267,7 @@ module.exports = function (Person) {
 
           // resolve visual ID
           return app.models.outbreak.helpers
-            .resolvePersonVisualIdTemplate(outbreak, data.target.visualId, context.isNewInstance ? null : data.source.existing.id);
+            .resolvePersonVisualIdTemplate(outbreak, data.target.visualId, data.source.existingRaw.type, context.isNewInstance ? null : data.source.existing.id);
         })
         .then(function (resolvedVisualId) {
           data.target.visualId = resolvedVisualId;
@@ -850,6 +850,12 @@ module.exports = function (Person) {
       delete query.$or;
     }
 
-    return app.models.person.rawFind(query, {skip: filter.skip, limit: filter.limit});
+    // find duplicates only if there is something to look for
+    if (query.$or) {
+      return app.models.person.rawFind(query, {skip: filter.skip, limit: filter.limit});
+    } else {
+      // otherwise return empty list
+      return Promise.resolve([]);
+    }
   };
 };
