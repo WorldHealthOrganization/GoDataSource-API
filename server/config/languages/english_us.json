@@ -580,7 +580,7 @@
       "LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_NAME": "Arc GIS server name",
       "LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_URL": "Arc GIS server URL",
       "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK": "Case ID mask",
-      "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK_DESCRIPTION": "0 – Digit (0 through 9) / 9 – Digit (auto-generated sequence number) / Y – Year (Using year from the date when a case has been reported) / @ – Letter (A through Z) / & - Any character(including spaces)",
+      "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK_DESCRIPTION": "0 – Digit (0 through 9) / 9 – Digit (auto-generated sequence number) / YYYY – Year (Using year from the date when a case has been reported) / @ – Letter (A through Z) / & - Any character(including spaces) / * - Anything (any string of any length)",
       "LNG_OUTBREAK_FIELD_LABEL_CASE_INVESTIGATION_TEMPLATE": "Case investigation template",
       "LNG_OUTBREAK_FIELD_LABEL_CONTACT_ID_MASK": "Contact ID mask",
       "LNG_OUTBREAK_FIELD_LABEL_CONTACT_ID_MASK_DESCRIPTION": "0 – Digit (0 through 9) / 9 – Digit (auto-generated sequence number) / Y – Year (Using year from the date when a contact has been reported) / @ – Letter (A through Z) / & - Any character(including spaces)",

@@ -88,6 +88,10 @@ module.exports = function (Contact) {
     'safeBurial'
   ];
 
+  Contact.locationFields = [
+    'addresses[].locationId'
+  ];
+
   Contact.foreignKeyResolverMap = {
     'addresses[].locationId': {
       modelName: 'location',

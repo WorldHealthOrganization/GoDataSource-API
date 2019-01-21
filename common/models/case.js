@@ -123,6 +123,10 @@ module.exports = function (Case) {
     'safeBurial'
   ];
 
+  Case.locationFields = [
+    'addresses[].locationId'
+  ];
+
   Case.foreignKeyResolverMap = {
     'addresses[].locationId': {
       modelName: 'location',

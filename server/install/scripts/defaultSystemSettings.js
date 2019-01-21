@@ -1,6 +1,7 @@
 'use strict';
 
 const app = require('../../server');
+const common = require('./_common');
 const SystemSettings = app.models.systemSettings;
 const defaultSettings = {
   'upstreamServers': [],
@@ -54,7 +55,7 @@ function run(callback) {
       if (systemSettings) {
         return systemSettings.updateAttributes(defaultSettings, options);
       } else {
-        return SystemSettings.create(defaultSettings, options);
+        return SystemSettings.create(Object.assign(defaultSettings, common.install.timestamps), options);
       }
     })
     .then(function () {

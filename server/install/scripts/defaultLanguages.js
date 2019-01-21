@@ -3,6 +3,7 @@
 const app = require('../../server');
 const fs = require('fs');
 const async = require('async');
+const common = require('./_common');
 
 // keep a list of languages that need to be installed
 const languageList = [];
@@ -32,11 +33,11 @@ languageList.forEach(function (language) {
         if (!foundLanguage) {
           // if not found, create it
           return app.models.language
-            .create({
+            .create(Object.assign({
               id: language.id,
               name: language.name,
               readOnly: language.readOnly
-            }, options);
+            }, common.install.timestamps), options);
         }
         return foundLanguage;
       })
@@ -48,7 +49,9 @@ languageList.forEach(function (language) {
           Object.keys(language.sections[section]).forEach(function (token) {
             languageTokens.push({
               token: token,
-              translation: language.sections[section][token]
+              translation: language.sections[section][token],
+              createdAt: common.install.timestamps.createdAt,
+              updatedAt: common.install.timestamps.updatedAt,
             });
           });
         });
