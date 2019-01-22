@@ -68,6 +68,7 @@ module.exports = function (Case) {
     'addresses[].postalCode': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE',
     'addresses[].locationId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID',
     'addresses[].geoLocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
+    'addresses[].geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
     'addresses[].date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
     'visualId': 'LNG_CASE_FIELD_LABEL_VISUAL_ID',
     'fillGeoLocation': 'LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION',

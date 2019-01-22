@@ -49,6 +49,10 @@
         }
       }
     },
+    "geoLocationAccurate": {
+      "type": "boolean",
+      "default": false
+    },
     "date": {
       "type": "date",
       "description": "Valid until date"
