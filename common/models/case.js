@@ -445,7 +445,7 @@ module.exports = function (Case) {
           // calculate delay if both dates are available (onset is ensured by the query)
           if (hospitalizationIsolationDate) {
             const onset = moment(result.dateOfOnset);
-            const hospitalisationIsolation = moment(hospitalizationIsolationDate);
+            const hospitalisationIsolation = moment(hospitalizationIsolationDate.startDate);
             result.delay = hospitalisationIsolation.diff(onset, 'days');
           }
           results.push(result);
