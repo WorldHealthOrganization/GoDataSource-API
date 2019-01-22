@@ -226,7 +226,6 @@ module.exports = function (Location) {
         ]
       })
       .then(function (matchedPeople) {
-        console.log(matchedPeople);
         callback(null, matchedPeople.length);
       })
       .catch(callback);
