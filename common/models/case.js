@@ -438,7 +438,7 @@ module.exports = function (Case) {
           // build each result
           const result = {
             dateOfOnset: caseRecord.dateOfOnset,
-            hospitalizationIsolationDate: hospitalizationIsolationDate,
+            hospitalizationIsolationDate: hospitalizationIsolationDate ? hospitalizationIsolationDate.startDate : undefined,
             delay: null,
             case: caseRecord
           };
