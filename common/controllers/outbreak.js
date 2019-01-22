@@ -1084,13 +1084,27 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Generate (next available) visual id
+   * Generate (next available) case visual id
    * @param visualIdMask
    * @param personId
    * @param callback
    */
-  Outbreak.prototype.generateVisualId = function (visualIdMask, personId, callback) {
-    Outbreak.helpers.getAvailableVisualId(this, visualIdMask, personId)
+  Outbreak.prototype.generateCaseVisualId = function (visualIdMask, personId, callback) {
+    Outbreak.helpers.getAvailableCaseVisualId(this, visualIdMask, personId)
+      .then(function (visualId) {
+        callback(null, visualId);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Generate (next available) contact visual id
+   * @param visualIdMask
+   * @param personId
+   * @param callback
+   */
+  Outbreak.prototype.generateContactVisualId = function (visualIdMask, personId, callback) {
+    Outbreak.helpers.getAvailableContactVisualId(this, visualIdMask, personId)
       .then(function (visualId) {
         callback(null, visualId);
       })
@@ -9035,6 +9049,20 @@ module.exports = function (Outbreak) {
     app.models.person
       .findDuplicatesByType(filter, this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', model)
       .then(duplicates => callback(null, duplicates))
+      .catch(callback);
+  };
+
+  /**
+   * Get a list of entries that show the delay between date of symptom onset and the hospitalization/isolation dates for a case
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.caseDelayBetweenOnsetAndHospitalizationIsolation = function (filter, callback) {
+    app.models.case
+      .delayBetweenOnsetAndHospitalisationIsolation(this.id, filter)
+      .then(function (result) {
+        callback(null, result);
+      })
       .catch(callback);
   };
 };
