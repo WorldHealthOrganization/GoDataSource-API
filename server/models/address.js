@@ -12,6 +12,7 @@ module.exports = function (Address) {
     'postalCode': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE',
     'locationId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID',
     'geoLocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
+    'geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
     'date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE'
   };
 
@@ -28,6 +29,7 @@ module.exports = function (Address) {
     'postalCode',
     'locationId',
     'geoLocation',
+    'geoLocationAccurate',
     'date'
   ];
 
