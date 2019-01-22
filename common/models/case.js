@@ -417,7 +417,6 @@ module.exports = function (Case) {
         const results = [];
         // go through case records
         cases.forEach(function (caseRecord) {
-
           // get first hospitalisation/isolation date (if any)
           let hospitalizationIsolationDate;
           // hospitalization/isolation dates are types of date ranges, look for them in dateRanges list
@@ -434,7 +433,6 @@ module.exports = function (Case) {
                   .includes(dateRange.typeId);
               });
           }
-
           // build each result
           const result = {
             dateOfOnset: caseRecord.dateOfOnset,
