@@ -388,6 +388,72 @@ module.exports = function (Case) {
 
 
   /**
+   * Get a list of entries that show the delay between date of symptom onset and the hospitalization/isolation dates a case
+   * @param outbreakId
+   * @param filter
+   * @returns {Promise<Array | never>}
+   */
+  Case.delayBetweenOnsetAndHospitalisationIsolation = function (outbreakId, filter) {
+    // find all cases that have date of onset defined
+    return Case
+      .rawFind(
+        app.utils.remote.convertLoopbackFilterToMongo(
+          app.utils.remote.mergeFilters({
+            where: {
+              outbreakId: outbreakId,
+              dateOfOnset: {
+                ne: null
+              }
+            }
+          }, filter || {})
+        ).where, {
+          order: {
+            dateOfOnset: 1
+          }
+        }
+      )
+      .then(function (cases) {
+        // build the list of results
+        const results = [];
+        // go through case records
+        cases.forEach(function (caseRecord) {
+          // get first hospitalisation/isolation date (if any)
+          let hospitalizationIsolationDate;
+          // hospitalization/isolation dates are types of date ranges, look for them in dateRanges list
+          if (Array.isArray(caseRecord.dateRanges) && caseRecord.dateRanges.length) {
+            hospitalizationIsolationDate = caseRecord.dateRanges
+            // we need the earliest one, make sure the list is sorted accordingly
+              .sort(function (a, b) {
+                return a.startDate - b.startDate;
+              })
+              .find(function (dateRange) {
+                return [
+                  'LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_HOSPITALIZATION',
+                  'LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_ISOLATION']
+                  .includes(dateRange.typeId);
+              });
+          }
+          // build each result
+          const result = {
+            dateOfOnset: caseRecord.dateOfOnset,
+            hospitalizationIsolationDate: hospitalizationIsolationDate ? hospitalizationIsolationDate.startDate : undefined,
+            delay: null,
+            case: caseRecord
+          };
+          // calculate delay if both dates are available (onset is ensured by the query)
+          if (hospitalizationIsolationDate) {
+            const onset = moment(result.dateOfOnset);
+            const hospitalisationIsolation = moment(hospitalizationIsolationDate.startDate);
+            result.delay = hospitalisationIsolation.diff(onset, 'days');
+          }
+          results.push(result);
+        });
+        // return the list of results
+        return results;
+      });
+  };
+
+  /**
    * Pre-filter cases for an outbreak using related models (relationship)
    * @param outbreak
    * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries

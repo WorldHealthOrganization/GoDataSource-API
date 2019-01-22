@@ -1440,6 +1440,12 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "getCasePossibleDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "caseDelayBetweenOnsetAndHospitalizationIsolation"
     }
   ],
   "methods": {
@@ -6319,6 +6325,41 @@
       "http": {
         "verb": "post",
         "path": "/cases/duplicates/find"
+      }
+    },
+    "prototype.caseDelayBetweenOnsetAndHospitalizationIsolation": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "delays",
+          "type": [
+            {
+              "type": {
+                "dateOfOnset": "date",
+                "hospitalizationIsolationDate": "date",
+                "delay": {
+                  "type": "number",
+                  "description": "Number of days between date of onset and the first hospitalization/isolation date of the case"
+                },
+                "case": "case"
+              }
+            }
+          ],
+          "description": "List of entries that show the delay between date of symptom onset and hospitalization/isolation date of a case",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get a list of entries that show the delay between date of symptom onset and hospitalization/isolation date of a case",
+      "http": {
+        "verb": "get",
+        "path": "/cases/delay-onset-hospitalization"
       }
     }
   }
