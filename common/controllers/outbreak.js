@@ -9051,4 +9051,18 @@ module.exports = function (Outbreak) {
       .then(duplicates => callback(null, duplicates))
       .catch(callback);
   };
+
+  /**
+   * Get a list of entries that show the delay between date of symptom onset and the hospitalization/isolation dates for a case
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.caseDelayBetweenOnsetAndHospitalizationIsolation = function (filter, callback) {
+    app.models.case
+      .delayBetweenOnsetAndHospitalisationIsolation(this.id, filter)
+      .then(function (result) {
+        callback(null, result);
+      })
+      .catch(callback);
+  };
 };
