@@ -174,4 +174,61 @@ module.exports = function (Location) {
       })
       .catch(callback);
   };
+
+  Location.prototype.propagateGeoLocationToLinkedPeople = function (callback) {
+    if (!this.geoLocation) {
+      return callback(app.utils.apiError.getError('LOCATION_NO_GEOLOCATION_INFORMATION', {id: this.id}));
+    }
+    app.models.person
+      .rawFind({
+        $or: [
+          {
+            addresses: {
+              $elemMatch: {
+                locationId: this.id,
+                geoLocationAccurate: {
+                  $ne: true
+                },
+                $or: [
+                  {
+                    'geoLocation.coordinates.0': {
+                      $ne: this.geoLocation.lng
+                    }
+                  },
+                  {
+                    'geoLocation.coordinates.1': {
+                      $ne: this.geoLocation.lat
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            'address.locationId': this.id,
+            'address.geoLocationAccurate': {
+              $ne: true
+            },
+            $or: [
+              {
+                'address.geoLocation.coordinates.0': {
+                  $ne: this.geoLocation.lng
+                }
+              },
+              {
+                'address.geoLocation.coordinates.1': {
+                  $ne: this.geoLocation.lat
+                }
+              }
+            ]
+
+          }
+        ]
+      })
+      .then(function (matchedPeople) {
+        console.log(matchedPeople);
+        callback(null, matchedPeople.length);
+      })
+      .catch(callback);
+  };
 };

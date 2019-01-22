@@ -246,5 +246,9 @@
   "INVALID_DATES": {
     "defaultStatusCode": 400,
     "messagePattern": "Invalid date properties"
+  },
+  "LOCATION_NO_GEOLOCATION_INFORMATION": {
+    "defaultStatusCode": 425,
+    "messagePattern": "The location you have used (id: `<%= id %>`) does not have Geo-Location information"
   }
 }
