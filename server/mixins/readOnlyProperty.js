@@ -34,7 +34,10 @@ module.exports = function (Model) {
             // do not parse more than 2 levels (we don't need that level of granularity when importing flat files)
             if (prefix || Model.definition.properties[propertyName].importTopLevelOnly) {
               // handle nested custom GeoPoint
-              if (Model.definition.properties[propertyName].type.name === 'customGeoPoint') {
+              if (
+                !Model.definition.properties[propertyName].importTopLevelOnly &&
+                Model.definition.properties[propertyName].type.name === 'customGeoPoint'
+              ) {
                 if (prefix) {
                   propertyName = `${prefix}.${propertyName}`;
                 }
