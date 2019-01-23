@@ -151,6 +151,12 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "countUsage"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_sys_config",
+      "permission": "ALLOW",
+      "property": "propagateGeoLocationToLinkedPeople"
     }
   ],
   "methods": {
@@ -335,6 +341,28 @@
         {
           "verb": "get",
           "path": "/usage/count"
+        }
+      ]
+    },
+    "prototype.propagateGeoLocationToLinkedPeople": {
+      "description": "Propagate Geo-Location to linked people.",
+      "accepts": [
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": {
+        "description": "Updated Records",
+        "arg": "count",
+        "type": "number",
+        "required": true
+      },
+      "http": [
+        {
+          "verb": "post",
+          "path": "/propagate-geo-location"
         }
       ]
     }

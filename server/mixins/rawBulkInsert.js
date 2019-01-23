@@ -47,7 +47,7 @@ module.exports = function (Model) {
 
       // enable author fields
       record.createdAt = now;
-      record.updateAt = now;
+      record.updatedAt = now;
       record.createdBy = userId;
       record.updatedBy = userId;
 

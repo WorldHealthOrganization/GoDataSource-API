@@ -95,7 +95,7 @@ module.exports = function (ExtendedPersistedModel) {
         );
       } else {
         checkUsages.push(
-          app.models[modelName].find(_filter)
+          app.models[modelName].rawFind(_filter.where)
         );
       }
     });
