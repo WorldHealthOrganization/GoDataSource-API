@@ -1861,6 +1861,78 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Count new cases outside known transmission chains
+   * @param filter Besides the default filter properties this request also accepts 'noDaysInChains': number on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countNewCasesOutsideKnownTransmissionChains = function (filter, callback) {
+    const self = this;
+    // default number of day used to determine new cases
+    let noDaysInChains = this.noDaysInChains;
+    // check if a different number was sent in the filter
+    if (filter && filter.where && filter.where.noDaysInChains) {
+      noDaysInChains = filter.where.noDaysInChains;
+      delete filter.where.noDaysInChains;
+    }
+    // start building a result
+    const result = {
+      newCases: 0,
+      total: 0,
+      caseIDs: []
+    };
+
+    // use a cases index to make sure we don't count a case multiple times
+    const casesIndex = {};
+    // calculate date used to compare contact date of onset with
+    const newCasesFromDate = new Date();
+    newCasesFromDate.setDate(newCasesFromDate.getDate() - noDaysInChains);
+
+    // get known transmission chains (case-case relationships)
+    app.models.relationship
+      .filterKnownTransmissionChains(this.id, filter)
+      .then(function (relationships) {
+        // go trough all relations
+        relationships.forEach(function (relation) {
+          // go trough all the people
+          if (Array.isArray(relation.people)) {
+            relation.people.forEach(function (person) {
+              // count each case only once (do a specific check for person type as transmission chains may include events)
+              if (!casesIndex[person.id] && person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
+                casesIndex[person.id] = true;
+              }
+            });
+          }
+        });
+        // find cases that are not part of known transmission chains
+        return app.models.case
+          .rawFind({
+            outbreakId: self.id,
+            _id: {
+              nin: Object.keys(casesIndex)
+            },
+          }, {
+            projection: {
+              dateOfReporting: 1
+            }
+          })
+          .then(function (cases) {
+            cases.forEach(function (caseRecord) {
+              // check if the case is new (date of reporting is later than the threshold date)
+              if ((new Date(caseRecord.dateOfReporting)) >= newCasesFromDate) {
+                result.newCases++;
+                result.caseIDs.push(caseRecord.id);
+              }
+              result.total++;
+            });
+          });
+      })
+      .then(function (){
+        callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
    * Count the cases with less than X contacts
    * Note: Besides the count the response also contains a list with the counted cases IDs
    * @param filter Besides the default filter properties this request also accepts 'noLessContacts': number on the first level in 'where'
