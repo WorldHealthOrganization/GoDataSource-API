@@ -250,5 +250,13 @@
   "LOCATION_NO_GEOLOCATION_INFORMATION": {
     "defaultStatusCode": 425,
     "messagePattern": "The location you have used (id: `<%= id %>`) does not have Geo-Location information"
+  },
+  "BULK_UPDATE_PARTIAL_SUCCESS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Bulk Update Partial Success. Some `<%= model %>` instances failed to be updated. Successfully updated: <%= success %> \nFailed to be updated: <%= failed %>"
+  },
+  "BULK_UPDATE_FAILED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Bulk Update Failed. `<%= model %>` instances failed to be updated: <%= failed %>"
   }
 }

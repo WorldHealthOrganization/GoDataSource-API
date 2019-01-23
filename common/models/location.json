@@ -346,7 +346,13 @@
     },
     "prototype.propagateGeoLocationToLinkedPeople": {
       "description": "Propagate Geo-Location to linked people.",
-      "accepts": [],
+      "accepts": [
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
       "returns": {
         "description": "Updated Records",
         "arg": "count",

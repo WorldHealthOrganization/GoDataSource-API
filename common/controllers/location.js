@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const fs = require('fs');
 const _ = require('lodash');
+const async = require('async');
 
 module.exports = function (Location) {
 
@@ -175,10 +176,20 @@ module.exports = function (Location) {
       .catch(callback);
   };
 
-  Location.prototype.propagateGeoLocationToLinkedPeople = function (callback) {
+  /**
+   * Propagate location GeoLocation to linked people that do not have manually added geo-location (geoLocationAccurate: false)
+   * @param options
+   * @param callback
+   * @returns {*}
+   */
+  Location.prototype.propagateGeoLocationToLinkedPeople = function (options, callback) {
+    const self = this;
+    // sanity check
     if (!this.geoLocation) {
       return callback(app.utils.apiError.getError('LOCATION_NO_GEOLOCATION_INFORMATION', {id: this.id}));
     }
+
+    // find people that have addresses linked to this location, that have different coordinates and their GeoLocation is not marked as accurate
     app.models.person
       .rawFind({
         $or: [
@@ -226,7 +237,97 @@ module.exports = function (Location) {
         ]
       })
       .then(function (matchedPeople) {
-        callback(null, matchedPeople.length);
+        // keep a list of errors
+        const errors = [];
+        // build a list of update actions
+        const updateActions = [];
+        // go through all the people
+        matchedPeople.forEach(function (person) {
+          // keep a map of fields to update
+          const fieldsToUpdate = {};
+          // if the person has a list of addresses
+          if (Array.isArray(person.addresses)) {
+            // go through all of them
+            person.addresses.forEach(function (address) {
+              // identify those that use current location and the coordinates are marked as inaccurate
+              if (address.locationId === self.id && !address.geoLocationAccurate) {
+                // update geo-location
+                address.geoLocation = {
+                  coordinates: [self.geoLocation.lng, self.geoLocation.lat],
+                  type: 'Point'
+                };
+              }
+            });
+            // update the list of fields to be updated
+            fieldsToUpdate['addresses'] = person.addresses;
+          }
+          // if the person has an address linked to current location and the coordinates are marked as inaccurate
+          if (person.address && person.address.locationId === self.id && !person.address.geoLocationAccurate) {
+            // update geo-location
+            person.address.geoLocation = {
+              coordinates: [self.geoLocation.lng, self.geoLocation.lat],
+              type: 'Point'
+            };
+            fieldsToUpdate['address'] = person.address;
+          }
+          // if there are updates to be made
+          if (Object.keys(fieldsToUpdate).length) {
+            // add them to the update actions
+            updateActions.push(function (callback) {
+              // update the person
+              app.models.person
+                .rawUpdateOne({
+                  _id: person.id
+                }, fieldsToUpdate, options)
+                .then(function (record) {
+                  callback(null, record);
+                })
+                .catch(function (error) {
+                  // if there are errors, store them but allow the process to continue
+                  errors.push({
+                    recordId: person.id,
+                    error: error
+                  });
+                  callback(null, null);
+                });
+            });
+          }
+        });
+        // promisify result
+        return new Promise(function (resolve, reject) {
+          // run update actions
+          async.parallelLimit(updateActions, 10, function (error, results) {
+            if (error) {
+              return reject(error);
+            }
+            resolve({error: errors, success: results.filter(record => record != null)});
+          });
+        });
+      })
+      .then(function (results) {
+        // if errors are present
+        if (results.error.length) {
+          // some updates succeeded
+          if (results.success.length) {
+            // send partial error
+            callback(app.utils.apiError.getError('BULK_UPDATE_PARTIAL_SUCCESS', {
+              model: Location.modelName,
+              success: results.success.length,
+              failed: results.error.length,
+              errors: results.error
+            }));
+          } else {
+            // all operations failed
+            callback(app.utils.apiError.getError('BULK_UPDATE_FAILED', {
+              model: Location.modelName,
+              failed: results.error.length,
+              errors: results.error
+            }));
+          }
+        } else {
+          // success
+          callback(null, results.success.length);
+        }
       })
       .catch(callback);
   };
