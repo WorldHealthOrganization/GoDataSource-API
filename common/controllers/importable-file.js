@@ -375,8 +375,18 @@ module.exports = function (ImportableFile) {
                     if (!results[modelName].modelProperties[propertyComponents[0]]) {
                       results[modelName].modelProperties[propertyComponents[0]] = {};
                     }
-                    // store the sub component under parent component
-                    results[modelName].modelProperties[propertyComponents[0]][propertyComponents[1]] = fieldLabelsMap[property];
+                    // 3rd nested level (geo-locations)
+                    if (propertyComponents.length > 2) {
+                      // define parent (sub)component
+                      if (!results[modelName].modelProperties[propertyComponents[0]][propertyComponents[1]]) {
+                        results[modelName].modelProperties[propertyComponents[0]][propertyComponents[1]] = {};
+                      }
+                      // store the sub component under parent (sub)component
+                      results[modelName].modelProperties[propertyComponents[0]][propertyComponents[1]][propertyComponents[2]] = fieldLabelsMap[property];
+                    } else {
+                      // store the sub component under parent component
+                      results[modelName].modelProperties[propertyComponents[0]][propertyComponents[1]] = fieldLabelsMap[property];
+                    }
                   } else {
                     // no sub components, store property directly
                     results[modelName].modelProperties[property] = fieldLabelsMap[property];
