@@ -831,6 +831,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countNewCasesOutsideKnownTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "countCasesWithLessThanXContacts"
@@ -2968,6 +2974,35 @@
       "http": {
         "verb": "get",
         "path": "/relationships/new-cases-in-transmission-chains/count"
+      }
+    },
+    "prototype.countNewCasesOutsideKnownTransmissionChains": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'noDaysInChains' number on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": {
+            "newCases": "number",
+            "total": "number",
+            "caseIds": [
+              "string"
+            ]
+          },
+          "description": "Retrieve number of new cases outside known transmission chains",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the number of new cases vs total number of cases outside known transmission chains",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/new-cases-outside-transmission-chains/count"
       }
     },
     "prototype.countEventNewContacts": {
