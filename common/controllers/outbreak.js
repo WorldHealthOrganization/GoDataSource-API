@@ -9065,4 +9065,30 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Count cases stratified by outcome over time
+   * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
+   * @param callback
+   */
+  Outbreak.prototype.countCasesStratifiedByOutcomeOverTime = function (filter, callback) {
+    app.models.case.countStratifiedByOutcomeOverTime(this, filter)
+      .then(function (result) {
+        callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count cases stratified by classification over reporting time
+   * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
+   * @param callback
+   */
+  Outbreak.prototype.countCasesStratifiedByClassificationOverReportingTime = function (filter, callback) {
+    app.models.case.countStratifiedByClassificationOverReportingTime(this, filter)
+      .then(function (result) {
+        callback(null, result);
+      })
+      .catch(callback);
+  };
 };
