@@ -33,10 +33,19 @@ module.exports = function (Model) {
           if (Model.definition.properties[propertyName].type && Model.definition.properties[propertyName].type.definition) {
             // do not parse more than 2 levels (we don't need that level of granularity when importing flat files)
             if (prefix || Model.definition.properties[propertyName].importTopLevelOnly) {
-              if (prefix) {
-                propertyName = `${prefix}.${propertyName}`;
+              // handle nested custom GeoPoint
+              if (Model.definition.properties[propertyName].type.name === 'customGeoPoint') {
+                if (prefix) {
+                  propertyName = `${prefix}.${propertyName}`;
+                }
+                importableProperties.push(`${propertyName}.lat`);
+                importableProperties.push(`${propertyName}.lng`);
+              } else {
+                if (prefix) {
+                  propertyName = `${prefix}.${propertyName}`;
+                }
+                importableProperties.push(propertyName);
               }
-              importableProperties.push(propertyName);
               return importableProperties;
             }
             // get next level of importable properties and merge the results
