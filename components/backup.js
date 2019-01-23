@@ -55,7 +55,8 @@ const createBackup = function (modules, location, done) {
       collections,
       {
         password: getBackupPassword(),
-        chunkSize: 10000
+        chunkSize: 10000,
+        exportEmptyCollections: true
       },
       (exportError, archivePath) => {
         if (exportError) {

@@ -118,12 +118,14 @@ function exportCollectionInBatches(dbConnection, mongoCollectionName, collection
     cursor
       .toArray()
       .then(function (records) {
-        // check if records were returned; consider collection finished if no records
-        if (!records || !records.length) {
-          logger.debug(`Collection '${collectionName}' export success.`);
-          return callback();
+        // if it was not requested to export empty collections
+        if (!options.exportEmptyCollections) {
+          // check if records were returned; consider collection finished if no records
+          if (!records || !records.length) {
+            logger.debug(`Collection '${collectionName}' export success.`);
+            return callback();
+          }
         }
-
         // export related files
         // if collection is not supported, it will be skipped
         dbSync.exportCollectionRelatedFiles(collectionName, records, archivesDirName, logger, options.password, (err) => {
