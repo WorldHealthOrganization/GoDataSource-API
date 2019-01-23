@@ -312,7 +312,7 @@ module.exports = function (Sync) {
                   }
 
                   // check if all the collections that needed to be imported failed entirely
-                  if (collectionsToImport.length && collectionsToImport.length === entirelyFailedCollections.length) {
+                  if (collectionsToImport.length && (collectionsToImport.length === entirelyFailedCollections.length)) {
                     // fatal sync error
                     return callback(Sync.getFatalError(err));
                   }
