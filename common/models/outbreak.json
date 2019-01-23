@@ -1293,6 +1293,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCasesStratifiedByOutcomeOverTime"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCasesStratifiedByClassificationOverReportingTime"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "countFollowUpsByTeam"
@@ -5508,6 +5520,90 @@
       "http": {
         "verb": "get",
         "path": "/cases/classification-over-time/count"
+      }
+    },
+    "prototype.countCasesStratifiedByOutcomeOverTime": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts 'periodType': enum [day, week, month], 'endDate' on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": {
+            "<periodIndex>": {
+              "type": {
+                "start": "date",
+                "end": "date",
+                "outcome": {
+                  "type": {
+                    "{caseOutcome}": {
+                      "type": "number",
+                      "description": "Number of cases for the outcome for the period"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "number",
+                  "description": "Total number of cases for the period"
+                }
+              }
+            }
+          },
+          "description": "Number of cases stratified by outcome over time",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Count cases stratified by outcome over time",
+      "http": {
+        "verb": "get",
+        "path": "/cases/outcome-over-time/count"
+      }
+    },
+    "prototype.countCasesStratifiedByClassificationOverReportingTime": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts 'periodType': enum [day, week, month], 'endDate' on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": {
+            "<periodIndex>": {
+              "type": {
+                "start": "date",
+                "end": "date",
+                "classification": {
+                  "type": {
+                    "{caseClassification}": {
+                      "type": "number",
+                      "description": "Number of cases in the classification for the reporting period"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "number",
+                  "description": "Total number of cases for the reporting period"
+                }
+              }
+            }
+          },
+          "description": "Number of cases stratified by classification over reporting time",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Count cases stratified by classification over reporting time",
+      "http": {
+        "verb": "get",
+        "path": "/cases/classification-over-reporting-time/count"
       }
     },
     "prototype.countFollowUpsByTeam": {
