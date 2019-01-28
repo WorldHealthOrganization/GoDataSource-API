@@ -55,10 +55,15 @@ module.exports = function (Sync) {
       exportLogEntry.actionCompletionDate = new Date();
 
       if (err) {
-        // make error readable
-        err.toString = function () {
-          return JSON.stringify(this);
-        };
+        if (err.code === 'NO-DATA') {
+          err = app.utils.apiError.getError('SYNC_NO_DATA_TO_EXPORT');
+        } else {
+          // make error readable
+          err.toString = function () {
+            return JSON.stringify(this);
+          };
+        }
+
         app.logger.debug(`Export ${exportLogEntry.id}: Error ${err}`);
         exportLogEntry.status = 'LNG_SYNC_STATUS_FAILED';
         exportLogEntry.error = err;
@@ -192,7 +197,8 @@ module.exports = function (Sync) {
             collections,
             {
               password: password,
-              chunkSize: chunkSize
+              chunkSize: chunkSize,
+              exportEmptyCollections: false
             },
             (err, fileName) => {
               // send the done function as the response needs to be returned
@@ -209,7 +215,8 @@ module.exports = function (Sync) {
             collections,
             {
               password: password,
-              chunkSize: chunkSize
+              chunkSize: chunkSize,
+              exportEmptyCollections: false
             },
             (err, fileName) => {
               // don't send the done function as the response was already sent

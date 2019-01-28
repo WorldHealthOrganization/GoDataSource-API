@@ -134,6 +134,9 @@ function exportCollectionInBatches(dbConnection, mongoCollectionName, collection
             return callback(err);
           }
 
+          // at least one collection has data to pack in an archive
+          options.hasDataToExport = true;
+
           let fileName = `${collectionName}.${batchNumber}.json`;
           let filePath = `${tmpDirName}/${fileName}`;
 
@@ -222,6 +225,10 @@ const worker = {
             };
           }
 
+          // flag that indicates if there is at least one collection with records
+          // if this is not true, do not pack the main archive
+          options.hasDataToExport = false;
+
           async
             .series(
               Object.keys(collections).map((collectionName) => {
@@ -238,6 +245,13 @@ const worker = {
               (err) => {
                 if (err) {
                   return reject(err);
+                }
+
+                // stop with error if there is no collection with data
+                if (!options.hasDataToExport) {
+                  return reject({
+                    code: 'NO-DATA'
+                  });
                 }
 
                 // archive file name
