@@ -55,10 +55,15 @@ module.exports = function (Sync) {
       exportLogEntry.actionCompletionDate = new Date();
 
       if (err) {
-        // make error readable
-        err.toString = function () {
-          return JSON.stringify(this);
-        };
+        if (err.code === 'NO-DATA') {
+          err = app.utils.apiError.getError('SYNC_NO_DATA_TO_EXPORT');
+        } else {
+          // make error readable
+          err.toString = function () {
+            return JSON.stringify(this);
+          };
+        }
+
         app.logger.debug(`Export ${exportLogEntry.id}: Error ${err}`);
         exportLogEntry.status = 'LNG_SYNC_STATUS_FAILED';
         exportLogEntry.error = err;

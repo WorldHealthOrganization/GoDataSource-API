@@ -258,5 +258,9 @@
   "BULK_UPDATE_FAILED": {
     "defaultStatusCode": 422,
     "messagePattern": "Bulk Update Failed. `<%= model %>` instances failed to be updated: <%= failed %>"
+  },
+  "SYNC_NO_DATA_TO_EXPORT": {
+    "defaultStatusCode": 422,
+    "messagePattern": "No data to export"
   }
 }

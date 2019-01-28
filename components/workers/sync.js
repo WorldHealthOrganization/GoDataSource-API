@@ -250,9 +250,7 @@ const worker = {
                 // stop with error if there is no collection with data
                 if (!options.hasDataToExport) {
                   return reject({
-                    // adding specific status code, to avoid being handled by Internal Error middleware
-                    statusCode: 404,
-                    message: 'No data to export'
+                    code: 'NO-DATA'
                   });
                 }
 
