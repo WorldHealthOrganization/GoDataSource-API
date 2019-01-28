@@ -192,7 +192,8 @@ module.exports = function (Sync) {
             collections,
             {
               password: password,
-              chunkSize: chunkSize
+              chunkSize: chunkSize,
+              exportEmptyCollections: false
             },
             (err, fileName) => {
               // send the done function as the response needs to be returned
@@ -209,7 +210,8 @@ module.exports = function (Sync) {
             collections,
             {
               password: password,
-              chunkSize: chunkSize
+              chunkSize: chunkSize,
+              exportEmptyCollections: false
             },
             (err, fileName) => {
               // don't send the done function as the response was already sent
