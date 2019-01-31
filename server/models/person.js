@@ -326,6 +326,28 @@ module.exports = function (Person) {
   });
 
   /**
+   * Before delete hooks
+   * - archive visual ID before soft-deleting record so we can add a new case with the same case ID
+   */
+  Person.observe('before delete', function (context, next) {
+    // in case we have visual ID we need to remove if before soft deleting this record
+    if (context.currentInstance.visualId) {
+      // archive visual ID
+      context.data.documents = context.currentInstance.documents || [];
+      context.data.documents.push({
+        type: 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_ARCHIVED_ID',
+        number: context.currentInstance.visualId
+      });
+
+      // remove visual ID
+      context.data.visualId = null;
+    }
+
+    // continue
+    next();
+  });
+
+  /**
    * After save hooks
    */
   Person.observe('after save', function (ctx, next) {
