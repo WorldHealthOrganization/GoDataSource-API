@@ -1,6 +1,6 @@
 {
   "name": "dateRangeWithDetails",
-  "base": "Model",
+  "base": "dateRange",
   "idInjection": true,
   "options": {
     "validateUpsert": true
@@ -9,12 +9,8 @@
     "id"
   ],
   "properties": {
-    "startDate": {
-      "type": "date",
-      "required": true
-    },
-    "endDate": {
-      "type": "date",
+    "typeId": {
+      "type": "string",
       "required": true
     },
     "centerName": {

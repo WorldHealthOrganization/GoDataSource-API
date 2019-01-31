@@ -30,18 +30,11 @@ module.exports = function (Person) {
       model: 'location',
       foreignKey: 'address.locationId'
     },
-    // hospitalization locations
-    hospitalizationLocations: {
+    // date range locations
+    dateRangeLocations: {
       type: 'belongsToManyComplex',
       model: 'location',
-      foreignKeyContainer: 'hospitalizationDates',
-      foreignKey: 'locationId'
-    },
-    // isolation locations
-    isolationLocations: {
-      type: 'belongsToManyComplex',
-      model: 'location',
-      foreignKeyContainer: 'isolationDates',
+      foreignKeyContainer: 'dateRanges',
       foreignKey: 'locationId'
     }
   };
@@ -71,9 +64,7 @@ module.exports = function (Person) {
     'deceased': 'LNG_CASE_FIELD_LABEL_DECEASED',
     'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
     'type': 'LNG_CASE_FIELD_LABEL_TYPE',
-    'isolationDates': 'LNG_CASE_FIELD_LABEL_ISOLATION_DATES',
-    'hospitalizationDates': 'LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES',
-    'incubationDates': 'LNG_CASE_FIELD_LABEL_INCUBATION_DATES',
+    'dateRanges': 'LNG_CASE_FIELD_LABEL_DATE_RANGES',
     'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
     'safeBurial': 'LNG_CASE_FIELD_LABEL_SAFE_BURIAL'
@@ -111,9 +102,7 @@ module.exports = function (Person) {
     'safeBurial',
     'documents',
     'type',
-    'isolationDates',
-    'hospitalizationDates',
-    'incubationDates',
+    'dateRanges',
     'transferRefused',
     'addresses'
   ];
@@ -126,6 +115,7 @@ module.exports = function (Person) {
 
   Person.locationFields = [
     'addresses[].locationId',
+    'dateRanges[].locationId',
     'address.locationId'
   ];
 

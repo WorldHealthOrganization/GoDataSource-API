@@ -42,21 +42,13 @@ module.exports = function (Case) {
     'dateOfOutcome': 'LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME',
     'deceased': 'LNG_CASE_FIELD_LABEL_DECEASED',
     'type': 'LNG_CASE_FIELD_LABEL_TYPE',
-    'isolationDates': 'LNG_CASE_FIELD_LABEL_ISOLATION_DATES',
-    'hospitalizationDates': 'LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES',
-    'incubationDates': 'LNG_CASE_FIELD_LABEL_INCUBATION_DATES',
-    'isolationDates[].startDate': 'LNG_CASE_FIELD_LABEL_ISOLATION_DATES_START_DATE',
-    'isolationDates[].endDate': 'LNG_CASE_FIELD_LABEL_ISOLATION_DATES_END_DATE',
-    'isolationDates[].centerName': 'LNG_CASE_FIELD_LABEL_ISOLATION_DATES_CENTER_NAME',
-    'isolationDates[].locationId': 'LNG_CASE_FIELD_LABEL_ISOLATION_DATES_LOCATION',
-    'isolationDates[].comments': 'LNG_CASE_FIELD_LABEL_ISOLATION_DATES_COMMENTS',
-    'hospitalizationDates[].startDate': 'LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES_START_DATE',
-    'hospitalizationDates[].endDate': 'LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES_END_DATE',
-    'hospitalizationDates[].centerName': 'LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES_CENTER_NAME',
-    'hospitalizationDates[].locationId': 'LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES_LOCATION',
-    'hospitalizationDates[].comments': 'LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES_COMMENTS',
-    'incubationDates[].startDate': 'LNG_CASE_FIELD_LABEL_INCUBATION_DATES_START_DATE',
-    'incubationDates[].endDate': 'LNG_CASE_FIELD_LABEL_INCUBATION_DATES_END_DATE',
+    'dateRanges': 'LNG_CASE_FIELD_LABEL_DATE_RANGES',
+    'dateRanges[].typeId': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_TYPE_ID',
+    'dateRanges[].startDate': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_START_DATE',
+    'dateRanges[].endDate': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_END_DATE',
+    'dateRanges[].centerName': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_CENTER_NAME',
+    'dateRanges[].locationId': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_LOCATION',
+    'dateRanges[].comments': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_COMMENTS',
     'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
     'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
@@ -80,13 +72,15 @@ module.exports = function (Case) {
   });
 
   Case.referenceDataFieldsToCategoryMap = {
+    type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE',
     classification: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION',
     riskLevel: 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL',
     gender: 'LNG_REFERENCE_DATA_CATEGORY_GENDER',
     occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
     outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
     'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
-    'addresses[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE'
+    'addresses[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE',
+    'dateRanges[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE'
   };
 
   Case.referenceDataFields = Object.keys(Case.referenceDataFieldsToCategoryMap);
@@ -118,20 +112,23 @@ module.exports = function (Case) {
     'dateOfInfection',
     'dateOfOnset',
     'dateOfOutcome',
-    'hospitalizationDates',
-    'incubationDates',
-    'isolationDates',
+    'dateRanges',
     'transferRefused',
     'deceased',
     'safeBurial'
   ];
 
   Case.locationFields = [
-    'addresses[].locationId'
+    'addresses[].locationId',
+    'dateRanges[].locationId'
   ];
 
   Case.foreignKeyResolverMap = {
     'addresses[].locationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'dateRanges[].locationId': {
       modelName: 'location',
       useProperty: 'name'
     },

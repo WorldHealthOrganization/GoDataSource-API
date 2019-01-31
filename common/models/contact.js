@@ -32,6 +32,7 @@ module.exports = function (Contact) {
     'dateOfOutcome': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME',
     'deceased': 'LNG_CONTACT_FIELD_LABEL_DECEASED',
     'visualId': 'LNG_CONTACT_FIELD_LABEL_VISUAL_ID',
+    'type': 'LNG_CONTACT_FIELD_LABEL_TYPE',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
     'addresses[].typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
     'addresses[].country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
@@ -51,6 +52,7 @@ module.exports = function (Contact) {
   });
 
   Contact.referenceDataFieldsToCategoryMap = {
+    type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE',
     riskLevel: 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL',
     gender: 'LNG_REFERENCE_DATA_CATEGORY_GENDER',
     occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
