@@ -28,8 +28,8 @@ const arrayFields = {
 
 const nonModelObjects = {
   geolocation: {
-    lat: 'LNG_LATITUDE',
-    lng: 'LNG_LONGITUDE'
+    lat: 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LAT',
+    lng: 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LNG'
   }
 };
 
@@ -103,7 +103,7 @@ const getChunksForInterval = function (interval, chunk) {
       {
         // first chunk is from the interval start date
         start: interval[0],
-        // end is start of next month (one day gets substracted later)
+        // end is start of next month (one day gets subtracted later)
         end: getDateEndOfDay(interval[1]).startOf('month')
       },
       {

@@ -203,9 +203,54 @@ module.exports = function (Person) {
   }
 
   /**
+   * Normalize GeoLocation Coordinates (make sure they are numbers)
+   * @param context
+   */
+  function normalizeGeolocationCoordinates(context) {
+    // define person instance
+    let personInstance;
+    // if this is a new record
+    if (context.isNewInstance) {
+      // get instance data from the instance
+      personInstance = context.instance;
+    } else {
+      // existing instance, we're interested only in what is modified
+      personInstance = context.data;
+    }
+
+    /**
+     * Normalize address coordinates
+     * @param address
+     */
+    function normalizeAddressCoordinates(address) {
+      // Check if both coordinates are available and make sure they are numbers
+      if (address.geoLocation && address.geoLocation.lat && address.geoLocation.lng) {
+        address.geoLocation.lat = parseFloat(address.geoLocation.lat);
+        address.geoLocation.lng = parseFloat(address.geoLocation.lng);
+      }
+    }
+
+    // if the record has a list of addresses
+    if (Array.isArray(personInstance.addresses) && personInstance.addresses.length) {
+      // normalize coordinates for each address
+      personInstance.addresses.forEach(function (address) {
+        normalizeAddressCoordinates(address);
+      });
+    }
+    // if the record has only one address (record is event)
+    if (personInstance.address) {
+      // normalize the address
+      normalizeAddressCoordinates(personInstance.address);
+    }
+  }
+
+  /**
    * Before save hooks
    */
   Person.observe('before save', function (context, next) {
+    // normalize geo-points
+    normalizeGeolocationCoordinates(context);
+    // get context data
     const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
     // if the record is not being deleted or this is not a system triggered update
     if (!data.source.all.deleted && !data.source.all.systemTriggeredUpdate) {
@@ -257,7 +302,7 @@ module.exports = function (Person) {
 
           // resolve visual ID
           return app.models.outbreak.helpers
-            .resolvePersonVisualIdTemplate(outbreak, data.target.visualId, context.isNewInstance ? null : data.source.existing.id);
+            .resolvePersonVisualIdTemplate(outbreak, data.target.visualId, data.source.existingRaw.type, context.isNewInstance ? null : data.source.existing.id);
         })
         .then(function (resolvedVisualId) {
           data.target.visualId = resolvedVisualId;
@@ -268,6 +313,28 @@ module.exports = function (Person) {
       // validation disabled
       next();
     }
+  });
+
+  /**
+   * Before delete hooks
+   * - archive visual ID before soft-deleting record so we can add a new case with the same case ID
+   */
+  Person.observe('before delete', function (context, next) {
+    // in case we have visual ID we need to remove if before soft deleting this record
+    if (context.currentInstance.visualId) {
+      // archive visual ID
+      context.data.documents = context.currentInstance.documents || [];
+      context.data.documents.push({
+        type: 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_ARCHIVED_ID',
+        number: context.currentInstance.visualId
+      });
+
+      // remove visual ID
+      context.data.visualId = null;
+    }
+
+    // continue
+    next();
   });
 
   /**
@@ -840,6 +907,12 @@ module.exports = function (Person) {
       delete query.$or;
     }
 
-    return app.models.person.rawFind(query, {skip: filter.skip, limit: filter.limit});
+    // find duplicates only if there is something to look for
+    if (query.$or) {
+      return app.models.person.rawFind(query, {skip: filter.skip, limit: filter.limit});
+    } else {
+      // otherwise return empty list
+      return Promise.resolve([]);
+    }
   };
 };

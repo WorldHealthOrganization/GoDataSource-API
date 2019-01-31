@@ -114,6 +114,12 @@
       "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
       "default": "9999999999"
     },
+    "contactIdMask": {
+      "type": "string",
+      "required": true,
+      "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
+      "default": "9999999999"
+    },
     "arcGisServers": [
       "arcGisServer"
     ],
@@ -635,13 +641,13 @@
       "principalType": "ROLE",
       "principalId": "write_case",
       "permission": "ALLOW",
-      "property": "generateVisualId"
+      "property": "generateCaseVisualId"
     },
     {
       "principalType": "ROLE",
       "principalId": "write_contact",
       "permission": "ALLOW",
-      "property": "generateVisualId"
+      "property": "generateContactVisualId"
     },
     {
       "principalType": "ROLE",
@@ -822,6 +828,12 @@
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "countNewCasesInKnownTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countNewCasesOutsideKnownTransmissionChains"
     },
     {
       "principalType": "ROLE",
@@ -1287,6 +1299,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCasesStratifiedByOutcomeOverTime"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCasesStratifiedByClassificationOverReportingTime"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "countFollowUpsByTeam"
@@ -1434,6 +1458,12 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "getCasePossibleDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "caseDelayBetweenOnsetAndHospitalizationIsolation"
     }
   ],
   "methods": {
@@ -2261,17 +2291,18 @@
         "path": "/reference-data"
       }
     },
-    "prototype.generateVisualId": {
+    "prototype.generateCaseVisualId": {
       "accepts": [
         {
           "arg": "visualIdMask",
           "type": "string",
+          "required": true,
           "description": "Visual ID mask partially resolved (except for the sequence no.)"
         },
         {
           "arg": "personId",
           "type": "string",
-          "description": "Case/Contact/Event ID for validating existing visual ID (optional)"
+          "description": "Case ID for validating existing visual ID (optional)"
         }
       ],
       "returns": [
@@ -2286,7 +2317,36 @@
       "description": "Generates the next (available) visual ID based on the outbreak mask.",
       "http": {
         "verb": "post",
-        "path": "/generate-visual-id"
+        "path": "/cases/generate-visual-id"
+      }
+    },
+    "prototype.generateContactVisualId": {
+      "accepts": [
+        {
+          "arg": "visualIdMask",
+          "type": "string",
+          "required": true,
+          "description": "Visual ID mask partially resolved (except for the sequence no.)"
+        },
+        {
+          "arg": "personId",
+          "type": "string",
+          "description": "Contact ID for validating existing visual ID (optional)"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "visualId",
+          "type": "string",
+          "description": "Visual ID",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Generates the next (available) visual ID based on the outbreak mask.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/generate-visual-id"
       }
     },
     "prototype.getCaseQRResourceLink": {
@@ -2914,6 +2974,35 @@
       "http": {
         "verb": "get",
         "path": "/relationships/new-cases-in-transmission-chains/count"
+      }
+    },
+    "prototype.countNewCasesOutsideKnownTransmissionChains": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'noDaysInChains' number on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": {
+            "newCases": "number",
+            "total": "number",
+            "caseIds": [
+              "string"
+            ]
+          },
+          "description": "Retrieve number of new cases outside known transmission chains",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the number of new cases vs total number of cases outside known transmission chains",
+      "http": {
+        "verb": "get",
+        "path": "/relationships/new-cases-outside-transmission-chains/count"
       }
     },
     "prototype.countEventNewContacts": {
@@ -5468,6 +5557,90 @@
         "path": "/cases/classification-over-time/count"
       }
     },
+    "prototype.countCasesStratifiedByOutcomeOverTime": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts 'periodType': enum [day, week, month], 'endDate' on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": {
+            "<periodIndex>": {
+              "type": {
+                "start": "date",
+                "end": "date",
+                "outcome": {
+                  "type": {
+                    "{caseOutcome}": {
+                      "type": "number",
+                      "description": "Number of cases for the outcome for the period"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "number",
+                  "description": "Total number of cases for the period"
+                }
+              }
+            }
+          },
+          "description": "Number of cases stratified by outcome over time",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Count cases stratified by outcome over time",
+      "http": {
+        "verb": "get",
+        "path": "/cases/outcome-over-time/count"
+      }
+    },
+    "prototype.countCasesStratifiedByClassificationOverReportingTime": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts 'periodType': enum [day, week, month], 'endDate' on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": {
+            "<periodIndex>": {
+              "type": {
+                "start": "date",
+                "end": "date",
+                "classification": {
+                  "type": {
+                    "{caseClassification}": {
+                      "type": "number",
+                      "description": "Number of cases in the classification for the reporting period"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "number",
+                  "description": "Total number of cases for the reporting period"
+                }
+              }
+            }
+          },
+          "description": "Number of cases stratified by classification over reporting time",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Count cases stratified by classification over reporting time",
+      "http": {
+        "verb": "get",
+        "path": "/cases/classification-over-reporting-time/count"
+      }
+    },
     "prototype.countFollowUpsByTeam": {
       "accepts": [
         {
@@ -6283,6 +6456,41 @@
       "http": {
         "verb": "post",
         "path": "/cases/duplicates/find"
+      }
+    },
+    "prototype.caseDelayBetweenOnsetAndHospitalizationIsolation": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "delays",
+          "type": [
+            {
+              "type": {
+                "dateOfOnset": "date",
+                "hospitalizationIsolationDate": "date",
+                "delay": {
+                  "type": "number",
+                  "description": "Number of days between date of onset and the first hospitalization/isolation date of the case"
+                },
+                "case": "case"
+              }
+            }
+          ],
+          "description": "List of entries that show the delay between date of symptom onset and hospitalization/isolation date of a case",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get a list of entries that show the delay between date of symptom onset and hospitalization/isolation date of a case",
+      "http": {
+        "verb": "get",
+        "path": "/cases/delay-onset-hospitalization"
       }
     }
   }

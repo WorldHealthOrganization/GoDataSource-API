@@ -116,6 +116,9 @@
     "External ID": {
       "readOnly": false
     },
+    "Archived ID": {
+      "readOnly": false
+    },
     "Other": {
       "readOnly": false
     }

@@ -307,5 +307,9 @@
   "mobileDatabaseDownloadParameters": {
     "dataSource": null,
     "public": false
+  },
+  "customGeoPoint": {
+    "dataSource": null,
+    "public": false
   }
 }

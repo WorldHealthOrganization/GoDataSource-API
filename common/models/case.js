@@ -60,6 +60,9 @@ module.exports = function (Case) {
     'addresses[].postalCode': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE',
     'addresses[].locationId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID',
     'addresses[].geoLocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
+    'addresses[].geoLocation.lat': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT',
+    'addresses[].geoLocation.lng': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG',
+    'addresses[].geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
     'addresses[].date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
     'visualId': 'LNG_CASE_FIELD_LABEL_VISUAL_ID',
     'fillGeoLocation': 'LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION',
@@ -88,6 +91,7 @@ module.exports = function (Case) {
   };
 
   Case.printFieldsinOrder = [
+    'visualId',
     'firstName',
     'middleName',
     'lastName',
@@ -199,12 +203,16 @@ module.exports = function (Case) {
   });
 
   /**
-   * Count cases stratified by classification over time
+   * Count cases stratified by category over time
    * @param outbreak
-   * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
-   * @return {PromiseLike<T | never>}
+   * @param referenceDataCategoryId
+   * @param timePropertyName
+   * @param exportedPropertyName
+   * @param counterFn
+   * @param filter
+   * @returns {PromiseLike<any | never>}
    */
-  Case.countStratifiedByClassificationOverTime = function (outbreak, filter) {
+  Case.countStratifiedByCategoryOverTime = function (outbreak, referenceDataCategoryId, timePropertyName, exportedPropertyName, counterFn, filter) {
     // initialize periodType filter; default is day; accepting day/week/month
     let periodType, endDate;
     let periodTypes = {
@@ -251,37 +259,37 @@ module.exports = function (Case) {
     // build period map
     const periodMap = app.utils.helpers.getChunksForInterval(periodInterval, periodType);
 
-    // get available case classifications
-    const caseClassifications = {};
+    // get available case categories
+    const categoryList = {};
     return app.models.referenceData
       .find({
         where: {
-          categoryId: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION'
+          categoryId: referenceDataCategoryId
         }
       })
-      .then(function (classifications) {
-        // add default entries for all classifications
-        classifications.forEach(function (classification) {
-          caseClassifications[classification.id] = 0;
+      .then(function (categoryItems) {
+        // add default entries for all categoryItems
+        categoryItems.forEach(function (categoryItem) {
+          categoryList[categoryItem.id] = 0;
         });
-        // add case classifications to periodMap
+        // add case categoryItems to periodMap
         Object.keys(periodMap)
           .forEach(function (periodMapIndex) {
             Object.assign(periodMap[periodMapIndex], {
-              classification: caseClassifications,
+              [exportedPropertyName]: categoryList,
               total: 0
             });
           });
       })
       .then(function () {
-        // find cases that have date of onset earlier then end of the period interval
+        // find cases that have <timePropertyName> earlier then end of the period interval
         return app.models.case
           .rawFind(
             app.utils.remote.convertLoopbackFilterToMongo(
               app.utils.remote.mergeFilters({
                 where: {
                   outbreakId: outbreak.id,
-                  dateOfOnset: {
+                  [timePropertyName]: {
                     lte: new Date(periodInterval[1])
                   }
                 }
@@ -290,8 +298,8 @@ module.exports = function (Case) {
           )
           .then(function (cases) {
             return new Promise(function (resolve, reject) {
-              // count case classifications over time
-              casesWorker.countStratifiedByClassificationOverTime(cases, periodInterval, periodType, periodMap, caseClassifications, function (error, periodMap) {
+              // count categories over time
+              counterFn(cases, periodInterval, periodType, periodMap, categoryList, function (error, periodMap) {
                 // handle errors
                 if (error) {
                   return reject(error);
@@ -302,6 +310,58 @@ module.exports = function (Case) {
             });
           });
       });
+  };
+
+
+  /**
+   * Count cases stratified by classification over time
+   * @param outbreak
+   * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
+   * @return {PromiseLike<T | never>}
+   */
+  Case.countStratifiedByClassificationOverTime = function (outbreak, filter) {
+    return Case.countStratifiedByCategoryOverTime(
+      outbreak,
+      'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION',
+      'dateOfOnset',
+      'classification',
+      casesWorker.countStratifiedByClassificationOverTime,
+      filter
+    );
+  };
+
+  /**
+   * Count cases stratified by outcome over time
+   * @param outbreak
+   * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
+   * @return {PromiseLike<T | never>}
+   */
+  Case.countStratifiedByOutcomeOverTime = function (outbreak, filter) {
+    return Case.countStratifiedByCategoryOverTime(
+      outbreak,
+      'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
+      'dateOfOutcome',
+      'outcome',
+      casesWorker.countStratifiedByOutcomeOverTime,
+      filter
+    );
+  };
+
+  /**
+   * Count cases stratified by classification over reporting time
+   * @param outbreak
+   * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
+   * @return {PromiseLike<T | never>}
+   */
+  Case.countStratifiedByClassificationOverReportingTime = function (outbreak, filter) {
+    return Case.countStratifiedByCategoryOverTime(
+      outbreak,
+      'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION',
+      'dateOfReporting',
+      'classification',
+      casesWorker.countStratifiedByClassificationOverReportingTime,
+      filter
+    );
   };
 
   /**
@@ -382,6 +442,72 @@ module.exports = function (Case) {
       });
   };
 
+
+  /**
+   * Get a list of entries that show the delay between date of symptom onset and the hospitalization/isolation dates a case
+   * @param outbreakId
+   * @param filter
+   * @returns {Promise<Array | never>}
+   */
+  Case.delayBetweenOnsetAndHospitalisationIsolation = function (outbreakId, filter) {
+    // find all cases that have date of onset defined
+    return Case
+      .rawFind(
+        app.utils.remote.convertLoopbackFilterToMongo(
+          app.utils.remote.mergeFilters({
+            where: {
+              outbreakId: outbreakId,
+              dateOfOnset: {
+                ne: null
+              }
+            }
+          }, filter || {})
+        ).where, {
+          order: {
+            dateOfOnset: 1
+          }
+        }
+      )
+      .then(function (cases) {
+        // build the list of results
+        const results = [];
+        // go through case records
+        cases.forEach(function (caseRecord) {
+          // get first hospitalisation/isolation date (if any)
+          let hospitalizationIsolationDate;
+          // hospitalization/isolation dates are types of date ranges, look for them in dateRanges list
+          if (Array.isArray(caseRecord.dateRanges) && caseRecord.dateRanges.length) {
+            hospitalizationIsolationDate = caseRecord.dateRanges
+            // we need the earliest one, make sure the list is sorted accordingly
+              .sort(function (a, b) {
+                return a.startDate - b.startDate;
+              })
+              .find(function (dateRange) {
+                return [
+                  'LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_HOSPITALIZATION',
+                  'LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_ISOLATION']
+                  .includes(dateRange.typeId);
+              });
+          }
+          // build each result
+          const result = {
+            dateOfOnset: caseRecord.dateOfOnset,
+            hospitalizationIsolationDate: hospitalizationIsolationDate ? hospitalizationIsolationDate.startDate : undefined,
+            delay: null,
+            case: caseRecord
+          };
+          // calculate delay if both dates are available (onset is ensured by the query)
+          if (hospitalizationIsolationDate) {
+            const onset = moment(result.dateOfOnset);
+            const hospitalisationIsolation = moment(hospitalizationIsolationDate.startDate);
+            result.delay = hospitalisationIsolation.diff(onset, 'days');
+          }
+          results.push(result);
+        });
+        // return the list of results
+        return results;
+      });
+  };
 
   /**
    * Pre-filter cases for an outbreak using related models (relationship)
