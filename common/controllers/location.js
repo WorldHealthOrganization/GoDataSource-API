@@ -130,7 +130,7 @@ module.exports = function (Location) {
           // remap properties
           const locationsList = app.utils.helpers.convertBooleanProperties(
             Location,
-            app.utils.helpers.remapProperties(rawLocationsList, body.map));
+            app.utils.helpers.remapProperties(rawLocationsList, body.map, body.valuesMap));
           // build hierarchical list
           const hierarchicalList = Location.buildHierarchicalLocationsList(locationsList, true);
           // import locations
