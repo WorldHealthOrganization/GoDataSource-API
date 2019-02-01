@@ -286,6 +286,9 @@
     },
     "Incubation": {
       "readOnly": true
+    },
+    "Other": {
+      "readOnly": true
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE": {
