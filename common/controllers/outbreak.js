@@ -4376,6 +4376,18 @@ module.exports = function (Outbreak) {
             createCases.push(function (callback) {
               // set outbreak id
               caseData.outbreakId = self.id;
+
+              // filter out empty addresses
+              if (caseData.addresses) {
+                caseData.addresses = _.filter(caseData.addresses, (address) => {
+                  return !!_.find(address, (propertyValue) => {
+                    return typeof propertyValue === 'string' ?
+                      !!propertyValue.trim() :
+                      !!propertyValue;
+                  });
+                });
+              }
+
               // sync the case
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.case, caseData, options)
                 .then(function (result) {
@@ -4470,6 +4482,18 @@ module.exports = function (Outbreak) {
               // set outbreak ids
               contactData.outbreakId = self.id;
               relationshipData.outbreakId = self.id;
+
+              // filter out empty addresses
+              if (contactData.addresses) {
+                contactData.addresses = _.filter(contactData.addresses, (address) => {
+                  return !!_.find(address, (propertyValue) => {
+                    return typeof propertyValue === 'string' ?
+                      !!propertyValue.trim() :
+                      !!propertyValue;
+                  });
+                });
+              }
+
               // sync the contact
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.contact, contactData, options)
                 .then(function (syncResult) {
