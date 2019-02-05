@@ -4379,13 +4379,7 @@ module.exports = function (Outbreak) {
 
               // filter out empty addresses
               if (caseData.addresses) {
-                caseData.addresses = _.filter(caseData.addresses, (address) => {
-                  return !!_.find(address, (propertyValue) => {
-                    return typeof propertyValue === 'string' ?
-                      !!propertyValue.trim() :
-                      !!propertyValue;
-                  });
-                });
+                caseData.addresses = app.models.person.sanitizeAddresses(caseData);
               }
 
               // sync the case
@@ -4485,13 +4479,7 @@ module.exports = function (Outbreak) {
 
               // filter out empty addresses
               if (contactData.addresses) {
-                contactData.addresses = _.filter(contactData.addresses, (address) => {
-                  return !!_.find(address, (propertyValue) => {
-                    return typeof propertyValue === 'string' ?
-                      !!propertyValue.trim() :
-                      !!propertyValue;
-                  });
-                });
+                contactData.addresses = app.models.person.sanitizeAddresses(contactData);
               }
 
               // sync the contact
