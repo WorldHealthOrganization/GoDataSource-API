@@ -4378,8 +4378,9 @@ module.exports = function (Outbreak) {
               caseData.outbreakId = self.id;
 
               // filter out empty addresses
-              if (caseData.addresses) {
-                caseData.addresses = app.models.person.sanitizeAddresses(caseData);
+              const addresses = app.models.person.sanitizeAddresses(caseData);
+              if (addresses) {
+                caseData.addresses = addresses;
               }
 
               // sync the case
@@ -4478,8 +4479,9 @@ module.exports = function (Outbreak) {
               relationshipData.outbreakId = self.id;
 
               // filter out empty addresses
-              if (contactData.addresses) {
-                contactData.addresses = app.models.person.sanitizeAddresses(contactData);
+              const addresses = app.models.person.sanitizeAddresses(contactData);
+              if (addresses) {
+                contactData.addresses = addresses;
               }
 
               // sync the contact

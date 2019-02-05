@@ -157,8 +157,10 @@ module.exports = function (Person) {
   };
 
   /**
-   * Remove empty addresses
-   * @param person Model or JSON representation
+   * Remove empty addresses and return a filtered array of addresses if an array is provided,
+   * otherwise return the provided addresses value ( null | undefined | ... )
+   * @param person
+   * @returns {Array | any}
    */
   Person.sanitizeAddresses = function (person) {
     if (person.toJSON) {
