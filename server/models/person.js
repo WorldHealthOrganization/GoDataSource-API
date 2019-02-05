@@ -157,6 +157,32 @@ module.exports = function (Person) {
   };
 
   /**
+   * Remove empty addresses and return a filtered array of addresses if an array is provided,
+   * otherwise return the provided addresses value ( null | undefined | ... )
+   * @param person
+   * @returns {Array | any}
+   */
+  Person.sanitizeAddresses = function (person) {
+    if (person.toJSON) {
+      person = person.toJSON();
+    }
+
+    // filter out empty addresses
+    if (person.addresses) {
+      return _.filter(person.addresses, (address) => {
+        return !!_.find(address, (propertyValue) => {
+          return typeof propertyValue === 'string' ?
+            !!propertyValue.trim() :
+            !!propertyValue;
+        });
+      });
+    }
+
+    // no addresses under this person
+    return person.addresses;
+  };
+
+  /**
    * Basic person address validation
    * @param personInstance
    * @return {*}

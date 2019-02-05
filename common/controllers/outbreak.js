@@ -4376,6 +4376,13 @@ module.exports = function (Outbreak) {
             createCases.push(function (callback) {
               // set outbreak id
               caseData.outbreakId = self.id;
+
+              // filter out empty addresses
+              const addresses = app.models.person.sanitizeAddresses(caseData);
+              if (addresses) {
+                caseData.addresses = addresses;
+              }
+
               // sync the case
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.case, caseData, options)
                 .then(function (result) {
@@ -4470,6 +4477,13 @@ module.exports = function (Outbreak) {
               // set outbreak ids
               contactData.outbreakId = self.id;
               relationshipData.outbreakId = self.id;
+
+              // filter out empty addresses
+              const addresses = app.models.person.sanitizeAddresses(contactData);
+              if (addresses) {
+                contactData.addresses = addresses;
+              }
+
               // sync the contact
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.contact, contactData, options)
                 .then(function (syncResult) {

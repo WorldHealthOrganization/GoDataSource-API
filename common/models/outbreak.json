@@ -4296,9 +4296,9 @@
       ],
       "returns": [
         {
-          "arg": "cases",
+          "arg": "contacts",
           "type": [
-            "case"
+            "contact"
           ],
           "root": true,
           "required": true
