@@ -22,15 +22,14 @@ module.exports = function (Contact) {
     'documents': 'LNG_CONTACT_FIELD_LABEL_DOCUMENTS',
     'documents[].type': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE',
     'documents[].number': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER',
-    'dateDeceased': 'LNG_CONTACT_FIELD_LABEL_DATE_DECEASED',
     'wasCase': 'LNG_CONTACT_FIELD_LABEL_WAS_CASE',
     'dateBecomeContact': 'LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT',
     'dateOfReporting': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING',
     'phoneNumber': 'LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER',
     'riskLevel': 'LNG_CONTACT_FIELD_LABEL_RISK_LEVEL',
     'riskReason': 'LNG_CONTACT_FIELD_LABEL_RISK_REASON',
+    'outcomeId': 'LNG_CONTACT_FIELD_LABEL_OUTCOME_ID',
     'dateOfOutcome': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME',
-    'deceased': 'LNG_CONTACT_FIELD_LABEL_DECEASED',
     'visualId': 'LNG_CONTACT_FIELD_LABEL_VISUAL_ID',
     'type': 'LNG_CONTACT_FIELD_LABEL_TYPE',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
@@ -48,7 +47,8 @@ module.exports = function (Contact) {
     'addresses[].date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
     'fillGeoLocation': 'LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION',
     'isDateOfReportingApproximate': 'LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
-    'safeBurial': 'LNG_CONTACT_FIELD_LABEL_SAFE_BURIAL'
+    'safeBurial': 'LNG_CONTACT_FIELD_LABEL_SAFE_BURIAL',
+    'dateOfBurial': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_BURIAL'
   });
 
   Contact.referenceDataFieldsToCategoryMap = {
@@ -56,6 +56,7 @@ module.exports = function (Contact) {
     riskLevel: 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL',
     gender: 'LNG_REFERENCE_DATA_CATEGORY_GENDER',
     occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
+    outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
     'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
     'addresses[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE'
   };
@@ -65,7 +66,8 @@ module.exports = function (Contact) {
   // add parsers for field values that require parsing when displayed (eg. in pdf)
   Contact.fieldToValueParsersMap = {
     dob: dateParser,
-    dateDeceased: dateParser,
+    dateOfOutcome: dateParser,
+    dateOfBurial: dateParser,
     'addresses[].date': dateParser,
     'followUps[].date': dateParser
   };
@@ -87,10 +89,11 @@ module.exports = function (Contact) {
     'riskLevel',
     'riskReason',
     'wasCase',
+    'outcomeId',
+    'dateOfOutcome',
     'dateBecomeContact',
-    'dateDeceased',
-    'deceased',
-    'safeBurial'
+    'safeBurial',
+    'dateOfBurial'
   ];
 
   Contact.locationFields = [

@@ -54,26 +54,27 @@ module.exports = function (Person) {
     'dateBecomeCase': 'LNG_CASE_FIELD_LABEL_DATE_BECOME_CASE',
     'wasCase': 'LNG_CONTACT_FIELD_LABEL_WAS_CASE',
     'dateBecomeContact': 'LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT',
-    'dateDeceased': 'LNG_CASE_FIELD_LABEL_DATE_DECEASED',
     'dateOfInfection': 'LNG_CASE_FIELD_LABEL_DATE_OF_INFECTION',
     'dateOfOnset': 'LNG_CASE_FIELD_LABEL_DATE_OF_ONSET',
     'phoneNumber': 'LNG_CASE_FIELD_LABEL_PHONE_NUMBER',
     'riskLevel': 'LNG_CASE_FIELD_LABEL_RISK_LEVEL',
     'riskReason': 'LNG_CASE_FIELD_LABEL_RISK_REASON',
+    'outcomeId': 'LNG_CASE_FIELD_LABEL_OUTCOME_ID',
     'dateOfOutcome': 'LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME',
-    'deceased': 'LNG_CASE_FIELD_LABEL_DECEASED',
     'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
     'type': 'LNG_CASE_FIELD_LABEL_TYPE',
     'dateRanges': 'LNG_CASE_FIELD_LABEL_DATE_RANGES',
     'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
-    'safeBurial': 'LNG_CASE_FIELD_LABEL_SAFE_BURIAL'
+    'safeBurial': 'LNG_CASE_FIELD_LABEL_SAFE_BURIAL',
+    'dateOfBurial': 'LNG_CASE_FIELD_LABEL_DATE_OF_BURIAL'
   });
 
   Person.referenceDataFields = [
     'gender',
     'classification',
     'riskLevel',
+    'outcomeId',
     'occupation',
     'documents.type'
   ];
@@ -91,14 +92,14 @@ module.exports = function (Person) {
     'dateBecomeCase',
     'wasCase',
     'dateBecomeContact',
-    'dateDeceased',
     'dateOfInfection',
     'dateOfOnset',
     'phoneNumber',
     'riskLevel',
     'riskReason',
+    'outcomeId',
     'dateOfOutcome',
-    'deceased',
+    'dateOfBurial',
     'safeBurial',
     'documents',
     'type',

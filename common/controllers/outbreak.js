@@ -2988,7 +2988,9 @@ module.exports = function (Outbreak) {
       defaultFilter = app.utils.remote
         .mergeFilters({
           where: {
-            deceased: false
+            outcomeId: {
+              neq: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED'
+            }
           }
         }, defaultFilter);
     } else {
@@ -3144,7 +3146,7 @@ module.exports = function (Outbreak) {
             }
 
             // check if case is dead; will not add it to classificationCounters if so
-            if (!item.deceased) {
+            if (item.outcomeId !== 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED') {
               // period classification
               // initialize counter for period classification if it's not already initialized
               if (!periodMap[casePeriodIdentifier].classificationCounters[item.classification]) {
@@ -3267,7 +3269,7 @@ module.exports = function (Outbreak) {
             }
 
             // check if case is dead; will not add it to classificationCounters if so
-            if (!item.deceased) {
+            if (item.outcomeId !== 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED') {
               // initialize counter for total classification if it's not already initialized
               if (!result.totalCasesClassificationCounters[item.classification]) {
                 result.totalCasesClassificationCounters[item.classification] = {
@@ -3714,12 +3716,6 @@ module.exports = function (Outbreak) {
           outbreakId: outbreakId,
           // getting only the cases and contacts as there are no inconsistencies to check for events
           or: [{
-            // for contacts only get the ones where dateDeceased < date of birth; this check also applies for cases
-            $where: 'this.dateDeceased < this.dob',
-            type: {
-              in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
-            }
-          }, {
             // for case: compare against dob
             type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
             // first check for is dob exists to not make the other checks
@@ -3738,26 +3734,6 @@ module.exports = function (Outbreak) {
             }, {
               // dateOfOutcome < date of birth
               $where: 'this.dateOfOutcome < this.dob',
-            }]
-          }, {
-            // for case: compare against dateDeceased
-            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-            // first check for is dob exists to not make the other checks
-            dateDeceased: {
-              neq: null
-            },
-            or: [{
-              // dateOfInfection > dateDeceased
-              $where: 'this.dateOfInfection > this.dateDeceased',
-            }, {
-              // dateOfOnset > dateDeceased
-              $where: 'this.dateOfOnset > this.dateDeceased',
-            }, {
-              // dateBecomeCase > dateDeceased
-              $where: 'this.dateBecomeCase > this.dateDeceased',
-            }, {
-              // dateOfOutcome > dateDeceased
-              $where: 'this.dateOfOutcome > this.dateDeceased',
             }]
           }, {
             // for case: compare dateOfInfection, dateOfOnset, dateBecomeCase, dateOfOutcome
@@ -3782,14 +3758,13 @@ module.exports = function (Outbreak) {
               $where: 'this.dateBecomeCase > this.dateOfOutcome',
             }]
           }, {
-            // for case: compare dateRanges startDate/endDate for each item in them and against the date of birth and dateDeceased
+            // for case: compare dateRanges startDate/endDate for each item in them and against the date of birth
             type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
             $where: `function () {
               // initialize check result
               var inconsistencyInKeyDates = false;
-              // get date of birth and dateDeceased
+              // get date of birth
               var dob = this.dob;
-              var dateDeceased = this.dateDeceased;
 
               // loop through the dateRanges and make comparisons
               var datesContainers = ['dateRanges'];
@@ -3808,12 +3783,6 @@ module.exports = function (Outbreak) {
                     if (!inconsistencyInKeyDates && dob) {
                       inconsistencyInKeyDates = dateEntry.startDate < dob ? true : false;
                       inconsistencyInKeyDates = inconsistencyInKeyDates || (dateEntry.endDate < dob ? true : false);
-                    }
-
-                    // check for dateDeceased; both startDate and endDate must be before dob
-                    if (!inconsistencyInKeyDates && dateDeceased) {
-                      inconsistencyInKeyDates = dateEntry.startDate > dateDeceased ? true : false;
-                      inconsistencyInKeyDates = inconsistencyInKeyDates || (dateEntry.endDate > dateDeceased ? true : false);
                     }
 
                     // stop checks if an inconsistency was found
@@ -3849,29 +3818,13 @@ module.exports = function (Outbreak) {
           // initialize inconsistencies
           let inconsistencies = [];
 
-          // get dob and dateDeceased since they are used in the majority of comparisons
+          // get dob since it is used in the majority of comparisons
           let dob = person.dob ? moment(person.dob) : null;
-          let dateDeceased = person.dateDeceased ? moment(person.dateDeceased) : null;
           // also get the other dates
           let dateOfInfection = person.dateOfInfection ? moment(person.dateOfInfection) : null;
           let dateOfOnset = person.dateOfOnset ? moment(person.dateOfOnset) : null;
           let dateBecomeCase = person.dateBecomeCase ? moment(person.dateBecomeCase) : null;
           let dateOfOutcome = person.dateOfOutcome ? moment(person.dateOfOutcome) : null;
-
-          // for contacts only get the ones where dateDeceased < date of birth; this check also applies for cases
-          // no need to check for person type as the query was done only for contacts/cases
-          if (dob && dateDeceased && dob.isAfter(dateDeceased)) {
-            inconsistencies.push({
-              dates: [{
-                field: 'dob',
-                label: caseFieldsLabelMap.dob
-              }, {
-                field: 'dateDeceased',
-                label: caseFieldsLabelMap.dateDeceased
-              }],
-              issue: inconsistenciesOperators.greaterThan
-            });
-          }
 
           // for case:
           if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
@@ -3930,65 +3883,6 @@ module.exports = function (Outbreak) {
                     label: caseFieldsLabelMap.dateOfOutcome
                   }],
                   issue: inconsistenciesOperators.greaterThan
-                });
-              }
-            }
-
-            // compare against dateDeceased
-            if (dateDeceased) {
-              // dateOfInfection > dateDeceased
-              if (dateOfInfection && dateOfInfection.isAfter(dateDeceased)) {
-                inconsistencies.push({
-                  dates: [{
-                    field: 'dateDeceased',
-                    label: caseFieldsLabelMap.dateDeceased
-                  }, {
-                    field: 'dateOfInfection',
-                    label: caseFieldsLabelMap.dateOfInfection
-                  }],
-                  issue: inconsistenciesOperators.lessThan
-                });
-              }
-
-              // dateOfOnset > dateDeceased
-              if (dateOfOnset && dateOfOnset.isAfter(dateDeceased)) {
-                inconsistencies.push({
-                  dates: [{
-                    field: 'dateDeceased',
-                    label: caseFieldsLabelMap.dateDeceased
-                  }, {
-                    field: 'dateOfOnset',
-                    label: caseFieldsLabelMap.dateOfOnset
-                  }],
-                  issue: inconsistenciesOperators.lessThan
-                });
-              }
-
-              // dateBecomeCase > dateDeceased
-              if (dateBecomeCase && dateBecomeCase.isAfter(dateDeceased)) {
-                inconsistencies.push({
-                  dates: [{
-                    field: 'dateDeceased',
-                    label: caseFieldsLabelMap.dateDeceased
-                  }, {
-                    field: 'dateBecomeCase',
-                    label: caseFieldsLabelMap.dateBecomeCase
-                  }],
-                  issue: inconsistenciesOperators.lessThan
-                });
-              }
-
-              // dateOfOutcome > dateDeceased
-              if (dateOfOutcome && dateOfOutcome.isAfter(dateDeceased)) {
-                inconsistencies.push({
-                  dates: [{
-                    field: 'dateDeceased',
-                    label: caseFieldsLabelMap.dateDeceased
-                  }, {
-                    field: 'dateOfOutcome',
-                    label: caseFieldsLabelMap.dateOfOutcome
-                  }],
-                  issue: inconsistenciesOperators.lessThan
                 });
               }
             }
@@ -4078,7 +3972,7 @@ module.exports = function (Outbreak) {
               });
             }
 
-            // compare dateRanges startDate/endDate for each item in them and against the date of birth and dateDeceased
+            // compare dateRanges startDate/endDate for each item in them and against the date of birth
             // loop through the dateRanges and make comparisons
             var datesContainers = ['dateRanges'];
             datesContainers.forEach(function (datesContainer) {
@@ -4136,36 +4030,6 @@ module.exports = function (Outbreak) {
                     }
                   }
 
-                  // check for dateDeceased; both startDate and endDate must be before dob
-                  if (dateDeceased) {
-                    if (startDate.isAfter(dateDeceased)) {
-                      inconsistencies.push({
-                        dates: [{
-                          field: 'dateDeceased',
-                          label: caseFieldsLabelMap.dateDeceased
-                        }, {
-                          field: `${datesContainer}.${dateEntryIndex}.startDate`,
-                          label: caseFieldsLabelMap[`${datesContainer}[].startDate`],
-                          dateRangeType: dateEntry.typeId
-                        }],
-                        issue: inconsistenciesOperators.lessThan
-                      });
-                    }
-
-                    if (endDate.isAfter(dateDeceased)) {
-                      inconsistencies.push({
-                        dates: [{
-                          field: 'dateDeceased',
-                          label: caseFieldsLabelMap.dateDeceased
-                        }, {
-                          field: `${datesContainer}.${dateEntryIndex}.endDate`,
-                          label: caseFieldsLabelMap[`${datesContainer}[].endDate`],
-                          dateRangeType: dateEntry.typeId
-                        }],
-                        issue: inconsistenciesOperators.lessThan
-                      });
-                    }
-                  }
                 });
               }
             });
@@ -4611,8 +4475,8 @@ module.exports = function (Outbreak) {
 
       // An array with all the expected date type fields found in an extended case model (including relationships and labResults)
       const caseDossierDateFields = ['dob', 'dateRanges[].typeId', 'dateRanges[].startDate', 'dateRanges[].endDate', 'dateRanges[].centerName',
-        'addresses[].date', 'dateBecomeCase', 'dateDeceased', 'dateOfInfection', 'dateOfOnset', 'dateOfOutcome', 'relationships[].contactDate',
-        'relationships[].people[].dob', 'relationships[].people[].addresses[].date', 'labResults[].dateSampleTaken',
+        'addresses[].date', 'dateBecomeCase', 'dateOfInfection', 'dateOfOnset', 'outcomeId', 'dateOfOutcome', 'safeBurial', 'dateOfBurial',
+        'relationships[].contactDate', 'relationships[].people[].dob', 'relationships[].people[].addresses[].date', 'labResults[].dateSampleTaken',
         'labResults[].dateSampleDelivered', 'labResults[].dateTesting', 'labResults[].dateOfResult'
       ];
 
@@ -4849,9 +4713,9 @@ module.exports = function (Outbreak) {
       // An array with all the expected date type fields found in an extended contact model (including relationships and followUps)
       const contactDossierDateFields = ['dob', 'addresses[].date', 'relationships[].contactDate', 'relationships[].people[].dob',
         'relationships[].people[].dateBecomeCase', 'relationships[].people[].dateOfInfection', 'relationships[].people[].dateOfOnset',
-        'relationships[].people[].dateOfOutcome', 'relationships[].people[].dateRanges[].typeId', 'relationships[].people[].dateRanges[].startDate',
+        'relationships[].people[].outcomeId', 'relationships[].people[].dateOfOutcome', 'relationships[].people[].dateRanges[].typeId', 'relationships[].people[].dateRanges[].startDate',
         'relationships[].people[].dateRanges[].endDate', 'relationships[].people[].dateRanges[].centerName', 'relationships[].people[].addresses[].date',
-        'followUps[].date', 'followUps[].address.date'
+        'relationships[].people[].dateOfBurial','relationships[].people[].safeBurial', 'followUps[].date', 'followUps[].address.date'
       ];
 
       // Get the language dictionary
@@ -6173,7 +6037,7 @@ module.exports = function (Outbreak) {
                 // get case current location
                 caseLatestLocation = caseCurrentAddress.locationId;
               }
-              if (caseModel.deceased) {
+              if (caseModel.outcomeId === 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED') {
                 // if the case has a current location and the location is a reporting location
                 if (caseLatestLocation && data.deceased[caseLatestLocation]) {
                   data.deceased[caseLatestLocation] = +data.deceased[caseLatestLocation] + 1;
