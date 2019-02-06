@@ -17,13 +17,7 @@
       "required": true
     },
     "statusId": {
-      "type": "string",
-      "enum": [
-        "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED",
-        "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK",
-        "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK",
-        "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED"
-      ]
+      "type": "string"
     },
     "address": {
       "type": "address"

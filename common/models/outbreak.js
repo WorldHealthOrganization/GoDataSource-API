@@ -37,6 +37,7 @@ module.exports = function (Outbreak) {
     contactFollowUpTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_FOLLOWUP_TEMPLATE',
     labResultsTemplate: 'LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE',
     caseIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK',
+    contactIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_ID_MASK',
     'arcGisServers': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVERS',
     'arcGisServers[].name': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_NAME',
     'arcGisServers[].url': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_URL'
@@ -526,21 +527,44 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Get the next available visual id
+   * Get the next available case visual id
    * @param outbreak
    * @param visualId
    * @param [personId]
    * @return {*}
    */
-  Outbreak.helpers.getAvailableVisualId = function (outbreak, visualId, personId) {
+  Outbreak.helpers.getAvailableCaseVisualId = function (outbreak, visualId, personId) {
+    return Outbreak.helpers.getAvailableVisualId(outbreak, 'caseIdMask', visualId, personId);
+  };
+
+  /**
+   * Get the next available contact visual id
+   * @param outbreak
+   * @param visualId
+   * @param [personId]
+   * @return {*}
+   */
+  Outbreak.helpers.getAvailableContactVisualId = function (outbreak, visualId, personId) {
+    return Outbreak.helpers.getAvailableVisualId(outbreak, 'contactIdMask', visualId, personId);
+  };
+
+  /**
+   * Get the next available visual id
+   * @param outbreak
+   * @param maskProperty
+   * @param visualId
+   * @param [personId]
+   * @return {*}
+   */
+  Outbreak.helpers.getAvailableVisualId = function (outbreak, maskProperty, visualId, personId) {
     // get search regex for visual id template
-    let maskRegExp = app.utils.maskField.convertMaskToSearchRegExp(outbreak.caseIdMask, visualId);
+    let maskRegExp = app.utils.maskField.convertMaskToSearchRegExp(outbreak[maskProperty], visualId);
     // if no search regex returned
     if (!maskRegExp) {
       // invalid mask error
       return Promise.reject(app.utils.apiError.getError('INVALID_VISUAL_ID_MASK', {
         visualIdTemplate: visualId,
-        outbreakVisualIdMask: outbreak.caseIdMask
+        outbreakVisualIdMask: outbreak[maskProperty]
       }));
     }
     // if a personId was provided, check if current visualId is owned by that person (visual ID did not change value)
@@ -592,12 +616,12 @@ module.exports = function (Outbreak) {
             // person found
             if (person) {
               // get it's numeric index
-              index = app.utils.maskField.extractValueFromMaskedField(outbreak.caseIdMask, person.visualId);
+              index = app.utils.maskField.extractValueFromMaskedField(outbreak[maskProperty], person.visualId);
             }
             // get next index
             index++;
             // resolve the mask using the computed index
-            return app.utils.maskField.resolveMask(outbreak.caseIdMask, visualId, index);
+            return app.utils.maskField.resolveMask(outbreak[maskProperty], visualId, index);
           });
       });
   };
@@ -751,7 +775,7 @@ module.exports = function (Outbreak) {
     if (contactQuery) {
       // find the contacts that match the query
       findContacts = app.models.contact
-        .rawFind({and:[contactQuery, {outbreakId: options.outbreakId}]}, {projection: {_id: 1}})
+        .rawFind({and: [contactQuery, {outbreakId: options.outbreakId}]}, {projection: {_id: 1}})
         .then(function (contacts) {
           // return a list of contact ids
           return contacts.map(contact => contact.id);
@@ -959,6 +983,7 @@ module.exports = function (Outbreak) {
       'safeBurial',
       'dateOfBurial',
       'classification',
+      'classificationHistory',
       'riskLevel',
       'riskReason',
       'transferRefused',
@@ -967,9 +992,8 @@ module.exports = function (Outbreak) {
     ];
     // the following case props are array and should be treated differently
     const caseArrayProps = [
-      'isolationDates',
-      'hospitalizationDates',
-      'incubationDates',
+      'dateRanges',
+      'classificationHistory'
     ];
 
     // decide which type of properties map to use, based on given type
@@ -1221,15 +1245,16 @@ module.exports = function (Outbreak) {
    * Resolve person visual id template, if visualId field present
    * @param outbreak
    * @param visualId
+   * @param personType
    * @param [personId]
    * @return {*}
    */
-  Outbreak.helpers.resolvePersonVisualIdTemplate = function (outbreak, visualId, personId) {
+  Outbreak.helpers.resolvePersonVisualIdTemplate = function (outbreak, visualId, personType, personId) {
     // if the field is present
     if (typeof visualId === 'string' && visualId.length) {
       // get the next available visual id for the visual id template
       return Outbreak.helpers
-        .getAvailableVisualId(outbreak, visualId, personId)
+        .getAvailableVisualId(outbreak, (personType === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ? 'caseIdMask' : 'contactIdMask'), visualId, personId)
         .then(function (visualId) {
           // validate its uniqueness
           return Outbreak.helpers.validateVisualIdUniqueness(outbreak.id, visualId, personId);

@@ -1084,13 +1084,27 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Generate (next available) visual id
+   * Generate (next available) case visual id
    * @param visualIdMask
    * @param personId
    * @param callback
    */
-  Outbreak.prototype.generateVisualId = function (visualIdMask, personId, callback) {
-    Outbreak.helpers.getAvailableVisualId(this, visualIdMask, personId)
+  Outbreak.prototype.generateCaseVisualId = function (visualIdMask, personId, callback) {
+    Outbreak.helpers.getAvailableCaseVisualId(this, visualIdMask, personId)
+      .then(function (visualId) {
+        callback(null, visualId);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Generate (next available) contact visual id
+   * @param visualIdMask
+   * @param personId
+   * @param callback
+   */
+  Outbreak.prototype.generateContactVisualId = function (visualIdMask, personId, callback) {
+    Outbreak.helpers.getAvailableContactVisualId(this, visualIdMask, personId)
       .then(function (visualId) {
         callback(null, visualId);
       })
@@ -1841,6 +1855,78 @@ module.exports = function (Outbreak) {
             });
           }
         });
+        callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count new cases outside known transmission chains
+   * @param filter Besides the default filter properties this request also accepts 'noDaysInChains': number on the first level in 'where'
+   * @param callback
+   */
+  Outbreak.prototype.countNewCasesOutsideKnownTransmissionChains = function (filter, callback) {
+    const self = this;
+    // default number of day used to determine new cases
+    let noDaysInChains = this.noDaysInChains;
+    // check if a different number was sent in the filter
+    if (filter && filter.where && filter.where.noDaysInChains) {
+      noDaysInChains = filter.where.noDaysInChains;
+      delete filter.where.noDaysInChains;
+    }
+    // start building a result
+    const result = {
+      newCases: 0,
+      total: 0,
+      caseIDs: []
+    };
+
+    // use a cases index to make sure we don't count a case multiple times
+    const casesIndex = {};
+    // calculate date used to compare contact date of onset with
+    const newCasesFromDate = new Date();
+    newCasesFromDate.setDate(newCasesFromDate.getDate() - noDaysInChains);
+
+    // get known transmission chains (case-case relationships)
+    app.models.relationship
+      .filterKnownTransmissionChains(this.id, filter)
+      .then(function (relationships) {
+        // go trough all relations
+        relationships.forEach(function (relation) {
+          // go trough all the people
+          if (Array.isArray(relation.people)) {
+            relation.people.forEach(function (person) {
+              // count each case only once (do a specific check for person type as transmission chains may include events)
+              if (!casesIndex[person.id] && person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
+                casesIndex[person.id] = true;
+              }
+            });
+          }
+        });
+        // find cases that are not part of known transmission chains
+        return app.models.case
+          .rawFind({
+            outbreakId: self.id,
+            _id: {
+              nin: Object.keys(casesIndex)
+            },
+          }, {
+            projection: {
+              dateOfReporting: 1
+            }
+          })
+          .then(function (cases) {
+            cases.forEach(function (caseRecord) {
+              // check if the case is new (date of reporting is later than the threshold date)
+              if ((new Date(caseRecord.dateOfReporting)) >= newCasesFromDate) {
+                result.newCases++;
+                result.caseIDs.push(caseRecord.id);
+              }
+              result.total++;
+            });
+          });
+      })
+      .then(function (){
         callback(null, result);
       })
       .catch(callback);
@@ -3624,7 +3710,7 @@ module.exports = function (Outbreak) {
     let outbreakId = this.id;
 
     // get all the followups for the filtered period
-    app.models.person.find(app.utils.remote
+    app.models.person.rawFind(app.utils.remote
       .mergeFilters({
         where: {
           outbreakId: outbreakId,
@@ -3672,7 +3758,7 @@ module.exports = function (Outbreak) {
               $where: 'this.dateBecomeCase > this.dateOfOutcome',
             }]
           }, {
-            // for case: compare isolationDates, hospitalizationDates, incubationDates startDate/endDate for each item in them and against the date of birth
+            // for case: compare dateRanges startDate/endDate for each item in them and against the date of birth
             type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
             $where: `function () {
               // initialize check result
@@ -3680,8 +3766,8 @@ module.exports = function (Outbreak) {
               // get date of birth
               var dob = this.dob;
 
-              // loop through the isolationDates, hospitalizationDates, incubationDates and make comparisons
-              var datesContainers = ['isolationDates', 'hospitalizationDates', 'incubationDates'];
+              // loop through the dateRanges and make comparisons
+              var datesContainers = ['dateRanges'];
               for (var i = 0; i < datesContainers.length; i++) {
                 // check if the datesContainer exists on the model
                 var datesContainer = datesContainers[i];
@@ -3716,7 +3802,7 @@ module.exports = function (Outbreak) {
             }`
           }]
         }
-      }, filter || {}), {disableSanitization: true})
+      }, filter || {}).where)
       .then(function (people) {
         // get case fields label map
         let caseFieldsLabelMap = app.models.case.fieldLabelsMap;
@@ -3886,9 +3972,9 @@ module.exports = function (Outbreak) {
               });
             }
 
-            // compare isolationDates, hospitalizationDates, incubationDates startDate/endDate for each item in them and against the date of birth
-            // loop through the isolationDates, hospitalizationDates, incubationDates and make comparisons
-            var datesContainers = ['isolationDates', 'hospitalizationDates', 'incubationDates'];
+            // compare dateRanges startDate/endDate for each item in them and against the date of birth
+            // loop through the dateRanges and make comparisons
+            var datesContainers = ['dateRanges'];
             datesContainers.forEach(function (datesContainer) {
               if (person[datesContainer] && person[datesContainer].length) {
                 // loop through the dates to find inconsistencies
@@ -3902,10 +3988,12 @@ module.exports = function (Outbreak) {
                     inconsistencies.push({
                       dates: [{
                         field: `${datesContainer}.${dateEntryIndex}.startDate`,
-                        label: caseFieldsLabelMap[`${datesContainer}[].startDate`]
+                        label: caseFieldsLabelMap[`${datesContainer}[].startDate`],
+                        dateRangeType: dateEntry.typeId
                       }, {
                         field: `${datesContainer}.${dateEntryIndex}.endDate`,
-                        label: caseFieldsLabelMap[`${datesContainer}[].endDate`]
+                        label: caseFieldsLabelMap[`${datesContainer}[].endDate`],
+                        dateRangeType: dateEntry.typeId
                       }],
                       issue: inconsistenciesOperators.greaterThan
                     });
@@ -3920,7 +4008,8 @@ module.exports = function (Outbreak) {
                           label: caseFieldsLabelMap.dob
                         }, {
                           field: `${datesContainer}.${dateEntryIndex}.startDate`,
-                          label: caseFieldsLabelMap[`${datesContainer}[].startDate`]
+                          label: caseFieldsLabelMap[`${datesContainer}[].startDate`],
+                          dateRangeType: dateEntry.typeId
                         }],
                         issue: inconsistenciesOperators.greaterThan
                       });
@@ -3933,12 +4022,14 @@ module.exports = function (Outbreak) {
                           label: caseFieldsLabelMap.dob
                         }, {
                           field: `${datesContainer}.${dateEntryIndex}.endDate`,
-                          label: caseFieldsLabelMap[`${datesContainer}[].endDate`]
+                          label: caseFieldsLabelMap[`${datesContainer}[].endDate`],
+                          dateRangeType: dateEntry.typeId
                         }],
                         issue: inconsistenciesOperators.greaterThan
                       });
                     }
                   }
+
                 });
               }
             });
@@ -4149,6 +4240,13 @@ module.exports = function (Outbreak) {
             createCases.push(function (callback) {
               // set outbreak id
               caseData.outbreakId = self.id;
+
+              // filter out empty addresses
+              const addresses = app.models.person.sanitizeAddresses(caseData);
+              if (addresses) {
+                caseData.addresses = addresses;
+              }
+
               // sync the case
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.case, caseData, options)
                 .then(function (result) {
@@ -4243,6 +4341,13 @@ module.exports = function (Outbreak) {
               // set outbreak ids
               contactData.outbreakId = self.id;
               relationshipData.outbreakId = self.id;
+
+              // filter out empty addresses
+              const addresses = app.models.person.sanitizeAddresses(contactData);
+              if (addresses) {
+                contactData.addresses = addresses;
+              }
+
               // sync the contact
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.contact, contactData, options)
                 .then(function (syncResult) {
@@ -4369,9 +4474,9 @@ module.exports = function (Outbreak) {
       let sanitizedCases = [];
 
       // An array with all the expected date type fields found in an extended case model (including relationships and labResults)
-      const caseDossierDateFields = ['dob', 'isolationDates[].startDate', 'isolationDates[].endDate', 'hospitalizationDates[].startDate', 'hospitalizationDates[].endDate',
-        'incubationDates[].startDate', 'incubationDates[].endDate', 'addresses[].date', 'dateBecomeCase', 'dateOfInfection', 'dateOfOnset', 'outcomeId',
-        'dateOfOutcome', 'safeBurial', 'dateOfBurial', 'relationships[].contactDate', 'relationships[].people[].dob', 'relationships[].people[].addresses[].date', 'labResults[].dateSampleTaken',
+      const caseDossierDateFields = ['dob', 'dateRanges[].typeId', 'dateRanges[].startDate', 'dateRanges[].endDate', 'dateRanges[].centerName',
+        'addresses[].date', 'dateBecomeCase', 'dateOfInfection', 'dateOfOnset', 'outcomeId', 'dateOfOutcome', 'safeBurial', 'dateOfBurial',
+        'relationships[].contactDate', 'relationships[].people[].dob', 'relationships[].people[].addresses[].date', 'labResults[].dateSampleTaken',
         'labResults[].dateSampleDelivered', 'labResults[].dateTesting', 'labResults[].dateOfResult'
       ];
 
@@ -4428,7 +4533,7 @@ module.exports = function (Outbreak) {
                   return;
                 }
                 // Translate the values of the fields marked as reference data fields on the case/contact model
-                app.utils.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models.person.typeToModelMap[relationshipMember.type], dictionary);
+                app.utils.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models[app.models.person.typeToModelMap[relationshipMember.type]], dictionary);
 
                 // Assign the person to the relationship to be displayed as part of it
                 relationship.person = relationshipMember;
@@ -4608,9 +4713,8 @@ module.exports = function (Outbreak) {
       // An array with all the expected date type fields found in an extended contact model (including relationships and followUps)
       const contactDossierDateFields = ['dob', 'addresses[].date', 'relationships[].contactDate', 'relationships[].people[].dob',
         'relationships[].people[].dateBecomeCase', 'relationships[].people[].dateOfInfection', 'relationships[].people[].dateOfOnset',
-        'relationships[].people[].outcomeId','relationships[].people[].dateOfOutcome', 'relationships[].people[].isolationDates[].startDate', 'relationships[].people[].isolationDates[].endDate',
-        'relationships[].people[].hospitalizationDates[].startDate', 'relationships[].people[].hospitalizationDates[].endDate',
-        'relationships[].people[].incubationDates[].startDate', 'relationships[].people[].incubationDates[].endDate', 'relationships[].people[].addresses[].date',
+        'relationships[].people[].outcomeId', 'relationships[].people[].dateOfOutcome', 'relationships[].people[].dateRanges[].typeId', 'relationships[].people[].dateRanges[].startDate',
+        'relationships[].people[].dateRanges[].endDate', 'relationships[].people[].dateRanges[].centerName', 'relationships[].people[].addresses[].date',
         'relationships[].people[].dateOfBurial','relationships[].people[].safeBurial', 'followUps[].date', 'followUps[].address.date'
       ];
 
@@ -4661,7 +4765,7 @@ module.exports = function (Outbreak) {
                 });
 
                 // Translate the values of the fields marked as reference data fields on the case/contact model
-                app.utils.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models.person.typeToModelMap[relationshipMember.type], dictionary);
+                app.utils.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models[app.models.person.typeToModelMap[relationshipMember.type]], dictionary);
 
                 // Assign the person to the relationship to be displayed as part of it
                 relationship.person = relationshipMember;
@@ -8900,6 +9004,46 @@ module.exports = function (Outbreak) {
     app.models.person
       .findDuplicatesByType(filter, this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', model)
       .then(duplicates => callback(null, duplicates))
+      .catch(callback);
+  };
+
+  /**
+   * Get a list of entries that show the delay between date of symptom onset and the hospitalization/isolation dates for a case
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.caseDelayBetweenOnsetAndHospitalizationIsolation = function (filter, callback) {
+    app.models.case
+      .delayBetweenOnsetAndHospitalisationIsolation(this.id, filter)
+      .then(function (result) {
+        callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count cases stratified by outcome over time
+   * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
+   * @param callback
+   */
+  Outbreak.prototype.countCasesStratifiedByOutcomeOverTime = function (filter, callback) {
+    app.models.case.countStratifiedByOutcomeOverTime(this, filter)
+      .then(function (result) {
+        callback(null, result);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count cases stratified by classification over reporting time
+   * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
+   * @param callback
+   */
+  Outbreak.prototype.countCasesStratifiedByClassificationOverReportingTime = function (filter, callback) {
+    app.models.case.countStratifiedByClassificationOverReportingTime(this, filter)
+      .then(function (result) {
+        callback(null, result);
+      })
       .catch(callback);
   };
 };

@@ -44,7 +44,9 @@ module.exports = function (Language) {
                   .create({
                     token: languageToken.token,
                     languageId: self.id,
-                    translation: languageToken.translation
+                    translation: languageToken.translation,
+                    createdAt: languageToken.createdAt,
+                    updatedAt: languageToken.updatedAt
                   }, options);
               }
             })

@@ -89,6 +89,12 @@ function exportFilteredModelsList(app, Model, query, exportType, fileName, encry
   // find results
   Model.rawFind(query)
     .then(function (results) {
+
+      // convert geo-points (if any)
+      results.forEach(function (result) {
+        helpers.covertAddressesGeoPointToLoopbackFormat(result);
+      });
+
       // by default export CSV
       if (!exportType) {
         exportType = 'json';

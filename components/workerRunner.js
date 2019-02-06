@@ -105,7 +105,31 @@ module.exports = {
      */
     countStratifiedByClassificationOverTime: function (cases, periodInterval, periodType, periodMap, caseClassifications, callback) {
       invokeWorkerMethod('cases', 'countStratifiedByClassificationOverTime', [cases, periodInterval, periodType, periodMap, caseClassifications], callback);
-    }
+    },
+    /**
+     * Count cases stratified by outcome over time
+     * @param cases
+     * @param periodInterval
+     * @param periodType
+     * @param periodMap
+     * @param caseOutcomeList
+     * @param callback
+     */
+    countStratifiedByOutcomeOverTime: function (cases, periodInterval, periodType, periodMap, caseOutcomeList, callback) {
+      invokeWorkerMethod('cases', 'countStratifiedByOutcomeOverTime', [cases, periodInterval, periodType, periodMap, caseOutcomeList], callback);
+    },
+    /**
+     * Count cases stratified by classification over reporting time
+     * @param cases
+     * @param periodInterval
+     * @param periodType
+     * @param periodMap
+     * @param caseClassifications
+     * @param callback
+     */
+    countStratifiedByClassificationOverReportingTime: function (cases, periodInterval, periodType, periodMap, caseClassifications, callback) {
+      invokeWorkerMethod('cases', 'countStratifiedByClassificationOverReportingTime', [cases, periodInterval, periodType, periodMap, caseClassifications], callback);
+    },
   },
   sync: {
     /**

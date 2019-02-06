@@ -38,16 +38,11 @@
     },
     "geoLocation": {
       "required": false,
-      "type": {
-        "lat": {
-          "type": "number",
-          "required": false
-        },
-        "lng": {
-          "type": "number",
-          "required": false
-        }
-      }
+      "type": "customGeoPoint"
+    },
+    "geoLocationAccurate": {
+      "type": "boolean",
+      "default": false
     },
     "date": {
       "type": "date",

@@ -118,12 +118,14 @@ function exportCollectionInBatches(dbConnection, mongoCollectionName, collection
     cursor
       .toArray()
       .then(function (records) {
-        // check if records were returned; consider collection finished if no records
-        if (!records || !records.length) {
-          logger.debug(`Collection '${collectionName}' export success.`);
-          return callback();
+        // if it was not requested to export empty collections
+        if (!options.exportEmptyCollections) {
+          // check if records were returned; consider collection finished if no records
+          if (!records || !records.length) {
+            logger.debug(`Collection '${collectionName}' export success.`);
+            return callback();
+          }
         }
-
         // export related files
         // if collection is not supported, it will be skipped
         dbSync.exportCollectionRelatedFiles(collectionName, records, archivesDirName, logger, options.password, (err) => {
@@ -131,6 +133,9 @@ function exportCollectionInBatches(dbConnection, mongoCollectionName, collection
             logger.debug(`Collection '${collectionName}' related files export failed. Error: ${err}`);
             return callback(err);
           }
+
+          // at least one collection has data to pack in an archive
+          options.hasDataToExport = true;
 
           let fileName = `${collectionName}.${batchNumber}.json`;
           let filePath = `${tmpDirName}/${fileName}`;
@@ -220,6 +225,10 @@ const worker = {
             };
           }
 
+          // flag that indicates if there is at least one collection with records
+          // if this is not true, do not pack the main archive
+          options.hasDataToExport = false;
+
           async
             .series(
               Object.keys(collections).map((collectionName) => {
@@ -236,6 +245,13 @@ const worker = {
               (err) => {
                 if (err) {
                   return reject(err);
+                }
+
+                // stop with error if there is no collection with data
+                if (!options.hasDataToExport) {
+                  return reject({
+                    code: 'NO-DATA'
+                  });
                 }
 
                 // archive file name

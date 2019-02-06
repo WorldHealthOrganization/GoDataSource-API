@@ -30,18 +30,11 @@ module.exports = function (Person) {
       model: 'location',
       foreignKey: 'address.locationId'
     },
-    // hospitalization locations
-    hospitalizationLocations: {
+    // date range locations
+    dateRangeLocations: {
       type: 'belongsToManyComplex',
       model: 'location',
-      foreignKeyContainer: 'hospitalizationDates',
-      foreignKey: 'locationId'
-    },
-    // isolation locations
-    isolationLocations: {
-      type: 'belongsToManyComplex',
-      model: 'location',
-      foreignKeyContainer: 'isolationDates',
+      foreignKeyContainer: 'dateRanges',
       foreignKey: 'locationId'
     }
   };
@@ -70,9 +63,7 @@ module.exports = function (Person) {
     'dateOfOutcome': 'LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME',
     'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
     'type': 'LNG_CASE_FIELD_LABEL_TYPE',
-    'isolationDates': 'LNG_CASE_FIELD_LABEL_ISOLATION_DATES',
-    'hospitalizationDates': 'LNG_CASE_FIELD_LABEL_HOSPITALIZATION_DATES',
-    'incubationDates': 'LNG_CASE_FIELD_LABEL_INCUBATION_DATES',
+    'dateRanges': 'LNG_CASE_FIELD_LABEL_DATE_RANGES',
     'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
     'safeBurial': 'LNG_CASE_FIELD_LABEL_SAFE_BURIAL',
@@ -112,9 +103,7 @@ module.exports = function (Person) {
     'safeBurial',
     'documents',
     'type',
-    'isolationDates',
-    'hospitalizationDates',
-    'incubationDates',
+    'dateRanges',
     'transferRefused',
     'addresses'
   ];
@@ -127,6 +116,7 @@ module.exports = function (Person) {
 
   Person.locationFields = [
     'addresses[].locationId',
+    'dateRanges[].locationId',
     'address.locationId'
   ];
 
@@ -165,6 +155,32 @@ module.exports = function (Person) {
         return result;
       }, '');
     }
+  };
+
+  /**
+   * Remove empty addresses and return a filtered array of addresses if an array is provided,
+   * otherwise return the provided addresses value ( null | undefined | ... )
+   * @param person
+   * @returns {Array | any}
+   */
+  Person.sanitizeAddresses = function (person) {
+    if (person.toJSON) {
+      person = person.toJSON();
+    }
+
+    // filter out empty addresses
+    if (person.addresses) {
+      return _.filter(person.addresses, (address) => {
+        return !!_.find(address, (propertyValue) => {
+          return typeof propertyValue === 'string' ?
+            !!propertyValue.trim() :
+            !!propertyValue;
+        });
+      });
+    }
+
+    // no addresses under this person
+    return person.addresses;
   };
 
   /**
@@ -214,9 +230,54 @@ module.exports = function (Person) {
   }
 
   /**
+   * Normalize GeoLocation Coordinates (make sure they are numbers)
+   * @param context
+   */
+  function normalizeGeolocationCoordinates(context) {
+    // define person instance
+    let personInstance;
+    // if this is a new record
+    if (context.isNewInstance) {
+      // get instance data from the instance
+      personInstance = context.instance;
+    } else {
+      // existing instance, we're interested only in what is modified
+      personInstance = context.data;
+    }
+
+    /**
+     * Normalize address coordinates
+     * @param address
+     */
+    function normalizeAddressCoordinates(address) {
+      // Check if both coordinates are available and make sure they are numbers
+      if (address.geoLocation && address.geoLocation.lat && address.geoLocation.lng) {
+        address.geoLocation.lat = parseFloat(address.geoLocation.lat);
+        address.geoLocation.lng = parseFloat(address.geoLocation.lng);
+      }
+    }
+
+    // if the record has a list of addresses
+    if (Array.isArray(personInstance.addresses) && personInstance.addresses.length) {
+      // normalize coordinates for each address
+      personInstance.addresses.forEach(function (address) {
+        normalizeAddressCoordinates(address);
+      });
+    }
+    // if the record has only one address (record is event)
+    if (personInstance.address) {
+      // normalize the address
+      normalizeAddressCoordinates(personInstance.address);
+    }
+  }
+
+  /**
    * Before save hooks
    */
   Person.observe('before save', function (context, next) {
+    // normalize geo-points
+    normalizeGeolocationCoordinates(context);
+    // get context data
     const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
     // if the record is not being deleted or this is not a system triggered update
     if (!data.source.all.deleted && !data.source.all.systemTriggeredUpdate) {
@@ -268,7 +329,7 @@ module.exports = function (Person) {
 
           // resolve visual ID
           return app.models.outbreak.helpers
-            .resolvePersonVisualIdTemplate(outbreak, data.target.visualId, context.isNewInstance ? null : data.source.existing.id);
+            .resolvePersonVisualIdTemplate(outbreak, data.target.visualId, data.source.existingRaw.type, context.isNewInstance ? null : data.source.existing.id);
         })
         .then(function (resolvedVisualId) {
           data.target.visualId = resolvedVisualId;
@@ -279,6 +340,28 @@ module.exports = function (Person) {
       // validation disabled
       next();
     }
+  });
+
+  /**
+   * Before delete hooks
+   * - archive visual ID before soft-deleting record so we can add a new case with the same case ID
+   */
+  Person.observe('before delete', function (context, next) {
+    // in case we have visual ID we need to remove if before soft deleting this record
+    if (context.currentInstance.visualId) {
+      // archive visual ID
+      context.data.documents = context.currentInstance.documents || [];
+      context.data.documents.push({
+        type: 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_ARCHIVED_ID',
+        number: context.currentInstance.visualId
+      });
+
+      // remove visual ID
+      context.data.visualId = null;
+    }
+
+    // continue
+    next();
   });
 
   /**
@@ -851,6 +934,12 @@ module.exports = function (Person) {
       delete query.$or;
     }
 
-    return app.models.person.rawFind(query, {skip: filter.skip, limit: filter.limit});
+    // find duplicates only if there is something to look for
+    if (query.$or) {
+      return app.models.person.rawFind(query, {skip: filter.skip, limit: filter.limit});
+    } else {
+      // otherwise return empty list
+      return Promise.resolve([]);
+    }
   };
 };

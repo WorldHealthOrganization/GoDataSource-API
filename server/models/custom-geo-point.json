@@ -1,0 +1,25 @@
+{
+  "name": "customGeoPoint",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "lat": {
+      "type": "number",
+      "required": false
+    },
+    "lng": {
+      "type": "number",
+      "required": false
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

@@ -31,6 +31,7 @@ module.exports = function (Contact) {
     'outcomeId': 'LNG_CONTACT_FIELD_LABEL_OUTCOME_ID',
     'dateOfOutcome': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME',
     'visualId': 'LNG_CONTACT_FIELD_LABEL_VISUAL_ID',
+    'type': 'LNG_CONTACT_FIELD_LABEL_TYPE',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
     'addresses[].typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
     'addresses[].country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
@@ -40,6 +41,9 @@ module.exports = function (Contact) {
     'addresses[].postalCode': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE',
     'addresses[].locationId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID',
     'addresses[].geoLocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
+    'addresses[].geoLocation.lat': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT',
+    'addresses[].geoLocation.lng': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG',
+    'addresses[].geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
     'addresses[].date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
     'fillGeoLocation': 'LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION',
     'isDateOfReportingApproximate': 'LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
@@ -48,6 +52,7 @@ module.exports = function (Contact) {
   });
 
   Contact.referenceDataFieldsToCategoryMap = {
+    type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE',
     riskLevel: 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL',
     gender: 'LNG_REFERENCE_DATA_CATEGORY_GENDER',
     occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
@@ -70,6 +75,7 @@ module.exports = function (Contact) {
 
   // contact fields to print
   Contact.printFieldsinOrder = [
+    'visualId',
     'firstName',
     'middleName',
     'lastName',
@@ -88,6 +94,10 @@ module.exports = function (Contact) {
     'dateBecomeContact',
     'safeBurial',
     'dateOfBurial'
+  ];
+
+  Contact.locationFields = [
+    'addresses[].locationId'
   ];
 
   Contact.foreignKeyResolverMap = {

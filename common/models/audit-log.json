@@ -64,6 +64,30 @@
       "foreignKey": "userId"
     }
   },
-  "acls": [],
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "__get__user"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permission": "ALLOW",
+      "property": "count"
+    }
+  ],
   "methods": {}
 }

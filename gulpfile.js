@@ -10,6 +10,7 @@ const moment = require('moment');
 
 let platform = 'windows-x86';
 let type = 'hub';
+let version;
 
 /**
  * Prepare build
@@ -22,6 +23,9 @@ gulp.task('prepare-build', function (callback) {
     }
     if (arg === '--type') {
       type = process.argv[index + 1];
+    }
+    if (arg === '--version') {
+      version = process.argv[index + 1];
     }
   });
 
@@ -45,7 +49,7 @@ gulp.task('prepare-build', function (callback) {
     return callback(errors);
   }
   // output build information
-  process.stdout.write(`\nBuilding ${type} for ${platform}.\nYou can specify other types and platforms by sending arguments. E.g.: npm run build -- --type hub --platform windows-x86\n\n`);
+  process.stdout.write(`\nBuilding ${type} for ${platform}.\nYou can specify other types and platforms by sending arguments. E.g.: npm run build -- --version 1.1.1 --type hub --platform windows-x86\n\n`);
   callback();
 });
 
@@ -121,7 +125,7 @@ gulp.task('update-build-info', ['install-dependencies'], function (callback) {
   // set build information
   packageJson.build.platform = platform;
   packageJson.build.type = type;
-  packageJson.build.version = packageJson.version;
+  packageJson.build.version = version || packageJson.version;
   packageJson.build.build = moment().format('YYYYMMDD');
   // remove unneeded information
   delete packageJson.devDependencies;
