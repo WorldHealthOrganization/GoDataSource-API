@@ -46,11 +46,7 @@
       "type": "string"
     },
     "status": {
-      "type": "string",
-      "enum": [
-        "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_IN_PROGRESS",
-        "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_COMPLETED"
-      ]
+      "type": "string"
     },
     "questionnaireAnswers": {
       "type": "object"
