@@ -945,6 +945,9 @@
     "Not Performed": {
       "readOnly": true
     },
+    "Not Attempted": {
+      "readOnly": true
+    },
     "Seen Ok": {
       "readOnly": true
     },
