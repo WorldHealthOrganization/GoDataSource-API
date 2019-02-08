@@ -527,13 +527,14 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Get the next available case visual id
+   * In case a mask is provided then retrieve the next available case visual id, or if a visual id is provided check if
+   * it matches the outbreak mask and it isn't a duplicate
    * @param outbreak
    * @param visualId
    * @param [personId]
-   * @return {*}
+   * @return Visual ID or throws one of the following validation errors: DUPLICATE_VISUAL_ID / INVALID_VISUAL_ID_MASK
    */
-  Outbreak.helpers.getAvailableCaseVisualId = function (outbreak, visualId, personId) {
+  Outbreak.helpers.validateOrGetAvailableCaseVisualId = function (outbreak, visualId, personId) {
     // validate visualId uniqueness
     return Outbreak.helpers
       .validateVisualIdUniqueness(outbreak.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', visualId, personId)
@@ -544,13 +545,14 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Get the next available contact visual id
+   * In case a mask is provided then retrieve the next available contact visual id, or if a visual id is provided check if
+   * it matches the outbreak mask and it isn't a duplicate
    * @param outbreak
    * @param visualId
    * @param [personId]
-   * @return {*}
+   * @return Visual ID or throws one of the following validation errors: DUPLICATE_VISUAL_ID / INVALID_VISUAL_ID_MASK
    */
-  Outbreak.helpers.getAvailableContactVisualId = function (outbreak, visualId, personId) {
+  Outbreak.helpers.validateOrGetAvailableContactVisualId = function (outbreak, visualId, personId) {
     // validate visualId uniqueness
     return Outbreak.helpers
       .validateVisualIdUniqueness(outbreak.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', visualId, personId)
