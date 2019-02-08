@@ -444,7 +444,6 @@ module.exports = function (ReferenceData) {
           if (context.data) {
             // in case we're trying to delete this record there is no point in setting data since that won't be saved
             if (context.data.deleted) {
-              // unhandled error
               return next(error);
             }
 

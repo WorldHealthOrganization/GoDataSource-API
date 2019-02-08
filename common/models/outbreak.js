@@ -534,7 +534,13 @@ module.exports = function (Outbreak) {
    * @return {*}
    */
   Outbreak.helpers.getAvailableCaseVisualId = function (outbreak, visualId, personId) {
-    return Outbreak.helpers.getAvailableVisualId(outbreak, 'caseIdMask', visualId, personId);
+    // validate visualId uniqueness
+    return Outbreak.helpers
+      .validateVisualIdUniqueness(outbreak.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', visualId, personId)
+      .then(() => {
+        // generate visual id accordingly to visualId mask
+        return Outbreak.helpers.getAvailableVisualId(outbreak, 'caseIdMask', visualId, personId);
+      });
   };
 
   /**
@@ -545,7 +551,13 @@ module.exports = function (Outbreak) {
    * @return {*}
    */
   Outbreak.helpers.getAvailableContactVisualId = function (outbreak, visualId, personId) {
-    return Outbreak.helpers.getAvailableVisualId(outbreak, 'contactIdMask', visualId, personId);
+    // validate visualId uniqueness
+    return Outbreak.helpers
+      .validateVisualIdUniqueness(outbreak.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', visualId, personId)
+      .then(() => {
+        // generate visual id accordingly to visualId mask
+        return Outbreak.helpers.getAvailableVisualId(outbreak, 'contactIdMask', visualId, personId);
+      });
   };
 
   /**
@@ -930,16 +942,18 @@ module.exports = function (Outbreak) {
    * Validates whether a given visual identifier is unique per given outbreak
    * If not, then a DUPLICATE_VISUAL_ID error is built and returned
    * @param outbreakId Outbreaks identifier
+   * @param personType Case ( LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE ) / Contact ( LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT ) (string)
    * @param visualId Visual identifier (string)
    * @param [instanceId] Current instance id
    * @returns Promise { false (if unique), error }
    */
-  Outbreak.helpers.validateVisualIdUniqueness = function (outbreakId, visualId, instanceId) {
+  Outbreak.helpers.validateVisualIdUniqueness = function (outbreakId, personType, visualId, instanceId) {
     return app.models.person
       .findOne({
         where: {
           outbreakId: outbreakId,
           visualId: visualId,
+          type: personType,
           id: {
             neq: instanceId
           }
@@ -1252,12 +1266,13 @@ module.exports = function (Outbreak) {
   Outbreak.helpers.resolvePersonVisualIdTemplate = function (outbreak, visualId, personType, personId) {
     // if the field is present
     if (typeof visualId === 'string' && visualId.length) {
-      // get the next available visual id for the visual id template
+      // validate its uniqueness
       return Outbreak.helpers
-        .getAvailableVisualId(outbreak, (personType === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ? 'caseIdMask' : 'contactIdMask'), visualId, personId)
-        .then(function (visualId) {
-          // validate its uniqueness
-          return Outbreak.helpers.validateVisualIdUniqueness(outbreak.id, visualId, personId);
+        .validateVisualIdUniqueness(outbreak.id, personType, visualId, personId)
+        .then(() => {
+          // get the next available visual id for the visual id template
+          return Outbreak.helpers
+            .getAvailableVisualId(outbreak, (personType === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ? 'caseIdMask' : 'contactIdMask'), visualId, personId);
         });
     } else {
       // nothing to resolve
