@@ -442,6 +442,12 @@ module.exports = function (ReferenceData) {
         if (error && ['MODEL_NOT_EDITABLE', 'MODEL_IN_USE'].indexOf(error.code) !== -1) {
           // and if data was sent
           if (context.data) {
+            // in case we're trying to delete this record there is no point in setting data since that won't be saved
+            if (context.data.deleted) {
+              // unhandled error
+              return next(error);
+            }
+
             // allow customizing some safe properties
             const customizableProperties = ['iconId', 'colorCode'];
 
