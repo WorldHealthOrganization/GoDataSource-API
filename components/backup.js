@@ -69,7 +69,7 @@ const createBackup = function (modules, location, done) {
         let fileName = fileParse.name + fileParse.ext;
 
         // build new path for the backup file
-        let newPath = `${location}/${fileName}`;
+        let newPath = path.join(location, fileName);
 
         // copy the archive from temporary OS directory to the desired location
         fs.copyFile(archivePath, newPath, (copyError) => {
@@ -411,7 +411,6 @@ const preRoutine = function (done) {
       });
     });
 };
-
 
 module.exports = {
   create: createBackup,
