@@ -13,6 +13,11 @@ module.exports = function (HelpCategory) {
    * Save translatable fields values, to create translations later
    */
   HelpCategory.observe('before save', function (context, next) {
+    // do not execute hook on sync
+    if (context.options && context.options._sync) {
+      return next();
+    }
+
     if (context.isNewInstance) {
       let instance = context.instance;
       let identifier = `LNG_${_.snakeCase(HelpCategory.modelName).toUpperCase()}_${_.snakeCase(instance.name).toUpperCase()}`;
@@ -57,6 +62,11 @@ module.exports = function (HelpCategory) {
    * Defaults to user language at the time of creation
    */
   HelpCategory.observe('after save', function (context, next) {
+    // do not execute hook on sync
+    if (context.options && context.options._sync) {
+      return next();
+    }
+
     const models = app.models;
     const languageTokenModel = models.languageToken;
 
