@@ -11,6 +11,11 @@ module.exports = function (HelpItem) {
    * Save translatable fields values, to create translations later
    */
   HelpItem.observe('before save', function (context, next) {
+    // do not execute hook on sync
+    if (context.options && context.options._sync) {
+      return next();
+    }
+
     if (context.isNewInstance) {
       let instance = context.instance;
       let identifier = `${context.instance.categoryId}_${_.snakeCase(HelpItem.modelName).toUpperCase()}_${_.snakeCase(instance.title).toUpperCase()}`;
@@ -55,6 +60,11 @@ module.exports = function (HelpItem) {
    * Defaults to user language at the time of creation
    */
   HelpItem.observe('after save', function (context, next) {
+    // do not execute hook on sync
+    if (context.options && context.options._sync) {
+      return next();
+    }
+
     const models = app.models;
     const languageTokenModel = models.languageToken;
 
