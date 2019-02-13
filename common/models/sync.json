@@ -239,6 +239,11 @@
           "arg": "autoEncrypt",
           "type": "boolean",
           "description": "Auto Encrypt; Default 'true'"
+        },
+        {
+          "arg": "generatePersonVisualId",
+          "type": "boolean",
+          "description": "Generate visualId on cases/contacts; Default: 'false'"
         }
       ],
       "returns": [

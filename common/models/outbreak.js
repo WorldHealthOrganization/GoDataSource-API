@@ -537,7 +537,7 @@ module.exports = function (Outbreak) {
   Outbreak.helpers.validateOrGetAvailableCaseVisualId = function (outbreak, visualId, personId) {
     // validate visualId uniqueness
     return Outbreak.helpers
-      .validateVisualIdUniqueness(outbreak.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', visualId, personId)
+      .validateVisualIdUniqueness(outbreak.id, visualId, personId)
       .then(() => {
         // generate visual id accordingly to visualId mask
         return Outbreak.helpers.getAvailableVisualId(outbreak, 'caseIdMask', visualId, personId);
@@ -555,7 +555,7 @@ module.exports = function (Outbreak) {
   Outbreak.helpers.validateOrGetAvailableContactVisualId = function (outbreak, visualId, personId) {
     // validate visualId uniqueness
     return Outbreak.helpers
-      .validateVisualIdUniqueness(outbreak.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', visualId, personId)
+      .validateVisualIdUniqueness(outbreak.id, visualId, personId)
       .then(() => {
         // generate visual id accordingly to visualId mask
         return Outbreak.helpers.getAvailableVisualId(outbreak, 'contactIdMask', visualId, personId);
@@ -944,18 +944,16 @@ module.exports = function (Outbreak) {
    * Validates whether a given visual identifier is unique per given outbreak
    * If not, then a DUPLICATE_VISUAL_ID error is built and returned
    * @param outbreakId Outbreaks identifier
-   * @param personType Case ( LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE ) / Contact ( LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT ) (string)
    * @param visualId Visual identifier (string)
    * @param [instanceId] Current instance id
    * @returns Promise { false (if unique), error }
    */
-  Outbreak.helpers.validateVisualIdUniqueness = function (outbreakId, personType, visualId, instanceId) {
+  Outbreak.helpers.validateVisualIdUniqueness = function (outbreakId, visualId, instanceId) {
     return app.models.person
       .findOne({
         where: {
           outbreakId: outbreakId,
           visualId: visualId,
-          type: personType,
           id: {
             neq: instanceId
           }
@@ -1270,7 +1268,7 @@ module.exports = function (Outbreak) {
     if (typeof visualId === 'string' && visualId.length) {
       // validate its uniqueness
       return Outbreak.helpers
-        .validateVisualIdUniqueness(outbreak.id, personType, visualId, personId)
+        .validateVisualIdUniqueness(outbreak.id, visualId, personId)
         .then(() => {
           // get the next available visual id for the visual id template
           return Outbreak.helpers

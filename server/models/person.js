@@ -301,11 +301,6 @@ module.exports = function (Person) {
       context.options.triggerRelationshipUpdates = true;
     }
 
-    // do not execute rest of hook on sync
-    if (context.options && context.options._sync) {
-      return next();
-    }
-
     // validate addresses
     // if the record is not being deleted or this is not a system triggered update
     if (!data.source.all.deleted && !data.source.all.systemTriggeredUpdate) {
@@ -316,6 +311,11 @@ module.exports = function (Person) {
         // stop with error
         return next(addressValidationError);
       }
+    }
+
+    // do not execute visualId login on sync if the generatePersonVisualId flag is false
+    if (context.options && context.options._sync && !context.options.generatePersonVisualId) {
+      return next();
     }
 
     // check if visual id should be validated (validation can be disabled under certain conditions)
