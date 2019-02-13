@@ -7882,7 +7882,8 @@ module.exports = function (Outbreak) {
                         address: app.models.address.getHumanReadableAddress(record.address),
                         day: record.index,
                         from: moment(_.get(record, 'contact.followUp.startDate')).format('YYYY-MM-DD'),
-                        to: moment(_.get(record, 'contact.followUp.endDate')).format('YYYY-MM-DD')
+                        to: moment(_.get(record, 'contact.followUp.endDate')).format('YYYY-MM-DD'),
+                        date: record.date ? moment(record.date).format('YYYY-MM-DD') : undefined
                       };
                       // mark appropriate status as done
                       recordEntry[record.statusId] = 'X';
@@ -7909,37 +7910,43 @@ module.exports = function (Outbreak) {
             })
             .then(function (referenceData) {
               // build table headers
-              const headers = [{
-                id: 'firstName',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME')
-              }, {
-                id: 'lastName',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME')
-              }, {
-                id: 'middleName',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME')
-              }, {
-                id: 'age',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE')
-              }, {
-                id: 'gender',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER')
-              }, {
-                id: 'location',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION')
-              }, {
-                id: 'address',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS')
-              }, {
-                id: 'day',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_DAY')
-              }, {
-                id: 'from',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM')
-              }, {
-                id: 'to',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO')
-              }];
+              const headers = [
+                ...(contactData ? [{
+                  id: 'date',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_DATE')
+                }] : [{
+                  id: 'firstName',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME')
+                }, {
+                  id: 'lastName',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME')
+                }, {
+                  id: 'middleName',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME')
+                }, {
+                  id: 'age',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE')
+                }, {
+                  id: 'gender',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER')
+                }]),
+                ...[{
+                  id: 'location',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION')
+                }, {
+                  id: 'address',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS')
+                }, {
+                  id: 'day',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_DAY')
+                }, {
+                  id: 'from',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM')
+                }, {
+                  id: 'to',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO')
+                }]
+              ];
 
               // also add follow-up statuses to table headers
               referenceData.forEach(function (referenceDataItem) {
