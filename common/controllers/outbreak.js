@@ -7957,7 +7957,7 @@ module.exports = function (Outbreak) {
               });
               // define a list of common labels
               const commonLabels = {
-                title: `${dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TITLE')}: ${contactData ? contactData.firstName + ' ' + contactData.lastName : moment(startDate).format('YYYY-MM-DD')}`,
+                title: `${dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TITLE')}: ${contactData ? app.models.person.getDisplayName(contactData) : moment(startDate).format('YYYY-MM-DD')}`,
                 groupTitle: dictionary.getTranslation(groupBy === 'place' ? 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_LOCATION' : 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_CASE'),
                 total: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TOTAL')
               };
