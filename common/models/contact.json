@@ -45,39 +45,9 @@
     "outcomeId": {
       "type": "string"
     },
-    "dateOfOutcome": {
-      "type": "date"
-    },
     "safeBurial": {
       "type": "boolean",
       "default": false
-    },
-    "dateOfBurial": {
-      "type": "date"
-    },
-    "followUp": {
-      "description": "Object containing start/end dates for the contact's follow-up period. The dates are automatically calculated based on contact relationships dates and outbreak.periodOfFollowup",
-      "type": {
-        "originalStartDate": {
-          "description": "Date of the contact's earliest relationship (first contactDate)",
-          "type": "date"
-        },
-        "startDate": {
-          "description": "Latest contactDate of the contact's relationships",
-          "type": "date"
-        },
-        "endDate": {
-          "description": "Follow-up end date for the contact. Calculated from the startDate + outbreak.periodOfFollowup days",
-          "type": "date"
-        },
-        "status": {
-          "description": "Follow-up status",
-          "type": "string"
-        }
-      }
-    },
-    "dateBecomeContact": {
-      "type": "date"
     },
     "wasCase": {
       "type": "boolean",
@@ -91,7 +61,13 @@
   },
   "excludeBaseProperties": [
     "name",
-    "description"
+    "description",
+    "dateOfInfection",
+    "dateOfOnset",
+    "dateBecomeCase",
+    "dateRanges",
+    "classificationHistory",
+    "date"
   ],
   "validations": [],
   "relations": {

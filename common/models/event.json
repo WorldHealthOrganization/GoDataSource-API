@@ -32,9 +32,6 @@
       "type": "string",
       "required": true
     },
-    "date": {
-      "type": "date"
-    },
     "dateApproximate": {
       "type": "boolean"
     },
@@ -61,7 +58,16 @@
     "phoneNumber",
     "occupation",
     "addresses",
-    "documents"
+    "documents",
+    "dateOfInfection",
+    "dateOfOnset",
+    "dateBecomeCase",
+    "dateRanges",
+    "classificationHistory",
+    "dateOfOutcome",
+    "dateOfBurial",
+    "dateBecomeContact",
+    "followUp"
   ],
   "validations": [],
   "relations": {},

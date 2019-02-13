@@ -39,17 +39,8 @@
     "gender": {
       "type": "string"
     },
-    "dateOfInfection": {
-      "type": "date"
-    },
-    "dateOfOnset": {
-      "type": "date"
-    },
     "isDateOfOnsetApproximate": {
       "type": "boolean"
-    },
-    "dateBecomeCase": {
-      "type": "date"
     },
     "wasContact": {
       "type": "boolean",
@@ -58,29 +49,13 @@
     "outcomeId": {
       "type": "string"
     },
-    "dateOfOutcome": {
-      "type": "date"
-    },
-    "dateRanges": [
-      "dateRangeWithDetails"
-    ],
     "safeBurial": {
       "type": "boolean",
       "default": false
     },
-    "dateOfBurial": {
-      "type": "date"
-    },
     "classification": {
       "type": "string",
       "required": true
-    },
-    "classificationHistory": {
-      "type": [
-        "classificationHistoryItem"
-      ],
-      "required": true,
-      "readOnly": true
     },
     "riskLevel": {
       "type": "string"
@@ -98,13 +73,11 @@
   },
   "excludeBaseProperties": [
     "name",
-    "description"
+    "description",
+    "dateBecomeContact",
+    "followUp",
+    "date"
   ],
-  "indexes": {
-    "dateOfOnset_index": {
-      "dateOfOnset": 1
-    }
-  },
   "validations": [],
   "relations": {
     "labResults": {
