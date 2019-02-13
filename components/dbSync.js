@@ -83,6 +83,10 @@ let syncCollections = Object.keys(collectionsMap).filter((collection) => syncExc
 // add the case, contact and event models besides the existing ones
 let syncModels = syncCollections.concat(['case', 'contact', 'event']);
 
+// on import sync package we need to sync in series some collections that generate values based on resources in DB
+// eg: person model - visualId
+const collectionsToSyncInSeries = ['person'];
+
 /**
  * Add outbreakId filter if found to a mongoDB filter;
  * Note: the base mongoDB filter is not affected
@@ -601,6 +605,7 @@ module.exports = {
   collectionsMap: collectionsMap,
   collectionsFilterMap: collectionsFilterMap,
   collectionsImportFilterMap: collectionsImportFilterMap,
+  collectionsToSyncInSeries: collectionsToSyncInSeries,
   syncRecord: syncRecord,
   syncRecordFlags: syncRecordFlags,
   syncCollections: syncCollections,

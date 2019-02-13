@@ -359,9 +359,10 @@ module.exports = function (Sync) {
    * @param triggerBackupBeforeSync Flag to specify whether before the import a backup should be triggered. If the flag is not sent the System settings triggerBackupBeforeSync flag will be used
    * @param password Encryption password
    * @param autoEncrypt Auto Encrypt
+   * @param generatePersonVisualId Generate visualId on cases/contacts. Default: false
    * @param done
    */
-  Sync.importDatabaseSnapshot = function (req, snapshot, asynchronous, triggerBackupBeforeSync, password, autoEncrypt, done) {
+  Sync.importDatabaseSnapshot = function (req, snapshot, asynchronous, triggerBackupBeforeSync, password, autoEncrypt, generatePersonVisualId, done) {
     const buildError = app.utils.apiError.getError;
 
     /**
@@ -475,6 +476,16 @@ module.exports = function (Sync) {
         }
       }
 
+      // get generatePersonVisualId value
+      let generatePersonVisualId = false;
+      // check if the flag was sent and if is true
+      if (fields.generatePersonVisualId != null && (
+        fields.generatePersonVisualId === 'true' ||
+        fields.generatePersonVisualId === '1'
+      )) {
+        generatePersonVisualId = true;
+      }
+
       // get password
       const password = getSyncEncryptPassword(fields.password, _.get(requestOptions, 'remotingContext.req.authData.credentials'), autoEncrypt);
 
@@ -495,7 +506,10 @@ module.exports = function (Sync) {
               outbreakIDs,
               requestOptions,
               triggerBackupBeforeSync,
-              {password: password},
+              {
+                password: password,
+                generatePersonVisualId: generatePersonVisualId
+              },
               function (err) {
                 // send done function to return the response
                 importCallback(err, syncLogEntry, requestOptions, done);
@@ -512,7 +526,10 @@ module.exports = function (Sync) {
               outbreakIDs,
               requestOptions,
               triggerBackupBeforeSync,
-              {password: password},
+              {
+                password: password,
+                generatePersonVisualId: generatePersonVisualId
+              },
               function (err) {
                 // don't send the done function as the response was already sent
                 importCallback(err, syncLogEntry, requestOptions);

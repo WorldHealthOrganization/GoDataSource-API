@@ -277,19 +277,11 @@ module.exports = function (Person) {
   Person.observe('before save', function (context, next) {
     // normalize geo-points
     normalizeGeolocationCoordinates(context);
+
     // get context data
     const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
-    // if the record is not being deleted or this is not a system triggered update
-    if (!data.source.all.deleted && !data.source.all.systemTriggeredUpdate) {
-      // validate person addresses
-      const addressValidationError = validatePersonAddresses(data.source.all);
-      // if there is an address validation error
-      if (addressValidationError) {
-        // stop with error
-        return next(addressValidationError);
-      }
-    }
-    // if case classification was changed
+
+    // trigger relationships updates on case classification change to/from discarded
     if (
       (
         !context.isNewInstance &&
@@ -307,6 +299,23 @@ module.exports = function (Person) {
     ) {
       // set a flag on context to trigger relationship updated due to significant changes in case classification (from/to discarded case)
       context.options.triggerRelationshipUpdates = true;
+    }
+
+    // validate addresses
+    // if the record is not being deleted or this is not a system triggered update
+    if (!data.source.all.deleted && !data.source.all.systemTriggeredUpdate) {
+      // validate person addresses
+      const addressValidationError = validatePersonAddresses(data.source.all);
+      // if there is an address validation error
+      if (addressValidationError) {
+        // stop with error
+        return next(addressValidationError);
+      }
+    }
+
+    // do not execute visualId login on sync if the generatePersonVisualId flag is false
+    if (context.options && context.options._sync && !context.options.generatePersonVisualId) {
+      return next();
     }
 
     // check if visual id should be validated (validation can be disabled under certain conditions)

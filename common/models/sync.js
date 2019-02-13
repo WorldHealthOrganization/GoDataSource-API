@@ -130,12 +130,16 @@ module.exports = function (Sync) {
    * @param outbreakIDs List of outbreak IDs for the outbreaks that can be synced
    * @param reqOptions
    * @param triggerBackupBeforeSync Flag which if sent overrides the systemSettings flag
-   * @param options {{password: '<decryptPassword>'}}
+   * @param options {{password: '<decryptPassword>', generatePersonVisualId: true/false (default: false)}}
    * @param callback
    */
   Sync.syncDatabaseWithSnapshot = function (filePath, syncLogEntry, outbreakIDs, reqOptions, triggerBackupBeforeSync, options, callback) {
     // default options
     options = options || {};
+
+    // add generatePersonVisualId flag in reqOptions; default false
+    reqOptions.generatePersonVisualId = options.generatePersonVisualId !== undefined ? options.generatePersonVisualId : false;
+
     // check if backup should be triggered
     app.models.systemSettings
       .getCache()
@@ -233,37 +237,55 @@ module.exports = function (Sync) {
                         try {
                           let collectionRecords = JSON.parse(data);
 
-                          return async.parallelLimit(
-                            collectionRecords.map((collectionRecord) => (doneRecord) => {
-                              // convert mongodb id notation to Loopback notation
-                              // to be consistent with external function calls
-                              collectionRecord.id = collectionRecord._id;
+                          // construct sync functions
+                          let syncFunctions = collectionRecords.map((collectionRecord) => (doneRecord) => {
+                            // convert mongodb id notation to Loopback notation
+                            // to be consistent with external function calls
+                            collectionRecord.id = collectionRecord._id;
 
-                              // if needed for the collection, check for collectionRecord outbreakId
-                              if (outbreakIDs.length &&
-                                dbSync.collectionsImportFilterMap[collectionName] &&
-                                !dbSync.collectionsImportFilterMap[collectionName](collectionName, collectionRecord, outbreakIDs)) {
-                                app.logger.debug(`Sync ${syncLogEntry.id}: Skipped syncing record (collection: ${collectionName}, id: ${collectionRecord.id}) as it's outbreak ID is not accepted`);
-                                return doneRecord();
-                              }
-
-                              // sync the record with the main database
-                              dbSync.syncRecord(app.logger, model, collectionRecord, reqOptions, (err) => {
-                                if (err) {
-                                  app.logger.debug(`Sync ${syncLogEntry.id}: Failed syncing record (collection: ${collectionName}, id: ${collectionRecord.id}). Error: ${err.message}`);
-                                  failedIds[collectionName].push(`ID: "${collectionRecord.id}". Error: ${err.message}`);
-                                }
-                                return doneRecord();
-                              });
-                            }), 10,
-                            () => {
-                              if (!failedIds[collectionName].length) {
-                                delete failedIds[collectionName];
-                              }
-
-                              return done();
+                            // if needed for the collection, check for collectionRecord outbreakId
+                            if (outbreakIDs.length &&
+                              dbSync.collectionsImportFilterMap[collectionName] &&
+                              !dbSync.collectionsImportFilterMap[collectionName](collectionName, collectionRecord, outbreakIDs)) {
+                              app.logger.debug(`Sync ${syncLogEntry.id}: Skipped syncing record (collection: ${collectionName}, id: ${collectionRecord.id}) as it's outbreak ID is not accepted`);
+                              return doneRecord();
                             }
-                          );
+
+                            // sync the record with the main database
+                            dbSync.syncRecord(app.logger, model, collectionRecord, reqOptions, (err) => {
+                              if (err) {
+                                app.logger.debug(`Sync ${syncLogEntry.id}: Failed syncing record (collection: ${collectionName}, id: ${collectionRecord.id}). Error: ${err.message}`);
+                                failedIds[collectionName].push(`ID: "${collectionRecord.id}". Error: ${err.message}`);
+                              }
+                              return doneRecord();
+                            });
+                          });
+
+                          // depending on collection the sync can be done in parallel or in series
+                          if (dbSync.collectionsToSyncInSeries.indexOf(collectionName) !== -1) {
+                            return async.series(
+                              syncFunctions,
+                              () => {
+                                if (!failedIds[collectionName].length) {
+                                  delete failedIds[collectionName];
+                                }
+
+                                return done();
+                              }
+                            );
+                          } else {
+                            return async.parallelLimit(
+                              syncFunctions,
+                              10,
+                              () => {
+                                if (!failedIds[collectionName].length) {
+                                  delete failedIds[collectionName];
+                                }
+
+                                return done();
+                              }
+                            );
+                          }
                         } catch (parseError) {
                           app.logger.error(`Sync ${syncLogEntry.id}: Failed to parse collection file ${filePath}. ${parseError}`);
                           // keep failed collection with error
