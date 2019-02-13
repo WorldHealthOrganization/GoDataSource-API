@@ -9,7 +9,11 @@
     "collection": "person"
   },
   "scope": {
-    "order": ["name ASC", "lastName ASC", "firstName ASC"]
+    "order": [
+      "name ASC",
+      "lastName ASC",
+      "firstName ASC"
+    ]
   },
   "properties": {
     "id": {
@@ -81,6 +85,68 @@
     },
     "dateOfLastContact": {
       "type": "date"
+    },
+    "dateOfInfection": {
+      "type": "date",
+      "description": "Case property; Defining it here as on sync we use the person model and not the case model"
+    },
+    "dateOfOnset": {
+      "type": "date",
+      "description": "Case property; Defining it here as on sync we use the person model and not the case model"
+    },
+    "dateBecomeCase": {
+      "type": "date",
+      "description": "Case property; Defining it here as on sync we use the person model and not the case model"
+    },
+    "dateRanges": {
+      "type": [
+        "dateRangeWithDetails"
+      ],
+      "description": "Case property; Defining it here as on sync we use the person model and not the case model"
+    },
+    "classificationHistory": {
+      "type": [
+        "classificationHistoryItem"
+      ],
+      "readOnly": true,
+      "description": "Case property; Defining it here as on sync we use the person model and not the case model"
+    },
+    "dateOfOutcome": {
+      "type": "date",
+      "description": "Case/Contact property; Defining it here as on sync we use the person model and not the case/contact model"
+    },
+    "dateOfBurial": {
+      "type": "date",
+      "description": "Case/Contact property; Defining it here as on sync we use the person model and not the case/contact model"
+    },
+    "dateBecomeContact": {
+      "type": "date",
+      "description": "Contact property; Defining it here as on sync we use the person model and not the contact model"
+    },
+    "followUp": {
+      "description": "Contact property; Defining it here as on sync we use the person model and not the contact model. Object containing start/end dates for the contact's follow-up period. The dates are automatically calculated based on contact relationships dates and outbreak.periodOfFollowup",
+      "type": {
+        "originalStartDate": {
+          "description": "Date of the contact's earliest relationship (first contactDate)",
+          "type": "date"
+        },
+        "startDate": {
+          "description": "Latest contactDate of the contact's relationships",
+          "type": "date"
+        },
+        "endDate": {
+          "description": "Follow-up end date for the contact. Calculated from the startDate + outbreak.periodOfFollowup days",
+          "type": "date"
+        },
+        "status": {
+          "description": "Follow-up status",
+          "type": "string"
+        }
+      }
+    },
+    "date": {
+      "type": "date",
+      "description": "Event property; Defining it here as on sync we use the person model and not the event model"
     }
   },
   "indexes": {
@@ -134,6 +200,9 @@
     },
     "followUp_endDate_index": {
       "followUp.endDate": 1
+    },
+    "dateOfOnset_index": {
+      "dateOfOnset": 1
     }
   },
   "validations": [],
