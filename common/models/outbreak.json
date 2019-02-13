@@ -6175,8 +6175,11 @@
         },
         {
           "arg": "date",
-          "type": "date",
-          "required": true
+          "type": "date"
+        },
+        {
+          "arg": "contactId",
+          "type": "string"
         },
         {
           "arg": "groupBy",
