@@ -7504,12 +7504,13 @@ module.exports = function (Outbreak) {
    * Export contact follow-up list for one day
    * @param res
    * @param date
+   * @param contactId
    * @param groupBy
    * @param filter
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportContactFollowUpListPerDay = function (res, date, groupBy, filter, options, callback) {
+  Outbreak.prototype.exportContactFollowUpListPerDay = function (res, date, contactId, groupBy, filter, options, callback) {
     // make context available
     const self = this;
     // get language id
@@ -7527,8 +7528,18 @@ module.exports = function (Outbreak) {
       // execute callback
       callback(error, result);
       // replace callback with no-op to prevent calling it multiple times
-      callback = function noOp() {
-      };
+      callback = function noOp() {};
+    }
+
+    // make sure we have either date or contactId
+    if (
+      !date &&
+      !contactId
+    ) {
+      // return validation error: at least one of these two must be provided
+      const error = new Error('Either date or contactId must be provided');
+      res.req.logger.error(JSON.stringify(error));
+      return cb(error);
     }
 
     // load language dictionary
@@ -7592,10 +7603,29 @@ module.exports = function (Outbreak) {
       // define start date, end date for follow-ups
       let startDate;
       let endDate;
+      let dateCondition = {};
       // set them according to date
       if (date) {
+        // determine start & end dates
         startDate = genericHelpers.getDate(date);
         endDate = genericHelpers.getDateEndOfDay(date);
+
+        // determine date condition that will be added when retrieving follow-ups
+        dateCondition =  {
+          date: {
+            gte: new Date(startDate),
+            lte: new Date(endDate)
+          }
+        };
+      }
+
+      // determine contact condition that will be added when retrieving follow-ups
+      let contactCondition = {};
+      let contactData;
+      if (contactId) {
+        contactCondition = {
+          personId: contactId
+        };
       }
 
       // keep a list of locations to resolve
@@ -7604,17 +7634,16 @@ module.exports = function (Outbreak) {
       app.models.followUp
         .preFilterForOutbreak(self, filter)
         .then(function (filter) {
-
           // find follow-ups using filter
           return app.models.followUp.rawFind({
             $and: [
-              filter.where, {
-                date: {
-                  gte: new Date(startDate),
-                  lte: new Date(endDate)
+              filter.where, Object.assign(
+                {
+                  outbreakId: self.id
                 },
-                outbreakId: self.id
-              }
+                dateCondition,
+                contactCondition
+              )
             ]
           }, {
             projection: {
@@ -7630,8 +7659,8 @@ module.exports = function (Outbreak) {
           // find contacts for the found follow-ups
           return app.models.contact
             .rawFind({
-              _id: {
-                inq: followUps.map(followUp => followUp.personId)
+              _id: contactId ? contactId : {
+                inq: [...new Set(followUps.map(followUp => followUp.personId))]
               },
               outbreakId: self.id
             }, {
@@ -7653,6 +7682,10 @@ module.exports = function (Outbreak) {
               contacts.forEach(function (contact) {
                 contactsMap[contact.id] = contact;
               });
+
+              // keep contact data to use later when generating pdf
+              contactData = contactsMap[contactId];
+
               // add contact information for each follow-up
               followUps.forEach(function (followUp) {
                 followUp.contact = contactsMap[followUp.personId];
@@ -7770,7 +7803,7 @@ module.exports = function (Outbreak) {
                           });
                           // go through all follow-ups
                           followUps.forEach(function (followUp) {
-                            // init group if not already inited
+                            // init group if not already initialized
                             if (!groups[contactToCaseMap[followUp.personId]]) {
                               // get person information from the map
                               const person = peopleMap[contactToCaseMap[followUp.personId]] || {};
@@ -7849,7 +7882,8 @@ module.exports = function (Outbreak) {
                         address: app.models.address.getHumanReadableAddress(record.address),
                         day: record.index,
                         from: moment(_.get(record, 'contact.followUp.startDate')).format('YYYY-MM-DD'),
-                        to: moment(_.get(record, 'contact.followUp.endDate')).format('YYYY-MM-DD')
+                        to: moment(_.get(record, 'contact.followUp.endDate')).format('YYYY-MM-DD'),
+                        date: record.date ? moment(record.date).format('YYYY-MM-DD') : undefined
                       };
                       // mark appropriate status as done
                       recordEntry[record.statusId] = 'X';
@@ -7876,37 +7910,43 @@ module.exports = function (Outbreak) {
             })
             .then(function (referenceData) {
               // build table headers
-              const headers = [{
-                id: 'firstName',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME')
-              }, {
-                id: 'lastName',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME')
-              }, {
-                id: 'middleName',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME')
-              }, {
-                id: 'age',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE')
-              }, {
-                id: 'gender',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER')
-              }, {
-                id: 'location',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION')
-              }, {
-                id: 'address',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS')
-              }, {
-                id: 'day',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_DAY')
-              }, {
-                id: 'from',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM')
-              }, {
-                id: 'to',
-                header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO')
-              }];
+              const headers = [
+                ...(contactData ? [{
+                  id: 'date',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_DATE')
+                }] : [{
+                  id: 'firstName',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME')
+                }, {
+                  id: 'lastName',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME')
+                }, {
+                  id: 'middleName',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME')
+                }, {
+                  id: 'age',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE')
+                }, {
+                  id: 'gender',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER')
+                }]),
+                ...[{
+                  id: 'location',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION')
+                }, {
+                  id: 'address',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS')
+                }, {
+                  id: 'day',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_DAY')
+                }, {
+                  id: 'from',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM')
+                }, {
+                  id: 'to',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO')
+                }]
+              ];
 
               // also add follow-up statuses to table headers
               referenceData.forEach(function (referenceDataItem) {
@@ -7917,7 +7957,7 @@ module.exports = function (Outbreak) {
               });
               // define a list of common labels
               const commonLabels = {
-                title: `${dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TITLE')}: ${moment(startDate).format('YYYY-MM-DD')}`,
+                title: `${dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TITLE')}: ${contactData ? app.models.person.getDisplayName(contactData) : moment(startDate).format('YYYY-MM-DD')}`,
                 groupTitle: dictionary.getTranslation(groupBy === 'place' ? 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_LOCATION' : 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_CASE'),
                 total: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TOTAL')
               };
