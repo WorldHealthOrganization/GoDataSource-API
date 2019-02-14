@@ -407,34 +407,50 @@ module.exports = function (Case) {
             const labResultsMap = {};
             // go through all lab results
             labResults.forEach(function (labResult) {
-              // only keep the first one for each person
+              // initialize case group if necessary
               if (!labResultsMap[labResult.personId]) {
-                labResultsMap[labResult.personId] = labResult;
+                labResultsMap[labResult.personId] = [];
               }
+
+              // keep all lab tests for each case
+              labResultsMap[labResult.personId].push(labResult);
             });
 
-            // build the list of results
+            // go through case records & build the list of results
             const results = [];
-            // go through case records
             cases.forEach(function (caseRecord) {
+              // get case lab results if we have any
+              const labResultData = labResultsMap[caseRecord.id] ? labResultsMap[caseRecord.id] : [];
 
-              // get lab result's dateSampleTaken, if available
-              const labResultDate = labResultsMap[caseRecord.id] ? labResultsMap[caseRecord.id].dateSampleTaken : null;
-              // build each result
-              const result = {
-                dateOfOnset: caseRecord.dateOfOnset,
-                dateOfFirstLabTest: labResultDate,
-                delay: null,
-                case: caseRecord
-              };
-              // calculate delay if both dates are available (onset is ensured by the query)
-              if (labResultDate) {
-                const onset = moment(result.dateOfOnset);
-                const labTest = moment(result.dateOfFirstLabTest);
-                result.delay = labTest.diff(onset, 'days');
-              }
-              results.push(result);
+              // go through each lab data & get lab result's dateSampleTaken
+              let labResultIndex = 0;
+              do {
+                // get lab result if we have one
+                const labResultDate = labResultData[labResultIndex] ? labResultData[labResultIndex].dateSampleTaken : null;
+
+                // build each result
+                const result = {
+                  dateOfOnset: caseRecord.dateOfOnset,
+                  dateSampleTaken: labResultDate,
+                  delay: null,
+                  case: caseRecord
+                };
+
+                // calculate delay if both dates are available (onset is ensured by the query)
+                if (labResultDate) {
+                  const onset = moment(result.dateOfOnset);
+                  const labTest = moment(result.dateSampleTaken);
+                  result.delay = labTest.diff(onset, 'days');
+                }
+
+                // add result to list
+                results.push(result);
+
+                // next lab result for this case
+                labResultIndex++;
+              } while (labResultIndex < labResultData.length);
             });
+
             // return the list of results
             return results;
           });
