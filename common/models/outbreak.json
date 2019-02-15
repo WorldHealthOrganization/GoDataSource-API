@@ -6144,7 +6144,7 @@
             {
               "type": {
                 "dateOfOnset": "date",
-                "dateOfFirstLabTest": "date",
+                "dateSampleTaken": "date",
                 "delay": {
                   "type": "number",
                   "description": "Number of days between date of onset and the date of the first lab test sample"
