@@ -423,6 +423,7 @@ module.exports = function (Case) {
               const labResultData = labResultsMap[caseRecord.id] ? labResultsMap[caseRecord.id] : [];
 
               // go through each lab data & get lab result's dateSampleTaken
+              // we need to use DO...WHILE because even if we don't have lab data for a case, we still need to send back an empty result
               let labResultIndex = 0;
               do {
                 // get lab result if we have one
