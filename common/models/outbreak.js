@@ -1584,8 +1584,8 @@ module.exports = function (Outbreak) {
         });
       });
 
-      // execute actions in parallel
-      async.parallelLimit(actions, 10, function (error) {
+      // execute actions in sync because we need to generate a different visualID for each record
+      async.series(actions, function (error) {
         if (error) {
           return reject(error);
         }
