@@ -157,7 +157,9 @@ module.exports = function (ImportMapping) {
     // are we allowed to change this one ?
     if (ImportMapping.helpers.isReadOnly(context.req.authData.user.id, context.instance)) {
       // throw error
-      next(app.utils.apiError.getError('AUTHORIZATION_REQUIRED'));
+      next(app.utils.apiError.getError('ACCESS_DENIED', {
+        accessErrors: 'Client is not allowed to change this record'
+      }, 403));
     } else {
       // finished - continue
       next();
@@ -175,7 +177,9 @@ module.exports = function (ImportMapping) {
         // are we allowed to delete this one ?
         if (ImportMapping.helpers.isReadOnly(context.req.authData.user.id, importMapping)) {
           // throw error
-          next(app.utils.apiError.getError('AUTHORIZATION_REQUIRED'));
+          next(app.utils.apiError.getError('ACCESS_DENIED', {
+            accessErrors: 'Client is not allowed to delete this record'
+          }, 403));
         } else {
           // finished - continue
           next();
