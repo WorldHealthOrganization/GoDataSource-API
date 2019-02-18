@@ -33,7 +33,7 @@ module.exports = function (ImportMapping) {
     },
 
     /**
-     *
+     * Check if an import mapping record is read-only
      * @param userId Authenticated User
      * @param importMappingModel Record to be checked if read-only
      * @returns {boolean} true if readonly, False otherwise
@@ -42,7 +42,6 @@ module.exports = function (ImportMapping) {
       return importMappingModel.userId !== userId;
     },
 
-    //
     /**
      * Attach custom properties on a model that we don't want to save in the database before sending data back to client
      * @param userId Authenticated User
