@@ -311,5 +311,17 @@
   "customGeoPoint": {
     "dataSource": null,
     "public": false
+  },
+  "importMapping": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "importMappingValue": {
+    "dataSource": null,
+    "public": false
+  },
+  "importMappingOptionValue": {
+    "dataSource": null,
+    "public": false
   }
 }
