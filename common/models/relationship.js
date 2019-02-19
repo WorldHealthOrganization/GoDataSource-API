@@ -23,9 +23,9 @@ module.exports = function (Relationship) {
     Object.assign(
       fieldLabelsMap,
       Relationship.fieldLabelsMap, _.transform(
-        app.models.case.fieldLabelsMap,
-        (r, v, k) => {
-          r[`sourcePerson.${k}`] = v;
+        app.models.person.fieldLabelsMap,
+        (tokens, token, property) => {
+          tokens[`sourcePerson.${property}`] = token;
         },
         {}
       ), {
@@ -37,9 +37,9 @@ module.exports = function (Relationship) {
     Object.assign(
       fieldLabelsMap,
       Relationship.fieldLabelsMap, _.transform(
-        app.models.case.fieldLabelsMap,
-        (r, v, k) => {
-          r[`targetPerson.${k}`] = v;
+        app.models.person.fieldLabelsMap,
+        (tokens, token, property) => {
+          tokens[`targetPerson.${property}`] = token;
         },
         {}
       ), {

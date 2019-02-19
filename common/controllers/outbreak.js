@@ -8280,6 +8280,9 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
+        // we need to add target & source label to differentiate between their properties ( e.g. firstName, lastName... )
+        options.prependObjectProperties = true;
+
         // export list of relationships
         app.utils.remote.helpers.exportFilteredModelsList(app, app.models.relationship, filter.where, exportType, 'Relationship List', encryptPassword, anonymizeFields, options, function (results) {
           // construct unique list of persons that we need to retrieve
@@ -8320,6 +8323,7 @@ module.exports = function (Outbreak) {
           // attach persons to the list of relationships
           return buildQuery
             .then(() => {
+              // add source & target objects
               results.forEach((relationship) => {
                 // map source & target
                 if (
@@ -8343,7 +8347,7 @@ module.exports = function (Outbreak) {
                   }
                 }
               });
-            }).then(() => {
+
               // return results once we map everything we need
               return results;
             });

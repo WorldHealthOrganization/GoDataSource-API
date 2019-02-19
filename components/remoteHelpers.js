@@ -120,11 +120,13 @@ function exportFilteredModelsList(app, Model, query, exportType, fileName, encry
           // if a flat file is exported, data needs to be flattened, include 3 elements for each array
           if (!['json', 'xml'].includes(exportType) && /(\[]|\.)/.test(propertyName)) {
             // determine if we need to include parent token
-            const parentIndex = propertyName.indexOf('.');
             let parentToken;
-            if (parentIndex >= -1) {
-              const parentKey = propertyName.substr(0, parentIndex);
-              parentToken = fieldLabelsMap[parentKey];
+            if (options.prependObjectProperties) {
+              const parentIndex = propertyName.indexOf('.');
+              if (parentIndex >= -1) {
+                const parentKey = propertyName.substr(0, parentIndex);
+                parentToken = fieldLabelsMap[parentKey];
+              }
             }
 
             // create headers
