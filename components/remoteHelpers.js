@@ -121,7 +121,7 @@ function exportFilteredModelsList(app, Model, query, exportType, fileName, encry
           if (!['json', 'xml'].includes(exportType) && /(\[]|\.)/.test(propertyName)) {
             // determine if we need to include parent token
             let parentToken;
-            if (options.prependObjectProperties) {
+            if (options.prependObjectNames) {
               const parentIndex = propertyName.indexOf('.');
               if (parentIndex >= -1) {
                 const parentKey = propertyName.substr(0, parentIndex);

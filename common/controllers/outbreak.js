@@ -8281,7 +8281,7 @@ module.exports = function (Outbreak) {
         }
 
         // we need to add target & source label to differentiate between their properties ( e.g. firstName, lastName... )
-        options.prependObjectProperties = true;
+        options.prependObjectNames = true;
 
         // export list of relationships
         app.utils.remote.helpers.exportFilteredModelsList(app, app.models.relationship, filter.where, exportType, 'Relationship List', encryptPassword, anonymizeFields, options, function (results) {
