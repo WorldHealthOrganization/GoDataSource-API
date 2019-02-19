@@ -924,10 +924,10 @@ const formatDateFields = function (model, dateFieldsList) {
     let reference = getReferencedValue(model, field);
     if (Array.isArray(reference)) {
       reference.forEach((indicator) => {
-        _.set(model, indicator.exactPath, indicator.value ? getDateDisplayValue(indicator.value) : ' ');
+        _.set(model, indicator.exactPath, indicator.value ? getDateDisplayValue(indicator.value) : '');
       });
     } else {
-      _.set(model, reference.exactPath, reference.value ? getDateDisplayValue(reference.value) : ' ');
+      _.set(model, reference.exactPath, reference.value ? getDateDisplayValue(reference.value) : '');
     }
   });
 };
@@ -945,7 +945,7 @@ const formatUndefinedValues = function (model) {
     } else if (typeof (model[key]) === 'object' && model[key] !== null) {
       formatUndefinedValues(model[key]);
     } else if (model[key] === undefined) {
-      _.set(model, key, ' ');
+      _.set(model, key, '');
     }
   });
 };
@@ -967,10 +967,10 @@ const translateDataSetReferenceDataValues = function (dataSet, Model, dictionary
         let reference = getReferencedValue(model, field);
         if (Array.isArray(reference)) {
           reference.forEach((indicator) => {
-            _.set(model, indicator.exactPath, indicator.value ? dictionary.getTranslation(indicator.value) : ' ');
+            _.set(model, indicator.exactPath, indicator.value ? dictionary.getTranslation(indicator.value) : '');
           });
         } else {
-          _.set(model, reference.exactPath, reference.value ? dictionary.getTranslation(reference.value) : ' ');
+          _.set(model, reference.exactPath, reference.value ? dictionary.getTranslation(reference.value) : '');
         }
       });
     });

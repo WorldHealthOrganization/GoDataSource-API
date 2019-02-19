@@ -8256,6 +8256,101 @@ module.exports = function (Outbreak) {
       .catch(callback);
   };
 
+  /**
+   * Export filtered relationships to file
+   * @param filter Supports 'where.person' MongoDB compatible queries
+   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param encryptPassword
+   * @param anonymizeFields
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportFilteredRelationships = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    // const self = this;
+    app.models.relationship
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // if encrypt password is not valid, remove it
+        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+          encryptPassword = null;
+        }
+
+        // make sure anonymizeFields is valid
+        if (!Array.isArray(anonymizeFields)) {
+          anonymizeFields = [];
+        }
+
+        // export list of relationships
+        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.relationship, filter.where, exportType, 'Relationship List', encryptPassword, anonymizeFields, options, function (results) {
+          // construct unique list of persons that we need to retrieve
+          let personIds = {};
+          results.forEach((relationship) => {
+            if (
+              relationship.persons &&
+              relationship.persons.length > 1
+            ) {
+              personIds[relationship.persons[0].id] = true;
+              personIds[relationship.persons[1].id] = true;
+            }
+          });
+
+          // flip object to array
+          personIds = Object.keys(personIds);
+
+          // start with a resolved promise (so we can link others)
+          let buildQuery = Promise.resolve();
+
+          // retrieve list of persons
+          const mappedPersons = {};
+          if (!_.isEmpty(personIds)) {
+            buildQuery = app.models.person
+              .rawFind({
+                id: {
+                  inq: personIds
+                }
+              })
+              .then((personRecords) => {
+                // map list of persons ( ID => persons model )
+                personRecords.forEach((personData) => {
+                  mappedPersons[personData.id] = personData;
+                });
+              });
+          }
+
+          // attach persons to the list of relationships
+          return buildQuery
+            .then(() => {
+              results.forEach((relationship) => {
+                // map source & target
+                if (
+                  relationship.persons &&
+                  relationship.persons.length > 1
+                ) {
+                  // retrieve person models
+                  const firstPerson = mappedPersons[relationship.persons[0].id];
+                  const secondPerson = mappedPersons[relationship.persons[1].id];
+                  if (
+                    firstPerson &&
+                    secondPerson
+                  ) {
+                    // attach target
+                    relationship.sourcePerson = relationship.persons[0].source ? firstPerson : secondPerson;
+                    relationship.targetPerson = relationship.persons[0].target ? firstPerson : secondPerson;
+                  } else {
+                    // relationship doesn't have source & target ( it should've been deleted ( cascade ... ) )
+                    relationship.sourcePerson = {};
+                    relationship.targetPerson = {};
+                  }
+                }
+              });
+            }).then(() => {
+              // return results once we map everything we need
+              return results;
+            });
+        }, callback);
+      })
+      .catch(callback);
+  };
 
   /**
    * Backwards compatibility for find, filtered-count and per-classification count contacts filters

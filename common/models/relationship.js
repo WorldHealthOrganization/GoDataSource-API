@@ -8,6 +8,49 @@ module.exports = function (Relationship) {
   // set flag to not get controller
   Relationship.hasController = false;
 
+  // initialize model helpers
+  Relationship.helpers = {};
+
+  /**
+   * Return a list of field labels map that are allowed for export
+   * @returns {*}
+   */
+  Relationship.helpers.sanitizeFieldLabelsMapForExport = () => {
+    // make sure we don't alter the original array
+    const fieldLabelsMap = {};
+
+    // append source export fields
+    Object.assign(
+      fieldLabelsMap,
+      Relationship.fieldLabelsMap, _.transform(
+        app.models.case.fieldLabelsMap,
+        (r, v, k) => {
+          r[`sourcePerson.${k}`] = v;
+        },
+        {}
+      ), {
+        'sourcePerson': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE'
+      }
+    );
+
+    // append target export fields
+    Object.assign(
+      fieldLabelsMap,
+      Relationship.fieldLabelsMap, _.transform(
+        app.models.case.fieldLabelsMap,
+        (r, v, k) => {
+          r[`targetPerson.${k}`] = v;
+        },
+        {}
+      ), {
+        'targetPerson': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET'
+      }
+    );
+
+    // finished
+    return fieldLabelsMap;
+  };
+
   Relationship.fieldLabelsMap = Object.assign({}, Relationship.fieldLabelsMap, {
     persons: 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS',
     'persons[].type': 'LNG_RELATIONSHIP_FIELD_LABEL_TYPE',
@@ -62,6 +105,7 @@ module.exports = function (Relationship) {
     'comment',
     'person'
   ];
+
   /**
    * Build or count transmission chains for an outbreak
    * @param outbreakId
@@ -871,6 +915,105 @@ module.exports = function (Relationship) {
       .then(function () {
         // return final result
         return result;
+      });
+  };
+
+  /**
+   * Pre-filter relationships for an outbreak using related models ( person ( case / contact / event ) )
+   * @param outbreak
+   * @param filter Supports 'where.person' MongoDB compatible queries
+   * @return {Promise<void | never>}
+   */
+  Relationship.preFilterForOutbreak = function (outbreak, filter) {
+    // set a default filter
+    filter = filter || {};
+
+    // get person query, if any
+    let personQuery = _.get(filter, 'where.person');
+
+    // if found, remove it form main query
+    if (personQuery) {
+      delete filter.where.person;
+    }
+
+    // get main relationship query
+    let relationshipQuery = _.get(filter, 'where');
+
+    // start with a resolved promise (so we can link others)
+    let buildQuery = Promise.resolve();
+
+    // if a person query is present
+    if (personQuery) {
+      // restrict query to current outbreak
+      personQuery = {
+        $and: [
+          personQuery,
+          {
+            outbreakId: outbreak.id
+          }
+        ]
+      };
+
+      // filter person based on query
+      buildQuery = buildQuery
+        .then(function () {
+          return app.models.person
+            .rawFind(personQuery, {projection: {_id: 1}})
+            .then(function (personRecords) {
+              // build a list of personIds that passed the filter
+              let personIds = [];
+              personRecords.forEach(function (person) {
+                personIds.push(person.id);
+              });
+              return Array.from(new Set(personIds));
+            });
+        });
+    }
+
+    // return relationships
+    return buildQuery
+      .then(function (personIds) {
+        // if personIds filter present
+        if (personIds) {
+          // update relationship query to filter based on personIds
+          if (_.isEmpty(relationshipQuery)) {
+            relationshipQuery = {
+              'persons.id': {
+                inq: personIds
+              }
+            };
+          } else {
+            relationshipQuery = {
+              and: [
+                relationshipQuery,
+                {
+                  'persons.id': {
+                    inq: personIds
+                  }
+                }
+              ]
+            };
+          }
+        }
+
+        // restrict relationship query to current outbreak
+        if (_.isEmpty(relationshipQuery)) {
+          relationshipQuery = {
+            outbreakId: outbreak.id
+          };
+        } else {
+          relationshipQuery = {
+            and: [
+              relationshipQuery,
+              {
+                outbreakId: outbreak.id
+              }
+            ]
+          };
+        }
+
+        // return updated filter
+        return Object.assign(filter, {where: relationshipQuery});
       });
   };
 };
