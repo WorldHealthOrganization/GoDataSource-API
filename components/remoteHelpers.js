@@ -115,9 +115,21 @@ function exportFilteredModelsList(app, Model, query, exportType, fileName, encry
         // define a list of table headers
         const headers = [];
         // headers come from model
-        Object.keys(Model.fieldLabelsMap).forEach(function (propertyName) {
+        const fieldLabelsMap = Model.helpers && Model.helpers.sanitizeFieldLabelsMapForExport ? Model.helpers.sanitizeFieldLabelsMapForExport() : Model.fieldLabelsMap;
+        Object.keys(fieldLabelsMap).forEach(function (propertyName) {
           // if a flat file is exported, data needs to be flattened, include 3 elements for each array
           if (!['json', 'xml'].includes(exportType) && /(\[]|\.)/.test(propertyName)) {
+            // determine if we need to include parent token
+            let parentToken;
+            if (options.prependObjectNames) {
+              const parentIndex = propertyName.indexOf('.');
+              if (parentIndex >= -1) {
+                const parentKey = propertyName.substr(0, parentIndex);
+                parentToken = fieldLabelsMap[parentKey];
+              }
+            }
+
+            // create headers
             let maxElements = 3;
             // pdf has a limited width, include only one element
             if (exportType === 'pdf') {
@@ -127,14 +139,14 @@ function exportFilteredModelsList(app, Model, query, exportType, fileName, encry
               headers.push({
                 id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
                 // use correct label translation for user language
-                header: `${dictionary.getTranslation(Model.fieldLabelsMap[propertyName])}${/\[]/.test(propertyName) ? ' [' + i + ']' : ''}`
+                header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(fieldLabelsMap[propertyName])}${/\[]/.test(propertyName) ? ' [' + i + ']' : ''}`
               });
             }
           } else {
             headers.push({
               id: propertyName,
               // use correct label translation for user language
-              header: dictionary.getTranslation(Model.fieldLabelsMap[propertyName])
+              header: dictionary.getTranslation(fieldLabelsMap[propertyName])
             });
           }
         });
