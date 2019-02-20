@@ -36,7 +36,8 @@ module.exports = function (Relationship) {
     // append source export fields
     Object.assign(
       fieldLabelsMap,
-      Relationship.fieldLabelsMap, _.transform(
+      Relationship.fieldLabelsMap,
+      _.transform(
         personFieldLabelsMap,
         (tokens, token, property) => {
           tokens[`sourcePerson.${property}`] = token;
@@ -50,7 +51,8 @@ module.exports = function (Relationship) {
     // append target export fields
     Object.assign(
       fieldLabelsMap,
-      Relationship.fieldLabelsMap, _.transform(
+      Relationship.fieldLabelsMap,
+      _.transform(
         personFieldLabelsMap,
         (tokens, token, property) => {
           tokens[`targetPerson.${property}`] = token;
@@ -60,6 +62,13 @@ module.exports = function (Relationship) {
         'targetPerson': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET'
       }
     );
+
+    // sanitize
+    delete fieldLabelsMap.persons;
+    delete fieldLabelsMap['persons[].type'];
+    delete fieldLabelsMap['persons[].id'];
+    delete fieldLabelsMap['persons[].target'];
+    delete fieldLabelsMap['persons[].source'];
 
     // finished
     return fieldLabelsMap;
