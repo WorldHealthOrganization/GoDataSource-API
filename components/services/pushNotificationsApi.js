@@ -16,7 +16,9 @@ Parse.serverURL = config.pushNotifications.serverURL;
 function Notification(type, text) {
   this.type = type;
   this.alert = text;
-  this['content-available'] = 1;
+  this.aps = {
+    'content-available': 1
+  };
 }
 
 /**
