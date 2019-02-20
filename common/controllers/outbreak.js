@@ -8323,6 +8323,24 @@ module.exports = function (Outbreak) {
           // attach persons to the list of relationships
           return buildQuery
             .then(() => {
+              // retrieve dictionary
+              return new Promise(function (resolve, reject) {
+                // load context user
+                const contextUser = app.utils.remote.getUserFromOptions(options);
+
+                // load user language dictionary
+                app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+                  // handle errors
+                  if (error) {
+                    return reject(error);
+                  }
+
+                  // finished
+                  resolve(dictionary);
+                });
+              });
+            })
+            .then((dictionary) => {
               // add source & target objects
               results.forEach((relationship) => {
                 // map source & target
@@ -8345,6 +8363,14 @@ module.exports = function (Outbreak) {
                     relationship.sourcePerson = {};
                     relationship.targetPerson = {};
                   }
+                }
+
+                // translate data
+                if (relationship.sourcePerson.gender) {
+                  relationship.sourcePerson.gender = dictionary.getTranslation(relationship.sourcePerson.gender);
+                }
+                if (relationship.targetPerson.gender) {
+                  relationship.targetPerson.gender = dictionary.getTranslation(relationship.targetPerson.gender);
                 }
               });
 

@@ -658,8 +658,11 @@
       "LNG_OUTBREAK_FIELD_LABEL_START_DATE_DESCRIPTION": "For info only"
     },
     "uiEntityFields": {
+      "LNG_ENTITY_FIELD_LABEL_ID": "UID",
       "LNG_ENTITY_FIELD_LABEL_ADDRESS": "Address",
       "LNG_ENTITY_FIELD_LABEL_AGE": "Age",
+      "LNG_ENTITY_FIELD_LABEL_AGE_YEARS": "Age / Years",
+      "LNG_ENTITY_FIELD_LABEL_AGE_MONTHS": "Age / Months",
       "LNG_ENTITY_FIELD_LABEL_CLASSIFICATION": "Classification",
       "LNG_ENTITY_FIELD_LABEL_DOB": "Date of birth",
       "LNG_ENTITY_FIELD_LABEL_DOCUMENT_NUMBER": "Document number",
@@ -668,6 +671,7 @@
       "LNG_ENTITY_FIELD_LABEL_INCONSISTENCIES": "Inconsistencies",
       "LNG_ENTITY_FIELD_LABEL_LAST_FOLLOW_UP": "Last follow-up",
       "LNG_ENTITY_FIELD_LABEL_LAST_NAME": "Last name",
+      "LNG_ENTITY_FIELD_LABEL_MIDDLE_NAME": "Middle name",
       "LNG_ENTITY_FIELD_LABEL_PLACE": "Place",
       "LNG_ENTITY_FIELD_LABEL_RISK": "Risk",
       "LNG_ENTITY_FIELD_LABEL_TYPE": "Type",

@@ -19,11 +19,26 @@ module.exports = function (Relationship) {
     // make sure we don't alter the original array
     const fieldLabelsMap = {};
 
+    // relationship person labels
+    const personFieldLabelsMap = {
+      'id': 'LNG_ENTITY_FIELD_LABEL_ID',
+      'visualId': 'LNG_ENTITY_FIELD_LABEL_VISUAL_ID',
+      'lastName': 'LNG_ENTITY_FIELD_LABEL_LAST_NAME',
+      'firstName': 'LNG_ENTITY_FIELD_LABEL_FIRST_NAME',
+      'middleName': 'LNG_ENTITY_FIELD_LABEL_MIDDLE_NAME',
+      'gender': 'LNG_ENTITY_FIELD_LABEL_GENDER',
+      'dob': 'LNG_ENTITY_FIELD_LABEL_DOB',
+      'age': 'LNG_ENTITY_FIELD_LABEL_AGE',
+      'age.years': 'LNG_ENTITY_FIELD_LABEL_AGE_YEARS',
+      'age.months': 'LNG_ENTITY_FIELD_LABEL_AGE_MONTHS',
+    };
+
     // append source export fields
     Object.assign(
       fieldLabelsMap,
-      Relationship.fieldLabelsMap, _.transform(
-        app.models.person.fieldLabelsMap,
+      Relationship.fieldLabelsMap,
+      _.transform(
+        personFieldLabelsMap,
         (tokens, token, property) => {
           tokens[`sourcePerson.${property}`] = token;
         },
@@ -36,8 +51,9 @@ module.exports = function (Relationship) {
     // append target export fields
     Object.assign(
       fieldLabelsMap,
-      Relationship.fieldLabelsMap, _.transform(
-        app.models.person.fieldLabelsMap,
+      Relationship.fieldLabelsMap,
+      _.transform(
+        personFieldLabelsMap,
         (tokens, token, property) => {
           tokens[`targetPerson.${property}`] = token;
         },
@@ -46,6 +62,13 @@ module.exports = function (Relationship) {
         'targetPerson': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET'
       }
     );
+
+    // sanitize
+    delete fieldLabelsMap.persons;
+    delete fieldLabelsMap['persons[].type'];
+    delete fieldLabelsMap['persons[].id'];
+    delete fieldLabelsMap['persons[].target'];
+    delete fieldLabelsMap['persons[].source'];
 
     // finished
     return fieldLabelsMap;
