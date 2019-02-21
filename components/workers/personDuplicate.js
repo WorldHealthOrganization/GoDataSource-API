@@ -36,18 +36,29 @@ function addEntryToIndexWithId(index, id, entry) {
 function getEntryId(entry, keys) {
   // start with an empty id
   let id = '';
+
+  // all values must match the conditions, otherwise the id can't be generated
+  // this translates into and AND condition between keys, instead of an OR how it was before
+  let allMatched = true;
+
   // go through all the keys
   keys.forEach(function (keyComponent) {
     // get the value associated with the key from the entry
     const value = _.get(entry, keyComponent);
     // if it's a valid value
-    if (value != null) {
+    if (
+      value != null &&
+      value !== ''
+    ) {
       // add it to the id
       id += value.toString().toLowerCase();
+    } else {
+      allMatched = false;
     }
   });
+
   // return build id
-  return id;
+  return allMatched ? id : '';
 }
 
 /**
@@ -55,9 +66,9 @@ function getEntryId(entry, keys) {
  * @param index
  * @param entry
  * @param keys
- * @param searchReverse
+ * @param reversed
  */
-function addEntryToIndex(index, entry, keys, searchReverse) {
+function addEntryToIndex(index, entry, keys, reversed) {
   // get index id for that key
   let id = getEntryId(entry, keys);
   // if the id is valid
@@ -65,17 +76,12 @@ function addEntryToIndex(index, entry, keys, searchReverse) {
     // group people with same types
     id = `${typeof entry.type === 'string' ? entry.type.toLowerCase() : 'unknown_type'}${id}`;
     // add the entry to the index using generated id
-    addEntryToIndexWithId(index, id, entry);
-    // if the match should be done in a reverse order as well
-    if (searchReverse) {
-      // get reversed id (id built from the keys in reverse order)
-      const revId = getEntryId(entry, keys.reverse());
-      // if this is a different id than the original one and there's a matching entry present (we're only adding reverse matches
-      // if direct matches are present for reverse index, otherwise skip them - adding reverse matches for all records, means duplicating direct results)
-      if (id !== revId && index[revId]) {
-        // add the entry as a possible duplicate
-        addEntryToIndexWithId(index, revId, entry);
-      }
+    // only if not reversed, if reversed we need to check if we have indexed before a records with the same index that wasn't in reverse mode
+    if (
+      !reversed ||
+      index[id]
+    ) {
+      addEntryToIndexWithId(index, id, entry);
     }
   }
 }
@@ -90,18 +96,22 @@ const worker = {
       phoneNumber: {}
     };
     // go through the list of people
+    // NO REVERSE
     people.forEach(function (person) {
       // if person has name (type event)
-      if (person.name) {
+      if (
+        person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT' &&
+        person.name
+      ) {
         // store people indexed by name
         addEntryToIndex(index.name, person, ['name']);
       }
-      // store people indexed by firstName and lastName (also try to match reverse order)
-      addEntryToIndex(index.name, person, ['firstName', 'lastName'], true);
-      // store people indexed by firstName and middleName (also try to match reverse order)
-      addEntryToIndex(index.name, person, ['firstName', 'middleName'], true);
-      // store people indexed by middleName and lastName (also try to match reverse order)
-      addEntryToIndex(index.name, person, ['middleName', 'lastName'], true);
+      // store people indexed by firstName and lastName
+      addEntryToIndex(index.name, person, ['firstName', 'lastName']);
+      // store people indexed by firstName and middleName
+      addEntryToIndex(index.name, person, ['firstName', 'middleName']);
+      // store people indexed by middleName and lastName
+      addEntryToIndex(index.name, person, ['middleName', 'lastName']);
       // if phone number is present
       if (person.phoneNumber) {
         // store people indexed by phoneNumber and gender
@@ -115,6 +125,17 @@ const worker = {
           addEntryToIndex(index.documents, person, [`documents.${idx}.type`, `documents.${idx}.number`]);
         });
       }
+    });
+
+    // go through the list of people
+    // REVERSE FIELDS
+    people.forEach(function (person) {
+      // store people indexed by firstName and lastName - match reverse order
+      addEntryToIndex(index.name, person, ['lastName', 'firstName'], true);
+      // store people indexed by firstName and middleName - match reverse order
+      addEntryToIndex(index.name, person, ['middleName', 'firstName'], true);
+      // store people indexed by middleName and lastName - match reverse order
+      addEntryToIndex(index.name, person, ['lastName', 'middleName'], true);
     });
 
     // build a list of results
