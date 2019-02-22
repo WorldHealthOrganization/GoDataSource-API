@@ -323,5 +323,13 @@
   "importMappingOptionValue": {
     "dataSource": null,
     "public": false
+  },
+  "filterMapping": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "filterMappingValue": {
+    "dataSource": null,
+    "public": false
   }
 }
