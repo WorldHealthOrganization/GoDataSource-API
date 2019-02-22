@@ -48,10 +48,13 @@ function getEntryId(entry, keys) {
     // if it's a valid value
     if (
       value != null &&
-      value !== ''
+      value !== '' && (
+        typeof value !== 'string' ||
+        value.trim() !== ''
+      )
     ) {
       // add it to the id
-      id += value.toString().toLowerCase();
+      id += value.toString().trim().toLowerCase();
     } else {
       allMatched = false;
     }
@@ -66,21 +69,28 @@ function getEntryId(entry, keys) {
  * @param index
  * @param entry
  * @param keys
- * @param reversed
+ * @param checkReversed
  */
-function addEntryToIndex(index, entry, keys, reversed) {
+function addEntryToIndex(index, entry, keys, checkReversed) {
   // get index id for that key
   let id = getEntryId(entry, keys);
+  let idReversed = checkReversed ? getEntryId(entry, [...keys].reverse()) : '';
+
   // if the id is valid
   if (id.length) {
     // group people with same types
     id = `${typeof entry.type === 'string' ? entry.type.toLowerCase() : 'unknown_type'}${id}`;
+    idReversed = idReversed ? `${typeof entry.type === 'string' ? entry.type.toLowerCase() : 'unknown_type'}${idReversed}` : idReversed;
+
     // add the entry to the index using generated id
-    // only if not reversed, if reversed we need to check if we have indexed before a records with the same index that wasn't in reverse mode
+    // in case we can revert the index id, we should check if we don't have already an index for the reversed id to add it there
+    // instead of creating a new index that is the reversed index of an existing normal index
     if (
-      !reversed ||
-      index[id]
+      idReversed &&
+      index[idReversed]
     ) {
+      addEntryToIndexWithId(index, idReversed, entry);
+    } else {
       addEntryToIndexWithId(index, id, entry);
     }
   }
@@ -95,8 +105,8 @@ const worker = {
       documents: {},
       phoneNumber: {}
     };
+
     // go through the list of people
-    // NO REVERSE
     people.forEach(function (person) {
       // if person has name (type event)
       if (
@@ -107,11 +117,11 @@ const worker = {
         addEntryToIndex(index.name, person, ['name']);
       }
       // store people indexed by firstName and lastName
-      addEntryToIndex(index.name, person, ['firstName', 'lastName']);
+      addEntryToIndex(index.name, person, ['firstName', 'lastName'], true);
       // store people indexed by firstName and middleName
-      addEntryToIndex(index.name, person, ['firstName', 'middleName']);
+      addEntryToIndex(index.name, person, ['firstName', 'middleName'], true);
       // store people indexed by middleName and lastName
-      addEntryToIndex(index.name, person, ['middleName', 'lastName']);
+      addEntryToIndex(index.name, person, ['middleName', 'lastName'], true);
       // if phone number is present
       if (person.phoneNumber) {
         // store people indexed by phoneNumber and gender
@@ -127,21 +137,10 @@ const worker = {
       }
     });
 
-    // go through the list of people
-    // REVERSE FIELDS
-    people.forEach(function (person) {
-      // store people indexed by firstName and lastName - match reverse order
-      addEntryToIndex(index.name, person, ['lastName', 'firstName'], true);
-      // store people indexed by firstName and middleName - match reverse order
-      addEntryToIndex(index.name, person, ['middleName', 'firstName'], true);
-      // store people indexed by middleName and lastName - match reverse order
-      addEntryToIndex(index.name, person, ['lastName', 'middleName'], true);
-    });
-
     // build a list of results
     let results = [];
     // go through the list of indices
-    ['name', 'documents', 'phoneNumber'].forEach(function (indexType) {
+    Object.keys(index).forEach(function (indexType) {
       // go through indexed entries of each index
       Object.keys(index[indexType]).forEach(function (groupId) {
         // if there is more than one record indexed
