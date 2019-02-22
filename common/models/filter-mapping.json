@@ -1,5 +1,5 @@
 {
-  "name": "importMapping",
+  "name": "filterMapping",
   "base": "extendedPersistedModel",
   "idInjection": true,
   "options": {
@@ -21,8 +21,8 @@
       "default": false,
       "description": "True if it should be visible to everyone"
     },
-    "mappings": [
-      "importMappingValue"
+    "filters": [
+      "filterMappingValue"
     ],
     "readOnly": {
       "type": "boolean",

@@ -1,0 +1,25 @@
+{
+  "name": "filterMappingValue",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "field": {
+      "type": "string",
+      "required": true
+    },
+    "filter": {
+      "type": "object",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
