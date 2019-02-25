@@ -2634,7 +2634,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Supports 'where.person' MongoDB compatible queries."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Supports 'where.person' & 'where.followUp' MongoDB compatible queries. If you include both person & followUp conditions, then and AND will be applied between them."
         },
         {
           "arg": "type",
