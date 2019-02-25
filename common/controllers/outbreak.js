@@ -8258,7 +8258,8 @@ module.exports = function (Outbreak) {
 
   /**
    * Export filtered relationships to file
-   * @param filter Supports 'where.person' MongoDB compatible queries
+   * @param filter Supports 'where.person' & 'where.followUp' MongoDB compatible queries. For person please include type in case you want to filter only cases, contacts etc.
+   * If you include both person & followUp conditions, then and AND will be applied between them.
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields

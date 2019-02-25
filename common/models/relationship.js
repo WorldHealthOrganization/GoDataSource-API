@@ -944,7 +944,8 @@ module.exports = function (Relationship) {
   /**
    * Pre-filter relationships for an outbreak using related models ( person ( case / contact / event ) )
    * @param outbreak
-   * @param filter Supports 'where.person' MongoDB compatible queries
+   * @param filter Supports 'where.person' & 'where.followUp' MongoDB compatible queries. For person please include type in case you want to filter only cases, contacts etc.
+   * If you include both person & followUp conditions, then and AND will be applied between them.
    * @return {Promise<void | never>}
    */
   Relationship.preFilterForOutbreak = function (outbreak, filter) {
@@ -954,9 +955,17 @@ module.exports = function (Relationship) {
     // get person query, if any
     let personQuery = _.get(filter, 'where.person');
 
-    // if found, remove it form main query
+    // if person query found, remove it form main query
     if (personQuery) {
       delete filter.where.person;
+    }
+
+    // get follow-up query, if any
+    let followUpQuery = _.get(filter, 'where.followUp');
+
+    // if follow-up query found, remove it form main query
+    if (followUpQuery) {
+      delete filter.where.followUp;
     }
 
     // get main relationship query
@@ -984,10 +993,67 @@ module.exports = function (Relationship) {
             .rawFind(personQuery, {projection: {_id: 1}})
             .then(function (personRecords) {
               // build a list of personIds that passed the filter
-              let personIds = [];
+              const personIds = [];
               personRecords.forEach(function (person) {
                 personIds.push(person.id);
               });
+              return Array.from(new Set(personIds));
+            });
+        });
+    }
+
+    // if a follow-up query is present
+    if (followUpQuery) {
+      // restrict query to current outbreak
+      followUpQuery = {
+        $and: [
+          followUpQuery,
+          {
+            outbreakId: outbreak.id
+          }
+        ]
+      };
+
+      // filter follow-ups based on query
+      buildQuery = buildQuery
+        .then((personIds) => {
+          // in case we triggered person query and no results were returned, then there is no point in triggering a follow-up query since an AND is applied between these two
+          if (
+            personIds &&
+            personIds.length < 1
+          ) {
+            return [];
+          }
+
+          // either person query returned something, or we didn't call a person query
+          return app.models.followUp
+            .rawFind(followUpQuery, {projection: {personId: 1}})
+            .then(function (followUpRecords) {
+              // did we filter by person as well, then we need to do an intersection between ids which
+              // translates into both person and follow-up conditions must match ?
+              if (!personIds) {
+                personIds = [];
+                followUpRecords.forEach((followUp) => {
+                  personIds.push(followUp.personId);
+                });
+              } else {
+                // build a list of personIds that passed the filter
+                const localPersonIds = {};
+                followUpRecords.forEach((followUp) => {
+                  localPersonIds[followUp.personId] = true;
+                });
+
+                // we need to make sure that both conditions match
+                const personIdsTmp = personIds;
+                personIds = [];
+                personIdsTmp.forEach((personId) => {
+                  if (localPersonIds[personId]) {
+                    personIds.push(personId);
+                  }
+                });
+              }
+
+              // finished => make sure we return unique values
               return Array.from(new Set(personIds));
             });
         });
