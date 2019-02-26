@@ -21,9 +21,13 @@
       "default": false,
       "description": "True if it should be visible to everyone"
     },
-    "filters": [
-      "filterMappingValue"
-    ],
+    "filterKey": {
+      "type": "string",
+      "required": true
+    },
+    "filterData": {
+      "type": "object"
+    },
     "readOnly": {
       "type": "boolean",
       "readOnly": true

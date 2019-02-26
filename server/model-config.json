@@ -327,9 +327,5 @@
   "filterMapping": {
     "dataSource": "mongoDb",
     "public": true
-  },
-  "filterMappingValue": {
-    "dataSource": null,
-    "public": false
   }
 }
