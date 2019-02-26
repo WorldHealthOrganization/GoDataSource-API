@@ -31,6 +31,12 @@ module.exports = function (Location) {
 
   Location.referenceDataFields = Object.keys(Location.referenceDataFieldsToCategoryMap);
 
+  // no location
+  Location.noLocation = {
+    id: '-',
+    name: '-'
+  };
+
   /**
    * Get sub-locations for a list of locations. Result is an array of location IDs
    * @param parentLocations Array of location Ids for which to get the sublocations

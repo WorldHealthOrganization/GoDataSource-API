@@ -6036,6 +6036,9 @@ module.exports = function (Outbreak) {
               if (caseCurrentAddress) {
                 // get case current location
                 caseLatestLocation = caseCurrentAddress.locationId;
+              } else {
+                // no location
+                caseLatestLocation = app.models.location.noLocation.id;
               }
               if (caseModel.outcomeId === 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED') {
                 // if the case has a current location and the location is a reporting location

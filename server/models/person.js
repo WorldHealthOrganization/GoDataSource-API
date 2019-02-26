@@ -554,7 +554,7 @@ module.exports = function (Person) {
    * @param personModel
    * @param filter
    * @param outbreak
-   * @returns {Promise}
+   * @returns {Promise} people without an address are grouped under a dummy location with name '-'
    */
   Person.getPeoplePerLocation = function (personModel, filter, outbreak) {
     // Make function return a promise so we can easily link additional async code
@@ -605,7 +605,13 @@ module.exports = function (Person) {
             let locationCorelationMap = {};
 
             // Initiate peopleDistribution as an object so we can add locations/people to it easier
-            let peopleDistribution = {};
+            // we need an empty location for people without addresses
+            let peopleDistribution = {
+              [app.models.location.noLocation.id]: {
+                location: app.models.location.noLocation,
+                people: []
+              }
+            };
 
             // Start building the peopleDistribution object by adding all reporting locations
             reportingLocations.forEach((location) => {
@@ -720,6 +726,8 @@ module.exports = function (Person) {
                   // if it has a current location, get it's correlated location
                   if (personCurrentLocation && locationCorelationMap[personCurrentLocation]) {
                     peopleDistribution[locationCorelationMap[personCurrentLocation]].people.push(person);
+                  } else {
+                    peopleDistribution[app.models.location.noLocation.id].people.push(person);
                   }
                 });
 
