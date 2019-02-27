@@ -1217,6 +1217,11 @@ const translateQuestionnaire = function (outbreak, Model, modelInstance, diction
     if (question) {
       let questionText = dictionary.getTranslation(question.text);
       let answer = '';
+
+      if (question.multiAnswer && Array.isArray(modelInstance.questionnaireAnswers[variable])) {
+        modelInstance.questionnaireAnswers[variable] = modelInstance.questionnaireAnswers[variable].slice(0, 1)[0].value;
+      }
+
       if (['LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS', 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER'].includes(question.answerType)) {
         answer = translateQuestionAnswers(question, modelInstance.questionnaireAnswers[variable], dictionary);
       } else {
@@ -1536,5 +1541,6 @@ module.exports = {
   sha256: sha256,
   createImageDoc: createImageDoc,
   convertToDate: convertToDate,
-  covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat
+  covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat,
+  prepareMultiAnswerQuestionsForPrint: prepareMultiAnswerQuestionsForPrint
 };
