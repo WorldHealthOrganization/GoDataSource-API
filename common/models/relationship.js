@@ -23,6 +23,7 @@ module.exports = function (Relationship) {
     const personFieldLabelsMap = {
       'id': 'LNG_ENTITY_FIELD_LABEL_ID',
       'visualId': 'LNG_ENTITY_FIELD_LABEL_VISUAL_ID',
+      'name': 'LNG_ENTITY_FIELD_LABEL_NAME',
       'lastName': 'LNG_ENTITY_FIELD_LABEL_LAST_NAME',
       'firstName': 'LNG_ENTITY_FIELD_LABEL_FIRST_NAME',
       'middleName': 'LNG_ENTITY_FIELD_LABEL_MIDDLE_NAME',
