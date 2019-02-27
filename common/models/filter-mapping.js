@@ -23,7 +23,7 @@ module.exports = function (FilterMapping) {
           or: [{
             userId: userId
           }, {
-            public: true
+            isPublic: true
           }]
         }
       }, filter);
