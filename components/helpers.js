@@ -1212,24 +1212,31 @@ const getSourceAndTargetFromModelHookContext = function (context) {
 const translateQuestionnaire = function (outbreak, Model, modelInstance, dictionary) {
   let newQuestionnaire = {};
   Object.keys(modelInstance.questionnaireAnswers).forEach((variable) => {
+    // shorthand ref
+    let qAnswer = modelInstance.questionnaireAnswers[variable];
+
+    // question definition
     let question = findQuestionByVariable(outbreak[Model.extendedForm.template], variable);
 
     if (question) {
       let questionText = dictionary.getTranslation(question.text);
       let answer = '';
 
-      if (question.multiAnswer && Array.isArray(modelInstance.questionnaireAnswers[variable])) {
-        modelInstance.questionnaireAnswers[variable] = modelInstance.questionnaireAnswers[variable].slice(0, 1)[0].value;
+      // for multi answer questions, just take the first item in the array
+      // they are sorted on 'before save' hooks for case/contact/lab result models
+      // also map the object from { value } to [ value ] to be consistent with the rest of answers
+      if (question.multiAnswer && Array.isArray(qAnswer) && qAnswer.length) {
+        qAnswer = qAnswer.slice(0, 1)[0].value;
       }
 
       if (['LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS', 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER'].includes(question.answerType)) {
-        answer = translateQuestionAnswers(question, modelInstance.questionnaireAnswers[variable], dictionary);
+        answer = translateQuestionAnswers(question, qAnswer, dictionary);
       } else {
         // Parse date type answers since xml cannot print them
-        if (modelInstance.questionnaireAnswers[variable] instanceof Date) {
-          answer = getDateDisplayValue(modelInstance.questionnaireAnswers[variable]);
+        if (qAnswer instanceof Date) {
+          answer = getDateDisplayValue(qAnswer);
         } else {
-          answer = modelInstance.questionnaireAnswers[variable];
+          answer = qAnswer;
         }
       }
       newQuestionnaire[questionText] = answer;
