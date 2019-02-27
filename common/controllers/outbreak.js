@@ -7415,11 +7415,21 @@ module.exports = function (Outbreak) {
                     data[data.length - 1]['index' + i] = dictionary.getTranslation(app.models.followUp.statusAcronymMap[followUp.statusId]);
                   });
 
+
                   // Add all questions as rows
                   templateParser.extractVariablesAndAnswerOptions(self.contactFollowUpTemplate).forEach((question) => {
                     data.push({description: dictionary.getTranslation(question.text)});
                     contact.followUps.forEach((followUp, i) => {
-                      data[data.length - 1]['index' + i] = genericHelpers.translateQuestionAnswers(question, _.get(followUp, `questionnaireAnswers[${question.name}]`), dictionary);
+                      let questionAnswer = _.get(followUp, `questionnaireAnswers[${question.variable}]`);
+
+                      // for multi answer questions, just take the first item in the array
+                      // they are sorted on 'before save' hooks for case/contact/lab result models
+                      // also map the object from { value } to [ value ] to be consistent with the rest of answers
+                      if (question.multiAnswer && Array.isArray(questionAnswer) && questionAnswer.length) {
+                        questionAnswer = questionAnswer.slice(0, 1)[0].value;
+                      }
+
+                      data[data.length - 1]['index' + i] = genericHelpers.translateQuestionAnswers(question, questionAnswer, dictionary);
                     });
                   });
 
