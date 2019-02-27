@@ -16,7 +16,7 @@
       "readOnly": true,
       "description": "Owner ID"
     },
-    "public": {
+    "isPublic": {
       "type": "boolean",
       "default": false,
       "description": "True if it should be visible to everyone"
