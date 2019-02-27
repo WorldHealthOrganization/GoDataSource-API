@@ -670,6 +670,7 @@
       "LNG_ENTITY_FIELD_LABEL_CLASSIFICATION": "Classification",
       "LNG_ENTITY_FIELD_LABEL_DOB": "Date of birth",
       "LNG_ENTITY_FIELD_LABEL_DOCUMENT_NUMBER": "Document number",
+      "LNG_ENTITY_FIELD_LABEL_NAME": "Name",
       "LNG_ENTITY_FIELD_LABEL_FIRST_NAME": "First Name",
       "LNG_ENTITY_FIELD_LABEL_GENDER": "Gender",
       "LNG_ENTITY_FIELD_LABEL_INCONSISTENCIES": "Inconsistencies",
