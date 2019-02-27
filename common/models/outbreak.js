@@ -1076,12 +1076,42 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Exclude inactive top level and additional questions
+   * @param questions
+   */
+  Outbreak.helpers.excludeInactiveQuestions = function (questions) {
+    return (function filterInactive(list) {
+      return list.filter((q) => {
+        // no reason for additional checks
+        if (q.inactive) {
+          return false;
+        }
+
+        // filter additional questions as well
+        // this will alter the array item
+        if (q.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER'
+          || q.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
+          q.answers = q.answers.map((answer) => {
+            answer.additionalQuestions = filterInactive(answer.additionalQuestions || []);
+            return answer;
+          });
+        }
+
+        // array item should be in the filtered list if top level is not inactive
+        return true;
+      });
+    })(questions);
+  };
+
+  /**
    * Parse a outbreak template's questions by translating any tokens based on given dictionary reference
    * Function works recursive by translating any additional questions of the answers
+   * Optional feature: Remove inactive questions
    * @param questions
    * @param dictionary
+   * @param excludeInactive
    */
-  Outbreak.helpers.parseTemplateQuestions = function (questions, dictionary) {
+  Outbreak.helpers.parseTemplateQuestions = function (questions, dictionary, excludeInactive = true) {
     // cache translation function name, used in many places below
     // include sanity check, fallback on initial value if no translation is found
     let translateToken = function (text) {
@@ -1089,11 +1119,22 @@ module.exports = function (Outbreak) {
       return translatedText ? translatedText : text;
     };
 
+    // filter questions of type FILE UPLOAD
+    let filteredQuestions = _.filter(
+      questions,
+        question => question.answerType !== 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD'
+    );
+
+    // filter inactive questions
+    if (excludeInactive) {
+      filteredQuestions = Outbreak.helpers.excludeInactiveQuestions(filteredQuestions);
+    }
+
     // Translate all the questions, including additional questions of the answers
     return (function translate(list) {
-      return list.map((question) => {
+      return list.map((question, index) => {
         let questionResult = {
-          order: question.order,
+          order: ++index,
           question: translateToken(question.text),
           variable: question.variable,
           answerType: question.answerType,
@@ -1114,7 +1155,7 @@ module.exports = function (Outbreak) {
 
         return questionResult;
       });
-    })(_.filter(questions, question => question.answerType !== 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD'));
+    })(filteredQuestions);
   };
 
   /**
@@ -1284,6 +1325,7 @@ module.exports = function (Outbreak) {
    * Print an empty case investigation, for either a new or an existing case
    * @param outbreakInstance
    * @param pdfUtils
+   * @param copies default to 1
    * @param foundCase
    * @param options
    * @param callback
