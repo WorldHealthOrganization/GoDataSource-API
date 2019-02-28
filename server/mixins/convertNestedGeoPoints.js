@@ -35,6 +35,33 @@ function getSourceAndTargetFromContext(context) {
 module.exports = function (Model) {
 
   /**
+   * Unset a loopback model property
+   * @param target
+   * @param path
+   */
+  function unsetProperty(
+    target,
+    path
+  ) {
+    // check if we can use unsetAttribute to properly remove a loopback model property
+    // determine parent name
+    const parentIndex = path.lastIndexOf('.');
+    if (parentIndex > -1) {
+      const childTarget = _.get(target, path.substring(0, parentIndex));
+      if (
+        childTarget &&
+        childTarget.unsetAttribute
+      ) {
+        childTarget.unsetAttribute(path.substring(parentIndex + 1));
+      } else {
+        _.unset(target, path);
+      }
+    } else {
+      _.unset(target, path);
+    }
+  }
+
+  /**
    * Convert MongoDB format to Loopback format
    * @param context
    */
@@ -128,7 +155,8 @@ module.exports = function (Model) {
             type: 'Point'
           });
         } else {
-          _.unset(data.target, nestedPoint.exactPath);
+          // check if we can use unsetAttribute to properly remove a loopback model property
+          unsetProperty(data.target, nestedPoint.exactPath);
         }
       });
     });
