@@ -7415,7 +7415,6 @@ module.exports = function (Outbreak) {
                     data[data.length - 1]['index' + i] = dictionary.getTranslation(app.models.followUp.statusAcronymMap[followUp.statusId]);
                   });
 
-
                   // Add all questions as rows
                   templateParser.extractVariablesAndAnswerOptions(self.contactFollowUpTemplate).forEach((question) => {
                     data.push({description: dictionary.getTranslation(question.text)});
