@@ -1166,21 +1166,30 @@ module.exports = function (Outbreak) {
         return question.variable === key;
       });
 
-      if (question && question.answers) {
-        question.answers.forEach((answer) => {
-          if (answers[key].indexOf(answer.value) !== -1) {
-            answer.selected = true;
-          }
+      if (question) {
+        // for multi answer questions, just take the first item in the array
+        // they are sorted on 'before save' hooks for case/contact/lab result models
+        // also map the object from { value } to [ value ] to be consistent with the rest of answers
+        if (question.multiAnswer && Array.isArray(answers[key]) && answers[key].length) {
+          answers[key] = answers[key].slice(0, 1)[0].value;
+        }
 
-          if (answer.additionalQuestions && answer.additionalQuestions.length) {
-            Outbreak.helpers.prepareQuestionsForPrint(answers, answer.additionalQuestions);
-          }
-        });
-      } else if (question && !question.answers) {
-        if (answers[key] instanceof Date || genericHelpers.isValidDate(answers[key])) {
-          question.value = genericHelpers.getDateDisplayValue(answers[key]);
+        if (question.answers) {
+          question.answers.forEach((answer) => {
+            if (answers[key].indexOf(answer.value) !== -1) {
+              answer.selected = true;
+            }
+
+            if (answer.additionalQuestions && answer.additionalQuestions.length) {
+              Outbreak.helpers.prepareQuestionsForPrint(answers, answer.additionalQuestions);
+            }
+          });
         } else {
-          question.value = answers[key];
+          if (answers[key] instanceof Date || genericHelpers.isValidDate(answers[key])) {
+            question.value = genericHelpers.getDateDisplayValue(answers[key]);
+          } else {
+            question.value = answers[key];
+          }
         }
       }
     });

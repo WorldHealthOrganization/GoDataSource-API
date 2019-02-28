@@ -1548,6 +1548,5 @@ module.exports = {
   sha256: sha256,
   createImageDoc: createImageDoc,
   convertToDate: convertToDate,
-  covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat,
-  prepareMultiAnswerQuestionsForPrint: prepareMultiAnswerQuestionsForPrint
+  covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat
 };
