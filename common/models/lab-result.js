@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const _ = require('lodash');
+const helpers = require('../../components/helpers');
 
 module.exports = function (LabResult) {
   // set flag to not get controller
@@ -123,4 +124,12 @@ module.exports = function (LabResult) {
         return Object.assign(filter, {where: labResultsQuery});
       });
   };
+
+  /**
+   * Before save hooks
+   */
+  LabResult.observe('before save', function (context, next) {
+    helpers.sortMultiAnswerQuestions(context.instance);
+    next();
+  });
 };

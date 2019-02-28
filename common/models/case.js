@@ -4,6 +4,7 @@ const app = require('../../server/server');
 const casesWorker = require('../../components/workerRunner').cases;
 const _ = require('lodash');
 const moment = require('moment');
+const helpers = require('../../components/helpers');
 
 module.exports = function (Case) {
   // set flag to not get controller
@@ -194,35 +195,11 @@ module.exports = function (Case) {
   }
 
   /**
-   * Sort multi answer questionnaire answers by date
-   * @param context
-   */
-  function sortMultiAnswerQuestions(context) {
-    if (context.questionnaireAnswers) {
-      // shorthand reference
-      const answers = context.questionnaireAnswers;
-
-      for (let prop in answers) {
-        if (Array.isArray(answers[prop]) && answers[prop].length) {
-          // check if at least first array item has 'date'
-          // doing this, to not try to find the question and check that is a multi answer
-          // too much overhead
-
-          // sort them by date
-          if (answers[prop][0].date) {
-            answers[prop] = answers[prop].sort((a, b) => moment(b.date).format('X') - moment(a.date).format('X'));
-          }
-        }
-      }
-    }
-  }
-
-  /**
    * Before save hooks
    */
   Case.observe('before save', function (context, next) {
     archiveClassificationChanges(context);
-    sortMultiAnswerQuestions(context.instance);
+    helpers.sortMultiAnswerQuestions(context.instance);
     next();
   });
 
