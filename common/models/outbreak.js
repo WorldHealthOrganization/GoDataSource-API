@@ -1250,6 +1250,13 @@ module.exports = function (Outbreak) {
       });
 
       if (question) {
+        // for multi answer questions, just take the first item in the array
+        // they are sorted on 'before save' hooks for case/contact/lab result models
+        // also map the object from { value } to [ value ] to be consistent with the rest of answers
+        if (question.multiAnswer && Array.isArray(answers[key]) && answers[key].length) {
+          answers[key] = answers[key].slice(0, 1)[0].value;
+        }
+
         // check the length of the list as well
         // weird case when question is free text but the answers is an empty list
         if (Array.isArray(question.answers) && question.answers.length) {
@@ -1259,6 +1266,7 @@ module.exports = function (Outbreak) {
             if (!answers[key]) {
               return;
             }
+
             if (answers[key].indexOf(answer.value) !== -1) {
               answer.selected = true;
             }
