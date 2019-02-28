@@ -1510,6 +1510,24 @@ function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}) {
   });
 }
 
+/**
+ * Sort multi answer questionnaire answers by date
+ * @param model
+ */
+const sortMultiAnswerQuestions = function (model) {
+  if (model.questionnaireAnswers) {
+    // shorthand reference
+    const answers = model.questionnaireAnswers;
+
+    for (let prop in answers) {
+      if (Array.isArray(answers[prop]) && answers[prop].length) {
+        // sort them by date
+        answers[prop] = answers[prop].sort((a, b) => moment(b.date).format('X') - moment(a.date).format('X'));
+      }
+    }
+  }
+};
+
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1548,5 +1566,6 @@ module.exports = {
   sha256: sha256,
   createImageDoc: createImageDoc,
   convertToDate: convertToDate,
-  covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat
+  covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat,
+  sortMultiAnswerQuestions: sortMultiAnswerQuestions
 };

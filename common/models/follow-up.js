@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const moment = require('moment');
 const _ = require('lodash');
+const helpers = require('../../components/helpers');
 
 module.exports = function (FollowUp) {
   // set flag to not get controller
@@ -245,6 +246,8 @@ module.exports = function (FollowUp) {
    * Before save hooks
    */
   FollowUp.observe('before save', function (ctx, next) {
+    helpers.sortMultiAnswerQuestions(ctx.instance);
+
     // set follow-up index (if needed)
     setFollowUpIndexIfNeeded(ctx)
     // set follow-up address (if needed)

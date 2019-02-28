@@ -1180,7 +1180,8 @@ module.exports = function (Outbreak) {
           question: translateToken(question.text),
           variable: question.variable,
           answerType: question.answerType,
-          answers: question.answers
+          answers: question.answers,
+          multiAnswer: question.multiAnswer
         };
 
         // do not try to translate answers that are free text
