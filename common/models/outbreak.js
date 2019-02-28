@@ -1087,13 +1087,16 @@ module.exports = function (Outbreak) {
           return false;
         }
 
+        // defensive check
+        // even tho answers is of type array, null value is still valid
+        q.answers = q.answers || [];
+
         // filter additional questions as well
         // this will alter the array item
         if (q.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER'
           || q.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
-          q.answers = q.answers.map((answer) => {
-            answer.additionalQuestions = filterInactive(answer.additionalQuestions || []);
-            return answer;
+          q.answers.forEach((answer) => {
+            answer.additionalQuestions = answer.additionalQuestions ? filterInactive(answer.additionalQuestions) : [];
           });
         }
 
@@ -1122,7 +1125,7 @@ module.exports = function (Outbreak) {
     // filter questions of type FILE UPLOAD
     let filteredQuestions = _.filter(
       questions,
-        question => question.answerType !== 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD'
+      question => question.answerType !== 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD'
     );
 
     // filter inactive questions
