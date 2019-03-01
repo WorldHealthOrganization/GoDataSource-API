@@ -718,7 +718,7 @@ module.exports = function (Relationship) {
 
         // find other people
         return app.models.person
-          .find({where: peopleFilter.where})
+          .find(peopleFilter)
           .then(function (people) {
             // build result
             let result = [];
