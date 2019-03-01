@@ -13,7 +13,6 @@ module.exports = function (Relationship) {
 
   /**
    * Return a list of field labels map that are allowed for export
-   * @returns {*}
    */
   Relationship.helpers.sanitizeFieldLabelsMapForExport = () => {
     // make sure we don't alter the original array

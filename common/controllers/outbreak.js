@@ -8554,19 +8554,70 @@ module.exports = function (Outbreak) {
           (results) => {
             return new Promise(function (resolve, reject) {
               // determine contacts for which we need to retrieve the first relationship
-              // #TODO
+              const contactsMap = _.transform(
+                results,
+                (r, v) => {
+                  r[v.id] = v;
+                },
+                {}
+              );
 
               // retrieve contacts relationships ( sorted by creation date )
               // only those for which source is a case / event ( at this point it shouldn't be possible to be a contact, but we should handle this case since date & source flags should be enough... )
-              // #TODO
+              // in case we don't have any contact Ids there is no point in searching for relationships
+              const contactIds = Object.keys(contactsMap);
+              const promise = contactIds.length < 1 ?
+                Promise.resolve([]) :
+                app.models.relationship.find({
+                  order: 'createdAt ASC',
+                  where: {
+                    'persons.id': {
+                      inq: contactIds
+                    }
+                  }
+                });
 
-              // keep only the first relationship
-              // #TODO
+              // handle exceptions
+              promise.catch(reject);
 
-              // assign relationships to contacts
-              // #TODO
+              // retrieve contacts relationships ( sorted by creation date )
+              promise.then((relationshipResults) => {
+                // keep only the first relationship
+                // assign relationships to contacts
+                _.each(relationshipResults, (relationship) => {
+                  // incomplete relationship ?
+                  if (relationship.persons.length < 2) {
+                    return;
+                  }
 
-              resolve(results);
+                  // determine contact & related ids
+                  let contactId, relatedId;
+                  if (relationship.persons[0].target) {
+                    contactId = relationship.persons[0].id;
+                    relatedId = relationship.persons[1].id;
+                  } else {
+                    contactId = relationship.persons[1].id;
+                    relatedId = relationship.persons[0].id;
+                  }
+
+                  // check if this is the first relationship for this contact
+                  // if it is, then we need to map information
+                  if (
+                    contactsMap[contactId] &&
+                    !contactsMap[contactId].relationship
+                  ) {
+                    // get relationship data
+                    contactsMap[contactId].relationship = relationship.toJSON();
+
+                    // set related ID
+                    contactsMap[contactId].relationship.relatedId = relatedId;
+                  }
+                });
+
+                // finished
+                resolve(results);
+              });
+
             });
           },
           callback
