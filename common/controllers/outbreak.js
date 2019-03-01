@@ -8536,7 +8536,35 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, filter.where, exportType, 'Contacts List', encryptPassword, anonymizeFields, options, callback);
+        app.utils.remote.helpers.exportFilteredModelsList(
+          app,
+          app.models.contact,
+          filter.where,
+          exportType,
+          'Contacts List',
+          encryptPassword,
+          anonymizeFields,
+          options,
+          (results) => {
+            return new Promise(function (resolve, reject) {
+              // determine contacts for which we need to retrieve the first relationship
+              // #TODO
+
+              // retrieve contacts relationships ( sorted by creation date )
+              // only those for which source is a case / event ( at this point it shouldn't be possible to be a contact, but we should handle this case since date & source flags should be enough... )
+              // #TODO
+
+              // keep only the first relationship
+              // #TODO
+
+              // assign relationships to contacts
+              // #TODO
+
+              resolve(results);
+            });
+          },
+          callback
+        );
       })
       .catch(callback);
   };
