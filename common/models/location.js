@@ -390,6 +390,25 @@ module.exports = function (Location) {
       });
     }
 
+    /**
+     * Convert a mongo point to a json point since loopback doesn't do it
+     * @param location
+     */
+    function convertNestedGeoPointsToLatLng(location) {
+      if (
+        location.geoLocation &&
+        location.geoLocation.coordinates &&
+        location.geoLocation.coordinates[0] != null &&
+        location.geoLocation.coordinates[1] != null
+      ) {
+        // convert it
+        location.geoLocation = {
+          lat: location.geoLocation.coordinates[1],
+          lng: location.geoLocation.coordinates[0]
+        };
+      }
+    }
+
     // store a hierarchical list of locations
     let hierarchicalLocationsList = [];
     // index position for each element for easy referencing
@@ -454,6 +473,10 @@ module.exports = function (Location) {
             // remove it from where it previously was in the list (will be moved under parent location)
             _.set(hierarchicalLocationsList, locationIndex[location.id], null);
           }
+
+          // process geopoint
+          convertNestedGeoPointsToLatLng(currentLocation.location);
+
           // add it under parent location
           length = parentLocation.children.push(currentLocation);
           // store its index

@@ -4270,6 +4270,7 @@
       "description": "Export dossier for one or more contacts",
       "http": {
         "verb": "post",
+        "ignoreActiveOutbreak": true,
         "path": "/contacts/dossier"
       }
     },
@@ -4320,6 +4321,7 @@
       "description": "Export dossier for one or more cases",
       "http": {
         "verb": "post",
+        "ignoreActiveOutbreak": true,
         "path": "/cases/dossier"
       }
     },
@@ -6433,6 +6435,7 @@
       "description": "Export pdf containing range of contacts to be seen by place/case",
       "http": {
         "verb": "post",
+        "ignoreActiveOutbreak": true,
         "path": "/contacts/range-list/export"
       }
     },
