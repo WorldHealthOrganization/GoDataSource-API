@@ -9,6 +9,10 @@
     "id"
   ],
   "properties": {
+    "inactive": {
+      "type": "boolean",
+      "default": false
+    },
     "text": {
       "type": "string",
       "required": true
