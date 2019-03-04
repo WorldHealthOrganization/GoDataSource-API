@@ -461,7 +461,7 @@ module.exports = function (Contact) {
         // doing this because we're reusing existing functionality that does not build the result the same way
         let contactGroups = {};
 
-        groups.forEach((group) => {
+        groups.peopleDistribution.forEach((group) => {
           if (group.people.length) {
             contactGroups[group.location.name] = group.people;
           }

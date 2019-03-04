@@ -5989,7 +5989,8 @@ module.exports = function (Outbreak) {
         })
         .then((result) => {
           let caseClassifications = result[0];
-          let caseDistribution = result[1];
+          let caseDistribution = result[1].peopleDistribution || [];
+          const locationCorelationMap = result[1].locationCorelationMap || {};
           let headers = [];
           // Initialize data as an object to easily distribute cases per classification. This will be changed to an array later.
           let data = {};
@@ -6050,22 +6051,33 @@ module.exports = function (Outbreak) {
               if (caseCurrentAddress) {
                 // get case current location
                 caseLatestLocation = caseCurrentAddress.locationId;
-              } else {
-                // no location
-                caseLatestLocation = app.models.location.noLocation.id;
               }
               if (caseModel.outcomeId === 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED') {
                 // if the case has a current location and the location is a reporting location
-                if (caseLatestLocation && data.deceased[caseLatestLocation]) {
-                  data.deceased[caseLatestLocation] = +data.deceased[caseLatestLocation] + 1;
+                if (caseLatestLocation) {
+                  if (data.deceased[locationCorelationMap[caseLatestLocation]]) {
+                    data.deceased[locationCorelationMap[caseLatestLocation]] = (parseInt(data.deceased[locationCorelationMap[caseLatestLocation]]) + 1) + '';
+                  }
+                } else {
+                  // missing location
+                  data.deceased[app.models.location.noLocation.id] = (parseInt(data.deceased[app.models.location.noLocation.id]) + 1) + '';
                 }
-                data.deceased.total = +data.deceased.total + 1;
+
+                // total
+                data.deceased.total = (parseInt(data.deceased.total) + 1) + '';
               } else if (data[caseModel.classification]) {
                 // if the case has a current location and the location is a reporting location
-                if (caseLatestLocation && data[caseModel.classification][caseLatestLocation]) {
-                  data[caseModel.classification][caseLatestLocation] = +data[caseModel.classification][caseLatestLocation] + 1;
+                if (caseLatestLocation) {
+                  if (data[caseModel.classification][locationCorelationMap[caseLatestLocation]]) {
+                    data[caseModel.classification][locationCorelationMap[caseLatestLocation]] = (parseInt(data[caseModel.classification][locationCorelationMap[caseLatestLocation]]) + 1) + '';
+                  }
+                } else {
+                  // missing location
+                  data[caseModel.classification][app.models.location.noLocation.id] = (parseInt(data[caseModel.classification][app.models.location.noLocation.id]) + 1) + '';
                 }
-                data[caseModel.classification].total = +data[caseModel.classification].total + 1;
+
+                // total
+                data[caseModel.classification].total = (parseInt(data[caseModel.classification].total) + 1) + '';
               }
             });
           });
@@ -6088,11 +6100,30 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countCasesPerLocationLevel = function (filter, callback) {
-    app.models.person.getPeoplePerLocation('case', filter, this)
+    // define additional filter to exclude cases of no interest
+    const additionalFilter = {
+      where: {
+        classification: {
+          nin: app.models.case.discardedCaseClassifications
+        }
+      }
+    };
+
+    // Merge the additional filter with the filter provided by the user
+    const _filter = app.utils.remote.mergeFilters(additionalFilter, filter || {});
+
+    // count people per location
+    app.models.person.getPeoplePerLocation('case', _filter, this)
       .then((result) => {
         let response = {locations: []};
         let allCasesCount = 0;
-        result.forEach((dataSet) => {
+        result.peopleDistribution.forEach((dataSet) => {
+          // ignore no location records
+          if (dataSet.location.id === app.models.location.noLocation.id) {
+            return;
+          }
+
+          // set data
           dataSet.casesCount = dataSet.people.length;
           allCasesCount += dataSet.people.length;
           dataSet.caseIds = dataSet.people.map(caseModel => caseModel.id);
@@ -6164,7 +6195,7 @@ module.exports = function (Outbreak) {
           ];
 
           let data = [];
-          result.forEach((dataObj) => {
+          result.peopleDistribution.forEach((dataObj) => {
             // Define the base form of the data for one row of the pdf list
             // Keep the values as strings so that 0 actually gets displayed in the table
             let row = {
@@ -6230,7 +6261,7 @@ module.exports = function (Outbreak) {
       .then((result) => {
         let response = {locations: []};
         let allContactsCount = 0;
-        result.forEach((dataSet) => {
+        result.peopleDistribution.forEach((dataSet) => {
           dataSet.contactsCount = dataSet.people.length;
           allContactsCount += dataSet.people.length;
           dataSet.contactIds = dataSet.people.map(contact => contact.id);
