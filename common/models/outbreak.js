@@ -118,10 +118,18 @@ module.exports = function (Outbreak) {
    * @param personId
    * @param type
    * @param data
+   * @param checkVisualId True if we should check both id and visual id when searching for person
    * @param callback
    * @return {*}
    */
-  Outbreak.helpers.validateAndNormalizePeople = function (personId, type, data, callback) {
+  Outbreak.helpers.validateAndNormalizePeople = function (personId, type, data, checkVisualId, callback) {
+    // checkVisualId not provided ?
+    if (!callback) {
+      callback = checkVisualId;
+      checkVisualId = undefined;
+    }
+
+    // do we have persons data ?
     if (Array.isArray(data.persons) && data.persons.length) {
 
       let errors = [];
@@ -173,9 +181,40 @@ module.exports = function (Outbreak) {
         if (!person.type) {
           // find each person
           personPromises.push(
-            app.models.person
-              .findById(person.id)
+            (!checkVisualId ?
+              app.models.person.findById(person.id) :
+              app.models.person.find({
+                where: {
+                  or: [
+                    { _id: person.id },
+                    { visualId: person.id }
+                  ]
+                }
+              }))
               .then(function (foundPerson) {
+                // in case we searched by visualId
+                if (
+                  checkVisualId &&
+                  foundPerson
+                ) {
+                  // we need to make sure we found only one record
+                  if (foundPerson.length > 1) {
+                    throw app.utils.apiError.getError('MODEL_VISUAL_ID_MATCHES_MORE_THAN_2_RECORDS', {
+                      model: app.models.person.modelName,
+                      visualId: person.id
+                    });
+                  }
+
+                  // we need to convert array to model
+                  foundPerson = foundPerson.length > 0 ? foundPerson[0] : null;
+
+                  // replace visualId with person id
+                  if (foundPerson) {
+                    person.id = foundPerson.id;
+                  }
+                }
+
+                // check if we found the related person
                 if (!foundPerson) {
                   throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
                     model: app.models.person.modelName,

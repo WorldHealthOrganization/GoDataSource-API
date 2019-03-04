@@ -4355,10 +4355,18 @@ module.exports = function (Outbreak) {
                   // promisify next step
                   return new Promise(function (resolve, reject) {
                     // normalize people
-                    Outbreak.helpers.validateAndNormalizePeople(contactRecord.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', relationshipData, function (error) {
+                    Outbreak.helpers.validateAndNormalizePeople(contactRecord.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', relationshipData, true, function (error) {
                       if (error) {
-                        return reject(error);
+                        // delete contact since contact was created without an error while relationship failed
+                        return app.models.contact.destroyById(
+                          contactRecord.id,
+                          () => {
+                            // return error
+                            return reject(error);
+                          }
+                        );
                       }
+
                       // sync relationship
                       return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.relationship, relationshipData, options)
                         .then(function (syncedRelationship) {

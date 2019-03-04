@@ -20,8 +20,8 @@ module.exports = function (Contact) {
     const fieldLabelsMap = {};
 
     // relationship person labels
-    const personFieldLabelsMap = {
-      'relatedId': 'LNG_RELATIONSHIP_FIELD_LABEL_RELATED_PERSON',
+    const relationshipFieldLabelsMap = {
+      'relatedId': 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS_RELATED_PERSON',
       'contactDate': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE',
       'contactDateEstimated': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE_ESTIMATED',
       'certaintyLevelId': 'LNG_RELATIONSHIP_FIELD_LABEL_CERTAINTY_LEVEL',
@@ -39,7 +39,7 @@ module.exports = function (Contact) {
       fieldLabelsMap,
       Contact.fieldLabelsMap,
       _.transform(
-        personFieldLabelsMap,
+        relationshipFieldLabelsMap,
         (tokens, token, property) => {
           tokens[`relationship.${property}`] = token;
         },
