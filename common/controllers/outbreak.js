@@ -15,6 +15,7 @@ const Uuid = require('uuid');
 const templateParser = require('./../../components/templateParser');
 const PromisePool = require('es6-promise-pool');
 const fork = require('child_process').fork;
+const WorkerRunner = require('./../../components/workerRunner');
 
 module.exports = function (Outbreak) {
 
@@ -9220,5 +9221,14 @@ module.exports = function (Outbreak) {
         callback(null, result);
       })
       .catch(callback);
+  };
+
+  /**
+   * Get contacts follow up report per date range
+   * @param dateRange
+   * @param callback
+   */
+  Outbreak.prototype.getContactFollowUpReport = function (dateRange, callback) {
+    WorkerRunner.getContactFollowUpReport(this.id, dateRange.startDate, dateRange.endDate);
   };
 };

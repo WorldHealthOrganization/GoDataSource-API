@@ -310,5 +310,15 @@ module.exports = {
         callback(null, result);
       });
     }
+  },
+  getContactFollowUpReport: function (outbreakId, startDate, endDate) {
+    return new Promise(function (resolve, reject) {
+      invokeWorkerMethod('contactFollowUpReport', 'get', [outbreakId, startDate, endDate], (error, result) => {
+        if (error) {
+          return reject(error);
+        }
+        return resolve(result);
+      });
+    });
   }
 };
