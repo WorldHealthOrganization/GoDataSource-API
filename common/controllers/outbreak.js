@@ -1241,9 +1241,6 @@ module.exports = function (Outbreak) {
       filter = {};
     }
 
-    // TODO: remove this after testing
-    filter.where = filter.where || {};
-
     // check if contacts should be included
     const includeContacts = _.get(filter, 'where.includeContacts', false);
     // if present remove it from the main filter
@@ -1252,8 +1249,7 @@ module.exports = function (Outbreak) {
     }
 
     // check if contacts should be counted
-    // TODO: move to default 'false' when ticket is done
-    const countContacts = _.get(filter, 'where.countContacts', true);
+    const countContacts = _.get(filter, 'where.countContacts', false);
     if (countContacts) {
       delete filter.where.countContacts;
     }
