@@ -4355,10 +4355,18 @@ module.exports = function (Outbreak) {
                   // promisify next step
                   return new Promise(function (resolve, reject) {
                     // normalize people
-                    Outbreak.helpers.validateAndNormalizePeople(contactRecord.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', relationshipData, function (error) {
+                    Outbreak.helpers.validateAndNormalizePeople(contactRecord.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', relationshipData, true, function (error) {
                       if (error) {
-                        return reject(error);
+                        // delete contact since contact was created without an error while relationship failed
+                        return app.models.contact.destroyById(
+                          contactRecord.id,
+                          () => {
+                            // return error
+                            return reject(error);
+                          }
+                        );
                       }
+
                       // sync relationship
                       return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.relationship, relationshipData, options)
                         .then(function (syncedRelationship) {
@@ -8542,7 +8550,86 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.contact, filter.where, exportType, 'Contacts List', encryptPassword, anonymizeFields, options, callback);
+        app.utils.remote.helpers.exportFilteredModelsList(
+          app,
+          app.models.contact,
+          filter.where,
+          exportType,
+          'Contacts List',
+          encryptPassword,
+          anonymizeFields,
+          options,
+          (results) => {
+            return new Promise(function (resolve, reject) {
+              // determine contacts for which we need to retrieve the first relationship
+              const contactsMap = _.transform(
+                results,
+                (r, v) => {
+                  r[v.id] = v;
+                },
+                {}
+              );
+
+              // retrieve contacts relationships ( sorted by creation date )
+              // only those for which source is a case / event ( at this point it shouldn't be possible to be a contact, but we should handle this case since date & source flags should be enough... )
+              // in case we don't have any contact Ids there is no point in searching for relationships
+              const contactIds = Object.keys(contactsMap);
+              const promise = contactIds.length < 1 ?
+                Promise.resolve([]) :
+                app.models.relationship.find({
+                  order: 'createdAt ASC',
+                  where: {
+                    'persons.id': {
+                      inq: contactIds
+                    }
+                  }
+                });
+
+              // handle exceptions
+              promise.catch(reject);
+
+              // retrieve contacts relationships ( sorted by creation date )
+              promise.then((relationshipResults) => {
+                // keep only the first relationship
+                // assign relationships to contacts
+                _.each(relationshipResults, (relationship) => {
+                  // incomplete relationship ?
+                  if (relationship.persons.length < 2) {
+                    return;
+                  }
+
+                  // determine contact & related ids
+                  let contactId, relatedId;
+                  if (relationship.persons[0].target) {
+                    contactId = relationship.persons[0].id;
+                    relatedId = relationship.persons[1].id;
+                  } else {
+                    contactId = relationship.persons[1].id;
+                    relatedId = relationship.persons[0].id;
+                  }
+
+                  // check if this is the first relationship for this contact
+                  // if it is, then we need to map information
+                  if (
+                    contactsMap[contactId] &&
+                    !contactsMap[contactId].relationship
+                  ) {
+                    // get relationship data
+                    contactsMap[contactId].relationship = relationship.toJSON();
+
+                    // set related ID
+                    contactsMap[contactId].relationship.relatedId = relatedId;
+                  }
+                });
+
+                // finished
+                resolve(results);
+              });
+
+            });
+          },
+          callback
+        );
       })
       .catch(callback);
   };
