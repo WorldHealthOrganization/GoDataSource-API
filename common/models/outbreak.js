@@ -208,10 +208,16 @@ module.exports = function (Outbreak) {
                   // we need to convert array to model
                   foundPerson = foundPerson.length > 0 ? foundPerson[0] : null;
 
-                  // replace visualId with person id
-                  if (foundPerson) {
-                    person.id = foundPerson.id;
+                  // check if we found the related person
+                  if (!foundPerson) {
+                    throw app.utils.apiError.getError('PERSON_NOT_FOUND', {
+                      model: app.models.person.modelName,
+                      id: person.id
+                    });
                   }
+
+                  // replace visualId with person id
+                  person.id = foundPerson.id;
                 }
 
                 // check if we found the related person
