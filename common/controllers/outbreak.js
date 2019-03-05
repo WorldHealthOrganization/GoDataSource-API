@@ -1242,10 +1242,16 @@ module.exports = function (Outbreak) {
     }
 
     // check if contacts should be included
-    let includeContacts = _.get(filter, 'where.includeContacts', false);
+    const includeContacts = _.get(filter, 'where.includeContacts', false);
     // if present remove it from the main filter
     if (includeContacts) {
       delete filter.where.includeContacts;
+    }
+
+    // check if contacts should be counted
+    const countContacts = _.get(filter, 'where.countContacts', false);
+    if (countContacts) {
+      delete filter.where.countContacts;
     }
 
     // get active filter
@@ -1335,7 +1341,7 @@ module.exports = function (Outbreak) {
       })
       .then(function (personIds) {
         // if contacts should not be included
-        if (!includeContacts) {
+        if (!includeContacts && !countContacts) {
           // restrict chain data to cases and events
           filter = app.utils.remote
             .mergeFilters({
@@ -1356,7 +1362,9 @@ module.exports = function (Outbreak) {
           endDate: endDate,
           active: activeFilter,
           includedPeopleFilter: includedPeopleFilter,
-          size: sizeFilter
+          size: sizeFilter,
+          countContacts: countContacts,
+          includeContacts: includeContacts
         };
       });
   };
@@ -1365,9 +1373,10 @@ module.exports = function (Outbreak) {
    * Post process/filter transmission chains
    * @param filter
    * @param dataSet
+   * @param opts
    * @return {{transmissionChains: {chains: Array, length: number}, nodes: {}, edges: {}}}
    */
-  Outbreak.prototype.postProcessTransmissionChains = function (filter, dataSet) {
+  Outbreak.prototype.postProcessTransmissionChains = function (filter, dataSet, opts = {}) {
     // define result structure
     const result = {
       transmissionChains: {
@@ -1465,8 +1474,18 @@ module.exports = function (Outbreak) {
         nodesToKeepIndex[edge.persons[1].id] = true;
       }
     });
+
+    // check if contact nodes should be removed from result
+    // this should happen when include contacts flag is not set
+    const shouldKeepContacts = opts.includeContacts;
+
     // go through all the nodes
     Object.keys(dataSet.nodes).forEach(function (nodeId) {
+      // do not keep contact nodes
+      if (!shouldKeepContacts && dataSet.nodes[nodeId].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+        return;
+      }
+
       // if the node should be kept
       if (nodesToKeepIndex[nodeId]) {
         // store it in the result
@@ -1594,13 +1613,17 @@ module.exports = function (Outbreak) {
         const activeFilter = processedFilter.active;
         const includedPeopleFilter = processedFilter.includedPeopleFilter;
         const sizeFilter = processedFilter.size;
+        const includeContacts = processedFilter.includeContacts;
+
+        // flag that indicates that contacts should be counted per chain
+        const countContacts = processedFilter.countContacts;
 
         // end date is supported only one first level of where in transmission chains
         _.set(filter, 'where.endDate', endDate);
 
         // get transmission chains
         app.models.relationship
-          .getTransmissionChains(self.id, self.periodOfFollowup, filter, function (error, transmissionChains) {
+          .getTransmissionChains(self.id, self.periodOfFollowup, filter, countContacts, function (error, transmissionChains) {
             if (error) {
               return callback(error);
             }
@@ -1610,7 +1633,7 @@ module.exports = function (Outbreak) {
               active: activeFilter,
               size: sizeFilter,
               includedPeopleFilter: includedPeopleFilter
-            }, transmissionChains);
+            }, transmissionChains, { includeContacts: includeContacts });
 
             // determine if isolated nodes should be included
             const shouldIncludeIsolatedNodes = (

@@ -135,9 +135,10 @@ module.exports = function (Relationship) {
    * @param followUpPeriod
    * @param filter Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
    * @param countOnly
+   * @param countContacts Flag that indicates that contacts too should be counted per chain
    * @param callback
    */
-  Relationship.buildOrCountTransmissionChains = function (outbreakId, followUpPeriod, filter, countOnly, callback) {
+  Relationship.buildOrCountTransmissionChains = function (outbreakId, followUpPeriod, filter, countOnly, countContacts, callback) {
     // define an endDate filter
     let endDate;
     // if there's a filter
@@ -236,7 +237,14 @@ module.exports = function (Relationship) {
               transmissionChain.count(relationships, followUpPeriod, {activeChainStartDate: endDate}, callback);
             } else {
               // build transmission chain - set activeChainStartDate - used for determining if a chain is active - to be specified endDate (by default today)
-              transmissionChain.build(relationships, followUpPeriod, {activeChainStartDate: endDate}, callback);
+              transmissionChain.build(
+                relationships,
+                followUpPeriod,
+                {
+                  activeChainStartDate: endDate,
+                  countContacts: countContacts
+                },
+                callback);
             }
           });
       })
@@ -248,10 +256,11 @@ module.exports = function (Relationship) {
    * @param outbreakId
    * @param followUpPeriod
    * @param filter Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
+   * @param countContacts
    * @param callback
    */
-  Relationship.getTransmissionChains = function (outbreakId, followUpPeriod, filter, callback) {
-    Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, filter, false, callback);
+  Relationship.getTransmissionChains = function (outbreakId, followUpPeriod, filter, countContacts, callback) {
+    Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, filter, false, countContacts, callback);
   };
 
   /**
@@ -262,7 +271,7 @@ module.exports = function (Relationship) {
    * @param callback
    */
   Relationship.countTransmissionChains = function (outbreakId, followUpPeriod, filter, callback) {
-    Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, filter, true, callback);
+    Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, filter, true, false, callback);
   };
 
   /**
