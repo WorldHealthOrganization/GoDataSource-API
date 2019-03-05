@@ -3,7 +3,6 @@
 // module dependencies
 const MongoClient = require('mongodb').MongoClient;
 const DbConfig = require('./../../server/datasources').mongoDb;
-const Logger = require('./../logger');
 const MomentLibrary = require('moment');
 const MomentRange = require('moment-range');
 const _ = require('lodash');
