@@ -117,7 +117,12 @@ const worker = {
                   // calculate the percentage for each day
                   for (let d in result.days) {
                     const currentDay = result.days[d];
-                    currentDay.percentage = (currentDay.followedUp * 100) / (currentDay.followedUp + currentDay.notFollowedUp);
+                    const percentage = (currentDay.followedUp * 100) / (currentDay.followedUp + currentDay.notFollowedUp);
+                    currentDay.percentage = percentage || 0;
+
+                    // convert date back to UTC
+                    result.days[Helpers.getDate(d).format()] = currentDay;
+                    delete result.days[d];
                   }
 
                   return resolve(result);
@@ -140,28 +145,32 @@ const worker = {
 
                     // go trough list of contacts
                     // if we have an entry in the contacts map
-                    // check if it was already counted for this day
-                    // if so skip it
-                    // otherwise check status of the follow up and count him as expected
+                    // if so, check if in the current date, the contact has the follow up performed, if so, skip it
+                    // otherwise check status of the follow up and count him as followed up or not
                     for (let contactId in groupedByContact) {
-                      if (!contactFollowUpsMap.has[contactId]) {
-                        contactFollowUpsMap.set(contactId, new Set());
+                      if (!contactFollowUpsMap.has(contactId)) {
+                        contactFollowUpsMap.set(contactId, []);
                       }
                       const contactSeenDates = contactFollowUpsMap.get(contactId);
-                      const seenDateIdx = [...contactSeenDates].findIndex(day => day.isSame(currentDate, 'day'));
-                      if (seenDateIdx !== -1) {
-                        continue;
-                      }
+                      const seenDateIdx = contactSeenDates.findIndex(dateInfo => dateInfo.date.isSame(currentDate, 'day'));
+
                       // check if at least one is performed
                       const isPerformed = !!groupedByContact[contactId].filter(fp => isFollowUpPerformed(fp)).length;
                       if (isPerformed) {
                         result.days[days[i]].followedUp++;
                       } else {
+                        if (seenDateIdx !== -1 && contactSeenDates[seenDateIdx].isPerformed) {
+                          continue;
+                        }
                         result.days[days[i]].notFollowedUp++;
                       }
 
                       // add it as seen for current date
-                      contactSeenDates.add(currentDate);
+                      contactSeenDates.push({
+                        date: currentDate,
+                        isPerformed: isPerformed
+                      });
+                      contactFollowUpsMap.set(contactId, contactSeenDates);
                     }
                   }
                 }

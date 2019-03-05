@@ -6600,13 +6600,13 @@
       ],
       "returns": [
         {
-          "arg": "analysis",
+          "arg": "report",
           "type": "object",
-          "description": "TBD",
+          "description": "Report",
           "required": true
         }
       ],
-      "description": "TBD",
+      "description": "Get total number of contacts that were followed up in the given period of time",
       "http": {
         "verb": "post",
         "path": "/contacts/follow-up-report"
