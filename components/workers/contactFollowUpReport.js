@@ -16,7 +16,7 @@ const Moment = MomentRange.extendMoment(MomentLibrary);
 const collectionName = 'followUp';
 
 // collection records batch size
-const batchSize = 1;
+const batchSize = 10000;
 
 // copying this here to not load the whole application in the child process
 // too much overhead
