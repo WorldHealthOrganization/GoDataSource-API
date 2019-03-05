@@ -9229,6 +9229,10 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getContactFollowUpReport = function (dateRange, callback) {
-    WorkerRunner.getContactFollowUpReport(this.id, dateRange.startDate, dateRange.endDate);
+    WorkerRunner
+      .getContactFollowUpReport(this.id, dateRange.startDate, dateRange.endDate)
+      .then((result) => {
+        let a = 1;
+      });
   };
 };

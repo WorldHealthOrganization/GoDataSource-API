@@ -16,7 +16,7 @@ const Moment = MomentRange.extendMoment(MomentLibrary);
 const collectionName = 'followUp';
 
 // collection records batch size
-const batchSize = 1000;
+const batchSize = 1;
 
 // copying this here to not load the whole application in the child process
 // too much overhead
@@ -70,7 +70,7 @@ const worker = {
 
     // get range of days
     const range = Moment.range(startDate, endDate);
-    const days = Array.from(range.by('days')).map((m => m.toDate()));
+    const days = Array.from(range.by('days')).map((m => m.toString()));
 
     // result props
     const result = {
@@ -78,7 +78,7 @@ const worker = {
       totalContacts: 0
     };
     days.forEach((day) => {
-      result.days[day.toISOString()] = {
+      result.days[day] = {
         followedUp: 0,
         notFollowedUp: 0,
         percentage: 0
@@ -99,33 +99,33 @@ const worker = {
               .collection('followUp')
               .find(filter, {
                 skip: skip,
-                limit: batchSize
+                limit: batchSize,
+                projection: {
+                  date: 1,
+                  personId: 1,
+                  statusId: 1
+                }
               });
 
             cursor
               .toArray()
               .then((records) => {
-                if (!records) {
+                if (!records.length) {
                   // get the total count of contacts into the result
                   result.totalContacts = contactFollowUpsMap.size;
 
                   // calculate the percentage for each day
-                  result.days.forEach(day => {
-                    day.percentage = (day.followedUp * 100) / (day.followedUp + day.notFollowedUp);
-                  });
+                  for (let d in result.days) {
+                    const currentDay = result.days[d];
+                    currentDay.percentage = (currentDay.followedUp * 100) / (currentDay.followedUp + currentDay.notFollowedUp);
+                  }
 
                   return resolve(result);
                 }
 
-                // transform date to actual Date objects
-                records = records.map((r) => {
-                  r.date = new Date(r.date);
-                  return r;
-                });
-
                 // group follow ups by day
                 const groupedByDayRecords = _.groupBy(records, function (record) {
-                  return Helpers.getDate(record.date).toDate().toISOString();
+                  return Helpers.getDate(record.date).toString();
                 });
 
                 for (let i = 0; i < days.length; i++) {
@@ -148,26 +148,26 @@ const worker = {
                         contactFollowUpsMap.set(contactId, new Set());
                       }
                       const contactSeenDates = contactFollowUpsMap.get(contactId);
-                      const seenDateIdx = contactSeenDates.findIndex(day => day.isSame(currentDate, 'day'));
-                      if (seenDateIdx === -1) {
+                      const seenDateIdx = [...contactSeenDates].findIndex(day => day.isSame(currentDate, 'day'));
+                      if (seenDateIdx !== -1) {
                         continue;
                       }
                       // check if at least one is performed
-                      const isPerformed = groupedByContact[contactId].filter(fp => isFollowUpPerformed(fp)).length;
+                      const isPerformed = !!groupedByContact[contactId].filter(fp => isFollowUpPerformed(fp)).length;
                       if (isPerformed) {
-                        result.days[currentDate.toISOString()].followedUp++;
+                        result.days[days[i]].followedUp++;
                       } else {
-                        result.days[currentDate.toISOString()].notFollowedUp++;
+                        result.days[days[i]].notFollowedUp++;
                       }
 
                       // add it as seen for current date
-                      contactFollowUpsMap[contactId].add(currentDate);
+                      contactSeenDates.add(currentDate);
                     }
                   }
                 }
 
                 // continue with next batch
-                return getNextBatch(skip + batchSize);
+                getNextBatch(skip + batchSize);
               });
           })();
         });
