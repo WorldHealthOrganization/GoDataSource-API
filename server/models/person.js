@@ -554,7 +554,7 @@ module.exports = function (Person) {
    * @param personModel
    * @param filter
    * @param outbreak
-   * @returns {Promise} people without an address are grouped under a dummy location with name '-'
+   * @returns {Promise} Returns => { peopleDistribution: [...], locationCorelationMap: { ... } }. People without an address are grouped under a dummy location with name '-'
    */
   Person.getPeoplePerLocation = function (personModel, filter, outbreak) {
     // Make function return a promise so we can easily link additional async code
@@ -661,6 +661,7 @@ module.exports = function (Person) {
                 }
               };
             }
+
             // Merge the additional filter with the filter provided by the user
             _filter = app.utils.remote.mergeFilters(additionalFilter, filter || {});
 
@@ -724,8 +725,13 @@ module.exports = function (Person) {
                     personCurrentLocation = personCurrentAddress.locationId;
                   }
                   // if it has a current location, get it's correlated location
-                  if (personCurrentLocation && locationCorelationMap[personCurrentLocation]) {
-                    peopleDistribution[locationCorelationMap[personCurrentLocation]].people.push(person);
+                  if (personCurrentLocation) {
+                    if (locationCorelationMap[personCurrentLocation]) {
+                      peopleDistribution[locationCorelationMap[personCurrentLocation]].people.push(person);
+                    } else {
+                      // geographicalLevelId not matched
+                      // NOT HANDLED
+                    }
                   } else {
                     peopleDistribution[app.models.location.noLocation.id].people.push(person);
                   }
@@ -733,7 +739,12 @@ module.exports = function (Person) {
 
                 // After the peopleDistribution object is fully populate it, use only it's values from now on.
                 // The keys were used only to easily distribute the locations/people
-                resolve(Object.values(peopleDistribution).filter(entry => entry.people.length));
+                resolve({
+                  peopleDistribution: Object
+                    .values(peopleDistribution)
+                    .filter(entry => entry.people.length),
+                  locationCorelationMap: locationCorelationMap
+                });
               });
           })
           .catch(error);
