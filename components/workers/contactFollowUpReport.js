@@ -96,7 +96,7 @@ const worker = {
           // process records in batches
           (function getNextBatch(skip = 0) {
             const cursor = dbConnection
-              .collection('followUp')
+              .collection(collectionName)
               .find(filter, {
                 skip: skip,
                 limit: batchSize,
@@ -156,20 +156,38 @@ const worker = {
 
                       // check if at least one is performed
                       const isPerformed = !!groupedByContact[contactId].filter(fp => isFollowUpPerformed(fp)).length;
-                      if (isPerformed) {
-                        result.days[days[i]].followedUp++;
-                      } else {
-                        if (seenDateIdx !== -1 && contactSeenDates[seenDateIdx].isPerformed) {
+
+                      // if it has a followed up performed now, but the last one for the contact was not
+                      // substract one for not followed up count and add one in the followed up count
+                      // consequent follow ups for the current day will not be taken into consideration
+                      if (seenDateIdx !== -1) {
+                        if (contactSeenDates[seenDateIdx].isPerformed) {
                           continue;
                         }
-                        result.days[days[i]].notFollowedUp++;
+                        // now is performed
+                        if (isPerformed) {
+                          result.days[days[i]].notFollowedUp--;
+                          result.days[days[i]].followedUp++;
+                        }
+                      } else {
+                        if (isPerformed) {
+                          result.days[days[i]].followedUp++;
+                        } else {
+                          result.days[days[i]].notFollowedUp++;
+                        }
                       }
 
-                      // add it as seen for current date
-                      contactSeenDates.push({
+                      // add it to history
+                      const dateHistory = {
                         date: currentDate,
                         isPerformed: isPerformed
-                      });
+                      };
+                      if (seenDateIdx !== -1) {
+                        contactSeenDates[seenDateIdx] = dateHistory;
+                      } else {
+                        contactSeenDates.push(dateHistory);
+                      }
+
                       contactFollowUpsMap.set(contactId, contactSeenDates);
                     }
                   }
