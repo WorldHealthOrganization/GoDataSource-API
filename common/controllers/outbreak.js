@@ -6809,6 +6809,9 @@ module.exports = function (Outbreak) {
                         questionsAnswers[question.name] = answers[question.name];
                       });
 
+                      // convert the questionnaire answers to old format
+                      questionsAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(questionsAnswers);
+
                       // add questionnaire answers into the table if any
                       for (let questionId in questionsAnswers) {
                         if (questionsAnswers.hasOwnProperty(questionId)) {
@@ -7383,6 +7386,7 @@ module.exports = function (Outbreak) {
           // Prepare questionnaire answers for printing
           results.forEach((followUp) => {
             if (followUp.questionnaireAnswers) {
+              followUp.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(followUp.questionnaireAnswers);
               followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
             }
           });
@@ -7615,13 +7619,7 @@ module.exports = function (Outbreak) {
                     data.push({description: dictionary.getTranslation(question.text)});
                     contact.followUps.forEach((followUp, i) => {
                       let questionAnswer = _.get(followUp, `questionnaireAnswers[${question.variable}]`);
-
-                      // for multi answer questions, just take the first item in the array
-                      // they are sorted on 'before save' hooks for case/contact/lab result models
-                      // also map the object from { value } to [ value ] to be consistent with the rest of answers
-                      if (question.multiAnswer && Array.isArray(questionAnswer) && questionAnswer.length) {
-                        questionAnswer = questionAnswer.slice(0, 1)[0].value;
-                      }
+                      questionAnswer = genericHelpers.convertQuestionAnswerToOldFormat(questionAnswer);
 
                       data[data.length - 1]['index' + i] = genericHelpers.translateQuestionAnswers(question, questionAnswer, dictionary);
                     });
@@ -8457,6 +8455,7 @@ module.exports = function (Outbreak) {
           // Prepare questionnaire answers for printing
           results.forEach((caseModel) => {
             if (caseModel.questionnaireAnswers) {
+              caseModel.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(caseModel.questionnaireAnswers);
               caseModel.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.case, caseModel, dictionary);
             }
           });

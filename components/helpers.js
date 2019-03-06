@@ -1211,9 +1211,10 @@ const getSourceAndTargetFromModelHookContext = function (context) {
  */
 const translateQuestionnaire = function (outbreak, Model, modelInstance, dictionary) {
   let newQuestionnaire = {};
-  Object.keys(modelInstance.questionnaireAnswers).forEach((variable) => {
+  const questionnaireAnswers = convertQuestionnaireAnswersToOldFormat(modelInstance.questionnaireAnswers);
+  Object.keys(questionnaireAnswers).forEach((variable) => {
     // shorthand ref
-    let qAnswer = modelInstance.questionnaireAnswers[variable];
+    let qAnswer = questionnaireAnswers[variable];
 
     // question definition
     let question = findQuestionByVariable(outbreak[Model.extendedForm.template], variable);
@@ -1221,13 +1222,6 @@ const translateQuestionnaire = function (outbreak, Model, modelInstance, diction
     if (question) {
       let questionText = dictionary.getTranslation(question.text);
       let answer = '';
-
-      // for multi answer questions, just take the first item in the array
-      // they are sorted on 'before save' hooks for case/contact/lab result models
-      // also map the object from { value } to [ value ] to be consistent with the rest of answers
-      if (question.multiAnswer && Array.isArray(qAnswer) && qAnswer.length) {
-        qAnswer = qAnswer.slice(0, 1)[0].value;
-      }
 
       if (['LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS', 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER'].includes(question.answerType)) {
         answer = translateQuestionAnswers(question, qAnswer, dictionary);
@@ -1528,6 +1522,30 @@ const sortMultiAnswerQuestions = function (model) {
   }
 };
 
+/**
+ * Convert questionnaire answers from new format ([ { date: Date, value: Question answer } ]) to old
+ * @param answer
+ */
+const convertQuestionAnswerToOldFormat = function (answer) {
+  if (Array.isArray(answer) && answer.length) {
+    // doing this to take the latest answer for multi day answers
+    return answer.slice(0, 1)[0].value;
+  }
+  return answer;
+};
+
+/**
+ * Convert questionnaire answers from new format ([ { date: Date, value: Question answer } ]) to value
+ * @param answers
+ */
+const convertQuestionnaireAnswersToOldFormat = function (answers) {
+  const result = {};
+  for (let qVar in answers) {
+    result[qVar] = convertQuestionAnswerToOldFormat(answers[qVar]);
+  }
+  return result;
+};
+
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1567,5 +1585,7 @@ module.exports = {
   createImageDoc: createImageDoc,
   convertToDate: convertToDate,
   covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat,
-  sortMultiAnswerQuestions: sortMultiAnswerQuestions
+  sortMultiAnswerQuestions: sortMultiAnswerQuestions,
+  convertQuestionAnswerToOldFormat: convertQuestionAnswerToOldFormat,
+  convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat
 };

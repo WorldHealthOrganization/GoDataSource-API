@@ -1245,19 +1245,15 @@ module.exports = function (Outbreak) {
    * @param questions
    */
   Outbreak.helpers.prepareQuestionsForPrint = function (answers, questions) {
+    // convert questionnaire answers to old format, before doing anything
+    answers = genericHelpers.convertQuestionnaireAnswersToOldFormat(answers);
+
     Object.keys(answers).forEach((key) => {
       let question = _.find(questions, (question) => {
         return question.variable === key;
       });
 
       if (question) {
-        // for multi answer questions, just take the first item in the array
-        // they are sorted on 'before save' hooks for case/contact/lab result models
-        // also map the object from { value } to [ value ] to be consistent with the rest of answers
-        if (question.multiAnswer && Array.isArray(answers[key]) && answers[key].length) {
-          answers[key] = answers[key].slice(0, 1)[0].value;
-        }
-
         // check the length of the list as well
         // weird case when question is free text but the answers is an empty list
         if (Array.isArray(question.answers) && question.answers.length) {
