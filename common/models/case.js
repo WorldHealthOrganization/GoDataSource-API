@@ -60,6 +60,7 @@ module.exports = function (Case) {
           }
 
           // delete each isolated contact
+          // do not wait for this, just continue with the execution flow
           isolatedContacts.forEach((isolatedContact) => {
             if (isolatedContact.isValid) {
               isolatedContact.contact.destroy();
