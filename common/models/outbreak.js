@@ -1186,7 +1186,8 @@ module.exports = function (Outbreak) {
           question: translateToken(question.text),
           variable: question.variable,
           answerType: question.answerType,
-          answers: question.answers
+          answers: question.answers,
+          multiAnswer: question.multiAnswer
         };
 
         // do not try to translate answers that are free text
@@ -1250,26 +1251,31 @@ module.exports = function (Outbreak) {
    * @param questions
    */
   Outbreak.helpers.prepareQuestionsForPrint = function (answers, questions) {
+    // convert questionnaire answers to old format, before doing anything
+    answers = genericHelpers.convertQuestionnaireAnswersToOldFormat(answers);
+
     Object.keys(answers).forEach((key) => {
       let question = _.find(questions, (question) => {
         return question.variable === key;
       });
 
-      if (question && question.answers) {
-        question.answers.forEach((answer) => {
-          if (answers[key].indexOf(answer.value) !== -1) {
-            answer.selected = true;
-          }
+      if (question) {
+        if (question.answers) {
+          question.answers.forEach((answer) => {
+            if (answers[key].indexOf(answer.value) !== -1) {
+              answer.selected = true;
+            }
 
-          if (answer.additionalQuestions && answer.additionalQuestions.length) {
-            Outbreak.helpers.prepareQuestionsForPrint(answers, answer.additionalQuestions);
-          }
-        });
-      } else if (question && !question.answers) {
-        if (answers[key] instanceof Date || genericHelpers.isValidDate(answers[key])) {
-          question.value = genericHelpers.getDateDisplayValue(answers[key]);
+            if (answer.additionalQuestions && answer.additionalQuestions.length) {
+              Outbreak.helpers.prepareQuestionsForPrint(answers, answer.additionalQuestions);
+            }
+          });
         } else {
-          question.value = answers[key];
+          if (answers[key] instanceof Date || genericHelpers.isValidDate(answers[key])) {
+            question.value = genericHelpers.getDateDisplayValue(answers[key]);
+          } else {
+            question.value = answers[key];
+          }
         }
       }
     });

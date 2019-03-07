@@ -1211,20 +1211,26 @@ const getSourceAndTargetFromModelHookContext = function (context) {
  */
 const translateQuestionnaire = function (outbreak, Model, modelInstance, dictionary) {
   let newQuestionnaire = {};
-  Object.keys(modelInstance.questionnaireAnswers).forEach((variable) => {
+  const questionnaireAnswers = convertQuestionnaireAnswersToOldFormat(modelInstance.questionnaireAnswers);
+  Object.keys(questionnaireAnswers).forEach((variable) => {
+    // shorthand ref
+    let qAnswer = questionnaireAnswers[variable];
+
+    // question definition
     let question = findQuestionByVariable(outbreak[Model.extendedForm.template], variable);
 
     if (question) {
       let questionText = dictionary.getTranslation(question.text);
       let answer = '';
+
       if (['LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS', 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER'].includes(question.answerType)) {
-        answer = translateQuestionAnswers(question, modelInstance.questionnaireAnswers[variable], dictionary);
+        answer = translateQuestionAnswers(question, qAnswer, dictionary);
       } else {
         // Parse date type answers since xml cannot print them
-        if (modelInstance.questionnaireAnswers[variable] instanceof Date) {
-          answer = getDateDisplayValue(modelInstance.questionnaireAnswers[variable]);
+        if (qAnswer instanceof Date) {
+          answer = getDateDisplayValue(qAnswer);
         } else {
-          answer = modelInstance.questionnaireAnswers[variable];
+          answer = qAnswer;
         }
       }
       newQuestionnaire[questionText] = answer;
@@ -1498,6 +1504,48 @@ function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}) {
   });
 }
 
+/**
+ * Sort multi answer questionnaire answers by date
+ * @param model
+ */
+const sortMultiAnswerQuestions = function (model) {
+  if (model.questionnaireAnswers) {
+    // shorthand reference
+    const answers = model.questionnaireAnswers;
+
+    for (let prop in answers) {
+      if (Array.isArray(answers[prop]) && answers[prop].length) {
+        // sort them by date
+        answers[prop] = answers[prop].sort((a, b) => moment(b.date).format('X') - moment(a.date).format('X'));
+      }
+    }
+  }
+};
+
+/**
+ * Convert questionnaire answers from new format ([ { date: Date, value: Question answer } ]) to old
+ * @param answer
+ */
+const convertQuestionAnswerToOldFormat = function (answer) {
+  if (Array.isArray(answer) && answer.length) {
+    // doing this to take the latest answer for multi day answers
+    return answer.slice(0, 1)[0].value;
+  }
+  return answer;
+};
+
+/**
+ * Convert questionnaire answers from new format ([ { date: Date, value: Question answer } ]) to value
+ * @param answers
+ */
+const convertQuestionnaireAnswersToOldFormat = function (answers) {
+  const result = {};
+  for (let qVar in answers) {
+    result[qVar] = convertQuestionAnswerToOldFormat(answers[qVar]);
+  }
+  return result;
+};
+
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1536,5 +1584,8 @@ module.exports = {
   sha256: sha256,
   createImageDoc: createImageDoc,
   convertToDate: convertToDate,
-  covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat
+  covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat,
+  sortMultiAnswerQuestions: sortMultiAnswerQuestions,
+  convertQuestionAnswerToOldFormat: convertQuestionAnswerToOldFormat,
+  convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat
 };
