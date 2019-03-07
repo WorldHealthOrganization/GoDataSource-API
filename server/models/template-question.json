@@ -13,6 +13,10 @@
       "type": "boolean",
       "default": false
     },
+    "inactive": {
+      "type": "boolean",
+      "default": false
+    },
     "text": {
       "type": "string",
       "required": true

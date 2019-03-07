@@ -9,6 +9,50 @@ module.exports = function (Contact) {
   // set flag to not get controller
   Contact.hasController = false;
 
+  // initialize model helpers
+  Contact.helpers = {};
+
+  /**
+   * Return a list of field labels map that are allowed for export
+   */
+  Contact.helpers.sanitizeFieldLabelsMapForExport = () => {
+    // make sure we don't alter the original array
+    const fieldLabelsMap = {};
+
+    // relationship person labels
+    const relationshipFieldLabelsMap = {
+      'relatedId': 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS_RELATED_PERSON',
+      'contactDate': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE',
+      'contactDateEstimated': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE_ESTIMATED',
+      'certaintyLevelId': 'LNG_RELATIONSHIP_FIELD_LABEL_CERTAINTY_LEVEL',
+      'exposureTypeId': 'LNG_RELATIONSHIP_FIELD_LABEL_EXPOSURE_TYPE',
+      'exposureFrequencyId': 'LNG_RELATIONSHIP_FIELD_LABEL_EXPOSURE_FREQUENCY',
+      'exposureDurationId': 'LNG_RELATIONSHIP_FIELD_LABEL_EXPOSURE_DURATION',
+      'socialRelationshipTypeId': 'LNG_RELATIONSHIP_FIELD_LABEL_RELATION',
+      'socialRelationshipDetail': 'LNG_RELATIONSHIP_FIELD_LABEL_RELATION_DETAIL',
+      'clusterId': 'LNG_RELATIONSHIP_FIELD_LABEL_CLUSTER',
+      'comment': 'LNG_RELATIONSHIP_FIELD_LABEL_COMMENT',
+    };
+
+    // append source export fields
+    Object.assign(
+      fieldLabelsMap,
+      Contact.fieldLabelsMap,
+      _.transform(
+        relationshipFieldLabelsMap,
+        (tokens, token, property) => {
+          tokens[`relationship.${property}`] = token;
+        },
+        {}
+      ), {
+        'relationship': 'LNG_CONTACT_FIELD_LABEL_RELATIONSHIP'
+      }
+    );
+
+    // finished
+    return fieldLabelsMap;
+  };
+
   Contact.fieldLabelsMap = Object.assign({}, Contact.fieldLabelsMap, {
     'firstName': 'LNG_CONTACT_FIELD_LABEL_FIRST_NAME',
     'middleName': 'LNG_CONTACT_FIELD_LABEL_MIDDLE_NAME',
@@ -417,7 +461,7 @@ module.exports = function (Contact) {
         // doing this because we're reusing existing functionality that does not build the result the same way
         let contactGroups = {};
 
-        groups.forEach((group) => {
+        groups.peopleDistribution.forEach((group) => {
           if (group.people.length) {
             contactGroups[group.location.name] = group.people;
           }

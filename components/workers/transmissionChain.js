@@ -21,6 +21,31 @@ const worker = {
     // keep information about active transmission chains
     let activeTransmissionChains = {};
 
+    // case/event to contact map
+    const caseEventToContactMap = {};
+
+    /**
+     * If any of the people in the pair is a contact, then the other is always a case/event
+     * Add the other partner in the case/event to contact map pointing to the contact partner
+     * @param person1
+     * @param person2
+     */
+    const addPeoplePairToCaseEventToContactMap = function (person1, person2) {
+      if (person1.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+        if (caseEventToContactMap[person2.id]) {
+          caseEventToContactMap[person2.id].add(person1.id);
+        } else {
+          caseEventToContactMap[person2.id] = new Set([person1.id]);
+        }
+      } else if (person2.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+        if (caseEventToContactMap[person1.id]) {
+          caseEventToContactMap[person1.id].add(person2.id);
+        } else {
+          caseEventToContactMap[person1.id] = new Set([person2.id]);
+        }
+      }
+    };
+
     // keep information about nodes and edges
     let nodes = {};
     let edges = {};
@@ -156,6 +181,9 @@ const worker = {
 
         // transmission chains are build only by case/event-case/event relationships
         if (relationshipPerson1.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' || relationshipPerson2.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+          if (options.countContacts) {
+            addPeoplePairToCaseEventToContactMap(relationshipPerson1, relationshipPerson2);
+          }
           relationsIndex++;
           continue;
         }
@@ -271,17 +299,38 @@ const worker = {
 
         // keep an index for people in the chain
         const transmissionChainPersonIndex = {};
+
         // map each person from the chain into the index
         transmissionChain.forEach(function (peoplePair) {
           peoplePair.forEach(function (personId) {
             transmissionChainPersonIndex[personId] = true;
           });
         });
+
+        // if count contacts flag is set, count the number of contacts per chain
+        let contactsCount = 0;
+        if (options.countContacts) {
+          // unique list of contacts per all participants in a chain
+          let contactsSet = new Set();
+
+          const peopleKeys = Object.keys(transmissionChainPersonIndex);
+          peopleKeys.forEach((person) => {
+            if (caseEventToContactMap[person]) {
+              contactsSet = new Set([...contactsSet, ...caseEventToContactMap[person]]);
+            }
+          });
+          contactsCount = contactsSet.size;
+        }
+
         // transmission chain size represents the number of people in the chain
         const transmissionChainSize = Object.keys(transmissionChainPersonIndex).length;
 
         // add it to the list of chains
         _chains.chains[resultIndex] = {chain: transmissionChain, active: isChainActive, size: transmissionChainSize};
+        // include contacts count to chain information
+        if (options.countContacts) {
+          _chains.chains[resultIndex].contactsCount = contactsCount;
+        }
         // store length for each chain
         chainsLengths[resultIndex] = {length: transmissionChain.length, active: isChainActive, size: transmissionChainSize};
         resultIndex++;
@@ -305,7 +354,6 @@ const worker = {
         activeChainsCount: activeChainsLength
       };
     } else {
-
       // keep a map of edges (person:person) to edge data to easily locate edge (relation) data for transmission chain edges
       const edgesMap = {};
       // go through all edges
