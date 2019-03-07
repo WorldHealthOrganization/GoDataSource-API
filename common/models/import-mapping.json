@@ -21,7 +21,11 @@
       "default": false,
       "description": "True if it should be visible to everyone"
     },
-    "mappings": [
+    "mappingKey": {
+      "type": "string",
+      "required": true
+    },
+    "mappingData": [
       "importMappingValue"
     ],
     "readOnly": {
