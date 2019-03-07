@@ -1476,6 +1476,12 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "caseDelayBetweenOnsetAndHospitalizationIsolation"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_outbreak",
+      "permission": "ALLOW",
+      "property": "getContactFollowUpReport"
     }
   ],
   "methods": {
@@ -6576,6 +6582,34 @@
       "http": {
         "verb": "get",
         "path": "/cases/delay-onset-hospitalization"
+      }
+    },
+    "prototype.getContactFollowUpReport": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "dateRange",
+          "description": "Start/end dates",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "report",
+          "type": "object",
+          "description": "Report",
+          "required": true
+        }
+      ],
+      "description": "Get total number of contacts that were followed up in the given period of time",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/follow-up-report"
       }
     }
   }
