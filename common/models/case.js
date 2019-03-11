@@ -8,16 +8,18 @@ const async = require('async');
 
 module.exports = function (Case) {
   Case.observe('after delete', (context, next) => {
+    const caseId = context.instance.id;
+
     // get all relations with contacts for the case the deleted case
     app.models.relationship
       .rawFind({
         $or: [
           {
-            'persons.0.id': context.instance.id,
+            'persons.0.id': caseId,
             'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
           },
           {
-            'persons.1.id': context.instance.id,
+            'persons.1.id': caseId,
             'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
           }
         ]
@@ -37,14 +39,18 @@ module.exports = function (Case) {
                 // get all relations for the contact
                 app.models.relationship
                   .rawFind({
-                    $and: [
+                    $or: [
                       {
-                        'persons.id': contact.id
+                        'persons.0.id': contact.id,
+                        'persons.1.id': {
+                          $ne: caseId
+                        }
                       },
                       {
-                        'persons.id': {
-                          $ne: context.instance.id
-                        }
+                        'persons.0.id': {
+                          $ne: caseId
+                        },
+                        'persons.1.id': contact.id
                       }
                     ]
                   })
