@@ -1485,6 +1485,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "modifyCaseMultipleContacts"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_followup",
       "permission": "ALLOW",
       "property": "getFollowUpsGroupedByContact"
@@ -5121,6 +5127,43 @@
       "http": {
         "verb": "post",
         "path": "/events/:nk/contacts"
+      }
+    },
+    "prototype.modifyCaseMultipleContacts": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "data",
+          "type": [
+            "contact"
+          ],
+          "description": "Array containing contacts",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "createResponse",
+          "type": [
+            "contact"
+          ],
+          "description": "Array of updated contacts",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Update multiple contacts for a case",
+      "http": {
+        "verb": "put",
+        "path": "/cases/:nk/contacts"
       }
     },
     "prototype.findLabResults": {

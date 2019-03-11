@@ -5680,17 +5680,26 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Create multiple contacts for events
-   * @param eventId
+   * Modify multiple contacts for cases
+   * @param caseId
    * @param data
-   * @param options
    * @param callback
    */
-  Outbreak.prototype.createEventMultipleContacts = function (eventId, data, options, callback) {
-    Outbreak.createPersonMultipleContacts(this, app.models.event.modelName, eventId, data, options)
-      .then(function (results) {
-        callback(null, results);
-      })
+  Outbreak.prototype.modifyCaseMultipleContacts = function (caseId, data, callback) {
+    Outbreak.modifyPersonMultipleContacts(this, app.models.case.modelName, caseId, data)
+      .then((results) => callback(null, results))
+      .catch(callback);
+  };
+
+  /**
+   * Modify multiple contacts for events
+   * @param eventId
+   * @param data
+   * @param callback
+   */
+  Outbreak.prototype.modifyEventMultipleContacts = function (eventId, data, callback) {
+    Outbreak.modifyPersonMultipleContacts(this, app.models.event.modelName, eventId, data)
+      .then((results) => callback(null, results))
       .catch(callback);
   };
 

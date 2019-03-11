@@ -1692,4 +1692,97 @@ module.exports = function (Outbreak) {
       });
     });
   };
+
+  /**
+   * Modify multiple contacts for case/event
+   * @param outbreak Outbreak instance
+   * @param modelName case/event
+   * @param modelId caseId/eventId
+   * @param data
+   * @return {Promise<any>}
+   */
+  Outbreak.modifyPersonMultipleContacts = function (outbreak, modelName, modelId, data) {
+    // promisify the result
+    return new Promise((resolve, reject) => {
+      // initialize array of actions that will be executed in async mode
+      const actions = [];
+
+      // initialize array of failed/successful entries
+      const failedEntries = [];
+      const successfulEntries = [];
+
+      // nothing to do
+      if (!data.length) {
+        return resolve(successfulEntries);
+      }
+
+      data.forEach(function (entry, index) {
+        actions.push(function (asyncCallback) {
+          // make sure a contact id is passed
+          // otherwise we don't know which contact to update
+          if (!entry.id) {
+            failedEntries.push({
+              recordNo: index,
+              error: app.utils.apiError.getError('CONTACT_ID_REQUIRED')
+            });
+            return asyncCallback();
+          }
+
+          // make sure each contact has the correct outbreak set
+          entry.outbreakId = outbreak.id;
+
+          // get the existing contact instance
+          app.models.contact
+            .findById(entry.id)
+            .then((contact) => {
+              if (!contact) {
+                failedEntries.push({
+                  recordNo: index,
+                  error: app.utils.apiError.getError('MODEL_NOT_FOUND', {
+                    model: app.models.contact.modelName,
+                    id: entry.id
+                  })
+                });
+                return asyncCallback();
+              }
+              // update contact attributes through loopback model functionality
+              contact
+                .updateAttributes(entry)
+                .then((updatedContact) => {
+                  // add pair to the success list
+                  successfulEntries.push({
+                    recordNo: index,
+                    contact: updatedContact
+                  });
+                  return asyncCallback();
+                });
+            })
+            .catch((err) => {
+              // pair add failed; add entry to the failed list
+              failedEntries.push({
+                recordNo: index,
+                error: err
+              });
+              return asyncCallback();
+            });
+        });
+      });
+
+      async.series(actions, (err) => {
+        if (err) {
+          return reject(err);
+        }
+
+        if (!failedEntries.length) {
+          // all entries updated successfully
+          return resolve(successfulEntries);
+        } else {
+          return reject(app.utils.apiError.getError('MULTIPLE_CONTACTS_UPDATE_PARTIAL_SUCCESS', {
+            failed: failedEntries,
+            success: successfulEntries
+          }));
+        }
+      });
+    });
+  };
 };

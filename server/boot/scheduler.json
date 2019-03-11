@@ -1,1 +1,1 @@
-{}
+{"sync":{"http://whocd.clarisoft.com":{"startTime":"2019-03-01T10:18:38.167Z","lastExecutedTime":"2019-03-04T08:27:49.954Z","timeUnit":"h","interval":15}},"backup":{"startTime":"2019-02-27T11:42:41.753Z","lastExecutedTime":null,"timeUnit":"h","interval":24},"backupCleanup":{"startTime":"2019-02-27T11:42:41.754Z","lastExecutedTime":null,"timeUnit":"d","interval":90}}
