@@ -1728,9 +1728,6 @@ module.exports = function (Outbreak) {
             return asyncCallback();
           }
 
-          // make sure each contact has the correct outbreak set
-          entry.outbreakId = outbreak.id;
-
           // get the existing contact instance
           app.models.contact
             .findById(entry.id)
