@@ -4,8 +4,81 @@ const app = require('../../server/server');
 const casesWorker = require('../../components/workerRunner').cases;
 const _ = require('lodash');
 const moment = require('moment');
+const async = require('async');
 
 module.exports = function (Case) {
+  Case.observe('after delete', (context, next) => {
+    const caseId = context.instance.id;
+
+    // get all relations with contacts for the case the deleted case
+    app.models.relationship
+      .rawFind({
+        $or: [
+          {
+            'persons.0.id': caseId,
+            'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          },
+          {
+            'persons.1.id': caseId,
+            'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          }
+        ]
+      })
+      .then((relationships) => {
+        async.parallelLimit(relationships.map((rel) => {
+          const contact = rel.persons.find((p) => p.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
+          return (cb) => {
+            app.models.contact
+              .find({
+                where: {
+                  id: contact.id
+                }
+              })
+              .then((contacts) => {
+                const contact = contacts[0];
+                // get all relations for the contact
+                app.models.relationship
+                  .rawFind({
+                    $or: [
+                      {
+                        'persons.0.id': contact.id,
+                        'persons.1.id': {
+                          $ne: caseId
+                        }
+                      },
+                      {
+                        'persons.0.id': {
+                          $ne: caseId
+                        },
+                        'persons.1.id': contact.id
+                      }
+                    ]
+                  })
+                  .then((relationships) => {
+                    return cb(null, { contact: contact, isValid: !relationships.length });
+                  });
+              })
+              .catch((error) => cb(error));
+          };
+        }), 10, (err, isolatedContacts) => {
+          if (err) {
+            return next(err);
+          }
+
+          // delete each isolated contact
+          // do not wait for this, just continue with the execution flow
+          isolatedContacts.forEach((isolatedContact) => {
+            if (isolatedContact.isValid) {
+              isolatedContact.contact.destroy();
+            }
+          });
+
+          // fire and forget
+          return next();
+        });
+      });
+  });
+
   // set flag to not get controller
   Case.hasController = false;
 
