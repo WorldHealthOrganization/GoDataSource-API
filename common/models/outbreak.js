@@ -1717,23 +1717,41 @@ module.exports = function (Outbreak) {
         return resolve(successfulEntries);
       }
 
-      existingContacts.forEach((existingContact, index) => {
-        actions.push((asyncCallback) => {
-          // make sure a contact id is passed
-          // otherwise we don't know which contact to update
-          if (!existingContact.id) {
-            failedEntries.push({
-              recordNo: index,
-              error: getError('CONTACT_ID_REQUIRED')
-            });
-            return asyncCallback();
+      // get contact ids and retrieve information about them
+      const ids = [];
+      existingContacts.forEach((contact) => {
+        if (contact.id) {
+          ids.push(contact.id);
+        }
+      });
+      contactModel
+        .find({
+          where: {
+            id: {
+              inq: ids
+            }
           }
+        })
+        .then((existingContactModel) => {
+          const existingContactModelMap = {};
+          existingContactModel.forEach((contact) => {
+            existingContactModelMap[contact.id] = contact;
+          });
 
-          // get existing contact in database
-          contactModel
-            .findById(existingContact.id)
-            .then((existingContactFromDb) => {
-              if (!existingContactFromDb) {
+          existingContacts.forEach((existingContact, index) => {
+            actions.push((asyncCallback) => {
+              // make sure a contact id is passed
+              // otherwise we don't know which contact to update
+              if (!existingContact.id) {
+                failedEntries.push({
+                  recordNo: index,
+                  error: getError('CONTACT_ID_REQUIRED')
+                });
+                return asyncCallback();
+              }
+
+              // check if contact exists in database
+              if (!existingContactModelMap[existingContact.id]) {
                 failedEntries.push({
                   recordNo: index,
                   error: getError('MODEL_NOT_FOUND', {
@@ -1743,8 +1761,9 @@ module.exports = function (Outbreak) {
                 });
                 return asyncCallback();
               }
+
               // update contact attributes through loopback model functionality
-              existingContactFromDb
+              existingContactModelMap[existingContact.id]
                 .updateAttributes(existingContact)
                 .then((updatedContact) => {
                   // add it to success list
@@ -1753,36 +1772,36 @@ module.exports = function (Outbreak) {
                     contact: updatedContact
                   });
                   return asyncCallback();
+                })
+                .catch((err) => {
+                  // failed to update
+                  failedEntries.push({
+                    recordNo: index,
+                    error: err
+                  });
+                  return asyncCallback();
                 });
-            })
-            .catch((err) => {
-              // failed to update
-              failedEntries.push({
-                recordNo: index,
-                error: err
-              });
-              return asyncCallback();
             });
+          });
+
+          // run the async actions
+          async.series(actions, (err) => {
+            if (err) {
+              return reject(err);
+            }
+
+            // all entries updated successfully
+            if (!failedEntries.length) {
+              return resolve(successfulEntries);
+            }
+
+            // send back partial error
+            return reject(getError('MULTIPLE_CONTACTS_UPDATE_PARTIAL_SUCCESS', {
+              failed: failedEntries,
+              success: successfulEntries
+            }));
+          });
         });
-      });
-
-      // run the async actions
-      async.series(actions, (err) => {
-        if (err) {
-          return reject(err);
-        }
-
-        // all entries updated successfully
-        if (!failedEntries.length) {
-          return resolve(successfulEntries);
-        }
-
-        // send back partial error
-        return reject(getError('MULTIPLE_CONTACTS_UPDATE_PARTIAL_SUCCESS', {
-          failed: failedEntries,
-          success: successfulEntries
-        }));
-      });
     });
   };
 };
