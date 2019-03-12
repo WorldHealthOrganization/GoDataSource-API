@@ -1487,7 +1487,7 @@
       "principalType": "ROLE",
       "principalId": "read_followup",
       "permission": "ALLOW",
-      "property": "getFollowupsGroupedByContact"
+      "property": "getFollowUpsGroupedByContact"
     }
   ],
   "methods": {
@@ -6618,7 +6618,7 @@
         "path": "/contacts/follow-up-report"
       }
     },
-    "prototype.getFollowupsGroupedByContact": {
+    "prototype.getFollowUpsGroupedByContact": {
       "accepts": [
         {
           "arg": "filter",
@@ -6638,7 +6638,7 @@
       "description": "Get list of follow ups grouped by contact and pagination support",
       "http": {
         "verb": "get",
-        "path": "/range-followups"
+        "path": "/range-follow-ups"
       }
     }
   }

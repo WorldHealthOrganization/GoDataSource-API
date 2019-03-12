@@ -9382,7 +9382,7 @@ module.exports = function (Outbreak) {
    * @param filter
    * @param callback
    */
-  Outbreak.prototype.getFollowupsGroupedByContact = function (filter, callback) {
+  Outbreak.prototype.getFollowUpsGroupedByContact = function (filter, callback) {
     // convert filter to mongodb filter structure
     filter = filter || {};
     filter.where = filter.where || {};
@@ -9438,10 +9438,17 @@ module.exports = function (Outbreak) {
             }
           })
           .then((contacts) => {
+            // create a map of contact id -> contact information
+            // to easily lookup identify it when attaching contact information for each group
+            const contactsMap = {};
+            contacts.forEach((contact) => {
+              contactsMap[contact.id] = contact;
+            });
+
+            // attach contact information to each group
             contactGroups.forEach((group) => {
-              const foundContact = contacts.find((contact) => contact.id === group._id);
-              if (foundContact) {
-                group.contact = foundContact;
+              if (contactsMap[group._id]) {
+                group.contact = contactsMap[group._id];
               }
               delete group._id;
             });
