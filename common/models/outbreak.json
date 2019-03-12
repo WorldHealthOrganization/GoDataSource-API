@@ -1487,13 +1487,7 @@
       "principalType": "ROLE",
       "principalId": "write_contact",
       "permission": "ALLOW",
-      "property": "modifyCaseMultipleContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "modifyEventMultipleContacts"
+      "property": "bulkModifyContacts"
     },
     {
       "principalType": "ROLE",
@@ -6636,6 +6630,38 @@
         "path": "/contacts/follow-up-report"
       }
     },
+    "prototype.bulkModifyContacts": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": [
+            "contact"
+          ],
+          "description": "Array containing contacts",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "createResponse",
+          "type": [
+            "contact"
+          ],
+          "description": "Array of updated contacts",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Update multiple contacts",
+      "http": {
+        "verb": "put",
+        "path": "/contacts/bulk"
+      }
+    },
     "prototype.getFollowUpsGroupedByContact": {
       "accepts": [
         {
@@ -6680,80 +6706,6 @@
       "http": {
         "verb": "get",
         "path": "/range-follow-ups/count"
-      }
-    },
-    "prototype.modifyCaseMultipleContacts": {
-      "accepts": [
-        {
-          "arg": "nk",
-          "type": "string",
-          "description": "Foreign key for cases"
-        },
-        {
-          "arg": "data",
-          "type": [
-            "contact"
-          ],
-          "description": "Array containing contacts",
-          "http": {
-            "source": "body"
-          },
-          "root": true,
-          "required": true
-        }
-      ],
-      "returns": [
-        {
-          "arg": "createResponse",
-          "type": [
-            "contact"
-          ],
-          "description": "Array of updated contacts",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Update multiple contacts for a case",
-      "http": {
-        "verb": "put",
-        "path": "/cases/:nk/contacts"
-      }
-    },
-    "prototype.modifyEventMultipleContacts": {
-      "accepts": [
-        {
-          "arg": "nk",
-          "type": "string",
-          "description": "Foreign key for events"
-        },
-        {
-          "arg": "data",
-          "type": [
-            "contact"
-          ],
-          "description": "Array containing contacts",
-          "http": {
-            "source": "body"
-          },
-          "root": true,
-          "required": true
-        }
-      ],
-      "returns": [
-        {
-          "arg": "createResponse",
-          "type": [
-            "contact"
-          ],
-          "description": "Array of updated contacts",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Update multiple contacts for a event",
-      "http": {
-        "verb": "put",
-        "path": "/events/:nk/contacts"
       }
     }
   }

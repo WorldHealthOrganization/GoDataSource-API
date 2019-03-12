@@ -1694,14 +1694,15 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Modify multiple contacts for case/event
-   * @param outbreak Outbreak instance
-   * @param modelName case/event
-   * @param modelId caseId/eventId
-   * @param data
+   * Modify multiple contacts
+   * @param existingContacts
    * @return {Promise<any>}
    */
-  Outbreak.modifyPersonMultipleContacts = function (outbreak, modelName, modelId, data) {
+  Outbreak.modifyMultipleContacts = function (existingContacts) {
+    // reference shortcuts
+    const getError = app.utils.apiError.getError;
+    const contactModel = app.models.contact;
+
     // promisify the result
     return new Promise((resolve, reject) => {
       // initialize array of actions that will be executed in async mode
@@ -1712,41 +1713,41 @@ module.exports = function (Outbreak) {
       const successfulEntries = [];
 
       // nothing to do
-      if (!data.length) {
+      if (!existingContacts.length) {
         return resolve(successfulEntries);
       }
 
-      data.forEach(function (entry, index) {
-        actions.push(function (asyncCallback) {
+      existingContacts.forEach((existingContact, index) => {
+        actions.push((asyncCallback) => {
           // make sure a contact id is passed
           // otherwise we don't know which contact to update
-          if (!entry.id) {
+          if (!existingContact.id) {
             failedEntries.push({
               recordNo: index,
-              error: app.utils.apiError.getError('CONTACT_ID_REQUIRED')
+              error: getError('CONTACT_ID_REQUIRED')
             });
             return asyncCallback();
           }
 
-          // get the existing contact instance
-          app.models.contact
-            .findById(entry.id)
-            .then((contact) => {
-              if (!contact) {
+          // get existing contact in database
+          contactModel
+            .findById(existingContact.id)
+            .then((existingContactFromDb) => {
+              if (!existingContactFromDb) {
                 failedEntries.push({
                   recordNo: index,
-                  error: app.utils.apiError.getError('MODEL_NOT_FOUND', {
-                    model: app.models.contact.modelName,
-                    id: entry.id
+                  error: getError('MODEL_NOT_FOUND', {
+                    model: contactModel.modelName,
+                    id: existingContact.id
                   })
                 });
                 return asyncCallback();
               }
               // update contact attributes through loopback model functionality
-              contact
-                .updateAttributes(entry)
+              existingContactFromDb
+                .updateAttributes(existingContact)
                 .then((updatedContact) => {
-                  // add pair to the success list
+                  // add it to success list
                   successfulEntries.push({
                     recordNo: index,
                     contact: updatedContact
@@ -1755,7 +1756,7 @@ module.exports = function (Outbreak) {
                 });
             })
             .catch((err) => {
-              // pair add failed; add entry to the failed list
+              // failed to update
               failedEntries.push({
                 recordNo: index,
                 error: err
@@ -1765,20 +1766,22 @@ module.exports = function (Outbreak) {
         });
       });
 
+      // run the async actions
       async.series(actions, (err) => {
         if (err) {
           return reject(err);
         }
 
+        // all entries updated successfully
         if (!failedEntries.length) {
-          // all entries updated successfully
           return resolve(successfulEntries);
-        } else {
-          return reject(app.utils.apiError.getError('MULTIPLE_CONTACTS_UPDATE_PARTIAL_SUCCESS', {
-            failed: failedEntries,
-            success: successfulEntries
-          }));
         }
+
+        // send back partial error
+        return reject(getError('MULTIPLE_CONTACTS_UPDATE_PARTIAL_SUCCESS', {
+          failed: failedEntries,
+          success: successfulEntries
+        }));
       });
     });
   };

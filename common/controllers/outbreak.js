@@ -5680,25 +5680,12 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Modify multiple contacts for cases
-   * @param caseId
-   * @param data
+   * Bulk modify contacts
+   * @param existingContacts
    * @param callback
    */
-  Outbreak.prototype.modifyCaseMultipleContacts = function (caseId, data, callback) {
-    Outbreak.modifyPersonMultipleContacts(this, app.models.case.modelName, caseId, data)
-      .then((results) => callback(null, results))
-      .catch(callback);
-  };
-
-  /**
-   * Modify multiple contacts for events
-   * @param eventId
-   * @param data
-   * @param callback
-   */
-  Outbreak.prototype.modifyEventMultipleContacts = function (eventId, data, callback) {
-    Outbreak.modifyPersonMultipleContacts(this, app.models.event.modelName, eventId, data)
+  Outbreak.prototype.bulkModifyContacts = function (existingContacts, callback) {
+    Outbreak.modifyMultipleContacts(existingContacts)
       .then((results) => callback(null, results))
       .catch(callback);
   };
