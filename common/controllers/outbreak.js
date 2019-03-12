@@ -9588,6 +9588,26 @@ module.exports = function (Outbreak) {
       order: 'dateOfReporting ASC'
     };
 
+    // initialize map for final followup status to properties that need to be updated in result
+    const finalFollowupStatusMap = {
+      'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED': {
+        counter: 'totalCasesFromContactWithFollowupComplete',
+        idContainer: 'caseFromContactWithFollowupCompleteIDs'
+      },
+      'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP': {
+        counter: 'totalCasesFromContactWithFollowupComplete',
+        idContainer: 'caseFromContactWithFollowupCompleteIDs'
+      },
+      'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP': {
+        counter: 'totalCasesFromContactWithFollowupLostToFollowup',
+        idContainer: 'caseFromContactWithFollowupLostToFollowupIDs'
+      },
+      'no_data': {
+        counter: 'totalCasesFromContactWithFollowupNoData',
+        idContainer: 'caseFromContactWithFollowupNoDataIDs'
+      }
+    };
+
     // get all the cases for the filtered period
     app.models.case.find(app.utils.remote
       .mergeFilters(defaultFilter, filter || {}))
@@ -9657,222 +9677,49 @@ module.exports = function (Outbreak) {
           // create a period identifier
           let casePeriodIdentifier = casePeriodInterval.join(' - ');
 
-          // get index of the case location in the period counters per location array
-          let periodLocationIndex = periodMap[casePeriodIdentifier].countersPerLocation.locations.findIndex(location => location.id === caseLocationId);
-          // initialize location entry is not already initialized
-          if (periodLocationIndex === -1) {
-            periodLocationIndex = periodMap[casePeriodIdentifier].countersPerLocation.locations.push(
-              Object.assign(
-                {
-                  id: caseLocationId,
-                  totalCasesCount: 0,
-                  caseIDs: []
-                },
-                // check for includeDeaths flag to add additional properties
-                includeDeaths ? {
-                  totalDeadCasesCount: 0,
-                  totalDeadConfirmedCasesCount: 0,
-                  deadCaseIDs: [],
-                  deadConfirmedCaseIDs: []
-                } : {}
-              )
-            ) - 1;
-          }
+          // increase total case count counter and add case ID in container
+          periodMap[casePeriodIdentifier].totalCasesCount++;
+          periodMap[casePeriodIdentifier].caseIDs.push(item.id);
+          result.totalCasesCount++;
+          result.caseIDs.push(item.id);
 
-          // get index of the case location in the entire interval counters per location array
-          let entireIntervalLocationIndex = result.totalCasesCountersForIntervalPerLocation.locations.findIndex(location => location.id === caseLocationId);
-          // initialize location entry is not already initialized
-          if (entireIntervalLocationIndex === -1) {
-            entireIntervalLocationIndex = result.totalCasesCountersForIntervalPerLocation.locations.push(
-              Object.assign(
-                {
-                  id: caseLocationId,
-                  totalCasesCount: 0,
-                  caseIDs: []
-                },
-                // check for includeDeaths flag to add additional properties
-                includeDeaths ? {
-                  totalDeadCasesCount: 0,
-                  totalDeadConfirmedCasesCount: 0,
-                  deadCaseIDs: [],
-                  deadConfirmedCaseIDs: []
-                } : {}
-              )
-            ) - 1;
-          }
+          // check if case was converted from contact and increase required counters
+          if (!item.dateBecomeCase) {
+            // case was not converted from contact
+            // increase period counters
+            periodMap[casePeriodIdentifier].totalCasesNotFromContact++;
+            periodMap[casePeriodIdentifier].caseNotFromContactIDs.push(item.id);
 
-          // check if case is dead; will not add it to classificationCounters if so
-          if (item.outcomeId !== 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED') {
-            // period classification
-            // initialize counter for period classification if it's not already initialized
-            if (!periodMap[casePeriodIdentifier].classificationCounters[item.classification]) {
-              periodMap[casePeriodIdentifier].classificationCounters[item.classification] = {
-                count: 0,
-                caseIDs: [],
-                locations: []
-              };
-            }
-            periodMap[casePeriodIdentifier].classificationCounters[item.classification].count++;
-            periodMap[casePeriodIdentifier].classificationCounters[item.classification].caseIDs.push(item.id);
-
-            // get index of the case location in the locations array
-            let locationIndex = periodMap[casePeriodIdentifier].classificationCounters[item.classification].locations.findIndex(location => location.id === caseLocationId);
-            // initialize location entry is not already initialized
-            if (locationIndex === -1) {
-              locationIndex = periodMap[casePeriodIdentifier].classificationCounters[item.classification].locations.push({
-                id: caseLocationId,
-                totalCasesCount: 0,
-                caseIDs: []
-              }) - 1;
-            }
-
-            // increase period classification location counters
-            periodMap[casePeriodIdentifier].classificationCounters[item.classification].locations[locationIndex].totalCasesCount++;
-            periodMap[casePeriodIdentifier].classificationCounters[item.classification].locations[locationIndex].caseIDs.push(item.id);
-
-            // increase period counters outside of case classification
-            periodMap[casePeriodIdentifier].totalCasesCount++;
-            periodMap[casePeriodIdentifier].caseIDs.push(item.id);
-
-            // increase period location counters
-            periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].totalCasesCount++;
-            periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].caseIDs.push(item.id);
-
-            // entire interval classification
-            // initialize counter for entire interval classification if it's not already initialized
-            if (!result.totalCasesClassificationCountersForInterval[item.classification]) {
-              result.totalCasesClassificationCountersForInterval[item.classification] = {
-                count: 0,
-                caseIDs: [],
-                locations: []
-              };
-            }
-            result.totalCasesClassificationCountersForInterval[item.classification].count++;
-            result.totalCasesClassificationCountersForInterval[item.classification].caseIDs.push(item.id);
-
-            // get index of the case location in the entire interval classification locations array
-            let entireIntervalClassificationLocationIndex = result.totalCasesClassificationCountersForInterval[item.classification].locations.findIndex(location => location.id === caseLocationId);
-            // initialize location entry is not already initialized
-            if (entireIntervalClassificationLocationIndex === -1) {
-              entireIntervalClassificationLocationIndex = result.totalCasesClassificationCountersForInterval[item.classification].locations.push({
-                id: caseLocationId,
-                totalCasesCount: 0,
-                caseIDs: []
-              }) - 1;
-            }
-
-            // increase entire interval classification classification location counters
-            result.totalCasesClassificationCountersForInterval[item.classification].locations[entireIntervalClassificationLocationIndex].totalCasesCount++;
-            result.totalCasesClassificationCountersForInterval[item.classification].locations[entireIntervalClassificationLocationIndex].caseIDs.push(item.id);
-
-            // increase entire interval counters outside of case classification
-            result.totalCasesForIntervalCount++;
-            result.caseIDsForInterval.push(item.id);
-
-            // increase entire interval location counters
-            result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].totalCasesCount++;
-            result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].caseIDs.push(item.id);
+            // increase total counters
+            result.totalCasesNotFromContact++;
+            result.caseNotFromContactIDs.push(item.id);
           } else {
-            // update period counters
-            if (caseConfirmed) {
-              // update confirmed dead case counters
-              periodMap[casePeriodIdentifier].totalDeadConfirmedCasesCount++;
-              periodMap[casePeriodIdentifier].deadConfirmedCaseIDs.push(item.id);
-              periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].totalDeadConfirmedCasesCount++;
-              periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].deadConfirmedCaseIDs.push(item.id);
+            // case was converted from a contact
+            // get follow-up status; null means no data
+            let finalFollowupStatus = _.get(item, 'followUp.status', null);
+            // get entry in finalFollowupStatusMap
+            let finalFollowupStatusEntry = finalFollowupStatusMap[finalFollowupStatus ? finalFollowupStatus : 'no_data'];
+            // increase period counter
+            periodMap[casePeriodIdentifier][finalFollowupStatusEntry.counter]++;
+            periodMap[casePeriodIdentifier][finalFollowupStatusEntry.idContainer].push(item.id);
 
-              result.totalDeadConfirmedCasesForIntervalCount++;
-              result.deadConfirmedCaseIDsForInterval.push(item.id);
-              result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].totalDeadConfirmedCasesCount++;
-              result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].deadConfirmedCaseIDs.push(item.id);
-            }
+            // increase total counters
+            result[finalFollowupStatusEntry.counter]++;
+            result[finalFollowupStatusEntry.idContainer].push(item.id);
 
-            // update death counters
-            periodMap[casePeriodIdentifier].totalDeadCasesCount++;
-            periodMap[casePeriodIdentifier].deadCaseIDs.push(item.id);
-            periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].totalDeadCasesCount++;
-            periodMap[casePeriodIdentifier].countersPerLocation.locations[periodLocationIndex].deadCaseIDs.push(item.id);
+            // calculate new percentage if finalFollowupStatus has data
+            if (finalFollowupStatus) {
+              // period percentage
+              periodMap[casePeriodIdentifier].percentageOfCasesWithFollowupData =
+                (periodMap[casePeriodIdentifier].totalCasesFromContactWithFollowupComplete +
+                  periodMap[casePeriodIdentifier].totalCasesFromContactWithFollowupLostToFollowup) /
+                periodMap[casePeriodIdentifier].totalCasesCount;
 
-            result.totalDeadCasesForIntervalCount++;
-            result.deadCaseIDsForInterval.push(item.id);
-            result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].totalDeadCasesCount++;
-            result.totalCasesCountersForIntervalPerLocation.locations[entireIntervalLocationIndex].deadCaseIDs.push(item.id);
-          }
-
-          // check for include totals to increase totals counters
-          if (includeTotals) {
-            // get index of the case location in the total counters per location array
-            let totalLocationIndex = result.totalCasesCountersPerLocation.locations.findIndex(location => location.id === caseLocationId);
-            // initialize location entry is not already initialized
-            if (totalLocationIndex === -1) {
-              totalLocationIndex = result.totalCasesCountersPerLocation.locations.push(
-                Object.assign(
-                  {
-                    id: caseLocationId,
-                    totalCasesCount: 0,
-                    caseIDs: []
-                  },
-                  // check for includeDeaths flag to add additional properties
-                  includeDeaths ? {
-                    totalDeadCasesCount: 0,
-                    totalDeadConfirmedCasesCount: 0,
-                    deadCaseIDs: [],
-                    deadConfirmedCaseIDs: []
-                  } : {}
-                )
-              ) - 1;
-            }
-
-            // check if case is dead; will not add it to classificationCounters if so
-            if (item.outcomeId !== 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED') {
-              // initialize counter for total classification if it's not already initialized
-              if (!result.totalCasesClassificationCounters[item.classification]) {
-                result.totalCasesClassificationCounters[item.classification] = {
-                  count: 0,
-                  caseIDs: [],
-                  locations: []
-                };
-              }
-              result.totalCasesClassificationCounters[item.classification].count++;
-              result.totalCasesClassificationCounters[item.classification].caseIDs.push(item.id);
-
-              // get index of the case location in the total classification locations array
-              let totalClassificationLocationIndex = result.totalCasesClassificationCounters[item.classification].locations.findIndex(location => location.id === caseLocationId);
-              // initialize location entry is not already initialized
-              if (totalClassificationLocationIndex === -1) {
-                totalClassificationLocationIndex = result.totalCasesClassificationCounters[item.classification].locations.push({
-                  id: caseLocationId,
-                  totalCasesCount: 0,
-                  caseIDs: []
-                }) - 1;
-              }
-
-              // increase period classification location counters
-              result.totalCasesClassificationCounters[item.classification].locations[totalClassificationLocationIndex].totalCasesCount++;
-              result.totalCasesClassificationCounters[item.classification].locations[totalClassificationLocationIndex].caseIDs.push(item.id);
-
-              // increase counters outside of case classification
-              result.totalCasesCount++;
-              result.caseIDs.push(item.id);
-
-              // increase location counters
-              result.totalCasesCountersPerLocation.locations[totalLocationIndex].totalCasesCount++;
-              result.totalCasesCountersPerLocation.locations[totalLocationIndex].caseIDs.push(item.id);
-            } else {
-              // update period counters
-              if (caseConfirmed) {
-                // update confirmed dead case counters
-                result.totalDeadConfirmedCasesCount++;
-                result.deadConfirmedCaseIDs.push(item.id);
-                result.totalCasesCountersPerLocation.locations[totalLocationIndex].totalDeadConfirmedCasesCount++;
-                result.totalCasesCountersPerLocation.locations[totalLocationIndex].deadConfirmedCaseIDs.push(item.id);
-              }
-
-              // update death counters
-              result.totalDeadCasesCount++;
-              result.deadCaseIDs.push(item.id);
-              result.totalCasesCountersPerLocation.locations[totalLocationIndex].totalDeadCasesCount++;
-              result.totalCasesCountersPerLocation.locations[totalLocationIndex].deadCaseIDs.push(item.id);
+              // total percentage
+              result.percentageOfCasesWithFollowupData =
+                (result.totalCasesFromContactWithFollowupComplete +
+                  result.totalCasesFromContactWithFollowupLostToFollowup) /
+                result.totalCasesCount;
             }
           }
         });
