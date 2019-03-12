@@ -9405,8 +9405,10 @@ module.exports = function (Outbreak) {
       },
       {
         $group : {
-          _id : "$personId",
-          followUps: { $push: "$$ROOT" }
+          _id : '$personId',
+          followUps: {
+            $push: '$$ROOT'
+          }
         }
       }
     ];
