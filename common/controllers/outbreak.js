@@ -7402,8 +7402,7 @@ module.exports = function (Outbreak) {
             gender: 1,
             age: 1,
             dateOfLastContact: 1,
-            addresses: 1,
-            phoneNumber: 1
+            addresses: 1
           },
           skip: skip,
           limit: limit
@@ -7492,6 +7491,9 @@ module.exports = function (Outbreak) {
                     });
                   });
 
+                  // contact current address
+                  const currentAddress = app.models.person.getCurrentAddress(contact);
+
                   // add contact information
                   _data[index].contactInformation = {
                     title: dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'),
@@ -7500,8 +7502,8 @@ module.exports = function (Outbreak) {
                       `${dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_GENDER')}: ${pdfUtils.displayValue(dictionary.getTranslation(contact.gender))}`,
                       `${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')}: ${_.get(contact, 'age.years')} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(contact, 'age.months')} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
                       `${dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE')}: ${moment(contact.dateOfLastContact).format('YYYY-MM-DD')}`,
-                      `${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_ADDRESSES')}: ${app.models.address.getHumanReadableAddress(app.models.person.getCurrentAddress(contact))}`,
-                      `${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER')}: ${pdfUtils.displayValue(contact.phoneNumber)}`
+                      `${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_ADDRESSES')}: ${app.models.address.getHumanReadableAddress(currentAddress)}`,
+                      `${dictionary.getTranslation('LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER')}: ${pdfUtils.displayValue(currentAddress.phoneNumber)}`
                     ]
                   };
 
@@ -7744,8 +7746,7 @@ module.exports = function (Outbreak) {
                 gender: 1,
                 age: 1,
                 dateOfLastContact: 1,
-                addresses: 1,
-                phoneNumber: 1
+                addresses: 1
               }
             })
             .then(function (contacts) {
@@ -8933,8 +8934,7 @@ module.exports = function (Outbreak) {
                 gender: 1,
                 age: 1,
                 dateOfLastContact: 1,
-                addresses: 1,
-                phoneNumber: 1
+                addresses: 1
               }
             })
             .then(function (contacts) {
