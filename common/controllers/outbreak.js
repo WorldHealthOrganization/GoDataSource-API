@@ -9375,4 +9375,88 @@ module.exports = function (Outbreak) {
       .then(result => callback(null, result))
       .catch(callback);
   };
+
+  /**
+   * Get followups grouped by contact
+   * Also return information about each contact
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.getFollowUpsGroupedByContact = function (filter, callback) {
+    // convert filter to mongodb filter structure
+    filter = filter || {};
+    filter.where = filter.where || {};
+    const parsedFilter = app.utils.remote.convertLoopbackFilterToMongo(
+      {
+        $and: [
+          {
+            $or: [
+              { deleted: false },
+              { deleted: { $eq: null } }
+            ]
+          },
+          filter.where
+        ]
+      });
+
+    const aggregatePipeline = [
+      {
+        $match: parsedFilter
+      },
+      {
+        $group : {
+          _id : '$personId',
+          followUps: {
+            $push: '$$ROOT'
+          }
+        }
+      }
+    ];
+    if (!isNaN(filter.skip)) {
+      aggregatePipeline.push({
+        $skip: filter.skip
+      });
+    }
+    if (!isNaN(filter.limit)) {
+      aggregatePipeline.push({
+        $limit: filter.limit
+      });
+    }
+
+    const cursor = app.dataSources.mongoDb.connector
+      .collection('followUp')
+      .aggregate(aggregatePipeline);
+
+    // convert result to array
+    cursor
+      .toArray()
+      .then((contactGroups) => {
+        // get list of contacts ids, in order to retrieve information about them
+        const contactIds = contactGroups.map((group) => group._id);
+        app.models.contact
+          .rawFind({
+            id: {
+              inq: contactIds
+            }
+          })
+          .then((contacts) => {
+            // create a map of contact id -> contact information
+            // to easily lookup identify it when attaching contact information for each group
+            const contactsMap = {};
+            contacts.forEach((contact) => {
+              contactsMap[contact.id] = contact;
+            });
+
+            // attach contact information to each group
+            contactGroups.forEach((group) => {
+              if (contactsMap[group._id]) {
+                group.contact = contactsMap[group._id];
+              }
+              delete group._id;
+            });
+            return callback(null, contactGroups);
+          });
+      })
+      .catch(callback);
+  };
 };

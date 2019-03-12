@@ -1482,6 +1482,12 @@
       "principalId": "read_outbreak",
       "permission": "ALLOW",
       "property": "getContactFollowUpReport"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "getFollowUpsGroupedByContact"
     }
   ],
   "methods": {
@@ -6610,6 +6616,29 @@
       "http": {
         "verb": "post",
         "path": "/contacts/follow-up-report"
+      }
+    },
+    "prototype.getFollowUpsGroupedByContact": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "data",
+          "type": "object",
+          "root": true,
+          "description": "List of follow ups grouped by contact",
+          "required": true
+        }
+      ],
+      "description": "Get list of follow ups grouped by contact and pagination support",
+      "http": {
+        "verb": "get",
+        "path": "/range-follow-ups"
       }
     }
   }
