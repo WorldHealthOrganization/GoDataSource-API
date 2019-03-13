@@ -674,10 +674,10 @@ module.exports = function (FollowUp) {
       aggregatePipeline.push(
         {
           $lookup: {
-            from: "person",
-            localField: "_id",
-            foreignField: "_id",
-            as: "contacts"
+            from: 'person',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'contacts'
           }
         },
         // $lookup always returns an array
@@ -690,12 +690,12 @@ module.exports = function (FollowUp) {
                 {
                   contact: {
                     $arrayElemAt: [
-                      "$contacts",
+                      '$contacts',
                       0
                     ]
                   }
                 },
-                "$$ROOT"
+                '$$ROOT'
               ]
             }
           }
