@@ -5244,9 +5244,6 @@ module.exports = function (Outbreak) {
         if (!includeContactAddress) {
           contactProperties.splice(contactProperties.indexOf('addresses'), 1);
         }
-        if (!includeContactPhoneNumber) {
-          contactProperties.splice(contactProperties.indexOf('phoneNumber'), 1);
-        }
 
         // resolve models foreign keys (locationId in addresses)
         // resolve reference data fields
@@ -5276,6 +5273,12 @@ module.exports = function (Outbreak) {
               contact.toPrint = {};
               // set empty string for null/undefined values
               contactProperties.forEach(prop => contact.toPrint[prop] = typeof contact[prop] !== 'undefined' && contact[prop] !== null ? contact[prop] : '');
+
+              // if we should include phone number, just take it from the current address
+              if (includeContactPhoneNumber) {
+                const currentAddress = app.models.person.getCurrentAddress(contact);
+                contact.toPrint.phoneNumber = currentAddress.phoneNumber;
+              }
 
               // if addresses need to be added keep only the residence
               // Note: the typeId was already translated so need to check against the translated value

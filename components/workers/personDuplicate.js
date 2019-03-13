@@ -122,11 +122,16 @@ const worker = {
       addEntryToIndex(index.name, person, ['firstName', 'middleName'], true);
       // store people indexed by middleName and lastName
       addEntryToIndex(index.name, person, ['middleName', 'lastName'], true);
-      // if phone number is present
-      if (person.phoneNumber) {
-        // store people indexed by phoneNumber and gender
-        addEntryToIndex(index.phoneNumber, person, ['phoneNumber', 'gender']);
+      // if the person has addresses
+      // check the phoneNumber and gender combination
+      if (Array.isArray(person.addresses)) {
+        // go trough the addresses
+        person.addresses.forEach(function (addr, idx) {
+          // index them by phoneNumber and gender
+          addEntryToIndex(index.phoneNumber, person, [`addresses.${idx}.phoneNumber`, 'gender']);
+        });
       }
+
       // if the person has documents
       if (Array.isArray(person.documents)) {
         // go trough the documents
