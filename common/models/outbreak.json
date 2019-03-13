@@ -6660,7 +6660,7 @@
           "arg": "data",
           "type": "object",
           "root": true,
-          "description": "Count of groups of follow ups",
+          "description": "Count groups of follow ups",
           "required": true
         }
       ],
