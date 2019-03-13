@@ -1488,6 +1488,12 @@
       "principalId": "read_followup",
       "permission": "ALLOW",
       "property": "getFollowUpsGroupedByContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_followup",
+      "permission": "ALLOW",
+      "property": "countFollowUpsGroupedByContact"
     }
   ],
   "methods": {
@@ -6639,6 +6645,29 @@
       "http": {
         "verb": "get",
         "path": "/range-follow-ups"
+      }
+    },
+    "prototype.countFollowUpsGroupedByContact": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "data",
+          "type": "object",
+          "root": true,
+          "description": "Count of groups of follow ups",
+          "required": true
+        }
+      ],
+      "description": "Count list of follow ups grouped by contact",
+      "http": {
+        "verb": "get",
+        "path": "/range-follow-ups/count"
       }
     }
   }

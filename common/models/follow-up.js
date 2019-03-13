@@ -570,4 +570,190 @@ module.exports = function (FollowUp) {
         return Object.assign(filter, {where: followUpQuery});
       });
   };
+
+  /**
+   * Retrieve list of follow ups grouped by contact
+   * Information about contact is returned as well
+   * Also 'countOnly' flag is supported, in this case only the count of groups is returned as result
+   * @param outbreakId
+   * @param filter
+   * @param countOnly
+   * @param callback
+   */
+  FollowUp.getOrCountGroupedByPerson = function (outbreakId, filter, countOnly, callback) {
+    // convert filter to mongodb filter structure
+    filter = filter || {};
+    filter.where = filter.where || {};
+    const parsedFilter = app.utils.remote.convertLoopbackFilterToMongo(
+      {
+        $and: [
+          // make sure we're only retrieving follow ups from the current outbreak
+          {
+            outbreakId: this.id
+          },
+          // retrieve only non-deleted records
+          {
+            $or: [
+              {
+                deleted: false
+              },
+              {
+                deleted: {
+                  $eq: null
+                }
+              }
+            ]
+          },
+          // conditions coming from request
+          filter.where
+        ]
+      });
+
+    // parse order props
+    const knownOrderTypes = {
+      ASC: 1,
+      DESC: -1
+    };
+    const orderProps = {};
+    if (Array.isArray(filter.order)) {
+      filter.order.forEach((pair) => {
+        // split prop and order type
+        const split = pair.split(' ');
+        // ignore if we don't receive a pair
+        if (split.length !== 2) {
+          return;
+        }
+        // make sure the order type is known
+        if (!knownOrderTypes.hasOwnProperty(split[1].toUpperCase())) {
+          return;
+        }
+        orderProps[split[0]] = knownOrderTypes[split[1]];
+      });
+    }
+
+    // mongodb aggregate pipeline
+    const aggregatePipeline = [
+      // match conditions for followups
+      {
+        $match: parsedFilter
+      },
+      // group follow ups by person id
+      // structure after grouping (_id -> personId, followUps -> list of follow ups)
+      {
+        $group : {
+          _id : '$personId',
+          followUps: {
+            $push: '$$ROOT'
+          }
+        }
+      }
+    ];
+    // we only add pagination fields if they are numbers
+    // otherwise aggregation will fail
+    if (!isNaN(filter.skip)) {
+      aggregatePipeline.push({
+        $skip: filter.skip
+      });
+    }
+    if (!isNaN(filter.limit)) {
+      aggregatePipeline.push({
+        $limit: filter.limit
+      });
+    }
+
+    // if count flag is set, do not do any transformation on the data
+    // just count the groups
+    if (countOnly) {
+      aggregatePipeline.push({
+        $count: 'count'
+      });
+    } else {
+      // add additional data transformation into pipeline, after pagination is done
+      // otherwise we transform unnecessary amount of data, that actually should be excluded from result
+      // retrieve information about the person
+      aggregatePipeline.push(
+        {
+          $lookup: {
+            from: "person",
+            localField: "_id",
+            foreignField: "_id",
+            as: "contacts"
+          }
+        },
+        // $lookup always returns an array
+        // in this case an array with one element (the contact itself)
+        // lets convert the array with one element to an object (contact -> contact information)
+        {
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [
+                {
+                  contact: {
+                    $arrayElemAt: [
+                      "$contacts",
+                      0
+                    ]
+                  }
+                },
+                "$$ROOT"
+              ]
+            }
+          }
+        },
+        // remove initial $lookup results
+        // we've converted that array of contacts (1 to be precise) into an object
+        // remove the _id property that is the personId, because we supplied information about the contact using $lookup
+        // also convert all the _id's keys into 'id' to be consistent
+        {
+          $addFields: {
+            contact: {
+              id: '$contact._id'
+            },
+            followUps: {
+              $map: {
+                input: '$followUps',
+                as: 'followUp',
+                in: {
+                  $mergeObjects: [
+                    '$$followUp',
+                    {
+                      id: '$$followUp._id'
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            contact: {
+              _id: 0
+            },
+            followUps: {
+              _id: 0
+            },
+            contacts: 0
+          }
+        }
+      );
+
+      // do not add sort with 0 items, it will throw error
+      if (Object.keys(orderProps).length) {
+        aggregatePipeline.push({
+          $sort: orderProps
+        });
+      }
+    }
+
+    // run the aggregation against database
+    const cursor = app.dataSources.mongoDb.connector.collection('followUp').aggregate(aggregatePipeline);
+
+    // get the records from the cursor
+    cursor
+      .toArray()
+      .then(records => callback(null, records))
+      .catch(callback);
+  };
 };
