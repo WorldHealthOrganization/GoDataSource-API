@@ -661,16 +661,9 @@ module.exports = function (FollowUp) {
       });
     }
 
-    // if count flag is set, do not do any transformation on the data
-    // just count the groups
-    if (countOnly) {
-      aggregatePipeline.push({
-        $count: 'count'
-      });
-    } else {
+    if (!countOnly) {
       // add additional data transformation into pipeline, after pagination is done
       // otherwise we transform unnecessary amount of data, that actually should be excluded from result
-      // retrieve information about the person
       aggregatePipeline.push(
         {
           $lookup: {
@@ -680,61 +673,16 @@ module.exports = function (FollowUp) {
             as: 'contacts'
           }
         },
-        // $lookup always returns an array
-        // in this case an array with one element (the contact itself)
-        // lets convert the array with one element to an object (contact -> contact information)
-        {
-          $replaceRoot: {
-            newRoot: {
-              $mergeObjects: [
-                {
-                  contact: {
-                    $arrayElemAt: [
-                      '$contacts',
-                      0
-                    ]
-                  }
-                },
-                '$$ROOT'
-              ]
-            }
-          }
-        },
-        // remove initial $lookup results
-        // we've converted that array of contacts (1 to be precise) into an object
-        // remove the _id property that is the personId, because we supplied information about the contact using $lookup
-        // also convert all the _id's keys into 'id' to be consistent
-        {
-          $addFields: {
-            contact: {
-              id: '$contact._id'
-            },
-            followUps: {
-              $map: {
-                input: '$followUps',
-                as: 'followUp',
-                in: {
-                  $mergeObjects: [
-                    '$$followUp',
-                    {
-                      id: '$$followUp._id'
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
         {
           $project: {
             _id: 0,
             contact: {
-              _id: 0
+              $arrayElemAt: [
+                '$contacts',
+                0
+              ]
             },
-            followUps: {
-              _id: 0
-            },
-            contacts: 0
+            followUps: 1
           }
         }
       );
@@ -753,7 +701,29 @@ module.exports = function (FollowUp) {
     // get the records from the cursor
     cursor
       .toArray()
-      .then(records => callback(null, records))
+      .then(records => {
+        // do not send the results back, just the count
+        if (countOnly) {
+          return callback(null, {
+            count: records.length
+          });
+        }
+        // replace _id with id, to be consistent
+        records.forEach((record) => {
+          if (record.contact) {
+            record.contact.id = record.contact._id;
+            delete record.contact._id;
+          }
+          if (Array.isArray(record.followUps)) {
+            record.followUps.forEach((followUp) => {
+              followUp.id = followUp._id;
+              delete followUp._id;
+            });
+          }
+        });
+        // return results
+        return callback(null, records);
+      })
       .catch(callback);
   };
 };
