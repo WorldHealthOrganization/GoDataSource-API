@@ -624,7 +624,8 @@ module.exports = function (FollowUp) {
           return;
         }
         // make sure the order type is known
-        if (!knownOrderTypes.hasOwnProperty(split[1].toUpperCase())) {
+        split[1] = split[1].toUpperCase();
+        if (!knownOrderTypes.hasOwnProperty(split[1])) {
           return;
         }
         orderProps[split[0]] = knownOrderTypes[split[1]];
