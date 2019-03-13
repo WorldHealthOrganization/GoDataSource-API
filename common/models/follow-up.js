@@ -649,18 +649,6 @@ module.exports = function (FollowUp) {
         }
       }
     ];
-    // we only add pagination fields if they are numbers
-    // otherwise aggregation will fail
-    if (!isNaN(filter.skip)) {
-      aggregatePipeline.push({
-        $skip: filter.skip
-      });
-    }
-    if (!isNaN(filter.limit)) {
-      aggregatePipeline.push({
-        $limit: filter.limit
-      });
-    }
 
     if (!countOnly) {
       // add additional data transformation into pipeline, after pagination is done
@@ -692,6 +680,19 @@ module.exports = function (FollowUp) {
       if (Object.keys(orderProps).length) {
         aggregatePipeline.push({
           $sort: orderProps
+        });
+      }
+
+      // we only add pagination fields if they are numbers
+      // otherwise aggregation will fail
+      if (!isNaN(filter.skip)) {
+        aggregatePipeline.push({
+          $skip: filter.skip
+        });
+      }
+      if (!isNaN(filter.limit)) {
+        aggregatePipeline.push({
+          $limit: filter.limit
         });
       }
     }
