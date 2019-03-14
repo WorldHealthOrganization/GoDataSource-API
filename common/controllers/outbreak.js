@@ -5276,8 +5276,11 @@ module.exports = function (Outbreak) {
 
               // if we should include phone number, just take it from the current address
               if (includeContactPhoneNumber) {
-                const currentAddress = app.models.person.getCurrentAddress(contact);
-                contact.toPrint.phoneNumber = currentAddress.phoneNumber;
+                const currentAddress = contact.addresses.find(addr => addr.typeId === usualPlaceOfResidence);
+                if (currentAddress) {
+                  contact.phoneNumber = typeof currentAddress.phoneNumber !== 'undefined'
+                  && currentAddress.phoneNumber !== null ? currentAddress.phoneNumber : '';
+                }
               }
 
               // if addresses need to be added keep only the residence
@@ -5288,6 +5291,9 @@ module.exports = function (Outbreak) {
 
               // translate labels
               contact.toPrint = genericHelpers.translateFieldLabels(app, contact.toPrint, app.models.contact.modelName, dictionary);
+
+              // phone number should be translated from addresses
+              contact.toPrint[dictionary.getTranslation(app.models.address.fieldLabelsMap.phoneNumber)] = contact.phoneNumber;
 
               // check if the results need to be grouped
               if (groupResultsBy) {
