@@ -68,6 +68,18 @@
     "defaultStatusCode": 400,
     "messagePattern": "Invalid request parameters. Details: <%= errorMessages %>"
   },
+  "REQUEST_VALIDATION_ERROR_DUPLICATE_CLIENT_IDS": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid request parameters. Details: <%= errorMessages %>"
+  },
+  "REQUEST_VALIDATION_ERROR_INVALID_BACKUP_LOCATION": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid request parameters. Details: <%= errorMessages %>"
+  },
+  "REQUEST_VALIDATION_ERROR_DUPLICATE_SERVER_IDS": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid request parameters. Details: <%= errorMessages %>"
+  },
   "ACCESS_DENIED": {
     "messagePattern": "Logged in user doesn't have access this endpoint: <%= accessErrors %>."
   },
