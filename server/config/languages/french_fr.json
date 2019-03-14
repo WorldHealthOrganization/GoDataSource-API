@@ -361,7 +361,6 @@
       "LNG_LAYOUT_MENU_ITEM_CASES_LABEL": "Cas",
       "LNG_LAYOUT_MENU_ITEM_CHANGE_PASSWORD_LABEL": "Changer mot de passe",
       "LNG_LAYOUT_MENU_ITEM_CLIENT_APPLICATIONS_LABEL": "Client Applications",
-      "LNG_LAYOUT_MENU_ITEM_CLOUD_BACKUP": "Cloud Backup",
       "LNG_LAYOUT_MENU_ITEM_CLUSTERS_LABEL": "Clusters",
       "LNG_LAYOUT_MENU_ITEM_CONTACTS_FOLLOW_UPS_LABEL": "Suivis à venir",
       "LNG_LAYOUT_MENU_ITEM_CONTACTS_LABEL": "Contacts",
@@ -390,13 +389,18 @@
       "LNG_LAYOUT_MENU_ITEM_SYNC_LABEL": "Sync",
       "LNG_LAYOUT_MENU_ITEM_SYSTEM_CONFIG_LABEL": "Configuration du système",
       "LNG_LAYOUT_MENU_ITEM_TEAMS_ASSIGNMENTS_LABEL": "Teams & Assignments",
-      "LNG_LAYOUT_MENU_ITEM_TERMS_OF_USE": "Terms of Use",
       "LNG_LAYOUT_MENU_ITEM_TRANSMISSION_CHAINS_COUNT_MAP_LABEL": "Cases Count Map",
       "LNG_LAYOUT_MENU_ITEM_TRANSMISSION_CHAINS_LABEL": "Chains of Transmission Graph",
       "LNG_LAYOUT_MENU_ITEM_TRANSMISSION_CHAINS_LIST_LABEL": "Chains of Transmission List",
       "LNG_LAYOUT_MENU_ITEM_UPSTREAM_SERVERS_LABEL": "Upstream Servers",
       "LNG_LAYOUT_MENU_ITEM_USERS_LABEL": "Utilisateurs",
-      "LNG_LAYOUT_SELECTED_OUTBREAK_LABEL": "Épidémie sélectionnée"
+      "LNG_LAYOUT_SELECTED_OUTBREAK_LABEL": "Épidémie sélectionnée",
+      "LNG_LAYOUT_MENU_ITEM_SET_SECURITY_QUESTION_LABEL": "Set security question",
+      "LNG_LAYOUT_MENU_ITEM_SAVED_FILTERS_LABEL": "Saved filters",
+      "LNG_LAYOUT_MENU_ITEM_CLOUD_BACKUP_LABEL": "Cloud backup",
+      "LNG_LAYOUT_MENU_ITEM_TERMS_OF_USE_LABEL": "Terms of use",
+      "LNG_LAYOUT_MENU_ITEM_SAVED_IMPORT_MAPPING_LABEL": "Saved import mapping",
+      "LNG_LAYOUT_MENU_ITEM_VERSION_LABEL": "Version"
     },
     "uiStepperButtons": {
       "LNG_STEPPER_BUTTON_BACK": "Retour",
@@ -431,13 +435,13 @@
       "LNG_PAGE_ACTION_MODIFY": "Modifier",
       "LNG_PAGE_ACTION_RELATIONSHIPS": "Relations",
       "LNG_PAGE_ACTION_RESTORE": "Restaurer",
-      "LNG_PAGE_ACTION_SEE_RELATIONSHIPS": "Voir relations",
-      "LNG_PAGE_ACTION_VIEW": "Ouvrir"
+      "LNG_PAGE_ACTION_VIEW": "Ouvrir",
+      "LNG_PAGE_ACTION_SEE_EXPOSURES_FROM": "See contacts",
+      "LNG_PAGE_ACTION_SEE_EXPOSURES_TO": "See exposures"
     },
     "uiCommonButtons": {
       "LNG_COMMON_BUTTON_ADD": "Ajouter",
       "LNG_COMMON_BUTTON_ADD_DATE_RANGE": "Ajouter une autre plage de dates",
-      "LNG_COMMON_BUTTON_ASSIGN_TO": "Assign To",
       "LNG_COMMON_BUTTON_BACK": "Retour",
       "LNG_COMMON_BUTTON_CANCEL": "Annuler",
       "LNG_COMMON_BUTTON_CHANGE": "Changer",
@@ -451,14 +455,14 @@
       "LNG_COMMON_BUTTON_NEXT": "Suivant",
       "LNG_COMMON_BUTTON_QUICK_ACTIONS": "Quick actions",
       "LNG_COMMON_BUTTON_REFRESH_LIST": "Rafraîchir",
-      "LNG_COMMON_BUTTON_RELATIONSHIPS": "Relations",
       "LNG_COMMON_BUTTON_RESET_FILTERS": "Réinitialiser",
       "LNG_COMMON_BUTTON_SAVE": "Enregistrer",
       "LNG_COMMON_BUTTON_SELECT": "Sélectionner",
-      "LNG_COMMON_BUTTON_SHARE_RELATIONSHIPS": "Share Relationships",
       "LNG_COMMON_BUTTON_VIEW": "Ouvrir",
       "LNG_COMMON_BUTTON_UPDATE": "Update",
-      "LNG_COMMON_BUTTON_BACK_TO_LOGIN": "Back to login"
+      "LNG_COMMON_BUTTON_BACK_TO_LOGIN": "Back to login",
+      "LNG_COMMON_BUTTON_EXPOSURES_FROM": "Contacts",
+      "LNG_COMMON_BUTTON_EXPOSURES_TO": "Exposures"
     },
     "uiDialogs": {
       "LNG_DIALOG_CONFIRM_ADD_USER_TEAM": "This user is already assigned to the following teams: {{teamNames}}. Are you sure you want to add it to this team as well ?",
@@ -531,7 +535,14 @@
       "LNG_DIALOG_CONFIRM_LOOSE_CHANGES_QUESTION_ANSWER": "There are unsaved changes that will be lost if you continue",
       "LNG_DIALOG_CONFIRM_DELETE_PERSON": "Are you sure you want to delete this person: '{{name}}'?",
       "LNG_DIALOG_CONFIRM_REPLACE_GEOLOCATION": "Do you want to replace current latitude and longitude with location's values? If you enter the coordinates manually you should turn the slider on.",
-      "LNG_DIALOG_CONFIRM_PROPAGATE_LAT_LNG": "This location is being used. Do you want to propagate the new latitude and longitude values to the addresses that are using this location?"
+      "LNG_DIALOG_CONFIRM_PROPAGATE_LAT_LNG": "This location is being used. Do you want to propagate the new latitude and longitude values to the addresses that are using this location?",
+      "LNG_DIALOG_SAVE_FILTERS_UPDATE_OR_CREATE_TITLE": "Do you want to update '{{filter}}' or create a new one?",
+      "LNG_DIALOG_SAVE_MAPPINGS_UPDATE_OR_CREATE_TITLE": "Do you want to update '{{mapping}}' or create a new one?",
+      "LNG_DIALOG_SAVE_FILTERS_TITLE": "Enter a name for the new filter",
+      "LNG_DIALOG_CONFIRM_DELETE_SAVED_FILTER": "Are you sure you want to delete this filter?",
+      "LNG_DIALOG_CONFIRM_DELETE_SAVED_IMPORT_MAPPING": "Are you sure you want to delete this saved import mapping?",
+      "LNG_DIALOG_SAVE_MAPPING_IMPORTS_TITLE" : "Enter a name for the new mapping import",
+      "LNG_DIALOG_SAVE_MAPPING_IMPORTS_BUTTON" : "Save import mapping"
     },
     "uiLoginPage": {
       "LNG_PAGE_LOGIN_ACTION_LOGIN_BUTTON": "S'identifier",
@@ -561,7 +572,10 @@
       "LNG_API_ERROR_CODE_INVALID_VISUAL_ID_MASK": "Invalid ID ( accepted: {{mask}} )",
       "LNG_API_ERROR_CODE_DUPLICATE_VISUAL_ID": "Duplicate ID",
       "LNG_API_ERROR_CODE_REFERENCE_DATA_ENTRY_IN_USE": "{{entryValue}} is in use and cannot be deleted",
-      "LNG_API_ERROR_CODE_MODEL_IN_USE": "Resource is in use and cannot be deleted"
+      "LNG_API_ERROR_CODE_MODEL_IN_USE": "Resource is in use and cannot be deleted",
+      "LNG_API_ERROR_CODE_REQUEST_VALIDATION_ERROR_DUPLICATE_CLIENT_IDS": "Client IDs must be unique",
+      "LNG_API_ERROR_CODE_REQUEST_VALIDATION_ERROR_DUPLICATE_SERVER_IDS": "Server URLs must be unique",
+      "LNG_API_ERROR_CODE_REQUEST_VALIDATION_ERROR_INVALID_BACKUP_LOCATION": "Configured backup location is not accessible for read/write"
     },
     "uiCommonFields": {
       "LNG_COMMON_FIELD_LABEL_CURRENT_PASSWORD": "Mot de passe actuel",
@@ -573,7 +587,6 @@
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_LINE_1_DESCRIPTION": "",
       "LNG_ADDRESS_FIELD_LABEL_CITY": "Ville",
       "LNG_ADDRESS_FIELD_LABEL_CITY_DESCRIPTION": "",
-      "LNG_ADDRESS_FIELD_LABEL_DATE": "Date",
       "LNG_ADDRESS_FIELD_LABEL_DATE_DESCRIPTION": "",
       "LNG_ADDRESS_FIELD_LABEL_GEOLOCATION_LAT": "Latitude",
       "LNG_ADDRESS_FIELD_LABEL_GEOLOCATION_LAT_DESCRIPTION": "",
@@ -589,7 +602,8 @@
       "LNG_ADDRESS_LABEL_ADD_NEW_ADDRESS": "Ajouter adresse",
       "LNG_ADDRESS_LABEL_NO_ADDRESSES": "Pas d'adresse",
       "LNG_ADDRESS_FIELD_LABEL_MANUAL_COORDINATES": "Coordinates are accurate",
-      "LNG_ADDRESS_FIELD_LABEL_MANUAL_COORDINATES_DESCRIPTION": ""
+      "LNG_ADDRESS_FIELD_LABEL_MANUAL_COORDINATES_DESCRIPTION": "",
+      "LNG_ADDRESS_FIELD_LABEL_DATE": "Valid until"
     },
     "uiQuestionnaire": {
       "LNG_QUESTIONNAIRE_BUTTON_BROWSE": "Browse",
@@ -911,7 +925,11 @@
       "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_ACTION_VIEW_RELATIONSHIP": "View relationship",
       "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_ACTION_MODIFY_RELATIONSHIP": "Modify relationship",
       "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_ACTION_DELETE_RELATIONSHIP": "Delete relationship",
-      "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_TITLE": "Des relations"
+      "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_TITLE": "Des relations",
+      "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_EXPOSURES_TITLE": "Exposures",
+      "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_CONTACTS_TITLE": "Contacts",
+      "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_GROUP_ACTION_SHARE_SELECTED_EXPOSURES": "Share selected exposures",
+      "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_GROUP_ACTION_SHARE_SELECTED_CONTACTS": "Share selected contacts"
     },
     "uiModifyEntityRelationshipPage": {
       "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_ACTION_MODIFY_RELATIONSHIP_SUCCESS_MESSAGE": "Relation modifiée",
@@ -934,7 +952,7 @@
       "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_ACTION_CREATE_RELATIONSHIP_SUCCESS_MESSAGE": "Relation créée",
       "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_COPY_BUTTON_TITLE": "Copier la valeur sur tous les autres qui ont une valeur vide",
       "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_TAB_RELATIONSHIPS": "Relations",
-      "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_TITLE": "Créer relation"
+      "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_TITLE": "Créer"
     },
     "uiContactFields": {
       "LNG_CONTACT_FIELD_LABEL_ADDRESS": "Address",
@@ -1092,7 +1110,6 @@
       "LNG_RELATIONSHIP_FIELD_LABEL_RELATION": "Relation",
       "LNG_RELATIONSHIP_FIELD_LABEL_RELATIONSHIP": "Relationship",
       "LNG_RELATIONSHIP_FIELD_LABEL_RELATIONSHIP_DESCRIPTION": "",
-      "LNG_RELATIONSHIP_FIELD_LABEL_RELATIONSHIP_TYPE": "Type",
       "LNG_RELATIONSHIP_FIELD_LABEL_RELATION_DESCRIPTION": "",
       "LNG_RELATIONSHIP_FIELD_LABEL_RELATION_DETAIL": "Relation Detail",
       "LNG_RELATIONSHIP_FIELD_LABEL_SOCIAL_RELATIONSHIP_TYPE": "Type de relation sociale",
@@ -1152,7 +1169,6 @@
       "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_MARK_CONTACT_AS_MISSING_FROM_FOLLOW_UP_SUCCESS_MESSAGE": "Suivi marqué comme raté",
       "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_MARK_CONTACT_AS_PRESENT": "Marquer le contact comme présent",
       "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_MARK_CONTACT_AS_PRESENT_ON_FOLLOW_UP_SUCCESS_MESSAGE": "Suivi marqué comme présent",
-      "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_MODIFY_QUESTIONNAIRE": "Modify Questionnaire",
       "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_RESTORE_SUCCESS_MESSAGE": "Suivi restauré",
       "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_VIEW_FOLLOW_UP": "View follow-up",
       "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_MODIFY_FOLLOW_UP": "Modify follow-up",
@@ -1178,9 +1194,11 @@
       "LNG_PAGE_LIST_FOLLOW_UPS_PRINT_DAILY_FORM_NO_DATE_ERROR": "Please select follow-up date",
       "LNG_PAGE_LIST_FOLLOW_UPS_PRINT_DAILY_FORM_TITLE": "Print Follow-up List",
       "LNG_PAGE_LIST_FOLLOW_UPS_PRINT_DAILY_TITLE": "Daily Follow-ups",
-      "LNG_PAGE_LIST_FOLLOW_UPS_TITLE": "Suivis",
       "LNG_PAGE_LIST_FOLLOW_UPS_UPCOMING_TITLE": "Suivis à venir",
-      "LNG_PAGE_LIST_FOLLOW_UPS_EXPORT_CONTACT_BUTTON": "Contact"
+      "LNG_PAGE_LIST_FOLLOW_UPS_EXPORT_CONTACT_BUTTON": "Contact",
+      "LNG_PAGE_LIST_FOLLOW_UPS_TITLE": "Follow-ups",
+      "LNG_PAGE_LIST_FOLLOW_UPS_FOR_RELATED_CONTACTS_TITLE": "Follow-ups for related contacts",
+      "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_MODIFY_QUESTIONNAIRE": "Quick modify follow-up"
     },
     "uiCreateFollowUpPage": {
       "LNG_PAGE_CREATE_FOLLOW_UP_ACTION_CREATE_FOLLOW_UP_BUTTON": "Créer suivi",
@@ -2197,7 +2215,8 @@
       "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_BUTTON_ADD_NEW_AT_POSITION_X": "Add Question no",
       "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_ANSWER_BUTTON_ADD_NEW_TOP": "Add Answer Top",
       "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_ANSWER_BUTTON_ADD_NEW_BOTTOM": "Add Answer Bottom",
-      "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_ANSWER_BUTTON_ADD_NEW_AT_POSITION_X": "Add Answer no"
+      "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_ANSWER_BUTTON_ADD_NEW_AT_POSITION_X": "Add Answer no",
+      "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_FIELD_LABEL_INACTIVE": "Inactive?"
     },
     "uiOutbreakListPage": {
       "LNG_PAGE_LIST_OUTBREAKS_ACTION_CLONE_SUCCESS_MESSAGE": "Outbreak successfully cloned",
@@ -2313,7 +2332,6 @@
       "LNG_PAGE_DASHBOARD_EPI_CURVE_SHOW_DAYS_LABEL": "Show Days",
       "LNG_PAGE_DASHBOARD_EPI_CURVE_SHOW_MONTHS_LABEL": "Show Months",
       "LNG_PAGE_DASHBOARD_EPI_CURVE_SHOW_WEEKS_LABEL": "Show Weeks",
-      "LNG_PAGE_DASHBOARD_EPI_CURVE_TITLE": "Cases counts over time stratified by classification",
       "LNG_PAGE_DASHBOARD_GANTT_CHART_REPORT_LABEL": "Gantt Chart",
       "LNG_PAGE_DASHBOARD_GANTT_CHART_SHOW_DAYS_LABEL": "Show Days",
       "LNG_PAGE_DASHBOARD_GANTT_CHART_SHOW_MONTHS_LABEL": "Show Months",
@@ -2353,7 +2371,11 @@
       "LNG_PAGE_DASHBOARD_KPI_NEW_CHAINS_OF_TRANSMISSION_FROM_REGISTERED_CONTACTS_WHO_BECAME_CASES": "Chaînes de transmission de contacts enregistrés qui sont devenus des cas",
       "LNG_PAGE_DASHBOARD_KPI_SECTION_MENU_SHOW_ALL_LABEL": "Afficher tout",
       "LNG_PAGE_DASHBOARD_NO_OUTBREAKS_MESSAGE": "There is no data to be displayed because there are no Outbreaks in the system.",
-      "LNG_PAGE_DASHBOARD_REPORTS_BUTTON_LABEL": "Reports"
+      "LNG_PAGE_DASHBOARD_REPORTS_BUTTON_LABEL": "Reports",
+      "LNG_PAGE_DASHBOARD_EPI_CURVE_TITLE": "Epi Curve",
+      "LNG_PAGE_DASHBOARD_EPI_CURVE_CLASSIFICATION_TITLE": "Cases counts over time stratified by classification",
+      "LNG_PAGE_DASHBOARD_EPI_CURVE_OUTCOME_TITLE": "Cases counts over time stratified by outcome",
+      "LNG_PAGE_DASHBOARD_EPI_CURVE_REPORTING_TITLE": "Cases counts over reporting time stratified by classification"
     },
     "uiChainsOfTransmission": {
       "LNG_PAGE_DASHBOARD_CHAINS_OF_TRANSMISSION_ACTION_VIEW_FULL_RESOURCE": "Voir la ressource complète",
@@ -2411,7 +2433,8 @@
       "LNG_TRANSMISSION_CHAIN_FIELD_LABEL_LENGTH": "Longueur",
       "LNG_TRANSMISSION_CHAIN_FIELD_LABEL_NO_CASES": "Nombre de cas",
       "LNG_TRANSMISSION_CHAIN_FIELD_LABEL_NO_CASES_ALIVE": "Nombre de cas vivants",
-      "LNG_TRANSMISSION_CHAIN_FIELD_LABEL_ROOT_CASE": "Cas racine"
+      "LNG_TRANSMISSION_CHAIN_FIELD_LABEL_ROOT_CASE": "Cas racine",
+      "LNG_TRANSMISSION_CHAIN_FIELD_LABEL_NUMBER_OF_CONTACTS": "Number of contacts"
     },
     "uiTransmissionChainsGeoMap": {
       "LNG_PAGE_TRANSMISSION_CHAINS_GEO_MAP_EXPORT": "Export Geospatial Map"
@@ -2446,7 +2469,11 @@
       "LNG_SIDE_FILTERS_SORT_BY_DESC_PLACEHOLDER": "Descendant",
       "LNG_SIDE_FILTERS_SORT_BY_PLACEHOLDER": "Trier par",
       "LNG_SIDE_FILTERS_SORT_DIRECTION_LABEL": "Ordre",
-      "LNG_SIDE_FILTERS_TITLE": "Les filtres"
+      "LNG_SIDE_FILTERS_TITLE": "Les filtres",
+      "LNG_SIDE_FILTERS_SAVE_FILTER_BUTTON": "Save filter",
+      "LNG_SIDE_FILTERS_LOAD_FILTER_LABEL": "Load filter",
+      "LNG_SIDE_FILTERS_SAVE_FILTER_SUCCESS_MESSAGE": "Filter saved",
+      "LNG_SIDE_FILTERS_MODIFY_FILTER_SUCCESS_MESSAGE": "Filter updated"
     },
     "uiSideColumn": {
       "LNG_SIDE_COLUMNS_APPLY_FILTERS_BUTTON": "Appliquer",
@@ -2502,7 +2529,10 @@
       "LNG_PAGE_IMPORT_DATA_LABEL_SELECT_SOURCE": "Sélectionnez la source",
       "LNG_PAGE_IMPORT_DATA_LABEL_SELECT_SOURCE_DESTINATION_LEVEL": "Choisir le niveau",
       "LNG_PAGE_IMPORT_DATA_LABEL_SOURCE_FILE_INFORMATION": "Informations sur le fichier source",
-      "LNG_PAGE_IMPORT_DATA_SUCCESS_MESSAGE": "Données importées"
+      "LNG_PAGE_IMPORT_DATA_SUCCESS_MESSAGE": "Données importées",
+      "LNG_PAGE_IMPORT_DATA_BUTTON_SAVE_IMPORT_MAPPING": "Save import mapping",
+      "LNG_PAGE_IMPORT_DATA_LOAD_SAVED_IMPORT_MAPPING_LABEL": "Load import mapping",
+      "LNG_PAGE_IMPORT_DATA_LOAD_SAVED_IMPORT_MAPPING_SUCCESS_MESSAGE": "Saved import mapping loaded"
     },
     "uiImportHierarchicalLocations": {
       "LNG_PAGE_IMPORT_HIERARCHICAL_LOCATIONS_TITLE": "Importer des emplacements hiérarchiques"
@@ -2811,7 +2841,8 @@
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_TOGGLE_DISPLAY_MARKER_LABELS_LABEL": "Display labels",
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NO_DATA": "There are no chains with geolocation",
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_LIST_BUTTON": "List",
-      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_CASE_COUNT_MAP_BUTTON": "Case count map"
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_CASE_COUNT_MAP_BUTTON": "Case count map",
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_SHAPE_TITLE": "Shape"
     },
     "uiInconsistencyLabels": {
       "LNG_PAGE_INCONSISTENCY_LABEL_BIGGER": "\"{{date1}}\" is bigger than \"{{date2}}\"",
@@ -2874,12 +2905,13 @@
       "LNG_PAGE_LIST_LAB_RESULTS_TITLE": "Lab results"
     },
     "uiEntityRelationshipsListShareAssignCreatePages": {
-      "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_BULK_ACTION_CREATE_RELATIONSHIP_BUTTON": "Create Relationship",
       "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_BULK_SUCCESS_MESSAGE": "Relationships created!",
       "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_BULK_TAB_RELATIONSHIPS": "Relationships",
       "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_BULK_TITLE": "Create relationships",
       "LNG_PAGE_LIST_ENTITY_ASSIGN_RELATIONSHIPS_TITLE": "Assign To",
-      "LNG_PAGE_LIST_ENTITY_SHARE_RELATIONSHIPS_TITLE": "Share Relationships"
+      "LNG_PAGE_LIST_ENTITY_ASSIGN_EXPOSURES_TITLE": "Share exposures with",
+      "LNG_PAGE_LIST_ENTITY_ASSIGN_CONTACTS_TITLE": "Share contacts with",
+      "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_BULK_ACTION_CREATE_RELATIONSHIP_BUTTON": "Create relationships"
     },
     "uiTeamsWorkload": {
       "LNG_PAGE_TEAMS_WORKLOAD_TABLE_OF_LABEL": "{{done}} of {{total}}",
@@ -3459,6 +3491,50 @@
       "LNG_FORM_DATE_RANGE_SLIDER_FIELD_LABEL_DESCRIPTION": "",
       "LNG_FORM_DATE_RANGE_SLIDER_FIELD_LABEL_MAX": "Max",
       "LNG_FORM_DATE_RANGE_SLIDER_FIELD_LABEL_MAX_DESCRIPTION": ""
+    },
+    "uiSavedFiltersListPage": {
+      "LNG_PAGE_LIST_SAVED_FILTERS_TITLE": "Saved Filters",
+      "LNG_PAGE_LIST_SAVED_FILTERS_ACTION_DELETE_FILTER_SUCCESS_MESSAGE": "Filter deleted",
+      "LNG_PAGE_LIST_SAVED_FILTERS_ACTION_MODIFY_FILTER_SUCCESS_MESSAGE": "Filter modified",
+      "LNG_PAGE_LIST_SAVED_FILTERS_ACTION_DELETE_FILTER": "Delete filter"
+    },
+    "uiSavedFiltersFields": {
+      "LNG_SAVED_FILTERS_FIELD_LABEL_NAME": "Name",
+      "LNG_SAVED_FILTERS_FIELD_LABEL_NAME_DESCRIPTION": "",
+      "LNG_SAVED_FILTERS_FIELD_LABEL_PUBLIC": "Public",
+      "LNG_SAVED_FILTERS_FIELD_LABEL_PUBLIC_DESCRIPTION": "",
+      "LNG_SAVED_FILTERS_FIELD_LABEL_FOR_PAGE": "For page"
+    },
+    "uiSavedFiltersForPagesLabels": {
+      "LNG_APP_PAGE_LAB_RESULTS": "Lab results",
+      "LNG_APP_PAGE_CASE_LAB_RESULTS": "Individual case lab results",
+      "LNG_APP_PAGE_DAILY_FOLLOW_UPS": "Contact daily follow-ups",
+      "LNG_APP_PAGE_AVAILABLE_ENTITIES_FOR_RELATIONSHIPS": "Available entities for relationships",
+      "LNG_APP_PAGE_PEOPLE_TO_SHARE_RELATIONSHIPS_WITH": "Entity relationships / Assign to",
+      "LNG_APP_PAGE_INDIVIDUAL_CONTACT_FOLLOW_UPS": "Individual contact follow-ups",
+      "LNG_APP_PAGE_CASES": "Cases",
+      "LNG_APP_PAGE_CONTACTS": "Contacts"
+    },
+    "uiSavedImportMappingsListPage": {
+      "LNG_PAGE_LIST_SAVED_IMPORT_MAPPING_TITLE": "Saved import mappings",
+      "LNG_PAGE_LIST_SAVED_IMPORT_MAPPING_ACTION_DELETE_MAPPING": "Delete saved import mapping",
+      "LNG_PAGE_LIST_SAVED_IMPORT_MAPPING_ACTION_DELETE_SUCCESS_MESSAGE": "Saved import deleted",
+      "LNG_PAGE_LIST_SAVED_IMPORT_MAPPING_ACTION_MODIFY_FILTER_SUCCESS_MESSAGE": "Saved import mapping modified"
+    },
+    "savedImportMappingsPages": {
+      "LNG_APP_PAGE_IMPORT_CASES": "Cases",
+      "LNG_APP_PAGE_IMPORT_CONTACTS": "Contacts"
+    },
+    "uiSavedImportMappingsFields": {
+      "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_NAME": "Name",
+      "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_NAME_DESCRIPTION": "",
+      "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_IS_PUBLIC": "Public",
+      "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_IS_PUBLIC_DESCRIPTION": "",
+      "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_FOR_PAGE": "For page"
+    },
+    "uiVersionPage": {
+      "LNG_PAGE_VERSION_TITLE": "Version",
+      "LNG_PAGE_VERSION_TEXT_DESCRIPTION": "Go.Data version: {{version}} ."
     }
   }
 }
