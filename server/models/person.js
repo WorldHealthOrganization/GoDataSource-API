@@ -912,7 +912,7 @@ module.exports = function (Person) {
                   {
                     $and: [
                       {
-                        type: {
+                        phoneNumber: {
                           $ne: null
                         }
                       },

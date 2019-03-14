@@ -5292,8 +5292,10 @@ module.exports = function (Outbreak) {
               // translate labels
               contact.toPrint = genericHelpers.translateFieldLabels(app, contact.toPrint, app.models.contact.modelName, dictionary);
 
-              // phone number should be translated from addresses
-              contact.toPrint[dictionary.getTranslation(app.models.address.fieldLabelsMap.phoneNumber)] = contact.phoneNumber;
+              if (includeContactPhoneNumber) {
+                // phone number should be translated from addresses
+                contact.toPrint[dictionary.getTranslation(app.models.address.fieldLabelsMap.phoneNumber)] = contact.phoneNumber;
+              }
 
               // check if the results need to be grouped
               if (groupResultsBy) {
@@ -7512,7 +7514,7 @@ module.exports = function (Outbreak) {
                       `${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')}: ${_.get(contact, 'age.years')} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(contact, 'age.months')} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
                       `${dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE')}: ${moment(contact.dateOfLastContact).format('YYYY-MM-DD')}`,
                       `${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_ADDRESSES')}: ${app.models.address.getHumanReadableAddress(currentAddress)}`,
-                      `${dictionary.getTranslation('LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER')}: ${pdfUtils.displayValue(currentAddress.phoneNumber)}`
+                      `${dictionary.getTranslation('LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER')}: ${pdfUtils.displayValue(currentAddress ? currentAddress.phoneNumber : null)}`
                     ]
                   };
 
