@@ -901,6 +901,35 @@ module.exports = function (Person) {
       );
     }
 
+    // check against each address in the target body the following combination (phoneNumber, gender)
+    if (targetBody.addresses && targetBody.gender) {
+      targetBody.addresses.forEach((addr) => {
+        if (addr.phoneNumber) {
+          query.$or.push({
+            addresses: {
+              $elemMatch: {
+                $and: [
+                  {
+                    $and: [
+                      {
+                        type: {
+                          $ne: null
+                        }
+                      },
+                      {
+                        phoneNumber: addr.phoneNumber
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            gender: targetBody.gender
+          });
+        }
+      });
+    }
+
     // check against each document in the target body
     if (targetBody.documents) {
       targetBody.documents.forEach((doc) => {
