@@ -14,28 +14,26 @@ const defaultAdmin = {
   passwordChange: true
 };
 const rolesMap = {
-  'System Administrator': {
+  'System administrator': {
     description: 'This is a built in role that manages user accounts, and configuration of the system.',
     permissionIds: [
       'read_sys_config',
       'write_sys_config',
-      'write_reference_data',
-      'read_user_account',
-      'write_user_account',
       'read_role',
       'write_role',
-      'write_help',
-      'approve_help',
+      'read_user_account',
+      'write_user_account',
       'read_outbreak'
     ]
   },
-  'GO.Data Administrator': {
+  'GO.Data administrator': {
     description: 'This role has access to configuration of the Go.Data for specific outbreak.',
     permissionIds: [
       'read_outbreak',
       'write_outbreak',
-      'write_help',
-      'approve_help'
+      'write_reference_data',
+      'read_sys_config',
+      'write_sys_config'
     ]
   },
   'Epidemiologist': {
@@ -48,37 +46,12 @@ const rolesMap = {
       'write_contact',
       'read_followup',
       'write_followup',
+      'read_sys_config',
       'read_report'
     ]
   },
-  'Data Manager': {
+  'Data manager': {
     description: 'This is a built in role that provides support and coordinates the collection of all data related to the outbreak.',
-    permissionIds: [
-      'read_outbreak',
-      'write_outbreak',
-      'read_case',
-      'write_case',
-      'read_contact',
-      'write_contact',
-      'read_report',
-      'read_followup'
-    ]
-  },
-  'Contact Tracing Team Lead': {
-    description: 'This is a built in role that coordinates the work of multiple Contact Tracers.',
-    permissionIds: [
-      'read_outbreak',
-      'read_report',
-      'read_case',
-      'write_case',
-      'read_contact',
-      'write_contact',
-      'read_team',
-      'write_team'
-    ]
-  },
-  'Contact Tracer': {
-    description: 'This is a built in role that follows up with contacts and monitors their health.',
     permissionIds: [
       'read_outbreak',
       'read_case',
@@ -86,7 +59,63 @@ const rolesMap = {
       'read_contact',
       'write_contact',
       'read_followup',
-      'write_followup'
+      'write_followup',
+      'read_sys_config',
+      'read_report'
+    ]
+  },
+  'Contact tracing coordinator': {
+    description: 'This is a built in role that coordinates the work of multiple Contact Tracers.',
+    permissionIds: [
+      'read_case',
+      'write_case',
+      'read_contact',
+      'write_contact',
+      'read_followup',
+      'write_followup',
+      'read_outbreak',
+      'read_sys_config',
+      'read_team',
+      'write_team',
+      'read_report',
+      'read_user_account'
+    ]
+  },
+  'Contact Tracer': {
+    description: 'This is a built in role that follows up with contacts and monitors their health.',
+    permissionIds: [
+      'read_case',
+      'write_case',
+      'read_contact',
+      'write_contact',
+      'read_followup',
+      'write_followup',
+      'read_outbreak',
+      'read_sys_config'
+    ]
+  },
+  'Help content manager': {
+    description: 'This is a built in role that manages content.',
+    permissionIds: [
+      'write_help',
+      'approve_help'
+    ]
+  },
+  'Language manager': {
+    description: 'This is a built in role that manages languages.',
+    permissionIds: [
+      'read_sys_config',
+      'write_sys_config'
+    ]
+  },
+  'Reports and data viewer': {
+    description: 'This is a built in role that manages reports.',
+    permissionIds: [
+      'read_report',
+      'read_case',
+      'read_contact',
+      'read_outbreak',
+      'read_sys_config'
     ]
   }
 };
