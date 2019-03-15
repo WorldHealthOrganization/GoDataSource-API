@@ -1023,6 +1023,12 @@ module.exports = function (Outbreak) {
         contactLists[0].push(...contactLists[1]);
         return contactLists[0];
       })
+
+      // filter out contacts that don't have at least one case with classification in Case.discardedCaseClassifications
+      .then(() => {
+        // #TODO
+      })
+
       .then((contacts) => {
         if (!contacts.length) {
           return [];
