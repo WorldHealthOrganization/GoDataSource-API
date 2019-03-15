@@ -15,7 +15,8 @@
     "reset-admin-password": "node ./server/install/install.js reset-admin-password",
     "install-script": "node ./server/install/install.js install-script",
     "restore-backup": "node ./server/scripts/restoreBackup.js",
-    "dump-help-data": "node ./server/install/install.js dump-help-data"
+    "dump-help-data": "node ./server/install/install.js dump-help-data",
+    "dump-language-data": "node ./server/install/install.js dump-language-data"
   },
   "dependencies": {
     "@google/maps": "0.5.5",
