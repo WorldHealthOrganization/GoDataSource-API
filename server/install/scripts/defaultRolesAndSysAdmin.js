@@ -81,7 +81,7 @@ const rolesMap = {
       'read_user_account'
     ]
   },
-  'Contact Tracer': {
+  'Contact tracer': {
     description: 'This is a built in role that follows up with contacts and monitors their health.',
     permissionIds: [
       'read_case',
@@ -149,13 +149,13 @@ function initRolesCreation() {
                 permissionIds: rolesMap[roleName].permissionIds
               }, common.install.timestamps), options)
               .then(function (role) {
-                if (roleName === 'System Administrator') {
+                if (roleName === 'System administrator') {
                   defaultAdmin.roleIds = [role.id];
                 }
                 return 'created.';
               });
           } else if (rewrite) {
-            if (roleName === 'System Administrator') {
+            if (roleName === 'System administrator') {
               defaultAdmin.roleIds = [role.id];
             }
             return role
@@ -167,7 +167,7 @@ function initRolesCreation() {
                 return 'updated.';
               });
           } else {
-            if (roleName === 'System Administrator') {
+            if (roleName === 'System administrator') {
               defaultAdmin.roleIds = [role.id];
             }
             return 'skipped. Role already exists.';
