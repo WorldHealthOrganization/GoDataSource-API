@@ -69,7 +69,7 @@ function run(callback) {
               langToken
                 .updateAttributes({
                   translation: newTranslation
-                })
+                }, options)
                 .catch(cb)
                 .then(() => {
                   // finished
@@ -178,7 +178,7 @@ function run(callback) {
                         name: data.name,
                         order: data.order,
                         description: data.description
-                      })
+                      }, options)
                       .catch(cb)
                       .then(() => {
                         // finished
@@ -296,7 +296,7 @@ function run(callback) {
                         comment: data.comment,
                         categoryId: data.categoryId,
                         approved: true
-                      })
+                      }, options)
                       .catch(cb)
                       .then(() => {
                         // finished
