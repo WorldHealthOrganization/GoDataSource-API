@@ -19,17 +19,17 @@ function run(callback) {
     // retrieve help categories
     .then((helpCategories) => {
       // retrieve help categories
-      const categoryData = [];
+      const exportData = {
+        translations: {},
+        helpCategories: []
+      };
       const categoryDataMap = {};
       const tokensToTranslate = [];
 
       // go through categories and export needed data
       (helpCategories || []).forEach((helpCategory) => {
-        // log
-        helpCategory.name
-
         // push category
-        categoryData.push({
+        exportData.helpCategories.push({
           id: helpCategory.id,
           name: helpCategory.name,
           order: helpCategory.order,
@@ -44,12 +44,12 @@ function run(callback) {
         );
 
         // map category
-        categoryDataMap[helpCategory.id] = categoryData.length - 1;
+        categoryDataMap[helpCategory.id] = exportData.helpCategories.length - 1;
       });
 
       // next
       return Promise.resolve({
-        categoryData: categoryData,
+        exportData: exportData,
         categoryDataMap: categoryDataMap,
         tokensToTranslate: tokensToTranslate
       });
@@ -58,7 +58,7 @@ function run(callback) {
     // retrieve help items
     .then((data) => {
       // data
-      const categoryData = data.categoryData;
+      const exportData = data.exportData;
       const categoryDataMap = data.categoryDataMap;
       const tokensToTranslate = data.tokensToTranslate;
 
@@ -78,7 +78,7 @@ function run(callback) {
             // go through help items and export needed data
             (helpItems || []).forEach((helpItem) => {
               // push item to parent category
-              categoryData[categoryDataMap[helpItem.categoryId]].items.push({
+              exportData.helpCategories[categoryDataMap[helpItem.categoryId]].items.push({
                 id: helpItem.id,
                 title: helpItem.title,
                 content: helpItem.content,
@@ -102,7 +102,7 @@ function run(callback) {
     // translate categories & items
     .then((data) => {
       // retrieve tokens
-      const categoryData = data.categoryData;
+      const exportData = data.exportData;
       const tokensToTranslate = data.tokensToTranslate;
       return new Promise((resolve, reject) => {
         // retrieve tokens translations
@@ -116,38 +116,15 @@ function run(callback) {
           })
           .catch(reject)
           .then((languageTokens) => {
-            // create translation dictionary
-            const tokenDictionary = {};
+            // add tokens to list
             (languageTokens || []).forEach((languageToken) => {
               // init ?
-              if (!tokenDictionary[languageToken.token]) {
-                tokenDictionary[languageToken.token] = {};
+              if (!exportData.translations[languageToken.token]) {
+                exportData.translations[languageToken.token] = {};
               }
 
               // add translation
-              tokenDictionary[languageToken.token][languageToken.languageId] = languageToken.translation;
-            });
-
-            // convert token to object with data
-            const tokenToValues = (token) => {
-              return {
-                token: token,
-                translations: tokenDictionary[token] ? tokenDictionary[token] : token
-              };
-            };
-
-            // go through categories and translate them
-            (categoryData || []).forEach((category) => {
-              // translate
-              category.name = tokenToValues(category.name);
-              category.description = tokenToValues(category.description);
-
-              // translate help items
-              category.items.forEach((helpItem) => {
-                // translate
-                helpItem.title = tokenToValues(helpItem.title);
-                helpItem.content = tokenToValues(helpItem.content);
-              });
+              exportData.translations[languageToken.token][languageToken.languageId] = languageToken.translation;
             });
 
             // finished
@@ -159,12 +136,12 @@ function run(callback) {
     // write file content
     .then((data) => {
       // data
-      const categoryData = data.categoryData;
+      const exportData = data.exportData;
 
       // export data
       fs.writeFile(
         module.resolvedPath,
-        JSON.stringify(categoryData, null, 2),
+        JSON.stringify(exportData, null, 2),
         (err) => {
           // an error occurred ?
           if (err) {
