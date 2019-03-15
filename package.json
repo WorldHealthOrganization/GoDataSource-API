@@ -14,7 +14,8 @@
     "migrate-database": "node ./server/install/install.js migrate-database",
     "reset-admin-password": "node ./server/install/install.js reset-admin-password",
     "install-script": "node ./server/install/install.js install-script",
-    "restore-backup": "node ./server/scripts/restoreBackup.js"
+    "restore-backup": "node ./server/scripts/restoreBackup.js",
+    "dump-help-data": "node ./server/install/install.js dump-help-data"
   },
   "dependencies": {
     "@google/maps": "0.5.5",
