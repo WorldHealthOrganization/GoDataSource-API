@@ -12,7 +12,7 @@ const _ = require('lodash');
  *        {
  *          "relation": "role",
  *          "scope": {
- *            "where": {"name": "System Administrator"},
+ *            "where": {"name": "System administrator"},
  *            "filterParent": true
  *          }
  *        },
