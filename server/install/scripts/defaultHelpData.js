@@ -69,7 +69,7 @@ function run(callback) {
               langToken
                 .updateAttributes({
                   translation: newTranslation
-                })
+                }, options)
                 .catch(cb)
                 .then(() => {
                   // finished
@@ -178,7 +178,7 @@ function run(callback) {
                         name: data.name,
                         order: data.order,
                         description: data.description
-                      })
+                      }, options)
                       .catch(cb)
                       .then(() => {
                         // finished
@@ -276,7 +276,8 @@ function run(callback) {
               if (
                 helpItemModel.title === fileHelpItem.title &&
                 helpItemModel.content === fileHelpItem.content &&
-                helpItemModel.comment === fileHelpItem.comment
+                helpItemModel.comment === fileHelpItem.comment &&
+                helpItemModel.approved
               ) {
                 // finished
                 app.logger.debug(`No need to update help item ${helpItemModel.id}`);
@@ -293,8 +294,9 @@ function run(callback) {
                         title: data.title,
                         content: data.content,
                         comment: data.comment,
-                        categoryId: data.categoryId
-                      })
+                        categoryId: data.categoryId,
+                        approved: true
+                      }, options)
                       .catch(cb)
                       .then(() => {
                         // finished
@@ -326,7 +328,8 @@ function run(callback) {
                       title: newHelpItem.title,
                       content: newHelpItem.content,
                       comment: newHelpItem.comment,
-                      categoryId: newHelpItem.categoryId
+                      categoryId: newHelpItem.categoryId,
+                      approved: true
                     }, common.install.timestamps), options)
                     .catch(cb)
                     .then(() => {
