@@ -127,8 +127,10 @@ const worker = {
       if (Array.isArray(person.addresses)) {
         // go trough the addresses
         person.addresses.forEach(function (addr, idx) {
-          // index them by phoneNumber and gender
-          addEntryToIndex(index.phoneNumber, person, [`addresses.${idx}.phoneNumber`, 'gender']);
+          if (addr.phoneNumber) {
+            // index them by phoneNumber and gender
+            addEntryToIndex(index.phoneNumber, person, [`addresses.${idx}.phoneNumber`, 'gender']);
+          }
         });
       }
 
