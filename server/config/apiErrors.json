@@ -282,5 +282,13 @@
   "SYNC_NO_DATA_TO_EXPORT": {
     "defaultStatusCode": 422,
     "messagePattern": "No data to export"
+  },
+  "CONTACT_ID_REQUIRED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Contact ID is required"
+  },
+  "MULTIPLE_CONTACTS_UPDATE_PARTIAL_SUCCESS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Multiple contacts update partial success. Some contact instances failed to be updated."
   }
 }

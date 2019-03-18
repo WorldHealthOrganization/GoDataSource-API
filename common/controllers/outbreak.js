@@ -5753,17 +5753,13 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Create multiple contacts for events
-   * @param eventId
-   * @param data
-   * @param options
+   * Bulk modify contacts
+   * @param existingContacts
    * @param callback
    */
-  Outbreak.prototype.createEventMultipleContacts = function (eventId, data, options, callback) {
-    Outbreak.createPersonMultipleContacts(this, app.models.event.modelName, eventId, data, options)
-      .then(function (results) {
-        callback(null, results);
-      })
+  Outbreak.prototype.bulkModifyContacts = function (existingContacts, callback) {
+    Outbreak.modifyMultipleContacts(existingContacts)
+      .then((results) => callback(null, results))
       .catch(callback);
   };
 

@@ -1485,6 +1485,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "bulkModifyContacts"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_followup",
       "permission": "ALLOW",
       "property": "getFollowUpsGroupedByContact"
@@ -6628,6 +6634,38 @@
       "http": {
         "verb": "post",
         "path": "/contacts/follow-up-report"
+      }
+    },
+    "prototype.bulkModifyContacts": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": [
+            "contact"
+          ],
+          "description": "Array containing contacts",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "createResponse",
+          "type": [
+            "contact"
+          ],
+          "description": "Array of updated contacts",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Update multiple contacts",
+      "http": {
+        "verb": "put",
+        "path": "/contacts/bulk"
       }
     },
     "prototype.getFollowUpsGroupedByContact": {
