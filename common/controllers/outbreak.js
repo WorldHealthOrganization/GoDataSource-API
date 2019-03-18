@@ -9733,10 +9733,12 @@ module.exports = function (Outbreak) {
   /**
    * Export list of contacts where each contact has a page with follow up questionnaire and answers
    * @param filter
+   * @param reqOptions
    * @param callback
    */
-  Outbreak.prototype.exportDailyContactFollowUpForm = function (filter, callback) {
-    const languageId = options.remotingContext.req.authData.user.languageId;
+  Outbreak.prototype.exportDailyContactFollowUpForm = function (filter, reqOptions, callback) {
+    const outbreak = this;
+    const languageId = reqOptions.remotingContext.req.authData.user.languageId;
 
     // get the latest date of contact for the current outbreak
     app.models.relationship.rawFind(
@@ -9744,19 +9746,21 @@ module.exports = function (Outbreak) {
         outbreakId: this.id
       },
       {
-        order: [
-          'contactDate DESC'
-        ],
+        order: {
+          contactDate: -1
+        },
         limit: 1
       })
       .then((relationships) => {
         if (!relationships.length) {
           return callback();
         }
-        const lastContactDate = relationships[0].contactDate;
+
+        // lets work only with moment objects
+        const lastContactDate = genericHelpers.getDate(relationships[0].contactDate);
 
         // calculate end day of follow up by taking the last contact day and adding the outbreak period of follow up to it
-        const lastFollowUpDay = null;
+        const lastFollowUpDay = genericHelpers.getDateEndOfDay(lastContactDate.clone().add(outbreak.periodOfFollowup, 'days'));
 
         // get list of contacts based on the filter passed on request
         // pre-filter using related data (case, contact)
@@ -9782,12 +9786,13 @@ module.exports = function (Outbreak) {
                     $and: [
                       {
                         date: {
-                          $lte: lastFollowUpDay
+                          // mongodb works with Date instances not Moment objects
+                          $lte: lastFollowUpDay.toDate()
                         }
                       },
                       {
                         date: {
-                          $gt: lastContactDate
+                          $gt: lastContactDate.toDate()
                         }
                       }
 
@@ -9813,16 +9818,37 @@ module.exports = function (Outbreak) {
             const aggregatePipeline = [
               // match conditions for followups
               {
-                $match: parsedFilter
+                $match: followUpsFilter
               },
               // group follow ups by person id
               // structure after grouping (_id -> personId, followUps -> list of follow ups)
               {
-                $group : {
-                  _id : '$personId',
+                $group: {
+                  _id: '$personId',
                   followUps: {
                     $push: '$$ROOT'
                   }
+                }
+              },
+              // retrieve contact information
+              {
+                $lookup: {
+                  from: 'person',
+                  localField: '_id',
+                  foreignField: '_id',
+                  as: 'contacts'
+                }
+              },
+              {
+                $project: {
+                  _id: 0,
+                  contact: {
+                    $arrayElemAt: [
+                      '$contacts',
+                      0
+                    ]
+                  },
+                  followUps: 1
                 }
               }
             ];
@@ -9836,108 +9862,135 @@ module.exports = function (Outbreak) {
               .then(records => {
                 // replace _id with id, to be consistent
                 records.forEach((record) => {
-                  if (record.contact) {
-                    record.contact.id = record.contact._id;
-                    delete record.contact._id;
-                  }
                   if (Array.isArray(record.followUps)) {
-                    record.followUps.forEach((followUp) => {
-                      followUp.id = followUp._id;
-                      delete followUp._id;
+                    // group them by index and get only the latest follow up in the day
+                    // this means sorted by updatedAt date and take the first one
+                    const followUpsGroupedByIndex = _.groupBy(record.followUps, 'index');
+                    for (let index in followUpsGroupedByIndex) {
+                      const orderedFollowUps = _.orderBy(followUpsGroupedByIndex[index], ['updatedAt'], ['desc']);
+                      if (!orderedFollowUps.length) {
+                        followUpsGroupedByIndex[index] = null;
+                      }
+                      followUpsGroupedByIndex[index] = orderedFollowUps[0];
+
+                      // alter the initial follow ups list
+                      record.followUps = followUpsGroupedByIndex;
+                    }
+                  }
+                });
+
+                // get language tokens
+                app.models.language.getLanguageDictionary(languageId, (err, dictionary) => {
+                  if (err) {
+                    return callback(err);
+                  }
+
+                  // create the document
+                  const doc = pdfUtils.createPdfDoc({
+                    fontSize: 6,
+                    layout: 'landscape',
+                    margin: 20,
+                    lineGap: 0,
+                    wordSpacing: 0,
+                    characterSpacing: 0,
+                    paragraphGap: 0
+                  });
+
+                  // add a top margin of 2 lines for each page
+                  doc.on('pageAdded', () => {
+                    doc.moveDown(2);
+                  });
+
+                  // set margin top for first page here, to not change the entire createPdfDoc functionality
+                  doc.moveDown(2);
+
+                  // initiate the headers
+                  let headers = [{
+                    id: 'description',
+                    header: ''
+                  }];
+
+                  // add a header for each day of the follow-up period
+                  for (let i = 1; i <= outbreak.periodOfFollowup; i++) {
+                    headers.push({
+                      id: 'index' + i,
+                      header: i
                     });
                   }
+
+                  // add title to the document
+                  pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_LIST_CONTACTS_EXPORT_DAILY_FOLLOW_UP_LIST_TITLE'));
+
+                  records.forEach((record, index) => {
+                    const contact = record.contact;
+
+                    // table data, each entry is a row
+                    const data = [];
+
+                    // add all questions as rows
+                    outbreak.contactFollowUpTemplate.forEach((question) => {
+                      // add question texts as first row
+                      data.push({ description: dictionary.getTranslation(question.text) });
+
+                      for (let index in record.followUps) {
+                        data[data.length - 1]['index' + index] = genericHelpers.translateQuestionAnswers(question, record.followUps[index].questionnaireAnswers[question.variable], dictionary);
+                      }
+                    });
+
+                    // cache initial document margin
+                    const initialXMargin = doc.x;
+
+                    // build the contact name, doing this to avoid unnecessary spaces, where a name is not defined
+                    const names = [
+                      contact.firstName,
+                      contact.middleName,
+                      contact.lastName
+                    ];
+                    // final construct name structure that is displayed
+                    let displayedName = '';
+                    names.forEach((name) => {
+                      if (name) {
+                        displayedName = displayedName + ' ' + pdfUtils.displayValue(name);
+                      }
+                    });
+                    // add additional information at the start of each page
+                    pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'), 14);
+                    doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_NAME')}: ${displayedName}`);
+                    doc.text(`${dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_GENDER')}: ${dictionary.getTranslation(contact.gender)}`);
+                    doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')}: ${contact.age.years} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${contact.age.months} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`);
+                    doc.text(`${dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE')}: ${moment(contact.dateOfLastContact).format('YYYY-MM-DD')}`);
+                    doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_ADDRESSES')}: ${app.models.address.getHumanReadableAddress(app.models.person.getCurrentAddress(contact))}`);
+                    doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER')}: ${contact.phoneNumber}`);
+                    doc.moveDown(2);
+
+                    // add the symptoms/follow-up table
+                    pdfUtils.createTableInPDFDocument(headers, data, doc);
+
+                    // comments area
+                    doc.x = initialXMargin;
+                    pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_DATE_FIELD_LABEL_COMMENTS'), 14);
+                    doc.moveDown(2);
+
+                    // add a new page for every contact
+                    if (index < records.length - 1) {
+                      doc.addPage();
+                    }
+                  });
+
+                  // finish the document
+                  doc.end();
+
+                  // export the file
+                  genericHelpers.streamToBuffer(doc, (err, buffer) => {
+                    if (err) {
+                      return callback(err);
+                    }
+                    app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'Daily Contact Follow-up.pdf', callback);
+                  });
                 });
               });
           });
       })
       .catch(callback);
-
-    app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
-      app.models.contact.find(filter)
-        .then((contacts) => {
-          // Filter contacts with no follow-ups
-          contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
-
-          // Create the document
-          const doc = pdfUtils.createPdfDoc({
-            fontSize: 6,
-            layout: 'landscape',
-            margin: 20,
-            lineGap: 0,
-            wordSpacing: 0,
-            characterSpacing: 0,
-            paragraphGap: 0
-          });
-
-          // add a top margin of 2 lines for each page
-          doc.on('pageAdded', () => {
-            doc.moveDown(2);
-          });
-
-          // set margin top for first page here, to not change the entire createPdfDoc functionality
-          doc.moveDown(2);
-
-          contacts.forEach((contact, index) => {
-            // Initiate the data
-            let data = [{
-              description: 'Date'
-            }];
-
-            // Initiate the headers
-            let headers = [{
-              id: 'description',
-              header: ''
-            }];
-
-            // Add a header for each day of the follow-up period
-            for (let i = 1; i <= self.periodOfFollowup; i++) {
-              headers.push({
-                id: 'index' + i,
-                header: i
-              });
-
-              // Add the dates of each follow-up
-              data[0]['index' + i] = moment(date).subtract((contact.followUps[0].index - i), 'days').format('YYYY-MM-DD');
-            }
-
-            // Add all questions as rows
-            self.contactFollowUpTemplate.forEach((question) => {
-              data.push({description: question.text});
-              contact.followUps.forEach((followUp) => {
-                data[data.length - 1]['index' + followUp.index] = genericHelpers.translateQuestionAnswers(question, followUp.questionnaireAnswers[question.variable], dictionary);
-              });
-            });
-
-            // Add additional information at the start of each page
-            pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'), 14);
-            doc.text(`${dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_GENDER')}: ${dictionary.getTranslation(contact.gender)}`);
-            doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')}: ${contact.age.years} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${contact.age.months} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`);
-            doc.text(`${dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE')}: ${moment(contact.dateOfLastContact).format('YYYY-MM-DD')}`);
-            doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_ADDRESSES')}: ${app.models.address.getHumanReadableAddress(app.models.person.getCurrentAddress(contact))}`);
-            doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER')}: ${contact.phoneNumber}`);
-            doc.moveDown(2);
-
-            // Add the symptoms/follow-up table
-            pdfUtils.createTableInPDFDocument(headers, data, doc);
-
-            // Add a new page for every contact
-            if (index < contacts.length - 1) {
-              doc.addPage();
-            }
-          });
-
-          // Finish the document
-          doc.end();
-
-          // Export the file
-          genericHelpers.streamToBuffer(doc, (err, buffer) => {
-            if (err) {
-              callback(err);
-            } else {
-              app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'Daily Contact Follow-up.pdf', callback);
-            }
-          });
-        });
-    });
   };
 };
