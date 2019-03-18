@@ -6771,10 +6771,6 @@
               "type": "number",
               "description": "Total number of cases in the Outbreak that have been contacts and final follow-up status is Lost to Follow-up"
             },
-            "totalCasesFromContactWithFollowupNoData": {
-              "type": "number",
-              "description": "Total number of cases in the Outbreak that have been contacts and final follow-up status is No Data"
-            },
             "caseIDs": {
               "type": [
                 "string"
@@ -6798,12 +6794,6 @@
                 "string"
               ],
               "description": "Array containing the cases IDs in the Outbreak that have been contacts and final follow-up status is Lost to Follow-up"
-            },
-            "caseFromContactWithFollowupNoDataIDs": {
-              "type": [
-                "string"
-              ],
-              "description": "Array containing the cases IDs in the Outbreak that have been contacts and final follow-up status is No Data"
             },
             "percentageOfCasesWithFollowupData": {
               "type": "number",
@@ -6831,10 +6821,6 @@
                       "type": "number",
                       "description": "Total number of cases in the Outbreak that have been contacts and final follow-up status is Lost to Follow-up"
                     },
-                    "totalCasesFromContactWithFollowupNoData": {
-                      "type": "number",
-                      "description": "Total number of cases in the Outbreak that have been contacts and final follow-up status is No Data"
-                    },
                     "caseIDs": {
                       "type": [
                         "string"
@@ -6858,12 +6844,6 @@
                         "string"
                       ],
                       "description": "Array containing the cases IDs in the Outbreak that have been contacts and final follow-up status is Lost to Follow-up"
-                    },
-                    "caseFromContactWithFollowupNoDataIDs": {
-                      "type": [
-                        "string"
-                      ],
-                      "description": "Array containing the cases IDs in the Outbreak that have been contacts and final follow-up status is No Data"
                     },
                     "percentageOfCasesWithFollowupData": {
                       "type": "number",

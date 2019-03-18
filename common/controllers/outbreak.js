@@ -1016,13 +1016,13 @@ module.exports = function (Outbreak) {
 
     // retrieve cases that were discarded so we can exclude contacts that are related only to discarded contacts
     app.models.case
-      // retrieve discarded cases
+    // retrieve discarded cases
       .rawFind({
         outbreakId: outbreakId,
         classification: {
           $in: app.models.case.discardedCaseClassifications
         }
-      }, { projection: { _id: 1 } })
+      }, {projection: {_id: 1}})
       // retrieve contacts for which we can generate follow-ups
       .then((caseIds) => {
         // retrieve list of discarded case ids
@@ -1045,7 +1045,7 @@ module.exports = function (Outbreak) {
                 $nin: caseIds
               }
             }]
-          }, { projection: { persons: 1 } });
+          }, {projection: {persons: 1}});
       })
       // retrieve contacts for which we need to generate follow-ups
       .then((relationshipPersons) => {
@@ -9553,12 +9553,10 @@ module.exports = function (Outbreak) {
       totalCasesNotFromContact: 0,
       totalCasesFromContactWithFollowupComplete: 0,
       totalCasesFromContactWithFollowupLostToFollowup: 0,
-      totalCasesFromContactWithFollowupNoData: 0,
       caseIDs: [],
       caseNotFromContactIDs: [],
       caseFromContactWithFollowupCompleteIDs: [],
       caseFromContactWithFollowupLostToFollowupIDs: [],
-      caseFromContactWithFollowupNoDataIDs: [],
       percentageOfCasesWithFollowupData: 0,
       period: []
     };
@@ -9601,10 +9599,6 @@ module.exports = function (Outbreak) {
       'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP': {
         counter: 'totalCasesFromContactWithFollowupLostToFollowup',
         idContainer: 'caseFromContactWithFollowupLostToFollowupIDs'
-      },
-      'no_data': {
-        counter: 'totalCasesFromContactWithFollowupNoData',
-        idContainer: 'caseFromContactWithFollowupNoDataIDs'
       }
     };
 
@@ -9621,12 +9615,10 @@ module.exports = function (Outbreak) {
             totalCasesNotFromContact: 0,
             totalCasesFromContactWithFollowupComplete: 0,
             totalCasesFromContactWithFollowupLostToFollowup: 0,
-            totalCasesFromContactWithFollowupNoData: 0,
             caseIDs: [],
             caseNotFromContactIDs: [],
             caseFromContactWithFollowupCompleteIDs: [],
             caseFromContactWithFollowupLostToFollowupIDs: [],
-            caseFromContactWithFollowupNoDataIDs: [],
             percentageOfCasesWithFollowupData: 0
           });
         });
@@ -9695,20 +9687,22 @@ module.exports = function (Outbreak) {
             result.caseNotFromContactIDs.push(item.id);
           } else {
             // case was converted from a contact
-            // get follow-up status; null means no data
+            // get follow-up status
             let finalFollowupStatus = _.get(item, 'followUp.status', null);
-            // get entry in finalFollowupStatusMap
-            let finalFollowupStatusEntry = finalFollowupStatusMap[finalFollowupStatus ? finalFollowupStatus : 'no_data'];
-            // increase period counter
-            periodMap[casePeriodIdentifier][finalFollowupStatusEntry.counter]++;
-            periodMap[casePeriodIdentifier][finalFollowupStatusEntry.idContainer].push(item.id);
+            // get entry in finalFollowupStatusMap; the entry might not be found for unknown statuses
+            let finalFollowupStatusEntry = finalFollowupStatusMap[finalFollowupStatus];
 
-            // increase total counters
-            result[finalFollowupStatusEntry.counter]++;
-            result[finalFollowupStatusEntry.idContainer].push(item.id);
+            // check if the final follow-up status is known; was found in map
+            if (finalFollowupStatusEntry) {
+              // increase period counter
+              periodMap[casePeriodIdentifier][finalFollowupStatusEntry.counter]++;
+              periodMap[casePeriodIdentifier][finalFollowupStatusEntry.idContainer].push(item.id);
 
-            // calculate new percentage if finalFollowupStatus has data
-            if (finalFollowupStatus) {
+              // increase total counters
+              result[finalFollowupStatusEntry.counter]++;
+              result[finalFollowupStatusEntry.idContainer].push(item.id);
+
+              // calculate new percentage as the status is known
               // period percentage
               periodMap[casePeriodIdentifier].percentageOfCasesWithFollowupData =
                 (periodMap[casePeriodIdentifier].totalCasesFromContactWithFollowupComplete +
@@ -9720,6 +9714,9 @@ module.exports = function (Outbreak) {
                 (result.totalCasesFromContactWithFollowupComplete +
                   result.totalCasesFromContactWithFollowupLostToFollowup) /
                 result.totalCasesCount;
+            } else {
+              // case was created from a contact that has an unknown (not default reference data) follow-up status
+              // it was already added in the total cases count; no need to add in another counter
             }
           }
         });
