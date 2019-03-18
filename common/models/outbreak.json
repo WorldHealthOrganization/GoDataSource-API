@@ -987,6 +987,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "countCasesPerPeriodPerContactStatus"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_followup",
       "permission": "ALLOW",
       "property": "listLatestFollowUpsForContactsIfNotPerformed"
@@ -6735,6 +6741,128 @@
       "http": {
         "verb": "get",
         "path": "/cases/:fk/isolated-contacts"
+      }
+    },
+    "prototype.countCasesPerPeriodPerContactStatus": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'periodType': enum [day, week, month], 'periodInterval': ['date', 'date']"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "totalCasesCount": {
+              "type": "number",
+              "description": "Total number of cases in the Outbreak"
+            },
+            "totalCasesNotFromContact": {
+              "type": "number",
+              "description": "Total number of cases in the Outbreak that have never been contacts"
+            },
+            "totalCasesFromContactWithFollowupComplete": {
+              "type": "number",
+              "description": "Total number of cases in the Outbreak that have been contacts and final follow-up status is Under Follow-up or Follow-up complete"
+            },
+            "totalCasesFromContactWithFollowupLostToFollowup": {
+              "type": "number",
+              "description": "Total number of cases in the Outbreak that have been contacts and final follow-up status is Lost to Follow-up"
+            },
+            "caseIDs": {
+              "type": [
+                "string"
+              ],
+              "description": "Array containing the cases IDs in the Outbreak"
+            },
+            "caseNotFromContactIDs": {
+              "type": [
+                "string"
+              ],
+              "description": "Array containing the cases IDs in the Outbreak that have never been contacts"
+            },
+            "caseFromContactWithFollowupCompleteIDs": {
+              "type": [
+                "string"
+              ],
+              "description": "Array containing the cases IDs in the Outbreak that have been contacts and final follow-up status is Under Follow-up or Follow-up complete"
+            },
+            "caseFromContactWithFollowupLostToFollowupIDs": {
+              "type": [
+                "string"
+              ],
+              "description": "Array containing the cases IDs in the Outbreak that have been contacts and final follow-up status is Lost to Follow-up"
+            },
+            "percentageOfCasesWithFollowupData": {
+              "type": "number",
+              "description": "Percentage of cases with follow-up data (final status is Under Follow-up or Follow-up complete or Lost to Follow-up)"
+            },
+            "period": {
+              "type": [
+                {
+                  "type": {
+                    "start": "date",
+                    "end": "date",
+                    "totalCasesCount": {
+                      "type": "number",
+                      "description": "Total number of cases in the Outbreak"
+                    },
+                    "totalCasesNotFromContact": {
+                      "type": "number",
+                      "description": "Total number of cases in the Outbreak that have never been contacts"
+                    },
+                    "totalCasesFromContactWithFollowupComplete": {
+                      "type": "number",
+                      "description": "Total number of cases in the Outbreak that have been contacts and final follow-up status is Under Follow-up or Follow-up complete"
+                    },
+                    "totalCasesFromContactWithFollowupLostToFollowup": {
+                      "type": "number",
+                      "description": "Total number of cases in the Outbreak that have been contacts and final follow-up status is Lost to Follow-up"
+                    },
+                    "caseIDs": {
+                      "type": [
+                        "string"
+                      ],
+                      "description": "Array containing the cases IDs in the Outbreak"
+                    },
+                    "caseNotFromContactIDs": {
+                      "type": [
+                        "string"
+                      ],
+                      "description": "Array containing the cases IDs in the Outbreak that have never been contacts"
+                    },
+                    "caseFromContactWithFollowupCompleteIDs": {
+                      "type": [
+                        "string"
+                      ],
+                      "description": "Array containing the cases IDs in the Outbreak that have been contacts and final follow-up status is Under Follow-up or Follow-up complete"
+                    },
+                    "caseFromContactWithFollowupLostToFollowupIDs": {
+                      "type": [
+                        "string"
+                      ],
+                      "description": "Array containing the cases IDs in the Outbreak that have been contacts and final follow-up status is Lost to Follow-up"
+                    },
+                    "percentageOfCasesWithFollowupData": {
+                      "type": "number",
+                      "description": "Percentage of cases with follow-up data (final status is Under Follow-up or Follow-up complete or Lost to Follow-up)"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "description": "Object containing counters for cases per period",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of cases per period per their contact status",
+      "http": {
+        "verb": "get",
+        "path": "/cases/per-period-per-contact-status/count"
       }
     }
   }

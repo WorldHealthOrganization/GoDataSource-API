@@ -1016,13 +1016,13 @@ module.exports = function (Outbreak) {
 
     // retrieve cases that were discarded so we can exclude contacts that are related only to discarded contacts
     app.models.case
-      // retrieve discarded cases
+    // retrieve discarded cases
       .rawFind({
         outbreakId: outbreakId,
         classification: {
           $in: app.models.case.discardedCaseClassifications
         }
-      }, { projection: { _id: 1 } })
+      }, {projection: {_id: 1}})
       // retrieve contacts for which we can generate follow-ups
       .then((caseIds) => {
         // retrieve list of discarded case ids
@@ -1045,7 +1045,7 @@ module.exports = function (Outbreak) {
                 $nin: caseIds
               }
             }]
-          }, { projection: { persons: 1 } });
+          }, {projection: {persons: 1}});
       })
       // retrieve contacts for which we need to generate follow-ups
       .then((relationshipPersons) => {
@@ -1696,7 +1696,7 @@ module.exports = function (Outbreak) {
               active: activeFilter,
               size: sizeFilter,
               includedPeopleFilter: includedPeopleFilter
-            }, transmissionChains, { includeContacts: includeContacts });
+            }, transmissionChains, {includeContacts: includeContacts});
 
             // determine if isolated nodes should be included
             const shouldIncludeIsolatedNodes = (
@@ -2012,7 +2012,7 @@ module.exports = function (Outbreak) {
             });
           });
       })
-      .then(function (){
+      .then(function () {
         callback(null, result);
       })
       .catch(callback);
@@ -4809,7 +4809,7 @@ module.exports = function (Outbreak) {
         'relationships[].people[].dateBecomeCase', 'relationships[].people[].dateOfInfection', 'relationships[].people[].dateOfOnset',
         'relationships[].people[].outcomeId', 'relationships[].people[].dateOfOutcome', 'relationships[].people[].dateRanges[].typeId', 'relationships[].people[].dateRanges[].startDate',
         'relationships[].people[].dateRanges[].endDate', 'relationships[].people[].dateRanges[].centerName', 'relationships[].people[].addresses[].date',
-        'relationships[].people[].dateOfBurial','relationships[].people[].safeBurial', 'followUps[].date', 'followUps[].address.date'
+        'relationships[].people[].dateOfBurial', 'relationships[].people[].safeBurial', 'followUps[].date', 'followUps[].address.date'
       ];
 
       // Get the language dictionary
@@ -7671,7 +7671,8 @@ module.exports = function (Outbreak) {
       // execute callback
       callback(error, result);
       // replace callback with no-op to prevent calling it multiple times
-      callback = function noOp() {};
+      callback = function noOp() {
+      };
     }
 
     // make sure we have either date or contactId
@@ -7754,7 +7755,7 @@ module.exports = function (Outbreak) {
         endDate = genericHelpers.getDateEndOfDay(date);
 
         // determine date condition that will be added when retrieving follow-ups
-        dateCondition =  {
+        dateCondition = {
           date: {
             gte: new Date(startDate),
             lte: new Date(endDate)
@@ -9478,5 +9479,254 @@ module.exports = function (Outbreak) {
         ids: isolatedContacts.map((entry) => entry.contact.id)
       });
     });
+  };
+
+  /**
+   * Count the cases per period per contact status
+   * @param filter Besides the default filter properties this request also accepts
+   * 'periodType': enum [day, week, month],
+   * 'periodInterval':['date', 'date']
+   * @param callback
+   */
+  Outbreak.prototype.countCasesPerPeriodPerContactStatus = function (filter, callback) {
+    // initialize periodType filter; default is day; accepting day/week/month
+    let periodType;
+    let periodTypes = {
+      day: 'day',
+      week: 'week',
+      month: 'month'
+    };
+
+    // check if the periodType filter was sent; accepting it only on the first level
+    periodType = _.get(filter, 'where.periodType');
+    if (typeof periodType !== 'undefined') {
+      // periodType was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.periodType;
+    }
+
+    // check if the received periodType is accepted
+    if (Object.values(periodTypes).indexOf(periodType) === -1) {
+      // set default periodType
+      periodType = periodTypes.day;
+    }
+
+    // initialize periodInterval; keeping it as moment instances we need to use them further in the code
+    let periodInterval, today, todayEndOfDay, mondayStartOfDay, sundayEndOfDay, firstDayOfMonth, lastDayOfMonth;
+    // check if the periodInterval filter was sent; accepting it only on the first level
+    periodInterval = _.get(filter, 'where.periodInterval');
+    if (typeof periodInterval !== 'undefined') {
+      // periodInterval was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.periodInterval;
+      // normalize periodInterval dates
+      periodInterval[0] = genericHelpers.getDate(periodInterval[0]);
+      periodInterval[1] = genericHelpers.getDateEndOfDay(periodInterval[1]);
+    } else {
+      // set default periodInterval depending on periodType
+      switch (periodType) {
+        case periodTypes.day:
+          // get interval for today
+          today = genericHelpers.getDate();
+          todayEndOfDay = genericHelpers.getDateEndOfDay();
+          periodInterval = [today, todayEndOfDay];
+          break;
+        case periodTypes.week:
+          // get interval for this week
+          mondayStartOfDay = genericHelpers.getDate(null, 1);
+          sundayEndOfDay = genericHelpers.getDateEndOfDay(null, 7);
+          periodInterval = [mondayStartOfDay, sundayEndOfDay];
+          break;
+        case periodTypes.month:
+          // get interval for this month
+          firstDayOfMonth = genericHelpers.getDate().startOf('month');
+          lastDayOfMonth = genericHelpers.getDateEndOfDay().endOf('month');
+          periodInterval = [firstDayOfMonth, lastDayOfMonth];
+          break;
+      }
+    }
+
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // initialize result
+    let result = {
+      totalCasesCount: 0,
+      totalCasesNotFromContact: 0,
+      totalCasesFromContactWithFollowupComplete: 0,
+      totalCasesFromContactWithFollowupLostToFollowup: 0,
+      caseIDs: [],
+      caseNotFromContactIDs: [],
+      caseFromContactWithFollowupCompleteIDs: [],
+      caseFromContactWithFollowupLostToFollowupIDs: [],
+      percentageOfCasesWithFollowupData: 0,
+      period: []
+    };
+
+    // initialize default filter
+    let defaultFilter = {
+      where: {
+        outbreakId: outbreakId,
+        // get only the cases reported in the periodInterval
+        or: [{
+          and: [{
+            dateOfReporting: {
+              // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
+              between: periodInterval.slice()
+            },
+            dateBecomeCase: {
+              eq: null
+            }
+          }]
+        }, {
+          dateBecomeCase: {
+            // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
+            between: periodInterval.slice()
+          }
+        }]
+      },
+      order: 'dateOfReporting ASC'
+    };
+
+    // initialize map for final followup status to properties that need to be updated in result
+    const finalFollowupStatusMap = {
+      'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED': {
+        counter: 'totalCasesFromContactWithFollowupComplete',
+        idContainer: 'caseFromContactWithFollowupCompleteIDs'
+      },
+      'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP': {
+        counter: 'totalCasesFromContactWithFollowupComplete',
+        idContainer: 'caseFromContactWithFollowupCompleteIDs'
+      },
+      'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP': {
+        counter: 'totalCasesFromContactWithFollowupLostToFollowup',
+        idContainer: 'caseFromContactWithFollowupLostToFollowupIDs'
+      }
+    };
+
+    // get all the cases for the filtered period
+    app.models.case.find(app.utils.remote
+      .mergeFilters(defaultFilter, filter || {}))
+      .then(function (cases) {
+        // get periodMap for interval
+        let periodMap = genericHelpers.getChunksForInterval(periodInterval, periodType);
+        // fill additional details for each entry in the periodMap
+        Object.keys(periodMap).forEach(function (entry) {
+          Object.assign(periodMap[entry], {
+            totalCasesCount: 0,
+            totalCasesNotFromContact: 0,
+            totalCasesFromContactWithFollowupComplete: 0,
+            totalCasesFromContactWithFollowupLostToFollowup: 0,
+            caseIDs: [],
+            caseNotFromContactIDs: [],
+            caseFromContactWithFollowupCompleteIDs: [],
+            caseFromContactWithFollowupLostToFollowupIDs: [],
+            percentageOfCasesWithFollowupData: 0
+          });
+        });
+
+        cases.forEach(function (item) {
+          // get case date; it's either dateBecomeCase or dateOfReporting
+          let caseDate = item.dateBecomeCase || item.dateOfReporting;
+
+          // get period in which the case needs to be included
+          let casePeriodInterval, today, todayEndOfDay, mondayStartOfDay, sundayEndOfDay, firstDayOfMonth,
+            lastDayOfMonth;
+
+          switch (periodType) {
+            case periodTypes.day:
+              // get interval for today
+              today = genericHelpers.getDate(caseDate).toString();
+              todayEndOfDay = genericHelpers.getDateEndOfDay(caseDate).toString();
+              casePeriodInterval = [today, todayEndOfDay];
+              break;
+            case periodTypes.week:
+              // get interval for this week
+              mondayStartOfDay = genericHelpers.getDate(caseDate, 1);
+              sundayEndOfDay = genericHelpers.getDateEndOfDay(caseDate, 7);
+
+              // we should use monday only if it is later than the first date of the periodInterval; else use the first date of the period interval
+              mondayStartOfDay = (mondayStartOfDay.isAfter(periodInterval[0]) ? mondayStartOfDay : periodInterval[0]).toString();
+
+              // we should use sunday only if it is earlier than the last date of the periodInterval; else use the last date of the period interval
+              sundayEndOfDay = (sundayEndOfDay.isBefore(periodInterval[1]) ? sundayEndOfDay : periodInterval[1]).toString();
+
+              casePeriodInterval = [mondayStartOfDay, sundayEndOfDay];
+              break;
+            case periodTypes.month:
+              // get interval for this month
+              firstDayOfMonth = genericHelpers.getDate(caseDate).startOf('month');
+              lastDayOfMonth = genericHelpers.getDateEndOfDay(caseDate).endOf('month');
+
+              // we should use first day of month only if it is later than the first date of the periodInterval; else use the first date of the period interval
+              firstDayOfMonth = (firstDayOfMonth.isAfter(periodInterval[0]) ? firstDayOfMonth : periodInterval[0]).toString();
+
+              // we should use last day of month only if it is earlier than the last date of the periodInterval; else use the last date of the period interval
+              lastDayOfMonth = (lastDayOfMonth.isBefore(periodInterval[1]) ? lastDayOfMonth : periodInterval[1]).toString();
+
+              casePeriodInterval = [firstDayOfMonth, lastDayOfMonth];
+              break;
+          }
+
+          // create a period identifier
+          let casePeriodIdentifier = casePeriodInterval.join(' - ');
+
+          // increase total case count counter and add case ID in container
+          periodMap[casePeriodIdentifier].totalCasesCount++;
+          periodMap[casePeriodIdentifier].caseIDs.push(item.id);
+          result.totalCasesCount++;
+          result.caseIDs.push(item.id);
+
+          // check if case was converted from contact and increase required counters
+          if (!item.dateBecomeCase) {
+            // case was not converted from contact
+            // increase period counters
+            periodMap[casePeriodIdentifier].totalCasesNotFromContact++;
+            periodMap[casePeriodIdentifier].caseNotFromContactIDs.push(item.id);
+
+            // increase total counters
+            result.totalCasesNotFromContact++;
+            result.caseNotFromContactIDs.push(item.id);
+          } else {
+            // case was converted from a contact
+            // get follow-up status
+            let finalFollowupStatus = _.get(item, 'followUp.status', null);
+            // get entry in finalFollowupStatusMap; the entry might not be found for unknown statuses
+            let finalFollowupStatusEntry = finalFollowupStatusMap[finalFollowupStatus];
+
+            // check if the final follow-up status is known; was found in map
+            if (finalFollowupStatusEntry) {
+              // increase period counter
+              periodMap[casePeriodIdentifier][finalFollowupStatusEntry.counter]++;
+              periodMap[casePeriodIdentifier][finalFollowupStatusEntry.idContainer].push(item.id);
+
+              // increase total counters
+              result[finalFollowupStatusEntry.counter]++;
+              result[finalFollowupStatusEntry.idContainer].push(item.id);
+
+              // calculate new percentage as the status is known
+              // period percentage
+              periodMap[casePeriodIdentifier].percentageOfCasesWithFollowupData =
+                (periodMap[casePeriodIdentifier].totalCasesFromContactWithFollowupComplete +
+                  periodMap[casePeriodIdentifier].totalCasesFromContactWithFollowupLostToFollowup) /
+                periodMap[casePeriodIdentifier].totalCasesCount;
+
+              // total percentage
+              result.percentageOfCasesWithFollowupData =
+                (result.totalCasesFromContactWithFollowupComplete +
+                  result.totalCasesFromContactWithFollowupLostToFollowup) /
+                result.totalCasesCount;
+            } else {
+              // case was created from a contact that has an unknown (not default reference data) follow-up status
+              // it was already added in the total cases count; no need to add in another counter
+            }
+          }
+        });
+
+        // update results; sending array with period entries
+        result.period = Object.values(periodMap);
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
   };
 };
