@@ -576,7 +576,7 @@ module.exports = function (FollowUp) {
    * Information about contact is returned as well
    * Also 'countOnly' flag is supported, in this case only the count of groups is returned as result
    * @param outbreakId
-   * @param filter
+   * @param filter Supports 'where.contact' MongoDB compatible queries besides follow-ups conditions which are on the first level
    * @param countOnly
    * @param callback
    */
@@ -584,148 +584,179 @@ module.exports = function (FollowUp) {
     // convert filter to mongodb filter structure
     filter = filter || {};
     filter.where = filter.where || {};
-    const parsedFilter = app.utils.remote.convertLoopbackFilterToMongo(
-      {
-        $and: [
-          // make sure we're only retrieving follow ups from the current outbreak
+
+    // check if we have contact filters
+    let buildQuery = Promise.resolve();
+    if (!_.isEmpty(filter.where.contact)) {
+      // retrieve contact query
+      const contactQuery = filter.where.contact;
+
+      // retrieve contacts
+      buildQuery = buildQuery
+        .then(() => {
+          return app.models.contact.rawFind(
+            app.utils.remote.convertLoopbackFilterToMongo(contactQuery),
+            { projection: { _id: 1 } });
+        });
+    }
+
+    // no need to send contact filter further, since this one is handled separately
+    delete filter.where.contact;
+
+    // retrieve range follow-ups
+    buildQuery
+      .then((contactIds) => {
+        // parse filter
+        const parsedFilter = app.utils.remote.convertLoopbackFilterToMongo(
           {
-            outbreakId: this.id
-          },
-          // retrieve only non-deleted records
-          {
-            $or: [
+            $and: [
+              // make sure we're only retrieving follow ups from the current outbreak
               {
-                deleted: false
+                outbreakId: this.id
               },
+              // retrieve only non-deleted records
               {
-                deleted: {
-                  $eq: null
+                $or: [
+                  {
+                    deleted: false
+                  },
+                  {
+                    deleted: {
+                      $eq: null
+                    }
+                  }
+                ]
+              },
+              // filter by contact
+              ...(contactIds === undefined ? [] : [{
+                personId: {
+                  $in: Array.from(new Set((contactIds || []).map((contactData) => contactData.id)))
                 }
-              }
+              }]),
+
+              // conditions coming from request
+              filter.where
             ]
-          },
-          // conditions coming from request
-          filter.where
-        ]
-      });
+          });
 
-    // parse order props
-    const knownOrderTypes = {
-      ASC: 1,
-      DESC: -1
-    };
-    const orderProps = {};
-    if (Array.isArray(filter.order)) {
-      filter.order.forEach((pair) => {
-        // split prop and order type
-        const split = pair.split(' ');
-        // ignore if we don't receive a pair
-        if (split.length !== 2) {
-          return;
-        }
-        split[1] = split[1].toUpperCase();
-        // make sure the order type is known
-        if (!knownOrderTypes.hasOwnProperty(split[1])) {
-          return;
-        }
-        orderProps[split[0]] = knownOrderTypes[split[1]];
-      });
-    }
-
-    // mongodb aggregate pipeline
-    const aggregatePipeline = [
-      // match conditions for followups
-      {
-        $match: parsedFilter
-      },
-      // group follow ups by person id
-      // structure after grouping (_id -> personId, followUps -> list of follow ups)
-      {
-        $group : {
-          _id : '$personId',
-          followUps: {
-            $push: '$$ROOT'
-          }
-        }
-      }
-    ];
-
-    if (!countOnly) {
-      // add additional data transformation into pipeline, after pagination is done
-      // otherwise we transform unnecessary amount of data, that actually should be excluded from result
-      aggregatePipeline.push(
-        {
-          $lookup: {
-            from: 'person',
-            localField: '_id',
-            foreignField: '_id',
-            as: 'contacts'
-          }
-        },
-        {
-          $project: {
-            _id: 0,
-            contact: {
-              $arrayElemAt: [
-                '$contacts',
-                0
-              ]
-            },
-            followUps: 1
-          }
-        }
-      );
-
-      // do not add sort with 0 items, it will throw error
-      if (Object.keys(orderProps).length) {
-        aggregatePipeline.push({
-          $sort: orderProps
-        });
-      }
-
-      // we only add pagination fields if they are numbers
-      // otherwise aggregation will fail
-      if (!isNaN(filter.skip)) {
-        aggregatePipeline.push({
-          $skip: filter.skip
-        });
-      }
-      if (!isNaN(filter.limit)) {
-        aggregatePipeline.push({
-          $limit: filter.limit
-        });
-      }
-    }
-
-    // run the aggregation against database
-    const cursor = app.dataSources.mongoDb.connector.collection('followUp').aggregate(aggregatePipeline);
-
-    // get the records from the cursor
-    cursor
-      .toArray()
-      .then(records => {
-        // do not send the results back, just the count
-        if (countOnly) {
-          return callback(null, {
-            count: records.length
+        // parse order props
+        const knownOrderTypes = {
+          ASC: 1,
+          DESC: -1
+        };
+        const orderProps = {};
+        if (Array.isArray(filter.order)) {
+          filter.order.forEach((pair) => {
+            // split prop and order type
+            const split = pair.split(' ');
+            // ignore if we don't receive a pair
+            if (split.length !== 2) {
+              return;
+            }
+            split[1] = split[1].toUpperCase();
+            // make sure the order type is known
+            if (!knownOrderTypes.hasOwnProperty(split[1])) {
+              return;
+            }
+            orderProps[split[0]] = knownOrderTypes[split[1]];
           });
         }
-        // replace _id with id, to be consistent
-        records.forEach((record) => {
-          if (record.contact) {
-            record.contact.id = record.contact._id;
-            delete record.contact._id;
+
+        // mongodb aggregate pipeline
+        const aggregatePipeline = [
+          // match conditions for followups
+          {
+            $match: parsedFilter
+          },
+          // group follow ups by person id
+          // structure after grouping (_id -> personId, followUps -> list of follow ups)
+          {
+            $group : {
+              _id : '$personId',
+              followUps: {
+                $push: '$$ROOT'
+              }
+            }
           }
-          if (Array.isArray(record.followUps)) {
-            record.followUps.forEach((followUp) => {
-              followUp.id = followUp._id;
-              delete followUp._id;
+        ];
+
+        if (!countOnly) {
+          // add additional data transformation into pipeline, after pagination is done
+          // otherwise we transform unnecessary amount of data, that actually should be excluded from result
+          aggregatePipeline.push(
+            {
+              $lookup: {
+                from: 'person',
+                localField: '_id',
+                foreignField: '_id',
+                as: 'contacts'
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                contact: {
+                  $arrayElemAt: [
+                    '$contacts',
+                    0
+                  ]
+                },
+                followUps: 1
+              }
+            }
+          );
+
+          // do not add sort with 0 items, it will throw error
+          if (Object.keys(orderProps).length) {
+            aggregatePipeline.push({
+              $sort: orderProps
             });
           }
-        });
-        // return results
-        return callback(null, records);
-      })
-      .catch(callback);
+
+          // we only add pagination fields if they are numbers
+          // otherwise aggregation will fail
+          if (!isNaN(filter.skip)) {
+            aggregatePipeline.push({
+              $skip: filter.skip
+            });
+          }
+          if (!isNaN(filter.limit)) {
+            aggregatePipeline.push({
+              $limit: filter.limit
+            });
+          }
+        }
+
+        // run the aggregation against database
+        const cursor = app.dataSources.mongoDb.connector.collection('followUp').aggregate(aggregatePipeline);
+
+        // get the records from the cursor
+        cursor
+          .toArray()
+          .then(records => {
+            // do not send the results back, just the count
+            if (countOnly) {
+              return callback(null, {
+                count: records.length
+              });
+            }
+            // replace _id with id, to be consistent
+            records.forEach((record) => {
+              if (record.contact) {
+                record.contact.id = record.contact._id;
+                delete record.contact._id;
+              }
+              if (Array.isArray(record.followUps)) {
+                record.followUps.forEach((followUp) => {
+                  followUp.id = followUp._id;
+                  delete followUp._id;
+                });
+              }
+            });
+            // return results
+            return callback(null, records);
+          })
+          .catch(callback);
+      });
   };
 };
