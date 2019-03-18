@@ -1494,6 +1494,12 @@
       "principalId": "read_followup",
       "permission": "ALLOW",
       "property": "countFollowUpsGroupedByContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "getCaseIsolatedContacts"
     }
   ],
   "methods": {
@@ -6668,6 +6674,29 @@
       "http": {
         "verb": "get",
         "path": "/range-follow-ups/count"
+      }
+    },
+    "prototype.getCaseIsolatedContacts": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "data",
+          "type": "object",
+          "root": true,
+          "description": "Count of isolated contacts and list of ids",
+          "required": true
+        }
+      ],
+      "description": "Get count of isolated contacts for a case",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:fk/isolated-contacts"
       }
     }
   }

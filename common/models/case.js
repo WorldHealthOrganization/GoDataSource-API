@@ -7,11 +7,9 @@ const moment = require('moment');
 const async = require('async');
 
 module.exports = function (Case) {
-  Case.observe('after delete', (context, next) => {
-    const caseId = context.instance.id;
-
-    // get all relations with contacts for the case the deleted case
-    app.models.relationship
+  Case.getIsolatedContacts = function (caseId, callback) {
+    // get all relations with a contact
+    return app.models.relationship
       .rawFind({
         $or: [
           {
@@ -36,7 +34,7 @@ module.exports = function (Case) {
               })
               .then((contacts) => {
                 const contact = contacts[0];
-                // get all relations for the contact
+                // get all relations of the contact that are not with this case
                 app.models.relationship
                   .rawFind({
                     $or: [
@@ -54,29 +52,36 @@ module.exports = function (Case) {
                       }
                     ]
                   })
-                  .then((relationships) => {
-                    return cb(null, { contact: contact, isValid: !relationships.length });
-                  });
+                  .then((relationships) => cb(null, { contact: contact, isValid: !relationships.length }));
               })
               .catch((error) => cb(error));
           };
-        }), 10, (err, isolatedContacts) => {
+        }), 10, (err, possibleIsolatedContacts) => {
           if (err) {
-            return next(err);
+            return callback(err);
           }
-
-          // delete each isolated contact
-          // do not wait for this, just continue with the execution flow
-          isolatedContacts.forEach((isolatedContact) => {
-            if (isolatedContact.isValid) {
-              isolatedContact.contact.destroy();
-            }
-          });
-
-          // fire and forget
-          return next();
+          return callback(null, possibleIsolatedContacts.filter((entry) => entry.isValid));
         });
       });
+  };
+
+  Case.observe('after delete', (context, next) => {
+    Case.getIsolatedContacts(context.instance.id, (err, isolatedContacts) => {
+      if (err) {
+        return next(err);
+      }
+
+      // delete each isolated contact
+      // do not wait for this, just continue with the execution flow
+      isolatedContacts.forEach((isolatedContact) => {
+        if (isolatedContact.isValid) {
+          isolatedContact.contact.destroy();
+        }
+      });
+
+      // fire and forget
+      return next();
+    });
   });
 
   // set flag to not get controller

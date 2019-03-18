@@ -9466,4 +9466,21 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.countFollowUpsGroupedByContact = function (filter, callback) {
     app.models.followUp.getOrCountGroupedByPerson(this.id, filter, true, callback);
   };
+
+  /**
+   * Retrieve a case isolated contacts and count
+   * @param caseId
+   * @param callback
+   */
+  Outbreak.prototype.getCaseIsolatedContacts = function (caseId, callback) {
+    app.models.case.getIsolatedContacts(caseId, (err, isolatedContacts) => {
+      if (err) {
+        return callback(err);
+      }
+      return callback(null, {
+        count: isolatedContacts.length,
+        ids: isolatedContacts.map((entry) => entry.contact.id)
+      });
+    });
+  };
 };
