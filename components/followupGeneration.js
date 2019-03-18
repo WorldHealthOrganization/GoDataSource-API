@@ -31,12 +31,17 @@ const _createFollowUpEntry = function (props, contact) {
 };
 
 // get contacts that has inconclusive follow up period
-module.exports.getContactsWithInconclusiveLastFollowUp = function (startDate, outbreakId) {
+module.exports.getContactsWithInconclusiveLastFollowUp = function (startDate, outbreakId, allowedContactIds) {
   return App.models.contact
     .rawFind({
       $and: [
         {
           outbreakId: outbreakId
+        },
+        {
+          id: {
+            $in: allowedContactIds
+          }
         },
         {
           followUp: {
@@ -63,12 +68,17 @@ module.exports.getContactsWithInconclusiveLastFollowUp = function (startDate, ou
 };
 
 // get contacts that have follow up period between the passed start/end dates
-module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId) {
+module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId, allowedContactIds) {
   return App.models.contact
     .rawFind({
       $and: [
         {
           outbreakId: outbreakId
+        },
+        {
+          id: {
+            $in: allowedContactIds
+          }
         },
         {
           followUp: {

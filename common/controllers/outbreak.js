@@ -1013,11 +1013,73 @@ module.exports = function (Outbreak) {
     // retrieve list of contacts that are eligible for follow up generation
     // and those that have last follow up inconclusive
     let outbreakId = this.id;
-    Promise
-      .all([
-        FollowupGeneration.getContactsEligibleForFollowup(followupStartDate.toDate(), followupEndDate.toDate(), outbreakId),
-        FollowupGeneration.getContactsWithInconclusiveLastFollowUp(followupStartDate.toDate(), outbreakId)
-      ])
+
+    // retrieve cases that were discarded so we can exclude contacts that are related only to discarded contacts
+    app.models.case
+      // retrieve discarded cases
+      .rawFind({
+        outbreakId: outbreakId,
+        classification: {
+          $in: app.models.case.discardedCaseClassifications
+        }
+      }, { projection: { _id: 1 } })
+      // retrieve contacts for which we can generate follow-ups
+      .then((caseIds) => {
+        // retrieve list of discarded case ids
+        caseIds = (caseIds || []).map((caseData) => caseData.id);
+
+        // filter relationships
+        return app.models.relationship
+          .rawFind({
+            outbreakId: outbreakId,
+            $or: [{
+              'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+              'persons.0.id': {
+                $nin: caseIds
+              },
+              'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+            }, {
+              'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+              'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+              'persons.1.id': {
+                $nin: caseIds
+              }
+            }]
+          }, { projection: { persons: 1 } });
+      })
+      // retrieve contacts for which we need to generate follow-ups
+      .then((relationshipPersons) => {
+        // retrieve contact ids
+        const allowedContactIds = Array.from(new Set((relationshipPersons || []).map((relationshipData) => {
+          return relationshipData.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
+            relationshipData.persons[0].id :
+            relationshipData.persons[1].id;
+        })));
+
+        // there is no point in generating any follow-ups if no allowed contact were found
+        if (allowedContactIds.length < 1) {
+          return [
+            [],
+            []
+          ];
+        }
+
+        // retrieve contacts for which we can generate follow-ups
+        return Promise
+          .all([
+            FollowupGeneration.getContactsEligibleForFollowup(
+              followupStartDate.toDate(),
+              followupEndDate.toDate(),
+              outbreakId,
+              allowedContactIds
+            ),
+            FollowupGeneration.getContactsWithInconclusiveLastFollowUp(
+              followupStartDate.toDate(),
+              outbreakId,
+              allowedContactIds
+            )
+          ]);
+      })
       .then((contactLists) => {
         // merge the lists of contacts
         contactLists[0].push(...contactLists[1]);
@@ -1025,7 +1087,7 @@ module.exports = function (Outbreak) {
       })
       .then((contacts) => {
         if (!contacts.length) {
-          return [];
+          return 0;
         }
 
         // // get all teams and their locations to get eligible teams for each contact
