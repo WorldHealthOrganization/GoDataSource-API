@@ -40,9 +40,6 @@
     "gender": {
       "type": "string"
     },
-    "phoneNumber": {
-      "type": "string"
-    },
     "occupation": {
       "type": "string"
     },

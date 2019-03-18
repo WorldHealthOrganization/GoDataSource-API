@@ -56,7 +56,6 @@ module.exports = function (Person) {
     'dateBecomeContact': 'LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT',
     'dateOfInfection': 'LNG_CASE_FIELD_LABEL_DATE_OF_INFECTION',
     'dateOfOnset': 'LNG_CASE_FIELD_LABEL_DATE_OF_ONSET',
-    'phoneNumber': 'LNG_CASE_FIELD_LABEL_PHONE_NUMBER',
     'riskLevel': 'LNG_CASE_FIELD_LABEL_RISK_LEVEL',
     'riskReason': 'LNG_CASE_FIELD_LABEL_RISK_REASON',
     'outcomeId': 'LNG_CASE_FIELD_LABEL_OUTCOME_ID',
@@ -94,7 +93,6 @@ module.exports = function (Person) {
     'dateBecomeContact',
     'dateOfInfection',
     'dateOfOnset',
-    'phoneNumber',
     'riskLevel',
     'riskReason',
     'outcomeId',
@@ -903,12 +901,33 @@ module.exports = function (Person) {
       );
     }
 
-    // we check this only if phone number exists in the target
-    if (targetBody.phoneNumber && targetBody.gender) {
-      query.$or.push(buildRuleFilterPart({
-        phoneNumber: targetBody.phoneNumber,
-        gender: targetBody.gender
-      }));
+    // check against each address in the target body the following combination (phoneNumber, gender)
+    if (targetBody.addresses && targetBody.gender) {
+      targetBody.addresses.forEach((addr) => {
+        if (addr.phoneNumber) {
+          query.$or.push({
+            addresses: {
+              $elemMatch: {
+                $and: [
+                  {
+                    $and: [
+                      {
+                        phoneNumber: {
+                          $ne: null
+                        }
+                      },
+                      {
+                        phoneNumber: addr.phoneNumber
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            gender: targetBody.gender
+          });
+        }
+      });
     }
 
     // check against each document in the target body

@@ -623,8 +623,8 @@ module.exports = function (FollowUp) {
         if (split.length !== 2) {
           return;
         }
-        // make sure the order type is known
         split[1] = split[1].toUpperCase();
+        // make sure the order type is known
         if (!knownOrderTypes.hasOwnProperty(split[1])) {
           return;
         }

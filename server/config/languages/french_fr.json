@@ -603,7 +603,9 @@
       "LNG_ADDRESS_LABEL_NO_ADDRESSES": "Pas d'adresse",
       "LNG_ADDRESS_FIELD_LABEL_MANUAL_COORDINATES": "Coordinates are accurate",
       "LNG_ADDRESS_FIELD_LABEL_MANUAL_COORDINATES_DESCRIPTION": "",
-      "LNG_ADDRESS_FIELD_LABEL_DATE": "Valid until"
+      "LNG_ADDRESS_FIELD_LABEL_DATE": "Valid until",
+      "LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER": "Numéro de téléphone",
+      "LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER_DESCRIPTION": ""
     },
     "uiQuestionnaire": {
       "LNG_QUESTIONNAIRE_BUTTON_BROWSE": "Browse",

@@ -47,6 +47,9 @@
     "date": {
       "type": "date",
       "description": "Valid until date"
+    },
+    "phoneNumber": {
+      "type": "string"
     }
   },
   "validations": [],
