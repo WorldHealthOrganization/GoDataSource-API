@@ -1512,6 +1512,12 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "getCaseIsolatedContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "exportDailyContactFollowUpForm"
     }
   ],
   "methods": {
@@ -6863,6 +6869,47 @@
       "http": {
         "verb": "get",
         "path": "/cases/per-period-per-contact-status/count"
+      }
+    },
+    "prototype.exportDailyContactFollowUpForm": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export pdf containing daily follow up form",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/export-daily-follow-up-form"
       }
     }
   }

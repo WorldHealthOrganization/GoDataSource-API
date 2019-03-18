@@ -9729,4 +9729,215 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Export list of contacts where each contact has a page with follow up questionnaire and answers
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.exportDailyContactFollowUpForm = function (filter, callback) {
+    const languageId = options.remotingContext.req.authData.user.languageId;
+
+    // get the latest date of contact for the current outbreak
+    app.models.relationship.rawFind(
+      {
+        outbreakId: this.id
+      },
+      {
+        order: [
+          'contactDate DESC'
+        ],
+        limit: 1
+      })
+      .then((relationships) => {
+        if (!relationships.length) {
+          return callback();
+        }
+        const lastContactDate = relationships[0].contactDate;
+
+        // calculate end day of follow up by taking the last contact day and adding the outbreak period of follow up to it
+        const lastFollowUpDay = null;
+
+        // get list of contacts based on the filter passed on request
+        // pre-filter using related data (case, contact)
+        app.models.contact
+          .preFilterForOutbreak(this, filter)
+          // find contacts using filter
+          .then(filter => app.models.contact.find(filter))
+          .then(contacts => {
+            // get the ids of contacts
+            const ids = contacts.map(c => c.id);
+
+            // get all follow ups belonging to any of the contacts that matched the filter
+            const followUpsFilter = app.utils.remote.convertLoopbackFilterToMongo(
+              {
+                $and: [
+                  // make sure we're only retrieving follow ups from the current outbreak
+                  // and for the contacts desired
+                  {
+                    outbreakId: this.id,
+                    personId: {
+                      $in: ids
+                    },
+                    $and: [
+                      {
+                        date: {
+                          $lte: lastFollowUpDay
+                        }
+                      },
+                      {
+                        date: {
+                          $gt: lastContactDate
+                        }
+                      }
+
+                    ]
+                  },
+                  // retrieve only non-deleted records
+                  {
+                    $or: [
+                      {
+                        deleted: false
+                      },
+                      {
+                        deleted: {
+                          $eq: null
+                        }
+                      }
+                    ]
+                  }
+                ]
+              });
+
+            // mongodb aggregate pipeline
+            const aggregatePipeline = [
+              // match conditions for followups
+              {
+                $match: parsedFilter
+              },
+              // group follow ups by person id
+              // structure after grouping (_id -> personId, followUps -> list of follow ups)
+              {
+                $group : {
+                  _id : '$personId',
+                  followUps: {
+                    $push: '$$ROOT'
+                  }
+                }
+              }
+            ];
+
+            // run the aggregation against database
+            const cursor = app.dataSources.mongoDb.connector.collection('followUp').aggregate(aggregatePipeline);
+
+            // get the records from the cursor
+            cursor
+              .toArray()
+              .then(records => {
+                // replace _id with id, to be consistent
+                records.forEach((record) => {
+                  if (record.contact) {
+                    record.contact.id = record.contact._id;
+                    delete record.contact._id;
+                  }
+                  if (Array.isArray(record.followUps)) {
+                    record.followUps.forEach((followUp) => {
+                      followUp.id = followUp._id;
+                      delete followUp._id;
+                    });
+                  }
+                });
+              });
+          });
+      })
+      .catch(callback);
+
+    app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
+      app.models.contact.find(filter)
+        .then((contacts) => {
+          // Filter contacts with no follow-ups
+          contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
+
+          // Create the document
+          const doc = pdfUtils.createPdfDoc({
+            fontSize: 6,
+            layout: 'landscape',
+            margin: 20,
+            lineGap: 0,
+            wordSpacing: 0,
+            characterSpacing: 0,
+            paragraphGap: 0
+          });
+
+          // add a top margin of 2 lines for each page
+          doc.on('pageAdded', () => {
+            doc.moveDown(2);
+          });
+
+          // set margin top for first page here, to not change the entire createPdfDoc functionality
+          doc.moveDown(2);
+
+          contacts.forEach((contact, index) => {
+            // Initiate the data
+            let data = [{
+              description: 'Date'
+            }];
+
+            // Initiate the headers
+            let headers = [{
+              id: 'description',
+              header: ''
+            }];
+
+            // Add a header for each day of the follow-up period
+            for (let i = 1; i <= self.periodOfFollowup; i++) {
+              headers.push({
+                id: 'index' + i,
+                header: i
+              });
+
+              // Add the dates of each follow-up
+              data[0]['index' + i] = moment(date).subtract((contact.followUps[0].index - i), 'days').format('YYYY-MM-DD');
+            }
+
+            // Add all questions as rows
+            self.contactFollowUpTemplate.forEach((question) => {
+              data.push({description: question.text});
+              contact.followUps.forEach((followUp) => {
+                data[data.length - 1]['index' + followUp.index] = genericHelpers.translateQuestionAnswers(question, followUp.questionnaireAnswers[question.variable], dictionary);
+              });
+            });
+
+            // Add additional information at the start of each page
+            pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'), 14);
+            doc.text(`${dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_GENDER')}: ${dictionary.getTranslation(contact.gender)}`);
+            doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')}: ${contact.age.years} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${contact.age.months} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`);
+            doc.text(`${dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE')}: ${moment(contact.dateOfLastContact).format('YYYY-MM-DD')}`);
+            doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_ADDRESSES')}: ${app.models.address.getHumanReadableAddress(app.models.person.getCurrentAddress(contact))}`);
+            doc.text(`${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER')}: ${contact.phoneNumber}`);
+            doc.moveDown(2);
+
+            // Add the symptoms/follow-up table
+            pdfUtils.createTableInPDFDocument(headers, data, doc);
+
+            // Add a new page for every contact
+            if (index < contacts.length - 1) {
+              doc.addPage();
+            }
+          });
+
+          // Finish the document
+          doc.end();
+
+          // Export the file
+          genericHelpers.streamToBuffer(doc, (err, buffer) => {
+            if (err) {
+              callback(err);
+            } else {
+              app.utils.remote.helpers.offerFileToDownload(buffer, 'application/pdf', 'Daily Contact Follow-up.pdf', callback);
+            }
+          });
+        });
+    });
+  };
 };
