@@ -939,6 +939,7 @@ module.exports = function (Outbreak) {
           caseMap[caseRecord.id] = caseRecord;
           caseRecord.relationships = [];
         });
+
         // find relationships for those cases
         return app.models.relationship
           .rawFind({
@@ -979,7 +980,7 @@ module.exports = function (Outbreak) {
                   inq: relationshipIds
                 }
               }
-            }, filter || {}), countOnly, callback);
+            }, filter || {}), countOnly, false, callback);
           });
       })
       .catch(callback);
