@@ -9465,6 +9465,15 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Get bars cot data
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.getBarsTransmissionChains = function (filter, callback) {
+    app.models.case.getBarsTransmissionChainsData(this.id, filter, callback);
+  };
+
+  /**
    * Retrieve a case isolated contacts and count
    * @param caseId
    * @param callback

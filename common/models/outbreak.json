@@ -969,6 +969,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_report",
+      "permission": "ALLOW",
+      "property": "getBarsTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "exportFilteredRelationships"
@@ -2663,6 +2669,105 @@
       "http": {
         "verb": "get",
         "path": "/cases/export"
+      }
+    },
+    "prototype.getBarsTransmissionChains": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "cases": [
+            {
+              "type": {
+                "id": {
+                  "type": "string",
+                  "description": "Case UID"
+                },
+                "visualId": {
+                  "type": "string",
+                  "description": "Case visual ID"
+                },
+                "dateOfOnset": {
+                  "type": "date",
+                  "description": "Case dateOfOnset"
+                },
+                "addresses": [
+                  {
+                    "type": "address",
+                    "description": "Case addresses ( sorted by date asc, current address should be last since it doesn't have a date )"
+                  }
+                ],
+                "dates": [
+                  {
+                    "type": {
+                      "startDate": {
+                        "type": "date"
+                      },
+                      "endDate": {
+                        "type": "date"
+                      },
+                      "typeId": {
+                        "type": "string",
+                        "description": "Date type ( isolation / hospitalization ... )"
+                      },
+                      "locationId": {
+                        "type": "string",
+                        "description": "Date location UID"
+                      }
+                    }
+                  }
+                ],
+                "labResults": [
+                  {
+                    "type": {
+                      "dateOfResult": {
+                        "type": "date"
+                      },
+                      "testType": {
+                        "type": "string"
+                      },
+                      "result": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ],
+                "lastGraphDate": {
+                  "type": "date",
+                  "description": "Most recent date between any type dates, lab results dateOfResult and dateOfOnset"
+                }
+              }
+            }
+          ],
+          "relationships": {
+            "type": {
+              "uidSourceCase": [
+                {
+                  "type": "string",
+                  "description": "Target case UID"
+                }
+              ]
+            }
+          },
+          "minGraphDate": {
+            "type": "date",
+            "description": "Oldest date of onset => min(dateOfOnset)"
+          },
+          "maxGraphDate": {
+            "type": "date",
+            "description": "Most recent 'lastGraphDate' => max(lastGraphDate)"
+          }
+        }
+      ],
+      "description": "Bars graph data",
+      "http": {
+        "verb": "get",
+        "path": "/cases/bars-transmission-chains"
       }
     },
     "prototype.exportFilteredRelationships": {

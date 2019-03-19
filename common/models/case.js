@@ -720,4 +720,14 @@ module.exports = function (Case) {
         return Object.assign(filter, {where: casesQuery});
       });
   };
+
+  /**
+   * Get Case transmission chains data
+   * @param outbreakId
+   * @param filter
+   * @param callback
+   */
+  Case.getBarsTransmissionChainsData = function (outbreakId, filter, callback) {
+    callback(null, {test: true});
+  };
 };
