@@ -4631,7 +4631,9 @@ module.exports = function (Outbreak) {
             results.forEach((person, caseIndex) => {
               // keep the initial data of the case (we currently use it to generate the QR code only)
               sanitizedCases[caseIndex] = {
-                rawData: person
+                rawData: person,
+                relationships: [],
+                labResults: []
               };
 
               // anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
@@ -4645,8 +4647,6 @@ module.exports = function (Outbreak) {
 
               // prepare the case's relationships for printing
               person.relationships.forEach((relationship, relationshipIndex) => {
-                sanitizedCases[caseIndex].relationships = [];
-
                 // extract the person with which the case has a relationship
                 let relationshipMember = _.find(relationship.people, (member) => {
                   return member.id !== person.id;
@@ -4680,8 +4680,6 @@ module.exports = function (Outbreak) {
 
               // prepare the case's lab results and lab results questionnaires for printing
               person.labResults.forEach((labResult, labIndex) => {
-                sanitizedCases[caseIndex].labResults = [];
-
                 // translate the values of the fields marked as reference data fields on the lab result model
                 app.utils.helpers.translateDataSetReferenceDataValues(labResult, models.labResult, dictionary);
 
@@ -4766,12 +4764,12 @@ module.exports = function (Outbreak) {
                   // display case details
                   pdfUtils.displayModelDetails(doc, sanitizedCase.data, true, caseDetailsTitle);
 
-                  // display case's relationships
-                  pdfUtils.displayPersonRelationships(doc, sanitizedCase.relationships, relationshipsTitle);
-
                   // display case investigation questionnaire
                   doc.addPage();
                   pdfUtils.createQuestionnaire(doc, caseQuestionnaire, true, caseQuestionnaireTitle);
+
+                  // display case's relationships
+                  pdfUtils.displayPersonRelationships(doc, sanitizedCase.relationships, relationshipsTitle);
 
                   // display lab results and questionnaires
                   pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedCase.labResults, labResultsTitle, labResultsQuestionnaireTitle);

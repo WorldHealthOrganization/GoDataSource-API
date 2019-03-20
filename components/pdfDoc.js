@@ -544,7 +544,7 @@ const displayPersonSectionsWithQuestionnaire = function (doc, sections, title, q
   if (sections && Array.isArray(sections)) {
     sections.forEach((section, index) => {
       doc.addPage();
-      displayModelDetails(doc, _.omit(section, 'questionnaire'), true, index === 0 ? title : null);
+      displayModelDetails(doc, _.omit(section, 'questionnaire'), true, title);
       if (section.questionnaire && section.questionnaire.length) {
         doc.addPage();
         createQuestionnaire(doc, section.questionnaire, true, questionnaireTitle);
