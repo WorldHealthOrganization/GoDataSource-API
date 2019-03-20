@@ -2682,7 +2682,7 @@
       "returns": {
         "arg": "data",
         "type": {
-          "cases": {
+          "casesMap": {
             "type": {
               "uidCase": {
                 "type": {
@@ -2747,6 +2747,9 @@
               }
             }
           },
+          "casesOrder": [
+            "string"
+          ],
           "relationships": {
             "type": {
               "uidSourceCase": [
