@@ -952,6 +952,7 @@ module.exports = function (Case) {
             );
 
           // add response case
+          delete caseData._id;
           response.cases[caseData.id] = caseData;
         });
 
