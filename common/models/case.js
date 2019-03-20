@@ -912,25 +912,48 @@ module.exports = function (Case) {
 
           // determine lastGraphDate starting with lab results
           if (caseData.labResults) {
-            (caseData.labResults || []).forEach((lab) => {
-              if (lab.dateOfResult) {
-                const dateOfResult = moment(lab.dateOfResult);
-                caseData.lastGraphDate = dateOfResult.isAfter(caseData.lastGraphDate) ?
-                  dateOfResult :
-                  caseData.lastGraphDate;
+            const labResults = caseData.labResults || [];
+            caseData.labResults = [];
+            labResults.forEach((lab) => {
+              // ignore lab results without result date
+              if (!lab.dateOfResult) {
+                return;
               }
+
+              // determine lastGraphDate
+              const dateOfResult = moment(lab.dateOfResult);
+              caseData.lastGraphDate = dateOfResult.isAfter(caseData.lastGraphDate) ?
+                dateOfResult :
+                caseData.lastGraphDate;
+
+              // since we have dateOfResult, lets add it to the list
+              caseData.labResults.push(lab);
             });
           }
 
           // check if there is a date range more recent
           if (caseData.dateRanges) {
-            (caseData.dateRanges || []).forEach((dateRange) => {
-              if (dateRange.endDate) {
-                const endDate = moment(dateRange.endDate);
-                caseData.lastGraphDate = endDate.isAfter(caseData.lastGraphDate) ?
-                  endDate :
-                  caseData.lastGraphDate;
+            const dateRanges = caseData.dateRanges || [];
+            caseData.dateRanges = [];
+            dateRanges.forEach((dateRange) => {
+              // ignore date range without at least one of the dates ( start / end )
+              if (!dateRange.endDate && !dateRange.startDate) {
+                return;
               }
+
+              // make sure we have start date
+              dateRange.startDate = dateRange.startDate ? moment(dateRange.startDate) : moment(caseData.dateOfOnset);
+
+              // if we don't have an end date then we need to set the current date since this is still in progress
+              dateRange.endDate = dateRange.endDate ? moment(dateRange.endDate) : moment();
+
+              // determine last graph date
+              caseData.lastGraphDate = dateRange.endDate.isAfter(caseData.lastGraphDate) ?
+                dateRange.endDate :
+                caseData.lastGraphDate;
+
+              // since we have either start date or end date we can use it for the graph
+              caseData.dateRanges.push(dateRange);
             });
           }
 
