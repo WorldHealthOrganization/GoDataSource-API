@@ -733,7 +733,7 @@ module.exports = function (FollowUp) {
         // get the records from the cursor
         cursor
           .toArray()
-          .then(records => {
+          .then((records) => {
             // do not send the results back, just the count
             if (countOnly) {
               return callback(null, {
