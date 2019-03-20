@@ -4534,11 +4534,21 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.caseDossier = function (cases, anonymousFields, options, callback) {
-    const labResultsQuestionnaire = this.labResultsTemplate.toJSON();
-    let questions = [];
-    let tmpDir = tmp.dirSync({unsafeCleanup: true});
-    let tmpDirName = tmpDir.name;
-    // Get all requested cases, including their relationships and labResults
+    // reference shortcuts
+    const models = app.models;
+
+    // create a temporary directory to store generated pdfs that are included in the final archive
+    const tmpDir = tmp.dirSync({ unsafeCleanup: true });
+    const tmpDirName = tmpDir.name;
+
+    // current user language
+    const languageId = options.remotingContext.req.authData.user.languageId;
+
+    // questionnaires to be included in pdfs
+    const labResultsTemplate = this.labResultsTemplate.toJSON();
+    const caseInvestigationTemplate = this.caseInvestigationTemplate.toJSON();
+
+    // get all requested cases, including their relationships and lab results
     this.__get__cases({
       where: {
         id: {
@@ -4558,34 +4568,53 @@ module.exports = function (Outbreak) {
           relation: 'labResults'
         }
       ]
-    }, function (error, results) {
-      if (error) {
-        return callback(error);
+    }, (err, results) => {
+      if (err) {
+        return callback(err);
       }
 
-      const pdfUtils = app.utils.pdfDoc;
-      const languageId = options.remotingContext.req.authData.user.languageId;
-      let sanitizedCases = [];
+      const sanitizedCases = [];
 
-      // An array with all the expected date type fields found in an extended case model (including relationships and labResults)
-      const caseDossierDateFields = ['dob', 'dateRanges[].typeId', 'dateRanges[].startDate', 'dateRanges[].endDate', 'dateRanges[].centerName',
-        'addresses[].date', 'dateBecomeCase', 'dateOfInfection', 'dateOfOnset', 'outcomeId', 'dateOfOutcome', 'safeBurial', 'dateOfBurial',
-        'relationships[].contactDate', 'relationships[].people[].dob', 'relationships[].people[].addresses[].date', 'labResults[].dateSampleTaken',
-        'labResults[].dateSampleDelivered', 'labResults[].dateTesting', 'labResults[].dateOfResult'
+      // an array with all the expected date type fields found in an extended case model (including relationships and labResults)
+      const caseDossierDateFields = [
+        'dob',
+        'dateRanges[].typeId',
+        'dateRanges[].startDate',
+        'dateRanges[].endDate',
+        'dateRanges[].centerName',
+        'addresses[].date',
+        'dateBecomeCase',
+        'dateOfInfection',
+        'dateOfOnset',
+        'outcomeId',
+        'dateOfOutcome',
+        'safeBurial',
+        'dateOfBurial',
+        'relationships[].contactDate',
+        'relationships[].people[].dob',
+        'relationships[].people[].addresses[].date',
+        'labResults[].dateSampleTaken',
+        'labResults[].dateSampleDelivered',
+        'labResults[].dateTesting',
+        'labResults[].dateOfResult'
       ];
 
-      // Get the language dictionary
-      app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
-        // handle errors
-        if (error) {
-          return callback(error);
+      // get the language dictionary
+      app.models.language.getLanguageDictionary(languageId, (err, dictionary) => {
+        if (err) {
+          return callback(err);
         }
 
-        // Transform all DB models into JSONs for better handling
-        // We call the variable "person" only because "case" is a javascript reserved word
+        // translate lab results/case investigation questionnaires
+        const labResultsQuestionnaire = Outbreak.helpers.parseTemplateQuestions(labResultsTemplate, dictionary);
+        const caseInvestigationQuestionnaire = Outbreak.helpers.parseTemplateQuestions(caseInvestigationTemplate, dictionary);
+
+        // transform all DB models into JSONs for better handling
+        // we call the variable "person" only because "case" is a javascript reserved word
         results.forEach((person, caseIndex) => {
           results[caseIndex] = person.toJSON();
-          // Since relationships is a custom relation, the relationships collection is included differently in the case model,
+
+          // since relationships is a custom relation, the relationships collection is included differently in the case model,
           // and not converted by the initial toJSON method.
           person.relationships.forEach((relationship, relationshipIndex) => {
             person.relationships[relationshipIndex] = relationship.toJSON();
@@ -4595,8 +4624,8 @@ module.exports = function (Outbreak) {
           });
         });
 
-        // Replace all foreign keys with readable data
-        genericHelpers.resolveModelForeignKeys(app, app.models.case, results, dictionary)
+        // replace all foreign keys with readable data
+        genericHelpers.resolveModelForeignKeys(app, models.case, results, dictionary)
           .then((results) => {
             // transform the model into a simple JSON
             results.forEach((person, caseIndex) => {
@@ -4605,15 +4634,16 @@ module.exports = function (Outbreak) {
                 rawData: person
               };
 
-              // Anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
+              // anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
               // and formatting date type fields
               if (anonymousFields) {
                 app.utils.anonymizeDatasetFields.anonymize(person, anonymousFields);
               }
+
               app.utils.helpers.formatDateFields(person, caseDossierDateFields);
               app.utils.helpers.formatUndefinedValues(person);
 
-              // Prepare the case's relationships for printing
+              // prepare the case's relationships for printing
               person.relationships.forEach((relationship, relationshipIndex) => {
                 sanitizedCases[caseIndex].relationships = [];
 
@@ -4621,61 +4651,78 @@ module.exports = function (Outbreak) {
                 let relationshipMember = _.find(relationship.people, (member) => {
                   return member.id !== person.id;
                 });
+
                 // if relationship member was not found
                 if (!relationshipMember) {
                   // stop here (invalid relationship)
                   return;
                 }
-                // Translate the values of the fields marked as reference data fields on the case/contact model
-                app.utils.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models[app.models.person.typeToModelMap[relationshipMember.type]], dictionary);
 
-                // Assign the person to the relationship to be displayed as part of it
+                // translate the values of the fields marked as reference data fields on the case/contact model
+                app.utils.helpers.translateDataSetReferenceDataValues(
+                  relationshipMember,
+                  app.models[models.person.typeToModelMap[relationshipMember.type]],
+                  dictionary
+                );
+
+                // assign the person to the relationship to be displayed as part of it
                 relationship.person = relationshipMember;
 
-                // Translate the values of the fields marked as reference data fields on the relationship model
-                app.utils.helpers.translateDataSetReferenceDataValues(relationship, app.models.relationship, dictionary);
+                // translate the values of the fields marked as reference data fields on the relationship model
+                app.utils.helpers.translateDataSetReferenceDataValues(relationship, models.relationship, dictionary);
 
-                // Translate all remaining keys of the relationship model
-                relationship = app.utils.helpers.translateFieldLabels(app, relationship, app.models.relationship.modelName, dictionary);
+                // translate all remaining keys of the relationship model
+                relationship = app.utils.helpers.translateFieldLabels(app, relationship, models.relationship.modelName, dictionary);
 
-                // Add the sanitized relationship to the object to be printed
+                // add the sanitized relationship to the object to be printed
                 sanitizedCases[caseIndex].relationships[relationshipIndex] = relationship;
               });
 
-              // Prepare the  de case's lab results and lab results questionnaires for printing.
+              // prepare the case's lab results and lab results questionnaires for printing
               person.labResults.forEach((labResult, labIndex) => {
                 sanitizedCases[caseIndex].labResults = [];
 
-                // Translate the values of the fields marked as reference data fields on the lab result model
-                app.utils.helpers.translateDataSetReferenceDataValues(labResult, app.models.labResult, dictionary);
+                // translate the values of the fields marked as reference data fields on the lab result model
+                app.utils.helpers.translateDataSetReferenceDataValues(labResult, models.labResult, dictionary);
 
-                // Translate the questions and the answers from the lab results
-                questions = Outbreak.helpers.parseTemplateQuestions(labResultsQuestionnaire, dictionary);
+                // clone the questionnaires, as the function below is actually altering them
+                const labResultsQuestions = _.cloneDeep(labResultsQuestionnaire);
 
-                // Since we are presenting all the answers, mark the one that was selected, for each question
-                Outbreak.helpers.prepareQuestionsForPrint(labResult.questionnaireAnswers, questions);
+                // since we are presenting all the answers, mark the one that was selected, for each question
+                Outbreak.helpers.prepareQuestionsForPrint(labResult.questionnaireAnswers, labResultsQuestions);
 
-                // Translate the remaining fields on the lab result model
-                labResult = app.utils.helpers.translateFieldLabels(app, labResult, app.models.labResult.modelName, dictionary);
+                // translate the remaining fields on the lab result model
+                labResult = app.utils.helpers.translateFieldLabels(app, labResult, models.labResult.modelName, dictionary);
 
-                // Add the questionnaire separately (after field translations) because it will be displayed separately
-                labResult.questionnaire = questions;
+                // add the questionnaire separately (after field translations) because it will be displayed separately
+                labResult.questionnaire = labResultsQuestions;
 
-                // Add the sanitized lab results to the object to be printed
+                // add the sanitized lab results to the object to be printed
                 sanitizedCases[caseIndex].labResults[labIndex] = labResult;
               });
 
-              // Translate all remaining keys
-              person = app.utils.helpers.translateFieldLabels(app, person, app.models.case.modelName, dictionary);
+              // clone the questionnaires, as the function below is actually altering them
+              const caseInvestigationQuestions = _.cloneDeep(caseInvestigationQuestionnaire);
 
-              // Add the sanitized case to the object to be printed
+              // since we are presenting all the answers, mark the one that was selected, for each question
+              Outbreak.helpers.prepareQuestionsForPrint(person.questionnaireAnswers || {}, caseInvestigationQuestions);
+
+              // translate all remaining keys
+              person = app.utils.helpers.translateFieldLabels(app, person, models.case.modelName, dictionary);
+
+              // add the questionnaire separately (after field translations) because it will be displayed separately
+              person.questionnaire = caseInvestigationQuestions;
+
+              // add the sanitized case to the object to be printed
               sanitizedCases[caseIndex].data = person;
             });
 
-            // Translate the pdf section titles
+            // translate the pdf section titles
+            const caseDetailsTitle = dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS');
+            const caseQuestionnaireTitle = dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE');
             const relationshipsTitle = dictionary.getTranslation('LNG_PAGE_ACTION_RELATIONSHIPS');
             const labResultsTitle = dictionary.getTranslation('LNG_PAGE_LIST_CASE_LAB_RESULTS_TITLE');
-            const questionnaireTitle = dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE');
+            const labResultsQuestionnaireTitle = dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE');
 
             let pdfPromises = [];
 
@@ -4712,9 +4759,22 @@ module.exports = function (Outbreak) {
                   // set a listener on pageAdded to add the QR code to every new page
                   doc.on('pageAdded', addQrCode);
 
-                  pdfUtils.displayModelDetails(doc, sanitizedCase.data, true, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
+                  // remove the questionnaire from case printing model
+                  const caseQuestionnaire = sanitizedCase.data.questionnaire;
+                  delete sanitizedCase.data.questionnaire;
+
+                  // display case details
+                  pdfUtils.displayModelDetails(doc, sanitizedCase.data, true, caseDetailsTitle);
+
+                  // display case's relationships
                   pdfUtils.displayPersonRelationships(doc, sanitizedCase.relationships, relationshipsTitle);
-                  pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedCase.labResults, labResultsTitle, questionnaireTitle);
+
+                  // display case investigation questionnaire
+                  doc.addPage();
+                  pdfUtils.createQuestionnaire(doc, caseQuestionnaire, true, caseQuestionnaireTitle);
+
+                  // display lab results and questionnaires
+                  pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedCase.labResults, labResultsTitle, labResultsQuestionnaireTitle);
 
                   // add an additional empty page that contains only the QR code as per requirements
                   doc.addPage();

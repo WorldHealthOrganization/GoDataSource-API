@@ -538,6 +538,7 @@ const displayPersonRelationships = function (doc, relationships, title) {
  * @param doc
  * @param sections
  * @param title
+ * @param questionnaireTitle
  */
 const displayPersonSectionsWithQuestionnaire = function (doc, sections, title, questionnaireTitle) {
   if (sections && Array.isArray(sections)) {
