@@ -743,16 +743,13 @@ module.exports = function (Case) {
 
           // retrieve only non-deleted records
           {
-            $or: [
-              {
-                deleted: false
-              },
-              {
-                deleted: {
-                  $eq: null
-                }
+            $or: [{
+              deleted: false
+            }, {
+              deleted: {
+                $eq: null
               }
-            ]
+            }]
           },
 
           // filter only cases
@@ -821,10 +818,22 @@ module.exports = function (Case) {
           // lab results fields
           labResults: {
             $map: {
-              input: '$labResults',
+              input: {
+                $filter: {
+                  input: '$labResults',
+                  as: 'lab',
+                  cond: {
+                    $or: [{
+                      $eq: ['$$lab.deleted', false]
+                    }, {
+                      $eq: ['$$lab.deleted', null]
+                    }]
+                  }
+                }
+              },
               as: 'lab',
               in: {
-                dateOfResult: '$$lab.dateOfResult',
+                dateSampleTaken: '$$lab.dateSampleTaken',
                 testType: '$$lab.testType',
                 result: '$$lab.result'
               }
@@ -834,7 +843,19 @@ module.exports = function (Case) {
           // relationship fields
           relationships: {
             $map: {
-              input: '$relationships',
+              input: {
+                $filter: {
+                  input: '$relationships',
+                  as: 'rel',
+                  cond: {
+                    $or: [{
+                      $eq: ['$$rel.deleted', false]
+                    }, {
+                      $eq: ['$$rel.deleted', null]
+                    }]
+                  }
+                }
+              },
               as: 'rel',
               in: {
                 persons: '$$rel.persons'
@@ -854,9 +875,25 @@ module.exports = function (Case) {
     cursor
       .toArray()
       .then((records) => {
+        // sort by date method
+        const compareDates = (date1, date2) => {
+          // compare missing dates & dates
+          if (!date1 && !date2) {
+            return 0;
+          } else if (!date1) {
+            return 1;
+          } else if (!date2) {
+            return -1;
+          } else {
+            // compare dates
+            return moment(date1).diff(moment(date2));
+          }
+        };
+
         // sanitize records & determine other things :)
         const response = {
-          cases: {},
+          casesMap: {},
+          casesOrder: [],
           relationships: {},
           minGraphDate: null,
           maxGraphDate: null
@@ -866,16 +903,7 @@ module.exports = function (Case) {
           if (caseData.addresses) {
             caseData.addresses.sort((address1, address2) => {
               // compare missing dates & dates
-              if (!address1.date && !address2.date) {
-                return 0;
-              } else if (!address1.date) {
-                return 1;
-              } else if (!address2.date) {
-                return -1;
-              } else {
-                // compare dates
-                return moment(address1.date).diff(moment(address2.date));
-              }
+              return compareDates(address1.date, address2.date);
             });
           }
 
@@ -907,7 +935,7 @@ module.exports = function (Case) {
           }
 
           // determine lastGraphDate
-          // - should be the most recent date from case.dateOfOnset / case.dateRanges.endDate / case.labResults.dateOfResult
+          // - should be the most recent date from case.dateOfOnset / case.dateRanges.endDate / case.labResults.dateSampleTaken
           caseData.lastGraphDate = moment(caseData.dateOfOnset);
 
           // determine lastGraphDate starting with lab results
@@ -916,17 +944,17 @@ module.exports = function (Case) {
             caseData.labResults = [];
             labResults.forEach((lab) => {
               // ignore lab results without result date
-              if (!lab.dateOfResult) {
+              if (!lab.dateSampleTaken) {
                 return;
               }
 
               // determine lastGraphDate
-              const dateOfResult = moment(lab.dateOfResult);
-              caseData.lastGraphDate = dateOfResult.isAfter(caseData.lastGraphDate) ?
-                dateOfResult :
+              const dateSampleTaken = moment(lab.dateSampleTaken);
+              caseData.lastGraphDate = dateSampleTaken.isAfter(caseData.lastGraphDate) ?
+                dateSampleTaken :
                 caseData.lastGraphDate;
 
-              // since we have dateOfResult, lets add it to the list
+              // since we have dateSampleTaken, lets add it to the list
               caseData.labResults.push(lab);
             });
           }
@@ -976,8 +1004,17 @@ module.exports = function (Case) {
 
           // add response case
           delete caseData._id;
-          response.cases[caseData.id] = caseData;
+          response.casesMap[caseData.id] = caseData;
         });
+
+        //sort cases
+        response.casesOrder = Object
+          .values(response.casesMap)
+          .sort((case1, case2) => {
+            // compare missing dates & dates
+            return compareDates(case1.dateOfOnset, case2.dateOfOnset);
+          })
+          .map((caseData) => caseData.id);
 
         // return results
         return callback(
