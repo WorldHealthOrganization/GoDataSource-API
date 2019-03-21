@@ -671,7 +671,7 @@ module.exports = function (FollowUp) {
           // group follow ups by person id
           // structure after grouping (_id -> personId, followUps -> list of follow ups)
           {
-            $group : {
+            $group: {
               _id : '$personId',
               followUps: {
                 $push: '$$ROOT'
@@ -702,6 +702,21 @@ module.exports = function (FollowUp) {
                   ]
                 },
                 followUps: 1
+              }
+            },
+            // discard follow ups with contacts soft deleted
+            {
+              $match: {
+                $or: [
+                  {
+                    'contact.deleted': false
+                  },
+                  {
+                    'contact.deleted': {
+                      $eq: null
+                    }
+                  }
+                ]
               }
             }
           );
