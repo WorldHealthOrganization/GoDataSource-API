@@ -1417,13 +1417,29 @@ module.exports = function (Outbreak) {
         }
       });
 
-      caseModel.addresses = [models.address.fieldLabelsMap];
-      caseModel.documents = [models.document.fieldLabelsMap];
+      // translate case investigation labels
+      const caseSections = {};
+
+      const caseTemplateLabels = models.case.caseInvestigationSectionsFieldLabels;
+      for (const section in caseTemplateLabels) {
+        caseSections[section] = {
+          title: dictionary.getTranslation(caseTemplateLabels[section].title),
+          labels: caseTemplateLabels[section].labels.map((label) => dictionary.getTranslation(label))
+        };
+        if (section === 'addresses') {
+          caseSections[section].additionalTitles = [
+            dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'),
+            dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_OTHER')
+          ];
+        }
+
+        if (section === 'addresses' || section === 'documents') {
+          caseSections[section].copies = 2;
+        }
+      }
 
       contactModel.addresses = [models.address.fieldLabelsMap];
       contactModel.documents = [models.document.fieldLabelsMap];
-
-      let caseFields = genericHelpers.translateFieldLabels(app, caseModel, models.case.modelName, dictionary);
       let contactFields = genericHelpers.translateFieldLabels(app, contactModel, models.contact.modelName, dictionary);
 
       // remove not needed properties from lab result/relationship field maps
@@ -1444,9 +1460,12 @@ module.exports = function (Outbreak) {
       for (let i = 0; i < copies; i++) {
         pdfRequests.push(
           (callback) => {
+            const docFontSize = 9;
+            const qrFontSize = 6;
+
             // generate pdf document
             let doc = pdfUtils.createPdfDoc({
-              fontSize: 7,
+              fontSize: docFontSize,
               layout: 'portrait',
               lineGap: 0,
               wordSpacing: 0,
@@ -1461,15 +1480,21 @@ module.exports = function (Outbreak) {
             // add functionality whenever a new page is added
             doc.on('pageAdded', () => {
               doc.moveDown(2);
+              // we use a lower font size for QR, to not break the line
+              doc.fontSize(qrFontSize);
               app.utils.qrCode.addPersonQRCode(doc, outbreakInstance.id, 'case', foundCase || generatedId);
+              doc.fontSize(docFontSize);
             });
 
             // Apply previous code for the first page which is already added.
             doc.moveDown(2);
+            // we use a lower font size for QR, to not break the line
+            doc.fontSize(qrFontSize);
             app.utils.qrCode.addPersonQRCode(doc, outbreakInstance.id, 'case', foundCase || generatedId);
+            doc.fontSize(docFontSize);
 
             // add case profile fields (empty)
-            pdfUtils.displayModelDetails(doc, caseFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
+            pdfUtils.displayCaseInvestigation(doc, caseSections, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
 
             // add case investigation questionnaire into the pdf in a separate page (only if the questionnaire exists)
             if (caseQuestions && caseQuestions.length) {

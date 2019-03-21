@@ -705,6 +705,61 @@ const displayValue = function (value) {
   return (typeof value === 'undefined' || value === null) ? '' : value;
 };
 
+/**
+ * Display a model's fields
+ * Do not display actual values, only field names
+ * DisplayValues flag is also supported, if true it will display the actual field values
+ * This flag is needed to create empty profile pages
+ * Optionally a title can be added
+ * @param doc
+ * @param data
+ * @param displayValues
+ * @param title
+ * @param numberOfEmptyEntries
+ */
+const displayCaseInvestigation = function (doc, data, displayValues, title, numberOfEmptyEntries) {
+  // add page title
+  if (title) {
+    addTitle(doc, title, 14);
+    doc.moveDown();
+  }
+
+  // cache initial document margin
+  doc.x = doc.x + 20;
+  const initialXMargin = doc.x;
+
+  /**
+   * Display labels in pdf
+   * @param labels
+   * @param additionalTitles
+   * @param copies
+   */
+  const displayLabels = (labels, additionalTitles = [], copies) => {
+    if (copies) {
+      for (let i = 0; i < copies; i++) {
+        labels.forEach((label, index) => {
+          if (additionalTitles[index]) {
+            addTitle(doc, additionalTitles[index], 10);
+          }
+          doc.text(`${label} ${' '.repeat(10)} ${'_'.repeat(30)}`, initialXMargin + 20).moveDown();
+        });
+        doc.moveDown();
+      }
+    }
+  };
+
+  // display each field on a row
+  Object.keys(data).forEach((section) => {
+    // add section title
+    addTitle(doc, section, 12);
+
+    // display labels per section
+    displayLabels(data[section].labels, data[section].additionalTitles || [], data[section].copies);
+  });
+
+  return doc;
+};
+
 module.exports = {
   createPDFList: createPDFList,
   createImageDoc: createImageDoc,
@@ -717,5 +772,6 @@ module.exports = {
   addTitle: addTitle,
   MIME_TYPE: MIME_TYPE,
   downloadPdfDoc: downloadPdfDoc,
-  displayValue: displayValue
+  displayValue: displayValue,
+  displayCaseInvestigation: displayCaseInvestigation
 };
