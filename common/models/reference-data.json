@@ -73,6 +73,9 @@
       "type": "boolean",
       "required": true,
       "default": true
+    },
+    "order": {
+      "type": "number"
     }
   },
   "validations": [],
