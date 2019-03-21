@@ -75,8 +75,7 @@
       "default": true
     },
     "order": {
-      "type": "number",
-      "required": true
+      "type": "number"
     }
   },
   "validations": [],
