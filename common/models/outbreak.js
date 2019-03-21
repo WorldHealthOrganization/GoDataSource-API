@@ -1256,21 +1256,30 @@ module.exports = function (Outbreak) {
         return question.variable === key;
       });
 
-      if (question && question.answers) {
-        question.answers.forEach((answer) => {
-          if (answers[key].indexOf(answer.value) !== -1) {
-            answer.selected = true;
-          }
+      if (question) {
+        // check the length of the list as well
+        // weird case when question is free text but the answers is an empty list
+        if (Array.isArray(question.answers) && question.answers.length) {
+          question.answers.forEach((answer) => {
+            // when the question is multi/single answer and no option is selected
+            // code break if we don't check this
+            if (!answers[key]) {
+              return;
+            }
+            if (answers[key].indexOf(answer.value) !== -1) {
+              answer.selected = true;
+            }
 
-          if (answer.additionalQuestions && answer.additionalQuestions.length) {
-            Outbreak.helpers.prepareQuestionsForPrint(answers, answer.additionalQuestions);
-          }
-        });
-      } else if (question && !question.answers) {
-        if (answers[key] instanceof Date || genericHelpers.isValidDate(answers[key])) {
-          question.value = genericHelpers.getDateDisplayValue(answers[key]);
+            if (answer.additionalQuestions && answer.additionalQuestions.length) {
+              Outbreak.helpers.prepareQuestionsForPrint(answers, answer.additionalQuestions);
+            }
+          });
         } else {
-          question.value = answers[key];
+          if (answers[key] instanceof Date || genericHelpers.isValidDate(answers[key])) {
+            question.value = genericHelpers.getDateDisplayValue(answers[key]);
+          } else {
+            question.value = answers[key];
+          }
         }
       }
     });
