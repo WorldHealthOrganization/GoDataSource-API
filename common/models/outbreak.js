@@ -228,13 +228,6 @@ module.exports = function (Outbreak) {
                   });
                 }
 
-                // do not allow event-event relationships
-                if (type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT' && foundPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT') {
-                  throw app.utils.apiError.getError('INVALID_EVENT_EVENT_RELATIONSHIP', {
-                    id: person.id
-                  });
-                }
-
                 // do not allow contact-contact relationships
                 if (type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' && foundPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
                   throw app.utils.apiError.getError('INVALID_CONTACT_CONTACT_RELATIONSHIP', {

@@ -91,10 +91,6 @@
     "defaultStatusCode": 422,
     "messagePattern": "The case `<%= id %>` needs to be related to another case in order to be able to convert it to a contact"
   },
-  "INVALID_EVENT_EVENT_RELATIONSHIP": {
-    "defaultStatusCode": 422,
-    "messagePattern": "Related person `<%= id %>` is a event. Cannot create relationships between two events."
-  },
   "INVALID_CONTACT_CONTACT_RELATIONSHIP": {
     "defaultStatusCode": 422,
     "messagePattern": "Related person `<%= id %>` is a contact. Cannot create relationships between two contacts."
