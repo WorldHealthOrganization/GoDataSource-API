@@ -150,6 +150,7 @@ module.exports = function (ReferenceData) {
     'value': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_VALUE',
     'description': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_DESCRIPTION',
     'iconId': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ICON',
+    'order': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ORDER',
     'colorCode': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_COLOR',
     'active': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ACTIVE',
   });
@@ -448,7 +449,7 @@ module.exports = function (ReferenceData) {
             }
 
             // allow customizing some safe properties
-            const customizableProperties = ['iconId', 'colorCode'];
+            const customizableProperties = ['iconId', 'colorCode', 'order'];
 
             // if model is editable but in use, also let it change the 'active' field
             if (error.code === 'MODEL_IN_USE') {

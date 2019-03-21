@@ -40,7 +40,8 @@ function run(callback) {
                     categoryId: referenceDataCategory,
                     readOnly: defaultReferenceData[referenceDataCategory][referenceDataItem].readOnly,
                     colorCode: defaultReferenceData[referenceDataCategory][referenceDataItem].colorCode,
-                    iconId: defaultReferenceData[referenceDataCategory][referenceDataItem].iconId
+                    iconId: defaultReferenceData[referenceDataCategory][referenceDataItem].iconId,
+                    order: defaultReferenceData[referenceDataCategory][referenceDataItem].order
                   }, common.install.timestamps), options);
               }
               return foundReferenceData;
