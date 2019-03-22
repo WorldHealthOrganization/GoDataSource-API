@@ -212,6 +212,13 @@
     "createPdfFromImage": {
       "accepts": [
         {
+          "arg": "res",
+          "type": "object",
+          "http": {
+            "source": "res"
+          }
+        },
+        {
           "arg": "image",
           "type": "string",
           "required": true,

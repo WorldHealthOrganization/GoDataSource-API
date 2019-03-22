@@ -283,32 +283,6 @@ module.exports = {
           resolve(result);
         });
       });
-    },
-    /**
-     * Create a PDF file containing PNG images
-     * @param imageData
-     * @param splitFactor Split the image into:
-     * - a nxm matrix computed based on the provided image size
-     * - a square matrix with a side of <splitFactor> (1 no split, 2 => 2x2 grid, 3 => 3x3 grid) when splitType is grid
-     * - a list of <splitFactor> images, divided horizontally when splitType is horizontal
-     * - a list of <splitFactor> images, divided vertically when splitType is vertical
-     * @param splitType enum: ['auto', grid', 'horizontal', 'vertical']. Default 'auto'.
-     * @param callback
-     */
-    createImageDoc: function (imageData, splitFactor, splitType, callback) {
-      invokeWorkerMethod('helpers', 'createImageDoc', [imageData, splitFactor, splitType], function (error, result) {
-        if (error) {
-          return callback(error);
-        }
-        // if data was buffer, transform it back to buffer
-        if (
-          result &&
-          result.data &&
-          result.type === 'Buffer') {
-          result = Buffer.from(result.data);
-        }
-        callback(null, result);
-      });
     }
   },
   getContactFollowUpReport: function (outbreakId, startDate, endDate) {

@@ -292,6 +292,7 @@ const createImageDoc = function (imageData, splitFactor, splitType, callback) {
               }
             }
           }
+
           // keep a flag for first image (first page is auto-added, we don't want to add it twice)
           let firstImage = true;
 
