@@ -10121,6 +10121,7 @@ module.exports = function (Outbreak) {
                   // if there is, it means that that one is newer since follow-ups are sorted by date DESC and we don't need to set this one
                   const dateFormated = moment(followUp.date).format('YYYY-MM-DD');
                   if (!tableData[tableData.length - 1][dateFormated]) {
+                    followUp.questionnaireAnswers = followUp.questionnaireAnswers || {};
                     tableData[tableData.length - 1][dateFormated] = genericHelpers.translateQuestionAnswers(
                       question,
                       question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME' ?
