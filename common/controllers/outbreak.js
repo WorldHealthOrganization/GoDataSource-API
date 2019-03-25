@@ -9821,363 +9821,40 @@ module.exports = function (Outbreak) {
       callback = () => {};
     };
 
-    // get the latest date of contact for the current outbreak
-    app.models.relationship.rawFind(
-      {
-        outbreakId: this.id,
-        active: true
-      },
-      {
-        order: {
-          contactDate: -1
-        },
-        limit: 1
+    // get list of contacts based on the filter passed on request
+    app.models.contact
+      .rawFind(app.utils.remote
+        .mergeFilters({
+          where: {
+            outbreakId: outbreak.id,
+          }
+        }, filter || {}).where)
+      .then((contacts) => {
+        // map contacts
+        const contactsMap = {};
+        (contacts || []).forEach((contact) => {
+          contactsMap[contact.id] = contact;
+        });
+
+        // finished
+        return contactsMap;
       })
-      .then((relationships) => {
-        if (!relationships.length) {
-          return responseCallback();
-        }
+      .then((contactsMap) => {
+        // get the latest date of contact for the current outbreak
+        return app.models.relationship
+          .rawFind({
+            outbreakId: this.id,
+            active: true
+          },{
+            order: {
+              contactDate: -1
+            },
+            limit: 1
+          })
+          .then(() => {
 
-        // lets work only with moment objects
-        const lastContactDate = genericHelpers.getDate(relationships[0].contactDate);
-
-        // we start follow up period from next day after last contact date
-        const firstFollowUpDay = lastContactDate.clone().add(1, 'days');
-
-        // calculate end day of follow up by taking the last contact day and adding the outbreak period of follow up to it
-        const lastFollowUpDay = genericHelpers.getDateEndOfDay(firstFollowUpDay.clone().add(outbreak.periodOfFollowup, 'days'));
-
-        // get list of contacts based on the filter passed on request
-        app.models.contact
-          .rawFind(app.utils.remote
-            .mergeFilters({
-              where: {
-                outbreakId: outbreak.id,
-              }
-            }, filter || {}).where)
-          .then((contacts) => {
-            // get the ids of contacts
-            const ids = contacts.map(c => c.id);
-
-            // get all follow ups belonging to any of the contacts that matched the filter
-            const followUpsFilter = app.utils.remote.convertLoopbackFilterToMongo(
-              {
-                $and: [
-                  // make sure we're only retrieving follow ups from the current outbreak
-                  // and for the contacts desired
-                  {
-                    outbreakId: this.id,
-                    personId: {
-                      $in: ids
-                    },
-                    $and: [
-                      {
-                        date: {
-                          // mongodb works with Date instances not Moment objects
-                          $lte: lastFollowUpDay.toDate()
-                        }
-                      },
-                      {
-                        date: {
-                          $gte: firstFollowUpDay.toDate()
-                        }
-                      }
-                    ]
-                  },
-                  // retrieve only non-deleted records
-                  {
-                    $or: [
-                      {
-                        deleted: false
-                      },
-                      {
-                        deleted: {
-                          $eq: null
-                        }
-                      }
-                    ]
-                  }
-                ]
-              });
-
-            // mongodb aggregate pipeline
-            const aggregatePipeline = [
-              // match conditions for followups
-              {
-                $match: followUpsFilter
-              },
-              // group follow ups by person id
-              // structure after grouping (_id -> personId, followUps -> list of follow ups)
-              {
-                $group: {
-                  _id: '$personId',
-                  followUps: {
-                    $push: '$$ROOT'
-                  }
-                }
-              },
-              // retrieve contact information
-              {
-                $lookup: {
-                  from: 'person',
-                  localField: '_id',
-                  foreignField: '_id',
-                  as: 'contacts'
-                }
-              },
-              {
-                $project: {
-                  _id: 0,
-                  contact: {
-                    $arrayElemAt: [
-                      '$contacts',
-                      0
-                    ]
-                  },
-                  followUps: 1
-                }
-              }
-            ];
-
-            // run the aggregation against database
-            const cursor = app.dataSources.mongoDb.connector.collection('followUp').aggregate(aggregatePipeline);
-
-            // get the records from the cursor
-            cursor
-              .toArray()
-              .then(records => {
-                // replace _id with id, to be consistent
-                records.forEach((record) => {
-                  const newFollowUpsStructure = {};
-                  if (Array.isArray(record.followUps)) {
-                    // group them by index and get only the latest follow up in the day
-                    // this means sorted by updatedAt date and take the first one
-                    const followUpsGroupedByIndex = _.groupBy(record.followUps, 'index');
-                    for (let index in followUpsGroupedByIndex) {
-                      const orderedFollowUps = _.orderBy(followUpsGroupedByIndex[index], ['updatedAt'], ['desc']);
-                      if (!orderedFollowUps.length) {
-                        continue;
-                      }
-
-                      // only one follow up per index
-                      const followUp = orderedFollowUps[0];
-
-                      // convert date to moment to easily manipulate it
-                      followUp.date = genericHelpers.getDate(followUp.date);
-
-                      // defensive checks for questionnaire
-                      followUp.questionnaireAnswers = followUp.questionnaireAnswers || {};
-
-                      // exclude follow ups that are not within first and last follow up days
-                      // then group them again by date, to easily insert them as table rows
-                      if (followUp.date.isSameOrAfter(firstFollowUpDay) &&
-                        followUp.date.isSameOrBefore(lastFollowUpDay)) {
-                        newFollowUpsStructure[followUp.date.format(dateTableFormat)] = followUp;
-                      }
-                    }
-                  }
-                  // alter the original follow ups list
-                  record.followUps = newFollowUpsStructure;
-                });
-
-                // get language tokens
-                app.models.language.getLanguageDictionary(languageId, (err, dictionary) => {
-                  if (err) {
-                    return callback(err);
-                  }
-
-                  // table headers, first header has no name (it contains the questions)
-                  const tableHeaders = [
-                    {
-                      id: 'description',
-                      header: ''
-                    }
-                  ];
-
-                  let dayIndex = 1;
-                  for (let date = firstFollowUpDay.clone(); date.isSameOrBefore(lastFollowUpDay); date.add(1, 'day')) {
-                    tableHeaders.push({
-                      id: date.format(dateTableFormat),
-                      header: dayIndex
-                    });
-                    dayIndex++;
-                  }
-
-                  // build common labels (page title, comments title, contact details title)
-                  const commonLabels = {
-                    pageTitle: dictionary.getTranslation('LNG_PAGE_LIST_CONTACTS_EXPORT_DAILY_FOLLOW_UP_LIST_TITLE'),
-                    contactTitle: dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'),
-                    commentsTitle: dictionary.getTranslation('LNG_DATE_FIELD_LABEL_COMMENTS')
-                  };
-
-                  // build table data and contact details section properties
-                  const entries = [];
-                  records.forEach((record) => {
-                    const contact = record.contact;
-
-                    // table data, each index is a row
-                    const tableData = [];
-
-                    // build the contact name, doing this to avoid unnecessary spaces, where a name is not defined
-                    const names = [
-                      contact.firstName,
-                      contact.middleName,
-                      contact.lastName
-                    ];
-                    // final construct name structure that is displayed
-                    let displayedName = '';
-                    names.forEach((name) => {
-                      if (name) {
-                        displayedName = displayedName + ' ' + pdfUtils.displayValue(name);
-                      }
-                    });
-
-                    // contact details section
-                    // will be displayed in the order they are defined
-                    const contactDetails = [
-                      {
-                        label: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_NAME'),
-                        value: displayedName
-                      },
-                      {
-                        label: dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_GENDER'),
-                        value: dictionary.getTranslation(contact.gender)
-                      },
-                      {
-                        label: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE'),
-                        value: `${contact.age.years} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${contact.age.months} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`
-                      },
-                      {
-                        label: dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE'),
-                        value: moment(contact.dateOfLastContact).format('YYYY-MM-DD')
-                      },
-                      {
-                        label: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_ADDRESSES'),
-                        value: app.models.address.getHumanReadableAddress(app.models.person.getCurrentAddress(contact))
-                      },
-                      {
-                        label: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER'),
-                        value: contact.phoneNumber
-                      }
-                    ];
-
-
-                    // add all questions as rows
-                    outbreak.contactFollowUpTemplate.forEach((question) => {
-                      // add question texts as first row
-                      tableData.push({
-                        description: dictionary.getTranslation(question.text)
-                      });
-
-                      // add answers for each follow up day
-                      for (let date in record.followUps) {
-                        tableData[tableData.length - 1][date] = genericHelpers.translateQuestionAnswers(
-                          question,
-                          record.followUps[date].questionnaireAnswers[question.variable],
-                          dictionary
-                        );
-                      }
-                    });
-
-                    entries.push({
-                      contactDetails: contactDetails,
-                      tableData: tableData
-                    });
-                  });
-
-                  // start the pdf builder child processes
-                  const pdfBuilder = fork(`${__dirname}../../../components/workers/buildDailyFollowUpForm`,
-                    [], {
-                      execArgv: [],
-                      windowsHide: true
-                    }
-                  );
-
-                  // error event listener, stop the whole request cycle
-                  const eventListener = function () {
-                    const error = new Error(`Processing failed. Worker stopped. Event Details: ${JSON.stringify(arguments)}`);
-                    response.req.logger.error(JSON.stringify(error));
-                    return responseCallback(error);
-                  };
-
-                  // listen to exit/error events
-                  ['error', 'exit'].forEach((event) => {
-                    pdfBuilder.on(event, eventListener);
-                  });
-
-                  // listen to builder messages
-                  pdfBuilder.on('message', (args) => {
-                    // first argument is an error
-                    if (args[0]) {
-                      return responseCallback(args[0]);
-                    }
-                    // if the message is a chunk
-                    if (args[1] && args[1].chunk) {
-                      // write it on the response
-                      response.write(Buffer.from(args[1].chunk.data));
-                    }
-                    // if the worker finished, end the response as well
-                    if (args[1] && args[1].end) {
-                      // end the response
-                      response.end();
-
-                      // process will be closed gracefully, remove listeners
-                      ['error', 'exit'].forEach(function (event) {
-                        pdfBuilder.removeListener(event, eventListener);
-                      });
-
-                      // kill the builder process
-                      pdfBuilder.kill();
-                    }
-                  });
-
-                  // set headers related to files download
-                  response.set('Content-type', 'application/pdf');
-                  response.set('Content-disposition', 'attachment;filename=Daily Follow Up Form.pdf');
-
-                  // process contacts in batches
-                  (function nextBatch(commonLabels, headers, data) {
-                    // get current set size
-                    let currentSetSize = data.length;
-                    // no records left to be processed
-                    if (currentSetSize === 0) {
-                      // all records processed, inform the worker that is time to finish
-                      return pdfBuilder.send({ fn: 'finish', args: [] });
-                    } else if (currentSetSize > 100) {
-                      // too many records left, limit batch size to 100
-                      currentSetSize = 100;
-                    }
-                    // build a subset of data
-                    const dataSubset = data.splice(0, currentSetSize);
-
-                    // worker communicates via messages, listen to them
-                    const messageListener = function (args) {
-                      // first argument is an error
-                      if (args[0]) {
-                        return responseCallback(args[0]);
-                      }
-                      // if the worker is ready for the next batch
-                      if (args[1] && args[1].readyForNextBatch) {
-                        // remove current listener
-                        pdfBuilder.removeListener('message', messageListener);
-                        // send move to next step
-                        nextBatch(commonLabels, headers, entries);
-                      }
-                    };
-
-                    // listen to worker messages
-                    pdfBuilder.on('message', messageListener);
-
-                    // build pdf
-                    pdfBuilder.send({
-                      fn: 'sendData',
-                      args: [commonLabels, headers, dataSubset, !entries.length]
-                    });
-                  })(commonLabels, tableHeaders, entries);
-                });
-              });
           });
       })
-      .catch(responseCallback);
+      .catch(responseCallback);;
   };
 };
