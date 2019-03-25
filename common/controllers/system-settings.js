@@ -9,8 +9,6 @@ const config = require('../../server/config');
 const _ = require('lodash');
 const path = require('path');
 const fork = require('child_process').fork;
-const jimp = require('jimp');
-const async = require('async');
 
 module.exports = function (SystemSettings) {
 
@@ -89,12 +87,17 @@ module.exports = function (SystemSettings) {
    * @param callback
    */
   SystemSettings.createPdfFromImage = function (response, imageBase64Str, splitFactor, splitType, callback) {
+    // flag that indicates that the response callback is already called
+    // used to avoid writing chunks into response after the Loopback response callback has been called
+    let responseCallbackCalled = false;
+
     /**
      * Flow control, make sure callback is not called multiple times
      * @param err
      * @param result
      */
     const responseCallback = function (err, result) {
+      responseCallbackCalled = true;
       // execute callback
       callback(err, result);
       // replace callback with no-op to prevent calling it multiple times
@@ -131,7 +134,7 @@ module.exports = function (SystemSettings) {
         return responseCallback(args[0]);
       }
       // if the message is a chunk
-      if (args[1] && args[1].chunk) {
+      if (args[1] && args[1].chunk && !responseCallbackCalled) {
         // write it on the response
         response.write(Buffer.from(args[1].chunk.data));
       }
@@ -146,171 +149,26 @@ module.exports = function (SystemSettings) {
         // kill the worker
         worker.kill();
       }
+      // if the worker is done
+      // call the finish fn of the worker, to close the document
+      if (args[1] && args[1].done) {
+        // inform the worker that is time to finish
+        worker.send({fn: 'finish', args: []});
+      }
     });
 
     // set appropriate headers
     response.set('Content-type', 'application/pdf');
     response.set('Content-disposition', `attachment;filename=${uuid.v4()}.pdf`);
 
-    // define supported split types
-    const splitTypes = {
-      horizontal: 'horizontal',
-      vertical: 'vertical',
-      grid: 'grid',
-      auto: 'auto'
-    };
-
-    // make sure the split type is one of the supported ones
-    splitType = splitTypes[splitType];
-    // default split type is auto
-    if (!splitType) {
-      splitType = splitTypes.auto;
-    }
-
-    // A3 page - margins
-    const pageSize = {
-      width: 1190,
-      height: 840
-    };
-
-    // convert image base64 encoded string to buffer
-    // to be parsed by Jimp lib
-    const buffer = Buffer.from(imageBase64Str, 'base64');
-    jimp
-      .read(buffer)
-      .then((image) => {
-        if (!image) {
-          return callback(new Error('Unknown image format.'));
-        }
-
-        // compute image aspect ratio
-        const imageAspectRatio = image.bitmap.width / image.bitmap.height;
-        const pageAspectRatio = pageSize.width / pageSize.height;
-
-        // resize image to fill the page based on aspect ratio
-        if (imageAspectRatio > pageAspectRatio) {
-          image.resize(jimp.AUTO, pageSize.height * splitFactor);
-        } else {
-          image.resize(pageSize.width * splitFactor, jimp.AUTO);
-        }
-
-        // compute width, height, rows and columns
-        let width, height, rows, columns;
-
-        // for split type auto, decide automatically how many pages to create
-        if (splitType === splitTypes.auto) {
-          // compute how many columns and rows are needed based on image dimensions
-          columns = Math.ceil(image.bitmap.width / pageSize.width);
-          rows = Math.ceil(image.bitmap.height / pageSize.height);
-          // the width and height match page dimension
-          width = pageSize.width;
-          height = pageSize.height;
-        } else {
-          // decide image height and number of rows based on split type
-          if ([splitTypes.grid, splitTypes.vertical].includes(splitType)) {
-            height = image.bitmap.height / splitFactor;
-            rows = splitFactor;
-          } else {
-            height = image.bitmap.height;
-            rows = 1;
-          }
-
-          // decide image width and number of columns based on split type
-          if ([splitTypes.grid, splitTypes.horizontal].includes(splitType)) {
-            width = image.bitmap.width / splitFactor;
-            columns = splitFactor;
-          } else {
-            width = image.bitmap.width;
-            columns = 1;
-          }
-        }
-
-        // list of async functions to be passed to worker
-        const asyncFns = [];
-
-        // build a matrix of images, each cropped to its own position in the matrix
-        for (let row = 0; row < rows; row++) {
-          for (let column = 0; column < columns; column++) {
-            let processedHeight = row * height;
-            let processedWidth = column * width;
-            // calculate crop size and position
-            let cropWidth = Math.min(Math.max(0, image.bitmap.width - processedWidth), width);
-            let cropHeight = Math.min(Math.max(0, image.bitmap.height - processedHeight), height);
-            // if something was cropped, add it to the list of images
-            if (cropWidth && cropHeight) {
-              asyncFns.push((cb) => {
-                // clone the original image
-                image
-                  .clone((err, clonedImage) => {
-                    if (err) {
-                      return cb(err);
-                    }
-                    // crop it
-                    clonedImage.crop(
-                      processedWidth,
-                      processedHeight,
-                      cropWidth,
-                      cropHeight,
-                      (err, croppedImage) => {
-                        if (err) {
-                          return cb(err);
-                        }
-
-                        // convert it to base64, to be able to pass it to worker
-                        croppedImage.getBuffer(jimp.MIME_PNG, (err, buffer) => {
-                          if (err) {
-                            return cb(err);
-                          }
-                          const base64 = buffer.toString('base64');
-
-                          // force GC to cleanup the context early
-                          // otherwise the closure will contain big objects
-                          buffer = null;
-                          clonedImage = null;
-                          croppedImage = null;
-
-                          // pass it to worker and wait until it is ready for next image
-                          worker.send({
-                            fn: 'addImage',
-                            args: [{ base64: base64 }]
-                          });
-
-                          // worker communicates via messages, listen to them
-                          const listener = function (args) {
-                            // first argument is an error
-                            if (args[0]) {
-                              return cb(args[0]);
-                            }
-                            // if the worker is ready to receive data, continue with next async op
-                            if (args[1] && args[1].ready) {
-                              // remove current listener
-                              worker.removeListener('message', listener);
-                              // continue
-                              return cb();
-                            }
-                          };
-
-                          // listen to worker messages
-                          worker.on('message', listener);
-                        });
-                      }
-                    );
-                  });
-              });
-            }
-          }
-        }
-
-        // add cropped images one by one
-        async.series(asyncFns, (err) => {
-          if (err) {
-            return callback(err);
-          }
-          // inform the worker that is time to finish
-          worker.send({ fn: 'finish', args: [] });
-        });
-      })
-      .catch(callback);
+    worker.send({
+      fn: 'createImageDocument',
+      args: [{
+        imageBase64: imageBase64Str,
+        splitType: splitType,
+        splitFactor: splitFactor
+      }]
+    });
   };
 
   /**
