@@ -10095,7 +10095,7 @@ module.exports = function (Outbreak) {
                 },
                 {
                   label: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER'),
-                  value: app.models.person.getCurrentAddress(contactData).phoneNumber
+                  value: app.models.person.getCurrentAddress(contactData) ? app.models.person.getCurrentAddress(contactData).phoneNumber : ''
                 }
               ];
 
