@@ -39,7 +39,7 @@ const worker = {
    * @param data
    */
   createImageDocument(data) {
-    let { imageBase64, splitFactor, splitType } = data;
+    let { splitFactor, splitType } = data;
 
     // make sure the split type is one of the supported ones
     splitType = splitTypes[splitType];
@@ -48,13 +48,23 @@ const worker = {
       splitType = splitTypes.auto;
     }
 
-    Sharp(Buffer.from(imageBase64, 'base64'))
+    // decode the image and try to remove the 'boring' pixels from the edges
+    let originalImageBuffer = Buffer.from(data.imageBase64, 'base64');
+    let originalImage = Sharp(originalImageBuffer);
+    originalImage
         .trim()
-        .toBuffer({ resolveWithObject: true })
-        .then(({ data }) => {
-          // get the untouched image metadata (width, height...)
-          const originalImage = Sharp(data);
-          originalImage
+        .toBuffer((err, trimBuffer) => {
+          let sharpInstance = null;
+
+          // if trimming failed, might as well use the original image
+          if (err) {
+            sharpInstance = originalImage;
+          } else {
+            sharpInstance = Sharp(trimBuffer);
+          }
+
+          // get the image metadata (width, height)
+          sharpInstance
             .metadata()
             .then((metadata) => {
               // compute image aspect ratio
@@ -71,15 +81,19 @@ const worker = {
                 resizeWidth = pageSize.width * splitFactor;
               }
 
-              return originalImage
+              return sharpInstance
                 .resize(resizeWidth, resizeHeight)
                 .toBuffer({ resolveWithObject: true });
             })
             .then(({ data, info }) => {
-              // force V8 to cleanup big in-emory buffers
-              imageBase64 = null;
+              // force V8 to clean big objects
+              originalImage = null;
+              originalImageBuffer = null;
+
+              // decode the resized image
               const resizedImage = Sharp(data);
 
+              // cache its sizes
               const imageWidth = info.width;
               const imageHeight = info.height;
 
@@ -136,8 +150,6 @@ const worker = {
                     }
                     firstPage = false;
 
-                    console.log(Sharp.cache());
-
                     // store it in the document (fit to document size - margins)
                     doc.image(croppedImageBuffer, 0, 0, { fit: [pageSize.width, pageSize.height] });
 
@@ -179,9 +191,9 @@ const worker = {
                   }
                 }
               }
-            });
-        })
-        .catch((err) => process.send([{ error: err.message }]));
+            })
+            .catch((err) => process.send([{ error: err.message }]));
+        });
   },
   // close the PDF stream
   finish() {
