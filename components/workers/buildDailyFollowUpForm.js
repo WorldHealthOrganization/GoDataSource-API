@@ -23,11 +23,10 @@ const worker = {
   /**
    * Send data to worker
    * @param commonLabels
-   * @param tableHeaders
    * @param data
    * @param isLastSubset
    */
-  sendData: function (commonLabels, tableHeaders, data, isLastSubset = false) {
+  sendData: function (commonLabels, data, isLastSubset = false) {
     data.forEach((entry, index) => {
       // add title to each page
       PdfUtils.addTitle(doc, commonLabels.pageTitle);
@@ -48,7 +47,7 @@ const worker = {
       doc.moveDown(2);
 
       // add the symptoms/follow-up table
-      PdfUtils.createTableInPDFDocument(tableHeaders, entry.tableData, doc);
+      PdfUtils.createTableInPDFDocument(entry.tableHeaders, entry.tableData, doc);
 
       // comments area
       doc.x = initialXMargin;
