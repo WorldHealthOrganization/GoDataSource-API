@@ -91,18 +91,8 @@ module.exports = function (SystemSettings) {
     // used to avoid writing chunks into response after the Loopback response callback has been called
     let responseCallbackCalled = false;
 
-    /**
-     * Flow control, make sure callback is not called multiple times
-     * @param err
-     * @param result
-     */
-    const responseCallback = function (err, result) {
-      responseCallbackCalled = true;
-      // execute callback
-      callback(err, result);
-      // replace callback with no-op to prevent calling it multiple times
-      callback = () => {};
-    };
+    // worker exit events
+    const workerExitEvents = ['error', 'exit'];
 
     // start the PDF builder worker
     const worker = fork(`${__dirname}../../../components/workers/createImageDoc`,
@@ -116,11 +106,11 @@ module.exports = function (SystemSettings) {
     const shutdownListener = function () {
       const error = new Error(`Processing failed. Worker stopped. Event Details: ${JSON.stringify(arguments)}`);
       response.req.logger.error(JSON.stringify(error));
-      return responseCallback(error);
+      return callback(error);
     };
 
-    // listen to exit events
-    ['error', 'exit'].forEach(function (event) {
+    // listen to worker's exit events
+    workerExitEvents.forEach(function (event) {
       worker.on(event, shutdownListener);
     });
 
@@ -131,29 +121,27 @@ module.exports = function (SystemSettings) {
     worker.on('message', function (args) {
       // first argument is an error
       if (args[0]) {
-        return responseCallback(args[0]);
+        return callback(args[0]);
       }
-      // if the message is a chunk
-      if (args[1] && args[1].chunk && !responseCallbackCalled) {
-        // write it on the response
-        response.write(Buffer.from(args[1].chunk.data));
-      }
-      // if the worker finished
-      if (args[1] && args[1].end) {
-        // end the response
-        response.end();
-        // process will be closed gracefully, remove listeners
-        ['error', 'exit'].forEach(function (event) {
-          worker.removeListener(event, shutdownListener);
-        });
-        // kill the worker
-        worker.kill();
-      }
-      // if the worker is done
-      // call the finish fn of the worker, to close the document
-      if (args[1] && args[1].done) {
-        // inform the worker that is time to finish
-        worker.send({fn: 'finish', args: []});
+      if (args[1]) {
+        // send chunks to response
+        if (args[1].chunk) {
+          response.write(Buffer.from(args[1].chunk.data));
+        }
+        if (args[1].end) {
+          // end the response
+          response.end();
+          // process will be closed gracefully, remove listeners
+          ['error', 'exit'].forEach(function (event) {
+            worker.removeListener(event, shutdownListener);
+          });
+          // kill the worker
+          worker.kill();
+        }
+        // finished processing the images, notify the worker to close the document
+        if (args[1].done) {
+          worker.send({fn: 'finish', args: []});
+        }
       }
     });
 
