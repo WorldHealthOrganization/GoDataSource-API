@@ -15,7 +15,8 @@ module.exports = function (Address) {
     'geoLocation.lat': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT',
     'geoLocation.lng': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG',
     'geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
-    'date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE'
+    'date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
+    'phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER'
   };
 
   Address.referenceDataFields = [

@@ -5,8 +5,86 @@ const casesWorker = require('../../components/workerRunner').cases;
 const _ = require('lodash');
 const moment = require('moment');
 const helpers = require('../../components/helpers');
+const async = require('async');
 
 module.exports = function (Case) {
+  Case.getIsolatedContacts = function (caseId, callback) {
+    // get all relations with a contact
+    return app.models.relationship
+      .rawFind({
+        $or: [
+          {
+            'persons.0.id': caseId,
+            'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          },
+          {
+            'persons.1.id': caseId,
+            'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          }
+        ]
+      })
+      .then((relationships) => {
+        async.parallelLimit(relationships.map((rel) => {
+          const contact = rel.persons.find((p) => p.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
+          return (cb) => {
+            app.models.contact
+              .find({
+                where: {
+                  id: contact.id
+                }
+              })
+              .then((contacts) => {
+                const contact = contacts[0];
+                // get all relations of the contact that are not with this case
+                app.models.relationship
+                  .rawFind({
+                    $or: [
+                      {
+                        'persons.0.id': contact.id,
+                        'persons.1.id': {
+                          $ne: caseId
+                        }
+                      },
+                      {
+                        'persons.0.id': {
+                          $ne: caseId
+                        },
+                        'persons.1.id': contact.id
+                      }
+                    ]
+                  })
+                  .then((relationships) => cb(null, { contact: contact, isValid: !relationships.length }));
+              })
+              .catch((error) => cb(error));
+          };
+        }), 10, (err, possibleIsolatedContacts) => {
+          if (err) {
+            return callback(err);
+          }
+          return callback(null, possibleIsolatedContacts.filter((entry) => entry.isValid));
+        });
+      });
+  };
+
+  Case.observe('after delete', (context, next) => {
+    Case.getIsolatedContacts(context.instance.id, (err, isolatedContacts) => {
+      if (err) {
+        return next(err);
+      }
+
+      // delete each isolated contact
+      // do not wait for this, just continue with the execution flow
+      isolatedContacts.forEach((isolatedContact) => {
+        if (isolatedContact.isValid) {
+          isolatedContact.contact.destroy();
+        }
+      });
+
+      // fire and forget
+      return next();
+    });
+  });
+
   // set flag to not get controller
   Case.hasController = false;
 
@@ -35,7 +113,6 @@ module.exports = function (Case) {
     'dateOfOnset': 'LNG_CASE_FIELD_LABEL_DATE_OF_ONSET',
     'isDateOfOnsetApproximate': 'LNG_CASE_FIELD_LABEL_DATE_OF_ONSET_APPROXIMATE',
     'dateOfReporting': 'LNG_CASE_FIELD_LABEL_DATE_OF_REPORTING',
-    'phoneNumber': 'LNG_CASE_FIELD_LABEL_PHONE_NUMBER',
     'riskLevel': 'LNG_CASE_FIELD_LABEL_RISK_LEVEL',
     'riskReason': 'LNG_CASE_FIELD_LABEL_RISK_REASON',
     'outcomeId': 'LNG_CASE_FIELD_LABEL_OUTCOME_ID',
@@ -63,6 +140,7 @@ module.exports = function (Case) {
     'addresses[].geoLocation.lng': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG',
     'addresses[].geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
     'addresses[].date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
+    'addresses[].phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
     'visualId': 'LNG_CASE_FIELD_LABEL_VISUAL_ID',
     'fillGeoLocation': 'LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION',
     'isDateOfReportingApproximate': 'LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
@@ -99,7 +177,6 @@ module.exports = function (Case) {
     'dob',
     'age',
     'occupation',
-    'phoneNumber',
     'addresses',
     'documents',
     'type',
@@ -644,5 +721,309 @@ module.exports = function (Case) {
         // return updated filter
         return Object.assign(filter, {where: casesQuery});
       });
+  };
+
+  /**
+   * Get Case transmission chains data
+   * @param outbreakId
+   * @param filter
+   * @param callback
+   */
+  Case.getBarsTransmissionChainsData = function (outbreakId, filter, callback) {
+    // convert filter to mongodb filter structure
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // parse filter
+    const parsedFilter = app.utils.remote.convertLoopbackFilterToMongo(
+      {
+        $and: [
+          // make sure we're only retrieve cases from the current outbreak
+          {
+            outbreakId: outbreakId
+          },
+
+          // retrieve only non-deleted records
+          {
+            $or: [{
+              deleted: false
+            }, {
+              deleted: {
+                $eq: null
+              }
+            }]
+          },
+
+          // filter only cases
+          {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+          },
+          {
+            classification: {
+              nin: app.models.case.discardedCaseClassifications
+            }
+          },
+
+          // conditions coming from request
+          filter.where
+        ]
+      });
+
+    // query aggregation
+    const aggregatePipeline = [
+      // match conditions
+      {
+        $match: parsedFilter
+      },
+
+      // retrieve lab results
+      {
+        $lookup: {
+          from: 'labResult',
+          localField: '_id',
+          foreignField: 'personId',
+          as: 'labResults'
+        }
+      },
+
+      // retrieve relationships where case is source
+      {
+        $lookup: {
+          from: 'relationship',
+          localField: '_id',
+          foreignField: 'persons.id',
+          as: 'relationships'
+        }
+      },
+
+      // filter & retrieve only needed data
+      {
+        $project: {
+          // case fields
+          id: '$_id',
+          visualId: 1,
+          dateOfOnset: 1,
+          addresses: 1,
+          dateRanges: {
+            $map: {
+              input: '$dateRanges',
+              as: 'dateRange',
+              in: {
+                typeId: '$$dateRange.typeId',
+                locationId: '$$dateRange.locationId',
+                startDate: '$$dateRange.startDate',
+                endDate: '$$dateRange.endDate'
+              }
+            }
+          },
+
+          // lab results fields
+          labResults: {
+            $map: {
+              input: {
+                $filter: {
+                  input: '$labResults',
+                  as: 'lab',
+                  cond: {
+                    $or: [{
+                      $eq: ['$$lab.deleted', false]
+                    }, {
+                      $eq: ['$$lab.deleted', null]
+                    }]
+                  }
+                }
+              },
+              as: 'lab',
+              in: {
+                dateSampleTaken: '$$lab.dateSampleTaken',
+                testType: '$$lab.testType',
+                result: '$$lab.result'
+              }
+            }
+          },
+
+          // relationship fields
+          relationships: {
+            $map: {
+              input: {
+                $filter: {
+                  input: '$relationships',
+                  as: 'rel',
+                  cond: {
+                    $or: [{
+                      $eq: ['$$rel.deleted', false]
+                    }, {
+                      $eq: ['$$rel.deleted', null]
+                    }]
+                  }
+                }
+              },
+              as: 'rel',
+              in: {
+                persons: '$$rel.persons'
+              }
+            }
+          }
+        }
+      }
+    ];
+
+    // run request to db
+    const cursor = app.dataSources.mongoDb.connector
+      .collection('person')
+      .aggregate(aggregatePipeline);
+
+    // get the records from the cursor
+    cursor
+      .toArray()
+      .then((records) => {
+        // sort by date method
+        const compareDates = (date1, date2) => {
+          // compare missing dates & dates
+          if (!date1 && !date2) {
+            return 0;
+          } else if (!date1) {
+            return 1;
+          } else if (!date2) {
+            return -1;
+          } else {
+            // compare dates
+            return moment(date1).diff(moment(date2));
+          }
+        };
+
+        // sanitize records & determine other things :)
+        const response = {
+          casesMap: {},
+          casesOrder: [],
+          relationships: {},
+          minGraphDate: null,
+          maxGraphDate: null
+        };
+        (records || []).forEach((caseData) => {
+          // sort addresses
+          if (caseData.addresses) {
+            caseData.addresses.sort((address1, address2) => {
+              // compare missing dates & dates
+              return compareDates(address1.date, address2.date);
+            });
+          }
+
+          // transform relationships
+          if (caseData.relationships) {
+            // go through relationships and determine which can be added to our list
+            (caseData.relationships || []).forEach((rel) => {
+              // add to the list of relationships if both records are cases & our case is the source
+              if (
+                rel.persons.length > 1 &&
+                rel.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' &&
+                rel.persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' && (
+                  ( rel.persons[0].source && rel.persons[0].id === caseData.id ) ||
+                  ( rel.persons[1].source && rel.persons[1].id === caseData.id )
+                )
+              ) {
+                // determine if we need to initialize the list of target cases for our source case
+                if (!response.relationships[caseData.id]) {
+                  response.relationships[caseData.id] = [];
+                }
+
+                // add to the list
+                response.relationships[caseData.id].push(rel.persons[0].id === caseData.id ? rel.persons[1].id : rel.persons[0].id);
+              }
+            });
+
+            // finished - case relationship data not needed anymore
+            delete caseData.relationships;
+          }
+
+          // determine lastGraphDate
+          // - should be the most recent date from case.dateOfOnset / case.dateRanges.endDate / case.labResults.dateSampleTaken
+          caseData.lastGraphDate = moment(caseData.dateOfOnset);
+
+          // determine lastGraphDate starting with lab results
+          if (caseData.labResults) {
+            const labResults = caseData.labResults || [];
+            caseData.labResults = [];
+            labResults.forEach((lab) => {
+              // ignore lab results without result date
+              if (!lab.dateSampleTaken) {
+                return;
+              }
+
+              // determine lastGraphDate
+              const dateSampleTaken = moment(lab.dateSampleTaken);
+              caseData.lastGraphDate = dateSampleTaken.isAfter(caseData.lastGraphDate) ?
+                dateSampleTaken :
+                caseData.lastGraphDate;
+
+              // since we have dateSampleTaken, lets add it to the list
+              caseData.labResults.push(lab);
+            });
+          }
+
+          // check if there is a date range more recent
+          if (caseData.dateRanges) {
+            const dateRanges = caseData.dateRanges || [];
+            caseData.dateRanges = [];
+            dateRanges.forEach((dateRange) => {
+              // ignore date range without at least one of the dates ( start / end )
+              if (!dateRange.endDate && !dateRange.startDate) {
+                return;
+              }
+
+              // make sure we have start date
+              dateRange.startDate = dateRange.startDate ? moment(dateRange.startDate) : moment(caseData.dateOfOnset);
+
+              // if we don't have an end date then we need to set the current date since this is still in progress
+              dateRange.endDate = dateRange.endDate ? moment(dateRange.endDate) : moment();
+
+              // determine last graph date
+              caseData.lastGraphDate = dateRange.endDate.isAfter(caseData.lastGraphDate) ?
+                dateRange.endDate :
+                caseData.lastGraphDate;
+
+              // since we have either start date or end date we can use it for the graph
+              caseData.dateRanges.push(dateRange);
+            });
+          }
+
+          // determine oldest onset date
+          const dateOfOnset = moment(caseData.dateOfOnset);
+          response.minGraphDate = !response.minGraphDate ?
+            dateOfOnset : (
+              dateOfOnset.isBefore(response.minGraphDate) ?
+                dateOfOnset :
+                response.minGraphDate
+            );
+
+          // determine the most recent case graph date
+          response.maxGraphDate = !response.maxGraphDate ?
+            caseData.lastGraphDate : (
+              caseData.lastGraphDate.isAfter(response.maxGraphDate) ?
+                caseData.lastGraphDate :
+                response.maxGraphDate
+            );
+
+          // add response case
+          delete caseData._id;
+          response.casesMap[caseData.id] = caseData;
+        });
+
+        //sort cases
+        response.casesOrder = Object
+          .values(response.casesMap)
+          .sort((case1, case2) => {
+            // compare missing dates & dates
+            return compareDates(case1.dateOfOnset, case2.dateOfOnset);
+          })
+          .map((caseData) => caseData.id);
+
+        // return results
+        return callback(
+          null,
+          response
+        );
+      })
+      .catch(callback);
   };
 };

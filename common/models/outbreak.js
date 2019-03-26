@@ -228,13 +228,6 @@ module.exports = function (Outbreak) {
                   });
                 }
 
-                // do not allow event-event relationships
-                if (type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT' && foundPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT') {
-                  throw app.utils.apiError.getError('INVALID_EVENT_EVENT_RELATIONSHIP', {
-                    id: person.id
-                  });
-                }
-
                 // do not allow contact-contact relationships
                 if (type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' && foundPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
                   throw app.utils.apiError.getError('INVALID_CONTACT_CONTACT_RELATIONSHIP', {
@@ -939,6 +932,7 @@ module.exports = function (Outbreak) {
           caseMap[caseRecord.id] = caseRecord;
           caseRecord.relationships = [];
         });
+
         // find relationships for those cases
         return app.models.relationship
           .rawFind({
@@ -979,7 +973,7 @@ module.exports = function (Outbreak) {
                   inq: relationshipIds
                 }
               }
-            }, filter || {}), countOnly, callback);
+            }, filter || {}), countOnly, false, callback);
           });
       })
       .catch(callback);
@@ -1260,8 +1254,15 @@ module.exports = function (Outbreak) {
       });
 
       if (question) {
-        if (question.answers) {
+        // check the length of the list as well
+        // weird case when question is free text but the answers is an empty list
+        if (Array.isArray(question.answers) && question.answers.length) {
           question.answers.forEach((answer) => {
+            // when the question is multi/single answer and no option is selected
+            // code break if we don't check this
+            if (!answers[key]) {
+              return;
+            }
             if (answers[key].indexOf(answer.value) !== -1) {
               answer.selected = true;
             }
@@ -1696,6 +1697,118 @@ module.exports = function (Outbreak) {
           }));
         }
       });
+    });
+  };
+
+  /**
+   * Modify multiple contacts
+   * @param existingContacts
+   * @return {Promise<any>}
+   */
+  Outbreak.modifyMultipleContacts = function (existingContacts) {
+    // reference shortcuts
+    const getError = app.utils.apiError.getError;
+    const contactModel = app.models.contact;
+
+    // promisify the result
+    return new Promise((resolve, reject) => {
+      // initialize array of actions that will be executed in async mode
+      const actions = [];
+
+      // initialize array of failed/successful entries
+      const failedEntries = [];
+      const successfulEntries = [];
+
+      // nothing to do
+      if (!existingContacts.length) {
+        return resolve(successfulEntries);
+      }
+
+      // get contact ids and retrieve information about them
+      const ids = [];
+      existingContacts.forEach((contact) => {
+        if (contact.id) {
+          ids.push(contact.id);
+        }
+      });
+      contactModel
+        .find({
+          where: {
+            id: {
+              inq: ids
+            }
+          }
+        })
+        .then((existingContactModel) => {
+          const existingContactModelMap = {};
+          existingContactModel.forEach((contact) => {
+            existingContactModelMap[contact.id] = contact;
+          });
+
+          existingContacts.forEach((existingContact, index) => {
+            actions.push((asyncCallback) => {
+              // make sure a contact id is passed
+              // otherwise we don't know which contact to update
+              if (!existingContact.id) {
+                failedEntries.push({
+                  recordNo: index,
+                  error: getError('CONTACT_ID_REQUIRED')
+                });
+                return asyncCallback();
+              }
+
+              // check if contact exists in database
+              if (!existingContactModelMap[existingContact.id]) {
+                failedEntries.push({
+                  recordNo: index,
+                  error: getError('MODEL_NOT_FOUND', {
+                    model: contactModel.modelName,
+                    id: existingContact.id
+                  })
+                });
+                return asyncCallback();
+              }
+
+              // update contact attributes through loopback model functionality
+              existingContactModelMap[existingContact.id]
+                .updateAttributes(existingContact)
+                .then((updatedContact) => {
+                  // add it to success list
+                  successfulEntries.push({
+                    recordNo: index,
+                    contact: updatedContact
+                  });
+                  return asyncCallback();
+                })
+                .catch((err) => {
+                  // failed to update
+                  failedEntries.push({
+                    recordNo: index,
+                    error: err
+                  });
+                  return asyncCallback();
+                });
+            });
+          });
+
+          // run the async actions
+          async.series(actions, (err) => {
+            if (err) {
+              return reject(err);
+            }
+
+            // all entries updated successfully
+            if (!failedEntries.length) {
+              return resolve(successfulEntries);
+            }
+
+            // send back partial error
+            return reject(getError('MULTIPLE_CONTACTS_UPDATE_PARTIAL_SUCCESS', {
+              failed: failedEntries,
+              success: successfulEntries
+            }));
+          });
+        });
     });
   };
 };

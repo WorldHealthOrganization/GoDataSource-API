@@ -16,9 +16,6 @@ module.exports = function (SystemSettings) {
    * Validate upstream servers url uniqueness
    */
   SystemSettings.observe('before save', function (context, callback) {
-    // initialize validation error
-    let errorMessages = '', errorInfo = {};
-
     // get clients
     let clients = context.instance ? context.instance.clientApplications : context.data.clientApplications;
 
@@ -39,8 +36,12 @@ module.exports = function (SystemSettings) {
       let duplicateClientIDs = Object.keys(clientIDs).filter(clientID => clientIDs[clientID] > 1);
       if (duplicateClientIDs.length) {
         // duplicate client IDs were found; return validation error
-        errorMessages = `Client IDs must be unique. Duplicate client IDs: ${duplicateClientIDs.join(', ')}. `;
-        errorInfo.duplicateClientIDs = duplicateClientIDs;
+        return callback(app.utils.apiError.getError(
+          'REQUEST_VALIDATION_ERROR_DUPLICATE_CLIENT_IDS', {
+            errorMessages: `Client IDs must be unique. Duplicate client IDs: ${duplicateClientIDs.join(', ')}. `,
+            duplicateClientIDs: duplicateClientIDs
+          }
+        ));
       }
     }
 
@@ -64,8 +65,12 @@ module.exports = function (SystemSettings) {
       let duplicateServerURLs = Object.keys(serverURLs).filter(serverURL => serverURLs[serverURL] > 1);
       if (duplicateServerURLs.length) {
         // duplicate server URLs were found; return validation error
-        errorMessages += `Server URLs must be unique. Duplicate server URLs: ${duplicateServerURLs.join(', ')}.`;
-        errorInfo.duplicateServerURLs = duplicateServerURLs;
+        return callback(app.utils.apiError.getError(
+          'REQUEST_VALIDATION_ERROR_DUPLICATE_SERVER_IDS', {
+            errorMessages: `Server URLs must be unique. Duplicate server URLs: ${duplicateServerURLs.join(', ')}.`,
+            duplicateServerURLs: duplicateServerURLs
+          }
+        ));
       }
     }
 
@@ -79,23 +84,22 @@ module.exports = function (SystemSettings) {
       // if error occurred
       if (error) {
         // save error
-        errorMessages += `Configured backup location ${backupLocation} is not accessible for read/write`;
-        errorInfo.backupLocation = {
-          path: backupLocation,
-          resolvedPath: resolvedBackupLocation,
-          error: error
-        };
+        return callback(app.utils.apiError.getError(
+          'REQUEST_VALIDATION_ERROR_INVALID_BACKUP_LOCATION', {
+            errorMessages: `Configured backup location ${backupLocation} is not accessible for read/write`,
+            backupLocation: {
+              path: backupLocation,
+              resolvedPath: resolvedBackupLocation,
+              error: error
+            }
+          }
+        ));
       }
 
       // if everything went fine, use resolved backup location
       _.set(contextData, 'target.dataBackup.location', resolvedBackupLocation);
 
-      // check for validation error
-      if (errorMessages.length) {
-        errorInfo.errorMessages = errorMessages;
-        return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', errorInfo));
-      }
-
+      // finished
       return callback();
     });
   });

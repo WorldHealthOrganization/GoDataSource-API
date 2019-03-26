@@ -15,16 +15,15 @@ const defaultAdmin = {
 };
 
 const defaultSystemAdminRole = {
-  name: 'System Administrator',
+  name: 'System administrator',
   description: 'This is a built in role that manages user accounts, and configuration of the system.',
   permissionIds: [
     'read_sys_config',
     'write_sys_config',
-    'write_reference_data',
-    'read_user_account',
-    'write_user_account',
     'read_role',
     'write_role',
+    'read_user_account',
+    'write_user_account',
     'read_outbreak'
   ]
 };

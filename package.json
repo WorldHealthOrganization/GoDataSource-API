@@ -1,6 +1,6 @@
 {
   "name": "go-data-api",
-  "version": "1.0.0",
+  "version": "2.20.1",
   "main": "server/server.js",
   "engines": {
     "node": ">=8"
@@ -14,7 +14,9 @@
     "migrate-database": "node ./server/install/install.js migrate-database",
     "reset-admin-password": "node ./server/install/install.js reset-admin-password",
     "install-script": "node ./server/install/install.js install-script",
-    "restore-backup": "node ./server/scripts/restoreBackup.js"
+    "restore-backup": "node ./server/scripts/restoreBackup.js",
+    "dump-help-data": "node ./server/install/install.js dump-help-data",
+    "dump-language-data": "node ./server/install/install.js dump-language-data"
   },
   "dependencies": {
     "@google/maps": "0.5.5",
@@ -41,6 +43,7 @@
     "loopback-connector-mongodb": "3.8.0",
     "mkdirp": "0.5.1",
     "moment": "2.22.2",
+    "moment-range": "^4.0.2",
     "mongodb": "^3.1.10",
     "p-queue": "^3.0.0",
     "parse": "2.1.0",

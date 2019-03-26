@@ -3,8 +3,9 @@
 const async = require('async');
 const _ = require('lodash');
 const args = process.argv;
+const path = require('path');
 // keep a list of supported install arguments
-const supportedArguments = ['init-database', 'migrate-database', 'reset-admin-password', 'install-script'];
+const supportedArguments = ['init-database', 'migrate-database', 'reset-admin-password', 'install-script', 'dump-help-data', 'dump-language-data'];
 // keep a list of functions that will be run
 const runFunctions = [];
 // define a list of supported routines
@@ -18,7 +19,8 @@ const routines = {
       require('./scripts/defaultLanguages'),
       require('./scripts/defaultSystemSettings'),
       require('./scripts/defaultReferenceData'),
-      require('./scripts/defaultLocations')
+      require('./scripts/defaultLocations'),
+      require('./scripts/defaultHelpData')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });
@@ -26,7 +28,10 @@ const routines = {
   migrateDatabase: function () {
     console.log('Setting Up Database Migration...');
     [
-      require('./scripts/migrateDatabaseCollections')
+      require('./scripts/migrateDatabaseCollections'),
+      require('./scripts/defaultLanguages'),
+      require('./scripts/defaultReferenceData'),
+      require('./scripts/defaultHelpData')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });
@@ -50,6 +55,44 @@ const routines = {
       require(`./scripts/${script}`)
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
+    });
+  },
+  dumpHelpData: function () {
+    // need export file
+    let exportPath = /export=(.+)(?:\s+|$)/.exec(args.toString());
+    if (!exportPath) {
+      return console.error('No valid file path. Use -- export=<filePath> to specify a file where to export data');
+    }
+    exportPath = exportPath.pop();
+
+    // check if we have access to write to this file
+    const resolvedPath = path.resolve(exportPath);
+
+    // dump data
+    console.log('Dumping Help Data...');
+    [
+      require('./scripts/dumpHelpData')
+    ].forEach(function (installScript) {
+      runFunctions.push(installScript(resolvedPath));
+    });
+  },
+  dumpLanguageData: function () {
+    // need export file
+    let exportPath = /export=(.+)(?:\s+|$)/.exec(args.toString());
+    if (!exportPath) {
+      return console.error('No valid file path. Use -- export=<filePath> to specify a file where to export data');
+    }
+    exportPath = exportPath.pop();
+
+    // check if we have access to write to this file
+    const resolvedPath = path.resolve(exportPath);
+
+    // dump data
+    console.log('Dumping Language Data...');
+    [
+      require('./scripts/dumpLanguageData')
+    ].forEach(function (installScript) {
+      runFunctions.push(installScript(resolvedPath));
     });
   }
 };

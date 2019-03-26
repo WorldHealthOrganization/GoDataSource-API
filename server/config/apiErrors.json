@@ -68,6 +68,18 @@
     "defaultStatusCode": 400,
     "messagePattern": "Invalid request parameters. Details: <%= errorMessages %>"
   },
+  "REQUEST_VALIDATION_ERROR_DUPLICATE_CLIENT_IDS": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid request parameters. Details: <%= errorMessages %>"
+  },
+  "REQUEST_VALIDATION_ERROR_INVALID_BACKUP_LOCATION": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid request parameters. Details: <%= errorMessages %>"
+  },
+  "REQUEST_VALIDATION_ERROR_DUPLICATE_SERVER_IDS": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid request parameters. Details: <%= errorMessages %>"
+  },
   "ACCESS_DENIED": {
     "messagePattern": "Logged in user doesn't have access this endpoint: <%= accessErrors %>."
   },
@@ -78,10 +90,6 @@
   "INVALID_CASE_RELATIONSHIP": {
     "defaultStatusCode": 422,
     "messagePattern": "The case `<%= id %>` needs to be related to another case in order to be able to convert it to a contact"
-  },
-  "INVALID_EVENT_EVENT_RELATIONSHIP": {
-    "defaultStatusCode": 422,
-    "messagePattern": "Related person `<%= id %>` is a event. Cannot create relationships between two events."
   },
   "INVALID_CONTACT_CONTACT_RELATIONSHIP": {
     "defaultStatusCode": 422,
@@ -270,5 +278,13 @@
   "SYNC_NO_DATA_TO_EXPORT": {
     "defaultStatusCode": 422,
     "messagePattern": "No data to export"
+  },
+  "CONTACT_ID_REQUIRED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Contact ID is required"
+  },
+  "MULTIPLE_CONTACTS_UPDATE_PARTIAL_SUCCESS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Multiple contacts update partial success. Some contact instances failed to be updated."
   }
 }
