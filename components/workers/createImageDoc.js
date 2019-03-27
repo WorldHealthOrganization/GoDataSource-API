@@ -57,150 +57,173 @@ const worker = {
     // decode the image
     let originalImage = Sharp(originalImageBuffer);
     originalImage
-        .trim()
-        .toBuffer((err, trimBuffer) => {
-          // clean this up asap
-          originalImageBuffer = null;
+      .trim()
+      .toBuffer((err, trimBuffer) => {
+        // clean this up asap
+        originalImageBuffer = null;
 
-          let sharpInstance = null;
+        let sharpInstance = null;
 
-          // if trimming failed, might as well use the original image
-          if (err) {
-            sharpInstance = originalImage;
-          } else {
-            sharpInstance = Sharp(trimBuffer);
-          }
+        // if trimming failed, might as well use the original image
+        if (err) {
+          sharpInstance = originalImage;
+        } else {
+          sharpInstance = Sharp(trimBuffer);
+        }
 
-          // clean this up asap
-          originalImage = null;
+        // clean this up asap
+        originalImage = null;
 
-          // get the image metadata (width, height)
-          sharpInstance
-            .metadata()
-            .then((metadata) => {
-              // compute image aspect ratio
-              const imageAspectRatio = metadata.width / metadata.height;
-              const pageAspectRatio = pageSize.width / pageSize.height;
+        // get the image metadata (width, height)
+        sharpInstance
+          .metadata()
+          .then((metadata) => {
+            // compute image aspect ratio
+            const imageAspectRatio = metadata.width / metadata.height;
+            const pageAspectRatio = pageSize.width / pageSize.height;
 
-              // resize image to fill the page based on aspect ratio
-              // null values -> auto-scale to match the other axis
-              let resizeWidth = null;
-              let resizeHeight = null;
-              if (imageAspectRatio > pageAspectRatio) {
-                resizeHeight = pageSize.height * splitFactor;
+            // resize image to fill the page based on aspect ratio
+            // null values -> auto-scale to match the other axis
+            let resizeWidth = null;
+            let resizeHeight = null;
+            if (imageAspectRatio > pageAspectRatio) {
+              resizeHeight = pageSize.height * splitFactor;
+            } else {
+              resizeWidth = pageSize.width * splitFactor;
+            }
+
+            return sharpInstance
+              .resize(resizeWidth, resizeHeight)
+              .toBuffer({ resolveWithObject: true });
+          })
+          .then(({ data, info }) => {
+            // decode the resized image
+            const resizedImage = Sharp(data);
+
+            // cache its sizes
+            const imageWidth = info.width;
+            const imageHeight = info.height;
+
+            // compute width, height, rows and columns
+            let width, height, rows, columns;
+
+            // for split type auto, decide automatically how many pages to create
+            if (splitType === splitTypes.auto) {
+              // compute how many columns and rows are needed based on image dimensions
+              columns = Math.ceil(imageWidth / pageSize.width);
+              rows = Math.ceil(imageHeight / pageSize.height);
+              // the width and height match page dimension
+              width = pageSize.width;
+              height = pageSize.height;
+            } else {
+              // decide image height and number of rows based on split type
+              if ([splitTypes.grid, splitTypes.vertical].includes(splitType)) {
+                height = imageHeight / splitFactor;
+                rows = splitFactor;
               } else {
-                resizeWidth = pageSize.width * splitFactor;
+                height = imageHeight;
+                rows = 1;
               }
 
-              return sharpInstance
-                .resize(resizeWidth, resizeHeight)
-                .toBuffer({ resolveWithObject: true });
-            })
-            .then(({ data, info }) => {
-              // decode the resized image
-              const resizedImage = Sharp(data);
-
-              // cache its sizes
-              const imageWidth = info.width;
-              const imageHeight = info.height;
-
-              // compute width, height, rows and columns
-              let width, height, rows, columns;
-
-              // for split type auto, decide automatically how many pages to create
-              if (splitType === splitTypes.auto) {
-                // compute how many columns and rows are needed based on image dimensions
-                columns = Math.ceil(imageWidth / pageSize.width);
-                rows = Math.ceil(imageHeight / pageSize.height);
-                // the width and height match page dimension
-                width = pageSize.width;
-                height = pageSize.height;
+              // decide image width and number of columns based on split type
+              if ([splitTypes.grid, splitTypes.horizontal].includes(splitType)) {
+                width = imageWidth / splitFactor;
+                columns = splitFactor;
               } else {
-                // decide image height and number of rows based on split type
-                if ([splitTypes.grid, splitTypes.vertical].includes(splitType)) {
-                  height = imageHeight / splitFactor;
-                  rows = splitFactor;
-                } else {
-                  height = imageHeight;
-                  rows = 1;
-                }
-
-                // decide image width and number of columns based on split type
-                if ([splitTypes.grid, splitTypes.horizontal].includes(splitType)) {
-                  width = imageWidth / splitFactor;
-                  columns = splitFactor;
-                } else {
-                  width = imageWidth;
-                  columns = 1;
-                }
+                width = imageWidth;
+                columns = 1;
               }
+            }
 
-              // flag that indicates this is the first page in the document
-              // doing this to ensure we display one image per page
-              let firstPage = true;
+            // flag that indicates this is the first page in the document
+            // doing this to ensure we display one image per page
+            let firstPage = true;
 
-              // create an async queue for cropping images and adding them in the PDF
-              const asyncQ = Async.queue((task, callback) => {
-                // crop the image
-                resizedImage
-                  .clone()
-                  .extract({
-                    left: task.offsetWidth,
-                    top: task.offsetHeight,
-                    width: task.width,
-                    height: task.height
-                  })
-                  .toBuffer()
-                  .then((croppedImageBuffer) => {
-                    if (!firstPage) {
-                      doc.addPage();
-                    }
-                    firstPage = false;
+            // create an async queue for cropping images and adding them in the PDF
+            const asyncQ = Async.queue((task, qCallback) => {
+              Async.parallel(task.batch.map((task) => {
+                return (cropCallback) => {
+                  // crop the image
+                  resizedImage
+                    .clone()
+                    .extract({
+                      left: task.offsetWidth,
+                      top: task.offsetHeight,
+                      width: task.width,
+                      height: task.height
+                    })
+                    .toBuffer()
+                    .then((buffer) => cropCallback(null, buffer))
+                    .catch(cropCallback);
+                };
+              }), (err, buffers) => {
+                if (err) {
+                  return qCallback(err);
+                }
 
-                    // store it in the document (fit to document size - margins)
-                    doc.image(croppedImageBuffer, 0, 0, { fit: [pageSize.width, pageSize.height] });
-
-                    // overlay transparent logo
-                    doc.addTransparentLogo();
-
-                    return callback();
-                  })
-                  .catch(callback);
-              }, 1 /* do not change!!!, otherwise we encounter race conditions */);
-
-              // notify parent process that intensive task is done
-              asyncQ.drain = function () {
-                process.send([null, { done: true }]);
-              };
-
-              // if a image fails to be processed, kill the queue and notify the master process
-              asyncQ.error = function (err) {
-                asyncQ.kill();
-                process.send([{ error: err.message }]);
-              };
-
-              // build a matrix of images, each cropped to its own position in the matrix
-              for (let row = 0; row < rows; row++) {
-                for (let column = 0; column < columns; column++) {
-                  let processedHeight = row * height;
-                  let processedWidth = column * width;
-                  // calculate crop size and position
-                  let cropWidth = Math.min(Math.max(0, imageWidth - processedWidth), width);
-                  let cropHeight = Math.min(Math.max(0, imageHeight - processedHeight), height);
-                  // if something was cropped, add it to the list of images
-                  if (cropWidth && cropHeight) {
-                    asyncQ.push({
-                      offsetWidth: processedWidth,
-                      offsetHeight: processedHeight,
-                      width: cropWidth,
-                      height: cropHeight
-                    });
+                buffers.forEach((buffer) => {
+                  if (!firstPage) {
+                    doc.addPage();
                   }
+                  firstPage = false;
+
+                  // store it in the document (fit to document size - margins)
+                  doc.image(buffer, 0, 0, { fit: [pageSize.width, pageSize.height] });
+
+                  // overlay transparent logo
+                  doc.addTransparentLogo();
+                });
+
+                return qCallback();
+              });
+            }, 1 /* do not change!!!, otherwise we encounter race conditions */);
+
+            // notify parent process that intensive task is done
+            asyncQ.drain = function () {
+              process.send([null, { done: true }]);
+            };
+
+            // if a image fails to be processed, kill the queue and notify the master process
+            asyncQ.error = function (err) {
+              asyncQ.kill();
+              process.send([{ error: err.message }]);
+            };
+
+            // build a matrix of images, each cropped to its own position in the matrix
+            let batch = [];
+            const batchSize = Sharp.concurrency() || 1;
+            for (let row = 0; row < rows; row++) {
+              for (let column = 0; column < columns; column++) {
+                let processedHeight = row * height;
+                let processedWidth = column * width;
+                // calculate crop size and position
+                let cropWidth = Math.min(Math.max(0, imageWidth - processedWidth), width);
+                let cropHeight = Math.min(Math.max(0, imageHeight - processedHeight), height);
+                // if something was cropped, add it to the list of images
+                if (cropWidth && cropHeight) {
+                  // flush the current batch of items if threshold is reached
+                  if (batch.length === batchSize) {
+                    asyncQ.push({ batch: batch });
+                    batch = [];
+                  }
+                  batch.push({
+                    offsetWidth: processedWidth,
+                    offsetHeight: processedHeight,
+                    width: cropWidth,
+                    height: cropHeight
+                  });
                 }
               }
-            })
-            .catch((err) => process.send([{ error: err.message }]));
-        });
+            }
+
+            // sometimes the number of images is lower than the batch size
+            // just get all the remaining items from the batch size and process them
+            if (batch.length > 0) {
+              asyncQ.push({ batch: batch });
+            }
+          })
+          .catch((err) => process.send([{ error: err.message }]));
+      });
   },
   // close the PDF stream
   finish() {
