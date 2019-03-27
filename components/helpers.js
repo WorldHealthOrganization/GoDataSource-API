@@ -1498,6 +1498,91 @@ function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}) {
   });
 }
 
+/**
+ * Migrate data in batches
+ * @param Model
+ * @param modelHandleCallback
+ * @returns {Promise<any>}
+ */
+function migrateModelDataInBatches(
+  Model,
+  modelHandleCallback
+) {
+  return new Promise((resolve, reject) => {
+    // determine how many case we have so we can update them in batches
+    Model
+      .count({
+        $or: [
+          {
+            deleted: false
+          },
+          {
+            deleted: {
+              $eq: null
+            }
+          },
+          {
+            deleted: true
+          }
+        ]
+      })
+      .catch(reject)
+      .then((countedModels) => {
+        // make changes in batches
+        // retrieve batches until all are retrieve
+        let handledNo = 0;
+        const handledPerBatch = 1000;
+        const handleBatch = () => {
+          Model
+            .find({
+              deleted: true,
+              skip: handledNo,
+              limit: handledPerBatch
+            })
+            .catch(reject)
+            .then((models) => {
+              // create jobs to handle date in parallel
+              const jobs = [];
+              models.forEach((modelData) => {
+                jobs.push((cb) => {
+                  modelHandleCallback(modelData, cb);
+                });
+              });
+
+              // wait for all operations to be done
+              async.parallelLimit(
+                jobs,
+                10,
+                (err) => {
+                  // an err occurred ?
+                  if (err) {
+                    reject(err);
+                  }
+
+                  // there are more batches ?
+                  handledNo = handledNo + handledPerBatch;
+                  if (handledNo < countedModels) {
+                    handleBatch();
+                  } else {
+                    // finished
+                    resolve();
+                  }
+                }
+              );
+            });
+        };
+
+        // start
+        if (handledNo < countedModels) {
+          handleBatch();
+        } else {
+          // finished
+          resolve();
+        }
+      });
+  });
+}
+
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1536,5 +1621,6 @@ module.exports = {
   sha256: sha256,
   createImageDoc: createImageDoc,
   convertToDate: convertToDate,
-  covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat
+  covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat,
+  migrateModelDataInBatches: migrateModelDataInBatches
 };

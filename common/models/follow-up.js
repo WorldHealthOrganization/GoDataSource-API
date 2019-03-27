@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const moment = require('moment');
 const _ = require('lodash');
+const helpers = require('../../components/helpers');
 
 module.exports = function (FollowUp) {
   // set flag to not get controller
@@ -772,6 +773,51 @@ module.exports = function (FollowUp) {
             return callback(null, records);
           })
           .catch(callback);
+      });
+  };
+
+  /**
+   * Migrate data
+   * @param callback
+   */
+  FollowUp.migrate = (options, callback) => {
+    // determine how many follow-ups we have so we can update them in batches
+    helpers
+      .migrateModelDataInBatches(
+        FollowUp,
+        (modelData, cb) => {
+          // check if we have questionnaire answer and is we need to update data
+          if (
+            !_.isEmpty(modelData.questionnaireAnswers) && (
+              !_.isArray(modelData.questionnaireAnswers[Object.keys(modelData.questionnaireAnswers)[0]]) ||
+              !_.isObject(modelData.questionnaireAnswers[Object.keys(modelData.questionnaireAnswers)[0]][0])
+            )
+          ) {
+            // migrate questionnaire answers
+            const newQuestionnaireAnswers = {};
+            _.each(modelData.questionnaireAnswers, (value, variable) => {
+              newQuestionnaireAnswers[variable] = [{
+                value: value
+              }];
+            });
+
+            // update case questionnaire answers
+            modelData
+              .updateAttributes({
+                questionnaireAnswers: newQuestionnaireAnswers
+              }, options)
+              .catch(cb)
+              .then(() => cb());
+          } else {
+            // finished
+            cb();
+          }
+        }
+      )
+      .catch(callback)
+      .then(() => {
+        // finished
+        callback();
       });
   };
 };

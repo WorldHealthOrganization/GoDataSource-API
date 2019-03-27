@@ -5,6 +5,7 @@ const casesWorker = require('../../components/workerRunner').cases;
 const _ = require('lodash');
 const moment = require('moment');
 const async = require('async');
+const helpers = require('../../components/helpers');
 
 module.exports = function (Case) {
   Case.getIsolatedContacts = function (caseId, callback) {
@@ -1023,5 +1024,50 @@ module.exports = function (Case) {
         );
       })
       .catch(callback);
+  };
+
+  /**
+   * Migrate data
+   * @param callback
+   */
+  Case.migrate = (options, callback) => {
+    // determine how many case we have so we can update them in batches
+    helpers
+      .migrateModelDataInBatches(
+        Case,
+        (modelData, cb) => {
+          // check if we have questionnaire answer and is we need to update data
+          if (
+            !_.isEmpty(modelData.questionnaireAnswers) && (
+              !_.isArray(modelData.questionnaireAnswers[Object.keys(modelData.questionnaireAnswers)[0]]) ||
+              !_.isObject(modelData.questionnaireAnswers[Object.keys(modelData.questionnaireAnswers)[0]][0])
+            )
+          ) {
+            // migrate questionnaire answers
+            const newQuestionnaireAnswers = {};
+            _.each(modelData.questionnaireAnswers, (value, variable) => {
+              newQuestionnaireAnswers[variable] = [{
+                value: value
+              }];
+            });
+
+            // update case questionnaire answers
+            modelData
+              .updateAttributes({
+                questionnaireAnswers: newQuestionnaireAnswers
+              }, options)
+              .catch(cb)
+              .then(() => cb());
+          } else {
+            // finished
+            cb();
+          }
+        }
+      )
+      .catch(callback)
+      .then(() => {
+        // finished
+        callback();
+      });
   };
 };
