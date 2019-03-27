@@ -1509,12 +1509,17 @@ function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}) {
  * @param model
  */
 const sortMultiAnswerQuestions = function (model) {
-  if (model.questionnaireAnswers) {
+  if (
+    model &&
+    _.isObject(model.questionnaireAnswers)
+  ) {
     // shorthand reference
     const answers = model.questionnaireAnswers;
-
     for (let prop in answers) {
-      if (Array.isArray(answers[prop]) && answers[prop].length) {
+      if (
+        Array.isArray(answers[prop]) &&
+        answers[prop].length
+      ) {
         // sort them by date
         answers[prop] = answers[prop].sort((a, b) => moment(b.date).format('X') - moment(a.date).format('X'));
       }
