@@ -169,4 +169,12 @@ module.exports = function (LabResult) {
         callback();
       });
   };
+
+  /**
+   * Before save hooks
+   */
+  LabResult.observe('before save', function (context, next) {
+    helpers.sortMultiAnswerQuestions(context.isNewInstance ? context.instance : context.data);
+    next();
+  });
 };

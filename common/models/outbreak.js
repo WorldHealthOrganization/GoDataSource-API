@@ -1180,7 +1180,8 @@ module.exports = function (Outbreak) {
           question: translateToken(question.text),
           variable: question.variable,
           answerType: question.answerType,
-          answers: question.answers
+          answers: question.answers,
+          multiAnswer: question.multiAnswer
         };
 
         // do not try to translate answers that are free text
@@ -1244,6 +1245,9 @@ module.exports = function (Outbreak) {
    * @param questions
    */
   Outbreak.helpers.prepareQuestionsForPrint = function (answers, questions) {
+    // convert questionnaire answers to old format, before doing anything
+    answers = genericHelpers.convertQuestionnaireAnswersToOldFormat(answers);
+
     Object.keys(answers).forEach((key) => {
       let question = _.find(questions, (question) => {
         return question.variable === key;
@@ -1259,6 +1263,7 @@ module.exports = function (Outbreak) {
             if (!answers[key]) {
               return;
             }
+
             if (answers[key].indexOf(answer.value) !== -1) {
               answer.selected = true;
             }

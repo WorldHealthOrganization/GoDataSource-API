@@ -246,6 +246,8 @@ module.exports = function (FollowUp) {
    * Before save hooks
    */
   FollowUp.observe('before save', function (ctx, next) {
+    helpers.sortMultiAnswerQuestions(ctx.isNewInstance ? ctx.instance : ctx.data);
+
     // set follow-up index (if needed)
     setFollowUpIndexIfNeeded(ctx)
     // set follow-up address (if needed)

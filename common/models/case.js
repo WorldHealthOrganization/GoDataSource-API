@@ -4,6 +4,7 @@ const app = require('../../server/server');
 const casesWorker = require('../../components/workerRunner').cases;
 const _ = require('lodash');
 const moment = require('moment');
+const helpers = require('../../components/helpers');
 const async = require('async');
 const helpers = require('../../components/helpers');
 
@@ -276,6 +277,7 @@ module.exports = function (Case) {
    */
   Case.observe('before save', function (context, next) {
     archiveClassificationChanges(context);
+    helpers.sortMultiAnswerQuestions(context.isNewInstance ? context.instance : context.data);
     next();
   });
 

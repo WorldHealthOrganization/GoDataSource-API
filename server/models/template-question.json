@@ -9,6 +9,10 @@
     "id"
   ],
   "properties": {
+    "multiAnswer": {
+      "type": "boolean",
+      "default": false
+    },
     "inactive": {
       "type": "boolean",
       "default": false
