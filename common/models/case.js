@@ -275,6 +275,7 @@ module.exports = function (Case) {
    * Before save hooks
    */
   Case.observe('before save', function (context, next) {
+    archiveClassificationChanges(context);
     helpers.sortMultiAnswerQuestions(context.isNewInstance ? context.instance : context.data);
     next();
   });
