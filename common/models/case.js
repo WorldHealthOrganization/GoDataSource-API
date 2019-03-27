@@ -6,7 +6,6 @@ const _ = require('lodash');
 const moment = require('moment');
 const helpers = require('../../components/helpers');
 const async = require('async');
-const helpers = require('../../components/helpers');
 
 module.exports = function (Case) {
   Case.getIsolatedContacts = function (caseId, callback) {
