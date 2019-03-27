@@ -20,7 +20,8 @@ const routines = {
       require('./scripts/defaultSystemSettings'),
       require('./scripts/defaultReferenceData'),
       require('./scripts/defaultLocations'),
-      require('./scripts/defaultHelpData')
+      require('./scripts/defaultHelpData'),
+      require('./scripts/migrateModelData')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });
@@ -31,7 +32,8 @@ const routines = {
       require('./scripts/migrateDatabaseCollections'),
       require('./scripts/defaultLanguages'),
       require('./scripts/defaultReferenceData'),
-      require('./scripts/defaultHelpData')
+      require('./scripts/defaultHelpData'),
+      require('./scripts/migrateModelData')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });

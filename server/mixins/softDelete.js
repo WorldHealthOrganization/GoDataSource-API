@@ -354,7 +354,12 @@ module.exports = function (Model) {
    * @returns {*}
    */
   Model.count = function countDeleted(where = {}, ...args) {
-    const whereNotDeleted = {and: [where, filterNonDeleted]};
+    // do we need to filter by deleted ?
+    const whereStringified = where ? JSON.stringify(where) : '';
+    const filterDeleted = whereStringified.indexOf('"deleted":') > -1;
+
+    // filter
+    const whereNotDeleted = filterDeleted ? where : {and: [where, filterNonDeleted]};
     return _count.call(Model, whereNotDeleted, ...args);
   };
 
