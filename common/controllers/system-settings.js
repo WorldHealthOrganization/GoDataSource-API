@@ -87,10 +87,6 @@ module.exports = function (SystemSettings) {
    * @param callback
    */
   SystemSettings.createPdfFromImage = function (response, imageBase64Str, splitFactor, splitType, callback) {
-    // flag that indicates that the response callback is already called
-    // used to avoid writing chunks into response after the Loopback response callback has been called
-    let responseCallbackCalled = false;
-
     // worker exit events
     const workerExitEvents = ['error', 'exit'];
 
