@@ -129,7 +129,7 @@ module.exports = function (LabResult) {
    * Before save hooks
    */
   LabResult.observe('before save', function (context, next) {
-    helpers.sortMultiAnswerQuestions(context.instance);
+    helpers.sortMultiAnswerQuestions(context.isNewInstance ? context.instance : context.data);
     next();
   });
 };
