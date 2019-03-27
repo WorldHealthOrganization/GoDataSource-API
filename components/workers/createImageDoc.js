@@ -50,10 +50,18 @@ const worker = {
 
     // decode the image and try to remove the 'boring' pixels from the edges
     let originalImageBuffer = Buffer.from(data.imageBase64, 'base64');
+
+    // remove the big base64 string from call stack
+    data.imageBase64 = null;
+
+    // decode the image
     let originalImage = Sharp(originalImageBuffer);
     originalImage
         .trim()
         .toBuffer((err, trimBuffer) => {
+          // clean this up asap
+          originalImageBuffer = null;
+
           let sharpInstance = null;
 
           // if trimming failed, might as well use the original image
@@ -62,6 +70,9 @@ const worker = {
           } else {
             sharpInstance = Sharp(trimBuffer);
           }
+
+          // clean this up asap
+          originalImage = null;
 
           // get the image metadata (width, height)
           sharpInstance
@@ -86,10 +97,6 @@ const worker = {
                 .toBuffer({ resolveWithObject: true });
             })
             .then(({ data, info }) => {
-              // force V8 to clean big objects
-              originalImage = null;
-              originalImageBuffer = null;
-
               // decode the resized image
               const resizedImage = Sharp(data);
 
