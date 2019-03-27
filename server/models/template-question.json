@@ -50,6 +50,13 @@
         "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD"
       ]
     },
+    "answersDisplay": {
+      "type": "string",
+      "enum": [
+        "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+        "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_HORIZONTAL"
+      ]
+    },
     "answers": {
       "type": [
         "templateQuestionAnswer"
