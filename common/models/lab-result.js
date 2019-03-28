@@ -121,7 +121,7 @@ module.exports = function (LabResult) {
           ]
         };
         // return updated filter
-        return Object.assign(filter, {where: labResultsQuery});
+        return Object.assign(filter, app.utils.remote.convertLoopbackFilterToMongo({where: labResultsQuery}));
       });
   };
 
