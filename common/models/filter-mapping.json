@@ -49,19 +49,19 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_user_account",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "find"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_user_account",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "findById"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_user_account",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "count"
     },
