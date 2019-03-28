@@ -1414,7 +1414,12 @@
       "LNG_PAGE_TITLE_RANGE_CONTACTS_LIST": "Range list of Contacts",
       "LNG_RANGE_CONTACTS_LIST_HEADER_END_DATE": "End Date",
       "LNG_RANGE_CONTACTS_LIST_HEADER_START_DATE": "Start Date",
-      "LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON": "La personne"
+      "LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON": "La personne",
+      "LNG_DOB_LABEL_DAY": "Day",
+      "LNG_DOB_LABEL_MONTH": "Month",
+      "LNG_DOB_LABEL_YEAR": "Year",
+      "LNG_AGE_LABEL_YEARS": "Years",
+      "LNG_AGE_LABEL_MONTHS": "Months"
     },
     "countries": {
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY": "Pays",

@@ -9,6 +9,12 @@ const _ = require('lodash');
 // PDF mime type
 const MIME_TYPE = 'application/pdf';
 
+// standard number of underline characters to be used when displaying labels without values
+const STANDARD_UNDERLINE_COUNT = 40;
+
+// standard title font size
+const STANDARD_PAGE_TITLE = 20;
+
 // define a default document configuration
 const defaultDocumentConfiguration = {
   size: 'A4',
@@ -348,7 +354,7 @@ const createImageDoc = function (imageData, splitFactor, splitType, callback) {
  */
 const addTitle = function (doc, title, fontSize) {
   let oldFontSize = doc._fontSize;
-  doc.fontSize(fontSize || 20);
+  doc.fontSize(fontSize || STANDARD_PAGE_TITLE);
   doc.text(title);
   doc.fontSize(oldFontSize).moveDown(0.5);
 };
@@ -360,14 +366,19 @@ const addTitle = function (doc, title, fontSize) {
  * @param title
  * @param doc
  * @param questions
+ * @param options
  */
-const createQuestionnaire = function (doc, questions, withData, title) {
+const createQuestionnaire = function (doc, questions, withData, title, options) {
+  options = options || {};
+  options.underlineCount = options.underlineCount || STANDARD_UNDERLINE_COUNT;
+  options.titleSize = options.titleSize || STANDARD_PAGE_TITLE;
+
   // cache initial document margin
-  const initialXMargin = doc.x;
+  let initialXMargin = doc.x;
 
   // add questionnaire page title
   if (title) {
-    addTitle(doc, title, 14);
+    addTitle(doc, title, options.titleSize);
   }
 
   // recursively insert each question and their answers into the document
@@ -386,7 +397,7 @@ const createQuestionnaire = function (doc, questions, withData, title) {
               doc.moveDown().text('Answer: ', isNested ? initialXMargin + 60 : initialXMargin + 20);
             }
           } else {
-            doc.moveDown().text(`Answer: ${'_'.repeat(50)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
+            doc.moveDown().text(`Answer: ${'_'.repeat(options.underlineCount)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
           }
           break;
         // File uploads are not handled when printing a pdf
@@ -706,27 +717,40 @@ const displayValue = function (value) {
 };
 
 /**
- * Display a model's fields
- * Do not display actual values, only field names
- * DisplayValues flag is also supported, if true it will display the actual field values
- * This flag is needed to create empty profile pages
- * Optionally a title can be added
+ * Display a resource fields in sections
  * @param doc
- * @param data
- * @param displayValues
+ * @param sections
  * @param title
- * @param numberOfEmptyEntries
+ * @param options
  */
-const displayCaseInvestigation = function (doc, data, displayValues, title, numberOfEmptyEntries) {
+const displaySections = function (doc, sections, title, options) {
+  options = options || {};
+  options.underlineCount = options.underlineCount || STANDARD_UNDERLINE_COUNT;
+  options.titleSize = options.titleSize || STANDARD_PAGE_TITLE;
+
   // add page title
   if (title) {
-    addTitle(doc, title, 14);
+    addTitle(doc, title, options.titleSize);
     doc.moveDown();
   }
 
   // cache initial document margin
-  doc.x = doc.x + 20;
   const initialXMargin = doc.x;
+  const labelStartWidth = initialXMargin + 20;
+
+  // find the highest label width to align them property
+  const gap = 20;
+  let highestLabelWidth = 0;
+  Object.keys(sections).forEach((section) => {
+    if (sections[section].labels) {
+      sections[section].labels.forEach((label) => {
+        const estimatedWidth = doc.widthOfString(label);
+        if (estimatedWidth > highestLabelWidth) {
+          highestLabelWidth = estimatedWidth;
+        }
+      });
+    }
+  });
 
   /**
    * Display labels in pdf
@@ -735,26 +759,94 @@ const displayCaseInvestigation = function (doc, data, displayValues, title, numb
    * @param copies
    */
   const displayLabels = (labels, additionalTitles = [], copies) => {
-    if (copies) {
-      for (let i = 0; i < copies; i++) {
-        labels.forEach((label, index) => {
-          if (additionalTitles[index]) {
-            addTitle(doc, additionalTitles[index], 10);
-          }
-          doc.text(`${label} ${' '.repeat(10)} ${'_'.repeat(30)}`, initialXMargin + 20).moveDown();
-        });
-        doc.moveDown();
+    copies = copies || 1;
+    for (let i = 0; i < copies; i++) {
+      doc.x = initialXMargin;
+
+      if (additionalTitles[i]) {
+        addTitle(doc, additionalTitles[i], 13);
       }
+      labels.forEach((label) => {
+        // if label is an object then we expect the following format ({ name, value})
+        let labelName = label;
+        let labelValue = null;
+
+        if (typeof label === 'object') {
+          labelName = label.name;
+          labelValue = label.value;
+        }
+
+        const labelWidth = doc.widthOfString(labelName);
+        const offsetWidth = highestLabelWidth - labelWidth;
+        const labelHeight = doc.heightOfString(labelName);
+
+        doc.text(labelName, labelStartWidth);
+        doc.text(labelValue || '_'.repeat(options.underlineCount), labelStartWidth + labelWidth + gap + offsetWidth, doc.y - labelHeight);
+
+        doc.moveDown();
+      });
+      doc.moveDown();
     }
   };
 
   // display each field on a row
-  Object.keys(data).forEach((section) => {
+  Object.keys(sections).forEach((section) => {
+    // reset X axis
+    doc.x = initialXMargin;
+
     // add section title
-    addTitle(doc, section, 12);
+    addTitle(doc, sections[section].title, 16);
 
     // display labels per section
-    displayLabels(data[section].labels, data[section].additionalTitles || [], data[section].copies);
+    displayLabels(sections[section].labels, sections[section].additionalTitles || [], sections[section].copies);
+  });
+
+  return doc;
+};
+
+/**
+ * Display a resource labels without any data
+ * Align the label and continued dash lines
+ * @param doc
+ * @param labels
+ * @param title
+ * @param options
+ */
+const displayResourceLabels = function (doc, labels, title, options) {
+  options = options || {};
+  options.underlineCount = options.underlineCount || STANDARD_UNDERLINE_COUNT;
+  options.titleSize = options.titleSize || STANDARD_PAGE_TITLE;
+
+  // add page title
+  if (title) {
+    addTitle(doc, title, options.titleSize);
+    doc.moveDown();
+  }
+
+  // cache initial document margin
+  const initialXMargin = doc.x;
+  const labelStartWidth = initialXMargin;
+
+  // find the highest label width, to align them property
+  const gap = 20;
+  let highestLabelWidth = 0;
+  labels.forEach((label) => {
+    const estimatedWidth = doc.widthOfString(label);
+    if (estimatedWidth > highestLabelWidth) {
+      highestLabelWidth = estimatedWidth;
+    }
+  });
+
+  // display labels
+  labels.forEach((label) => {
+    const labelWidth = doc.widthOfString(label);
+    const offsetWidth = highestLabelWidth - labelWidth;
+    const labelHeight = doc.heightOfString(label);
+
+    doc.text(label, labelStartWidth);
+    doc.text('_'.repeat(options.underlineCount), labelStartWidth + labelWidth + gap + offsetWidth, doc.y - labelHeight);
+
+    doc.moveDown();
   });
 
   return doc;
@@ -773,5 +865,6 @@ module.exports = {
   MIME_TYPE: MIME_TYPE,
   downloadPdfDoc: downloadPdfDoc,
   displayValue: displayValue,
-  displayCaseInvestigation: displayCaseInvestigation
+  displaySections: displaySections,
+  displayResourceLabels: displayResourceLabels
 };

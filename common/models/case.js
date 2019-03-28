@@ -92,7 +92,7 @@ module.exports = function (Case) {
     'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_NOT_A_CASE_DISCARDED'
   ];
 
-  Case.caseInvestigationSectionsFieldLabels = {
+  Case.sectionsFieldLabels = {
     personalInformation: {
       title: 'LNG_FORM_CASE_QUICK_LABEL_PERSONAL',
       labels: [
@@ -102,8 +102,6 @@ module.exports = function (Case) {
         'LNG_CASE_FIELD_LABEL_GENDER',
         'LNG_CASE_FIELD_LABEL_OCCUPATION',
         'LNG_CASE_FIELD_LABEL_AGE',
-        'LNG_CASE_FIELD_LABEL_AGE_YEARS',
-        'LNG_CASE_FIELD_LABEL_AGE_MONTHS',
         'LNG_CASE_FIELD_LABEL_DOB',
         'LNG_CASE_FIELD_LABEL_DATE_OF_ONSET_APPROXIMATE',
         'LNG_CASE_FIELD_LABEL_DATE_OF_REPORTING',
