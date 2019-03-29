@@ -1090,7 +1090,8 @@ const getBuildInformation = function () {
     version: _.get(packageJson, 'build.version', _.get(packageJson, 'version')),
     build: _.get(packageJson, 'build.build', 'development'),
     process: {
-      platform: process.platform
+      platform: process.platform,
+      arch: process.arch
     }
   };
 };
