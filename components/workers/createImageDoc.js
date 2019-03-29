@@ -2,16 +2,23 @@
 
 // dependencies
 const PdfUtils = require('../pdfDoc');
-const Sharp = require('sharp');
 const Async = require('async');
 
-// remove caching constraints
-// to not break the internal library on big files
-Sharp.cache(false);
+// on 32 bit library is not installed
+// suppress errors
+let Sharp = null;
+try {
+  // load lib
+  Sharp = require('sharp');
 
-// use only half of the CPU power to process images
-// to not hinder the master process performance too much
-Sharp.concurrency(Math.floor(Sharp.concurrency() / 2));
+  // remove caching constraints
+  // to not break the internal library on big files
+  Sharp.cache(false);
+
+  // use only half of the CPU power to process images
+  // to not hinder the master process performance too much
+  Sharp.concurrency(Math.floor(Sharp.concurrency() / 2));
+} catch (err) {}
 
 // A3 page - margins
 const pageSize = {
