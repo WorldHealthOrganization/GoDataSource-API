@@ -1419,7 +1419,9 @@
       "LNG_DOB_LABEL_MONTH": "Month",
       "LNG_DOB_LABEL_YEAR": "Year",
       "LNG_AGE_LABEL_YEARS": "Years",
-      "LNG_AGE_LABEL_MONTHS": "Months"
+      "LNG_AGE_LABEL_MONTHS": "Months",
+      "LNG_CONTACT_PERSONAL_SECTION": "Personal Information",
+      "LNG_CONTACT_ADDRESSES_SECTION": "Addresses"
     },
     "countries": {
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY": "Pays",
