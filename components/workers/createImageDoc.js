@@ -18,7 +18,9 @@ try {
   // use only half of the CPU power to process images
   // to not hinder the master process performance too much
   Sharp.concurrency(Math.floor(Sharp.concurrency() / 2));
-} catch (err) {}
+} catch (err) {
+  return err;
+}
 
 // A3 page - margins
 const pageSize = {
