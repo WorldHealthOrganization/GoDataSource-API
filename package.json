@@ -70,6 +70,9 @@
     "nsp": "2.8.1",
     "pump": "3.0.0"
   },
+  "optionalDependencies": {
+    "sharp": "^0.22.0"
+  },
   "repository": {
     "type": "",
     "url": ""
