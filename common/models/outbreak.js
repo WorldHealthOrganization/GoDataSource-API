@@ -1404,25 +1404,64 @@ module.exports = function (Outbreak) {
         return callback(error);
       }
 
-      // translate case, lab results, contact fields
-      let caseModel = Object.assign({}, models.case.fieldLabelsMap);
-      let contactModel = Object.assign({}, models.contact.fieldLabelsMap);
+      // translate contact/case sections
+      const translateCaseContactSectionLabels = function (model) {
+        const underlineCount = 6;
+        const sections = {};
+        const templateLabels = models[model].sectionsFieldLabels;
+        for (const section in templateLabels) {
+          sections[section] = {
+            title: dictionary.getTranslation(templateLabels[section].title),
+            labels: templateLabels[section].labels.map((label) => {
+              const translation = dictionary.getTranslation(label);
+              // AGE and DOB have custom label values
+              let ageLabel = 'LNG_CASE_FIELD_LABEL_AGE';
+              let dobLabel = 'LNG_CASE_FIELD_LABEL_DOB';
+              if (model === 'contact') {
+                ageLabel = 'LNG_CONTACT_FIELD_LABEL_AGE';
+                dobLabel = 'LNG_CONTACT_FIELD_LABEL_DOB';
+              }
+              if (label === ageLabel) {
+                return {
+                  name: translation,
+                  value: '_'.repeat(underlineCount) +
+                    dictionary.getTranslation('LNG_AGE_LABEL_YEARS') +
+                    '_'.repeat(underlineCount) +
+                    dictionary.getTranslation('LNG_AGE_LABEL_MONTHS')
+                };
+              }
+              if (label === dobLabel) {
+                return {
+                  name: translation,
+                  value: '_'.repeat(underlineCount) +
+                    dictionary.getTranslation('LNG_DOB_LABEL_DAY') +
+                    '_'.repeat(underlineCount) +
+                    dictionary.getTranslation('LNG_DOB_LABEL_MONTH') +
+                    '_'.repeat(underlineCount) +
+                    dictionary.getTranslation('LNG_DOB_LABEL_YEAR')
+                };
+              }
+              return translation;
+            })
+          };
 
-      // remove array properties from model definition (they are handled separately)
-      Object.keys(caseModel).forEach(function (property) {
-        if (property.indexOf('[]') !== -1) {
-          delete caseModel[property];
+          if (section === 'addresses') {
+            sections[section].additionalTitles = [
+              dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'),
+              dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_OTHER')
+            ];
+          }
+
+          if (section === 'addresses' || section === 'documents') {
+            sections[section].copies = 2;
+          }
         }
-      });
+        return sections;
+      };
 
-      caseModel.addresses = [models.address.fieldLabelsMap];
-      caseModel.documents = [models.document.fieldLabelsMap];
-
-      contactModel.addresses = [models.address.fieldLabelsMap];
-      contactModel.documents = [models.document.fieldLabelsMap];
-
-      let caseFields = genericHelpers.translateFieldLabels(app, caseModel, models.case.modelName, dictionary);
-      let contactFields = genericHelpers.translateFieldLabels(app, contactModel, models.contact.modelName, dictionary);
+      // translate case investigation labels
+      const caseSections = translateCaseContactSectionLabels(models.case.modelName);
+      const contactSections = translateCaseContactSectionLabels(models.contact.modelName);
 
       // remove not needed properties from lab result/relationship field maps
       let relationFieldsMap = Object.assign({}, models.relationship.fieldLabelsMap);
@@ -1439,12 +1478,30 @@ module.exports = function (Outbreak) {
 
       let pdfRequests = [];
 
+      // standard PDF sizes
+      const docFontSize = 12;
+      const qrFontSize = 7;
+
+      // setup go-data title on the left and QR code on the right
+      const setupPageHeader = function (doc) {
+        // we start text after document title and QR code
+        doc.moveDown(8);
+
+        // make the content a bit more centered
+        doc.x = doc.x + 30;
+
+        // we use a lower font size for QR, to not break the line
+        doc.fontSize(qrFontSize);
+        app.utils.qrCode.addPersonQRCode(doc, outbreakInstance.id, 'case', foundCase || generatedId);
+        doc.fontSize(docFontSize);
+      };
+
       for (let i = 0; i < copies; i++) {
         pdfRequests.push(
           (callback) => {
             // generate pdf document
             let doc = pdfUtils.createPdfDoc({
-              fontSize: 7,
+              fontSize: docFontSize,
               layout: 'portrait',
               lineGap: 0,
               wordSpacing: 0,
@@ -1458,16 +1515,15 @@ module.exports = function (Outbreak) {
 
             // add functionality whenever a new page is added
             doc.on('pageAdded', () => {
-              doc.moveDown(2);
-              app.utils.qrCode.addPersonQRCode(doc, outbreakInstance.id, 'case', foundCase || generatedId);
+              setupPageHeader(doc);
             });
 
-            // Apply previous code for the first page which is already added.
-            doc.moveDown(2);
-            app.utils.qrCode.addPersonQRCode(doc, outbreakInstance.id, 'case', foundCase || generatedId);
+            // apply page header to first page
+            // event 'pageAdded' is not called when creating the document
+            setupPageHeader(doc);
 
             // add case profile fields (empty)
-            pdfUtils.displayModelDetails(doc, caseFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
+            pdfUtils.displaySections(doc, caseSections, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
 
             // add case investigation questionnaire into the pdf in a separate page (only if the questionnaire exists)
             if (caseQuestions && caseQuestions.length) {
@@ -1477,7 +1533,7 @@ module.exports = function (Outbreak) {
 
             // add lab results information into a separate page
             doc.addPage();
-            pdfUtils.displayModelDetails(doc, labResultsFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_DETAILS'));
+            pdfUtils.displayResourceLabels(doc, Object.keys(labResultsFields), dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_DETAILS'));
 
             // add lab results questionnaire into a separate page (only if the questionnaire exists)
             if (labQuestions && labQuestions.length) {
@@ -1487,8 +1543,9 @@ module.exports = function (Outbreak) {
 
             // add contact relation template
             doc.addPage();
-            pdfUtils.displayModelDetails(doc, contactFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
-            pdfUtils.displayModelDetails(doc, relationFields, false, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_RELATIONSHIP'));
+            pdfUtils.displaySections(doc, contactSections, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
+            doc.addPage();
+            pdfUtils.displayResourceLabels(doc, Object.keys(relationFields), dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_RELATIONSHIP'));
 
             // add an additional empty page that contains only the QR code as per requirements
             doc.addPage();
