@@ -1,6 +1,6 @@
 {
   "name": "go-data-api",
-  "version": "2.20.1",
+  "version": "2.21.0",
   "main": "server/server.js",
   "engines": {
     "node": ">=8"
@@ -77,7 +77,7 @@
   "license": "UNLICENSED",
   "description": "WHO's Go.Data API",
   "build": {
-    "platform": "windows-x86",
+    "platform": "-",
     "type": "hub"
   }
 }
