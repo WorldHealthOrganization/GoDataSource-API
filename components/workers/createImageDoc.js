@@ -19,7 +19,9 @@ try {
   // to not hinder the master process performance too much
   Sharp.concurrency(Math.floor(Sharp.concurrency() / 2));
 } catch (err) {
-  return err;
+  // hack to not break the eslint
+  Sharp = err;
+  Sharp = null;
 }
 
 // A3 page - margins
