@@ -99,6 +99,7 @@ module.exports = function (Contact) {
     personalInformation: {
       title: 'LNG_CONTACT_PERSONAL_SECTION',
       labels: [
+        'LNG_CONTACT_FIELD_LABEL_VISUAL_ID',
         'LNG_CONTACT_FIELD_LABEL_FIRST_NAME',
         'LNG_CONTACT_FIELD_LABEL_MIDDLE_NAME',
         'LNG_CONTACT_FIELD_LABEL_LAST_NAME',
@@ -107,6 +108,7 @@ module.exports = function (Contact) {
         'LNG_CONTACT_FIELD_LABEL_AGE',
         'LNG_CONTACT_FIELD_LABEL_DOB',
         'LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING',
+        'LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
         'LNG_CONTACT_FIELD_LABEL_RISK_LEVEL',
         'LNG_CONTACT_FIELD_LABEL_RISK_REASON'
       ]
