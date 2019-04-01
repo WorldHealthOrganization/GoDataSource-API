@@ -1181,13 +1181,18 @@ module.exports = function (Outbreak) {
           variable: question.variable,
           answerType: question.answerType,
           answers: question.answers,
-          multiAnswer: question.multiAnswer
+          multiAnswer: question.multiAnswer,
+          answersDisplay: question.answersDisplay
         };
 
         // do not try to translate answers that are free text
         if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER'
           || question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
           questionResult.answers = question.answers.map((answer) => {
+            if (answer.additionalQuestions && answer.additionalQuestions.length) {
+              // we don't support horizontal display for answers with additional questions
+              questionResult.answersDisplay = 'LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL'
+            }
             return {
               label: translateToken(answer.label),
               value: answer.value,
