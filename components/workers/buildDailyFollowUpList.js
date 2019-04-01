@@ -58,7 +58,7 @@ const worker = {
       // Add group title
       pdfUtils.addTitle(doc, `${commonLabels.groupTitle}: ${recordSet.name}`, 12);
 
-      doc.moveDown(3);
+      doc.moveDown(1);
 
       // Add the follow-up table (add data in batches)
       pdfUtils.createTableInPDFDocument(headers, recordSet.records, doc, null, null, function () {
@@ -67,6 +67,8 @@ const worker = {
 
         // Add group total
         pdfUtils.addTitle(doc, `${commonLabels.total}: ${recordSet.records.length}`, 12);
+
+        doc.moveDown(2);
 
         // if this is not the last record on in the last dataSet, add a new page for the next record
         if (!lastSet || index < Object.keys(initialDataSetLength).length - 1) {
