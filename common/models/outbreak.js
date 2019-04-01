@@ -1191,7 +1191,7 @@ module.exports = function (Outbreak) {
           questionResult.answers = question.answers.map((answer) => {
             if (answer.additionalQuestions && answer.additionalQuestions.length) {
               // we don't support horizontal display for answers with additional questions
-              questionResult.answersDisplay = 'LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL'
+              questionResult.answersDisplay = 'LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL';
             }
             return {
               label: translateToken(answer.label),
