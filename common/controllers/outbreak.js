@@ -6879,7 +6879,7 @@ module.exports = function (Outbreak) {
         return contactGroups;
       })
       .then((contactGroups) => {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
           // resolve location names if contacts are being grouped by case
           if (body.groupBy === 'case') {
             let groupContactLocationMap = {};
@@ -6907,44 +6907,38 @@ module.exports = function (Outbreak) {
               }
             }
 
+            // retrieve locations
             return models.location
-              .resolveLocationsWithLevel(allLocationsIds, {
-                locationIds: this.locationIds,
-                reportingGeographicalLevelId: this.reportingGeographicalLevelId
+              .rawFind({
+                id: {
+                  $in: allLocationsIds
+                }
               })
-              .then((resolvedLocationIdsMap) => {
-                // resolve the locations names
-                let locationNameResolvePromises = [];
+              .catch(reject)
+              .then((locations) => {
+                // map locations
+                const locationsMap = _.transform(
+                  locations,
+                  (accumulator, value) => {
+                    accumulator[value.id] = value;
+                  },
+                  {}
+                );
 
-                // remap each location to each contact
+                // add locations to each group
                 for (let group in groupContactLocationMap) {
-                  if (groupContactLocationMap.hasOwnProperty(group)) {
-                    // check if any of the group's contacts have an entry in the resolved location map
-                    let contactsWithResolvedLocation = groupContactLocationMap[group].filter((contactLocation) => {
-                      return resolvedLocationIdsMap.hasOwnProperty(contactLocation.locationId);
-                    });
-
-                    contactsWithResolvedLocation.forEach((item) => {
-                      ((locationId, index, groupName) => {
-                        locationNameResolvePromises.push(
-                          new Promise((resolve, reject) => {
-                            models.location
-                              .findById(locationId)
-                              .then((location) => {
-                                if (location) {
-                                  contactGroups[groupName][index].locationName = location.name;
-                                }
-                                return resolve();
-                              })
-                              .catch(reject);
-                          })
-                        );
-                      })(resolvedLocationIdsMap[item.locationId], item.arrayIndex, group);
-                    });
-                  }
+                  groupContactLocationMap[group].map((groupItem) => {
+                    if (
+                      groupItem.locationId &&
+                      locationsMap[groupItem.locationId]
+                    ) {
+                      contactGroups[group][groupItem.arrayIndex].locationName = locationsMap[groupItem.locationId].name;
+                    }
+                  });
                 }
 
-                return Promise.all(locationNameResolvePromises).then(() => resolve(contactGroups));
+                // finished
+                resolve(contactGroups);
               });
           }
           return resolve(contactGroups);
@@ -7860,26 +7854,10 @@ module.exports = function (Outbreak) {
                     // add follow-up  to the group
                     groups[locationId].records.push(followUp);
                   });
-                  // exported locations should match the reporting level set for outbreak
-                  return app.models.location
-                    .resolveLocationsWithLevel(Object.keys(groups), self)
-                    .then(function (locationMap) {
-                      // remap groups to use outbreak reporting level
-                      const _groups = {};
-                      Object.keys(groups).forEach(function (location) {
-                        // get group id
-                        const groupId = locationMap[location] || 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION';
-                        // if the group does not exist
-                        if (!_groups[groupId]) {
-                          // copy existing group
-                          _groups[groupId] = groups[location];
-                        } else {
-                          // otherwise update group with new records
-                          _groups[groupId].records.push(...groups[location].records);
-                        }
-                      });
-                      return _groups;
-                    });
+
+                  // no need to return locations grouped by outbreak admin level locations
+                  // that is how it was the old logic, which was removed after discussing with WHO in WGD-2000
+                  return groups;
                 case 'case':
                   // group by case, first find relationships of a contact
                   return app.models.relationship
@@ -9057,26 +9035,9 @@ module.exports = function (Outbreak) {
                       groups[locationId].records.push(contact);
                     });
 
-                    // exported locations should match the reporting level set for outbreak
-                    return app.models.location
-                      .resolveLocationsWithLevel(Object.keys(groups), self)
-                      .then(function (locationMap) {
-                        // remap groups to use outbreak reporting level
-                        const _groups = {};
-                        Object.keys(groups).forEach(function (location) {
-                          // get group id
-                          const groupId = locationMap[location] || 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION';
-                          // if the group does not exist
-                          if (!_groups[groupId]) {
-                            // copy existing group
-                            _groups[groupId] = groups[location];
-                          } else {
-                            // otherwise update group with new records
-                            _groups[groupId].records.push(...groups[location].records);
-                          }
-                        });
-                        return _groups;
-                      });
+                    // no need to return locations grouped by outbreak admin level locations
+                    // that is how it was the old logic, which was removed after discussing with WHO in WGD-2000
+                    return groups;
                   } else {
                     // group by case, first find relationships
                     return app.models.relationship
