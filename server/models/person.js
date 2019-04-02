@@ -339,7 +339,7 @@ module.exports = function (Person) {
           // get mask property
           let maskProperty = data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ? 'caseIdMask' : 'contactIdMask';
 
-          // resolve visual ID
+          // resolve visual ID; send the mask as the visualId to not break logic
           return app.models.outbreak.helpers
             .getAvailableVisualId(outbreak, maskProperty, outbreak[maskProperty]);
         })
