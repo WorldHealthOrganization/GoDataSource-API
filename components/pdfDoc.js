@@ -15,6 +15,9 @@ const STANDARD_UNDERLINE_COUNT = 40;
 // standard title font size
 const STANDARD_PAGE_TITLE = 20;
 
+// maximum number of nested questions allowed
+const MAX_QUESTIONS_LEVEL = 4;
+
 // define a default document configuration
 const defaultDocumentConfiguration = {
   size: 'A4',
@@ -371,11 +374,11 @@ const addTitle = function (doc, title, fontSize) {
  */
 const createQuestionnaire = function (doc, questions, withData, title, options) {
   options = options || {};
-  options.underlineCount = options.underlineCount || STANDARD_UNDERLINE_COUNT;
+  options.underlineCount = options.underlineCount || 25;
   options.titleSize = options.titleSize || STANDARD_PAGE_TITLE;
 
   // cache initial document margin
-  let initialXMargin = doc.x;
+  const initialXMargin = doc.x;
 
   // add questionnaire page title
   if (title) {
@@ -383,22 +386,38 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
   }
 
   // recursively insert each question and their answers into the document
-  (function addQuestions(questions, isNested) {
+  (function addQuestions(questions, margin, level) {
     questions.forEach((item) => {
-      doc.moveDown(1).text(`${item.order}. ${item.question}`, isNested ? initialXMargin + 40 : initialXMargin);
+      if (level > MAX_QUESTIONS_LEVEL) {
+        return;
+      }
+
+      let questionMargin = initialXMargin;
+      if (margin) {
+        questionMargin = margin + 25;
+      }
+
+      // display type
+      const displayVertical = item.answersDisplay === 'LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL';
+
+      // question test
+      doc.moveDown().text(`${item.order}. ${item.question}`, questionMargin + 20);
+
+      // answers should have indentation
+      questionMargin = questionMargin + 10;
 
       // answers type are written differently into the doc
       switch (item.answerType) {
         default:
           if (withData) {
             if (item.value) {
-              doc.moveDown().text('Answer: ' + item.value, isNested ? initialXMargin + 60 : initialXMargin + 20);
+              doc.moveDown().text('Answer: ' + item.value, questionMargin + 20);
             } else {
               // In case the user did not answer this questions, we prevent printing 'undefined'
-              doc.moveDown().text('Answer: ', isNested ? initialXMargin + 60 : initialXMargin + 20);
+              doc.moveDown().text('Answer: ', questionMargin + 20);
             }
           } else {
-            doc.moveDown().text(`Answer: ${'_'.repeat(options.underlineCount)}`, isNested ? initialXMargin + 60 : initialXMargin + 20);
+            doc.moveDown().text(`Answer: ${'_'.repeat(options.underlineCount)}`, questionMargin + 20);
           }
           break;
         // File uploads are not handled when printing a pdf
@@ -406,32 +425,73 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
           break;
         case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER':
         case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS':
-          // NOTE: only first nested level is handled for additional questions
+          // flag that indicates this is the first answer
+          let firstAnswer = true;
+          const getRectY = function (doc, displayVertical) {
+            return displayVertical ? doc.y - 3 : doc.y;
+          };
+
+          // from here starts the question
+          doc.moveDown();
+
+          let answerXMargin = questionMargin;
+          let answerY = doc.y;
+
           item.answers.forEach((answer) => {
-            doc.moveDown().text(answer.label, isNested ? initialXMargin + 85 : initialXMargin + 45);
+            if (!firstAnswer) {
+              if (displayVertical) {
+                doc.moveDown();
+              } else {
+                // reset X axis if last answer did break the line
+                if (!displayVertical && (doc.y - answerY > 10)) {
+                  answerXMargin = questionMargin;
+                  doc.moveDown(0.5);
+                } else {
+                  answerXMargin = doc.x + 20;
+                }
+              }
+            }
+
+            // calculate the checkbox height
+            const rectY = getRectY(doc, displayVertical);
+
             // we need to reduce rectangle height to be on the same height as the text
             if (withData && answer.selected) {
-              doc.moveUp()
-                .rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3, 15, 15)
-                .moveTo(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3)
-                .lineTo(isNested ? initialXMargin + 60 + 15 : initialXMargin + 20 + 15, doc.y - 3 + 15)
-                .moveTo(isNested ? initialXMargin + 60 + 15 : initialXMargin + 20 + 15, doc.y - 3)
-                .lineTo(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3 + 15)
-                .stroke()
-                .moveDown();
+              doc
+                .rect(answerXMargin + 20, rectY, 15, 15)
+                .moveTo(answerXMargin + 20, rectY)
+                .lineTo(answerXMargin + 20 + 15, rectY + 15)
+                .moveTo(answerXMargin + 20 + 15, rectY)
+                .lineTo(answerXMargin + 20, rectY + 15)
+                .stroke();
             } else {
-              doc.moveUp().rect(isNested ? initialXMargin + 60 : initialXMargin + 20, doc.y - 3, 15, 15).stroke().moveDown();
+              doc.rect(answerXMargin + 20, rectY, 15, 15).stroke();
             }
+
+            doc.text(answer.label, answerXMargin + 45, rectY);
+            doc.moveUp();
 
             // handle additional questions
             if (answer.additionalQuestions.length) {
-              addQuestions(answer.additionalQuestions, true);
+              doc.moveDown();
+              addQuestions(answer.additionalQuestions, questionMargin, level + 1);
+            } else {
+              if (displayVertical) {
+                doc.moveDown();
+              }
             }
+
+            // no longer first questions
+            firstAnswer = false;
           });
+
           break;
       }
+
+      // next question
+      doc.moveDown();
     });
-  })(questions);
+  })(questions, false, 0);
 
   return doc;
 };
