@@ -311,11 +311,53 @@ module.exports = function (Person) {
       }
     }
 
-    // do not execute visualId login on sync if the generatePersonVisualId flag is false
-    if (context.options && context.options._sync && !context.options.generatePersonVisualId) {
-      return next();
+    // special sync logic as no validation of visualId is required on sync
+    if (context.options && context.options._sync) {
+      // we need to generate the visualId when the generatePersonVisualId flag is sent and person visual ID is empty
+      if (!context.options.generatePersonVisualId) {
+        return next();
+      }
+
+      // if visual ID is sent; no need to do anything
+      if (data.target.visualId) {
+        return next();
+      }
+
+      // generatePersonVisualId is true and visual ID was not sent; try to generate the visual ID
+      // get outbreak
+      app.models.outbreak
+        .findById(data.source.existing.outbreakId)
+        .then(function (outbreak) {
+          // check for outbreak; should always exist
+          if (!outbreak) {
+            throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+              model: app.models.outbreak.modelName,
+              id: data.source.existing.outbreakId
+            });
+          }
+
+          // get mask property
+          let maskProperty = data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ? 'caseIdMask' : 'contactIdMask';
+
+          // resolve visual ID
+          return app.models.outbreak.helpers
+            .getAvailableVisualId(outbreak, maskProperty, outbreak[maskProperty]);
+        })
+        .then(function (resolvedVisualId) {
+          data.target.visualId = resolvedVisualId;
+          next();
+        })
+        .catch(function (err) {
+          // mask couldn't be generated; log error and continue saving the user
+          app.logger.debug(`Failed generating visualId for person '${data.target.id}'. Error: ${err}`);
+          next();
+        });
+
+      // stop logic for sync
+      return;
     }
 
+    // sync action doesn't need validation and it doesn't reach here
     // check if visual id should be validated (validation can be disabled under certain conditions)
     const validateVisualId = !_.get(context, 'options._disableVisualIdValidation', false);
 
