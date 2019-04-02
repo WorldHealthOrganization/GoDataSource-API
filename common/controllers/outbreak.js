@@ -7914,7 +7914,9 @@ module.exports = function (Outbreak) {
                       // if location was found
                       if (currentAddress) {
                         // use it
-                        locationId = currentAddress.locationId;
+                        locationId = currentAddress.locationId ?
+                          currentAddress.locationId :
+                          'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION';
                         // update follow-up address
                         followUp.address = currentAddress;
                       }
@@ -8031,6 +8033,10 @@ module.exports = function (Outbreak) {
                   locations.forEach(function (location) {
                     locationsMap[location.id] = location;
                   });
+
+                  // unknown translated name
+                  const unknownLocationName = dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION');
+
                   // go through the groups
                   Object.keys(groups).forEach(function (groupId) {
                     // build data sets
@@ -8046,7 +8052,7 @@ module.exports = function (Outbreak) {
                         data[groupId].name = _.get(locationsMap, `${groupId}.name`);
                       } else {
                         // otherwise add Unknown Location label
-                        data[groupId].name = dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION');
+                        data[groupId].name = unknownLocationName;
                       }
                     }
                     // go through all records
@@ -8151,7 +8157,13 @@ module.exports = function (Outbreak) {
               // process groups in batches
               (function processInBatches(commonLabels, headers, dataSet) {
                 // get the list of keys
-                const setKeys = Object.keys(dataSet);
+                let setKeys = Object.keys(dataSet);
+
+                // sort by location name ascending
+                setKeys.sort((locationId1, locationId2) => {
+                  return dataSet[locationId2].name.toLowerCase().localeCompare(dataSet[locationId1].name.toLowerCase());
+                });
+
                 // get max batch size
                 let maxBatchSize = setKeys.length;
                 // no records left to be processed
@@ -8159,7 +8171,7 @@ module.exports = function (Outbreak) {
                   // all records processed, inform the worker that is time to finish
                   return dailyFollowUpListBuilder.send({fn: 'finish', args: []});
                 } else if (maxBatchSize > 100) {
-                  // too many records left, limit batch size to 1000
+                  // too many records left, limit batch size to 100
                   maxBatchSize = 100;
                 }
                 // build a subset of data
