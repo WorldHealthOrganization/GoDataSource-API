@@ -11,9 +11,8 @@ try {
   // load lib
   Sharp = require('sharp');
 
-  // remove caching constraints
-  // to not break the internal library on big files
-  Sharp.cache(false);
+  // remove caching, to not break the internal library (libvips) on big files
+  //Sharp.cache();
 
   // do not allow concurrent executions
   // it uses too much memory on bigger scales (10+)
@@ -111,6 +110,10 @@ const worker = {
             // decode the resized image
             const resizedImage = Sharp(data);
 
+            // remove pixels limit
+            resizedImage.limitInputPixels(false);
+            resizedImage.sequentialRead(true);
+
             // cache its sizes
             const imageWidth = info.width;
             const imageHeight = info.height;
@@ -154,7 +157,6 @@ const worker = {
             const asyncQ = Async.queue((task, qCallback) => {
               // crop the image
               resizedImage
-                .clone()
                 .extract({
                   left: task.offsetWidth,
                   top: task.offsetHeight,
