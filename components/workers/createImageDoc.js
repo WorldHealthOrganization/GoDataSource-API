@@ -15,9 +15,9 @@ try {
   // to not break the internal library on big files
   Sharp.cache(false);
 
-  // use only half of the CPU power to process images
-  // to not hinder the master process performance too much
-  Sharp.concurrency(Math.floor(Sharp.concurrency() / 2));
+  // do not allow concurrent executions
+  // it uses too much memory on bigger scales (10+)
+  Sharp.concurrency(1);
 } catch (err) {
   // hack to not break the eslint
   Sharp = err;
@@ -152,27 +152,21 @@ const worker = {
 
             // create an async queue for cropping images and adding them in the PDF
             const asyncQ = Async.queue((task, qCallback) => {
-              Async.parallel(task.batch.map((task) => {
-                return (cropCallback) => {
-                  // crop the image
-                  resizedImage
-                    .clone()
-                    .extract({
-                      left: task.offsetWidth,
-                      top: task.offsetHeight,
-                      width: task.width,
-                      height: task.height
-                    })
-                    .toBuffer()
-                    .then((buffer) => cropCallback(null, buffer))
-                    .catch(cropCallback);
-                };
-              }), (err, buffers) => {
-                if (err) {
-                  return qCallback(err);
-                }
+              // crop the image
+              resizedImage
+                .clone()
+                .extract({
+                  left: task.offsetWidth,
+                  top: task.offsetHeight,
+                  width: task.width,
+                  height: task.height
+                })
+                .toBuffer()
+                .then((buffer) => {
+                  if (err) {
+                    return qCallback(err);
+                  }
 
-                buffers.forEach((buffer) => {
                   if (!firstPage) {
                     doc.addPage();
                   }
@@ -183,10 +177,10 @@ const worker = {
 
                   // overlay transparent logo
                   doc.addTransparentLogo();
-                });
 
-                return qCallback();
-              });
+                  return qCallback();
+                })
+                .catch(qCallback);
             }, 1 /* do not change!!!, otherwise we encounter race conditions */);
 
             // notify parent process that intensive task is done
@@ -201,8 +195,6 @@ const worker = {
             };
 
             // build a matrix of images, each cropped to its own position in the matrix
-            let batch = [];
-            const batchSize = Sharp.concurrency() || 1;
             for (let row = 0; row < rows; row++) {
               for (let column = 0; column < columns; column++) {
                 let processedHeight = row * height;
@@ -212,12 +204,7 @@ const worker = {
                 let cropHeight = Math.min(Math.max(0, imageHeight - processedHeight), height);
                 // if something was cropped, add it to the list of images
                 if (cropWidth && cropHeight) {
-                  // flush the current batch of items if threshold is reached
-                  if (batch.length === batchSize) {
-                    asyncQ.push({ batch: batch });
-                    batch = [];
-                  }
-                  batch.push({
+                  asyncQ.push({
                     offsetWidth: processedWidth,
                     offsetHeight: processedHeight,
                     width: cropWidth,
@@ -225,12 +212,6 @@ const worker = {
                   });
                 }
               }
-            }
-
-            // sometimes the number of images is lower than the batch size
-            // just get all the remaining items from the batch size and process them
-            if (batch.length > 0) {
-              asyncQ.push({ batch: batch });
             }
           })
           .catch((err) => process.send([{ error: err.message }]));
