@@ -477,7 +477,7 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
               addQuestions(answer.additionalQuestions, questionMargin, level + 1);
             } else {
               if (displayVertical) {
-                doc.moveDown();
+                doc.moveDown(1.5);
               }
             }
 

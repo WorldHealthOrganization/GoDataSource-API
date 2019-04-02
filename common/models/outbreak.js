@@ -1250,42 +1250,33 @@ module.exports = function (Outbreak) {
    * @param questions
    */
   Outbreak.helpers.prepareQuestionsForPrint = function (answers, questions) {
-    // convert questionnaire answers to old format, before doing anything
-    answers = genericHelpers.convertQuestionnaireAnswersToOldFormat(answers);
+    questions.forEach((question) => {
+      let qAnswer = answers[question.variable];
 
-    Object.keys(answers).forEach((key) => {
-      let question = _.find(questions, (question) => {
-        return question.variable === key;
-      });
-
-      if (question) {
-        // check the length of the list as well
-        // weird case when question is free text but the answers is an empty list
-        if (Array.isArray(question.answers) && question.answers.length) {
+      if (qAnswer) {
+        if (Array.isArray(question.answers) && question.answers.length && !Array.isArray(qAnswer)) {
+          qAnswer = [qAnswer];
+        }
+        if (Array.isArray(qAnswer) && qAnswer.length) {
           question.answers.forEach((answer) => {
-            // when the question is multi/single answer and no option is selected
-            // code break if we don't check this
-            if (!answers[key]) {
-              return;
-            }
-
-            if (answers[key].indexOf(answer.value) !== -1) {
+            if (qAnswer.indexOf(answer.value) !== -1) {
               answer.selected = true;
             }
-
             if (answer.additionalQuestions && answer.additionalQuestions.length) {
-              Outbreak.helpers.prepareQuestionsForPrint(answers, answer.additionalQuestions);
+              answer.additionalQuestions = Outbreak.helpers.prepareQuestionsForPrint(answers, answer.additionalQuestions);
             }
           });
         } else {
-          if (answers[key] instanceof Date || genericHelpers.isValidDate(answers[key])) {
-            question.value = genericHelpers.getDateDisplayValue(answers[key]);
+          if (qAnswer instanceof Date || genericHelpers.isValidDate(qAnswer)) {
+            question.value = genericHelpers.getDateDisplayValue(qAnswer);
           } else {
-            question.value = answers[key];
+            question.value = qAnswer;
           }
         }
       }
     });
+
+    return questions;
   };
 
   /**
