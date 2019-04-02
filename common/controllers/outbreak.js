@@ -4684,10 +4684,14 @@ module.exports = function (Outbreak) {
                 app.utils.helpers.translateDataSetReferenceDataValues(labResult, models.labResult, dictionary);
 
                 // clone the questionnaires, as the function below is actually altering them
-                const labResultsQuestions = _.cloneDeep(labResultsQuestionnaire);
+                let labResultsQuestions = _.cloneDeep(labResultsQuestionnaire);
+
+                // convert questionnaire answers to old format, before doing anything
+                let labResultAnswers = labResult.questionnaireAnswers || {};
+                labResultAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(labResultAnswers);
 
                 // since we are presenting all the answers, mark the one that was selected, for each question
-                Outbreak.helpers.prepareQuestionsForPrint(labResult.questionnaireAnswers, labResultsQuestions);
+                labResultsQuestions = Outbreak.helpers.prepareQuestionsForPrint(labResultAnswers, labResultsQuestions);
 
                 // translate the remaining fields on the lab result model
                 labResult = app.utils.helpers.translateFieldLabels(app, labResult, models.labResult.modelName, dictionary);
@@ -4700,10 +4704,14 @@ module.exports = function (Outbreak) {
               });
 
               // clone the questionnaires, as the function below is actually altering them
-              const caseInvestigationQuestions = _.cloneDeep(caseInvestigationQuestionnaire);
+              let caseInvestigationQuestions = _.cloneDeep(caseInvestigationQuestionnaire);
+
+              // convert questionnaire answers to old format, before doing anything
+              let personAnswers = person.questionnaireAnswers || {};
+              personAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(personAnswers);
 
               // since we are presenting all the answers, mark the one that was selected, for each question
-              Outbreak.helpers.prepareQuestionsForPrint(person.questionnaireAnswers || {}, caseInvestigationQuestions);
+              caseInvestigationQuestions = Outbreak.helpers.prepareQuestionsForPrint(personAnswers, caseInvestigationQuestions);
 
               // translate all remaining keys
               person = app.utils.helpers.translateFieldLabels(app, person, models.case.modelName, dictionary);
@@ -4948,8 +4956,12 @@ module.exports = function (Outbreak) {
                 // Translate the questions and the answers from the follow up
                 questions = Outbreak.helpers.parseTemplateQuestions(followUpQuestionnaire, dictionary);
 
+                // translate follow up questionnaire answers to general format
+                let followUpAnswers = followUp.questionnaireAnswers || {};
+                followUpAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(followUpAnswers);
+
                 // Since we are presenting all the answers, mark the one that was selected, for each question
-                Outbreak.helpers.prepareQuestionsForPrint(followUp.questionnaireAnswers, questions);
+                questions = Outbreak.helpers.prepareQuestionsForPrint(followUpAnswers, questions);
 
                 // Translate the remaining fields on the follow up model
                 followUp = app.utils.helpers.translateFieldLabels(app, followUp, app.models.followUp.modelName, dictionary);
