@@ -7903,10 +7903,37 @@ module.exports = function (Outbreak) {
               // add contact information for each follow-up
               followUps.forEach(function (followUp) {
                 followUp.contact = contactsMap[followUp.personId];
+
+                // assume unknown location
+                let locationId = 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION';
+
+                // try to get location from the follow-up
                 if (followUp.address && followUp.address.locationId) {
-                  locationsToResolve.push(followUp.address.locationId);
+                  locationId = followUp.address.locationId;
+                }
+
+                // if location was not found
+                if (locationId === 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION') {
+                  // try to get location from the contact
+                  let currentAddress = app.models.person.getCurrentAddress(followUp.contact || {});
+                  // if location was found
+                  if (currentAddress) {
+                    // use it
+                    currentAddress.locationId = currentAddress.locationId ?
+                      currentAddress.locationId :
+                      'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION';
+
+                    // update follow-up address
+                    followUp.address = currentAddress;
+                  }
+                }
+
+                // retrieve locations
+                if (locationId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION') {
+                  locationsToResolve.push(locationId);
                 }
               });
+
               // build groups (grouped by place/case)
               const groups = {};
               switch (groupBy) {
@@ -7915,24 +7942,12 @@ module.exports = function (Outbreak) {
                   followUps.forEach(function (followUp) {
                     // assume unknown location
                     let locationId = 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION';
+
                     // try to get location from the follow-up
                     if (followUp.address && followUp.address.locationId) {
                       locationId = followUp.address.locationId;
                     }
-                    // if location was not found
-                    if (locationId === 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION') {
-                      // try to get location from the contact
-                      let currentAddress = app.models.person.getCurrentAddress(followUp.contact || {});
-                      // if location was found
-                      if (currentAddress) {
-                        // use it
-                        locationId = currentAddress.locationId ?
-                          currentAddress.locationId :
-                          'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION';
-                        // update follow-up address
-                        followUp.address = currentAddress;
-                      }
-                    }
+
                     // init group (if not present)
                     if (!groups[locationId]) {
                       groups[locationId] = {
@@ -8069,10 +8084,6 @@ module.exports = function (Outbreak) {
                     }
                     // go through all records
                     groups[groupId].records.forEach(function (record) {
-                      // add record location information (from the resolved locations
-                      if (record.address && record.address.locationId) {
-                        record.location = locationsMap[record.address.locationId];
-                      }
                       // translate gender
                       record.gender = dictionary.getTranslation(_.get(record, 'contact.gender'));
                       // build record entry
@@ -8082,7 +8093,9 @@ module.exports = function (Outbreak) {
                         middleName: _.get(record, 'contact.middleName', ''),
                         age: `${_.get(record, 'contact.age.years', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(record, 'contact.age.months', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
                         gender: record.gender,
-                        location: _.get(record, 'location.name', ''),
+                        location: record.address && record.address.locationId && record.address.locationId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION' && locationsMap[record.address.locationId] ?
+                          locationsMap[record.address.locationId].name :
+                          unknownLocationName,
                         address: app.models.address.getHumanReadableAddress(record.address),
                         day: record.index,
                         from: moment(_.get(record, 'contact.followUp.startDate')).format('YYYY-MM-DD'),
@@ -8134,10 +8147,11 @@ module.exports = function (Outbreak) {
                   id: 'gender',
                   header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER')
                 }]),
-                ...[{
+                ...(groupBy === 'case' ? [{
                   id: 'location',
                   header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION')
-                }, {
+                }] : []),
+                ...[{
                   id: 'address',
                   header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS')
                 }, {
@@ -9114,6 +9128,9 @@ module.exports = function (Outbreak) {
                       // if location was found
                       if (currentAddress) {
                         // use it
+                        currentAddress.locationId = currentAddress.locationId ?
+                          currentAddress.locationId :
+                          'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION';
                         locationId = currentAddress.locationId;
                       }
 
@@ -9217,7 +9234,25 @@ module.exports = function (Outbreak) {
                   if (groupBy === 'place') {
                     // add group ids to the list of locations that need to be resolved
                     locationsToResolve.push(...Object.keys(groups));
+                  } else {
+                    const locationsToRetrieve = {};
+                    Object.keys(groups).forEach(function (groupId) {
+                      groups[groupId].records.forEach(function (record) {
+                        if (!record.currentAddress) {
+                          record.currentAddress = app.models.person.getCurrentAddress(record);
+                          if (
+                            record.currentAddress &&
+                            record.currentAddress.locationId &&
+                            record.currentAddress.locationId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION'
+                          ) {
+                            locationsToRetrieve[record.currentAddress.locationId] = true;
+                          }
+                        }
+                      });
+                    });
+                    locationsToResolve.push(...Object.keys(locationsToRetrieve));
                   }
+
                   // find locations
                   return app.models.location
                     .rawFind({
@@ -9258,6 +9293,7 @@ module.exports = function (Outbreak) {
                             data[groupId].name = unknownLocationTranslation;
                           }
                         }
+
                         // go through all records
                         groups[groupId].records.forEach(function (record) {
                           if (!record.currentAddress) {
@@ -9266,9 +9302,6 @@ module.exports = function (Outbreak) {
                             };
                           }
 
-                          // add record location information (from the resolved locations)
-                          record.location = locationsMap[record.currentAddress.locationId];
-
                           // build record entry
                           const recordEntry = {
                             lastName: _.get(record, 'lastName', ''),
@@ -9276,7 +9309,9 @@ module.exports = function (Outbreak) {
                             middleName: _.get(record, 'middleName', ''),
                             age: `${_.get(record, 'age.years', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(record, 'contact.age.months', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
                             gender: dictionary.getTranslation(_.get(record, 'gender')),
-                            location: _.get(record, 'location.name', ''),
+                            location: record.currentAddress && record.currentAddress.locationId && record.currentAddress.locationId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION' && locationsMap[record.currentAddress.locationId] ?
+                              locationsMap[record.currentAddress.locationId].name :
+                              unknownLocationTranslation,
                             address: app.models.address.getHumanReadableAddress(record.currentAddress),
                             from: moment(_.get(record, 'followUp.startDate')).format('YYYY-MM-DD'),
                             to: moment(_.get(record, 'followUp.endDate')).format('YYYY-MM-DD'),
@@ -9306,34 +9341,38 @@ module.exports = function (Outbreak) {
                   }
 
                   // build table headers
-                  const headers = [{
-                    id: 'firstName',
-                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME')
-                  }, {
-                    id: 'lastName',
-                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME')
-                  }, {
-                    id: 'middleName',
-                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME')
-                  }, {
-                    id: 'age',
-                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE')
-                  }, {
-                    id: 'gender',
-                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER')
-                  }, {
-                    id: 'location',
-                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION')
-                  }, {
-                    id: 'address',
-                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS')
-                  }, {
-                    id: 'from',
-                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM')
-                  }, {
-                    id: 'to',
-                    header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO')
-                  }];
+                  const headers = [
+                    ...([{
+                      id: 'firstName',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME')
+                    }, {
+                      id: 'lastName',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME')
+                    }, {
+                      id: 'middleName',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME')
+                    }, {
+                      id: 'age',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE')
+                    }, {
+                      id: 'gender',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER')
+                    }]),
+                    ...(groupBy === 'case' ? [{
+                      id: 'location',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION')
+                    }] : []),
+                    ...([{
+                      id: 'address',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS')
+                    }, {
+                      id: 'from',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM')
+                    }, {
+                      id: 'to',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO')
+                    }])
+                  ];
 
 
                   // group by title translation
