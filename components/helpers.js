@@ -624,7 +624,9 @@ const getReferencedValue = function (data, path) {
     // get remaining part
     const remainingPath = path.substring(arrayMarkerPosition + 3);
     // go through the array
-    _.get(data, arrayPath, []).forEach(function (dataItem, index) {
+    let dataFromPath = _.get(data, arrayPath, []);
+    dataFromPath = dataFromPath ? dataFromPath : [];
+    dataFromPath.forEach(function (dataItem, index) {
       // if there still is a path left
       if (remainingPath) {
         // process it
