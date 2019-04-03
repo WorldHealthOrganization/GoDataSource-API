@@ -11,9 +11,6 @@ try {
   // load lib
   Sharp = require('sharp');
 
-  // remove caching, to not break the internal library (libvips) on big files
-  //Sharp.cache();
-
   // do not allow concurrent executions
   // it uses too much memory on bigger scales (10+)
   Sharp.concurrency(1);
@@ -112,6 +109,8 @@ const worker = {
 
             // remove pixels limit
             resizedImage.limitInputPixels(false);
+
+            // it reduces the memory footprint and increases performance on some systems
             resizedImage.sequentialRead(true);
 
             // cache its sizes
