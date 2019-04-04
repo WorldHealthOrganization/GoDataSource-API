@@ -202,7 +202,7 @@ module.exports = function (Case) {
     'visualId': 'LNG_CASE_FIELD_LABEL_VISUAL_ID',
     'fillGeoLocation': 'LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION',
     'isDateOfReportingApproximate': 'LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
-    'questionnaireAnswers': 'LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE',
+    'questionnaireAnswers': 'LNG_CASE_FIELD_LABEL_QUESTIONNAIRE_ANSWERS',
     'safeBurial': 'LNG_CASE_FIELD_LABEL_SAFE_BURIAL',
     'dateOfBurial': 'LNG_CASE_FIELD_LABEL_DATE_OF_BURIAL'
   });

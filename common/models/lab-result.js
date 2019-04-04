@@ -21,7 +21,8 @@ module.exports = function (LabResult) {
     result: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_RESULT',
     quantitativeResult: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_QUANTITATIVE_RESULT',
     notes: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_NOTES',
-    status: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_STATUS'
+    status: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_STATUS',
+    questionnaireAnswers: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
   });
 
   LabResult.referenceDataFieldsToCategoryMap = {

@@ -86,6 +86,7 @@ module.exports = function (ReferenceData) {
     app.utils.remote.helpers.exportFilteredModelsList(
       app,
       app.models.referenceData,
+      {},
       filter.where,
       exportType,
       'Reference Data',

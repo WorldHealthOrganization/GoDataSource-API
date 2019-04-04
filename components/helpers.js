@@ -1207,6 +1207,47 @@ const getSourceAndTargetFromModelHookContext = function (context) {
 };
 
 /**
+ * Retrieve list of questionnaire questions and their variables
+ * @param questionnaire
+ * @param dictionary
+ * @returns {[{id, header}]}
+ */
+const retrieveQuestionnaireVariables = (questionnaire, dictionary) => {
+  // no questions
+  if (_.isEmpty(questionnaire)) {
+    return [];
+  }
+
+  // go through each question
+  const result = [];
+  _.each(questionnaire, (question) => {
+    // add question
+    if (!_.isEmpty(question.variable)) {
+      // add parent question
+      result.push({
+        id: question.variable,
+        header: dictionary.getTranslation(question.text)
+      });
+
+      // add children questions
+      if (!_.isEmpty(question.answers)) {
+        _.each(question.answers, (answer) => {
+          if (!_.isEmpty(answer.additionalQuestions)) {
+            result.push(...retrieveQuestionnaireVariables(
+              answer.additionalQuestions,
+              dictionary
+            ));
+          }
+        });
+      }
+    }
+  });
+
+  // finished
+  return result;
+}
+
+/**
  * Translates a questionnaireAnswers property (from case, labResult and followUp documents) into an object that looks like
  *  this {question1Text: answerLabel, question2Text: answerLabel, ...}
  * @param outbreak
@@ -1684,5 +1725,6 @@ module.exports = {
   covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat,
   sortMultiAnswerQuestions: sortMultiAnswerQuestions,
   convertQuestionAnswerToOldFormat: convertQuestionAnswerToOldFormat,
-  convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat
+  convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat,
+  retrieveQuestionnaireVariables: retrieveQuestionnaireVariables
 };
