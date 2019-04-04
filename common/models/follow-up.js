@@ -80,7 +80,7 @@ module.exports = function (FollowUp) {
     'isGenerated': 'LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED',
     'targeted': 'LNG_FOLLOW_UP_FIELD_LABEL_TARGETED',
     'comment': 'LNG_FOLLOW_UP_FIELD_LABEL_COMMENT',
-    'questionnaireAnswers': 'LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE',
+    'questionnaireAnswers': 'LNG_FOLLOW_UP_FIELD_LABEL_QUESTIONNAIRE_ANSWERS',
   });
 
   FollowUp.referenceDataFieldsToCategoryMap = {

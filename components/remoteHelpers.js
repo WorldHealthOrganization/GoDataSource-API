@@ -74,7 +74,19 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callba
  * @param [beforeExport] Optional result modifier before export
  * @param callback
  */
-function exportFilteredModelsList(app, Model, query, exportType, fileName, encryptPassword, anonymizeFields, options, beforeExport, callback) {
+function exportFilteredModelsList(
+  app,
+  Model,
+  modelPropertiesExpandOnFlatFiles,
+  query,
+  exportType,
+  fileName,
+  encryptPassword,
+  anonymizeFields,
+  options,
+  beforeExport,
+  callback
+) {
   // no-op fallback function for beforeExport hook
   // used for defensive checks, when it is not passed
   let noOp = (results) => Promise.resolve(results);
@@ -86,6 +98,7 @@ function exportFilteredModelsList(app, Model, query, exportType, fileName, encry
     // by default before export is a no-op function that returns a promise
     beforeExport = noOp;
   }
+
   // find results
   Model.rawFind(query)
     .then(function (results) {
@@ -143,11 +156,19 @@ function exportFilteredModelsList(app, Model, query, exportType, fileName, encry
               });
             }
           } else {
-            headers.push({
-              id: propertyName,
-              // use correct label translation for user language
-              header: dictionary.getTranslation(fieldLabelsMap[propertyName])
-            });
+            if (
+              !['json', 'xml'].includes(exportType) &&
+              modelPropertiesExpandOnFlatFiles &&
+              modelPropertiesExpandOnFlatFiles[propertyName]
+            ) {
+              headers.push(...modelPropertiesExpandOnFlatFiles[propertyName]);
+            } else {
+              headers.push({
+                id: propertyName,
+                // use correct label translation for user language
+                header: dictionary.getTranslation(fieldLabelsMap[propertyName])
+              });
+            }
           }
         });
 

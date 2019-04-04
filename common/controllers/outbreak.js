@@ -5578,28 +5578,40 @@ module.exports = function (Outbreak) {
         }
       },
       filter || {});
-    app.utils.remote.helpers.exportFilteredModelsList(app, app.models.referenceData, _filters.where, exportType, 'Reference Data', null, [], options, function (results) {
-      // translate category, value and description fields
-      return new Promise(function (resolve, reject) {
-        // load context user
-        const contextUser = app.utils.remote.getUserFromOptions(options);
-        // load user language dictionary
-        app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-          // handle errors
-          if (error) {
-            return reject(error);
-          }
-          // go trough all results
-          results.forEach(function (result) {
-            // translate category, value and description
-            result.categoryId = dictionary.getTranslation(result.categoryId);
-            result.value = dictionary.getTranslation(result.value);
-            result.description = dictionary.getTranslation(result.description);
+    app.utils.remote.helpers.exportFilteredModelsList(
+      app,
+      app.models.referenceData,
+      {},
+      _filters.where,
+      exportType,
+      'Reference Data',
+      null,
+      [],
+      options,
+      function (results) {
+        // translate category, value and description fields
+        return new Promise(function (resolve, reject) {
+          // load context user
+          const contextUser = app.utils.remote.getUserFromOptions(options);
+          // load user language dictionary
+          app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+            // handle errors
+            if (error) {
+              return reject(error);
+            }
+            // go trough all results
+            results.forEach(function (result) {
+              // translate category, value and description
+              result.categoryId = dictionary.getTranslation(result.categoryId);
+              result.value = dictionary.getTranslation(result.value);
+              result.description = dictionary.getTranslation(result.description);
+            });
+            resolve(results);
           });
-          resolve(results);
         });
-      });
-    }, callback);
+      },
+      callback
+    );
   };
 
   /**
@@ -7375,9 +7387,32 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.exportFilteredFollowups = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
     let self = this;
-    app.models.followUp
-      .preFilterForOutbreak(this, filter)
-      .then(function (filter) {
+    new Promise((resolve, reject) => {
+      // load user language dictionary
+      const contextUser = app.utils.remote.getUserFromOptions(options);
+      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+        // handle errors
+        if (error) {
+          return reject(error);
+        }
+
+        // resolved
+        resolve(dictionary);
+      });
+    })
+      .then((dictionary) => {
+        return app.models.followUp.preFilterForOutbreak(this, filter)
+          .then((filter) => {
+            return {
+              dictionary: dictionary,
+              filter: filter
+            };
+          });
+      })
+      .then(function (data) {
+        const dictionary = data.dictionary;
+        const filter = data.filter;
+
         // if encrypt password is not valid, remove it
         if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
           encryptPassword = null;
@@ -7388,16 +7423,33 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.followUp, filter.where, exportType, 'Follow-Up List', encryptPassword, anonymizeFields, options, function (results, dictionary) {
-          // Prepare questionnaire answers for printing
-          results.forEach((followUp) => {
-            if (followUp.questionnaireAnswers) {
-              followUp.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(followUp.questionnaireAnswers);
-              followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
-            }
-          });
-          return Promise.resolve(results);
-        }, callback);
+        app.utils.remote.helpers.exportFilteredModelsList(
+          app,
+          app.models.followUp,
+          {
+            questionnaireAnswers: genericHelpers.retrieveQuestionnaireVariables(
+              self.contactFollowUpTemplate,
+              dictionary
+            )
+          },
+          filter.where,
+          exportType,
+          'Follow-Up List',
+          encryptPassword,
+          anonymizeFields,
+          options,
+          function (results, dictionary) {
+            // Prepare questionnaire answers for printing
+            results.forEach((followUp) => {
+              if (followUp.questionnaireAnswers) {
+                followUp.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(followUp.questionnaireAnswers);
+                followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+              }
+            });
+            return Promise.resolve(results);
+          },
+          callback
+        );
       });
   };
 
@@ -8454,9 +8506,32 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
     const self = this;
-    app.models.case
-      .preFilterForOutbreak(this, filter)
-      .then(function (filter) {
+    new Promise((resolve, reject) => {
+      // load user language dictionary
+      const contextUser = app.utils.remote.getUserFromOptions(options);
+      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+        // handle errors
+        if (error) {
+          return reject(error);
+        }
+
+        // resolved
+        resolve(dictionary);
+      });
+    })
+      .then((dictionary) => {
+        return app.models.case.preFilterForOutbreak(this, filter)
+          .then((filter) => {
+            return {
+              dictionary: dictionary,
+              filter: filter
+            };
+          });
+      })
+      .then(function (data) {
+        const dictionary = data.dictionary;
+        const filter = data.filter;
+
         // if encrypt password is not valid, remove it
         if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
           encryptPassword = null;
@@ -8467,16 +8542,33 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.case, filter.where, exportType, 'Case List', encryptPassword, anonymizeFields, options, function (results, dictionary) {
-          // Prepare questionnaire answers for printing
-          results.forEach((caseModel) => {
-            if (caseModel.questionnaireAnswers) {
-              caseModel.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(caseModel.questionnaireAnswers);
-              caseModel.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.case, caseModel, dictionary);
-            }
-          });
-          return Promise.resolve(results);
-        }, callback);
+        app.utils.remote.helpers.exportFilteredModelsList(
+          app,
+          app.models.case,
+          {
+            questionnaireAnswers: genericHelpers.retrieveQuestionnaireVariables(
+              self.caseInvestigationTemplate,
+              dictionary
+            )
+          },
+          filter.where,
+          exportType,
+          'Case List',
+          encryptPassword,
+          anonymizeFields,
+          options,
+          function (results, dictionary) {
+            // Prepare questionnaire answers for printing
+            results.forEach((caseModel) => {
+              if (caseModel.questionnaireAnswers) {
+                caseModel.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(caseModel.questionnaireAnswers);
+                caseModel.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.case, caseModel, dictionary);
+              }
+            });
+            return Promise.resolve(results);
+          },
+          callback
+        );
       })
       .catch(callback);
   };
@@ -8510,100 +8602,112 @@ module.exports = function (Outbreak) {
         options.prependObjectNames = true;
 
         // export list of relationships
-        app.utils.remote.helpers.exportFilteredModelsList(app, app.models.relationship, filter.where, exportType, 'Relationship List', encryptPassword, anonymizeFields, options, function (results) {
-          // construct unique list of persons that we need to retrieve
-          let personIds = {};
-          results.forEach((relationship) => {
-            if (
-              relationship.persons &&
-              relationship.persons.length > 1
-            ) {
-              personIds[relationship.persons[0].id] = true;
-              personIds[relationship.persons[1].id] = true;
-            }
-          });
-
-          // flip object to array
-          personIds = Object.keys(personIds);
-
-          // start with a resolved promise (so we can link others)
-          let buildQuery = Promise.resolve();
-
-          // retrieve list of persons
-          const mappedPersons = {};
-          if (!_.isEmpty(personIds)) {
-            buildQuery = app.models.person
-              .rawFind({
-                id: {
-                  inq: personIds
-                }
-              })
-              .then((personRecords) => {
-                // map list of persons ( ID => persons model )
-                personRecords.forEach((personData) => {
-                  mappedPersons[personData.id] = personData;
-                });
-              });
-          }
-
-          // attach persons to the list of relationships
-          return buildQuery
-            .then(() => {
-              // retrieve dictionary
-              return new Promise(function (resolve, reject) {
-                // load context user
-                const contextUser = app.utils.remote.getUserFromOptions(options);
-
-                // load user language dictionary
-                app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-                  // handle errors
-                  if (error) {
-                    return reject(error);
-                  }
-
-                  // finished
-                  resolve(dictionary);
-                });
-              });
-            })
-            .then((dictionary) => {
-              // add source & target objects
-              results.forEach((relationship) => {
-                // map source & target
-                if (
-                  relationship.persons &&
-                  relationship.persons.length > 1
-                ) {
-                  // retrieve person models
-                  const firstPerson = mappedPersons[relationship.persons[0].id];
-                  const secondPerson = mappedPersons[relationship.persons[1].id];
-                  if (
-                    firstPerson &&
-                    secondPerson
-                  ) {
-                    // attach target
-                    relationship.sourcePerson = relationship.persons[0].source ? firstPerson : secondPerson;
-                    relationship.targetPerson = relationship.persons[0].target ? firstPerson : secondPerson;
-                  } else {
-                    // relationship doesn't have source & target ( it should've been deleted ( cascade ... ) )
-                    relationship.sourcePerson = {};
-                    relationship.targetPerson = {};
-                  }
-                }
-
-                // translate data
-                if (relationship.sourcePerson.gender) {
-                  relationship.sourcePerson.gender = dictionary.getTranslation(relationship.sourcePerson.gender);
-                }
-                if (relationship.targetPerson.gender) {
-                  relationship.targetPerson.gender = dictionary.getTranslation(relationship.targetPerson.gender);
-                }
-              });
-
-              // return results once we map everything we need
-              return results;
+        app.utils.remote.helpers.exportFilteredModelsList(
+          app,
+          app.models.relationship,
+          {},
+          filter.where,
+          exportType,
+          'Relationship List',
+          encryptPassword,
+          anonymizeFields,
+          options,
+          function (results) {
+            // construct unique list of persons that we need to retrieve
+            let personIds = {};
+            results.forEach((relationship) => {
+              if (
+                relationship.persons &&
+                relationship.persons.length > 1
+              ) {
+                personIds[relationship.persons[0].id] = true;
+                personIds[relationship.persons[1].id] = true;
+              }
             });
-        }, callback);
+
+            // flip object to array
+            personIds = Object.keys(personIds);
+
+            // start with a resolved promise (so we can link others)
+            let buildQuery = Promise.resolve();
+
+            // retrieve list of persons
+            const mappedPersons = {};
+            if (!_.isEmpty(personIds)) {
+              buildQuery = app.models.person
+                .rawFind({
+                  id: {
+                    inq: personIds
+                  }
+                })
+                .then((personRecords) => {
+                  // map list of persons ( ID => persons model )
+                  personRecords.forEach((personData) => {
+                    mappedPersons[personData.id] = personData;
+                  });
+                });
+            }
+
+            // attach persons to the list of relationships
+            return buildQuery
+              .then(() => {
+                // retrieve dictionary
+                return new Promise(function (resolve, reject) {
+                  // load context user
+                  const contextUser = app.utils.remote.getUserFromOptions(options);
+
+                  // load user language dictionary
+                  app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+                    // handle errors
+                    if (error) {
+                      return reject(error);
+                    }
+
+                    // finished
+                    resolve(dictionary);
+                  });
+                });
+              })
+              .then((dictionary) => {
+                // add source & target objects
+                results.forEach((relationship) => {
+                  // map source & target
+                  if (
+                    relationship.persons &&
+                    relationship.persons.length > 1
+                  ) {
+                    // retrieve person models
+                    const firstPerson = mappedPersons[relationship.persons[0].id];
+                    const secondPerson = mappedPersons[relationship.persons[1].id];
+                    if (
+                      firstPerson &&
+                      secondPerson
+                    ) {
+                      // attach target
+                      relationship.sourcePerson = relationship.persons[0].source ? firstPerson : secondPerson;
+                      relationship.targetPerson = relationship.persons[0].target ? firstPerson : secondPerson;
+                    } else {
+                      // relationship doesn't have source & target ( it should've been deleted ( cascade ... ) )
+                      relationship.sourcePerson = {};
+                      relationship.targetPerson = {};
+                    }
+                  }
+
+                  // translate data
+                  if (relationship.sourcePerson.gender) {
+                    relationship.sourcePerson.gender = dictionary.getTranslation(relationship.sourcePerson.gender);
+                  }
+                  if (relationship.targetPerson.gender) {
+                    relationship.targetPerson.gender = dictionary.getTranslation(relationship.targetPerson.gender);
+                  }
+                });
+
+                // return results once we map everything we need
+                return results;
+              });
+          },
+          callback
+        );
       })
       .catch(callback);
   };
@@ -8761,6 +8865,7 @@ module.exports = function (Outbreak) {
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
           app.models.contact,
+          {},
           filter.where,
           exportType,
           'Contacts List',
