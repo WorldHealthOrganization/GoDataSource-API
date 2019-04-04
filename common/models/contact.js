@@ -248,8 +248,13 @@ module.exports = function (Contact) {
         // keep a flag for updating contact
         let shouldUpdate = false;
         // build a list of properties that need to be updated
-        let propsToUpdate = {};
-        propsToUpdate.status = 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP';
+        // & preserve previous value
+        const previousStatusValue = _.get(contactInstance, 'followUp.status');
+        const propsToUpdate = {
+          status: previousStatusValue ?
+            previousStatusValue :
+            'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
+        };
         // preserve original startDate, if any
         if (contactInstance.followUp && contactInstance.followUp.originalStartDate) {
           propsToUpdate.originalStartDate = contactInstance.followUp.originalStartDate;
