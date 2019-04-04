@@ -1245,7 +1245,7 @@ const retrieveQuestionnaireVariables = (questionnaire, dictionary) => {
 
   // finished
   return result;
-}
+};
 
 /**
  * Translates a questionnaireAnswers property (from case, labResult and followUp documents) into an object that looks like
