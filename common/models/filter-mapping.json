@@ -67,19 +67,19 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_user_account",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "create"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_user_account",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "patchAttributes"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_user_account",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "deleteById"
     }
