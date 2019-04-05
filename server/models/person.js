@@ -814,7 +814,7 @@ module.exports = function (Person) {
    * @return {*}
    */
   Person.prototype.getCurrentAddress = function () {
-    Person.getCurrentAddress(this);
+    return Person.getCurrentAddress(this);
   };
 
   /**
