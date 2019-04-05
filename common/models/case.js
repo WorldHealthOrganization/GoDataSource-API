@@ -34,6 +34,13 @@ module.exports = function (Case) {
                 }
               })
               .then((contacts) => {
+                // contact missing ?
+                if (_.isEmpty(contacts)) {
+                  cb(null, { isValid: false });
+                  return;
+                }
+
+                // retrieve contact
                 const contact = contacts[0];
                 // get all relations of the contact that are not with this case
                 app.models.relationship
