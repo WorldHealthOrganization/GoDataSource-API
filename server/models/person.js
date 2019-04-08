@@ -1093,19 +1093,15 @@ module.exports = function (Person) {
       app.models.relationship
         .rawFind({
           or: [{
-            and: [{
-              'persons.0.id': personId,
-              'persons.1.id': {
-                inq: peopleIds
-              }
-            }]
+            'persons.0.id': personId,
+            'persons.1.id': {
+              inq: peopleIds
+            }
           }, {
-            and: [{
-              'persons.1.id': personId,
-              'persons.0.id': {
-                inq: peopleIds
-              }
-            }]
+            'persons.1.id': personId,
+            'persons.0.id': {
+              inq: peopleIds
+            }
           }]
         }, {
           projection: {
