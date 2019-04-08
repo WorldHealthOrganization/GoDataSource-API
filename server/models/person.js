@@ -1019,10 +1019,12 @@ module.exports = function (Person) {
     filter.where = {
       and: [
         {
-          outbreakId: outbreakId
-        }, {
+          outbreakId: outbreakId,
           id: {
             neq: personId
+          },
+          classification: {
+            nin: app.models.case.discardedCaseClassifications
           }
         },
         filter.where ? filter.where : {}
