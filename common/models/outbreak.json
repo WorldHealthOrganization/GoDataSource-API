@@ -411,9 +411,33 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "getCaseRelationshipsAvailablePeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCaseRelationshipsAvailablePeople"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "findContactRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "getContactRelationshipsAvailablePeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactRelationshipsAvailablePeople"
     },
     {
       "principalType": "ROLE",
@@ -1289,6 +1313,18 @@
       "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
+      "property": "getEventRelationshipsAvailablePeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countEventRelationshipsAvailablePeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
       "property": "countEventRelationshipExposures"
     },
     {
@@ -1557,6 +1593,63 @@
         "path": "/cases/:nk/relationships"
       }
     },
+    "prototype.getCaseRelationshipsAvailablePeople": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "people",
+          "type": [
+            "person"
+          ],
+          "description": "List of people that match the search criteria and belong to a case. Includes matchedDuplicateRelationships for each record",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries people of a case",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/relationships/available-people"
+      }
+    },
+    "prototype.countCaseRelationshipsAvailablePeople": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of of people that match the search criteria and belong to a case",
+          "required": true
+        }
+      ],
+      "description": "Counts people of a case",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/relationships/available-people/count"
+      }
+    },
     "prototype.createCaseRelationship": {
       "accepts": [
         {
@@ -1762,6 +1855,63 @@
         "path": "/contacts/:nk/relationships"
       }
     },
+    "prototype.getContactRelationshipsAvailablePeople": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "people",
+          "type": [
+            "person"
+          ],
+          "description": "List of people that match the search criteria and belong to a contact. Includes matchedDuplicateRelationships for each record",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries people of a contact",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/relationships/available-people"
+      }
+    },
+    "prototype.countContactRelationshipsAvailablePeople": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of of people that match the search criteria and belong to a contact",
+          "required": true
+        }
+      ],
+      "description": "Counts people of a contact",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/relationships/available-people/count"
+      }
+    },
     "prototype.createContactRelationship": {
       "accepts": [
         {
@@ -1965,6 +2115,63 @@
       "http": {
         "verb": "get",
         "path": "/events/:nk/relationships"
+      }
+    },
+    "prototype.getEventRelationshipsAvailablePeople": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "people",
+          "type": [
+            "person"
+          ],
+          "description": "List of people that match the search criteria and belong to a event. Includes matchedDuplicateRelationships for each record",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries people of a event",
+      "http": {
+        "verb": "get",
+        "path": "/events/:nk/relationships/available-people"
+      }
+    },
+    "prototype.countEventRelationshipsAvailablePeople": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for events"
+        },
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of of people that match the search criteria and belong to a event",
+          "required": true
+        }
+      ],
+      "description": "Counts people of a event",
+      "http": {
+        "verb": "get",
+        "path": "/event/:nk/relationships/available-people/count"
       }
     },
     "prototype.createEventRelationship": {

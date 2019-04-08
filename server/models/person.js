@@ -1002,4 +1002,142 @@ module.exports = function (Person) {
       return Promise.resolve([]);
     }
   };
+
+  /**
+   * retrieve available people for a specific case / contact / event
+   * @param outbreakId
+   * @param personId
+   * @param filter
+   * @returns {Promise<any>}
+   */
+  Person.getAvailablePeople = function (
+      outbreakId,
+      personId,
+      filter
+  ) {
+    // attach our conditions
+    filter.where = {
+      and: [
+        {
+          outbreakId: outbreakId,
+          id: {
+            neq: personId
+          },
+          classification: {
+            nin: app.models.case.discardedCaseClassifications
+          }
+        },
+        filter.where ? filter.where : {}
+      ]
+    };
+
+    // retrieve data
+    return Person
+      .find(filter)
+      .then((records) => {
+        return Person.determineIfRelationshipsExist(
+          outbreakId,
+          personId,
+          records
+        );
+      });
+  };
+
+  /**
+   * retrieve available people for a specific case / contact / event
+   * @param outbreakId
+   * @param personId
+   * @param where
+   * @returns {Promise<any>}
+   */
+  Person.getAvailablePeopleCount = function (
+    outbreakId,
+    personId,
+    where
+  ) {
+    // attach our conditions
+    where = {
+      and: [
+        {
+          outbreakId: outbreakId
+        }, {
+          id: {
+            neq: personId
+          }
+        },
+        where ? where : {}
+      ]
+    };
+
+    // retrieve data
+    return Person.count(where);
+  };
+
+  /**
+   * Determine which relationships could be a duplicate ( add property to each record from the relatedPeopleDara array )
+   * @param outbreakId
+   * @param personId
+   * @param relatedPeopleData
+   * @returns {Promise<any>}
+   */
+  Person.determineIfRelationshipsExist = function (
+    outbreakId,
+    personId,
+    relatedPeopleData
+  ) {
+    return new Promise((resolve, reject) => {
+      // determine people ids which we need to check if they are duplicates
+      const peopleIds = (relatedPeopleData || []).map((r) => r.id);
+
+      // retrieve all relationships of interest
+      app.models.relationship
+        .rawFind({
+          or: [{
+            'persons.0.id': personId,
+            'persons.1.id': {
+              inq: peopleIds
+            }
+          }, {
+            'persons.1.id': personId,
+            'persons.0.id': {
+              inq: peopleIds
+            }
+          }]
+        }, {
+          projection: {
+            _id: 1,
+            persons: 1
+          }
+        })
+        .catch(reject)
+        .then((relationshipsData) => {
+          // match relationship data to people
+          (relationshipsData || []).forEach((relData) => {
+            // first person is the main person ?
+            let indexOfRelatedPerson = 0;
+            if (relData.persons[0].id === personId) {
+              indexOfRelatedPerson = 1;
+            }
+
+            // add person match
+            const relatedRecord = _.find(relatedPeopleData, (r) => r.id === relData.persons[indexOfRelatedPerson].id);
+            if (relatedRecord) {
+              // initialize matches ?
+              if (!relatedRecord.matchedDuplicateRelationships) {
+                relatedRecord.matchedDuplicateRelationships = [];
+              }
+
+              // add our match
+              relatedRecord.matchedDuplicateRelationships.push({
+                relationshipId: relData.id,
+                relatedPerson: relData.persons[indexOfRelatedPerson]
+              });
+            }
+          });
+
+          // finished
+          resolve(relatedPeopleData);
+        });
+    });
+  };
 };

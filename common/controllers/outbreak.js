@@ -10392,4 +10392,124 @@ module.exports = function (Outbreak) {
       })
       .catch(responseCallback);
   };
+
+  /**
+   * Retrieve available people for a case
+   * @param caseId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.getCaseRelationshipsAvailablePeople = function (caseId, filter, callback) {
+    // retrieve available people
+    app.models.person
+      .getAvailablePeople(
+        this.id,
+        caseId,
+        filter
+      )
+      .catch(callback)
+      .then((records) => {
+        callback(null, records);
+      });
+  };
+
+  /**
+   * Count available people for a case
+   * @param caseId
+   * @param where
+   * @param callback
+   */
+  Outbreak.prototype.countCaseRelationshipsAvailablePeople = function (caseId, where, callback) {
+    // count available people
+    app.models.person
+      .getAvailablePeopleCount(
+        this.id,
+        caseId,
+        where
+      )
+      .catch(callback)
+      .then((counted) => {
+        callback(null, counted);
+      });
+  };
+
+  /**
+   * Retrieve available people for a contact
+   * @param contactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.getContactRelationshipsAvailablePeople = function (contactId, filter, callback) {
+    // retrieve available people
+    app.models.person
+      .getAvailablePeople(
+        this.id,
+        contactId,
+        filter
+      )
+      .catch(callback)
+      .then((records) => {
+        callback(null, records);
+      });
+  };
+
+  /**
+   * Count available people for a contact
+   * @param contactId
+   * @param where
+   * @param callback
+   */
+  Outbreak.prototype.countContactRelationshipsAvailablePeople = function (contactId, where, callback) {
+    // count available people
+    app.models.person
+      .getAvailablePeopleCount(
+        this.id,
+        contactId,
+        where
+      )
+      .catch(callback)
+      .then((counted) => {
+        callback(null, counted);
+      });
+  };
+
+  /**
+   * Retrieve available people for a case
+   * @param eventId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.getEventRelationshipsAvailablePeople = function (eventId, filter, callback) {
+    // retrieve available people
+    app.models.person
+      .getAvailablePeople(
+        this.id,
+        eventId,
+        filter
+      )
+      .catch(callback)
+      .then((records) => {
+        callback(null, records);
+      });
+  };
+
+  /**
+   * Count available people for an event
+   * @param eventId
+   * @param where
+   * @param callback
+   */
+  Outbreak.prototype.countEventRelationshipsAvailablePeople = function (eventId, where, callback) {
+    // count available people
+    app.models.person
+      .getAvailablePeopleCount(
+        this.id,
+        eventId,
+        where
+      )
+      .catch(callback)
+      .then((counted) => {
+        callback(null, counted);
+      });
+  };
 };
