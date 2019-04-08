@@ -34,12 +34,35 @@ function createResourceLink(resourceName, contextInfo) {
  * @param outbreakId
  * @param personType
  * @param identifier
+ * @param opts
  */
-function addPersonQRCode(document, outbreakId, personType, identifier) {
+function addPersonQRCode(document, outbreakId, personType, identifier, opts) {
   // Cache initial cursor position
   let initialXPosition = document.x;
   let initialYPosition = document.y;
   let qrCode = {};
+
+  // options defensive checks and defaults
+  opts = opts || {};
+
+  opts.imageSize = opts.imageSize || {};
+  opts.imageSize.width = opts.imageSize.width || 100;
+  opts.imageSize.height = opts.imageSize.height || 100;
+
+  opts.imagePosition = opts.imagePosition || {};
+  opts.imagePosition.x = opts.imagePosition.x || 465;
+  opts.imagePosition.y = opts.imagePosition.y || 10;
+
+  opts.identifierPosition = opts.identifierPosition || {};
+  opts.identifierPosition.x = opts.identifierPosition.x || 400;
+  opts.identifierPosition.y = opts.identifierPosition.y || 110;
+
+  // if we have a custom font size
+  // then use it for QR texts and reset to original size after all the QR text is displayed
+  const initialFontSize = document._fontSize;
+  if (opts.fontSize) {
+    document.fontSize(opts.fontSize);
+  }
 
   // Generate the QR code and add it to the page, together with some extra
   // details for either an existing or a new person
@@ -49,8 +72,11 @@ function addPersonQRCode(document, outbreakId, personType, identifier) {
       [`${personType}Id`]: identifier.id
     });
 
-    document.image(qrCode, 465, 15, {width: 100, height: 100});
-    document.text(`${identifier.id}`, 420, 115, {align: 'right'});
+    document.image(qrCode, opts.imagePosition.x, opts.imagePosition.y, {
+      width: opts.imageSize.width,
+      height: opts.imageSize.height
+    });
+    document.text(`${identifier.id}`, opts.identifierPosition.x, opts.identifierPosition.y, {align: 'right'});
     document.text(`${identifier.firstName || ''} ${identifier.middleName || ''} ${identifier.lastName || ''}`, {align: 'right'});
   } else {
     qrCode = createResourceLink(personType, {
@@ -58,14 +84,22 @@ function addPersonQRCode(document, outbreakId, personType, identifier) {
       [`${personType}Id`]: identifier
     });
 
-    document.image(qrCode, 465, 15, {width: 100, height: 100});
-    document.text(identifier, 420, 115, {align: 'right'});
-    document.text('_ '.repeat(52), {align: 'right'});
+    document.image(qrCode, opts.imagePosition.x, opts.imagePosition.y, {
+      width: opts.imageSize.width,
+      height: opts.imageSize.height
+    });
+    document.text(identifier, opts.identifierPosition.x, opts.identifierPosition.y, {align: 'right'});
+    if (opts.displayDashLines) {
+      document.text('_ '.repeat(52), {align: 'right'});
+    }
   }
 
   // Reset cursor position
   document.x = initialXPosition;
   document.y = initialYPosition;
+
+  // reset font size
+  document.fontSize(initialFontSize);
 }
 
 module.exports = {

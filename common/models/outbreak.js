@@ -1475,21 +1475,35 @@ module.exports = function (Outbreak) {
       let pdfRequests = [];
 
       // standard PDF sizes
-      const docFontSize = 12;
-      const qrFontSize = 7;
+      const docFontSize = 9;
+
+      // QR code options
+      const qrOpts = {
+        fontSize: 7,
+        displayDashLines: false,
+        imageSize: {
+          width: 75,
+          height: 75
+        },
+        identifierPosition: {
+          x: 380,
+          y: 90
+        },
+        imagePosition: {
+          x: 495
+        }
+      };
 
       // setup go-data title on the left and QR code on the right
       const setupPageHeader = function (doc) {
         // we start text after document title and QR code
-        doc.moveDown(8);
+        doc.moveDown(7);
 
         // make the content a bit more centered
         doc.x = doc.x + 30;
 
         // we use a lower font size for QR, to not break the line
-        doc.fontSize(qrFontSize);
-        app.utils.qrCode.addPersonQRCode(doc, outbreakInstance.id, 'case', foundCase || generatedId);
-        doc.fontSize(docFontSize);
+        app.utils.qrCode.addPersonQRCode(doc, outbreakInstance.id, 'case', foundCase || generatedId, qrOpts);
       };
 
       for (let i = 0; i < copies; i++) {
@@ -1509,6 +1523,14 @@ module.exports = function (Outbreak) {
               generatedId = uuid.v4();
             }
 
+            // additional options for document
+            const additionalOpts = {
+              titlePosition: {
+                x: doc.options.margin + 20,
+                y: 60
+              }
+            };
+
             // add functionality whenever a new page is added
             doc.on('pageAdded', () => {
               setupPageHeader(doc);
@@ -1519,29 +1541,29 @@ module.exports = function (Outbreak) {
             setupPageHeader(doc);
 
             // add case profile fields (empty)
-            pdfUtils.displaySections(doc, caseSections, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'));
+            pdfUtils.displaySections(doc, caseSections, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS'), additionalOpts);
 
             // add case investigation questionnaire into the pdf in a separate page (only if the questionnaire exists)
             if (caseQuestions && caseQuestions.length) {
               doc.addPage();
-              pdfUtils.createQuestionnaire(doc, caseQuestions, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE'));
+              pdfUtils.createQuestionnaire(doc, caseQuestions, false, dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE'), additionalOpts);
             }
 
             // add lab results information into a separate page
             doc.addPage();
-            pdfUtils.displayResourceLabels(doc, Object.keys(labResultsFields), dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_DETAILS'));
+            pdfUtils.displayResourceLabels(doc, Object.keys(labResultsFields), dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_DETAILS'), additionalOpts);
 
             // add lab results questionnaire into a separate page (only if the questionnaire exists)
             if (labQuestions && labQuestions.length) {
               doc.addPage();
-              pdfUtils.createQuestionnaire(doc, labQuestions, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE'));
+              pdfUtils.createQuestionnaire(doc, labQuestions, false, dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE'), additionalOpts);
             }
 
             // add contact relation template
             doc.addPage();
-            pdfUtils.displaySections(doc, contactSections, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
+            pdfUtils.displaySections(doc, contactSections, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'), additionalOpts);
             doc.addPage();
-            pdfUtils.displayResourceLabels(doc, Object.keys(relationFields), dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_RELATIONSHIP'));
+            pdfUtils.displayResourceLabels(doc, Object.keys(relationFields), dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_RELATIONSHIP'), additionalOpts);
 
             // add an additional empty page that contains only the QR code as per requirements
             doc.addPage();

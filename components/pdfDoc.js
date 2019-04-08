@@ -18,6 +18,10 @@ const STANDARD_PAGE_TITLE = 20;
 // maximum number of nested questions allowed
 const MAX_QUESTIONS_LEVEL = 4;
 
+// labels (label name: value) line gap
+// mainly used in displaying sections and resource labels functions
+const LABEL_LINE_GAP = 0.3;
+
 // define a default document configuration
 const defaultDocumentConfiguration = {
   size: 'A4',
@@ -355,11 +359,16 @@ const createImageDoc = function (imageData, splitFactor, splitType, callback) {
  * @param doc
  * @param title
  * @param fontSize
+ * @param position
  */
-const addTitle = function (doc, title, fontSize) {
+const addTitle = function (doc, title, fontSize, position) {
+  position = position || {};
+  position.x = position.x || doc.x;
+  position.y = position.y || doc.y;
+
   let oldFontSize = doc._fontSize;
   doc.fontSize(fontSize || STANDARD_PAGE_TITLE);
-  doc.text(title);
+  doc.text(title, position.x, position.y);
   doc.fontSize(oldFontSize).moveDown(0.5);
 };
 
@@ -376,14 +385,16 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
   options = options || {};
   options.underlineCount = options.underlineCount || 25;
   options.titleSize = options.titleSize || STANDARD_PAGE_TITLE;
+  options.titlePosition = options.titlePosition || {};
 
   // cache initial document margin
   const initialXMargin = doc.x;
 
   // add questionnaire page title
   if (title) {
-    addTitle(doc, title, options.titleSize);
+    addTitle(doc, title, options.titleSize, options.titlePosition);
   }
+  doc.x = initialXMargin;
 
   // recursively insert each question and their answers into the document
   (function addQuestions(questions, margin, level) {
@@ -401,7 +412,7 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
       const displayVertical = item.answersDisplay === 'LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL';
 
       // question test
-      doc.moveDown().text(`${item.order}. ${item.question}`, questionMargin + 20);
+      doc.moveDown().text(`${item.order}. ${item.question}`, !margin ? questionMargin : questionMargin + 20);
 
       // answers should have indentation
       questionMargin = questionMargin + 10;
@@ -489,7 +500,7 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
       }
 
       // next question
-      doc.moveDown();
+      doc.moveDown(0.5);
     });
   })(questions, false, 0);
 
@@ -788,15 +799,19 @@ const displaySections = function (doc, sections, title, options) {
   options = options || {};
   options.underlineCount = options.underlineCount || STANDARD_UNDERLINE_COUNT;
   options.titleSize = options.titleSize || STANDARD_PAGE_TITLE;
+  options.titlePosition = options.titlePosition || {};
+  options.lineGap = options.lineGap || LABEL_LINE_GAP;
+
+  const initialXMargin = doc.x;
 
   // add page title
   if (title) {
-    addTitle(doc, title, options.titleSize);
+    addTitle(doc, title, options.titleSize, options.titlePosition);
     doc.moveDown();
   }
 
   // cache initial document margin
-  const initialXMargin = doc.x;
+  doc.x = initialXMargin;
   const labelStartWidth = initialXMargin + 20;
 
   // find the highest label width to align them property
@@ -825,7 +840,7 @@ const displaySections = function (doc, sections, title, options) {
       doc.x = initialXMargin;
 
       if (additionalTitles[i]) {
-        addTitle(doc, additionalTitles[i], 13);
+        addTitle(doc, additionalTitles[i], 10);
       }
       labels.forEach((label) => {
         // if label is an object then we expect the following format ({ name, value})
@@ -844,7 +859,7 @@ const displaySections = function (doc, sections, title, options) {
         doc.text(labelName, labelStartWidth);
         doc.text(labelValue || '_'.repeat(options.underlineCount), labelStartWidth + labelWidth + gap + offsetWidth, doc.y - labelHeight);
 
-        doc.moveDown();
+        doc.moveDown(options.lineGap);
       });
       doc.moveDown();
     }
@@ -877,15 +892,18 @@ const displayResourceLabels = function (doc, labels, title, options) {
   options = options || {};
   options.underlineCount = options.underlineCount || STANDARD_UNDERLINE_COUNT;
   options.titleSize = options.titleSize || STANDARD_PAGE_TITLE;
+  options.titlePosition = options.titlePosition || {};
+  options.lineGap = options.lineGap || LABEL_LINE_GAP;
+  const initialXMargin = doc.x;
 
   // add page title
   if (title) {
-    addTitle(doc, title, options.titleSize);
+    addTitle(doc, title, options.titleSize, options.titlePosition);
     doc.moveDown();
   }
 
   // cache initial document margin
-  const initialXMargin = doc.x;
+  doc.x = initialXMargin;
   const labelStartWidth = initialXMargin;
 
   // find the highest label width, to align them property
@@ -907,7 +925,7 @@ const displayResourceLabels = function (doc, labels, title, options) {
     doc.text(label, labelStartWidth);
     doc.text('_'.repeat(options.underlineCount), labelStartWidth + labelWidth + gap + offsetWidth, doc.y - labelHeight);
 
-    doc.moveDown();
+    doc.moveDown(options.lineGap);
   });
 
   return doc;
