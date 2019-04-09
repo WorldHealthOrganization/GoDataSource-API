@@ -579,7 +579,7 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
               doc.x += 20;
               displayModelDetails(doc, item[prop], true);
             } else {
-              doc.text(`${prop}: ${item[prop]}`, initialXMargin + 20).moveDown();
+              doc.text(`${prop}: ${(item[prop] || item[prop] === 0 || item[prop] === false) ? item[prop] : ''}`, initialXMargin + 20).moveDown();
             }
           });
 
@@ -598,7 +598,7 @@ const displayModelDetails = function (doc, model, displayValues, title, numberOf
       doc.x += 20;
       displayModelDetails(doc, model[fieldName], true);
     } else {
-      doc.text(`${fieldName}: ${displayValues ? model[fieldName] : '_'.repeat(50)}`, initialXMargin).moveDown();
+      doc.text(`${fieldName}: ${displayValues ? ((model[fieldName] || model[fieldName] === 0 || model[fieldName] === false) ? model[fieldName] : '') : '_'.repeat(50)}`, initialXMargin).moveDown();
     }
   });
 
