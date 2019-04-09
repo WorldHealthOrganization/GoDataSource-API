@@ -66,7 +66,7 @@ module.exports = function (Language) {
             // check if token is valid (starts with LNG_)
             if (/^LNG_/.test(token)) {
               // translation may be missing, use a default
-              let translation = ' ';
+              let translation = '';
               // if the translation exists, use it
               if (parsedData.Sheets[sheetName][`B${index}`]) {
                 translation = parsedData.Sheets[sheetName][`B${index}`].v;
