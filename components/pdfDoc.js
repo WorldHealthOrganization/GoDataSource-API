@@ -396,6 +396,9 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
   }
   doc.x = initialXMargin;
 
+  // questionnaire
+  doc.moveDown(2);
+
   // recursively insert each question and their answers into the document
   (function addQuestions(questions, margin, level) {
     questions.forEach((item) => {
@@ -405,30 +408,27 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
 
       let questionMargin = initialXMargin;
       if (margin) {
-        questionMargin = margin + 25;
+        questionMargin = margin + 15;
       }
 
       // display type
       const displayVertical = item.answersDisplay === 'LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL';
 
       // question test
-      doc.moveDown().text(`${item.order}. ${item.question}`, !margin ? questionMargin : questionMargin + 20);
-
-      // answers should have indentation
-      questionMargin = questionMargin + 10;
+      doc.text(`${item.order}. ${item.question}`, questionMargin);
 
       // answers type are written differently into the doc
       switch (item.answerType) {
         default:
           if (withData) {
             if (item.value) {
-              doc.moveDown().text('Answer: ' + item.value, questionMargin + 20);
+              doc.text('Answer: ' + item.value, questionMargin);
             } else {
-              // In case the user did not answer this questions, we prevent printing 'undefined'
-              doc.moveDown().text('Answer: ', questionMargin + 20);
+              // in case the user did not answer this questions, we prevent printing 'undefined'
+              doc.text('Answer: ', questionMargin);
             }
           } else {
-            doc.moveDown().text(`Answer: ${'_'.repeat(options.underlineCount)}`, questionMargin + 20);
+            doc.text(`Answer: ${'_'.repeat(options.underlineCount)}`, questionMargin);
           }
           break;
         // File uploads are not handled when printing a pdf
@@ -439,11 +439,11 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
           // flag that indicates this is the first answer
           let firstAnswer = true;
           const getRectY = function (doc, displayVertical) {
-            return displayVertical ? doc.y - 3 : doc.y;
+            return displayVertical ? doc.y - 5 : doc.y;
           };
 
-          // from here starts the question
-          doc.moveDown();
+          // answers gap
+          doc.moveDown(0.5);
 
           let answerXMargin = questionMargin;
           let answerY = doc.y;
@@ -451,14 +451,15 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
           item.answers.forEach((answer) => {
             if (!firstAnswer) {
               if (displayVertical) {
-                doc.moveDown();
+                doc.moveDown(0.5);
               } else {
                 // reset X axis if last answer did break the line
                 if (!displayVertical && (doc.y - answerY > 10)) {
                   answerXMargin = questionMargin;
                   doc.moveDown(0.5);
                 } else {
-                  answerXMargin = doc.x + 20;
+                  // horizontal gap between each answers
+                  answerXMargin = doc.x + 25;
                 }
               }
             }
@@ -469,17 +470,18 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
             // we need to reduce rectangle height to be on the same height as the text
             if (withData && answer.selected) {
               doc
-                .rect(answerXMargin + 20, rectY, 15, 15)
-                .moveTo(answerXMargin + 20, rectY)
-                .lineTo(answerXMargin + 20 + 15, rectY + 15)
-                .moveTo(answerXMargin + 20 + 15, rectY)
-                .lineTo(answerXMargin + 20, rectY + 15)
+                .rect(answerXMargin, rectY, 10, 10)
+                .moveTo(answerXMargin, rectY)
+                .lineTo(answerXMargin + 10, rectY + 10)
+                .moveTo(answerXMargin + 10, rectY)
+                .lineTo(answerXMargin, rectY + 10)
                 .stroke();
             } else {
-              doc.rect(answerXMargin + 20, rectY, 15, 15).stroke();
+              doc.rect(answerXMargin, rectY, 10, 10).stroke();
             }
 
-            doc.text(answer.label, answerXMargin + 45, rectY);
+            // display text on the right side of the checkbox
+            doc.text(answer.label, answerXMargin + 15, rectY);
             doc.moveUp();
 
             // handle additional questions
@@ -488,7 +490,7 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
               addQuestions(answer.additionalQuestions, questionMargin, level + 1);
             } else {
               if (displayVertical) {
-                doc.moveDown(1.5);
+                doc.moveDown();
               }
             }
 
@@ -496,11 +498,13 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
             firstAnswer = false;
           });
 
+          // horizontal answers gap, after all the answers are displayed
+          if (!displayVertical) {
+            doc.moveDown();
+          }
+
           break;
       }
-
-      // next question
-      doc.moveDown(0.5);
     });
   })(questions, false, 0);
 
