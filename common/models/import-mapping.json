@@ -49,37 +49,37 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_user_account",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "find"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_user_account",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "findById"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_user_account",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "count"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_user_account",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "create"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_user_account",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "patchAttributes"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_user_account",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "deleteById"
     }
