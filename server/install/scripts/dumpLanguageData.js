@@ -3,7 +3,9 @@
 const app = require('../../server');
 const fs = require('fs');
 const languageToken = app.models.languageToken;
-const englishUS = require('./../../config/languages/english_us');
+
+const languageId = 'english_us';
+const languageJSON = require(`./../../config/languages/${languageId}`);
 
 /**
  * Run initiation
@@ -14,12 +16,12 @@ function run(callback) {
   languageToken
     .find({
       where: {
-        languageId: 'english_us'
+        languageId: languageId
       }
     })
     .catch(callback)
 
-    // put db values into english_us
+    // put db values into language
     .then((languageTokens) => {
       // map db tokens
       const tokensMap = {};
@@ -28,11 +30,11 @@ function run(callback) {
       });
 
       // copy db values to file
-      Object.keys(englishUS.sections || []).forEach((section) => {
-        Object.keys(englishUS.sections[section]).forEach((token) => {
+      Object.keys(languageJSON.sections || []).forEach((section) => {
+        Object.keys(languageJSON.sections[section]).forEach((token) => {
           // change translation ?
           if (tokensMap[token]) {
-            englishUS.sections[section][token] = tokensMap[token].translation;
+            languageJSON.sections[section][token] = tokensMap[token].translation;
           }
         });
       });
@@ -43,7 +45,7 @@ function run(callback) {
       // export data
       fs.writeFile(
         module.resolvedPath,
-        JSON.stringify(englishUS, null, 2),
+        JSON.stringify(languageJSON, null, 2),
         (err) => {
           // an error occurred ?
           if (err) {
