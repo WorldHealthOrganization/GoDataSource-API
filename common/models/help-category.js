@@ -72,7 +72,7 @@ module.exports = function (HelpCategory) {
 
     // retrieve original values
     let originalName = helpers.getOriginalValueFromContextOptions(context, 'name');
-    let originalDescription = helpers.getOriginalValueFromContextOptions(context, 'description') || ' ';
+    let originalDescription = helpers.getOriginalValueFromContextOptions(context, 'description') || '';
 
     if (context.isNewInstance) {
       // description is optional
