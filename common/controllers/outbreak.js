@@ -4811,7 +4811,9 @@ module.exports = function (Outbreak) {
                     if (err) {
                       reject(err);
                     } else {
-                      fs.writeFile(`${tmpDirName}/${sanitizedCase.rawData.lastName ? sanitizedCase.rawData.lastName.toUpperCase() + ' ' : ''}${sanitizedCase.rawData.firstName ? sanitizedCase.rawData.firstName : ''} - ${sanitizedCase.rawData.id}.pdf`, buffer, (err) => {
+                      const lastName = sanitizedCase.rawData.lastName ? sanitizedCase.rawData.lastName.replace(/\r|\n|\s/g, '').toUpperCase() + ' ' : '';
+                      const firstName = sanitizedCase.rawData.firstName ? sanitizedCase.rawData.firstName.replace(/\r|\n|\s/g, '') : '';
+                      fs.writeFile(`${tmpDirName}/${lastName}${firstName} - ${sanitizedCase.rawData.id}.pdf`, buffer, (err) => {
                         if (err) {
                           reject(err);
                         } else {
