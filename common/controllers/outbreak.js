@@ -4811,7 +4811,7 @@ module.exports = function (Outbreak) {
                     if (err) {
                       reject(err);
                     } else {
-                      fs.writeFile(`${tmpDirName}/${sanitizedCase.rawData.id}.pdf`, buffer, (err) => {
+                      fs.writeFile(`${tmpDirName}/${sanitizedCase.rawData.lastName ? sanitizedCase.rawData.lastName.toUpperCase() + ' ' : ''}${sanitizedCase.rawData.firstName ? sanitizedCase.rawData.firstName : ''} - ${sanitizedCase.rawData.id}.pdf`, buffer, (err) => {
                         if (err) {
                           reject(err);
                         } else {
