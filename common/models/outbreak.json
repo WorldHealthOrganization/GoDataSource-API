@@ -6965,6 +6965,7 @@
       "description": "Get total number of contacts that were followed up in the given period of time",
       "http": {
         "verb": "post",
+        "ignoreActiveOutbreak": true,
         "path": "/contacts/follow-up-report"
       }
     },
