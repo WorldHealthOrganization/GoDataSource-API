@@ -58,6 +58,17 @@ function encrypt(password, data) {
       if (err) {
         return reject(err);
       }
+
+      // convert data back to buffer which was lost while serialization ( main app => worker )
+      if (
+        data &&
+        data instanceof Object &&
+        data.data &&
+        data.type === 'Buffer'
+      ) {
+        data = Buffer.from(data.data);
+      }
+
       // encipher data
       const cipher = crypto.createCipheriv(algorithm, key.key, key.iv);
       const result = Buffer.concat([key.iv, key.salt, cipher.update(data), cipher.final()]);
