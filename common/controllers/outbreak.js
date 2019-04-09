@@ -3862,13 +3862,20 @@ module.exports = function (Outbreak) {
                   for (var j = 0; j < this[datesContainer].length; j++) {
                     var dateEntry = this[datesContainer][j];
 
-                    // compare startDate with endDate
-                    inconsistencyInKeyDates = dateEntry.startDate > dateEntry.endDate ? true : false;
+                    // make sure we have both dates when we compare them
+                    if (dateEntry.startDate && dateEntry.endDate) {
+                      // compare startDate with endDate
+                      inconsistencyInKeyDates = dateEntry.startDate > dateEntry.endDate ? true : false;
+                    }
 
                     // check for dob; both startDate and endDate must be after dob
                     if (!inconsistencyInKeyDates && dob) {
-                      inconsistencyInKeyDates = dateEntry.startDate < dob ? true : false;
-                      inconsistencyInKeyDates = inconsistencyInKeyDates || (dateEntry.endDate < dob ? true : false);
+                      if (dateEntry.startDate) {
+                        inconsistencyInKeyDates = dateEntry.startDate < dob ? true : false;
+                      }
+                      if (dateEntry.endDate) {
+                        inconsistencyInKeyDates = inconsistencyInKeyDates || (dateEntry.endDate < dob ? true : false);
+                      }
                     }
 
                     // stop checks if an inconsistency was found
@@ -4066,11 +4073,15 @@ module.exports = function (Outbreak) {
                 // loop through the dates to find inconsistencies
                 person[datesContainer].forEach(function (dateEntry, dateEntryIndex) {
                   // get startDate and endDate
-                  let startDate = moment(dateEntry.startDate);
-                  let endDate = moment(dateEntry.endDate);
+                  let startDate = dateEntry.startDate ? moment(dateEntry.startDate) : null;
+                  let endDate = dateEntry.endDate ? moment(dateEntry.endDate) : null;
 
                   // compare startDate with endDate
-                  if (startDate.isAfter(endDate)) {
+                  if (
+                    startDate &&
+                    endDate &&
+                    startDate.isAfter(endDate)
+                  ) {
                     inconsistencies.push({
                       dates: [{
                         field: `${datesContainer}.${dateEntryIndex}.startDate`,
@@ -4087,7 +4098,10 @@ module.exports = function (Outbreak) {
 
                   // check for dob; both startDate and endDate must be after dob
                   if (dob) {
-                    if (dob.isAfter(startDate)) {
+                    if (
+                      startDate &&
+                      dob.isAfter(startDate)
+                    ) {
                       inconsistencies.push({
                         dates: [{
                           field: 'dob',
@@ -4101,7 +4115,10 @@ module.exports = function (Outbreak) {
                       });
                     }
 
-                    if (dob.isAfter(endDate)) {
+                    if (
+                      endDate &&
+                      dob.isAfter(endDate)
+                    ) {
                       inconsistencies.push({
                         dates: [{
                           field: 'dob',
