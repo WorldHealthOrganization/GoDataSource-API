@@ -10533,4 +10533,14 @@ module.exports = function (Outbreak) {
         callback(null, counted);
       });
   };
+
+  /**
+   * Change source and targets of a relationship
+   * @param relationshipId
+   * @param sourceTargetIds
+   * @param callback
+   */
+  Outbreak.prototype.setTargetAndSourceForRelationship = function (relationshipId, sourceTargetIds, callback) {
+    callback();
+  };
 };
