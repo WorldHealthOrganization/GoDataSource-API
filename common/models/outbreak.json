@@ -465,6 +465,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "setTargetAndSourceForRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "setTargetAndSourceForRelationship"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "getCaseRelationship"
@@ -3693,6 +3705,38 @@
       "http": {
         "verb": "get",
         "path": "/relationships/secondary-cases-with-date-of-onset-before-primary-case"
+      }
+    },
+    "prototype.setTargetAndSourceForRelationship": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "relationship id"
+        }, {
+          "arg": "body",
+          "required": true,
+          "type": "object",
+          "model": "relationshipSourceTarget",
+          "http": {
+            "source": "body"
+          },
+          "description": "Source and Target values"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationship",
+          "type": "relationship",
+          "description": "Updated relationship",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Change source and target of a relationship ( needs write case / contact permission )",
+      "http": {
+        "verb": "post",
+        "path": "/relationships/:nk/replace-source-and-target"
       }
     },
     "prototype.countFollowUpContacts": {

@@ -10533,4 +10533,107 @@ module.exports = function (Outbreak) {
         callback(null, counted);
       });
   };
+
+  /**
+   * Change source and targets of a relationship
+   * @param relationshipId
+   * @param sourceTargetIds
+   * @param callback
+   */
+  Outbreak.prototype.setTargetAndSourceForRelationship = function (relationshipId, sourceTargetIds, callback) {
+    // outbreak id
+    const outbreakId = this.id;
+
+    // handle validation errors
+    const throwValidationError = (msg) => {
+      callback(app.utils.apiError.getError('VALIDATION_ERROR', {
+        model: app.models.relationshipSourceTarget.modelName,
+        details: msg
+      }));
+    };
+
+    // validate input
+    if (
+      !sourceTargetIds ||
+      !sourceTargetIds.sourceId ||
+      !sourceTargetIds.targetId
+    ) {
+      return throwValidationError('Must contain sourceId & targetId');
+    }
+
+    // validate round relationships
+    if (sourceTargetIds.sourceId === sourceTargetIds.targetId) {
+      return throwValidationError('SourceId needs to be different from targetId');
+    }
+
+    // retrieve source & target models
+    app.models.person
+      .rawFind({
+        outbreakId: outbreakId,
+        _id: {
+          inq: [sourceTargetIds.sourceId, sourceTargetIds.targetId]
+        }
+      })
+      .catch(callback)
+      .then((records) => {
+        // find source & target
+        const sourceModel = _.find(records, (r) => r.id === sourceTargetIds.sourceId);
+        const targetModel = _.find(records, (r) => r.id === sourceTargetIds.targetId);
+
+        // did we found our records ?
+        if (!sourceModel) {
+          return throwValidationError('Source model is missing');
+        }
+
+        // did we found our records ?
+        if (!targetModel) {
+          return throwValidationError('Target model is missing');
+        }
+
+        // finished
+        return {
+          sourceModel: sourceModel,
+          targetModel: targetModel
+        };
+      })
+      .then((sourceAndTarget) => {
+        return app.models.relationship
+          .findById(relationshipId)
+          .then((relationshipData) => {
+            // found ?
+            if (
+              !relationshipData ||
+              relationshipData.id !== relationshipId
+            ) {
+              return throwValidationError('Relationship model is missing');
+            }
+
+            // finished
+            return Object.assign(
+              sourceAndTarget, {
+                relationshipData: relationshipData
+              }
+            );
+          });
+      })
+      .then((replaceData) => {
+        // update relationship
+        return replaceData.relationshipData
+          .updateAttributes({
+            persons: [{
+              id: replaceData.targetModel.id,
+              type: replaceData.targetModel.type,
+              target: true
+            }, {
+              id: replaceData.sourceModel.id,
+              type: replaceData.sourceModel.type,
+              source: true
+            }]
+          });
+      })
+      .then((updatedRelationship) => {
+        // finished
+        callback(null, updatedRelationship);
+      });
+  };
 };

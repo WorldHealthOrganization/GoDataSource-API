@@ -1,0 +1,26 @@
+{
+  "name": "relationshipSourceTarget",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "RemovePropertiesFromDefinition": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "sourceId": {
+      "type": "string"
+    },
+    "targetId": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
