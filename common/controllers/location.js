@@ -339,6 +339,7 @@ module.exports = function (Location) {
                 .catch(function (error) {
                   // if there are errors, store them but allow the process to continue
                   errors.push({
+                    model: app.models.person.modelName,
                     recordId: person.id,
                     error: error
                   });
@@ -347,6 +348,58 @@ module.exports = function (Location) {
             });
           }
         });
+
+        // update the follow-up resources
+        // add an additional update action
+        updateActions.push(function (callback) {
+          app.models.followUp
+            .rawBulkUpdate({
+              'address.locationId': self.id,
+              'address.geoLocationAccurate': {
+                $ne: true
+              },
+              $or: [
+                {
+                  'address.geoLocation.coordinates.0': {
+                    $ne: self.geoLocation.lng
+                  }
+                },
+                {
+                  'address.geoLocation.coordinates.1': {
+                    $ne: self.geoLocation.lat
+                  }
+                }
+              ]
+            }, {
+              'address.geoLocation': {
+                coordinates: [self.geoLocation.lng, self.geoLocation.lat],
+                type: 'Point'
+              }
+            }, options)
+            .then(function (result) {
+              // check if result contains failed resources to add them into errors container
+              if (result.notModified) {
+                result.notModifiedIDs.forEach(function (id) {
+                  errors.push({
+                    model: app.models.followUp.modelName,
+                    recordId: id
+                  });
+                });
+              }
+
+              // send additional result details
+              callback(null, result.modified);
+            })
+            .catch(function (error) {
+              // all followUp updates failed
+              errors.push({
+                model: app.models.followUp.modelName,
+                error: error
+              });
+              callback(null, null);
+            });
+        });
+
         // promisify result
         return new Promise(function (resolve, reject) {
           // run update actions
@@ -354,7 +407,24 @@ module.exports = function (Location) {
             if (error) {
               return reject(error);
             }
-            resolve({error: errors, success: results.filter(record => record != null)});
+            resolve({
+              error: errors,
+              success: results.reduce(
+                function (accumulator, result) {
+                  // don't add null results
+                  if (!result) {
+                    return;
+                  }
+
+                  // followUp resources are updated in bulk so the action result is a number
+                  if (!isNaN(result)) {
+                    accumulator += result;
+                  } else {
+                    accumulator++;
+                  }
+                  return accumulator;
+                }, 0)
+            });
           });
         });
       })
@@ -362,11 +432,11 @@ module.exports = function (Location) {
         // if errors are present
         if (results.error.length) {
           // some updates succeeded
-          if (results.success.length) {
+          if (results.success !== undefined) {
             // send partial error
             callback(app.utils.apiError.getError('BULK_UPDATE_PARTIAL_SUCCESS', {
               model: Location.modelName,
-              success: results.success.length,
+              success: results.success,
               failed: results.error.length,
               errors: results.error
             }));
@@ -380,7 +450,7 @@ module.exports = function (Location) {
           }
         } else {
           // success
-          callback(null, results.success.length);
+          callback(null, results.success);
         }
       })
       .catch(callback);
