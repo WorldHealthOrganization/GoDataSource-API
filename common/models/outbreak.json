@@ -3715,10 +3715,9 @@
           "description": "relationship id"
         }, {
           "arg": "body",
-          "type": {
-            "sourceId": "string",
-            "targetId": "string"
-          },
+          "required": true,
+          "type": "object",
+          "model": "relationshipSourceTarget",
           "http": {
             "source": "body"
           },
