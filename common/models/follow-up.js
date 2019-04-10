@@ -592,7 +592,14 @@ module.exports = function (FollowUp) {
     let buildQuery = Promise.resolve();
     if (!_.isEmpty(filter.where.contact)) {
       // retrieve contact query
-      const contactQuery = filter.where.contact;
+      const contactQuery = {
+        $and: [
+          {
+            outbreakId: outbreakId
+          },
+          filter.where.contact
+        ]
+      };
 
       // retrieve contacts
       buildQuery = buildQuery
@@ -615,7 +622,7 @@ module.exports = function (FollowUp) {
             $and: [
               // make sure we're only retrieving follow ups from the current outbreak
               {
-                outbreakId: this.id
+                outbreakId: outbreakId
               },
               // retrieve only non-deleted records
               {
