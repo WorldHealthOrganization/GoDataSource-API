@@ -7939,7 +7939,8 @@ module.exports = function (Outbreak) {
               statusId: 1,
               date: 1,
               address: 1,
-              index: 1
+              index: 1,
+              targeted: 1
             }
           });
         })
@@ -8136,6 +8137,8 @@ module.exports = function (Outbreak) {
 
                   // unknown translated name
                   const unknownLocationName = dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION');
+                  const yesLabel = dictionary.getTranslation('LNG_COMMON_LABEL_YES');
+                  const noLabel = dictionary.getTranslation('LNG_COMMON_LABEL_NO');
 
                   // go through the groups
                   Object.keys(groups).forEach(function (groupId) {
@@ -8144,6 +8147,7 @@ module.exports = function (Outbreak) {
                       name: groups[groupId].name,
                       records: [],
                     };
+
                     // if the grouping is by place
                     if (groupBy === 'place') {
                       // and group id contains a location id
@@ -8155,10 +8159,12 @@ module.exports = function (Outbreak) {
                         data[groupId].name = unknownLocationName;
                       }
                     }
+
                     // go through all records
                     groups[groupId].records.forEach(function (record) {
                       // translate gender
                       record.gender = dictionary.getTranslation(_.get(record, 'contact.gender'));
+
                       // build record entry
                       const recordEntry = {
                         lastName: _.get(record, 'contact.lastName', ''),
@@ -8173,8 +8179,10 @@ module.exports = function (Outbreak) {
                         day: record.index,
                         from: moment(_.get(record, 'contact.followUp.startDate')).format('YYYY-MM-DD'),
                         to: moment(_.get(record, 'contact.followUp.endDate')).format('YYYY-MM-DD'),
-                        date: record.date ? moment(record.date).format('YYYY-MM-DD') : undefined
+                        date: record.date ? moment(record.date).format('YYYY-MM-DD') : undefined,
+                        targeted: record.targeted ? yesLabel : noLabel
                       };
+
                       // mark appropriate status as done
                       recordEntry[record.statusId] = 'X';
                       // add record entry to dataset
@@ -8236,6 +8244,9 @@ module.exports = function (Outbreak) {
                 }, {
                   id: 'to',
                   header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO')
+                }, {
+                  id: 'targeted',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TARGETED')
                 }]
               ];
 
