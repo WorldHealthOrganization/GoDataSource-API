@@ -20,7 +20,8 @@
     "RawFind": true,
     "RawUpdateOne": true,
     "RawBulkInsert": true,
-    "RawBulkDelete": true
+    "RawBulkDelete": true,
+    "RawBulkUpdate": true
   },
   "replaceOnPUT": false,
   "properties": {
