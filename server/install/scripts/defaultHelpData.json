@@ -10,13 +10,15 @@
           "id": "LNG_HELP_CATEGORY_GO_DATA_ADMINISTRATION_HELP_ITEM_AUDIT_LOGS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_ADMINISTRATION_HELP_ITEM_AUDIT_LOGS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_ADMINISTRATION_HELP_ITEM_AUDIT_LOGS_DESCRIPTION",
-          "comment": "Consulting the audit history of Go.Data."
+          "comment": "Consulting the audit history of Go.Data.",
+          "order": 1
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_ADMINISTRATION_HELP_ITEM_LAMGUAGES",
           "title": "LNG_HELP_CATEGORY_GO_DATA_ADMINISTRATION_HELP_ITEM_LAMGUAGES",
           "content": "LNG_HELP_CATEGORY_GO_DATA_ADMINISTRATION_HELP_ITEM_LAMGUAGES_DESCRIPTION",
-          "comment": "Configuring Go.Data for multilingual usage."
+          "comment": "Configuring Go.Data for multilingual usage.",
+          "order": 2
         }
       ]
     },
@@ -30,31 +32,36 @@
           "id": "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_BACKUPS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_BACKUPS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_BACKUPS_DESCRIPTION",
-          "comment": "Backing up and restoring Go.Data."
+          "comment": "Backing up and restoring Go.Data.",
+          "order": 1
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_CLIENT_APPLICATIONS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_CLIENT_APPLICATIONS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_CLIENT_APPLICATIONS_DESCRIPTION",
-          "comment": "Manage what can connect to your copy of Go.Data."
+          "comment": "Manage what can connect to your copy of Go.Data.",
+          "order": 2
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_DEVICES",
           "title": "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_DEVICES",
           "content": "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_DEVICES_DESCRIPTION",
-          "comment": "Consult, block and wipe any devices that connect to your copy of Go.Data."
+          "comment": "Consult, block and wipe any devices that connect to your copy of Go.Data.",
+          "order": 3
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_SYNCHRONISATION",
           "title": "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_SYNCHRONISATION",
           "content": "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_SYNCHRONISATION_DESCRIPTION",
-          "comment": "Configuring and executing synchronisation of Go.Data."
+          "comment": "Configuring and executing synchronisation of Go.Data.",
+          "order": 4
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_UPSTREAM_SERVERS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_UPSTREAM_SERVERS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_UPSTREAM_SERVERS_DESCRIPTION",
-          "comment": "Manage the copies of Go.Data to which your copy can send information."
+          "comment": "Manage the copies of Go.Data to which your copy can send information.",
+          "order": 5
         }
       ]
     },
@@ -68,55 +75,64 @@
           "id": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_ARCHIVING_GO_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_ARCHIVING_GO_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_ARCHIVING_GO_DATA_DESCRIPTION",
-          "comment": "Best practice for keeping longer term records of information collected with Go.Data."
+          "comment": "Best practice for keeping longer term records of information collected with Go.Data.",
+          "order": 1
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_BACKING_UP_AND_SYNCHRONISING",
           "title": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_BACKING_UP_AND_SYNCHRONISING",
           "content": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_BACKING_UP_AND_SYNCHRONISING_DESCRIPTION",
-          "comment": "Best practice to keep and exchange copies of Go.Data information."
+          "comment": "Best practice to keep and exchange copies of Go.Data information.",
+          "order": 2
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_BEST_PRACTICE_INTRODUCTION",
           "title": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_BEST_PRACTICE_INTRODUCTION",
           "content": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_BEST_PRACTICE_INTRODUCTION_DESCRIPTION",
-          "comment": "What constitutes best practice in Go.Data?"
+          "comment": "What constitutes best practice in Go.Data?",
+          "order": 3
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_DATA_GOVERNANCE",
           "title": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_DATA_GOVERNANCE",
           "content": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_DATA_GOVERNANCE_DESCRIPTION",
-          "comment": "Ownership and privacy concerns for information stored in Go.Data."
+          "comment": "Ownership and privacy concerns for information stored in Go.Data.",
+          "order": 4
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_HANDING_OVER_GO_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_HANDING_OVER_GO_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_HANDING_OVER_GO_DATA_DESCRIPTION",
-          "comment": "Best practice for transitioning ownership of an instance of Go.Data between users."
+          "comment": "Best practice for transitioning ownership of an instance of Go.Data between users.",
+          "order": 5
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_OUTBREAK_SET_UP_AND_DISTRIBUTION",
           "title": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_OUTBREAK_SET_UP_AND_DISTRIBUTION",
           "content": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_OUTBREAK_SET_UP_AND_DISTRIBUTION_DESCRIPTION",
-          "comment": "Best practice for setting up an outbreak and distributing it to other copies of Go.Data."
+          "comment": "Best practice for setting up an outbreak and distributing it to other copies of Go.Data.",
+          "order": 6
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_REFERENCE_DATA_MANAGEMENT",
           "title": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_REFERENCE_DATA_MANAGEMENT",
           "content": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_REFERENCE_DATA_MANAGEMENT_DESCRIPTION",
-          "comment": "Best practice for centralised and consistent reference data use."
+          "comment": "Best practice for centralised and consistent reference data use.",
+          "order": 7
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_ROLLING_OFF_MISSION",
           "title": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_ROLLING_OFF_MISSION",
           "content": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_ROLLING_OFF_MISSION_DESCRIPTION",
-          "comment": "Best practice for when you stop working with Go.Data."
+          "comment": "Best practice for when you stop working with Go.Data.",
+          "order": 8
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_VIEWING_DATA_INCONSISTENCIES",
           "title": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_VIEWING_DATA_INCONSISTENCIES",
           "content": "LNG_HELP_CATEGORY_GO_DATA_BEST_PRACTICE_HELP_ITEM_VIEWING_DATA_INCONSISTENCIES_DESCRIPTION",
-          "comment": "View inconsistencies in outbreak data."
+          "comment": "View inconsistencies in outbreak data.",
+          "order": 9
         }
       ]
     },
@@ -130,85 +146,99 @@
           "id": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_DOCUMENTS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_DOCUMENTS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_DOCUMENTS_DESCRIPTION",
-          "comment": "Working with documents related to a case."
+          "comment": "Working with documents related to a case.",
+          "order": 1
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_INVESTIGATION_QUESTIONNAIRE",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_INVESTIGATION_QUESTIONNAIRE",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_INVESTIGATION_QUESTIONNAIRE_DESCRIPTION",
-          "comment": "Working with the case investigation questionnaire."
+          "comment": "Working with the case investigation questionnaire.",
+          "order": 2
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_LAB_RESULTS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_LAB_RESULTS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_LAB_RESULTS_DESCRIPTION",
-          "comment": "Working with the lab results of a case."
+          "comment": "Working with the lab results of a case.",
+          "order": 3
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_LINE_LIST",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_LINE_LIST",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_LINE_LIST_DESCRIPTION",
-          "comment": "Working with the case line list in Go.Data"
+          "comment": "Working with the case line list in Go.Data",
+          "order": 4
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_MOVEMENT_MAP",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_MOVEMENT_MAP",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_MOVEMENT_MAP_DESCRIPTION",
-          "comment": "View the movements of a case on a map."
+          "comment": "View the movements of a case on a map.",
+          "order": 5
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_REPORTS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_REPORTS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_REPORTS_DESCRIPTION",
-          "comment": "Reports available on case data."
+          "comment": "Reports available on case data.",
+          "order": 6
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_TIMELINE",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_TIMELINE",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CASE_TIMELINE_DESCRIPTION",
-          "comment": "Chronological view of case activity."
+          "comment": "Chronological view of case activity.",
+          "order": 7
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CLUSTERS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CLUSTERS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CLUSTERS_DESCRIPTION",
-          "comment": "Clustering exposures in Go.Data."
+          "comment": "Clustering exposures in Go.Data.",
+          "order": 8
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CONTACT_LIST_FOR_CASES",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CONTACT_LIST_FOR_CASES",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_CONTACT_LIST_FOR_CASES_DESCRIPTION",
-          "comment": "Working with the contacts of a case."
+          "comment": "Working with the contacts of a case.",
+          "order": 9
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_DUPLICATE_RECORDS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_DUPLICATE_RECORDS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_DUPLICATE_RECORDS_DESCRIPTION",
-          "comment": "Handling duplicate case and contact data."
+          "comment": "Handling duplicate case and contact data.",
+          "order": 10
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_EVENTS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_EVENTS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_EVENTS_DESCRIPTION",
-          "comment": "Working with events in Go.Data."
+          "comment": "Working with events in Go.Data.",
+          "order": 11
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_IMPORT_EXPORT_CASES",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_IMPORT_EXPORT_CASES",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_IMPORT_EXPORT_CASES_DESCRIPTION",
-          "comment": "Extract and re-import case line list information in Go.Data."
+          "comment": "Extract and re-import case line list information in Go.Data.",
+          "order": 12
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_MODIFY_A_CASE",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_MODIFY_A_CASE",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_MODIFY_A_CASE_DESCRIPTION",
-          "comment": "Working with the edit view of a case."
+          "comment": "Working with the edit view of a case.",
+          "order": 13
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_PRINTING_CASE_INVESTIGATION_FORMS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_PRINTING_CASE_INVESTIGATION_FORMS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CASE_MANAGEMENT_HELP_ITEM_PRINTING_CASE_INVESTIGATION_FORMS_DESCRIPTION",
-          "comment": "Working with paper case investigation forms."
+          "comment": "Working with paper case investigation forms.",
+          "order": 14
         }
       ]
     },
@@ -222,73 +252,85 @@
           "id": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_BULK_PROCESSING_OF_CONTACTS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_BULK_PROCESSING_OF_CONTACTS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_BULK_PROCESSING_OF_CONTACTS_DESCRIPTION",
-          "comment": "Work with multiple contact records at the same time."
+          "comment": "Work with multiple contact records at the same time.",
+          "order": 1
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_CONTACT_CHRONOLOGY",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_CONTACT_CHRONOLOGY",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_CONTACT_CHRONOLOGY_DESCRIPTION",
-          "comment": "Viewing a timeline of significant events in the life of a contact."
+          "comment": "Viewing a timeline of significant events in the life of a contact.",
+          "order": 2
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_CONTACT_DOCUMENTS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_CONTACT_DOCUMENTS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_CONTACT_DOCUMENTS_DESCRIPTION",
-          "comment": "Working with documents for a contact."
+          "comment": "Working with documents for a contact.",
+          "order": 3
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_CONTACT_EXPOSURE",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_CONTACT_EXPOSURE",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_CONTACT_EXPOSURE_DESCRIPTION",
-          "comment": "Creating relationships from a contact to a case/event."
+          "comment": "Creating relationships from a contact to a case/event.",
+          "order": 4
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_CONTACT_LIST",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_CONTACT_LIST",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_CONTACT_LIST_DESCRIPTION",
-          "comment": "Working with the contact list."
+          "comment": "Working with the contact list.",
+          "order": 5
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_CONTACT_MOVEMENT",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_CONTACT_MOVEMENT",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_CONTACT_MOVEMENT_DESCRIPTION",
-          "comment": "Viewing the movement of a contact over time."
+          "comment": "Viewing the movement of a contact over time.",
+          "order": 6
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_EXPORT_IMPORT_CONTACT_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_EXPORT_IMPORT_CONTACT_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_EXPORT_IMPORT_CONTACT_DATA_DESCRIPTION",
-          "comment": "Extracting and re-importing contact data."
+          "comment": "Extracting and re-importing contact data.",
+          "order": 7
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_FOLLOW_UP_DASHBOARD",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_FOLLOW_UP_DASHBOARD",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_FOLLOW_UP_DASHBOARD_DESCRIPTION",
-          "comment": "Working with an overview of follow-up activity."
+          "comment": "Working with an overview of follow-up activity.",
+          "order": 8
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_GENERATING_FOLLOW_UPS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_GENERATING_FOLLOW_UPS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_GENERATING_FOLLOW_UPS_DESCRIPTION",
-          "comment": "Creating follow-ups for a contact."
+          "comment": "Creating follow-ups for a contact.",
+          "order": 9
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_MODIFYING_A_CONTACT",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_MODIFYING_A_CONTACT",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_MODIFYING_A_CONTACT_DESCRIPTION",
-          "comment": "Working with the edit mode for a contact."
+          "comment": "Working with the edit mode for a contact.",
+          "order": 10
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_PERFORMING_FOLLOW_UP",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_PERFORMING_FOLLOW_UP",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_PERFORMING_FOLLOW_UP_DESCRIPTION",
-          "comment": "Performing follow-up on computer or mobile device."
+          "comment": "Performing follow-up on computer or mobile device.",
+          "order": 11
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_PRINTING_FOLLOW_UP",
           "title": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_PRINTING_FOLLOW_UP",
           "content": "LNG_HELP_CATEGORY_GO_DATA_CONTACT_FOLLOW_UP_HELP_ITEM_PRINTING_FOLLOW_UP_DESCRIPTION",
-          "comment": "Generating a paper version of the Go.Data follow-up list."
+          "comment": "Generating a paper version of the Go.Data follow-up list.",
+          "order": 12
         }
       ]
     },
@@ -302,61 +344,71 @@
           "id": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_GO_DATA_AND_OTHER_TOOLS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_GO_DATA_AND_OTHER_TOOLS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_GO_DATA_AND_OTHER_TOOLS_DESCRIPTION",
-          "comment": "How does Go.Data relate to other field investigation tools?"
+          "comment": "How does Go.Data relate to other field investigation tools?",
+          "order": 1
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_HOW_DO_I_UPGRADE_GO_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_HOW_DO_I_UPGRADE_GO_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_HOW_DO_I_UPGRADE_GO_DATA_DESCRIPTION",
-          "comment": "Getting new versions of Go.Data."
+          "comment": "Getting new versions of Go.Data.",
+          "order": 2
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_IS_GO_DATA_FREE_TO_USE",
           "title": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_IS_GO_DATA_FREE_TO_USE",
           "content": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_IS_GO_DATA_FREE_TO_USE_DESCRIPTION",
-          "comment": "Are there licenses for using Go.Data?"
+          "comment": "Are there licenses for using Go.Data?",
+          "order": 3
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_IS_GO_DATA_SECURE",
           "title": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_IS_GO_DATA_SECURE",
           "content": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_IS_GO_DATA_SECURE_DESCRIPTION",
-          "comment": "Data secure and privacy concerns in Go.Data."
+          "comment": "Data secure and privacy concerns in Go.Data.",
+          "order": 4
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_IS_GO_DATA_SUPPORTED",
           "title": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_IS_GO_DATA_SUPPORTED",
           "content": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_IS_GO_DATA_SUPPORTED_DESCRIPTION",
-          "comment": "Can you call someone for help?"
+          "comment": "Can you call someone for help?",
+          "order": 5
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_ON_WHAT_DEVICES_CAN_I_RUN_GO_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_ON_WHAT_DEVICES_CAN_I_RUN_GO_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_ON_WHAT_DEVICES_CAN_I_RUN_GO_DATA_DESCRIPTION",
-          "comment": "Platforms on which Go.Data is supported."
+          "comment": "Platforms on which Go.Data is supported.",
+          "order": 6
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_WHAT_EXPERIENCE_DO_I_NEED_TO_USE_GO_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_WHAT_EXPERIENCE_DO_I_NEED_TO_USE_GO_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_WHAT_EXPERIENCE_DO_I_NEED_TO_USE_GO_DATA_DESCRIPTION",
-          "comment": "The types of users who can benefit from Go.Data and their background."
+          "comment": "The types of users who can benefit from Go.Data and their background.",
+          "order": 7
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_WHAT_IS_THE_FUTURE_OF_GO_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_WHAT_IS_THE_FUTURE_OF_GO_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_WHAT_IS_THE_FUTURE_OF_GO_DATA_DESCRIPTION",
-          "comment": "Will Go.Data continue to be developed?"
+          "comment": "Will Go.Data continue to be developed?",
+          "order": 8
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_WHAT_TECHNOLOGY_DOES_GO_DATA_USE",
           "title": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_WHAT_TECHNOLOGY_DOES_GO_DATA_USE",
           "content": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_WHAT_TECHNOLOGY_DOES_GO_DATA_USE_DESCRIPTION",
-          "comment": "Technical specifications for Go.Data."
+          "comment": "Technical specifications for Go.Data.",
+          "order": 9
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_WHO_IS_USING_GO_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_WHO_IS_USING_GO_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_FA_QS_HELP_ITEM_WHO_IS_USING_GO_DATA_DESCRIPTION",
-          "comment": "The Go.Data community."
+          "comment": "The Go.Data community.",
+          "order": 10
         }
       ]
     },
@@ -370,31 +422,36 @@
           "id": "LNG_HELP_CATEGORY_GO_DATA_GETTING_GELP_HELP_ITEM_CONTACT_US",
           "title": "LNG_HELP_CATEGORY_GO_DATA_GETTING_GELP_HELP_ITEM_CONTACT_US",
           "content": "LNG_HELP_CATEGORY_GO_DATA_GETTING_GELP_HELP_ITEM_CONTACT_US_DESCRIPTION",
-          "comment": "Reaching out to the Go.Data team."
+          "comment": "Reaching out to the Go.Data team.",
+          "order": 11
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_GETTING_GELP_HELP_ITEM_GOARN_NETWORK",
           "title": "LNG_HELP_CATEGORY_GO_DATA_GETTING_GELP_HELP_ITEM_GOARN_NETWORK",
           "content": "LNG_HELP_CATEGORY_GO_DATA_GETTING_GELP_HELP_ITEM_GOARN_NETWORK_DESCRIPTION",
-          "comment": "Getting help via the GOARN network."
+          "comment": "Getting help via the GOARN network.",
+          "order": 12
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_GETTING_GELP_HELP_ITEM_HELP_SYSTEM",
           "title": "LNG_HELP_CATEGORY_GO_DATA_GETTING_GELP_HELP_ITEM_HELP_SYSTEM",
           "content": "LNG_HELP_CATEGORY_GO_DATA_GETTING_GELP_HELP_ITEM_HELP_SYSTEM_DESCRIPTION",
-          "comment": "Go.Data's in-built help system."
+          "comment": "Go.Data's in-built help system.",
+          "order": 13
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_GETTING_GELP_HELP_ITEM_TRAINING",
           "title": "LNG_HELP_CATEGORY_GO_DATA_GETTING_GELP_HELP_ITEM_TRAINING",
           "content": "LNG_HELP_CATEGORY_GO_DATA_GETTING_GELP_HELP_ITEM_TRAINING_DESCRIPTION",
-          "comment": "Training and learning material for Go.Data."
+          "comment": "Training and learning material for Go.Data.",
+          "order": 14
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_GETTING_GELP_HELP_ITEM_VERSION_NUMBER",
           "title": "LNG_HELP_CATEGORY_GO_DATA_GETTING_GELP_HELP_ITEM_VERSION_NUMBER",
           "content": "LNG_HELP_CATEGORY_GO_DATA_GETTING_GELP_HELP_ITEM_VERSION_NUMBER_DESCRIPTION",
-          "comment": "How to find the version number of your copy of Go.Data."
+          "comment": "How to find the version number of your copy of Go.Data.",
+          "order": 15
         }
       ]
     },
@@ -408,25 +465,29 @@
           "id": "LNG_HELP_CATEGORY_GO_DATA_GETTING_STARTED_HELP_ITEM_CONFIGURING_GO_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_GETTING_STARTED_HELP_ITEM_CONFIGURING_GO_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_GETTING_STARTED_HELP_ITEM_CONFIGURING_GO_DATA_DESCRIPTION",
-          "comment": "How to configure Go.Data for first usage."
+          "comment": "How to configure Go.Data for first usage.",
+          "order": 1
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_GETTING_STARTED_HELP_ITEM_CONNECTING_GO_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_GETTING_STARTED_HELP_ITEM_CONNECTING_GO_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_GETTING_STARTED_HELP_ITEM_CONNECTING_GO_DATA_DESCRIPTION",
-          "comment": "How to connect to a copy of Go.Data."
+          "comment": "How to connect to a copy of Go.Data.",
+          "order": 2
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_GETTING_STARTED_HELP_ITEM_FIRST_LOGIN",
           "title": "LNG_HELP_CATEGORY_GO_DATA_GETTING_STARTED_HELP_ITEM_FIRST_LOGIN",
           "content": "LNG_HELP_CATEGORY_GO_DATA_GETTING_STARTED_HELP_ITEM_FIRST_LOGIN_DESCRIPTION",
-          "comment": "Logging in to Go.Data for the first time."
+          "comment": "Logging in to Go.Data for the first time.",
+          "order": 3
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_GETTING_STARTED_HELP_ITEM_INSTALLING_GO_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_GETTING_STARTED_HELP_ITEM_INSTALLING_GO_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_GETTING_STARTED_HELP_ITEM_INSTALLING_GO_DATA_DESCRIPTION",
-          "comment": "How to install and set-up Go.Data for the first time."
+          "comment": "How to install and set-up Go.Data for the first time.",
+          "order": 4
         }
       ]
     },
@@ -440,25 +501,29 @@
           "id": "LNG_HELP_CATEGORY_GO_DATA_INTRODUCTION_HELP_ITEM_INTRODUCTION",
           "title": "LNG_HELP_CATEGORY_GO_DATA_INTRODUCTION_HELP_ITEM_INTRODUCTION",
           "content": "LNG_HELP_CATEGORY_GO_DATA_INTRODUCTION_HELP_ITEM_INTRODUCTION_DESCRIPTION",
-          "comment": "An introduction and overview of Go.Data."
+          "comment": "An introduction and overview of Go.Data.",
+          "order": 1
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_INTRODUCTION_HELP_ITEM_QUICK_START",
           "title": "LNG_HELP_CATEGORY_GO_DATA_INTRODUCTION_HELP_ITEM_QUICK_START",
           "content": "LNG_HELP_CATEGORY_GO_DATA_INTRODUCTION_HELP_ITEM_QUICK_START_DESCRIPTION",
-          "comment": "A quick start guide to using Go.Data and getting the most from the help."
+          "comment": "A quick start guide to using Go.Data and getting the most from the help.",
+          "order": 2
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_INTRODUCTION_HELP_ITEM_WHEN_TO_USE_NOT_USE_GO_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_INTRODUCTION_HELP_ITEM_WHEN_TO_USE_NOT_USE_GO_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_INTRODUCTION_HELP_ITEM_WHEN_TO_USE_NOT_USE_GO_DATA_DESCRIPTION",
-          "comment": "For what sorts of work is Go.Data well and not well suited?"
+          "comment": "For what sorts of work is Go.Data well and not well suited?",
+          "order": 3
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_INTRODUCTION_HELP_ITEM_WHO_SHOULD_USE_GO_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_INTRODUCTION_HELP_ITEM_WHO_SHOULD_USE_GO_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_INTRODUCTION_HELP_ITEM_WHO_SHOULD_USE_GO_DATA_DESCRIPTION",
-          "comment": "A guide to the users at which Go.Data is targeted."
+          "comment": "A guide to the users at which Go.Data is targeted.",
+          "order": 4
         }
       ]
     },
@@ -472,43 +537,50 @@
           "id": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_CASES_ON_MOBILE",
           "title": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_CASES_ON_MOBILE",
           "content": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_CASES_ON_MOBILE_DESCRIPTION",
-          "comment": "Working with cases on a mobile device."
+          "comment": "Working with cases on a mobile device.",
+          "order": 1
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_CONNECTING_MOBILE",
           "title": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_CONNECTING_MOBILE",
           "content": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_CONNECTING_MOBILE_DESCRIPTION",
-          "comment": "Connecting your mobile copy of Go.Data to a computer copy."
+          "comment": "Connecting your mobile copy of Go.Data to a computer copy.",
+          "order": 2
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_CONTACTS_ON_MOBILE",
           "title": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_CONTACTS_ON_MOBILE",
           "content": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_CONTACTS_ON_MOBILE_DESCRIPTION",
-          "comment": "Working with contacts on a mobile device."
+          "comment": "Working with contacts on a mobile device.",
+          "order": 3
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_FOLLOW_UP_ON_MOBILE",
           "title": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_FOLLOW_UP_ON_MOBILE",
           "content": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_FOLLOW_UP_ON_MOBILE_DESCRIPTION",
-          "comment": "Working with contact follow-up on a mobile device."
+          "comment": "Working with contact follow-up on a mobile device.",
+          "order": 4
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_INSTALLING_MOBILE",
           "title": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_INSTALLING_MOBILE",
           "content": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_INSTALLING_MOBILE_DESCRIPTION",
-          "comment": "Getting the Go.Data application on mobile/tablet."
+          "comment": "Getting the Go.Data application on mobile/tablet.",
+          "order": 5
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_MAPS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_MAPS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_MAPS_DESCRIPTION",
-          "comment": "Working with maps on a mobile device."
+          "comment": "Working with maps on a mobile device.",
+          "order": 6
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_SYNCHRONISING",
           "title": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_SYNCHRONISING",
           "content": "LNG_HELP_CATEGORY_GO_DATA_MOBILE_HELP_ITEM_SYNCHRONISING_DESCRIPTION",
-          "comment": "Synchronising a mobile device."
+          "comment": "Synchronising a mobile device.",
+          "order": 7
         }
       ]
     },
@@ -522,37 +594,43 @@
           "id": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_CASE_INVESTIGATION_FORM",
           "title": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_CASE_INVESTIGATION_FORM",
           "content": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_CASE_INVESTIGATION_FORM_DESCRIPTION",
-          "comment": "Designing a case investigation form in Go.Data."
+          "comment": "Designing a case investigation form in Go.Data.",
+          "order": 1
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_FOLLOW_UP_FORM",
           "title": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_FOLLOW_UP_FORM",
           "content": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_FOLLOW_UP_FORM_DESCRIPTION",
-          "comment": "Designing a contact follow-up form in Go.Data."
+          "comment": "Designing a contact follow-up form in Go.Data.",
+          "order": 2
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_LAB_RESULTS_FORM",
           "title": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_LAB_RESULTS_FORM",
           "content": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_LAB_RESULTS_FORM_DESCRIPTION",
-          "comment": "Designing a laboratory form in Go.Data."
+          "comment": "Designing a laboratory form in Go.Data.",
+          "order": 3
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_MAP_SERVERS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_MAP_SERVERS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_MAP_SERVERS_DESCRIPTION",
-          "comment": "Configuring outbreaks for map reports."
+          "comment": "Configuring outbreaks for map reports.",
+          "order": 4
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_OUTBREAKS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_OUTBREAKS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_OUTBREAKS_DESCRIPTION",
-          "comment": "Working with outbreaks in Go.Data."
+          "comment": "Working with outbreaks in Go.Data.",
+          "order": 5
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_OUTBREAK_TEMPLATES",
           "title": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_OUTBREAK_TEMPLATES",
           "content": "LNG_HELP_CATEGORY_GO_DATA_OUTBREAKS_TEMPLATES_HELP_ITEM_OUTBREAK_TEMPLATES_DESCRIPTION",
-          "comment": "Using templates for working with outbreaks."
+          "comment": "Using templates for working with outbreaks.",
+          "order": 6
         }
       ]
     },
@@ -566,31 +644,36 @@
           "id": "LNG_HELP_CATEGORY_GO_DATA_REFERENCE_DATA_HELP_ITEM_EXPORT_IMPORT_REFERENCE_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_REFERENCE_DATA_HELP_ITEM_EXPORT_IMPORT_REFERENCE_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_REFERENCE_DATA_HELP_ITEM_EXPORT_IMPORT_REFERENCE_DATA_DESCRIPTION",
-          "comment": "Extracting and re-importing reference data."
+          "comment": "Extracting and re-importing reference data.",
+          "order": 1
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_REFERENCE_DATA_HELP_ITEM_ICONS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_REFERENCE_DATA_HELP_ITEM_ICONS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_REFERENCE_DATA_HELP_ITEM_ICONS_DESCRIPTION",
-          "comment": "Working with icons in Go.Data."
+          "comment": "Working with icons in Go.Data.",
+          "order": 2
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_REFERENCE_DATA_HELP_ITEM_LOCATIONS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_REFERENCE_DATA_HELP_ITEM_LOCATIONS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_REFERENCE_DATA_HELP_ITEM_LOCATIONS_DESCRIPTION",
-          "comment": "Working with place names in Go.Data."
+          "comment": "Working with place names in Go.Data.",
+          "order": 3
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_REFERENCE_DATA_HELP_ITEM_MODIFY_REFERENCE_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_REFERENCE_DATA_HELP_ITEM_MODIFY_REFERENCE_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_REFERENCE_DATA_HELP_ITEM_MODIFY_REFERENCE_DATA_DESCRIPTION",
-          "comment": "Adding and modifying the reference data that Go.Data uses."
+          "comment": "Adding and modifying the reference data that Go.Data uses.",
+          "order": 4
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_REFERENCE_DATA_HELP_ITEM_REFERENCE_DATA_LIST",
           "title": "LNG_HELP_CATEGORY_GO_DATA_REFERENCE_DATA_HELP_ITEM_REFERENCE_DATA_LIST",
           "content": "LNG_HELP_CATEGORY_GO_DATA_REFERENCE_DATA_HELP_ITEM_REFERENCE_DATA_LIST_DESCRIPTION",
-          "comment": "Working with the list of reference data in Go.Data."
+          "comment": "Working with the list of reference data in Go.Data.",
+          "order": 5
         }
       ]
     },
@@ -604,43 +687,50 @@
           "id": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_CASE_COUNT_MAP",
           "title": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_CASE_COUNT_MAP",
           "content": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_CASE_COUNT_MAP_DESCRIPTION",
-          "comment": "Visualising case counts on a map."
+          "comment": "Visualising case counts on a map.",
+          "order": 6
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_CHAINS_OF_TRANSMISSION",
           "title": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_CHAINS_OF_TRANSMISSION",
           "content": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_CHAINS_OF_TRANSMISSION_DESCRIPTION",
-          "comment": "Visualising the chains of transmission."
+          "comment": "Visualising the chains of transmission.",
+          "order": 7
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_DASHBOARD",
           "title": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_DASHBOARD",
           "content": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_DASHBOARD_DESCRIPTION",
-          "comment": "Making sense of the Go.Data start-up page."
+          "comment": "Making sense of the Go.Data start-up page.",
+          "order": 8
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_EDITING_THE_CHAINS_OF_TRANSMISSION",
           "title": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_EDITING_THE_CHAINS_OF_TRANSMISSION",
           "content": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_EDITING_THE_CHAINS_OF_TRANSMISSION_DESCRIPTION",
-          "comment": "Working with the chains of transmission in edit mode."
+          "comment": "Working with the chains of transmission in edit mode.",
+          "order": 9
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_HIERARCHICAL_NETWORK",
           "title": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_HIERARCHICAL_NETWORK",
           "content": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_HIERARCHICAL_NETWORK_DESCRIPTION",
-          "comment": "Visualising  the chain of transmission as a hierarchy."
+          "comment": "Visualising  the chain of transmission as a hierarchy.",
+          "order": 10
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_MAPPING_THE_CHAINS_OF_TRANSMISSION",
           "title": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_MAPPING_THE_CHAINS_OF_TRANSMISSION",
           "content": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_MAPPING_THE_CHAINS_OF_TRANSMISSION_DESCRIPTION",
-          "comment": "Visualising  the chains of transmission on a map."
+          "comment": "Visualising  the chains of transmission on a map.",
+          "order": 11
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_TIMELINE",
           "title": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_TIMELINE",
           "content": "LNG_HELP_CATEGORY_GO_DATA_REPORTS_HELP_ITEM_TIMELINE_DESCRIPTION",
-          "comment": "Visualising the chains of transmission as a timeline."
+          "comment": "Visualising the chains of transmission as a timeline.",
+          "order": 12
         }
       ]
     },
@@ -654,37 +744,43 @@
           "id": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_GO_DATA_DOES_NOT_INSTALL",
           "title": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_GO_DATA_DOES_NOT_INSTALL",
           "content": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_GO_DATA_DOES_NOT_INSTALL_DESCRIPTION",
-          "comment": "Issues encountered when installing Go.Data."
+          "comment": "Issues encountered when installing Go.Data.",
+          "order": 1
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_GO_DATA_DOES_NOT_SHOW_MY_DATA",
           "title": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_GO_DATA_DOES_NOT_SHOW_MY_DATA",
           "content": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_GO_DATA_DOES_NOT_SHOW_MY_DATA_DESCRIPTION",
-          "comment": "What to do if you suspect missing data."
+          "comment": "What to do if you suspect missing data.",
+          "order": 2
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_GO_DATA_DOES_NOT_START",
           "title": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_GO_DATA_DOES_NOT_START",
           "content": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_GO_DATA_DOES_NOT_START_DESCRIPTION",
-          "comment": "Issues when starting up Go.Data."
+          "comment": "Issues when starting up Go.Data.",
+          "order": 3
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_GO_DATA_DOES_NOT_SYNCHRONISE",
           "title": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_GO_DATA_DOES_NOT_SYNCHRONISE",
           "content": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_GO_DATA_DOES_NOT_SYNCHRONISE_DESCRIPTION",
-          "comment": "What to do if Go.Data has issues connecting to other instances."
+          "comment": "What to do if Go.Data has issues connecting to other instances.",
+          "order": 4
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_GO_DATA_SUDDENLY_STOPS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_GO_DATA_SUDDENLY_STOPS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_GO_DATA_SUDDENLY_STOPS_DESCRIPTION",
-          "comment": "What to do if Go.Data crashes during use."
+          "comment": "What to do if Go.Data crashes during use.",
+          "order": 5
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_I_CANT_CONNECT_MY_MOBILE_PHONE_TABLET",
           "title": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_I_CANT_CONNECT_MY_MOBILE_PHONE_TABLET",
           "content": "LNG_HELP_CATEGORY_GO_DATA_TROUBLESHOOTING_HELP_ITEM_I_CANT_CONNECT_MY_MOBILE_PHONE_TABLET_DESCRIPTION",
-          "comment": "What to do if you can't connect your contact tracing device."
+          "comment": "What to do if you can't connect your contact tracing device.",
+          "order": 6
         }
       ]
     },
@@ -698,25 +794,29 @@
           "id": "LNG_HELP_CATEGORY_GO_DATA_USERS_HELP_ITEM_MANAGING_TEAMS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_USERS_HELP_ITEM_MANAGING_TEAMS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_USERS_HELP_ITEM_MANAGING_TEAMS_DESCRIPTION",
-          "comment": "Grouping users in to teams for the purpose of contact tracing."
+          "comment": "Grouping users in to teams for the purpose of contact tracing.",
+          "order": 1
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_USERS_HELP_ITEM_MANAGING_USERS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_USERS_HELP_ITEM_MANAGING_USERS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_USERS_HELP_ITEM_MANAGING_USERS_DESCRIPTION",
-          "comment": "Managing the list of users that can access Go.Data."
+          "comment": "Managing the list of users that can access Go.Data.",
+          "order": 2
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_USERS_HELP_ITEM_ROLES_AND_PERMISSIONS",
           "title": "LNG_HELP_CATEGORY_GO_DATA_USERS_HELP_ITEM_ROLES_AND_PERMISSIONS",
           "content": "LNG_HELP_CATEGORY_GO_DATA_USERS_HELP_ITEM_ROLES_AND_PERMISSIONS_DESCRIPTION",
-          "comment": "How does Go.Data use roles and permissions to enforce security?"
+          "comment": "How does Go.Data use roles and permissions to enforce security?",
+          "order": 3
         },
         {
           "id": "LNG_HELP_CATEGORY_GO_DATA_USERS_HELP_ITEM_SECURITY_OVERVIEW",
           "title": "LNG_HELP_CATEGORY_GO_DATA_USERS_HELP_ITEM_SECURITY_OVERVIEW",
           "content": "LNG_HELP_CATEGORY_GO_DATA_USERS_HELP_ITEM_SECURITY_OVERVIEW_DESCRIPTION",
-          "comment": "How does Go.Data handle different types of users?"
+          "comment": "How does Go.Data handle different types of users?",
+          "order": 4
         }
       ]
     }

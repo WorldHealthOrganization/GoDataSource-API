@@ -295,6 +295,7 @@ function run(callback) {
                         content: data.content,
                         comment: data.comment,
                         categoryId: data.categoryId,
+                        order: data.order,
                         approved: true
                       }, options)
                       .catch(cb)
@@ -329,6 +330,7 @@ function run(callback) {
                       content: newHelpItem.content,
                       comment: newHelpItem.comment,
                       categoryId: newHelpItem.categoryId,
+                      order: newHelpItem.order,
                       approved: true
                     }, common.install.timestamps), options)
                     .catch(cb)
