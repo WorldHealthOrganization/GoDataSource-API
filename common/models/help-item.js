@@ -5,6 +5,13 @@ const _ = require('lodash');
 const helpers = require('../../components/helpers');
 
 module.exports = function (HelpItem) {
+  /**
+   * Default sort for help items
+   * @type {string[]}
+   */
+  HelpItem.defaultOrder = [
+    'order ASC'
+  ];
 
   /**
    * Replace the translatable fields with language tokens before saving

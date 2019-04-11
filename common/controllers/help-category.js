@@ -138,4 +138,38 @@ module.exports = function (HelpCategory) {
           .catch(callback);
       });
   };
+
+  /**
+   * Attach before remote (GET help categories ) hooks
+   */
+  HelpCategory.beforeRemote('find', function (context, modelInstance, next) {
+    // attach default order for categories
+    if (
+      !context.args.filter ||
+      _.isEmpty(context.args.filter.order)
+    ) {
+      context.args.filter = context.args.filter || {};
+      context.args.filter.order = app.models.helpCategory.defaultOrder;
+    }
+
+    // continue
+    next();
+  });
+
+  /**
+   * Attach before remote (GET help items ) hooks
+   */
+  HelpCategory.beforeRemote('prototype.__get__helpItems', function (context, modelInstance, next) {
+    // attach default order for categories
+    if (
+      !context.args.filter ||
+      _.isEmpty(context.args.filter.order)
+    ) {
+      context.args.filter = context.args.filter || {};
+      context.args.filter.order = app.models.helpCategory.defaultOrder;
+    }
+
+    // continue
+    next();
+  });
 };
