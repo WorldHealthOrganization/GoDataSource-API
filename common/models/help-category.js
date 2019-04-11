@@ -9,6 +9,14 @@ module.exports = function (HelpCategory) {
   HelpCategory.hasController = true;
 
   /**
+   * Default sort for help categories
+   * @type {string[]}
+   */
+  HelpCategory.defaultOrder = [
+    'order ASC'
+  ];
+
+  /**
    * Replace the translatable fields with language tokens before saving
    * Save translatable fields values, to create translations later
    */

@@ -33,6 +33,9 @@
     },
     "page": {
       "type": "string"
+    },
+    "order": {
+      "type": "number"
     }
   },
   "validations": [],
