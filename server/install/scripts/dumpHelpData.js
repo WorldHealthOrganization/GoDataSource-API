@@ -13,7 +13,11 @@ const fs = require('fs');
 function run(callback) {
   // retrieve category items
   helpCategory
-    .find()
+    .find({
+      order: [
+        'order asc'
+      ]
+    })
     .catch(callback)
 
     // retrieve help categories
@@ -71,7 +75,10 @@ function run(callback) {
               categoryId: {
                 inq: Object.keys(categoryDataMap)
               }
-            }
+            },
+            order: [
+              'order asc'
+            ]
           })
           .catch(reject)
           .then((helpItems) => {
@@ -83,6 +90,7 @@ function run(callback) {
                 title: helpItem.title,
                 content: helpItem.content,
                 comment: helpItem.comment,
+                order: helpItem.order,
                 page: helpItem.page
               });
 
