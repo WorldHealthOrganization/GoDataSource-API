@@ -115,10 +115,22 @@ module.exports = function (HelpCategory) {
         }
       }))
       .then((results) => {
+        // attach default order for categories & help items
+        if (
+          !filter ||
+          _.isEmpty(filter.order)
+        ) {
+          filter = filter || {};
+          filter.order = [
+            ...(app.models.helpCategory.defaultOrder || []).map((order) => `category.${order}`),
+            ...app.models.helpItem.defaultOrder
+          ];
+        }
+
         // Get all Help Categories referenced by the language tokens that have passed the search criteria
         let tokens = results.map((languageToken) => languageToken.token);
         app.models.helpItem
-          .find(app.utils.remote.mergeFilters({
+          .findAggregate(app.utils.remote.mergeFilters({
             where: {
               or: [
                 {
@@ -134,8 +146,8 @@ module.exports = function (HelpCategory) {
               ],
             }
           }, filter))
-          .then((result) => callback(null, result))
-          .catch(callback);
+          .catch(callback)
+          .then((data) => callback(null, data));
       });
   };
 
