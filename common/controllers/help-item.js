@@ -12,23 +12,45 @@ module.exports = function (HelpItem) {
     'findById',
     'deleteById',
     'prototype.__get__category',
-    'prototype.__get__user'
+    'prototype.__get__user',
+    'count',
+    'find'
   ]);
 
   /**
-   * Attach before remote (GET help items ) hooks
+   * Retrieve help items
+   * @param filter
+   * @param callback
    */
-  HelpItem.beforeRemote('find', function (context, modelInstance, next) {
-    // attach default order for categories
+  HelpItem.getHelpItems = (filter, callback) => {
+    // attach default order for categories & help items
     if (
-      !context.args.filter ||
-      _.isEmpty(context.args.filter.order)
+      !filter ||
+      _.isEmpty(filter.order)
     ) {
-      context.args.filter = context.args.filter || {};
-      context.args.filter.order = app.models.helpItem.defaultOrder;
+      filter = filter || {};
+      filter.order = [
+        ...(app.models.helpCategory.defaultOrder || []).map((order) => `category.${order}`),
+        ...app.models.helpItem.defaultOrder
+      ];
     }
 
-    // continue
-    next();
-  });
+    // retrieve items
+    app.models.helpItem
+      .findAggregate(filter)
+      .catch(callback)
+      .then((data) => callback(null, data));
+  };
+
+  /**
+   * Count help items
+   * @param where
+   * @param callback
+   */
+  HelpItem.countHelpItems = (where, callback) => {
+    app.models.helpItem
+      .findAggregate({ where: where }, true)
+      .catch(callback)
+      .then((data) => callback(null, data));
+  };
 };

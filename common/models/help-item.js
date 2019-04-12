@@ -152,4 +152,151 @@ module.exports = function (HelpItem) {
       }
     }
   });
+
+  /**
+   * Retrieve help items using mongo aggregation directly
+   * @param filter
+   * @param countOnly Boolean
+   */
+  HelpItem.findAggregate = (
+    filter,
+    countOnly
+  ) => {
+    return new Promise((resolve, reject) => {
+      // convert filter to mongodb filter structure
+      filter = filter || {};
+      let whereFilter = filter.where ? app.utils.remote.convertLoopbackFilterToMongo(filter.where) : {};
+
+      // add other conditions
+      const whereAdditionalConditions = {
+        $or: [
+          {
+            deleted: false
+          },
+          {
+            deleted: {
+              $eq: null
+            }
+          }
+        ]
+      };
+
+      // construct the final query filter
+      whereFilter = _.isEmpty(whereFilter) ?
+        whereAdditionalConditions : {
+          $and: [
+            whereFilter,
+            whereAdditionalConditions
+          ]
+        };
+
+      // construct aggregate filters
+      const aggregatePipeline = [
+        {
+          $match: whereFilter
+        }
+      ];
+
+      // no need to retrieve contact data, sort & skip records if we just need to count
+      if (countOnly) {
+        aggregatePipeline.push({
+          $project: {
+            _id: 1
+          }
+        });
+      } else {
+        aggregatePipeline.push(...[
+          {
+            $lookup: {
+              from: 'helpCategory',
+              localField: 'categoryId',
+              foreignField: '_id',
+              as: 'category'
+            }
+          }, {
+            $unwind: {
+              path: '$category',
+              preserveNullAndEmptyArrays: true
+            }
+          }
+        ]);
+
+        // parse order props
+        const knownOrderTypes = {
+          ASC: 1,
+          DESC: -1
+        };
+        const orderProps = {};
+        if (Array.isArray(filter.order)) {
+          filter.order.forEach((pair) => {
+            // split prop and order type
+            const split = pair.split(' ');
+            // ignore if we don't receive a pair
+            if (split.length !== 2) {
+              return;
+            }
+            split[1] = split[1].toUpperCase();
+            // make sure the order type is known
+            if (!knownOrderTypes.hasOwnProperty(split[1])) {
+              return;
+            }
+            orderProps[split[0]] = knownOrderTypes[split[1]];
+          });
+        }
+
+        // do not add sort with 0 items, it will throw error
+        if (Object.keys(orderProps).length) {
+          aggregatePipeline.push({
+            $sort: orderProps
+          });
+        }
+
+        // we only add pagination fields if they are numbers
+        // otherwise aggregation will fail
+        if (!isNaN(filter.skip)) {
+          aggregatePipeline.push({
+            $skip: filter.skip
+          });
+        }
+        if (!isNaN(filter.limit)) {
+          aggregatePipeline.push({
+            $limit: filter.limit
+          });
+        }
+      }
+
+      // retrieve data
+      app.dataSources.mongoDb.connector
+        .collection('helpItem')
+        .aggregate(aggregatePipeline)
+        .toArray()
+        .catch(reject)
+        .then((records) => {
+          // make sure we have an array
+          records = records || [];
+
+          // count records ?
+          if (countOnly) {
+            return resolve(records.length);
+          }
+
+          // replace _id with id
+          // root._id & root.category._id
+          records.forEach((record) => {
+            // root._id
+            record.id = record._id;
+            delete record._id;
+
+            // root.category._id
+            if (record.category) {
+              record.category.id = record.category._id;
+              delete record.category._id;
+            }
+          });
+
+          // finished
+          resolve(records);
+        });
+    });
+  };
 };
