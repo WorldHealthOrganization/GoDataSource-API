@@ -127,6 +127,7 @@ gulp.task('update-build-info', ['install-dependencies'], function (callback) {
   packageJson.build.type = type;
   packageJson.build.version = version || packageJson.version;
   packageJson.build.build = moment().format('YYMMDDHHmm');
+  packageJson.build.arch = packageJson.build.arch || 'x64';
   // remove unneeded information
   delete packageJson.devDependencies;
   fs.writeFile(`${__dirname}/build/package.json`, JSON.stringify(packageJson, null, 2), callback);

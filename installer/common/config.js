@@ -209,6 +209,17 @@ const cliArguments = {
       convertor: e => e
     }
   },
+  buildArch: {
+    source: sources.package,
+    paramPath: 'build.arch',
+    get: {
+      convertor: e => e
+    },
+    set: {
+      allowed: false,
+      convertor: e => e
+    }
+  },
   backUpPassword: {
     source: sources.config,
     paramPath: 'backUp.password',

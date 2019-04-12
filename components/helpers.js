@@ -1091,10 +1091,7 @@ const getBuildInformation = function () {
     type: _.get(packageJson, 'build.type', 'hub'),
     version: _.get(packageJson, 'build.version', _.get(packageJson, 'version')),
     build: _.get(packageJson, 'build.build', 'development'),
-    process: {
-      platform: process.platform,
-      arch: process.arch
-    }
+    arch: _.get(packageJson, 'build.arch', 'x64')
   };
 };
 
