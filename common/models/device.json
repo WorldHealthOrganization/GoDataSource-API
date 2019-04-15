@@ -86,9 +86,15 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_sys_config",
+      "permissions": "ALLOW",
+      "property": "findByPhysicalDeviceId"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "$client_application",
       "permissions": "ALLOW",
-      "property": "findById"
+      "property": "findByPhysicalDeviceId"
     },
     {
       "principalType": "ROLE",
@@ -162,6 +168,29 @@
       "http": {
         "verb": "post",
         "path": "/wipe-complete"
+      }
+    },
+    "findByPhysicalDeviceId": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Device physical id"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "device",
+          "type": "device",
+          "description": "Device data",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries devices",
+      "http": {
+        "verb": "get",
+        "path": "/findByPhysicalDeviceId/:nk"
       }
     }
   }

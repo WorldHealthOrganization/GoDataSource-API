@@ -100,4 +100,21 @@ module.exports = function (Device) {
       })
       .catch(callback);
   };
+
+  /**
+   * Retrieve device data by physical id
+   */
+  Device.findByPhysicalDeviceId = (physicalDeviceId, callback) => {
+    // try and find the device using device id
+    app.models.device
+      .findOne({
+        where: {
+          physicalDeviceId: physicalDeviceId
+        }
+      })
+      .catch(callback)
+      .then(function (device) {
+        callback(null, device);
+      });
+  };
 };
