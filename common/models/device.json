@@ -86,6 +86,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_sys_config",
       "permissions": "ALLOW",
       "property": "count"
