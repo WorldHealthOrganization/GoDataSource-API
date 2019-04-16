@@ -924,6 +924,11 @@ module.exports = function (FollowUp) {
               record.contact.id = record.contact._id;
               delete record.contact._id;
             }
+
+            // remap address lat & lng
+            FollowUp.prepareDataForRead({
+              data: record
+            });
           });
 
           // finished

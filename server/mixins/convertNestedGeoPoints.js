@@ -179,5 +179,9 @@ module.exports = function (Model) {
       prepareDataForRead(context);
       next();
     });
+
+    // expose model methods
+    Model.prepareDataForDB = prepareDataForDB;
+    Model.prepareDataForRead = prepareDataForRead;
   }
 };
