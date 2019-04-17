@@ -1005,6 +1005,10 @@ module.exports = function (Case) {
           // - should be the most recent date from case.dateOfOnset / case.dateRanges.endDate / case.labResults.dateSampleTaken
           caseData.lastGraphDate = moment(caseData.dateOfOnset);
 
+          // determine firstGraphDate
+          // - should be the oldest date from case.dateOfOnset / case.dateRanges.endDate / case.labResults.dateSampleTaken
+          caseData.firstGraphDate = moment(caseData.dateOfOnset);
+
           // determine lastGraphDate starting with lab results
           if (caseData.labResults) {
             const labResults = caseData.labResults || [];
@@ -1020,6 +1024,16 @@ module.exports = function (Case) {
               caseData.lastGraphDate = dateSampleTaken.isAfter(caseData.lastGraphDate) ?
                 dateSampleTaken :
                 caseData.lastGraphDate;
+
+              // determine min graph date
+              if (dateSampleTaken) {
+                caseData.firstGraphDate = !caseData.firstGraphDate ?
+                  dateSampleTaken : (
+                    dateSampleTaken.isBefore(caseData.firstGraphDate) ?
+                      dateSampleTaken :
+                      caseData.firstGraphDate
+                  );
+              }
 
               // since we have dateSampleTaken, lets add it to the list
               caseData.labResults.push(lab);
@@ -1042,6 +1056,16 @@ module.exports = function (Case) {
               // if we don't have an end date then we need to set the current date since this is still in progress
               dateRange.endDate = dateRange.endDate ? moment(dateRange.endDate) : moment();
 
+              // determine min graph date
+              if (dateRange.startDate) {
+                caseData.firstGraphDate = !caseData.firstGraphDate ?
+                  dateRange.startDate : (
+                    dateRange.startDate.isBefore(caseData.firstGraphDate) ?
+                      dateRange.startDate :
+                      caseData.firstGraphDate
+                  );
+              }
+
               // determine last graph date
               caseData.lastGraphDate = dateRange.endDate.isAfter(caseData.lastGraphDate) ?
                 dateRange.endDate :
@@ -1053,11 +1077,10 @@ module.exports = function (Case) {
           }
 
           // determine oldest onset date
-          const dateOfOnset = moment(caseData.dateOfOnset);
           response.minGraphDate = !response.minGraphDate ?
-            dateOfOnset : (
-              dateOfOnset.isBefore(response.minGraphDate) ?
-                dateOfOnset :
+            caseData.firstGraphDate : (
+              caseData.firstGraphDate.isBefore(response.minGraphDate) ?
+                caseData.firstGraphDate :
                 response.minGraphDate
             );
 

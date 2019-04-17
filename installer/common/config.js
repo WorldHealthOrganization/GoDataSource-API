@@ -216,7 +216,7 @@ const cliArguments = {
       convertor: e => e
     },
     set: {
-      allowed: false,
+      allowed: true,
       convertor: e => e
     }
   },

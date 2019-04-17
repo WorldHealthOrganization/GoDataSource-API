@@ -2923,6 +2923,10 @@
                     "type": "date",
                     "description": "Case dateOfOnset"
                   },
+                  "firstGraphDate": {
+                    "type": "date",
+                    "description": "Min graph date for this case"
+                  },
                   "addresses": [
                     {
                       "type": "address",
