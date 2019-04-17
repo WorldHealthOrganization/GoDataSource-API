@@ -1323,7 +1323,45 @@ module.exports = function (Outbreak) {
    */
   Outbreak.observe('after save', function (context, next) {
     // after successfully creating template, also create translations for it.
-    templateParser.afterHook(context, next);
+    templateParser.afterHook(
+      context, (err) => {
+        // error ?
+        if (err) {
+          next(err);
+        }
+
+        // on outbreak creation we need to add it to use whitelist in case user doesn't have access to all outbreaks
+        if (
+          context.isNewInstance &&
+          _.get(context, 'options.remotingContext.req.authData.userInstance') &&
+          _.get(context, 'instance.id')
+        ) {
+          const authentificatedUser = context.options.remotingContext.req.authData.userInstance;
+          const outbreakId = context.instance.id;
+          if (
+            !_.isEmpty(authentificatedUser.outbreakIds) &&
+            authentificatedUser.outbreakIds.indexOf(outbreakId) < 0
+          ) {
+            // add outbreak to the list
+            authentificatedUser.outbreakIds.push(outbreakId);
+
+            // save user
+            authentificatedUser
+              .updateAttributes({
+                outbreakIds: authentificatedUser.outbreakIds
+              })
+              .then(() => {
+                next();
+              })
+              .catch(next);
+          } else {
+            next();
+          }
+        } else {
+          next();
+        }
+      }
+    );
   });
 
   // on load, include default ArcGis servers
