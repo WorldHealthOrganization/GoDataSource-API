@@ -436,6 +436,7 @@
       "LNG_PAGE_ACTION_MODIFY": "Modificateur",
       "LNG_PAGE_ACTION_RELATIONSHIPS": "Rapports",
       "LNG_PAGE_ACTION_RESTORE": "Restaurateur",
+      "LNG_PAGE_ACTION_REFRESH_VISUAL_ID_DESCRIPTION" : "Regenerate visual ID",
       "LNG_PAGE_ACTION_VIEW": "Ouvrir",
       "LNG_PAGE_ACTION_SEE_EXPOSURES_FROM": "Voir les contacts",
       "LNG_PAGE_ACTION_SEE_EXPOSURES_TO": "Voir les expositions"
@@ -549,7 +550,8 @@
       "LNG_DIALOG_SAVE_MAPPING_IMPORTS_BUTTON": "Enregistrer le mappage d'importation",
       "LNG_DIALOG_CONFIRM_DELETE_CASE_WITH_EXPOSED_CONTACTS": "Cas: '{{name}}' a {{numberOfContacts}} contacts exposés à supprimer. Êtes-vous sûr de vouloir supprimer ce cas?",
       "LNG_DIALOG_CONFIRM_REMOVE_MULTI_ANSWER": "Êtes-vous sûr de vouloir supprimer cette réponse?",
-      "LNG_DIALOG_CONFIRM_DELETE_RELATIONSHIP_CHAIN_OF_TRANSMISSION": "Êtes-vous sûr de vouloir supprimer cette relation?"
+      "LNG_DIALOG_CONFIRM_DELETE_RELATIONSHIP_CHAIN_OF_TRANSMISSION": "Êtes-vous sûr de vouloir supprimer cette relation?",
+      "LNG_DIALOG_EXPORT_CHAIN_OF_TRANSMISSION_SCALE_INFO": "The higher the scale, the longer it can take to export Chains of Transmission"
     },
     "uiLoginPage": {
       "LNG_PAGE_LOGIN_ACTION_LOGIN_BUTTON": "S'identifier",
@@ -957,7 +959,8 @@
       "LNG_LOCATION_FIELD_LABEL_GEOGRAPHICAL_LEVEL_DESCRIPTION": "",
       "LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION": "Lieu du parent",
       "LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION_DESCRIPTION": "",
-      "LNG_PAGE_LIST_AVAILABLE_ENTITIES_FOR_RELATIONSHIP_TITLE": "Entités disponibles"
+      "LNG_PAGE_LIST_AVAILABLE_ENTITIES_FOR_RELATIONSHIP_TITLE": "Entités disponibles",
+      "LNG_PAGE_LIST_AVAILABLE_ENTITIES_HAS_POSSIBLE_RELATIONSHIP_DUPLICATE": "Possible Duplicate ?"
     },
     "uiCreateEntityRelationshipPage": {
       "LNG_PAGE_CREATE_ENTITY_ERROR_NO_SELECTED_ENTITIES": "Aucune entité sélectionnée pour les relations",
@@ -1166,7 +1169,9 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_TEAM_DESCRIPTION": "",
       "LNG_FOLLOW_UP_FIELD_LABEL_TIME_FILTER": "Dernière fois vu",
       "LNG_FOLLOW_UP_FIELD_LABEL_WEEK_NUMBER": "Numéro de semaine",
-      "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_VISUAL_ID": "ID de contact"
+      "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_VISUAL_ID": "ID de contact",
+      "LNG_FOLLOW_UP_FIELD_LABEL_NOT_TARGETED": "Not targeted",
+      "LNG_FOLLOW_UP_FIELD_LABEL_NOT_TARGETED_DESCRIPTION": ""
     },
     "uiTermsOfUsePage": {
       "LNG_PAGE_TERMS_OF_USE_TITLE": "Conditions d'utilisation",
@@ -1978,14 +1983,18 @@
       "LNG_PAGE_CREATE_CASE_LAB_RESULT_ACTION_CREATE_LAB_RESULT_BUTTON": "Créer résultat de laboratoire",
       "LNG_PAGE_CREATE_CASE_LAB_RESULT_TAB_DETAILS": "Détails",
       "LNG_PAGE_CREATE_CASE_LAB_RESULT_TAB_QUESTIONNAIRE_TITLE": "Questionnaire",
-      "LNG_PAGE_CREATE_CASE_LAB_RESULT_TITLE": "Créer résultat de laboratoire"
+      "LNG_PAGE_CREATE_CASE_LAB_RESULT_TITLE": "Créer résultat de laboratoire",
+      "LNG_PAGE_CREATE_CASE_LAB_RESULT_FIELD_LABEL_CASE": "Case",
+      "LNG_PAGE_CREATE_CASE_LAB_RESULT_WARNING_CASE_DATEOFONSET_AFTER_SAMPLE_TAKEN": "Warning: Date of onset is after sample taken date"
     },
     "uiModifyCaseLabResultPage": {
       "LNG_PAGE_MODIFY_CASE_LAB_RESULT_ACTION_MODIFY_CASE_LAB_RESULT_SUCCESS_MESSAGE": "Résultat de laboratoire modifié",
       "LNG_PAGE_MODIFY_CASE_LAB_RESULT_TAB_DETAILS_TITLE": "Détails",
       "LNG_PAGE_MODIFY_CASE_LAB_RESULT_TAB_QUESTIONNAIRE_TITLE": "Questionnaire",
       "LNG_PAGE_MODIFY_CASE_LAB_RESULT_TITLE": "Modifier le résultat {{sampleIdentifier}}",
-      "LNG_PAGE_VIEW_CASE_LAB_RESULT_TITLE": "Voir le résultat {{sampleIdentifier}}"
+      "LNG_PAGE_VIEW_CASE_LAB_RESULT_TITLE": "Voir le résultat {{sampleIdentifier}}",
+      "LNG_PAGE_VIEW_CASE_LAB_RESULT_FIELD_LABEL_CASE": "Case",
+      "LNG_PAGE_VIEW_CASE_LAB_RESULT_WARNING_CASE_DATEOFONSET_AFTER_SAMPLE_TAKEN": "Warning: Date of onset is after sample taken date"
     },
     "uiClusterFields": {
       "LNG_CLUSTER_FIELD_LABEL_DESCRIPTION": "Description",
@@ -2663,7 +2672,11 @@
       "LNG_PAGE_BULK_ADD_CONTACTS_TITLE": "En vrac ajouter des contacts",
       "LNG_PAGE_BULK_ADD_CONTACTS_WARNING_CASE_OR_EVENT_REQUIRED": "Vous pouvez ajouter un contact uniquement si un cas ou un événement!",
       "LNG_PAGE_BULK_ADD_CONTACTS_WARNING_INVALID_FIELDS": "Certains champs ne sont pas valides!",
-      "LNG_PAGE_BULK_ADD_CONTACTS_WARNING_NO_DATA": "Il n'y a pas de données à sauvegarder!"
+      "LNG_PAGE_BULK_ADD_CONTACTS_WARNING_NO_DATA": "Il n'y a pas de données à sauvegarder!",
+      "LNG_PAGE_BULK_ADD_CONTACTS_TAB_PICK_LOCATIONS": "Pick locations",
+      "LNG_PAGE_BULK_ADD_CONTACTS_TAB_ADD_CONTACTS": "Add contacts",
+      "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_LOCATIONS": "Locations",
+      "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_LOCATIONS_DESCRIPTION": "Select the locations to be assigned to contacts in the next step"
     },
     "uiExcelLikeSheetWidget": {
       "LNG_SHEET_CONTEXT_MENU_COPY": "Copie",
@@ -3217,7 +3230,9 @@
       "LNG_HELP_ITEM_FIELD_LABEL_PAGE": "Page",
       "LNG_HELP_ITEM_FIELD_LABEL_PAGE_DESCRIPTION": "Ajoutez le lien à la page. Ex: /contacts /*/vue. Où * remplacera l'identifiant de l'URL.",
       "LNG_HELP_ITEM_FIELD_LABEL_TITLE": "Titre",
-      "LNG_HELP_ITEM_FIELD_LABEL_TITLE_DESCRIPTION": ""
+      "LNG_HELP_ITEM_FIELD_LABEL_TITLE_DESCRIPTION": "",
+      "LNG_HELP_ITEM_FIELD_LABEL_ORDER": "Order",
+      "LNG_HELP_ITEM_FIELD_LABEL_ORDER_DESCRIPTION": ""
     },
     "uiHelpItemsListPage": {
       "LNG_PAGE_LIST_HELP_ITEMS_ACTION_APPROVE_SUCCESS_MESSAGE": "Article d'aide approuvé!",
@@ -3609,7 +3624,10 @@
     },
     "savedImportMappingsPages": {
       "LNG_APP_PAGE_IMPORT_CASES": "Cas",
-      "LNG_APP_PAGE_IMPORT_CONTACTS": "Contacts"
+      "LNG_APP_PAGE_IMPORT_CONTACTS": "Contacts",
+      "LNG_APP_PAGE_IMPORT_CASE_LAB_DATA": "Lab data",
+      "LNG_APP_PAGE_IMPORT_REFERENCE_DATA": "Reference data",
+      "LNG_APP_PAGE_IMPORT_LOCATION_DATA": "Locations"
     },
     "uiSavedImportMappingsFields": {
       "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_NAME": "prénom",
@@ -3642,7 +3660,11 @@
       "LNG_PAGE_BULK_MODIFY_CONTACTS_LABEL_ERRORS": "Erreurs de validation:",
       "LNG_PAGE_BULK_MODIFY_CONTACTS_LABEL_ERROR_MSG": "row {{row}}, les colonnes '{{columns}}' sont invalides",
       "LNG_PAGE_BULK_MODIFY_CONTACTS_WARNING_INVALID_FIELDS": "Certains champs sont invalides",
-      "LNG_PAGE_BULK_MODIFY_CONTACTS_ACTION_MODIFY_CONTACTS_SUCCESS_MESSAGE": "Contacts modifiés"
+      "LNG_PAGE_BULK_MODIFY_CONTACTS_ACTION_MODIFY_CONTACTS_SUCCESS_MESSAGE": "Contacts modifiés",
+      "LNG_PAGE_BULK_MODIFY_CONTACTS_TAB_PICK_LOCATIONS": "Pick locations",
+      "LNG_PAGE_BULK_MODIFY_CONTACTS_TAB_MODIFY_CONTACTS": "Modify contacts",
+      "LNG_PAGE_BULK_MODIFY_CONTACTS_LABEL_LOCATIONS": "Locations",
+      "LNG_PAGE_BULK_MODIFY_CONTACTS_LABEL_LOCATIONS_DESCRIPTION": "Select the locations to be assigned to contacts in the next step"
     }
   }
 }

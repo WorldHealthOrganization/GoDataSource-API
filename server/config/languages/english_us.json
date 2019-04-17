@@ -436,6 +436,7 @@
       "LNG_PAGE_ACTION_MODIFY": "Modify",
       "LNG_PAGE_ACTION_RELATIONSHIPS": "Relationships",
       "LNG_PAGE_ACTION_RESTORE": "Restore",
+      "LNG_PAGE_ACTION_REFRESH_VISUAL_ID_DESCRIPTION" : "Regenerate visual ID",
       "LNG_PAGE_ACTION_VIEW": "View",
       "LNG_PAGE_ACTION_SEE_EXPOSURES_FROM": "See contacts",
       "LNG_PAGE_ACTION_SEE_EXPOSURES_TO": "See exposures"
@@ -549,7 +550,8 @@
       "LNG_DIALOG_SAVE_MAPPING_IMPORTS_BUTTON": "Save import mapping",
       "LNG_DIALOG_CONFIRM_DELETE_CASE_WITH_EXPOSED_CONTACTS": "Case: '{{name}}' has {{numberOfContacts}} exposed contacts that will be deleted. Are you sure you want to delete this case?",
       "LNG_DIALOG_CONFIRM_REMOVE_MULTI_ANSWER": "Are you sure you want to remove this answer?",
-      "LNG_DIALOG_CONFIRM_DELETE_RELATIONSHIP_CHAIN_OF_TRANSMISSION": "Are you sure you want to delete this relationship?"
+      "LNG_DIALOG_CONFIRM_DELETE_RELATIONSHIP_CHAIN_OF_TRANSMISSION": "Are you sure you want to delete this relationship?",
+      "LNG_DIALOG_EXPORT_CHAIN_OF_TRANSMISSION_SCALE_INFO": "The higher the scale, the longer it can take to export Chains of Transmission"
     },
     "uiLoginPage": {
       "LNG_PAGE_LOGIN_ACTION_LOGIN_BUTTON": "Login",
@@ -957,7 +959,8 @@
       "LNG_LOCATION_FIELD_LABEL_GEOGRAPHICAL_LEVEL_DESCRIPTION": "",
       "LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION": "Parent Location",
       "LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION_DESCRIPTION": "",
-      "LNG_PAGE_LIST_AVAILABLE_ENTITIES_FOR_RELATIONSHIP_TITLE": "Available People"
+      "LNG_PAGE_LIST_AVAILABLE_ENTITIES_FOR_RELATIONSHIP_TITLE": "Available People",
+      "LNG_PAGE_LIST_AVAILABLE_ENTITIES_HAS_POSSIBLE_RELATIONSHIP_DUPLICATE": "Possible Duplicate ?"
     },
     "uiCreateEntityRelationshipPage": {
       "LNG_PAGE_CREATE_ENTITY_ERROR_NO_SELECTED_ENTITIES": "There are no records  selected for relationships",
@@ -1166,7 +1169,9 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_TEAM_DESCRIPTION": "",
       "LNG_FOLLOW_UP_FIELD_LABEL_TIME_FILTER": "Time last seen",
       "LNG_FOLLOW_UP_FIELD_LABEL_WEEK_NUMBER": "Week number",
-      "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_VISUAL_ID": "Contact ID"
+      "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_VISUAL_ID": "Contact ID",
+      "LNG_FOLLOW_UP_FIELD_LABEL_NOT_TARGETED": "Not targeted",
+      "LNG_FOLLOW_UP_FIELD_LABEL_NOT_TARGETED_DESCRIPTION": ""
     },
     "uiTermsOfUsePage": {
       "LNG_PAGE_TERMS_OF_USE_TITLE": "Terms of use",
@@ -1978,14 +1983,18 @@
       "LNG_PAGE_CREATE_CASE_LAB_RESULT_ACTION_CREATE_LAB_RESULT_BUTTON": "Create lab result",
       "LNG_PAGE_CREATE_CASE_LAB_RESULT_TAB_DETAILS": "Details",
       "LNG_PAGE_CREATE_CASE_LAB_RESULT_TAB_QUESTIONNAIRE_TITLE": "Questionnaire",
-      "LNG_PAGE_CREATE_CASE_LAB_RESULT_TITLE": "Create lab result"
+      "LNG_PAGE_CREATE_CASE_LAB_RESULT_TITLE": "Create lab result",
+      "LNG_PAGE_CREATE_CASE_LAB_RESULT_FIELD_LABEL_CASE": "Case",
+      "LNG_PAGE_CREATE_CASE_LAB_RESULT_WARNING_CASE_DATEOFONSET_AFTER_SAMPLE_TAKEN": "Warning: Date of onset is after sample taken date"
     },
     "uiModifyCaseLabResultPage": {
       "LNG_PAGE_MODIFY_CASE_LAB_RESULT_ACTION_MODIFY_CASE_LAB_RESULT_SUCCESS_MESSAGE": "Lab result modified",
       "LNG_PAGE_MODIFY_CASE_LAB_RESULT_TAB_DETAILS_TITLE": "Details",
       "LNG_PAGE_MODIFY_CASE_LAB_RESULT_TAB_QUESTIONNAIRE_TITLE": "Questionnaire",
       "LNG_PAGE_MODIFY_CASE_LAB_RESULT_TITLE": "Modify result {{sampleIdentifier}}",
-      "LNG_PAGE_VIEW_CASE_LAB_RESULT_TITLE": "View result {{sampleIdentifier}}"
+      "LNG_PAGE_VIEW_CASE_LAB_RESULT_TITLE": "View result {{sampleIdentifier}}",
+      "LNG_PAGE_VIEW_CASE_LAB_RESULT_FIELD_LABEL_CASE": "Case",
+      "LNG_PAGE_VIEW_CASE_LAB_RESULT_WARNING_CASE_DATEOFONSET_AFTER_SAMPLE_TAKEN": "Warning: Date of onset is after sample taken date"
     },
     "uiClusterFields": {
       "LNG_CLUSTER_FIELD_LABEL_DESCRIPTION": "Description",
@@ -2663,7 +2672,11 @@
       "LNG_PAGE_BULK_ADD_CONTACTS_TITLE": "Bulk Add Contacts",
       "LNG_PAGE_BULK_ADD_CONTACTS_WARNING_CASE_OR_EVENT_REQUIRED": "You can only add a contact though a Case or an Event",
       "LNG_PAGE_BULK_ADD_CONTACTS_WARNING_INVALID_FIELDS": "Some fields are invalid",
-      "LNG_PAGE_BULK_ADD_CONTACTS_WARNING_NO_DATA": "There is no data to be saved"
+      "LNG_PAGE_BULK_ADD_CONTACTS_WARNING_NO_DATA": "There is no data to be saved",
+      "LNG_PAGE_BULK_ADD_CONTACTS_TAB_PICK_LOCATIONS": "Pick locations",
+      "LNG_PAGE_BULK_ADD_CONTACTS_TAB_ADD_CONTACTS": "Add contacts",
+      "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_LOCATIONS": "Locations",
+      "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_LOCATIONS_DESCRIPTION": "Select the locations to be assigned to contacts in the next step"
     },
     "uiExcelLikeSheetWidget": {
       "LNG_SHEET_CONTEXT_MENU_COPY": "Copy",
@@ -3217,7 +3230,9 @@
       "LNG_HELP_ITEM_FIELD_LABEL_PAGE": "Page",
       "LNG_HELP_ITEM_FIELD_LABEL_PAGE_DESCRIPTION": "Provide the link to the page. Example: /contacts/*/view. Where * will replace the id from the URL.",
       "LNG_HELP_ITEM_FIELD_LABEL_TITLE": "Title",
-      "LNG_HELP_ITEM_FIELD_LABEL_TITLE_DESCRIPTION": ""
+      "LNG_HELP_ITEM_FIELD_LABEL_TITLE_DESCRIPTION": "",
+      "LNG_HELP_ITEM_FIELD_LABEL_ORDER": "Order",
+      "LNG_HELP_ITEM_FIELD_LABEL_ORDER_DESCRIPTION": ""
     },
     "uiHelpItemsListPage": {
       "LNG_PAGE_LIST_HELP_ITEMS_ACTION_APPROVE_SUCCESS_MESSAGE": "Help item approved",
@@ -3609,7 +3624,10 @@
     },
     "savedImportMappingsPages": {
       "LNG_APP_PAGE_IMPORT_CASES": "Cases",
-      "LNG_APP_PAGE_IMPORT_CONTACTS": "Contacts"
+      "LNG_APP_PAGE_IMPORT_CONTACTS": "Contacts",
+      "LNG_APP_PAGE_IMPORT_CASE_LAB_DATA": "Lab data",
+      "LNG_APP_PAGE_IMPORT_REFERENCE_DATA": "Reference data",
+      "LNG_APP_PAGE_IMPORT_LOCATION_DATA": "Locations"
     },
     "uiSavedImportMappingsFields": {
       "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_NAME": "Name",
@@ -3642,7 +3660,11 @@
       "LNG_PAGE_BULK_MODIFY_CONTACTS_LABEL_ERRORS": "Validation errors:",
       "LNG_PAGE_BULK_MODIFY_CONTACTS_LABEL_ERROR_MSG": " - row {{row}}, column(s) '{{columns}}' are invalid",
       "LNG_PAGE_BULK_MODIFY_CONTACTS_WARNING_INVALID_FIELDS": "Some fields are invalid",
-      "LNG_PAGE_BULK_MODIFY_CONTACTS_ACTION_MODIFY_CONTACTS_SUCCESS_MESSAGE": "Contacts modified"
+      "LNG_PAGE_BULK_MODIFY_CONTACTS_ACTION_MODIFY_CONTACTS_SUCCESS_MESSAGE": "Contacts modified",
+      "LNG_PAGE_BULK_MODIFY_CONTACTS_TAB_PICK_LOCATIONS": "Pick locations",
+      "LNG_PAGE_BULK_MODIFY_CONTACTS_TAB_MODIFY_CONTACTS": "Modify contacts",
+      "LNG_PAGE_BULK_MODIFY_CONTACTS_LABEL_LOCATIONS": "Locations",
+      "LNG_PAGE_BULK_MODIFY_CONTACTS_LABEL_LOCATIONS_DESCRIPTION": "Select the locations to be assigned to contacts in the next step"
     }
   }
 }
