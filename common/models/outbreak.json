@@ -2919,6 +2919,14 @@
                     "type": "string",
                     "description": "Case visual ID"
                   },
+                  "firstName": {
+                    "type": "string",
+                    "description": "Case firstName"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "description": "Case lastName"
+                  },
                   "dateOfOnset": {
                     "type": "date",
                     "description": "Case dateOfOnset"

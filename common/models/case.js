@@ -867,6 +867,8 @@ module.exports = function (Case) {
           // case fields
           id: '$_id',
           visualId: 1,
+          firstName: 1,
+          lastName: 1,
           dateOfOnset: 1,
           addresses: 1,
           dateRanges: {
