@@ -2901,44 +2901,48 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Only filter.where is supported. Defining fields, include, order, offset and limit aren't supported"
         }
       ],
       "returns": {
         "arg": "data",
         "type": {
-          "casesMap": {
+          "personsMap": {
             "type": {
-              "uidCase": {
+              "uidPerson": {
                 "type": {
                   "id": {
                     "type": "string",
-                    "description": "Case UID"
+                    "description": "Case / Event UID"
                   },
                   "visualId": {
                     "type": "string",
                     "description": "Case visual ID"
                   },
+                  "type": {
+                    "type": "string",
+                    "description": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE / LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT"
+                  },
                   "firstName": {
                     "type": "string",
-                    "description": "Case firstName"
+                    "description": "Case firstName / Event name"
                   },
                   "lastName": {
                     "type": "string",
                     "description": "Case lastName"
                   },
-                  "dateOfOnset": {
+                  "date": {
                     "type": "date",
-                    "description": "Case dateOfOnset"
+                    "description": "Case dateOfOnset / Event date"
                   },
                   "firstGraphDate": {
                     "type": "date",
-                    "description": "Min graph date for this case"
+                    "description": "Min graph date for this case / event"
                   },
                   "addresses": [
                     {
                       "type": "address",
-                      "description": "Case addresses ( sorted by date asc, current address should be last since it doesn't have a date )"
+                      "description": "Case addresses ( sorted by date asc, current address should be last since it doesn't have a date ) / Event address as an array with one address"
                     }
                   ],
                   "dateRanges": [
@@ -2978,28 +2982,28 @@
                   ],
                   "lastGraphDate": {
                     "type": "date",
-                    "description": "Most recent date between any type dates, lab results dateOfResult and dateOfOnset"
+                    "description": "Most recent date between any type dates, lab results dateOfResult and dateOfOnset / event date"
                   }
                 }
               }
             }
           },
-          "casesOrder": [
+          "personsOrder": [
             "string"
           ],
           "relationships": {
             "type": {
-              "uidSourceCase": [
+              "uidSourcePerson": [
                 {
                   "type": "string",
-                  "description": "Target case UID"
+                  "description": "Target case / event UID"
                 }
               ]
             }
           },
           "minGraphDate": {
             "type": "date",
-            "description": "Oldest date of onset => min(dateOfOnset)"
+            "description": "Oldest case date of onset / event date => min(case.dateOfOnset, event.date)"
           },
           "maxGraphDate": {
             "type": "date",
