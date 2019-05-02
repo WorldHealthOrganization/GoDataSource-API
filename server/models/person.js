@@ -5,6 +5,7 @@ const app = require('../server');
 const personDuplicate = require('../../components/workerRunner').personDuplicate;
 const helpers = require('../../components/helpers');
 const _ = require('lodash');
+const moment = require('moment');
 
 module.exports = function (Person) {
 
@@ -1139,5 +1140,371 @@ module.exports = function (Person) {
           resolve(relatedPeopleData);
         });
     });
+  };
+
+  /**
+   * Get bar transmission chains data
+   * @param outbreakId
+   * @param filter
+   * @param callback
+   */
+  Person.getBarsTransmissionChainsData = function (outbreakId, filter, callback) {
+    // convert filter to mongodb filter structure
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // parse filter
+    const parsedFilter = app.utils.remote.convertLoopbackFilterToMongo(
+      {
+        $and: [
+          // make sure we're only retrieve cases from the current outbreak
+          {
+            outbreakId: outbreakId
+          },
+
+          // retrieve only non-deleted records
+          {
+            $or: [{
+              deleted: false
+            }, {
+              deleted: {
+                $eq: null
+              }
+            }]
+          },
+
+          // retrieve cases & events
+          {
+            type: {
+              $in: [
+                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+              ]
+            }
+          },
+
+          // remove discarded cases
+          // shouldn't affect events since there we don't have classification and we use a nin condition
+          {
+            classification: {
+              nin: app.models.case.discardedCaseClassifications
+            }
+          },
+
+          // conditions coming from request
+          filter.where
+        ]
+      });
+
+    // query aggregation
+    const aggregatePipeline = [
+      // match conditions
+      {
+        $match: parsedFilter
+      },
+
+      // retrieve lab results for cases
+      {
+        $lookup: {
+          from: 'labResult',
+          localField: '_id',
+          foreignField: 'personId',
+          as: 'labResults'
+        }
+      },
+
+      // retrieve relationships where case / event is source
+      {
+        $lookup: {
+          from: 'relationship',
+          localField: '_id',
+          foreignField: 'persons.id',
+          as: 'relationships'
+        }
+      },
+
+      // filter & retrieve only needed data
+      {
+        $project: {
+          // case / event fields
+          id: '$_id',
+          visualId: 1,
+          type: 1,
+          firstName: {
+            $cond: {
+              if: { $eq: [ '$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT' ] },
+              then: '$name',
+              else: '$firstName'
+            }
+          },
+          lastName: 1,
+          date: {
+            $cond: {
+              if: { $eq: [ '$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT' ] },
+              then: '$date',
+              else: '$dateOfOnset'
+            }
+          },
+          addresses: {
+            $cond: {
+              if: { $eq: [ '$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT' ] },
+              then: ['$address'],
+              else: '$addresses'
+            }
+          },
+          dateRanges: {
+            $map: {
+              input: '$dateRanges',
+              as: 'dateRange',
+              in: {
+                typeId: '$$dateRange.typeId',
+                locationId: '$$dateRange.locationId',
+                startDate: '$$dateRange.startDate',
+                endDate: '$$dateRange.endDate'
+              }
+            }
+          },
+
+          // lab results fields
+          labResults: {
+            $map: {
+              input: {
+                $filter: {
+                  input: '$labResults',
+                  as: 'lab',
+                  cond: {
+                    $or: [{
+                      $eq: ['$$lab.deleted', false]
+                    }, {
+                      $eq: ['$$lab.deleted', null]
+                    }]
+                  }
+                }
+              },
+              as: 'lab',
+              in: {
+                dateSampleTaken: '$$lab.dateSampleTaken',
+                testType: '$$lab.testType',
+                result: '$$lab.result'
+              }
+            }
+          },
+
+          // relationship fields
+          relationships: {
+            $map: {
+              input: {
+                $filter: {
+                  input: '$relationships',
+                  as: 'rel',
+                  cond: {
+                    $or: [{
+                      $eq: ['$$rel.deleted', false]
+                    }, {
+                      $eq: ['$$rel.deleted', null]
+                    }]
+                  }
+                }
+              },
+              as: 'rel',
+              in: {
+                persons: '$$rel.persons'
+              }
+            }
+          }
+        }
+      }
+    ];
+
+    // run request to db
+    const cursor = app.dataSources.mongoDb.connector
+      .collection('person')
+      .aggregate(aggregatePipeline);
+
+    // get the records from the cursor
+    cursor
+      .toArray()
+      .then((records) => {
+        // sort by date method
+        const compareDates = (date1, date2) => {
+          // compare missing dates & dates
+          if (!date1 && !date2) {
+            return 0;
+          } else if (!date1) {
+            return 1;
+          } else if (!date2) {
+            return -1;
+          } else {
+            // compare dates
+            return moment(date1).diff(moment(date2));
+          }
+        };
+
+        // sanitize records & determine other things :)
+        const response = {
+          personsMap: {},
+          personsOrder: [],
+          relationships: {},
+          minGraphDate: null,
+          maxGraphDate: null
+        };
+        (records || []).forEach((recordData) => {
+          // sort addresses
+          if (recordData.addresses) {
+            recordData.addresses.sort((address1, address2) => {
+              // compare missing dates & dates
+              return compareDates(address1.date, address2.date);
+            });
+          }
+
+          // transform relationships
+          if (recordData.relationships) {
+            // go through relationships and determine which can be added to our list
+            (recordData.relationships || []).forEach((rel) => {
+              // add to the list of relationships if both records are cases /  events & our case / event is the source
+              if (
+                rel.persons.length > 1 && (
+                  rel.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ||
+                  rel.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                ) && (
+                  rel.persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ||
+                  rel.persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                )&& (
+                  ( rel.persons[0].source && rel.persons[0].id === recordData.id ) ||
+                  ( rel.persons[1].source && rel.persons[1].id === recordData.id )
+                )
+              ) {
+                // determine if we need to initialize the list of target cases / events for our source case / event
+                if (!response.relationships[recordData.id]) {
+                  response.relationships[recordData.id] = [];
+                }
+
+                // add to the list
+                response.relationships[recordData.id].push(rel.persons[0].id === recordData.id ? rel.persons[1].id : rel.persons[0].id);
+              }
+            });
+
+            // finished - case / event relationship data not needed anymore
+            delete recordData.relationships;
+          }
+
+          // determine lastGraphDate
+          // - should be the most recent date from case.dateOfOnset / case.dateRanges.endDate / case.labResults.dateSampleTaken / event.date
+          recordData.lastGraphDate = moment(recordData.date);
+
+          // determine firstGraphDate
+          // - should be the oldest date from case.dateOfOnset / case.dateRanges.endDate / case.labResults.dateSampleTaken / event.date
+          recordData.firstGraphDate = moment(recordData.date);
+
+          // determine lastGraphDate starting with lab results
+          // applies only for cases, since events don't have lab results
+          if (recordData.labResults) {
+            const labResults = recordData.labResults || [];
+            recordData.labResults = [];
+            labResults.forEach((lab) => {
+              // ignore lab results without result date
+              if (!lab.dateSampleTaken) {
+                return;
+              }
+
+              // determine lastGraphDate
+              const dateSampleTaken = moment(lab.dateSampleTaken);
+              recordData.lastGraphDate = !recordData.lastGraphDate ?
+                dateSampleTaken : (
+                  dateSampleTaken.isAfter(recordData.lastGraphDate) ?
+                    dateSampleTaken :
+                    recordData.lastGraphDate
+                );
+
+              // determine min graph date
+              recordData.firstGraphDate = !recordData.firstGraphDate ?
+                dateSampleTaken : (
+                  dateSampleTaken.isBefore(recordData.firstGraphDate) ?
+                    dateSampleTaken :
+                    recordData.firstGraphDate
+                );
+
+              // since we have dateSampleTaken, lets add it to the list
+              recordData.labResults.push(lab);
+            });
+          }
+
+          // check if there is a date range more recent
+          // applies only for cases, since events don't have lab results
+          if (recordData.dateRanges) {
+            const dateRanges = recordData.dateRanges || [];
+            recordData.dateRanges = [];
+            dateRanges.forEach((dateRange) => {
+              // ignore date range without at least one of the dates ( start / end )
+              if (!dateRange.endDate && !dateRange.startDate) {
+                return;
+              }
+
+              // make sure we have start date
+              dateRange.startDate = dateRange.startDate ? moment(dateRange.startDate) : moment(recordData.date);
+
+              // if we don't have an end date then we need to set the current date since this is still in progress
+              dateRange.endDate = dateRange.endDate ? moment(dateRange.endDate) : moment();
+
+              // determine min graph date
+              if (dateRange.startDate) {
+                recordData.firstGraphDate = !recordData.firstGraphDate ?
+                  dateRange.startDate : (
+                    dateRange.startDate.isBefore(recordData.firstGraphDate) ?
+                      dateRange.startDate :
+                      recordData.firstGraphDate
+                  );
+              }
+
+              // determine last graph date
+              recordData.lastGraphDate = !recordData.lastGraphDate ?
+                dateRange.endDate : (
+                  dateRange.endDate.isAfter(recordData.lastGraphDate) ?
+                    dateRange.endDate :
+                    recordData.lastGraphDate
+                );
+
+              // since we have either start date or end date we can use it for the graph
+              recordData.dateRanges.push(dateRange);
+            });
+          }
+
+          // determine oldest case onset date / event date
+          response.minGraphDate = !response.minGraphDate ?
+            recordData.firstGraphDate : (
+              recordData.firstGraphDate.isBefore(response.minGraphDate) ?
+                recordData.firstGraphDate :
+                response.minGraphDate
+            );
+
+          // determine the most recent case graph date
+          response.maxGraphDate = !response.maxGraphDate ?
+            recordData.lastGraphDate : (
+              recordData.lastGraphDate.isAfter(response.maxGraphDate) ?
+                recordData.lastGraphDate :
+                response.maxGraphDate
+            );
+
+          // add response case / event
+          delete recordData._id;
+          response.personsMap[recordData.id] = recordData;
+        });
+
+        //sort cases & events
+        response.personsOrder = Object
+          .values(response.personsMap)
+          .sort((person1, person2) => {
+            // compare missing dates & dates
+            return compareDates(person1.date, person2.date);
+          })
+          .map((personData) => personData.id);
+
+        // return results
+        return callback(
+          null,
+          response
+        );
+      })
+      .catch(callback);
   };
 };

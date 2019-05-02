@@ -9697,7 +9697,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getBarsTransmissionChains = function (filter, callback) {
-    app.models.case.getBarsTransmissionChainsData(this.id, filter, callback);
+    app.models.person.getBarsTransmissionChainsData(this.id, filter, callback);
   };
 
   /**
