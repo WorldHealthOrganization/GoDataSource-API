@@ -4235,6 +4235,12 @@ module.exports = function (Outbreak) {
           // go through all entries
           labResultsList.forEach(function (labResult, index) {
             createLabResults.push(function (callback) {
+              // sanitize questionnaire answers
+              // convert to new format if necessary
+              if (labResult.questionnaireAnswers) {
+                labResult.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToNewFormat(labResult.questionnaireAnswers);
+              }
+
               // first check if the case id (person id) is valid
               app.models.case
                 .findOne({
