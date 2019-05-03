@@ -245,23 +245,63 @@ function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, pare
           } else {
             // get the resolved value
             const value = _.get(item, sourcePath);
-            // define a replacement parent value
-            let replaceValueParent;
+
+            // define function that will handle recursive map
+            const mapValues = (localValue, addToArray) => {
+              // define a replacement parent value
+              let replaceValueParent;
+
+              // check if the value has a replacement value defined
+              if (
+                localValue !== undefined &&
+                typeof localValue !== 'object' &&
+                valuesMap &&
+                // strip indices for values map, we're only interested in the generic path not the exact one
+                (replaceValueParent = valuesMap[`${parentPathPrefix.replace(/\[\d+]/g, '[]')}${sourcePath.replace(/\[\d+]/g, '[]')}`])
+                && replaceValueParent[localValue] !== undefined
+              ) {
+                // use that replacement value
+                if (addToArray) {
+                  // push array
+                  let dataArray = _.get(result, `${processedMap.map[sourcePath]}`);
+                  if (!dataArray) {
+                    dataArray = [];
+                    _.set(result, `${processedMap.map[sourcePath]}`, dataArray);
+                  }
+
+                  // add value to array
+                  dataArray.push(replaceValueParent[localValue]);
+                } else {
+                  _.set(result, `${processedMap.map[sourcePath]}`, replaceValueParent[localValue]);
+                }
+              } else {
+                // if array we need to check values since we might have an array of mapped values
+                if (_.isArray(localValue)) {
+                  // go through each value and check if we can map it
+                  localValue.forEach((deepValue) => {
+                    mapValues(deepValue, true);
+                  });
+                } else {
+                  // no replacement value defined, use resolved value
+                  if (addToArray) {
+                    // push array
+                    let dataArray = _.get(result, `${processedMap.map[sourcePath]}`);
+                    if (!dataArray) {
+                      dataArray = [];
+                      _.set(result, `${processedMap.map[sourcePath]}`, dataArray);
+                    }
+
+                    // add value to array
+                    dataArray.push(localValue);
+                  } else {
+                    _.set(result, `${processedMap.map[sourcePath]}`, localValue);
+                  }
+                }
+              }
+            };
+
             // check if the value has a replacement value defined
-            if (
-              value !== undefined &&
-              typeof value !== 'object' &&
-              valuesMap &&
-              // strip indices for values map, we're only interested in the generic path not the exact one
-              (replaceValueParent = valuesMap[`${parentPathPrefix.replace(/\[\d+]/g, '[]')}${sourcePath.replace(/\[\d+]/g, '[]')}`])
-              && replaceValueParent[value] !== undefined
-            ) {
-              // use that replacement value
-              _.set(result, `${processedMap.map[sourcePath]}`, replaceValueParent[value]);
-            } else {
-              // no replacement value defined, use resolved value
-              _.set(result, `${processedMap.map[sourcePath]}`, value);
-            }
+            mapValues(value);
           }
         });
         // store the result
@@ -1633,6 +1673,30 @@ const convertQuestionnaireAnswersToOldFormat = function (answers) {
   return result;
 };
 
+/**
+ * Convert questionnaire answers from old format to new format
+ * @param answers
+ */
+const convertQuestionnaireAnswersToNewFormat = function (answers) {
+  const result = {};
+  for (let qVar in answers) {
+    if (
+      !answers[qVar] ||
+      !_.isArray(answers[qVar]) || (
+        answers[qVar].length > 0 &&
+        !_.isObject(answers[qVar][0])
+      )
+    ) {
+      result[qVar] = [{
+        value: answers[qVar]
+      }];
+    } else {
+      result[qVar] = answers[qVar];
+    }
+  }
+  return result;
+};
+
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1674,5 +1738,6 @@ module.exports = {
   sortMultiAnswerQuestions: sortMultiAnswerQuestions,
   convertQuestionAnswerToOldFormat: convertQuestionAnswerToOldFormat,
   convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat,
+  convertQuestionnaireAnswersToNewFormat: convertQuestionnaireAnswersToNewFormat,
   retrieveQuestionnaireVariables: retrieveQuestionnaireVariables
 };

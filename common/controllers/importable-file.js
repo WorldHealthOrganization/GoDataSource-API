@@ -113,7 +113,12 @@ function getDistinctPropertyValues(dataSet) {
   // go through all the keys
   Object.keys(flatDataSet).forEach(function (property) {
     // sanitize key (remove array markers and leading '.' if present)
-    const sanitizedProperty = property.replace(/\[\d+]/g, '[]').replace(/^\[]\.*/, '');
+    const sanitizedProperty = property
+      // don't replace basic types arrays ( string, number, dates etc )
+      .replace(/\[\d+]$/g, '')
+      // sanitize arrays containing objects object
+      .replace(/\[\d+]/g, '[]')
+      .replace(/^\[]\.*/, '');
     // if the property was not present in the set
     if (!distinctValuesMap[sanitizedProperty]) {
       // add it

@@ -4350,6 +4350,12 @@ module.exports = function (Outbreak) {
                 caseData.addresses = addresses;
               }
 
+              // sanitize questionnaire answers
+              // convert to new format if necessary
+              if (caseData.questionnaireAnswers) {
+                caseData.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToNewFormat(caseData.questionnaireAnswers);
+              }
+
               // sync the case
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.case, caseData, options)
                 .then(function (result) {
