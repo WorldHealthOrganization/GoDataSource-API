@@ -7450,6 +7450,7 @@ module.exports = function (Outbreak) {
           {
             questionnaireAnswers: genericHelpers.retrieveQuestionnaireVariables(
               self.contactFollowUpTemplate,
+              'questionnaireAnswers',
               dictionary
             )
           },
@@ -7459,13 +7460,11 @@ module.exports = function (Outbreak) {
           encryptPassword,
           anonymizeFields,
           options,
-          function (results, dictionary) {
+          function (results) {
             // Prepare questionnaire answers for printing
             results.forEach((followUp) => {
               if (followUp.questionnaireAnswers) {
-                // followUp.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(followUp.questionnaireAnswers);
-                // - convertQuestionnaireAnswersToOldFormat is already applied by translateQuestionnaire
-                followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
+                followUp.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(followUp.questionnaireAnswers);
               }
             });
             return Promise.resolve(results);
@@ -8581,6 +8580,7 @@ module.exports = function (Outbreak) {
           {
             questionnaireAnswers: genericHelpers.retrieveQuestionnaireVariables(
               self.caseInvestigationTemplate,
+              'questionnaireAnswers',
               dictionary
             )
           },
@@ -8590,13 +8590,11 @@ module.exports = function (Outbreak) {
           encryptPassword,
           anonymizeFields,
           options,
-          function (results, dictionary) {
+          function (results) {
             // Prepare questionnaire answers for printing
             results.forEach((caseModel) => {
               if (caseModel.questionnaireAnswers) {
-                // caseModel.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(caseModel.questionnaireAnswers);
-                // - convertQuestionnaireAnswersToOldFormat is already applied by translateQuestionnaire
-                caseModel.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.case, caseModel, dictionary);
+                caseModel.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(caseModel.questionnaireAnswers);
               }
             });
             return Promise.resolve(results);

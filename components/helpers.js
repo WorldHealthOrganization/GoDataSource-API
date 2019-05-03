@@ -1206,10 +1206,11 @@ const getSourceAndTargetFromModelHookContext = function (context) {
 /**
  * Retrieve list of questionnaire questions and their variables
  * @param questionnaire
+ * @param idHeaderPrefix
  * @param dictionary
  * @returns {[{id, header}]}
  */
-const retrieveQuestionnaireVariables = (questionnaire, dictionary) => {
+const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary) => {
   // no questions
   if (_.isEmpty(questionnaire)) {
     return [];
@@ -1220,11 +1221,24 @@ const retrieveQuestionnaireVariables = (questionnaire, dictionary) => {
   _.each(questionnaire, (question) => {
     // add question
     if (!_.isEmpty(question.variable)) {
-      // add parent question
-      result.push({
-        id: question.variable,
-        header: dictionary.getTranslation(question.text)
-      });
+      // can have multiple answers ?
+      if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
+        // add a column for each answer
+        if (!_.isEmpty(question.answers)) {
+          _.each(question.answers, (answer, answerIndex) => {
+            result.push({
+              id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable + ' ' + (answerIndex + 1),
+              header: dictionary.getTranslation(question.text) + ' ' + (answerIndex + 1)
+            });
+          });
+        }
+      } else {
+        // add parent question
+        result.push({
+          id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable,
+          header: dictionary.getTranslation(question.text)
+        });
+      }
 
       // add children questions
       if (!_.isEmpty(question.answers)) {
@@ -1232,6 +1246,7 @@ const retrieveQuestionnaireVariables = (questionnaire, dictionary) => {
           if (!_.isEmpty(answer.additionalQuestions)) {
             result.push(...retrieveQuestionnaireVariables(
               answer.additionalQuestions,
+              idHeaderPrefix,
               dictionary
             ));
           }
@@ -1242,46 +1257,6 @@ const retrieveQuestionnaireVariables = (questionnaire, dictionary) => {
 
   // finished
   return result;
-};
-
-/**
- * Translates a questionnaireAnswers property (from case, labResult and followUp documents) into an object that looks like
- *  this {question1Text: answerLabel, question2Text: answerLabel, ...}
- * @param outbreak
- * @param Model
- * @param modelInstance
- * @param dictionary
- * @returns {{}}
- */
-const translateQuestionnaire = function (outbreak, Model, modelInstance, dictionary) {
-  let newQuestionnaire = {};
-  const questionnaireAnswers = convertQuestionnaireAnswersToOldFormat(modelInstance.questionnaireAnswers);
-  Object.keys(questionnaireAnswers).forEach((variable) => {
-    // shorthand ref
-    let qAnswer = questionnaireAnswers[variable];
-
-    // question definition
-    let question = findQuestionByVariable(outbreak[Model.extendedForm.template], variable);
-
-    if (question) {
-      let questionText = dictionary.getTranslation(question.text);
-      let answer = '';
-
-      if (['LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS', 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER'].includes(question.answerType)) {
-        answer = translateQuestionAnswers(question, qAnswer, dictionary);
-      } else {
-        // Parse date type answers since xml cannot print them
-        if (qAnswer instanceof Date) {
-          answer = getDateDisplayValue(qAnswer);
-        } else {
-          answer = qAnswer;
-        }
-      }
-      newQuestionnaire[questionText] = answer;
-    }
-  });
-
-  return newQuestionnaire;
 };
 
 /**
@@ -1729,7 +1704,6 @@ module.exports = {
   translateDataSetReferenceDataValues: translateDataSetReferenceDataValues,
   translateFieldLabels: translateFieldLabels,
   includeSubLocationsInLocationFilter: includeSubLocationsInLocationFilter,
-  translateQuestionnaire: translateQuestionnaire,
   translateQuestionAnswers: translateQuestionAnswers,
   getBuildInformation: getBuildInformation,
   convertBooleanProperties: convertBooleanProperties,
