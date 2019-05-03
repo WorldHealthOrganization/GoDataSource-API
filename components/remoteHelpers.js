@@ -77,7 +77,6 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callba
 function exportFilteredModelsList(
   app,
   Model,
-  modelPropertiesExpandOnFlatFiles,
   query,
   exportType,
   fileName,
@@ -156,19 +155,11 @@ function exportFilteredModelsList(
               });
             }
           } else {
-            if (
-              !['json', 'xml'].includes(exportType) &&
-              modelPropertiesExpandOnFlatFiles &&
-              modelPropertiesExpandOnFlatFiles[propertyName]
-            ) {
-              headers.push(...modelPropertiesExpandOnFlatFiles[propertyName]);
-            } else {
-              headers.push({
-                id: propertyName,
-                // use correct label translation for user language
-                header: dictionary.getTranslation(fieldLabelsMap[propertyName])
-              });
-            }
+            headers.push({
+              id: propertyName,
+              // use correct label translation for user language
+              header: dictionary.getTranslation(fieldLabelsMap[propertyName])
+            });
           }
         });
 

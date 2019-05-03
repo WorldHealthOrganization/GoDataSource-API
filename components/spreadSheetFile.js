@@ -56,7 +56,7 @@ function buildSpreadSheet(headers, data) {
 function createCsvFile(headers, data, callback) {
   // add the questionnaire headers
   // since they depend on the translated data, we have to add them separately
-  addQuestionnaireHeadersForPrint(data, headers);
+  // addQuestionnaireHeadersForPrint(data, headers);
   const sheet = buildSpreadSheet(headers, data);
   // send back the sheet as CSV file
   callback(null, xlsx.utils.sheet_to_csv(sheet));
@@ -72,7 +72,7 @@ function createCsvFile(headers, data, callback) {
 function createExcelFile(headers, data, type, callback) {
   // add the questionnaire headers
   // since they depend on the translated data, we have to add them separately
-  addQuestionnaireHeadersForPrint(data, headers);
+  // addQuestionnaireHeadersForPrint(data, headers);
   const sheet = buildSpreadSheet(headers, data);
   const workBook = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(workBook, sheet);
@@ -88,7 +88,7 @@ function createExcelFile(headers, data, type, callback) {
 function createXlsFile(headers, data, callback) {
   // add the questionnaire headers
   // since they depend on the translated data, we have to add them separately
-  addQuestionnaireHeadersForPrint(data, headers);
+  // addQuestionnaireHeadersForPrint(data, headers);
   createExcelFile(headers, data, 'biff8', callback);
 }
 
@@ -101,7 +101,7 @@ function createXlsFile(headers, data, callback) {
 function createXlsxFile(headers, data, callback) {
   // add the questionnaire headers
   // since they depend on the translated data, we have to add them separately
-  addQuestionnaireHeadersForPrint(data, headers);
+  // addQuestionnaireHeadersForPrint(data, headers);
   createExcelFile(headers, data, 'xlsx', callback);
 }
 
@@ -114,7 +114,7 @@ function createXlsxFile(headers, data, callback) {
 function createOdsFile(headers, data, callback) {
   // add the questionnaire headers
   // since they depend on the translated data, we have to add them separately
-  addQuestionnaireHeadersForPrint(data, headers);
+  // addQuestionnaireHeadersForPrint(data, headers);
   createExcelFile(headers, data, 'ods', callback);
 }
 

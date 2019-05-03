@@ -559,8 +559,30 @@ const exportListFileSync = function (headers, dataSet, fileType, title = 'List')
         });
         break;
       case 'xlsx':
+        // prepare data for export & determine extra headers
+        const extraHeaders = {
+          value: {},
+          keys: ['questionnaireAnswers']
+        };
+        const formattedData = dataSet.map((item) => getFlatObject(
+          item,
+          null,
+          true,
+          extraHeaders
+        ));
+        Object.keys(extraHeaders.value || {}).forEach((headerId) => {
+          // don't add duplicates
+          if (!_.find(headers, { id: headerId })) {
+            headers.push({
+              id: headerId,
+              header: extraHeaders.value[headerId]
+            });
+          }
+        });
+
+        // export data
         file.mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-        spreadSheetFile.createXlsxFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, xlsxFile) {
+        spreadSheetFile.createXlsxFile(headers, formattedData, function (error, xlsxFile) {
           if (error) {
             return reject(error);
           }
@@ -806,8 +828,10 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
  * @param object
  * @param prefix
  * @param humanFriendly Use human friendly naming (e.g. "item 1 level sublevel" instead of "item[0].level.sublevel"). Default: false
+ * @param headersData Add missing headers if necessary ( e.g. { value: {'headerId': 'headerName'}, keys: ['questionnaireAnswers'] } )
+ * @param pushHeaders boolean: true, if we should add headers
  */
-const getFlatObject = function (object, prefix, humanFriendly) {
+const getFlatObject = function (object, prefix, humanFriendly, headers, pushHeaders) {
   // define result
   let result = {};
   // replace null/undefined prefix with empty string to simplify later operations
@@ -818,6 +842,35 @@ const getFlatObject = function (object, prefix, humanFriendly) {
   if (humanFriendly == null) {
     humanFriendly = false;
   }
+
+  // determine if we need to add dynamic header columns
+  if (
+    headers && (
+      pushHeaders || (
+        prefix &&
+        headers.keys &&
+        headers.keys.indexOf(prefix) > -1
+      )
+    )
+  ) {
+    // do we need to initialize array of headers ?
+    if (!headers.value) {
+      headers.value = {};
+    }
+
+    // append missing column names
+    pushHeaders = true;
+  }
+
+  // add custom header to list of headers
+  const pushHeaderhandler = (localPropertyName) => {
+    if (
+      pushHeaders &&
+      headers.value[localPropertyName] == undefined
+    ) {
+      headers.value[localPropertyName] = localPropertyName.substring(localPropertyName.indexOf(' ') + 1);
+    }
+  };
 
   // define property name (it will be updated later)
   let propertyName;
@@ -833,10 +886,13 @@ const getFlatObject = function (object, prefix, humanFriendly) {
       // if element is of complex type
       if (item && typeof item === 'object') {
         // process it
-        result = Object.assign({}, result, getFlatObject(item, propertyName, humanFriendly));
+        result = Object.assign({}, result, getFlatObject(item, propertyName, humanFriendly, headers, pushHeaders));
       } else {
         // simple type
         result[propertyName] = item;
+
+        // add header if necessary
+        pushHeaderhandler(propertyName);
       }
     });
     // element is object
@@ -858,14 +914,21 @@ const getFlatObject = function (object, prefix, humanFriendly) {
       if (object[property] && typeof object[property] === 'object') {
         // handle dates separately
         if (object[property] instanceof Date) {
+          // assign date
           result[propertyName] = getDateDisplayValue(object[property]);
+
+          // add header if necessary
+          pushHeaderhandler(propertyName);
         } else {
           // process it
-          result = Object.assign({}, result, getFlatObject(object[property], propertyName, humanFriendly));
+          result = Object.assign({}, result, getFlatObject(object[property], propertyName, humanFriendly, headers, pushHeaders));
         }
       } else {
         // simple type
         result[propertyName] = object[property];
+
+        // add header if necessary
+        pushHeaderhandler(propertyName);
       }
     });
   }
@@ -1204,47 +1267,6 @@ const getSourceAndTargetFromModelHookContext = function (context) {
 };
 
 /**
- * Retrieve list of questionnaire questions and their variables
- * @param questionnaire
- * @param dictionary
- * @returns {[{id, header}]}
- */
-const retrieveQuestionnaireVariables = (questionnaire, dictionary) => {
-  // no questions
-  if (_.isEmpty(questionnaire)) {
-    return [];
-  }
-
-  // go through each question
-  const result = [];
-  _.each(questionnaire, (question) => {
-    // add question
-    if (!_.isEmpty(question.variable)) {
-      // add parent question
-      result.push({
-        id: question.variable,
-        header: dictionary.getTranslation(question.text)
-      });
-
-      // add children questions
-      if (!_.isEmpty(question.answers)) {
-        _.each(question.answers, (answer) => {
-          if (!_.isEmpty(answer.additionalQuestions)) {
-            result.push(...retrieveQuestionnaireVariables(
-              answer.additionalQuestions,
-              dictionary
-            ));
-          }
-        });
-      }
-    }
-  });
-
-  // finished
-  return result;
-};
-
-/**
  * Translates a questionnaireAnswers property (from case, labResult and followUp documents) into an object that looks like
  *  this {question1Text: answerLabel, question2Text: answerLabel, ...}
  * @param outbreak
@@ -1345,17 +1367,39 @@ const buildAndTranslateAnswerLabel = function (questionText, answerValue, dictio
  * @param variable
  */
 const findQuestionByVariable = function (questions, variable) {
-  let result = _.find(questions, {'variable': variable,});
-  if (!result) {
-    questions.forEach((question) => {
-      if (question.answers) {
-        question.answers.forEach((answer) => {
+  let result;
+  if (questions) {
+    for (const questionIndex in questions) {
+      // check if this is our question
+      const question = questions[questionIndex];
+      result = question.variable === variable ? question : null;
+
+      // search nested questions
+      if (
+        !result &&
+        question.answers
+      ) {
+        for (const answerIndex in question.answers) {
+          const answer = question.answers[answerIndex];
           if (answer.additionalQuestions) {
+            // search for question
             result = findQuestionByVariable(answer.additionalQuestions, variable);
+
+            // we found the question
+            // stop iterating through answers
+            if (result) {
+              break;
+            }
           }
-        });
+        }
       }
-    });
+
+      // we found the question
+      // stop iterating through questions
+      if (result) {
+        break;
+      }
+    }
   }
 
   if (result && result.answerType !== 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD') {
@@ -1661,7 +1705,11 @@ const sortMultiAnswerQuestions = function (model) {
  * @param answer
  */
 const convertQuestionAnswerToOldFormat = function (answer) {
-  if (Array.isArray(answer) && answer.length) {
+  if (
+    Array.isArray(answer)
+    && answer.length > 0 &&
+    typeof answer[0] === 'object'
+  ) {
     // doing this to take the latest answer for multi day answers
     return answer.slice(0, 1)[0].value;
   }
@@ -1722,6 +1770,5 @@ module.exports = {
   covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat,
   sortMultiAnswerQuestions: sortMultiAnswerQuestions,
   convertQuestionAnswerToOldFormat: convertQuestionAnswerToOldFormat,
-  convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat,
-  retrieveQuestionnaireVariables: retrieveQuestionnaireVariables
+  convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat
 };

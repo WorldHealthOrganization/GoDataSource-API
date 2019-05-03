@@ -5602,7 +5602,6 @@ module.exports = function (Outbreak) {
     app.utils.remote.helpers.exportFilteredModelsList(
       app,
       app.models.referenceData,
-      {},
       _filters.where,
       exportType,
       'Reference Data',
@@ -7447,12 +7446,6 @@ module.exports = function (Outbreak) {
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
           app.models.followUp,
-          {
-            questionnaireAnswers: genericHelpers.retrieveQuestionnaireVariables(
-              self.contactFollowUpTemplate,
-              dictionary
-            )
-          },
           filter.where,
           exportType,
           'Follow-Up List',
@@ -7463,7 +7456,8 @@ module.exports = function (Outbreak) {
             // Prepare questionnaire answers for printing
             results.forEach((followUp) => {
               if (followUp.questionnaireAnswers) {
-                followUp.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(followUp.questionnaireAnswers);
+                // followUp.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(followUp.questionnaireAnswers);
+                // - convertQuestionnaireAnswersToOldFormat is already applied by translateQuestionnaire
                 followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
               }
             });
@@ -8577,12 +8571,6 @@ module.exports = function (Outbreak) {
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
           app.models.case,
-          {
-            questionnaireAnswers: genericHelpers.retrieveQuestionnaireVariables(
-              self.caseInvestigationTemplate,
-              dictionary
-            )
-          },
           filter.where,
           exportType,
           'Case List',
@@ -8593,7 +8581,8 @@ module.exports = function (Outbreak) {
             // Prepare questionnaire answers for printing
             results.forEach((caseModel) => {
               if (caseModel.questionnaireAnswers) {
-                caseModel.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(caseModel.questionnaireAnswers);
+                // caseModel.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(caseModel.questionnaireAnswers);
+                // - convertQuestionnaireAnswersToOldFormat is already applied by translateQuestionnaire
                 caseModel.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.case, caseModel, dictionary);
               }
             });
@@ -8637,7 +8626,6 @@ module.exports = function (Outbreak) {
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
           app.models.relationship,
-          {},
           filter.where,
           exportType,
           'Relationship List',
@@ -8897,7 +8885,6 @@ module.exports = function (Outbreak) {
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
           app.models.contact,
-          {},
           filter.where,
           exportType,
           'Contacts List',
