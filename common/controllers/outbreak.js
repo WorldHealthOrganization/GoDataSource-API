@@ -5602,6 +5602,7 @@ module.exports = function (Outbreak) {
     app.utils.remote.helpers.exportFilteredModelsList(
       app,
       app.models.referenceData,
+      {},
       _filters.where,
       exportType,
       'Reference Data',
@@ -8626,6 +8627,7 @@ module.exports = function (Outbreak) {
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
           app.models.relationship,
+          {},
           filter.where,
           exportType,
           'Relationship List',
@@ -8885,6 +8887,7 @@ module.exports = function (Outbreak) {
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
           app.models.contact,
+          {},
           filter.where,
           exportType,
           'Contacts List',
