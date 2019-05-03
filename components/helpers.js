@@ -1748,5 +1748,6 @@ module.exports = {
   covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat,
   sortMultiAnswerQuestions: sortMultiAnswerQuestions,
   convertQuestionAnswerToOldFormat: convertQuestionAnswerToOldFormat,
-  convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat
+  convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat,
+  retrieveQuestionnaireVariables: retrieveQuestionnaireVariables
 };
