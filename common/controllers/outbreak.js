@@ -7447,6 +7447,12 @@ module.exports = function (Outbreak) {
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
           app.models.followUp,
+          {
+            questionnaireAnswers: genericHelpers.retrieveQuestionnaireVariables(
+              self.contactFollowUpTemplate,
+              dictionary
+            )
+          },
           filter.where,
           exportType,
           'Follow-Up List',
@@ -8572,6 +8578,12 @@ module.exports = function (Outbreak) {
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
           app.models.case,
+          {
+            questionnaireAnswers: genericHelpers.retrieveQuestionnaireVariables(
+              self.caseInvestigationTemplate,
+              dictionary
+            )
+          },
           filter.where,
           exportType,
           'Case List',
