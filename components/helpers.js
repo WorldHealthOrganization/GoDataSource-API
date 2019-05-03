@@ -1708,7 +1708,6 @@ module.exports = {
   getBuildInformation: getBuildInformation,
   convertBooleanProperties: convertBooleanProperties,
   getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext,
-  addQuestionnaireHeadersForPrint: spreadSheetFile.addQuestionnaireHeadersForPrint,
   setOriginalValueInContextOptions: setOriginalValueInContextOptions,
   getOriginalValueFromContextOptions: getOriginalValueFromContextOptions,
   paginateResultSet: paginateResultSet,
