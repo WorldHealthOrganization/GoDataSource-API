@@ -1315,54 +1315,6 @@ const buildAndTranslateAnswerLabel = function (questionText, answerValue, dictio
 };
 
 /**
- * Return an outbreak's question, after searching for it using the "variable" field
- * @param questions
- * @param variable
- */
-const findQuestionByVariable = function (questions, variable) {
-  let result;
-  if (questions) {
-    for (const questionIndex in questions) {
-      // check if this is our question
-      const question = questions[questionIndex];
-      result = question.variable === variable ? question : null;
-
-      // search nested questions
-      if (
-        !result &&
-        question.answers
-      ) {
-        for (const answerIndex in question.answers) {
-          const answer = question.answers[answerIndex];
-          if (answer.additionalQuestions) {
-            // search for question
-            result = findQuestionByVariable(answer.additionalQuestions, variable);
-
-            // we found the question
-            // stop iterating through answers
-            if (result) {
-              break;
-            }
-          }
-        }
-      }
-
-      // we found the question
-      // stop iterating through questions
-      if (result) {
-        break;
-      }
-    }
-  }
-
-  if (result && result.answerType !== 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD') {
-    return result;
-  } else {
-    return;
-  }
-};
-
-/**
  * Set value in context options;
  * Creating options.${context.Model.modelName}._instance[${context.instance.id}][${container}] object in context and store the 'value' at the 'key' position
  * @param context
