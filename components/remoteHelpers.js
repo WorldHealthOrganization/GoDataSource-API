@@ -65,6 +65,7 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callba
  * Export filtered model list
  * @param app Inject app
  * @param Model Model that will be exported
+ * @param modelPropertiesExpandOnFlatFiles Headers for custom fields like questionnaireAnswers
  * @param query
  * @param exportType
  * @param fileName
@@ -77,6 +78,7 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callba
 function exportFilteredModelsList(
   app,
   Model,
+  modelPropertiesExpandOnFlatFiles,
   query,
   exportType,
   fileName,
@@ -155,11 +157,19 @@ function exportFilteredModelsList(
               });
             }
           } else {
-            headers.push({
-              id: propertyName,
-              // use correct label translation for user language
-              header: dictionary.getTranslation(fieldLabelsMap[propertyName])
-            });
+            if (
+              !['json', 'xml'].includes(exportType) &&
+              modelPropertiesExpandOnFlatFiles &&
+              modelPropertiesExpandOnFlatFiles[propertyName]
+            ) {
+              headers.push(...modelPropertiesExpandOnFlatFiles[propertyName]);
+            } else {
+              headers.push({
+                id: propertyName,
+                // use correct label translation for user language
+                header: dictionary.getTranslation(fieldLabelsMap[propertyName])
+              });
+            }
           }
         });
 

@@ -559,7 +559,6 @@ const exportListFileSync = function (headers, dataSet, fileType, title = 'List')
         });
         break;
       case 'xlsx':
-        // export data
         file.mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
         spreadSheetFile.createXlsxFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, xlsxFile) {
           if (error) {
@@ -859,7 +858,6 @@ const getFlatObject = function (object, prefix, humanFriendly) {
       if (object[property] && typeof object[property] === 'object') {
         // handle dates separately
         if (object[property] instanceof Date) {
-          // assign date
           result[propertyName] = getDateDisplayValue(object[property]);
         } else {
           // process it
@@ -1202,6 +1200,47 @@ const getSourceAndTargetFromModelHookContext = function (context) {
     result.target = context.data;
   }
   result.source.all = Object.assign({}, result.source.existing, result.source.updated);
+  return result;
+};
+
+/**
+ * Retrieve list of questionnaire questions and their variables
+ * @param questionnaire
+ * @param dictionary
+ * @returns {[{id, header}]}
+ */
+const retrieveQuestionnaireVariables = (questionnaire, dictionary) => {
+  // no questions
+  if (_.isEmpty(questionnaire)) {
+    return [];
+  }
+
+  // go through each question
+  const result = [];
+  _.each(questionnaire, (question) => {
+    // add question
+    if (!_.isEmpty(question.variable)) {
+      // add parent question
+      result.push({
+        id: question.variable,
+        header: dictionary.getTranslation(question.text)
+      });
+
+      // add children questions
+      if (!_.isEmpty(question.answers)) {
+        _.each(question.answers, (answer) => {
+          if (!_.isEmpty(answer.additionalQuestions)) {
+            result.push(...retrieveQuestionnaireVariables(
+              answer.additionalQuestions,
+              dictionary
+            ));
+          }
+        });
+      }
+    }
+  });
+
+  // finished
   return result;
 };
 
