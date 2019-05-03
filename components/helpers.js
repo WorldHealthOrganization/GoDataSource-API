@@ -559,30 +559,9 @@ const exportListFileSync = function (headers, dataSet, fileType, title = 'List')
         });
         break;
       case 'xlsx':
-        // prepare data for export & determine extra headers
-        const extraHeaders = {
-          value: {},
-          keys: ['questionnaireAnswers']
-        };
-        const formattedData = dataSet.map((item) => getFlatObject(
-          item,
-          null,
-          true,
-          extraHeaders
-        ));
-        Object.keys(extraHeaders.value || {}).forEach((headerId) => {
-          // don't add duplicates
-          if (!_.find(headers, { id: headerId })) {
-            headers.push({
-              id: headerId,
-              header: extraHeaders.value[headerId]
-            });
-          }
-        });
-
         // export data
         file.mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-        spreadSheetFile.createXlsxFile(headers, formattedData, function (error, xlsxFile) {
+        spreadSheetFile.createXlsxFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, xlsxFile) {
           if (error) {
             return reject(error);
           }
@@ -828,10 +807,8 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
  * @param object
  * @param prefix
  * @param humanFriendly Use human friendly naming (e.g. "item 1 level sublevel" instead of "item[0].level.sublevel"). Default: false
- * @param headersData Add missing headers if necessary ( e.g. { value: {'headerId': 'headerName'}, keys: ['questionnaireAnswers'] } )
- * @param pushHeaders boolean: true, if we should add headers
  */
-const getFlatObject = function (object, prefix, humanFriendly, headers, pushHeaders) {
+const getFlatObject = function (object, prefix, humanFriendly) {
   // define result
   let result = {};
   // replace null/undefined prefix with empty string to simplify later operations
@@ -842,35 +819,6 @@ const getFlatObject = function (object, prefix, humanFriendly, headers, pushHead
   if (humanFriendly == null) {
     humanFriendly = false;
   }
-
-  // determine if we need to add dynamic header columns
-  if (
-    headers && (
-      pushHeaders || (
-        prefix &&
-        headers.keys &&
-        headers.keys.indexOf(prefix) > -1
-      )
-    )
-  ) {
-    // do we need to initialize array of headers ?
-    if (!headers.value) {
-      headers.value = {};
-    }
-
-    // append missing column names
-    pushHeaders = true;
-  }
-
-  // add custom header to list of headers
-  const pushHeaderhandler = (localPropertyName) => {
-    if (
-      pushHeaders &&
-      headers.value[localPropertyName] == undefined
-    ) {
-      headers.value[localPropertyName] = localPropertyName.substring(localPropertyName.indexOf(' ') + 1);
-    }
-  };
 
   // define property name (it will be updated later)
   let propertyName;
@@ -886,13 +834,10 @@ const getFlatObject = function (object, prefix, humanFriendly, headers, pushHead
       // if element is of complex type
       if (item && typeof item === 'object') {
         // process it
-        result = Object.assign({}, result, getFlatObject(item, propertyName, humanFriendly, headers, pushHeaders));
+        result = Object.assign({}, result, getFlatObject(item, propertyName, humanFriendly));
       } else {
         // simple type
         result[propertyName] = item;
-
-        // add header if necessary
-        pushHeaderhandler(propertyName);
       }
     });
     // element is object
@@ -916,19 +861,13 @@ const getFlatObject = function (object, prefix, humanFriendly, headers, pushHead
         if (object[property] instanceof Date) {
           // assign date
           result[propertyName] = getDateDisplayValue(object[property]);
-
-          // add header if necessary
-          pushHeaderhandler(propertyName);
         } else {
           // process it
-          result = Object.assign({}, result, getFlatObject(object[property], propertyName, humanFriendly, headers, pushHeaders));
+          result = Object.assign({}, result, getFlatObject(object[property], propertyName, humanFriendly));
         }
       } else {
         // simple type
         result[propertyName] = object[property];
-
-        // add header if necessary
-        pushHeaderhandler(propertyName);
       }
     });
   }
