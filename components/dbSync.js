@@ -47,7 +47,8 @@ const collectionsMap = {
   auditLog: 'auditLog',
   fileAttachment: 'fileAttachment',
   device: 'device',
-  deviceHistory: 'deviceHistory'
+  deviceHistory: 'deviceHistory',
+  importMapping: 'importMapping'
 };
 
 // list of user related collections
