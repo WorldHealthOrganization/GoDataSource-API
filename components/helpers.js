@@ -248,6 +248,24 @@ function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, pare
 
             // define function that will handle recursive map
             const mapValues = (localValue, addToArray) => {
+              // get source path
+              let actualMapPath = processedMap.map[sourcePath];
+              const isBasicArray = processedMap.map[sourcePath].endsWith('_____A');
+              if (isBasicArray) {
+                actualMapPath = actualMapPath.substr(0, actualMapPath.length - '_____A'.length);
+              }
+
+              // initialize array if necessary
+              const getArray = (mapPath) => {
+                // push array
+                let dataArray = _.get(result, mapPath);
+                if (!dataArray) {
+                  dataArray = [];
+                  _.set(result, mapPath, dataArray);
+                }
+                return dataArray;
+              };
+
               // define a replacement parent value
               let replaceValueParent;
 
@@ -261,18 +279,13 @@ function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, pare
                 && replaceValueParent[localValue] !== undefined
               ) {
                 // use that replacement value
-                if (addToArray) {
-                  // push array
-                  let dataArray = _.get(result, `${processedMap.map[sourcePath]}`);
-                  if (!dataArray) {
-                    dataArray = [];
-                    _.set(result, `${processedMap.map[sourcePath]}`, dataArray);
-                  }
-
-                  // add value to array
-                  dataArray.push(replaceValueParent[localValue]);
+                if (
+                  addToArray ||
+                  isBasicArray
+                ) {
+                  getArray(actualMapPath).push(replaceValueParent[localValue]);
                 } else {
-                  _.set(result, `${processedMap.map[sourcePath]}`, replaceValueParent[localValue]);
+                  _.set(result, actualMapPath, replaceValueParent[localValue]);
                 }
               } else {
                 // if array we need to check values since we might have an array of mapped values
@@ -283,18 +296,16 @@ function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, pare
                   });
                 } else {
                   // no replacement value defined, use resolved value
-                  if (addToArray) {
-                    // push array
-                    let dataArray = _.get(result, `${processedMap.map[sourcePath]}`);
-                    if (!dataArray) {
-                      dataArray = [];
-                      _.set(result, `${processedMap.map[sourcePath]}`, dataArray);
+                  if (
+                    addToArray ||
+                    isBasicArray
+                  ) {
+                    // we don't push undefined values
+                    if (localValue !== undefined) {
+                      getArray(actualMapPath).push(localValue);
                     }
-
-                    // add value to array
-                    dataArray.push(localValue);
                   } else {
-                    _.set(result, `${processedMap.map[sourcePath]}`, localValue);
+                    _.set(result, actualMapPath, localValue);
                   }
                 }
               }

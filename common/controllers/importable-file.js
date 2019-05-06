@@ -62,6 +62,19 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, header
           id: outbreakId
         });
       }
+
+      // construct variable name
+      const getVarName = (variable) => {
+        return variable.name
+          // multi answers need to be basic data arrays
+          + (
+            app.models[modelName].extendedForm.isBasicArray &&
+            app.models[modelName].extendedForm.isBasicArray(variable) ?
+              '_____A' :
+              ''
+          );
+      };
+
       // extract variables from template
       const variables = templateParser.extractVariablesAndAnswerOptions(outbreak[app.models[modelName].extendedForm.template]);
 
@@ -69,7 +82,7 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, header
       if (variables.length) {
         // normalize them
         const normalizedVariables = variables.map(function (variable) {
-          result.modelProperties[app.models[modelName].extendedForm.containerProperty][variable.name] = variable.text;
+          result.modelProperties[app.models[modelName].extendedForm.containerProperty][getVarName(variable)] = variable.text;
           return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(variable.text));
         });
         // try to find mapping suggestions
@@ -92,8 +105,9 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, header
             variable.answers.forEach(function (answer) {
               answers.push(Object.assign({id: answer.value}, answer));
             });
+
             // add them to the available values
-            result.modelPropertyValues[app.models[modelName].extendedForm.containerProperty][variable.name] = answers;
+            result.modelPropertyValues[app.models[modelName].extendedForm.containerProperty][getVarName(variable)] = answers;
           }
         });
       }

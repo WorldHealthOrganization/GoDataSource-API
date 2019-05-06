@@ -125,7 +125,10 @@ module.exports = function (FollowUp) {
 
   FollowUp.extendedForm = {
     template: 'contactFollowUpTemplate',
-    containerProperty: 'questionnaireAnswers'
+    containerProperty: 'questionnaireAnswers',
+    isBasicArray: (variable) => {
+      return variable.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS';
+    }
   };
 
   /**
