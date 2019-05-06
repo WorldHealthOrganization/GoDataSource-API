@@ -26,7 +26,8 @@ module.exports = function (Backup) {
       'template',
       'icon',
       'device',
-      'deviceHistory'
+      'deviceHistory',
+      'importMapping'
     ],
     'Data': [
       'outbreak',
