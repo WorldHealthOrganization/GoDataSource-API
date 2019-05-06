@@ -4235,6 +4235,12 @@ module.exports = function (Outbreak) {
           // go through all entries
           labResultsList.forEach(function (labResult, index) {
             createLabResults.push(function (callback) {
+              // sanitize questionnaire answers
+              // convert to new format if necessary
+              if (labResult.questionnaireAnswers) {
+                labResult.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToNewFormat(labResult.questionnaireAnswers);
+              }
+
               // first check if the case id (person id) is valid
               app.models.case
                 .findOne({
@@ -4348,6 +4354,12 @@ module.exports = function (Outbreak) {
               const addresses = app.models.person.sanitizeAddresses(caseData);
               if (addresses) {
                 caseData.addresses = addresses;
+              }
+
+              // sanitize questionnaire answers
+              // convert to new format if necessary
+              if (caseData.questionnaireAnswers) {
+                caseData.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToNewFormat(caseData.questionnaireAnswers);
               }
 
               // sync the case
@@ -7450,6 +7462,7 @@ module.exports = function (Outbreak) {
           {
             questionnaireAnswers: genericHelpers.retrieveQuestionnaireVariables(
               self.contactFollowUpTemplate,
+              'questionnaireAnswers',
               dictionary
             )
           },
@@ -7459,12 +7472,11 @@ module.exports = function (Outbreak) {
           encryptPassword,
           anonymizeFields,
           options,
-          function (results, dictionary) {
+          function (results) {
             // Prepare questionnaire answers for printing
             results.forEach((followUp) => {
               if (followUp.questionnaireAnswers) {
                 followUp.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(followUp.questionnaireAnswers);
-                followUp.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.followUp, followUp, dictionary);
               }
             });
             return Promise.resolve(results);
@@ -8580,6 +8592,7 @@ module.exports = function (Outbreak) {
           {
             questionnaireAnswers: genericHelpers.retrieveQuestionnaireVariables(
               self.caseInvestigationTemplate,
+              'questionnaireAnswers',
               dictionary
             )
           },
@@ -8589,12 +8602,11 @@ module.exports = function (Outbreak) {
           encryptPassword,
           anonymizeFields,
           options,
-          function (results, dictionary) {
+          function (results) {
             // Prepare questionnaire answers for printing
             results.forEach((caseModel) => {
               if (caseModel.questionnaireAnswers) {
                 caseModel.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(caseModel.questionnaireAnswers);
-                caseModel.questionnaireAnswers = genericHelpers.translateQuestionnaire(self.toJSON(), app.models.case, caseModel, dictionary);
               }
             });
             return Promise.resolve(results);

@@ -65,6 +65,7 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callba
  * Export filtered model list
  * @param app Inject app
  * @param Model Model that will be exported
+ * @param modelPropertiesExpandOnFlatFiles Headers for custom fields like questionnaireAnswers
  * @param query
  * @param exportType
  * @param fileName

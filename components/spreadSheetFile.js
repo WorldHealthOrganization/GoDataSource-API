@@ -54,9 +54,6 @@ function buildSpreadSheet(headers, data) {
  * @param callback
  */
 function createCsvFile(headers, data, callback) {
-  // add the questionnaire headers
-  // since they depend on the translated data, we have to add them separately
-  addQuestionnaireHeadersForPrint(data, headers);
   const sheet = buildSpreadSheet(headers, data);
   // send back the sheet as CSV file
   callback(null, xlsx.utils.sheet_to_csv(sheet));
@@ -70,9 +67,6 @@ function createCsvFile(headers, data, callback) {
  * @param callback
  */
 function createExcelFile(headers, data, type, callback) {
-  // add the questionnaire headers
-  // since they depend on the translated data, we have to add them separately
-  addQuestionnaireHeadersForPrint(data, headers);
   const sheet = buildSpreadSheet(headers, data);
   const workBook = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(workBook, sheet);
@@ -86,9 +80,6 @@ function createExcelFile(headers, data, type, callback) {
  * @param callback
  */
 function createXlsFile(headers, data, callback) {
-  // add the questionnaire headers
-  // since they depend on the translated data, we have to add them separately
-  addQuestionnaireHeadersForPrint(data, headers);
   createExcelFile(headers, data, 'biff8', callback);
 }
 
@@ -99,9 +90,6 @@ function createXlsFile(headers, data, callback) {
  * @param callback
  */
 function createXlsxFile(headers, data, callback) {
-  // add the questionnaire headers
-  // since they depend on the translated data, we have to add them separately
-  addQuestionnaireHeadersForPrint(data, headers);
   createExcelFile(headers, data, 'xlsx', callback);
 }
 
@@ -112,35 +100,12 @@ function createXlsxFile(headers, data, callback) {
  * @param callback
  */
 function createOdsFile(headers, data, callback) {
-  // add the questionnaire headers
-  // since they depend on the translated data, we have to add them separately
-  addQuestionnaireHeadersForPrint(data, headers);
   createExcelFile(headers, data, 'ods', callback);
 }
-
-/**
- * Create questionnaire headers for flat file export. Added here since we cannot require helpers in this file because of
- * circular dependency
- * @param data
- * @param headers
- */
-const addQuestionnaireHeadersForPrint = function (data, headers) {
-  data.length && Object.keys(data[0]).forEach((key) => {
-    if (key.indexOf('questionnaireAnswers') !== -1) {
-      let indexOfSeparator = key.indexOf(' ');
-      let questionText = key.substring(indexOfSeparator + 1);
-      headers.push({
-        id: key,
-        header: questionText
-      });
-    }
-  });
-};
 
 module.exports = {
   createCsvFile: createCsvFile,
   createXlsFile: createXlsFile,
   createXlsxFile: createXlsxFile,
-  createOdsFile: createOdsFile,
-  addQuestionnaireHeadersForPrint: addQuestionnaireHeadersForPrint
+  createOdsFile: createOdsFile
 };

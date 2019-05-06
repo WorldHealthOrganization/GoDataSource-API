@@ -245,23 +245,74 @@ function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, pare
           } else {
             // get the resolved value
             const value = _.get(item, sourcePath);
-            // define a replacement parent value
-            let replaceValueParent;
+
+            // define function that will handle recursive map
+            const mapValues = (localValue, addToArray) => {
+              // get source path
+              let actualMapPath = processedMap.map[sourcePath];
+              const isBasicArray = processedMap.map[sourcePath].endsWith('_____A');
+              if (isBasicArray) {
+                actualMapPath = actualMapPath.substr(0, actualMapPath.length - '_____A'.length);
+              }
+
+              // initialize array if necessary
+              const getArray = (mapPath) => {
+                // push array
+                let dataArray = _.get(result, mapPath);
+                if (!dataArray) {
+                  dataArray = [];
+                  _.set(result, mapPath, dataArray);
+                }
+                return dataArray;
+              };
+
+              // define a replacement parent value
+              let replaceValueParent;
+
+              // check if the value has a replacement value defined
+              if (
+                localValue !== undefined &&
+                typeof localValue !== 'object' &&
+                valuesMap &&
+                // strip indices for values map, we're only interested in the generic path not the exact one
+                (replaceValueParent = valuesMap[`${parentPathPrefix.replace(/\[\d+]/g, '[]')}${sourcePath.replace(/\[\d+]/g, '[]')}`])
+                && replaceValueParent[localValue] !== undefined
+              ) {
+                // use that replacement value
+                if (
+                  addToArray ||
+                  isBasicArray
+                ) {
+                  getArray(actualMapPath).push(replaceValueParent[localValue]);
+                } else {
+                  _.set(result, actualMapPath, replaceValueParent[localValue]);
+                }
+              } else {
+                // if array we need to check values since we might have an array of mapped values
+                if (_.isArray(localValue)) {
+                  // go through each value and check if we can map it
+                  localValue.forEach((deepValue) => {
+                    mapValues(deepValue, true);
+                  });
+                } else {
+                  // no replacement value defined, use resolved value
+                  if (
+                    addToArray ||
+                    isBasicArray
+                  ) {
+                    // we don't push undefined values
+                    if (localValue !== undefined) {
+                      getArray(actualMapPath).push(localValue);
+                    }
+                  } else {
+                    _.set(result, actualMapPath, localValue);
+                  }
+                }
+              }
+            };
+
             // check if the value has a replacement value defined
-            if (
-              value !== undefined &&
-              typeof value !== 'object' &&
-              valuesMap &&
-              // strip indices for values map, we're only interested in the generic path not the exact one
-              (replaceValueParent = valuesMap[`${parentPathPrefix.replace(/\[\d+]/g, '[]')}${sourcePath.replace(/\[\d+]/g, '[]')}`])
-              && replaceValueParent[value] !== undefined
-            ) {
-              // use that replacement value
-              _.set(result, `${processedMap.map[sourcePath]}`, replaceValueParent[value]);
-            } else {
-              // no replacement value defined, use resolved value
-              _.set(result, `${processedMap.map[sourcePath]}`, value);
-            }
+            mapValues(value);
           }
         });
         // store the result
@@ -1206,10 +1257,11 @@ const getSourceAndTargetFromModelHookContext = function (context) {
 /**
  * Retrieve list of questionnaire questions and their variables
  * @param questionnaire
+ * @param idHeaderPrefix
  * @param dictionary
  * @returns {[{id, header}]}
  */
-const retrieveQuestionnaireVariables = (questionnaire, dictionary) => {
+const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary) => {
   // no questions
   if (_.isEmpty(questionnaire)) {
     return [];
@@ -1220,11 +1272,24 @@ const retrieveQuestionnaireVariables = (questionnaire, dictionary) => {
   _.each(questionnaire, (question) => {
     // add question
     if (!_.isEmpty(question.variable)) {
-      // add parent question
-      result.push({
-        id: question.variable,
-        header: dictionary.getTranslation(question.text)
-      });
+      // can have multiple answers ?
+      if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
+        // add a column for each answer
+        if (!_.isEmpty(question.answers)) {
+          _.each(question.answers, (answer, answerIndex) => {
+            result.push({
+              id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable + ' ' + (answerIndex + 1),
+              header: dictionary.getTranslation(question.text) + ' ' + (answerIndex + 1)
+            });
+          });
+        }
+      } else {
+        // add parent question
+        result.push({
+          id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable,
+          header: dictionary.getTranslation(question.text)
+        });
+      }
 
       // add children questions
       if (!_.isEmpty(question.answers)) {
@@ -1232,6 +1297,7 @@ const retrieveQuestionnaireVariables = (questionnaire, dictionary) => {
           if (!_.isEmpty(answer.additionalQuestions)) {
             result.push(...retrieveQuestionnaireVariables(
               answer.additionalQuestions,
+              idHeaderPrefix,
               dictionary
             ));
           }
@@ -1242,46 +1308,6 @@ const retrieveQuestionnaireVariables = (questionnaire, dictionary) => {
 
   // finished
   return result;
-};
-
-/**
- * Translates a questionnaireAnswers property (from case, labResult and followUp documents) into an object that looks like
- *  this {question1Text: answerLabel, question2Text: answerLabel, ...}
- * @param outbreak
- * @param Model
- * @param modelInstance
- * @param dictionary
- * @returns {{}}
- */
-const translateQuestionnaire = function (outbreak, Model, modelInstance, dictionary) {
-  let newQuestionnaire = {};
-  const questionnaireAnswers = convertQuestionnaireAnswersToOldFormat(modelInstance.questionnaireAnswers);
-  Object.keys(questionnaireAnswers).forEach((variable) => {
-    // shorthand ref
-    let qAnswer = questionnaireAnswers[variable];
-
-    // question definition
-    let question = findQuestionByVariable(outbreak[Model.extendedForm.template], variable);
-
-    if (question) {
-      let questionText = dictionary.getTranslation(question.text);
-      let answer = '';
-
-      if (['LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS', 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER'].includes(question.answerType)) {
-        answer = translateQuestionAnswers(question, qAnswer, dictionary);
-      } else {
-        // Parse date type answers since xml cannot print them
-        if (qAnswer instanceof Date) {
-          answer = getDateDisplayValue(qAnswer);
-        } else {
-          answer = qAnswer;
-        }
-      }
-      newQuestionnaire[questionText] = answer;
-    }
-  });
-
-  return newQuestionnaire;
 };
 
 /**
@@ -1337,32 +1363,6 @@ const buildAndTranslateAnswerLabel = function (questionText, answerValue, dictio
     }
   }
   return result;
-};
-
-/**
- * Return an outbreak's question, after searching for it using the "variable" field
- * @param questions
- * @param variable
- */
-const findQuestionByVariable = function (questions, variable) {
-  let result = _.find(questions, {'variable': variable,});
-  if (!result) {
-    questions.forEach((question) => {
-      if (question.answers) {
-        question.answers.forEach((answer) => {
-          if (answer.additionalQuestions) {
-            result = findQuestionByVariable(answer.additionalQuestions, variable);
-          }
-        });
-      }
-    });
-  }
-
-  if (result && result.answerType !== 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD') {
-    return result;
-  } else {
-    return;
-  }
 };
 
 /**
@@ -1661,7 +1661,11 @@ const sortMultiAnswerQuestions = function (model) {
  * @param answer
  */
 const convertQuestionAnswerToOldFormat = function (answer) {
-  if (Array.isArray(answer) && answer.length) {
+  if (
+    Array.isArray(answer)
+    && answer.length > 0 &&
+    typeof answer[0] === 'object'
+  ) {
     // doing this to take the latest answer for multi day answers
     return answer.slice(0, 1)[0].value;
   }
@@ -1676,6 +1680,30 @@ const convertQuestionnaireAnswersToOldFormat = function (answers) {
   const result = {};
   for (let qVar in answers) {
     result[qVar] = convertQuestionAnswerToOldFormat(answers[qVar]);
+  }
+  return result;
+};
+
+/**
+ * Convert questionnaire answers from old format to new format
+ * @param answers
+ */
+const convertQuestionnaireAnswersToNewFormat = function (answers) {
+  const result = {};
+  for (let qVar in answers) {
+    if (
+      !answers[qVar] ||
+      !_.isArray(answers[qVar]) || (
+        answers[qVar].length > 0 &&
+        !_.isObject(answers[qVar][0])
+      )
+    ) {
+      result[qVar] = [{
+        value: answers[qVar]
+      }];
+    } else {
+      result[qVar] = answers[qVar];
+    }
   }
   return result;
 };
@@ -1703,12 +1731,10 @@ module.exports = {
   translateDataSetReferenceDataValues: translateDataSetReferenceDataValues,
   translateFieldLabels: translateFieldLabels,
   includeSubLocationsInLocationFilter: includeSubLocationsInLocationFilter,
-  translateQuestionnaire: translateQuestionnaire,
   translateQuestionAnswers: translateQuestionAnswers,
   getBuildInformation: getBuildInformation,
   convertBooleanProperties: convertBooleanProperties,
   getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext,
-  addQuestionnaireHeadersForPrint: spreadSheetFile.addQuestionnaireHeadersForPrint,
   setOriginalValueInContextOptions: setOriginalValueInContextOptions,
   getOriginalValueFromContextOptions: getOriginalValueFromContextOptions,
   paginateResultSet: paginateResultSet,
@@ -1723,5 +1749,6 @@ module.exports = {
   sortMultiAnswerQuestions: sortMultiAnswerQuestions,
   convertQuestionAnswerToOldFormat: convertQuestionAnswerToOldFormat,
   convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat,
+  convertQuestionnaireAnswersToNewFormat: convertQuestionnaireAnswersToNewFormat,
   retrieveQuestionnaireVariables: retrieveQuestionnaireVariables
 };

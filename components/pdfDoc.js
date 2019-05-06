@@ -151,10 +151,6 @@ function createPDFList(headers, data, title, callback) {
 
   addTitle(document, title, 20);
 
-  // add the questionnaire headers
-  // since they depend on the translated data, we have to add them separately
-  addQuestionnaireHeadersForPrint(data, headers);
-
   // create table in document
   createTableInPDFDocument(headers, data, document, documentConfig);
 
@@ -751,16 +747,6 @@ function createTableInPDFDocument(headers, data, document, documentConfig, noHea
     })(data);
   }
 }
-
-/**
- * Create questionnaire headers for flat file export. Added here since we cannot require helpers in this file because of
- * circular dependency
- * @param data
- * @param headers
- */
-const addQuestionnaireHeadersForPrint = function (data, headers) {
-  return require('./helpers').addQuestionnaireHeadersForPrint(data, headers);
-};
 
 // convert a document into a binary buffer
 // send it over the network

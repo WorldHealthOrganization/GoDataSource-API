@@ -230,7 +230,10 @@ module.exports = function (Case) {
 
   Case.extendedForm = {
     template: 'caseInvestigationTemplate',
-    containerProperty: 'questionnaireAnswers'
+    containerProperty: 'questionnaireAnswers',
+    isBasicArray: (variable) => {
+      return variable.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS';
+    }
   };
 
   Case.printFieldsinOrder = [
