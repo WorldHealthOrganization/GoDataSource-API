@@ -4,6 +4,7 @@ const app = require('../../server/server');
 const templateParser = require('./../../components/templateParser');
 const _ = require('lodash');
 const async = require('async');
+const path = require('path');
 
 /**
  * Remove special chars and then lowercase the string
@@ -36,13 +37,17 @@ function getModelNamesFor(modelName) {
 /**
  * Get mapping suggestions for model extended form
  * @param outbreakId
+ * @param importType ( json, xml, xls... )
  * @param modelName
  * @param headers
  * @param normalizedHeaders
  * @param languageDictionary
  * @return {Promise.<T>}
  */
-function getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, headers, normalizedHeaders, languageDictionary) {
+function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, modelName, headers, normalizedHeaders, languageDictionary) {
+  // make sure we have a valid type
+  importType = importType ? importType.toLowerCase() : '.json';
+
   // start building a result
   const result = {
     suggestedFieldMapping: {},
@@ -66,8 +71,9 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, header
       // construct variable name
       const getVarName = (variable) => {
         return variable.name
-          // multi answers need to be basic data arrays
+          // multi answers need to be basic data arrays which aren't handled by flat file types ( non flat file should work properly without this functionality )
           + (
+            !['.json', '.xml'].includes(importType) &&
             app.models[modelName].extendedForm.isBasicArray &&
             app.models[modelName].extendedForm.isBasicArray(variable) ?
               '_____A' :
@@ -314,6 +320,9 @@ module.exports = function (ImportableFile) {
           return callback(error);
         }
 
+        // get file extension
+        const extension = path.extname(file.name);
+
         // keep e reference to parsed content
         const dataSet = result.jsonObj;
         // define main result
@@ -465,7 +474,7 @@ module.exports = function (ImportableFile) {
               }
               // get mapping suggestions for extended form
               steps.push(function (callback) {
-                getMappingSuggestionsForModelExtendedForm(outbreakId, modelName, result.fileHeaders, normalizedHeaders, languageDictionary)
+                getMappingSuggestionsForModelExtendedForm(outbreakId, extension, modelName, result.fileHeaders, normalizedHeaders, languageDictionary)
                   .then(function (_result) {
                     // update result
                     results[modelName] = Object.assign(
