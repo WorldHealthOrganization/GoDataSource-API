@@ -3439,7 +3439,12 @@
       "LNG_PREVIOUS_ANSWERS_SCREEN_PREVIOUS_ANSWERS_TITLE": "Previous Answers",
       "LNG_PREVIOUS_ANSWERS_SCREEN_NO_PREVIOUS_ANSWERS_TO_SHOW": "No previous answers to show",
       "LNG_QUESTIONNAIRE_LABEL_ADD_ANSWER": "Add Answer",
-      "LNG_QUESTIONNAIRE_LABEL_PREVIOUS_ANSWERS": "Prev Answers"
+      "LNG_QUESTIONNAIRE_LABEL_PREVIOUS_ANSWERS": "Prev Answers",
+      "LNG_FOLLOW_UP_AGENDA_NO_FOLLOW_UPS_FOR_DATE": "No follow-ups to show for this day",
+      "LNG_FOLLOW_UPS_SINGLE_SCREEN_ACTION_EDIT_CONTACT": "Edit contact",
+      "LNG_DIALOG_SAVE_ANYWAY_LABEL": "Save anyway",
+      "LNG_CASE_FIELD_LABEL_CASE_ID": "Case ID",
+      "LNG_CONTACT_FIELD_LABEL_CONTACT_ID": "Contact ID"
     },
     "reportDailyFollowUpList": {
       "LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS": "Address",
