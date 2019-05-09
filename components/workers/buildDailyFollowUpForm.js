@@ -5,7 +5,7 @@ const PdfUtils = require('../pdfDoc');
 
 // create the document
 const doc = PdfUtils.createPdfDoc({
-  fontSize: 6,
+  fontSize: 8,
   layout: 'landscape',
   margin: 20,
   lineGap: 0,
