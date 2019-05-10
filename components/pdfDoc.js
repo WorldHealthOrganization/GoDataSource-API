@@ -438,16 +438,17 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
             return displayVertical ? doc.y - 5 : doc.y;
           };
 
-          // answers gap
-          doc.moveDown(0.5);
-
           let answerXMargin = questionMargin;
           let answerY = doc.y;
+
+          // answers of type checkbox should be moved on line below
+          // for text answers we use doc.text() that already moves one line below
+          doc.moveDown();
 
           item.answers.forEach((answer) => {
             if (!firstAnswer) {
               if (displayVertical) {
-                doc.moveDown(0.5);
+                doc.moveDown();
               } else {
                 // reset X axis if last answer did break the line
                 if (!displayVertical && (doc.y - answerY > 10)) {
@@ -480,14 +481,14 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
             doc.text(answer.label, answerXMargin + 15, rectY);
             doc.moveUp();
 
+            if (displayVertical) {
+              doc.moveDown();
+            }
+
             // handle additional questions
             if (answer.additionalQuestions.length) {
-              doc.moveDown();
               addQuestions(answer.additionalQuestions, questionMargin, level + 1);
-            } else {
-              if (displayVertical) {
-                doc.moveDown();
-              }
+              doc.moveDown(0.5);
             }
 
             // no longer first questions
