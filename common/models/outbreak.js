@@ -115,6 +115,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Validate persons property
+   * @param outbreakId
    * @param personId
    * @param type
    * @param data
@@ -122,7 +123,7 @@ module.exports = function (Outbreak) {
    * @param callback
    * @return {*}
    */
-  Outbreak.helpers.validateAndNormalizePeople = function (personId, type, data, checkVisualId, callback) {
+  Outbreak.helpers.validateAndNormalizePeople = function (outbreakId, personId, type, data, checkVisualId, callback) {
     // checkVisualId not provided ?
     if (!callback) {
       callback = checkVisualId;
@@ -187,7 +188,10 @@ module.exports = function (Outbreak) {
                 where: {
                   or: [
                     { _id: person.id },
-                    { visualId: person.id }
+                    {
+                      outbreakId: outbreakId,
+                      visualId: person.id
+                    }
                   ]
                 }
               }))
@@ -289,7 +293,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.helpers.createPersonRelationship = function (outbreakId, personId, type, data, options, callback) {
-    Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error) {
+    Outbreak.helpers.validateAndNormalizePeople(outbreakId, personId, type, data, function (error) {
       if (error) {
         return callback(error);
       }
@@ -346,7 +350,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.helpers.updatePersonRelationship = function (personId, relationshipId, type, data, options, callback) {
-    Outbreak.helpers.validateAndNormalizePeople(personId, type, data, function (error) {
+    Outbreak.helpers.validateAndNormalizePeople(undefined, personId, type, data, function (error) {
       if (error) {
         return callback(error);
       }
