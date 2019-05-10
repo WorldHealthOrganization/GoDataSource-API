@@ -131,6 +131,107 @@ function addOutbreakIdMongoFilter(collectionName, baseFilter, filter) {
 }
 
 /**
+ * Add outbreak ID and person ID filter if found to a mongoDB filter;
+ * Note: the base mongoDB filter is not affected
+ * @param collectionName Collection name; Depending on collection name the filter might be different
+ * @param baseFilter MongoDB Base filter on which to add the person ID filter
+ * @param filter Filter from request in which to check for personsIds filter
+ * @returns {*}
+ */
+function addPersonMongoFilter(collectionName, baseFilter, filter) {
+  // need to also add the filter for outbreakId
+  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
+
+  // check for personsIds to filter
+  let personsIds = _.get(filter, 'where.personsIds');
+  if (personsIds) {
+    result._id = {
+      '$in': personsIds
+    };
+  }
+
+  return result;
+}
+
+/**
+ * Add outbreak ID and case ID filter if found to a mongoDB filter;
+ * Note: the base mongoDB filter is not affected
+ * @param collectionName Collection name; Depending on collection name the filter might be different
+ * @param baseFilter MongoDB Base filter on which to add the case ID filter
+ * @param filter Filter from request in which to check for casesIds filter
+ * @returns {*}
+ */
+function addLabResultMongoFilter(collectionName, baseFilter, filter) {
+  // need to also add the filter for outbreakId
+  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
+
+  // check for casesIds to filter
+  let casesIds = _.get(filter, 'where.casesIds');
+  if (casesIds) {
+    result.personId = {
+      '$in': casesIds
+    };
+  }
+
+  return result;
+}
+
+/**
+ * Add outbreak ID and contact ID + team ID filter if found to a mongoDB filter;
+ * Note: the base mongoDB filter is not affected
+ * @param collectionName Collection name; Depending on collection name the filter might be different
+ * @param baseFilter MongoDB Base filter on which to add the contacts ID and team ID filter
+ * @param filter Filter from request in which to check for contactsIds and teamsIDs filters; Both must be present
+ * @returns {*}
+ */
+function addFollowupMongoFilter(collectionName, baseFilter, filter) {
+  // need to also add the filter for outbreakId
+  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
+
+  // check for contactsIds and teamsIDs to filter
+  let contactsIds = _.get(filter, 'where.contactsIds');
+  let teamsIDs = _.get(filter, 'where.teamsIDs');
+  if (contactsIds && teamsIDs) {
+    result.personId = {
+      '$in': contactsIds
+    };
+    // get only the followups assigned to the teams or not assigned
+    result['$or'] = [{
+      teamId: {
+        '$in': teamsIDs
+      }
+    }, {
+      teamId: null
+    }]
+  }
+
+  return result;
+}
+
+/**
+ * Add outbreak ID and relationship ID filter if found to a mongoDB filter;
+ * Note: the base mongoDB filter is not affected
+ * @param collectionName Collection name; Depending on collection name the filter might be different
+ * @param baseFilter MongoDB Base filter on which to add the relationship ID filter
+ * @param filter Filter from request in which to check for relationshipsIds filter
+ * @returns {*}
+ */
+function addRelationshipMongoFilter(collectionName, baseFilter, filter) {
+  // need to also add the filter for outbreakId
+  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
+
+  // check for relationshipsIds to filter
+  let relationshipsIds = _.get(filter, 'where.relationshipsIds');
+  if (relationshipsIds) {
+    result._id = {
+      '$in': relationshipsIds
+    };
+  }
+
+  return result;
+}
+
+/**
  * Add language token filter if found to a mongoDB filter;
  * Note: the base mongoDB filter is not affected
  * @param collectionName Collection name; Currently not used however the function is automatically called with this param
@@ -214,10 +315,10 @@ function isImportableRecord(collectionName, record, outbreakIDs) {
 // map collections to filter update functions
 const collectionsFilterMap = {
   outbreak: addOutbreakIdMongoFilter,
-  person: addOutbreakIdMongoFilter,
-  labResult: addOutbreakIdMongoFilter,
-  followUp: addOutbreakIdMongoFilter,
-  relationship: addOutbreakIdMongoFilter,
+  person: addPersonMongoFilter,
+  labResult: addLabResultMongoFilter,
+  followUp: addFollowupMongoFilter,
+  relationship: addRelationshipMongoFilter,
   cluster: addOutbreakIdMongoFilter,
   fileAttachment: addOutbreakIdMongoFilter,
   languageToken: addLanguageTokenMongoFilter

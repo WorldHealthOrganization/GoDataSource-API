@@ -37,11 +37,12 @@ module.exports = function (Sync) {
    * @param password Encryption password
    * @param autoEncrypt Auto Encrypt
    * @param chunkSize Number of elements to be included in an archive. Default: 10000
+   * @param userEmail String; User email; used for filtering data based on user's teams locations
    * @param options
    * @param done
    * @returns {*}
    */
-  function getDatabaseSnapshot(filter, asynchronous, password, autoEncrypt, chunkSize, options, done) {
+  function getDatabaseSnapshot(filter, asynchronous, password, autoEncrypt, chunkSize, userEmail, options, done) {
     /**
      * Update export log entry and offer file for download if needed
      * @param err
@@ -93,136 +94,221 @@ module.exports = function (Sync) {
       }
     }
 
-    // get asynchronous flag value; default: false
-    asynchronous = asynchronous || false;
+    // if the userEmail is sent we need to do the following:
+    // 1. get user information as well as the assigned teams information; if the user is not part of any team request will error as no data needs to be exported
+    // 2. get locations for all teams where the user is assigned and filter the data (contacts, cases, follow-ups) based on the locations
+    // initialize container for found user data
+    let userModel;
+    // initialize container for found user teams IDs
+    let userTeamsIds;
+    // initialize container for locations for which to get related data
+    let userLocationIds;
 
-    filter = filter || {};
-    filter.where = filter.where || {};
+    // initialize userEmail logic promise
+    let userEmailLogic = Promise.resolve();
+    if (userEmail) {
+      // get user
+      userEmailLogic = app.models.user
+        .findOne({
+          where: {
+            email: userEmail
+          }
+        })
+        .then(function (user) {
+          if (!user) {
+            // requested user was not found; return error
+            return Promise.reject(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+              model: app.models.user.modelName,
+              id: userEmail
+            }));
+          }
 
-    // get chunkSize; default: 10000
-    chunkSize = chunkSize || 10000;
+          // cache user information
+          userModel = user;
 
-    // check for received outbreakIDs in filter
-    let outbreakIDFilter = _.get(filter, 'where.outbreakId');
-    // get allowed outbreaks IDs for the client
-    let allowedOutbreakIDs = _.get(options, 'remotingContext.req.authData.client.outbreakIDs', []);
-    // initialize list of IDs for the outbreaks that will be exported
-    let exportedOutbreakIDs = [];
+          // get user teams
+          return app.models.team
+            .find({
+              where: {
+                userIds: user.id
+              }
+            });
+        })
+        .then(function (teams) {
+          // requested user is not assigned to any team; return error as we cannot get location information for the user
+          if (!teams.length) {
+            return Promise.reject(app.utils.apiError.getError('SYNC_PACKAGE_FOR_USER_WITHOUT_TEAMS', {
+              userEmail: userEmail
+            }));
+          }
 
-    // the outbreakID filter is accepted as an {inq: ['outbreak ID']} filter of a string value
-    if (outbreakIDFilter) {
-      let requestOutbreakIDs = [];
-      if (typeof outbreakIDFilter === 'object' && outbreakIDFilter !== null && Array.isArray(outbreakIDFilter.inq)) {
-        requestOutbreakIDs = outbreakIDFilter.inq;
-      } else if (typeof outbreakIDFilter === 'string') {
-        requestOutbreakIDs = [outbreakIDFilter];
-      }
+          // get teams IDs
+          userTeamsIds = teams.map(team => team.id);
 
-      if (requestOutbreakIDs.length) {
-        // check if all the requested outbreak IDs are allowed
-        // if the allowedOutbreakIDs is an empty array all the outbreakIDs are allowed
-        if (!allowedOutbreakIDs.length) {
-          // nothing to do; will use the received outbreakIDs from the filter
-        } else {
-          let disallowedOutbreakIDs = requestOutbreakIDs.filter(outbreakID => allowedOutbreakIDs.indexOf(outbreakID) === -1);
-          if (disallowedOutbreakIDs.length) {
-            // some disallowed outbreak IDs were requested; return error
-            return done(app.utils.apiError.getError('ACCESS_DENIED', {
-              accessErrors: `Client is not allowed to access the following outbreaks: ${disallowedOutbreakIDs.join(', ')}`
-            }, 403));
+          // get teams locations
+          let teamsLocationsIDs = teams.reduce(function (accumulator, team) {
+            return accumulator.concat(team.locationIds);
+          }, []);
+          // remove duplicates
+          teamsLocationsIDs = [...new Set(teamsLocationsIDs)];
+
+          // get teams locations including sub-locations
+          return new Promise(function (resolve, reject) {
+            app.models.location
+              .getSubLocations(teamsLocationsIDs, [], function (error, locationIds) {
+                if (error) {
+                  return reject(error);
+                }
+
+                // cache locationIds
+                userLocationIds = locationIds;
+
+                return resolve();
+              });
+          });
+        });
+    }
+
+    // run user email logic at first
+    userEmailLogic
+      .then(function () {
+        // get asynchronous flag value; default: false
+        asynchronous = asynchronous || false;
+
+        filter = filter || {};
+        filter.where = filter.where || {};
+
+        // add user locationsIds and teamsIds in filter to have them available for future logic
+        filter.where.locationsIds = userLocationIds;
+        filter.where.teamsIds = userTeamsIds;
+
+        // get chunkSize; default: 10000
+        chunkSize = chunkSize || 10000;
+
+        // check for received outbreakIDs in filter
+        let outbreakIDFilter = _.get(filter, 'where.outbreakId');
+        // get allowed outbreaks IDs; if userEmail was sent get the outbreaks IDs for the requested user else get the outbreaks IDs for the client
+        let allowedOutbreakIDs = userModel ?
+          _.get(userModel, 'outbreakIds', []) :
+          _.get(options, 'remotingContext.req.authData.client.outbreakIDs', []);
+        // initialize list of IDs for the outbreaks that will be exported
+        let exportedOutbreakIDs = [];
+
+        // the outbreakID filter is accepted as an {inq: ['outbreak ID']} filter of a string value
+        if (outbreakIDFilter) {
+          let requestOutbreakIDs = [];
+          if (typeof outbreakIDFilter === 'object' && outbreakIDFilter !== null && Array.isArray(outbreakIDFilter.inq)) {
+            requestOutbreakIDs = outbreakIDFilter.inq;
+          } else if (typeof outbreakIDFilter === 'string') {
+            requestOutbreakIDs = [outbreakIDFilter];
+          }
+
+          if (requestOutbreakIDs.length) {
+            // check if all the requested outbreak IDs are allowed
+            // if the allowedOutbreakIDs is an empty array all the outbreakIDs are allowed
+            if (!allowedOutbreakIDs.length) {
+              // nothing to do; will use the received outbreakIDs from the filter
+            } else {
+              let disallowedOutbreakIDs = requestOutbreakIDs.filter(outbreakID => allowedOutbreakIDs.indexOf(outbreakID) === -1);
+              if (disallowedOutbreakIDs.length) {
+                // some disallowed outbreak IDs were requested; return error
+                return done(app.utils.apiError.getError('ACCESS_DENIED', {
+                  accessErrors: `Client is not allowed to access the following outbreaks: ${disallowedOutbreakIDs.join(', ')}`
+                }, 403));
+              }
+            }
+
+            // outbreaks that will be filtered are the ones from the received filter; no need to changes the filter
+            exportedOutbreakIDs = requestOutbreakIDs;
+          } else {
+            // an empty outbreakId filter was sent; nothing to do here, will use the client allowed outbreakIDs
           }
         }
 
-        // outbreaks that will be filtered are the ones from the received filter; no need to changes the filter
-        exportedOutbreakIDs = requestOutbreakIDs;
-      } else {
-        // an empty outbreakId filter was sent; nothing to do here, will use the client allowed outbreakIDs
-      }
-    }
+        // set the client allowed outbreakIDs in the filter if the received outbreakId filter was empty/invalid
+        if (!exportedOutbreakIDs.length && allowedOutbreakIDs.length) {
+          // outbreakId filter was not sent or is in an invalid format
+          // use the allowedOutbreakIDs as filter
+          filter.where.outbreakId = {
+            inq: allowedOutbreakIDs
+          };
 
-    // set the client allowed outbreakIDs in the filter if the received outbreakId filter was empty/invalid
-    if (!exportedOutbreakIDs.length && allowedOutbreakIDs.length) {
-      // outbreakId filter was not sent or is in an invalid format
-      // use the allowedOutbreakIDs as filter
-      filter.where.outbreakId = {
-        inq: allowedOutbreakIDs
-      };
-
-      // keep exportedOutbreakIDs data
-      exportedOutbreakIDs = allowedOutbreakIDs;
-    }
-
-    // create list of exported collections depending on different filters
-    let collections;
-
-    // get exportType filter
-    let exportTypeFilter = _.get(filter, 'where.exportType');
-    if (Object.keys(dbSync.collectionsForExportTypeMap).indexOf(exportTypeFilter) !== -1) {
-      // sent exportType is valid; export assigned collections
-      // in this case the collections filter is ignored
-      collections = dbSync.collectionsForExportTypeMap[exportTypeFilter];
-    } else {
-      // check for collections filter
-      let collectionsFilter = _.get(filter, 'where.collections');
-      if (Array.isArray(collectionsFilter)) {
-        // export the received collections
-        collections = collectionsFilter;
-      } else {
-        // use mobile exportType collections by default
-        collections = dbSync.collectionsForExportTypeMap.mobile;
-      }
-    }
-
-    // get includeUsers filter to check if the user collections need to be exported
-    let includeUsersFilter = _.get(filter, 'where.includeUsers');
-    if (includeUsersFilter) {
-      collections = collections.concat(dbSync.userCollections);
-    }
-
-    // get password
-    password = getSyncEncryptPassword(password, _.get(options, 'remotingContext.req.authData.credentials'), autoEncrypt);
-
-    // create export log entry
-    app.models.databaseExportLog
-      .create({
-        syncClientId: _.get(options, 'remotingContext.req.authData.client.credentials.clientId', `webUser: ${_.get(options, 'remotingContext.req.authData.user.id', 'unavailable')}`),
-        actionStartDate: new Date(),
-        status: 'LNG_SYNC_STATUS_IN_PROGRESS',
-        outbreakIDs: exportedOutbreakIDs
-      }, options)
-      .then(function (exportLogEntry) {
-        if (!asynchronous) {
-          Sync.exportDatabase(
-            filter,
-            collections,
-            {
-              password: password,
-              chunkSize: chunkSize,
-              exportEmptyCollections: false
-            },
-            (err, fileName) => {
-              // send the done function as the response needs to be returned
-              exportCallback(err, fileName, exportLogEntry, options, done);
-            });
-        } else {
-          // export is done asynchronous
-          // send response; don't wait for export
-          done(null, exportLogEntry.id);
-
-          // export the DB
-          Sync.exportDatabase(
-            filter,
-            collections,
-            {
-              password: password,
-              chunkSize: chunkSize,
-              exportEmptyCollections: false
-            },
-            (err, fileName) => {
-              // don't send the done function as the response was already sent
-              exportCallback(err, fileName, exportLogEntry, options);
-            });
+          // keep exportedOutbreakIDs data
+          exportedOutbreakIDs = allowedOutbreakIDs;
         }
+
+        // create list of exported collections depending on different filters
+        let collections;
+
+        // get exportType filter
+        let exportTypeFilter = _.get(filter, 'where.exportType');
+        if (Object.keys(dbSync.collectionsForExportTypeMap).indexOf(exportTypeFilter) !== -1) {
+          // sent exportType is valid; export assigned collections
+          // in this case the collections filter is ignored
+          collections = dbSync.collectionsForExportTypeMap[exportTypeFilter];
+        } else {
+          // check for collections filter
+          let collectionsFilter = _.get(filter, 'where.collections');
+          if (Array.isArray(collectionsFilter)) {
+            // export the received collections
+            collections = collectionsFilter;
+          } else {
+            // use mobile exportType collections by default
+            collections = dbSync.collectionsForExportTypeMap.mobile;
+          }
+        }
+
+        // get includeUsers filter to check if the user collections need to be exported
+        let includeUsersFilter = _.get(filter, 'where.includeUsers');
+        if (includeUsersFilter) {
+          collections = collections.concat(dbSync.userCollections);
+        }
+
+        // get password
+        password = getSyncEncryptPassword(password, _.get(options, 'remotingContext.req.authData.credentials'), autoEncrypt);
+
+        // create export log entry
+        return app.models.databaseExportLog
+          .create({
+            syncClientId: _.get(options, 'remotingContext.req.authData.client.credentials.clientId', `webUser: ${_.get(options, 'remotingContext.req.authData.user.id', 'unavailable')}`),
+            actionStartDate: new Date(),
+            status: 'LNG_SYNC_STATUS_IN_PROGRESS',
+            outbreakIDs: exportedOutbreakIDs
+          }, options)
+          .then(function (exportLogEntry) {
+            if (!asynchronous) {
+              Sync.exportDatabase(
+                filter,
+                collections,
+                {
+                  password: password,
+                  chunkSize: chunkSize,
+                  exportEmptyCollections: false
+                },
+                (err, fileName) => {
+                  // send the done function as the response needs to be returned
+                  exportCallback(err, fileName, exportLogEntry, options, done);
+                });
+            } else {
+              // export is done asynchronous
+              // send response; don't wait for export
+              done(null, exportLogEntry.id);
+
+              // export the DB
+              Sync.exportDatabase(
+                filter,
+                collections,
+                {
+                  password: password,
+                  chunkSize: chunkSize,
+                  exportEmptyCollections: false
+                },
+                (err, fileName) => {
+                  // don't send the done function as the response was already sent
+                  exportCallback(err, fileName, exportLogEntry, options);
+                });
+            }
+          });
       })
       .catch(done);
   }
@@ -240,11 +326,12 @@ module.exports = function (Sync) {
    * @param filter
    * @param password Encryption password
    * @param autoEncrypt Auto Encrypt
+   * @param userEmail String; User email; used for filtering data based on user's teams locations
    * @param options Options from request
    * @param done
    */
-  Sync.getDatabaseSnapshot = function (filter, password, autoEncrypt, options, done) {
-    getDatabaseSnapshot(filter, false, password, autoEncrypt, null, options, done);
+  Sync.getDatabaseSnapshot = function (filter, password, autoEncrypt, userEmail, options, done) {
+    getDatabaseSnapshot(filter, false, password, autoEncrypt, null, userEmail, options, done);
   };
 
   /**
@@ -261,11 +348,12 @@ module.exports = function (Sync) {
    * @param filter
    * @param password Encryption password
    * @param autoEncrypt Auto Encrypt
+   * @param userEmail String; User email; used for filtering data based on user's teams locations
    * @param options Options from request
    * @param done
    */
-  Sync.getDatabaseSnapshotAsynchronous = function (filter, password, autoEncrypt, options, done) {
-    getDatabaseSnapshot(filter, true, password, autoEncrypt, null, options, done);
+  Sync.getDatabaseSnapshotAsynchronous = function (filter, password, autoEncrypt, userEmail, options, done) {
+    getDatabaseSnapshot(filter, true, password, autoEncrypt, null, userEmail, options, done);
   };
 
   /**
@@ -283,10 +371,11 @@ module.exports = function (Sync) {
    * @param autoEncrypt Auto Encrypt
    * @param chunkSize Number of elements to be included in an archive. Default: 10000
    * @param data Object; Can contain languageTokens array; if present only those language tokens and the reference data related ones will be exported
+   * @param userEmail String; User email; used for filtering data based on user's teams locations
    * @param options Options from request
    * @param done
    */
-  Sync.getDatabaseSnapshotForMobile = function (filter, password, autoEncrypt, chunkSize, data, options, done) {
+  Sync.getDatabaseSnapshotForMobile = function (filter, password, autoEncrypt, chunkSize, data, userEmail, options, done) {
     // check for data.languageTokens; if present, update filter
     if (Array.isArray(data.languageTokens)) {
       filter = filter || {};
@@ -294,7 +383,7 @@ module.exports = function (Sync) {
       // add languageTokens filter; will be further processed before it reaches DB
       filter.where.languageTokens = data.languageTokens;
     }
-    getDatabaseSnapshot(filter, false, password, autoEncrypt, chunkSize, options, done);
+    getDatabaseSnapshot(filter, false, password, autoEncrypt, chunkSize, userEmail, options, done);
   };
 
   /**

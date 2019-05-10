@@ -229,39 +229,150 @@ const worker = {
           // if this is not true, do not pack the main archive
           options.hasDataToExport = false;
 
-          async
-            .series(
-              Object.keys(collections).map((collectionName) => {
-                return (callback) => {
-                  // get mongoDB filter that will be sent; for some collections we might send additional filters
-                  let mongoDBFilter = dbSync.collectionsFilterMap[collectionName] ? dbSync.collectionsFilterMap[collectionName](collectionName, customFilter, filter) : customFilter;
-
-                  logger.debug(`Exporting collection: ${collectionName}`);
-
-                  // export collection
-                  exportCollectionInBatches(dbConnection, collections[collectionName], collectionName, mongoDBFilter, options.chunkSize || 10000, tmpDirName, archivesDirName, options, callback);
-                };
-              }),
-              (err) => {
-                if (err) {
-                  return reject(err);
+          // check for filter locationsIds and filter teamIds; both of none will be present
+          // when present we need to filter persons and all person related data based on location
+          // initialize filter data gathering promise
+          let filterDataGathering = Promise.resolve();
+          if (filter.where.locationsIds && filter.where.teamsIds) {
+            // get person IDs for the location
+            filterDataGathering = dbConnection
+              .collection(dbSync.collectionsMap.person)
+              .find({
+                '$or': [{
+                  addresses: {
+                    '$elemMatch': {
+                      typeId: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
+                      locationId: {
+                        '$in': filter.where.locationsIds
+                      }
+                    }
+                  }
+                }, {
+                  'address.typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
+                  'address.locationId': {
+                    '$in': filter.where.locationsIds
+                  }
+                }]
+              }, {
+                projection: {
+                  _id: 1,
+                  type: 1
                 }
+              })
+              .toArray()
+              .then(function (persons) {
+                // loop through the personsIds to get contactIds/caseIds/eventIds
+                let contactsIds = [];
+                let casesIds = [];
+                let eventsIds = [];
+                let personsIds = [];
+                persons.forEach(function (person) {
+                  switch (person.type) {
+                    case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT':
+                      contactsIds.push(person._id);
+                      break;
+                    case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
+                      casesIds.push(person._id);
+                      break;
+                    case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT':
+                      eventsIds.push(person._id);
+                      break;
+                    default:
+                      break;
+                  }
+                  personsIds.push(person.id);
+                });
 
-                // stop with error if there is no collection with data
-                if (!options.hasDataToExport) {
-                  return reject({
-                    code: 'NO-DATA'
-                  });
-                }
+                // cache IDs on filter for future usage
+                filter.where.contactsIds = contactsIds;
+                filter.where.casesIds = casesIds;
+                filter.where.eventsIds = eventsIds;
+                filter.where.personsIds = personsIds;
 
-                // archive file name
-                let archiveName = `${tmpDirName}/../snapshot_${Moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+                // get contacts relationships IDs in order to get related cases IDs; there might be cases not already found (in other locations)
+                return dbConnection
+                  .collection(dbSync.collectionsMap.relationship)
+                  .find({
+                    'persons.id': {
+                      '$in': contactsIds
+                    }
+                  })
+                  .toArray();
+              })
+              .then(function (relationships) {
+                // loop through the relationships to get the IDs and the cases/events IDs
+                let relationshipsIds = [];
+                let casesIds = [];
+                let eventsIds = [];
+                let personsIds = [];
 
-                createZipArchive(archivesDirName, archiveName, logger)
-                  .then(resolve)
-                  .catch(reject);
-              }
-            );
+                relationships.forEach(function (relationship) {
+                  // cache relationship ID
+                  relationshipsIds.push(relationship._id);
+                  // get the source person ID as the target is the contact
+                  let source = relationship.persons.filter(person => person.source === true)[0];
+                  // cache IDs
+                  personsIds.push(source.id);
+                  if (source.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
+                    casesIds.push(source.id);
+                  } else {
+                    eventsIds.push(source.id);
+                  }
+                });
+
+                // cache IDs on the filter
+                filter.where.relationshipsIds = relationshipsIds;
+                // get all unique personsIds
+                personsIds = personsIds.concat(filter.where.personsIds);
+                filter.where.personsIds = [...new Set(personsIds)];
+                // get all unique casesIds
+                casesIds = casesIds.concat(filter.where.casesIds);
+                filter.where.casesIds = [...new Set(casesIds)];
+                // get all unique eventsIds
+                eventsIds = eventsIds.concat(filter.where.eventsIds);
+                filter.where.eventsIds = [...new Set(eventsIds)];
+              });
+          }
+
+          // run data gathering at first
+          filterDataGathering
+            .then(function () {
+              // loop through all the collections and get the data
+              async
+                .series(
+                  Object.keys(collections).map((collectionName) => {
+                    return (callback) => {
+                      // get mongoDB filter that will be sent; for some collections we might send additional filters
+                      let mongoDBFilter = dbSync.collectionsFilterMap[collectionName] ? dbSync.collectionsFilterMap[collectionName](collectionName, customFilter, filter) : customFilter;
+
+                      logger.debug(`Exporting collection: ${collectionName}`);
+
+                      // export collection
+                      exportCollectionInBatches(dbConnection, collections[collectionName], collectionName, mongoDBFilter, options.chunkSize || 10000, tmpDirName, archivesDirName, options, callback);
+                    };
+                  }),
+                  (err) => {
+                    if (err) {
+                      return reject(err);
+                    }
+
+                    // stop with error if there is no collection with data
+                    if (!options.hasDataToExport) {
+                      return reject({
+                        code: 'NO-DATA'
+                      });
+                    }
+
+                    // archive file name
+                    let archiveName = `${tmpDirName}/../snapshot_${Moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+
+                    createZipArchive(archivesDirName, archiveName, logger)
+                      .then(resolve)
+                      .catch(reject);
+                  }
+                );
+            })
+            .catch(reject);
         });
       });
   },
