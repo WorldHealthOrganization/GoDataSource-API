@@ -2576,7 +2576,7 @@
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_ADDRESS_MULTIPLE_USUAL_PLACE_OF_RESIDENCE": "Échec d'importation de l'enregistrement {{recordNo}} car il y a plusieurs adresses usuelles",
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_ADDRESS_MUST_HAVE_USUAL_PLACE_OF_RESIDENCE": "Impossible d'importer l'enregistrement {{recordNo}} car l'adresse doit avoir un lieu de résidence",
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_ADDRESS_PREVIOUS_PLACE_OF_RESIDENCE_MUST_HAVE_DATE": "Échec de l'importation de l'enregistrement {{recordNo}} car l'adresse précédente doit avoir une date.",
-      "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_INVALID_VISUAL_ID_MASK": "Échec d'importation de l'enregistrement {{recordNo}} en raison d'un masque d'identifiant de cas invalide d'épidémie",
+      "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_INVALID_VISUAL_ID_MASK": "Échec d'importation de l'enregistrement {{recordNo}} en raison d'un masque d'identifiant invalide d'épidémie",
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_NOT_IMPORTED": "Échec de l'enregistrement de l'enregistrement {{recordNo}} à cause de: {{fields}}",
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_NOT_IMPORTED_DUPLICATE": "Échec de l'importation de l'enregistreur car il s'agit d'un doublon",
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_NOT_IMPORTED_GENERAL": "Échec de l'importation de l'enregistrement {{recordNo}}: {{message}}",

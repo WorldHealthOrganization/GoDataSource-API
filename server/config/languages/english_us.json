@@ -2576,7 +2576,7 @@
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_ADDRESS_MULTIPLE_USUAL_PLACE_OF_RESIDENCE": "Failed to import record {{recordNo}} because there are multiple addresses specified as Current Address",
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_ADDRESS_MUST_HAVE_USUAL_PLACE_OF_RESIDENCE": "Failed to import record {{recordNo}} because address must be specified as a Current Address",
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_ADDRESS_PREVIOUS_PLACE_OF_RESIDENCE_MUST_HAVE_DATE": "Failed to import record {{recordNo}} because previous address should have date",
-      "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_INVALID_VISUAL_ID_MASK": "Failed to import record {{recordNo}} because it does not match the outbreak Case ID mask",
+      "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_INVALID_VISUAL_ID_MASK": "Failed to import record {{recordNo}} because it does not match the outbreak mask",
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_NOT_IMPORTED": "Failed to import record {{recordNo}} because of: {{fields}}",
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_NOT_IMPORTED_DUPLICATE": "Failed to import record {{recordNo}} because it is a duplicate",
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_NOT_IMPORTED_GENERAL": "Failed to import record {{recordNo}}: {{message}}",

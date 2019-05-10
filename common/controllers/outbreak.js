@@ -4362,6 +4362,11 @@ module.exports = function (Outbreak) {
                 caseData.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToNewFormat(caseData.questionnaireAnswers);
               }
 
+              // sanitize visual ID
+              if (caseData.visualId) {
+                caseData.visualId = app.models.person.sanitizeVisualId(caseData.visualId);
+              }
+
               // sync the case
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.case, caseData, options)
                 .then(function (result) {
@@ -4449,10 +4454,12 @@ module.exports = function (Outbreak) {
               const relationshipData = app.utils.helpers.convertBooleanProperties(
                 app.models.relationship,
                 app.utils.helpers.extractImportableFields(app.models.relationship, recordData.relationship));
+
               // extract contact data
               const contactData = app.utils.helpers.convertBooleanProperties(
                 app.models.contact,
                 app.utils.helpers.extractImportableFields(app.models.contact, recordData));
+
               // set outbreak ids
               contactData.outbreakId = self.id;
               relationshipData.outbreakId = self.id;
@@ -4463,6 +4470,11 @@ module.exports = function (Outbreak) {
                 contactData.addresses = addresses;
               }
 
+              // sanitize visual ID
+              if (contactData.visualId) {
+                contactData.visualId = app.models.person.sanitizeVisualId(contactData.visualId);
+              }
+
               // sync the contact
               return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.contact, contactData, options)
                 .then(function (syncResult) {
@@ -4470,7 +4482,7 @@ module.exports = function (Outbreak) {
                   // promisify next step
                   return new Promise(function (resolve, reject) {
                     // normalize people
-                    Outbreak.helpers.validateAndNormalizePeople(contactRecord.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', relationshipData, true, function (error) {
+                    Outbreak.helpers.validateAndNormalizePeople(self.id, contactRecord.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', relationshipData, true, function (error) {
                       if (error) {
                         // delete contact since contact was created without an error while relationship failed
                         return app.models.contact.destroyById(

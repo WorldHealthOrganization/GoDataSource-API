@@ -1507,4 +1507,14 @@ module.exports = function (Person) {
       })
       .catch(callback);
   };
+
+  /**
+   * Replace system visual ID system values
+   * @param visualId
+   */
+  Person.sanitizeVisualId = (visualId) => {
+    return !visualId ? visualId : visualId
+      .replace(/YYYY/g, moment().format('YYYY'))
+      .replace(/\*/g, '');
+  };
 };

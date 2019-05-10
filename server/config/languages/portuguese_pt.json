@@ -2576,7 +2576,7 @@
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_ADDRESS_MULTIPLE_USUAL_PLACE_OF_RESIDENCE": "Falha ao importar o registro {{recordNo}} porque há vários locais de endereços comuns",
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_ADDRESS_MUST_HAVE_USUAL_PLACE_OF_RESIDENCE": "Falha ao importar registro {{recordNo}} porque o endereço deve ter um lugar de residência",
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_ADDRESS_PREVIOUS_PLACE_OF_RESIDENCE_MUST_HAVE_DATE": "Falha ao importar registro {{recordNo}} porque o endereço anterior deveria ter data",
-      "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_INVALID_VISUAL_ID_MASK": "Falha ao importar registro {{recordNo}} por causa da máscara do identificador do surto",
+      "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_INVALID_VISUAL_ID_MASK": "Falha ao importar registro {{recordNo}} da máscara do identificador do surto",
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_NOT_IMPORTED": "não conseguiu registro de importação {{recordNo}} devido a: {{fields}}",
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_NOT_IMPORTED_DUPLICATE": "Falha ao importar o registro {{recordNo}} porque está duplicado",
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_NOT_IMPORTED_GENERAL": "Falha ao importar o registro {{recordNo}}: {{message}}",
