@@ -458,14 +458,18 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
               if (displayVertical) {
                 doc.moveDown();
               } else {
-                // reset X  axis if last answer did break the line
-                if (!displayVertical && (doc.y - answerY > 10)) {
-                  answerXMargin = questionMargin;
-                  doc.moveDown(0.5);
-                } else {
-                  // horizontal gap between each answers
-                  answerXMargin = horizontalAnswerX + 10;
-                }
+                // horizontal gap between each answers
+                answerXMargin = horizontalAnswerX + 10;
+              }
+            }
+
+            let labelWidth = doc.widthOfString(answer.label);
+
+            if (!displayVertical) {
+              const computedWidth = answerXMargin + labelWidth + 45;
+              if (computedWidth > 500) {
+                answerXMargin = questionMargin;
+                doc.moveDown(1.5);
               }
             }
 
@@ -485,9 +489,8 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
               doc.rect(answerXMargin, rectY, 10, 10).stroke();
             }
 
-            // display text on the right side of the checkbox
             doc.text(answer.label, answerXMargin + 15, rectY);
-            horizontalAnswerX = answerXMargin + 15 + doc.widthOfString(answer.label);
+            horizontalAnswerX = answerXMargin + labelWidth + 15;
             doc.moveUp();
 
             if (displayVertical) {
