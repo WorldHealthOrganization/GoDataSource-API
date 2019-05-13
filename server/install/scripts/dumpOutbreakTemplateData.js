@@ -67,6 +67,37 @@ function run(callback) {
             tokensToTranslate.push(
               item.disease
             );
+
+            // push questionnaire translations
+            const pushQuestionsTranslations = (questions) => {
+              (questions || []).forEach((question) => {
+                // question tokens
+                tokensToTranslate.push(
+                  question.text,
+                  question.category,
+                  question.answerType,
+                  question.answersDisplay
+                );
+
+                // answer tokens
+                (question.answers || []).forEach((answer) => {
+                  // answer tokens
+                  tokensToTranslate.push(
+                    answer.label
+                  );
+
+                  // answer questions
+                  if (answer.additionalQuestions) {
+                    pushQuestionsTranslations(answer.additionalQuestions);
+                  }
+                });
+              });
+            };
+
+            // questionnaire translations
+            pushQuestionsTranslations(item.caseInvestigationTemplate);
+            pushQuestionsTranslations(item.contactFollowUpTemplate);
+            pushQuestionsTranslations(item.labResultsTemplate);
           });
 
           // next
