@@ -202,7 +202,7 @@ function addFollowupMongoFilter(collectionName, baseFilter, filter) {
       }
     }, {
       teamId: null
-    }]
+    }];
   }
 
   return result;
