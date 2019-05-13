@@ -190,7 +190,7 @@ function addFollowupMongoFilter(collectionName, baseFilter, filter) {
 
   // check for contactsIds and teamsIDs to filter
   let contactsIds = _.get(filter, 'where.contactsIds');
-  let teamsIDs = _.get(filter, 'where.teamsIDs');
+  let teamsIDs = _.get(filter, 'where.teamsIds');
   if (contactsIds && teamsIDs) {
     result.personId = {
       '$in': contactsIds

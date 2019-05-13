@@ -280,7 +280,7 @@ const worker = {
                     default:
                       break;
                   }
-                  personsIds.push(person.id);
+                  personsIds.push(person._id);
                 });
 
                 // cache IDs on filter for future usage
