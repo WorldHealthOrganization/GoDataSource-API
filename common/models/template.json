@@ -20,6 +20,9 @@
     "frequencyOfFollowUp": {
       "type": "number"
     },
+    "frequencyOfFollowUpPerDay": {
+      "type": "number"
+    },
     "noDaysAmongContacts": {
       "type": "number",
       "description": "Number of days used to calculate the proportion of new cases detected among known contacts"
@@ -35,6 +38,9 @@
     "noLessContacts": {
       "type": "number",
       "description": "Number of contacts used to determine the proportion of cases with less than X contacts"
+    },
+    "longPeriodsBetweenCaseOnset": {
+      "type": "number"
     },
     "noDaysNewContacts": {
       "type": "number",

@@ -16,7 +16,8 @@
     "install-script": "node ./server/install/install.js install-script",
     "restore-backup": "node ./server/scripts/restoreBackup.js",
     "dump-help-data": "node ./server/install/install.js dump-help-data",
-    "dump-language-data": "node ./server/install/install.js dump-language-data"
+    "dump-language-data": "node ./server/install/install.js dump-language-data",
+    "dump-outbreak-template-data": "node ./server/install/install.js dump-outbreak-template-data"
   },
   "dependencies": {
     "@google/maps": "0.5.5",
