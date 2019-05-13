@@ -1516,10 +1516,12 @@
       "name": "Ebola virus and Marburg virus disease",
       "disease": null,
       "periodOfFollowup": 21,
+      "frequencyOfFollowUpPerDay": "1",
       "noDaysAmongContacts": 1,
       "noDaysInChains": 1,
       "noDaysNotSeen": 3,
       "noLessContacts": 5,
+      "longPeriodsBetweenCaseOnset": "12",
       "noDaysNewContacts": 1,
       "caseInvestigationTemplate": [
         {
@@ -3110,10 +3112,12 @@
       "name": "MERS-CoV",
       "disease": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MIDDLE_EASI_RESPIRATORY_SYNDROME_CORONAVIRUS_MERS_CO_V",
       "periodOfFollowup": 14,
+      "frequencyOfFollowUpPerDay": "1",
       "noDaysAmongContacts": 1,
       "noDaysInChains": 1,
       "noDaysNotSeen": 3,
       "noLessContacts": 5,
+      "longPeriodsBetweenCaseOnset": "14",
       "noDaysNewContacts": 1,
       "caseInvestigationTemplate": [
         {
