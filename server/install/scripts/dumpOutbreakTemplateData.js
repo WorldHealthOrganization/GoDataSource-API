@@ -2,8 +2,7 @@
 
 const app = require('../../server');
 const languageToken = app.models.languageToken;
-const helpCategory = app.models.helpCategory;
-const helpItem = app.models.helpItem;
+const outbreakTemplate = app.models.template;
 const fs = require('fs');
 
 /**
@@ -27,103 +26,57 @@ function run(callback) {
         languageIds.push(languageData.id);
       });
 
-      // retrieve category items
-      helpCategory
+      // retrieve items
+      outbreakTemplate
         .find({
           order: [
-            'order asc'
+            'name asc'
           ]
         })
         .catch(callback)
 
-        // retrieve help categories
-        .then((helpCategories) => {
-          // retrieve help categories
+        // retrieved items
+        .then((outbreakTemplates) => {
+          // retrieve language data
+          const tokensToTranslate = [];
           const exportData = {
             translations: {},
-            helpCategories: []
+            outbreakTemplates: []
           };
-          const categoryDataMap = {};
-          const tokensToTranslate = [];
 
-          // go through categories and export needed data
-          (helpCategories || []).forEach((helpCategory) => {
-            // push category
-            exportData.helpCategories.push({
-              id: helpCategory.id,
-              name: helpCategory.name,
-              order: helpCategory.order,
-              description: helpCategory.description,
-              items: []
+          // go through items and export needed data
+          (outbreakTemplates || []).forEach((item) => {
+            // push item
+            exportData.outbreakTemplates.push({
+              id: item.id,
+              name: item.name,
+              disease: item.disease,
+              periodOfFollowup: item.periodOfFollowup,
+              frequencyOfFollowUp: item.frequencyOfFollowUp,
+              noDaysAmongContacts: item.noDaysAmongContacts,
+              noDaysInChains: item.noDaysInChains,
+              noDaysNotSeen: item.noDaysNotSeen,
+              noLessContacts: item.noLessContacts,
+              noDaysNewContacts: item.noDaysNewContacts,
+              caseInvestigationTemplate: item.caseInvestigationTemplate,
+              contactFollowUpTemplate: item.contactFollowUpTemplate,
+              labResultsTemplate: item.labResultsTemplate
             });
 
             // translate tokens
             tokensToTranslate.push(
-              helpCategory.name,
-              helpCategory.description
+              item.disease
             );
-
-            // map category
-            categoryDataMap[helpCategory.id] = exportData.helpCategories.length - 1;
           });
 
           // next
           return Promise.resolve({
             exportData: exportData,
-            categoryDataMap: categoryDataMap,
             tokensToTranslate: tokensToTranslate
           });
         })
 
-        // retrieve help items
-        .then((data) => {
-          // data
-          const exportData = data.exportData;
-          const categoryDataMap = data.categoryDataMap;
-          const tokensToTranslate = data.tokensToTranslate;
-
-          // get items
-          return new Promise((resolve, reject) => {
-            // retrieve category items
-            helpItem
-              .find({
-                where: {
-                  categoryId: {
-                    inq: Object.keys(categoryDataMap)
-                  }
-                },
-                order: [
-                  'order asc'
-                ]
-              })
-              .catch(reject)
-              .then((helpItems) => {
-                // go through help items and export needed data
-                (helpItems || []).forEach((helpItem) => {
-                  // push item to parent category
-                  exportData.helpCategories[categoryDataMap[helpItem.categoryId]].items.push({
-                    id: helpItem.id,
-                    title: helpItem.title,
-                    content: helpItem.content,
-                    comment: helpItem.comment,
-                    order: helpItem.order,
-                    page: helpItem.page
-                  });
-
-                  // translate tokens
-                  tokensToTranslate.push(
-                    helpItem.title,
-                    helpItem.content
-                  );
-                });
-
-                // finished
-                resolve(data);
-              });
-          });
-        })
-
-        // translate categories & items
+        // translate items
         .then((data) => {
           // retrieve tokens
           const exportData = data.exportData;
@@ -176,7 +129,7 @@ function run(callback) {
               }
 
               // finished
-              console.log('Dumped Help Data');
+              console.log('Dumped Outbreak Template Data');
               callback();
             }
           );

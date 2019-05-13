@@ -5,7 +5,7 @@ const _ = require('lodash');
 const args = process.argv;
 const path = require('path');
 // keep a list of supported install arguments
-const supportedArguments = ['init-database', 'migrate-database', 'reset-admin-password', 'install-script', 'dump-help-data', 'dump-language-data'];
+const supportedArguments = ['init-database', 'migrate-database', 'reset-admin-password', 'install-script', 'dump-help-data', 'dump-language-data', 'dump-outbreak-template-data'];
 // keep a list of functions that will be run
 const runFunctions = [];
 // define a list of supported routines
@@ -93,6 +93,25 @@ const routines = {
     console.log('Dumping Language Data...');
     [
       require('./scripts/dumpLanguageData')
+    ].forEach(function (installScript) {
+      runFunctions.push(installScript(resolvedPath));
+    });
+  },
+  dumpOutbreakTemplateData: function () {
+    // need export file
+    let exportPath = /export=(.+)(?:\s+|$)/.exec(args.toString());
+    if (!exportPath) {
+      return console.error('No valid file path. Use -- export=<filePath> to specify a file where to export data');
+    }
+    exportPath = exportPath.pop();
+
+    // check if we have access to write to this file
+    const resolvedPath = path.resolve(exportPath);
+
+    // dump data
+    console.log('Dumping Outbreak Template Data...');
+    [
+      require('./scripts/dumpOutbreakTemplateData')
     ].forEach(function (installScript) {
       runFunctions.push(installScript(resolvedPath));
     });
