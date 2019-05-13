@@ -467,6 +467,8 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
 
             if (!displayVertical) {
               const computedWidth = answerXMargin + labelWidth + 45;
+              // check that we don't reach the maximum width of the document
+              // otherwise pdfkit library just breaks when executing .text()
               if (computedWidth > 500) {
                 answerXMargin = questionMargin;
                 doc.moveDown(1.5);
