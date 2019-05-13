@@ -416,6 +416,7 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
       // answers type are written differently into the doc
       switch (item.answerType) {
         default:
+          doc.moveDown(0.5);
           if (withData) {
             if (item.value) {
               doc.text('Answer: ' + item.value, questionMargin);
@@ -426,6 +427,7 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
           } else {
             doc.text(`Answer: ${'_'.repeat(options.underlineCount)}`, questionMargin);
           }
+          doc.moveDown(0.5);
           break;
         // File uploads are not handled when printing a pdf
         case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD':
@@ -443,20 +445,26 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
 
           // answers of type checkbox should be moved on line below
           // for text answers we use doc.text() that already moves one line below
-          doc.moveDown();
+          if (displayVertical) {
+            doc.moveDown();
+          } else {
+            doc.moveDown(0.5);
+          }
+
+          let horizontalAnswerX = doc.x;
 
           item.answers.forEach((answer) => {
             if (!firstAnswer) {
               if (displayVertical) {
                 doc.moveDown();
               } else {
-                // reset X axis if last answer did break the line
+                // reset X  axis if last answer did break the line
                 if (!displayVertical && (doc.y - answerY > 10)) {
                   answerXMargin = questionMargin;
                   doc.moveDown(0.5);
                 } else {
                   // horizontal gap between each answers
-                  answerXMargin = doc.x + 25;
+                  answerXMargin = horizontalAnswerX + 10;
                 }
               }
             }
@@ -479,6 +487,7 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
 
             // display text on the right side of the checkbox
             doc.text(answer.label, answerXMargin + 15, rectY);
+            horizontalAnswerX = answerXMargin + 15 + doc.widthOfString(answer.label);
             doc.moveUp();
 
             if (displayVertical) {
@@ -487,6 +496,7 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
 
             // handle additional questions
             if (answer.additionalQuestions.length) {
+              doc.moveDown(0.5);
               addQuestions(answer.additionalQuestions, questionMargin, level + 1);
               doc.moveDown(0.5);
             }
@@ -498,6 +508,8 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
           // horizontal answers gap, after all the answers are displayed
           if (!displayVertical) {
             doc.moveDown();
+          } else {
+            doc.moveDown(0.5);
           }
 
           break;
