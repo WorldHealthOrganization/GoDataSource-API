@@ -3,9 +3,11 @@
 const app = require('../../server');
 const languageToken = app.models.languageToken;
 const outbreakTemplate = app.models.template;
+const referenceData = app.models.referenceData;
 const defaultOutbreakTemplateData = require('./defaultOutbreakTemplateData.json');
 const common = require('./_common');
 const async = require('async');
+const _ = require('lodash');
 
 // initialize action options; set _init, _sync flags to prevent execution of some after save scripts
 let options = {
@@ -59,7 +61,6 @@ function run(callback) {
           // finished
           app.logger.debug(`Translation is the same for ${langTokenModel.token} => ${langTokenModel.languageId}`);
         } else {
-app.logger.debug(`U: ${langTokenModel.token}`);
           (function (langToken, newTranslation) {
             createUpdateLanguageTokensJob.push((cb) => {
               // display log
@@ -84,280 +85,283 @@ app.logger.debug(`U: ${langTokenModel.token}`);
       // create new language tokens
       Object.keys(defaultOutbreakTemplateDataJson.translations || {})
         .forEach((token) => {
-app.logger.debug(`U: ${token}`);
-          // // go through each language token
-          // Object.keys(defaultHelpDataJson.translations[token] || {})
-          //   .forEach((languageId) => {
-          //     (function (newToken, newLanguageId, newTranslation) {
-          //       // add to create list
-          //       createUpdateLanguageTokensJob.push((cb) => {
-          //         // display log
-          //         app.logger.debug(`Creating token ${newToken} => ${newLanguageId} ...`);
-          //
-          //         // create token
-          //         languageToken
-          //           .create(Object.assign({
-          //             token: newToken,
-          //             languageId: newLanguageId,
-          //             translation: newTranslation
-          //           }, common.install.timestamps), options)
-          //           .catch(cb)
-          //           .then(() => {
-          //             // finished
-          //             app.logger.debug(`Created token ${newToken} => ${newLanguageId}`);
-          //             cb();
-          //           });
-          //       });
-          //     })(token, languageId, defaultHelpDataJson.translations[token][languageId]);
-          //   });
+          // go through each language token
+          Object.keys(defaultOutbreakTemplateDataJson.translations[token] || {})
+            .forEach((languageId) => {
+              (function (newToken, newLanguageId, newTranslation) {
+                // add to create list
+                createUpdateLanguageTokensJob.push((cb) => {
+                  // display log
+                  app.logger.debug(`Creating token ${newToken} => ${newLanguageId} ...`);
+
+                  // create token
+                  languageToken
+                    .create(Object.assign({
+                      token: newToken,
+                      languageId: newLanguageId,
+                      translation: newTranslation
+                    }, common.install.timestamps), options)
+                    .catch(cb)
+                    .then(() => {
+                      // finished
+                      app.logger.debug(`Created token ${newToken} => ${newLanguageId}`);
+                      cb();
+                    });
+                });
+              })(token, languageId, defaultOutbreakTemplateDataJson.translations[token][languageId]);
+            });
         });
 
-      return [];
-      // // execute jobs
-      // return new Promise((resolve, reject) => {
-      //   // wait for all operations to be done
-      //   async.parallelLimit(createUpdateLanguageTokensJob, 10, function (error) {
-      //     // error
-      //     if (error) {
-      //       return reject(error);
-      //     }
-      //
-      //     // finished
-      //     resolve();
-      //   });
-      // });
+      // execute jobs
+      return new Promise((resolve, reject) => {
+        // wait for all operations to be done
+        async.parallelLimit(createUpdateLanguageTokensJob, 10, function (error) {
+          // error
+          if (error) {
+            return reject(error);
+          }
+
+          // finished
+          resolve();
+        });
+      });
     })
 
-    // // create help categories
-    // .then(() => {
-    //   // execute jobs
-    //   return new Promise((resolve, reject) => {
-    //     // map categories for easy find
-    //     const categoriesMap = {};
-    //     (defaultHelpDataJson.helpCategories || [])
-    //       .forEach((category) => {
-    //         categoriesMap[category.id] = category;
-    //       });
-    //
-    //     // determine which help categories exist already
-    //     const createUpdateCategoriesJobs = [];
-    //     const categoryIds = Object.keys(categoriesMap);
-    //     const existingCategories = {};
-    //     helpCategory
-    //       .find({
-    //         where: {
-    //           id: {
-    //             inq: categoryIds
-    //           }
-    //         }
-    //       })
-    //       .catch(reject)
-    //       .then((categoryModels) => {
-    //         (categoryModels || []).forEach((categoryModel) => {
-    //           // add to list of existing categories so we can exclude it from creation
-    //           existingCategories[categoryModel.id] = true;
-    //
-    //           // determine if we need to update category
-    //           const fileCategory = categoriesMap[categoryModel.id];
-    //           if (
-    //             categoryModel.name === fileCategory.name &&
-    //             categoryModel.order === fileCategory.order &&
-    //             categoryModel.description === fileCategory.description
-    //           ) {
-    //             // finished
-    //             app.logger.debug(`No need to update category ${categoryModel.id}`);
-    //           } else {
-    //             // update category
-    //             (function (updateCategoryModel, data) {
-    //               // update category
-    //               createUpdateCategoriesJobs.push((cb) => {
-    //                 // display log
-    //                 app.logger.debug(`Updating category ${updateCategoryModel.id} ...`);
-    //
-    //                 // update
-    //                 updateCategoryModel
-    //                   .updateAttributes({
-    //                     name: data.name,
-    //                     order: data.order,
-    //                     description: data.description
-    //                   }, options)
-    //                   .catch(cb)
-    //                   .then(() => {
-    //                     // finished
-    //                     app.logger.debug(`Updated category ${updateCategoryModel.id}`);
-    //                     cb();
-    //                   });
-    //               });
-    //             })(categoryModel, fileCategory);
-    //           }
-    //         });
-    //
-    //         // create categories that weren't updated
-    //         (defaultHelpDataJson.helpCategories || []).forEach((category) => {
-    //           // don't create category if we've updated this one
-    //           if (existingCategories[category.id]) {
-    //             return;
-    //           }
-    //
-    //           // create category
-    //           (function (newCategory) {
-    //             // create category
-    //             createUpdateCategoriesJobs.push((cb) => {
-    //               // display log
-    //               app.logger.debug(`Creating category ${newCategory.id} ...`);
-    //
-    //               // create
-    //               helpCategory
-    //                 .create(Object.assign({
-    //                   id: newCategory.id,
-    //                   name: newCategory.name,
-    //                   order: newCategory.order,
-    //                   description: newCategory.description
-    //                 }, common.install.timestamps), options)
-    //                 .catch(cb)
-    //                 .then(() => {
-    //                   // finished
-    //                   app.logger.debug(`Created category ${newCategory.id}`);
-    //                   cb();
-    //                 });
-    //             });
-    //           })(category);
-    //         });
-    //
-    //         // wait for all operations to be done
-    //         async.parallelLimit(createUpdateCategoriesJobs, 10, function (error) {
-    //           // error
-    //           if (error) {
-    //             return reject(error);
-    //           }
-    //
-    //           // finished
-    //           resolve();
-    //         });
-    //       });
-    //   });
-    // })
-    //
-    // // create help categories items
-    // .then(() => {
-    //   // execute jobs
-    //   return new Promise((resolve, reject) => {
-    //     // map category help items for easy find
-    //     const itemMap = {};
-    //     (defaultHelpDataJson.helpCategories || [])
-    //       .forEach((category) => {
-    //         (category.items || []).forEach((item) => {
-    //           // keep category id
-    //           item.categoryId = category.id;
-    //
-    //           // map
-    //           itemMap[item.id] = item;
-    //         });
-    //       });
-    //
-    //     // determine which help category items exist already
-    //     const createUpdateCategoryItemsJobs = [];
-    //     const itemsIds = Object.keys(itemMap);
-    //     const existingHelpItems = {};
-    //     helpItem
-    //       .find({
-    //         where: {
-    //           id: {
-    //             inq: itemsIds
-    //           }
-    //         }
-    //       })
-    //       .catch(reject)
-    //       .then((helpItemModels) => {
-    //         (helpItemModels || []).forEach((helpItemModel) => {
-    //           // add to list of existing help items so we can exclude it from creation
-    //           existingHelpItems[helpItemModel.id] = true;
-    //
-    //           // determine if we need to update help item
-    //           const fileHelpItem = itemMap[helpItemModel.id];
-    //           if (
-    //             helpItemModel.title === fileHelpItem.title &&
-    //             helpItemModel.content === fileHelpItem.content &&
-    //             helpItemModel.comment === fileHelpItem.comment &&
-    //             helpItemModel.approved
-    //           ) {
-    //             // finished
-    //             app.logger.debug(`No need to update help item ${helpItemModel.id}`);
-    //           } else {
-    //             // update help item
-    //             (function (updateHelpItemModel, data) {
-    //               createUpdateCategoryItemsJobs.push((cb) => {
-    //                 // display log
-    //                 app.logger.debug(`Updating help item ${updateHelpItemModel.id} ...`);
-    //
-    //                 // update
-    //                 updateHelpItemModel
-    //                   .updateAttributes({
-    //                     title: data.title,
-    //                     content: data.content,
-    //                     comment: data.comment,
-    //                     categoryId: data.categoryId,
-    //                     order: data.order,
-    //                     approved: true
-    //                   }, options)
-    //                   .catch(cb)
-    //                   .then(() => {
-    //                     // finished
-    //                     app.logger.debug(`Updated help item ${updateHelpItemModel.id}`);
-    //                     cb();
-    //                   });
-    //               });
-    //             })(helpItemModel, fileHelpItem);
-    //           }
-    //         });
-    //
-    //         // create help items that weren't updated
-    //         (Object.values(itemMap)).forEach((helpItemData) => {
-    //           // don't create help item if we've updated this one
-    //           if (existingHelpItems[helpItemData.id]) {
-    //             return;
-    //           }
-    //
-    //           // create help item
-    //           (function (newHelpItem) {
-    //             createUpdateCategoryItemsJobs.push((cb) => {
-    //               // display log
-    //               app.logger.debug(`Creating help item ${newHelpItem.id} ...`);
-    //
-    //               // create
-    //               helpItem
-    //                 .create(Object.assign({
-    //                   id: newHelpItem.id,
-    //                   title: newHelpItem.title,
-    //                   content: newHelpItem.content,
-    //                   comment: newHelpItem.comment,
-    //                   categoryId: newHelpItem.categoryId,
-    //                   order: newHelpItem.order,
-    //                   approved: true
-    //                 }, common.install.timestamps), options)
-    //                 .catch(cb)
-    //                 .then(() => {
-    //                   // finished
-    //                   app.logger.debug(`Created help item ${newHelpItem.id}`);
-    //                   cb();
-    //                 });
-    //             });
-    //           })(helpItemData);
-    //         });
-    //
-    //         // wait for all operations to be done
-    //         async.parallelLimit(createUpdateCategoryItemsJobs, 10, function (error) {
-    //           // error
-    //           if (error) {
-    //             return reject(error);
-    //           }
-    //
-    //           // finished
-    //           resolve();
-    //         });
-    //       });
-    //   });
-    // })
+    // create reference data items
+    .then(() => {
+      // execute jobs
+      return new Promise((resolve, reject) => {
+        // nothing to do ?
+        if (_.isEmpty(defaultOutbreakTemplateDataJson.referenceData)) {
+          return resolve();
+        }
+
+        // map reference items
+        const referenceItemMap = {};
+        (defaultOutbreakTemplateDataJson.referenceData || [])
+          .forEach((item) => {
+            referenceItemMap[item.id] = item;
+          });
+
+        // determine which reference items exist already
+        const createUpdateRefItemJobs = [];
+        const existingRefItems = {};
+        referenceData
+          .find({
+            where: {
+              id: {
+                inq: Object.keys(referenceItemMap)
+              }
+            }
+          })
+          .catch(reject)
+          .then((refDataItems) => {
+            (refDataItems || []).forEach((refDataItem) => {
+              // add to list of existing items so we can exclude it from creation
+              existingRefItems[refDataItem.id] = true;
+
+              // determine if we need to update ref items
+              const fileData = referenceItemMap[refDataItem.id];
+              if (
+                refDataItem.value === fileData.value &&
+                refDataItem.description === fileData.description &&
+                refDataItem.colorCode === fileData.colorCode &&
+                refDataItem.order === fileData.order
+              ) {
+                // finished
+                app.logger.debug(`No need to update reference data item ${refDataItem.id}`);
+              } else {
+                // update item
+                (function (updateRefItem, data) {
+                  createUpdateRefItemJobs.push((cb) => {
+                    // display log
+                    app.logger.debug(`Updating reference data item ${updateRefItem.id} ...`);
+
+                    // update
+                    updateRefItem
+                      .updateAttributes({
+                        value: data.value,
+                        description: data.description,
+                        colorCode: data.colorCode,
+                        order: data.order
+                      }, options)
+                      .catch(cb)
+                      .then(() => {
+                        // finished
+                        app.logger.debug(`Updated reference data item ${updateRefItem.id}`);
+                        cb();
+                      });
+                  });
+                })(refDataItem, fileData);
+              }
+            });
+
+            // create reference data item that weren't updated
+            (defaultOutbreakTemplateDataJson.referenceData || []).forEach((fileData) => {
+              // don't create ref data item if we've updated this one
+              if (existingRefItems[fileData.id]) {
+                return;
+              }
+
+              // create ref data item
+              (function (newRefItem) {
+                createUpdateRefItemJobs.push((cb) => {
+                  // display log
+                  app.logger.debug(`Creating reference data item ${newRefItem.id} ...`);
+
+                  // create
+                  referenceData
+                    .create(Object.assign({
+                      id: newRefItem.id,
+                      categoryId: newRefItem.categoryId,
+                      value: newRefItem.value,
+                      description: newRefItem.description,
+                      colorCode: newRefItem.colorCode,
+                      order: newRefItem.order
+                    }, common.install.timestamps), options)
+                    .catch(cb)
+                    .then(() => {
+                      // finished
+                      app.logger.debug(`Created reference data item ${newRefItem.id}`);
+                      cb();
+                    });
+                });
+              })(fileData);
+            });
+
+            // wait for all operations to be done
+            async.parallelLimit(createUpdateRefItemJobs, 10, function (error) {
+              // error
+              if (error) {
+                return reject(error);
+              }
+
+              // finished
+              resolve();
+            });
+          });
+      });
+    })
+
+    // create outbreak templates
+    .then(() => {
+      // execute jobs
+      return new Promise((resolve, reject) => {
+        // nothing to do ?
+        if (_.isEmpty(defaultOutbreakTemplateDataJson.outbreakTemplates)) {
+          return resolve();
+        }
+
+        // map outbreak templates
+        const outbreakTemplatesMap = {};
+        (defaultOutbreakTemplateDataJson.outbreakTemplates || [])
+          .forEach((item) => {
+            outbreakTemplatesMap[item.id] = item;
+          });
+
+        // determine which template items exist already
+        const createUpdateItemsJobs = [];
+        const existingTemplates = {};
+        outbreakTemplate
+          .find({
+            where: {
+              id: {
+                inq: Object.keys(outbreakTemplatesMap)
+              }
+            }
+          })
+          .catch(reject)
+          .then((outbreakTemplateModels) => {
+            (outbreakTemplateModels || []).forEach((outbreakTemplateModel) => {
+              // add to list of existing items so we can exclude it from creation
+              existingTemplates[outbreakTemplateModel.id] = true;
+
+              // update item
+              const fileData = outbreakTemplatesMap[outbreakTemplateModel.id];
+              (function (updateTemplateModel, data) {
+                createUpdateItemsJobs.push((cb) => {
+                  // display log
+                  app.logger.debug(`Updating outbreak template ${outbreakTemplateModel.id} ...`);
+
+                  // update
+                  updateTemplateModel
+                    .updateAttributes({
+                      name: data.name,
+                      disease: data.disease,
+                      periodOfFollowup: data.periodOfFollowup,
+                      frequencyOfFollowUp: data.frequencyOfFollowUp,
+                      noDaysAmongContacts: data.noDaysAmongContacts,
+                      noDaysInChains: data.noDaysInChains,
+                      noDaysNotSeen: data.noDaysNotSeen,
+                      noLessContacts: data.noLessContacts,
+                      noDaysNewContacts: data.noDaysNewContacts,
+                      caseInvestigationTemplate: data.caseInvestigationTemplate,
+                      contactFollowUpTemplate: data.contactFollowUpTemplate,
+                      labResultsTemplate: data.labResultsTemplate
+                    }, options)
+                    .catch(cb)
+                    .then(() => {
+                      // finished
+                      app.logger.debug(`Updated outbreak template ${outbreakTemplateModel.id}`);
+                      cb();
+                    });
+                });
+              })(outbreakTemplateModel, fileData);
+            });
+
+            // create items that weren't updated
+            (defaultOutbreakTemplateDataJson.outbreakTemplates || []).forEach((oTemplateData) => {
+              // don't create item if we've updated this one
+              if (existingTemplates[oTemplateData.id]) {
+                return;
+              }
+
+              // create item
+              (function (newTemplateItem) {
+                createUpdateItemsJobs.push((cb) => {
+                  // display log
+                  app.logger.debug(`Creating outbreak template ${newTemplateItem.id} ...`);
+
+                  // create
+                  outbreakTemplate
+                    .create(Object.assign({
+                      id: newTemplateItem.id,
+                      name: newTemplateItem.name,
+                      disease: newTemplateItem.disease,
+                      periodOfFollowup: newTemplateItem.periodOfFollowup,
+                      frequencyOfFollowUp: newTemplateItem.frequencyOfFollowUp,
+                      noDaysAmongContacts: newTemplateItem.noDaysAmongContacts,
+                      noDaysInChains: newTemplateItem.noDaysInChains,
+                      noDaysNotSeen: newTemplateItem.noDaysNotSeen,
+                      noLessContacts: newTemplateItem.noLessContacts,
+                      noDaysNewContacts: newTemplateItem.noDaysNewContacts,
+                      caseInvestigationTemplate: newTemplateItem.caseInvestigationTemplate,
+                      contactFollowUpTemplate: newTemplateItem.contactFollowUpTemplate,
+                      labResultsTemplate: newTemplateItem.labResultsTemplate
+                    }, common.install.timestamps), options)
+                    .catch(cb)
+                    .then(() => {
+                      // finished
+                      app.logger.debug(`Created outbreak template ${newTemplateItem.id}`);
+                      cb();
+                    });
+                });
+              })(oTemplateData);
+            });
+
+            // wait for all operations to be done
+            async.parallelLimit(createUpdateItemsJobs, 10, function (error) {
+              // error
+              if (error) {
+                return reject(error);
+              }
+
+              // finished
+              resolve();
+            });
+          });
+      });
+    })
 
     // finished
     .then(() => {

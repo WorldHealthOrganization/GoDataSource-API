@@ -3,7 +3,9 @@
 const app = require('../../server');
 const languageToken = app.models.languageToken;
 const outbreakTemplate = app.models.template;
+const referenceData = app.models.referenceData;
 const fs = require('fs');
+const _ = require('lodash');
 
 /**
  * Run initiation
@@ -39,8 +41,10 @@ function run(callback) {
         .then((outbreakTemplates) => {
           // retrieve language data
           const tokensToTranslate = [];
+          const referenceDataToGet = {};
           const exportData = {
             translations: {},
+            referenceData: [], // question categories & diseases
             outbreakTemplates: []
           };
 
@@ -64,20 +68,32 @@ function run(callback) {
             });
 
             // translate tokens
-            tokensToTranslate.push(
-              item.disease
-            );
+            // NOTHING TO PUSH HERE
+            // - name isn't translated
+            // - disease will be handled separately
+            // tokensToTranslate.push();
+
+            // make sure we retrieve category information
+            if (item.disease) {
+              referenceDataToGet[item.disease] = true;
+            }
 
             // push questionnaire translations
             const pushQuestionsTranslations = (questions) => {
               (questions || []).forEach((question) => {
                 // question tokens
+                // no need to push the following since they should already be in the system
+                // - answerType
+                // - answersDisplay
+                // - category will be handled separately
                 tokensToTranslate.push(
-                  question.text,
-                  question.category,
-                  question.answerType,
-                  question.answersDisplay
+                  question.text
                 );
+
+                // make sure we retrieve category information
+                if (question.category) {
+                  referenceDataToGet[question.category] = true;
+                }
 
                 // answer tokens
                 (question.answers || []).forEach((answer) => {
@@ -103,7 +119,58 @@ function run(callback) {
           // next
           return Promise.resolve({
             exportData: exportData,
-            tokensToTranslate: tokensToTranslate
+            tokensToTranslate: tokensToTranslate,
+            referenceDataToGet: referenceDataToGet
+          });
+        })
+
+        // retrieve reference data ( diseases & question categories )
+        .then((data) => {
+          const exportData = data.exportData;
+          const referenceDataToGet = data.referenceDataToGet;
+          const tokensToTranslate = data.tokensToTranslate;
+          return new Promise((resolve, reject) => {
+            // nothing to retrieve ?
+            if (_.isEmpty(referenceDataToGet)) {
+              resolve(data);
+              return;
+            }
+
+            // retrieve reference data
+            referenceData
+              .find({
+                where: {
+                  id: {
+                    inq: Object.keys(referenceDataToGet)
+                  }
+                }
+              })
+              .catch(reject)
+              .then((referenceDataItems) => {
+                (referenceDataItems || []).forEach((referenceDataItem) => {
+                  // add item
+                  // - icon requires more complex logic for export / import so we will ignore ir for now...
+                  // - active will always be true if found in default items...otherwise there is no point...to have it in the default items
+                  exportData.referenceData.push({
+                    id: referenceDataItem.id,
+                    categoryId: referenceDataItem.categoryId,
+                    value: referenceDataItem.value,
+                    description: referenceDataItem.description,
+                    colorCode: referenceDataItem.colorCode,
+                    order: referenceDataItem.order
+                  });
+
+                  // translate
+                  // - category is already in the system, since these aren't editable and they can be created only by the system
+                  tokensToTranslate.push(
+                    referenceDataItem.value,
+                    referenceDataItem.description
+                  );
+                });
+
+                // finished
+                resolve(data);
+              });
           });
         })
 

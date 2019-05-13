@@ -1,16 +1,10 @@
 {
   "translations": {
-    "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_HORIZONTAL": {
-      "english_us": "Horizontal",
-      "french_fr": "Horizontal",
-      "portuguese_pt": "Horizontal",
-      "spanish_es": "Horizontal"
-    },
-    "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL": {
-      "english_us": "Vertical",
-      "french_fr": "Verticale",
-      "portuguese_pt": "Vertical",
-      "spanish_es": "Vertical"
+    "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MIDDLE_EASI_RESPIRATORY_SYNDROME_CORONAVIRUS_MERS_CO_V_DESCRIPTION": {
+      "english_us": "",
+      "french_fr": "",
+      "portuguese_pt": "",
+      "spanish_es": ""
     },
     "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MIDDLE_EASI_RESPIRATORY_SYNDROME_CORONAVIRUS_MERS_CO_V": {
       "english_us": "Middle East respiratory syndrome coronavirus (MERS-CoV)",
@@ -18,35 +12,11 @@
       "portuguese_pt": "Coronavirus da síndrome respiratória do Oriente Médio (MERS-CoV)*****",
       "spanish_es": "Coronavirus del síndrome respiratorio de Oriente Medio (MERS-CoV) *****"
     },
-    "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME": {
-      "english_us": "Date/Time",
-      "french_fr": "Date / heure",
-      "portuguese_pt": "Data hora",
-      "spanish_es": "Fecha / Hora "
-    },
-    "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT": {
-      "english_us": "Freetext",
-      "french_fr": "Texte libre",
-      "portuguese_pt": "Texto livre",
-      "spanish_es": "Texto libre"
-    },
-    "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS": {
-      "english_us": "Multiple answers",
-      "french_fr": "Réponses multiples",
-      "portuguese_pt": "Múltiplas respostas",
-      "spanish_es": "Múltiples respuestas"
-    },
-    "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_NUMERIC": {
-      "english_us": "Numeric",
-      "french_fr": "Numérique",
-      "portuguese_pt": "Numérico",
-      "spanish_es": "Numérico"
-    },
-    "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER": {
-      "english_us": "Single answer",
-      "french_fr": "Réponse unique",
-      "portuguese_pt": "Resposta única",
-      "spanish_es": "Respuesta única"
+    "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL_DESCRIPTION": {
+      "english_us": "",
+      "french_fr": "",
+      "portuguese_pt": "",
+      "spanish_es": ""
     },
     "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL": {
       "english_us": "Clinical",
@@ -1471,6 +1441,75 @@
       "french_fr": "Fever"
     }
   },
+  "referenceData": [
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MIDDLE_EASI_RESPIRATORY_SYNDROME_CORONAVIRUS_MERS_CO_V",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_DISEASE",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MIDDLE_EASI_RESPIRATORY_SYNDROME_CORONAVIRUS_MERS_CO_V",
+      "description": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MIDDLE_EASI_RESPIRATORY_SYNDROME_CORONAVIRUS_MERS_CO_V_DESCRIPTION"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL",
+      "description": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL_DESCRIPTION"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CONTACT_WITH_CONFIRMED_PATIENT",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CONTACT_WITH_CONFIRMED_PATIENT"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_DROMEDARY_CAMEL_CONTACT",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_DROMEDARY_CAMEL_CONTACT"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EXPOSURE_RISK",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EXPOSURE_RISK"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_FORM_COMPLETION_INFORMATION",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_FORM_COMPLETION_INFORMATION"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_VISITS",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_VISITS"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HISTORY_OF_PRESENT_ILNESS",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HISTORY_OF_PRESENT_ILNESS"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_OTHER_ANIMAL_CONTACT",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_OTHER_ANIMAL_CONTACT"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_PATIENTS_CONDITION",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_PATIENTS_CONDITION"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_RECENT_TRAVEL",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_RECENT_TRAVEL"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_UNDERLYING_MEDICAL_CONDITIONS",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_UNDERLYING_MEDICAL_CONDITIONS"
+    }
+  ],
   "outbreakTemplates": [
     {
       "id": "d6a9d08f-b452-4ecb-81ad-67888b8eba28",

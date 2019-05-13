@@ -21,6 +21,7 @@ const routines = {
       require('./scripts/defaultReferenceData'),
       require('./scripts/defaultLocations'),
       require('./scripts/defaultHelpData'),
+      require('./scripts/defaultOutbreakTemplateData'),
       require('./scripts/migrateModelData')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
@@ -33,6 +34,7 @@ const routines = {
       require('./scripts/defaultLanguages'),
       require('./scripts/defaultReferenceData'),
       require('./scripts/defaultHelpData'),
+      require('./scripts/defaultOutbreakTemplateData'),
       require('./scripts/migrateModelData')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
