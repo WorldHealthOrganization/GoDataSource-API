@@ -286,5 +286,9 @@
   "MULTIPLE_CONTACTS_UPDATE_PARTIAL_SUCCESS": {
     "defaultStatusCode": 422,
     "messagePattern": "Multiple contacts update partial success. Some contact instances failed to be updated."
+  },
+  "SYNC_PACKAGE_FOR_USER_WITHOUT_TEAMS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Sync package cannot be generated for user `<%= userEmail %>` as it is not assigned to any team"
   }
 }

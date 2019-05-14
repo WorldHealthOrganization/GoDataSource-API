@@ -98,6 +98,14 @@
           "description": "Auto Encrypt; Default 'true'"
         },
         {
+          "arg": "userEmail",
+          "type": "string",
+          "http": {
+            "source": "query"
+          },
+          "description": "User email; Used to filter data based on user's teams locations"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -147,6 +155,14 @@
           "arg": "autoEncrypt",
           "type": "boolean",
           "description": "Auto Encrypt; Default 'true'"
+        },
+        {
+          "arg": "userEmail",
+          "type": "string",
+          "http": {
+            "source": "query"
+          },
+          "description": "User email; Used to filter data based on user's teams locations"
         },
         {
           "arg": "options",
@@ -360,6 +376,14 @@
           "root": true,
           "required": true,
           "description": "Can contain languageTokens array; if present only those language tokens and the reference data related ones will be exported"
+        },
+        {
+          "arg": "userEmail",
+          "type": "string",
+          "http": {
+            "source": "query"
+          },
+          "description": "User email; Used to filter data based on user's teams locations"
         },
         {
           "arg": "options",
