@@ -411,7 +411,7 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
       const displayVertical = item.answersDisplay === 'LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL';
 
       // question test
-      doc.text(`${item.order}. ${item.question}`, questionMargin);
+      doc.moveDown().text(`${item.order}. ${item.question}`, questionMargin);
 
       // answers type are written differently into the doc
       switch (item.answerType) {
@@ -502,7 +502,6 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
             if (answer.additionalQuestions.length) {
               doc.moveDown(0.5);
               addQuestions(answer.additionalQuestions, questionMargin, level + 1);
-              doc.moveDown(0.5);
             }
 
             // no longer first questions
