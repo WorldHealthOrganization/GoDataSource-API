@@ -99,6 +99,9 @@ module.exports = function (SystemSettings) {
         }
 
         // if everything went fine, use resolved backup location
+        // need to also set the other dataBackup properties as they would be reset when setting the dataBackup location
+        // need to start from the source as the target might not contain dataBackup
+        _.set(contextData, 'target.dataBackup', Object.assign(_.get(contextData, 'source.all.dataBackup', {}), _.get(contextData, 'target.dataBackup', {})));
         _.set(contextData, 'target.dataBackup.location', resolvedBackupLocation);
 
         // finished
