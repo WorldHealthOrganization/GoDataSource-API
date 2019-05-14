@@ -977,10 +977,10 @@ const formatDateFields = function (model, dateFieldsList) {
     let reference = getReferencedValue(model, field);
     if (Array.isArray(reference)) {
       reference.forEach((indicator) => {
-        _.set(model, indicator.exactPath, indicator.value ? getDateDisplayValue(indicator.value) : '');
+        _.set(model, indicator.exactPath, indicator.value ? moment(getDateDisplayValue(indicator.value)).format('YYYY-MM-DD') : '');
       });
     } else {
-      _.set(model, reference.exactPath, reference.value ? getDateDisplayValue(reference.value) : '');
+      _.set(model, reference.exactPath, reference.value ? moment(getDateDisplayValue(reference.value)).format('YYYY-MM-DD') : '');
     }
   });
 };
