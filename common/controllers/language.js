@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const xlsx = require('xlsx');
 const fs = require('fs');
+const _ = require('lodash');
 
 module.exports = function (Language) {
 
@@ -13,6 +14,7 @@ module.exports = function (Language) {
     'prototype.__findById__languageTokens',
     'prototype.__updateById__languageTokens',
     'prototype.__destroyById__languageTokens',
+    'prototype.__get__languageTokens'
   ]);
 
   Language.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
@@ -163,6 +165,35 @@ module.exports = function (Language) {
           app.utils.remote.helpers
             .offerFileToDownload(file, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', `${self.name}.xlsx`, callback);
         });
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Retrieve language tokens
+   * @param callback
+   */
+  Language.prototype.getLanguageTokens = function (filter, callback) {
+    // exclude ids since they aren't needed
+    const options = {
+      excludeIds: true
+    };
+
+    // construct what data should be retrieved
+    if (
+      filter &&
+      filter.fields
+    ) {
+      options.projection = _.transform(filter.fields || [], (r, v) => r[v] = 1, {});
+    }
+
+    // retrieve language tokens
+    app.models.languageToken
+      .rawFind({
+        languageId: this.id
+      }, options)
+      .then((tokens) => {
+        callback(null, tokens);
       })
       .catch(callback);
   };
