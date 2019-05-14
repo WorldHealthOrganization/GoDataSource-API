@@ -441,7 +441,6 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
           };
 
           let answerXMargin = questionMargin;
-          let answerY = doc.y;
 
           // answers of type checkbox should be moved on line below
           // for text answers we use doc.text() that already moves one line below
