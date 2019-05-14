@@ -174,8 +174,12 @@ module.exports = function (Language) {
    * @param callback
    */
   Language.prototype.getLanguageTokens = function (filter, callback) {
+    // exclude ids since they aren't needed
+    const options = {
+      excludeIds: true
+    };
+
     // construct what data should be retrieved
-    const options = {};
     if (
       filter &&
       filter.fields
