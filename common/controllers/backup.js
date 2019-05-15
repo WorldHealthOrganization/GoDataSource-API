@@ -3,6 +3,8 @@
 // requires
 const app = require('../../server/server');
 const backup = require('../../components/backup');
+const helpers = require('../../components/helpers');
+const path = require('path');
 
 module.exports = function (Backup) {
 
@@ -34,18 +36,57 @@ module.exports = function (Backup) {
     // get the id of the authenticated user from request options
     let userId = requestOptions.accessToken.userId;
 
-    // retrieve system settings, fallback on default data backup settings, if not available in the request
-    if (params.location && params.modules) {
-      backupModel.createBackup(params.location, params.modules, userId, done);
-    } else {
-      app.models.systemSettings
-        .findOne()
-        .then((systemSettings) => {
-          let location = params.location || systemSettings.dataBackup.location;
-          let modules = params.modules || systemSettings.dataBackup.modules;
-          backupModel.createBackup(location, modules, userId, done);
+    // check for received params; we need to retrieve location and modules from system settings if they are missing from params
+    // initialize backup settings promise
+    let getBackupSettings = Promise.resolve();
+    if (!params.location || !params.modules) {
+      getBackupSettings = app.models.systemSettings
+        .getCache()
+        .then(function (record) {
+          // initialize error
+          if (!record) {
+            return Promise.reject(app.utils.apiError.getError('INTERNAL_ERROR', {
+              error: 'System Settings were not found'
+            }));
+          }
+
+          return record;
         });
     }
+
+    // get backup setting
+    getBackupSettings
+      .then(function (systemSettings) {
+        // get backup location and modules to be used
+        let backupLocation = params.location || systemSettings.dataBackup.location;
+        let backupModules = params.modules || systemSettings.dataBackup.modules;
+
+        // validate location before starting backup creation
+        // initialize resolved location
+        let resolvedLocation;
+        try {
+          resolvedLocation = path.resolve(backupLocation);
+          helpers.isPathOK(resolvedLocation);
+        } catch (err) {
+          // return error
+          return Promise.reject(app.utils.apiError.getError(
+            'REQUEST_VALIDATION_ERROR_INVALID_BACKUP_LOCATION', {
+              errorMessages: `Configured backup location '${backupLocation}' is not accessible for read/write`,
+              backupLocation: {
+                path: backupLocation,
+                resolvedPath: resolvedLocation,
+                error: err
+              }
+            }
+          ));
+        }
+
+        // backup setting are valid; create backup
+        backupModel.createBackup(backupLocation, backupModules, userId, done);
+      })
+      .catch(function (err) {
+        return done(err);
+      });
   };
 
   /**

@@ -74,34 +74,40 @@ module.exports = function (SystemSettings) {
       }
     }
 
-    // get configured backup location
-    const contextData = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
-    const backupLocation = _.get(contextData, 'source.all.dataBackup.location');
-    const resolvedBackupLocation = path.resolve(backupLocation);
+    // check if backup settings were sent; all are required
+    if (context.instance && context.instance.dataBackup || context.data.dataBackup) {
+      // get configured backup location
+      const contextData = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
+      const backupLocation = _.get(contextData, 'source.all.dataBackup.location');
+      const resolvedBackupLocation = path.resolve(backupLocation);
 
-    // check if backup location is accessible for read and writes
-    fs.access(resolvedBackupLocation, fs.constants.R_OK | fs.constants.W_OK, function (error) {
-      // if error occurred
-      if (error) {
-        // save error
-        return callback(app.utils.apiError.getError(
-          'REQUEST_VALIDATION_ERROR_INVALID_BACKUP_LOCATION', {
-            errorMessages: `Configured backup location ${backupLocation} is not accessible for read/write`,
-            backupLocation: {
-              path: backupLocation,
-              resolvedPath: resolvedBackupLocation,
-              error: error
+      // check if backup location is accessible for read and writes
+      fs.access(resolvedBackupLocation, fs.constants.R_OK | fs.constants.W_OK, function (error) {
+        // if error occurred
+        if (error) {
+          // save error
+          return callback(app.utils.apiError.getError(
+            'REQUEST_VALIDATION_ERROR_INVALID_BACKUP_LOCATION', {
+              errorMessages: `Configured backup location ${backupLocation} is not accessible for read/write`,
+              backupLocation: {
+                path: backupLocation,
+                resolvedPath: resolvedBackupLocation,
+                error: error
+              }
             }
-          }
-        ));
-      }
+          ));
+        }
 
-      // if everything went fine, use resolved backup location
-      _.set(contextData, 'target.dataBackup.location', resolvedBackupLocation);
+        // if everything went fine, use resolved backup location
+        _.set(contextData, 'target.dataBackup.location', resolvedBackupLocation);
 
+        // finished
+        return callback();
+      });
+    } else {
       // finished
       return callback();
-    });
+    }
   });
 
   /**
