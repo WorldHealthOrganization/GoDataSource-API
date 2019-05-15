@@ -28,7 +28,6 @@ module.exports = function (Model) {
    * @param {number} [options.limit]
    * @param {object} [options.order]
    * @param {object} [options.projection]
-   * @param {object} [options.excludeIds]
    * @return {Promise<any>}
    */
   Model.rawFind = function (query, options = {}) {
@@ -92,13 +91,9 @@ module.exports = function (Model) {
         app.logger.debug(`[QueryId: ${queryId}] MongoDB request completed after ${timer.getElapsedMilliseconds()} msec`);
         // add id property (not the native _id property)
         records.forEach(function (record) {
-          if (!options.excludeIds) {
-            record.id = record._id;
-          }
+          record.id = record._id;
           delete record._id;
         });
-
-        // finished
         return records;
       });
   };

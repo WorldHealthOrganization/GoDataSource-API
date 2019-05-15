@@ -4,6 +4,7 @@ const app = require('../../server/server');
 const xlsx = require('xlsx');
 const fs = require('fs');
 const _ = require('lodash');
+const moment = require('moment');
 
 module.exports = function (Language) {
 
@@ -174,26 +175,121 @@ module.exports = function (Language) {
    * @param callback
    */
   Language.prototype.getLanguageTokens = function (filter, callback) {
-    // exclude ids since they aren't needed
-    const options = {
-      excludeIds: true
-    };
+    // default data
+    filter = filter || {};
+    const fields = filter.fields || [
+      'token',
+      'translation'
+    ];
+    let whereFilter = filter.where || {};
 
-    // construct what data should be retrieved
-    if (
-      filter &&
-      filter.fields
-    ) {
-      options.projection = _.transform(filter.fields || [], (r, v) => r[v] = 1, {});
+    // do we need to retrieve only updated tokens ?
+    if (whereFilter.updatedSince) {
+      // retrieve date
+      const updatedSince = moment(whereFilter.updatedSince).toISOString();
+      delete whereFilter.updatedSince;
+
+      // filter tokens
+      const condition = {
+        $or: [
+          {
+            createdAt: {
+              $eq: null
+            }
+          }, {
+            createdAt: {
+              $gte: updatedSince
+            }
+          }, {
+            updatedAt: {
+              $eq: null
+            }
+          }, {
+            updatedAt: {
+              $gte: updatedSince
+            }
+          }
+        ]
+      };
+      if (_.isEmpty(whereFilter)) {
+        whereFilter = condition;
+      } else {
+        whereFilter = {
+          $and: [
+            whereFilter,
+            condition
+          ]
+        };
+      }
+
     }
 
+    // construct where condition
+    let where = {
+      languageId: this.id
+    };
+    if (!_.isEmpty(whereFilter)) {
+      where = {
+        $and: [
+          whereFilter,
+          where
+        ]
+      };
+    }
+
+    // construct what data should be retrieved
+    const projection = _.transform(fields, (r, v) => r[v] = 1, {});
+
+    // there is no need to retrieve the id
+    projection._id = 0;
+
     // retrieve language tokens
-    app.models.languageToken
-      .rawFind({
-        languageId: this.id
-      }, options)
+    // since we can't replace root we will need to go through tokens ourselves
+    app.dataSources.mongoDb.connector
+      .collection('languageToken')
+      .find(app.utils.remote.convertLoopbackFilterToMongo(
+        where
+      ), {
+        projection: Object.assign(
+          // we need createdAt & updatedAt because of mongo 3.2 limitations, check above & bellow for more details
+          projection, {
+            createdAt: 1,
+            updatedAt: 1
+          }
+        )
+      })
+      .toArray()
       .then((tokens) => {
-        callback(null, tokens);
+        // determine max date
+        // since we can't do this with mongo 3.2 aggregation
+        let lastUpdateDate;
+        (tokens || []).forEach(function (token) {
+          // retrieve record create & update dates
+          const createdAt = token.createdAt ? moment(token.createdAt) : null;
+          delete token.createdAt;
+          const updatedAt = token.updatedAt ? moment(token.updatedAt) : null;
+          delete token.updatedAt;
+
+          // determine last update date
+          if (createdAt) {
+            lastUpdateDate = !lastUpdateDate ?
+              createdAt :
+              (createdAt.isAfter(lastUpdateDate) ? createdAt : lastUpdateDate);
+          }
+          if (updatedAt) {
+            lastUpdateDate = !lastUpdateDate ?
+              updatedAt :
+              (updatedAt.isAfter(lastUpdateDate) ? updatedAt : lastUpdateDate);
+          }
+        });
+
+        // retrieve language tokens
+        callback(
+          null, {
+            lastUpdateDate: lastUpdateDate ? lastUpdateDate.toISOString() : null,
+            tokens: tokens
+          }
+        );
       })
       .catch(callback);
   };
