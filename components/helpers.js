@@ -1083,12 +1083,16 @@ const includeSubLocationsInLocationFilter = function (app, filter, callback) {
     if (propertyName.includes('parentLocationIdFilter')) {
       // start with no location filter
       let parentLocationFilter;
+      let inqKey = 'inq';
       // handle string type
       if (typeof filter[propertyName] === 'string') {
         parentLocationFilter = [filter[propertyName]];
         // handle include type
       } else if (filter[propertyName] && typeof filter[propertyName] === 'object' && Array.isArray(filter[propertyName].inq)) {
         parentLocationFilter = filter[propertyName].inq;
+      } else if (filter[propertyName] && typeof filter[propertyName] === 'object' && Array.isArray(filter[propertyName].$in)) {
+        parentLocationFilter = filter[propertyName].$in;
+        inqKey = '$in';
       }
       // if a parent location filter was specified
       if (parentLocationFilter) {
@@ -1101,7 +1105,7 @@ const includeSubLocationsInLocationFilter = function (app, filter, callback) {
               }
               // replace original filter with actual location filter and use found location ids
               filter[propertyName.replace('parentLocationIdFilter', 'locationId')] = {
-                inq: locationIds
+                [inqKey]: locationIds
               };
               // remove original filter
               delete filter[propertyName];
