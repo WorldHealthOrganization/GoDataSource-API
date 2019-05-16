@@ -286,6 +286,7 @@ module.exports = function (Language) {
         // retrieve language tokens
         callback(
           null, {
+            languageId: this.id,
             lastUpdateDate: lastUpdateDate ? lastUpdateDate.toISOString() : null,
             tokens: tokens
           }

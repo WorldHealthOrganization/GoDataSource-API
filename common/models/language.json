@@ -111,13 +111,16 @@
       "returns": {
         "arg": "data",
         "type": {
+          "languageId": {
+            "type": "string"
+          },
+          "lastUpdateDate": {
+            "type": "date"
+          },
           "tokens": {
             "type": [
               "languageToken"
             ]
-          },
-          "lastUpdateDate": {
-            "type": "date"
           }
         },
         "root": true,
