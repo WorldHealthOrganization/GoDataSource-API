@@ -105,20 +105,27 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields. - must be a JSON-encoded string ({\"something\":\"value\"}). Note: it supports 'identifier' property on the first level of where. This allows searching people based on id, visualId and documents.number"
+          "description": "Filter defining fields. - must be a JSON-encoded string ({\"something\":\"value\"}). Note: it supports 'updatedSince' property on the first level of where which is optional. This allows retrieving tokens updated after this date"
         }
       ],
-      "returns": [
-        {
-          "arg": "tokens",
-          "type": [
-            "languageToken"
-          ],
-          "description": "List of language tokens",
-          "root": true,
-          "required": true
-        }
-      ],
+      "returns": {
+        "arg": "data",
+        "type": {
+          "languageId": {
+            "type": "string"
+          },
+          "lastUpdateDate": {
+            "type": "date"
+          },
+          "tokens": {
+            "type": [
+              "languageToken"
+            ]
+          }
+        },
+        "root": true,
+        "required": true
+      },
       "description": "Queries language tokens of language.",
       "http": {
         "verb": "get",
