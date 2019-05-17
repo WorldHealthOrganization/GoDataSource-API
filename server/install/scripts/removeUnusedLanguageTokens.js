@@ -215,8 +215,8 @@ function run(callback) {
           // determine token ids since the same token is duplicated for each language, we will have multiple
           const idsToRemove = [];
           (records || []).forEach((record) => {
+            idsToRemove.push(record._id);
             if (module.confirmRemoval) {
-              idsToRemove.push(record._id);
               app.logger.debug(`Preparing to remove token '${record.token}' from language '${record.languageId}'`);
             } else {
               app.logger.debug(`Should remove token '${record.token}' from language '${record.languageId}'`);
