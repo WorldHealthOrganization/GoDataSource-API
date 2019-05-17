@@ -4,7 +4,7 @@ const app = require('../../server');
 const _ = require('lodash');
 const async = require('async');
 
-const languageJSON = require(`./../../config/languages/english_us`);
+const languageJSON = require('./../../config/languages/english_us');
 
 /**
  * Run initiation
