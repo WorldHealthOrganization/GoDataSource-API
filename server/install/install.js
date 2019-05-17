@@ -5,7 +5,7 @@ const _ = require('lodash');
 const args = process.argv;
 const path = require('path');
 // keep a list of supported install arguments
-const supportedArguments = ['init-database', 'migrate-database', 'reset-admin-password', 'install-script', 'dump-help-data', 'dump-language-data', 'dump-outbreak-template-data'];
+const supportedArguments = ['init-database', 'migrate-database', 'reset-admin-password', 'install-script', 'dump-help-data', 'dump-language-data', 'dump-outbreak-template-data', 'remove-unused-language-tokens'];
 // keep a list of functions that will be run
 const runFunctions = [];
 // define a list of supported routines
@@ -116,6 +116,23 @@ const routines = {
       require('./scripts/dumpOutbreakTemplateData')
     ].forEach(function (installScript) {
       runFunctions.push(installScript(resolvedPath));
+    });
+  },
+  removeUnusedLanguageTokens: function () {
+    // need export file
+    let confirmRemoval = /confirm=(.+)(?:\s+|$)/.exec(args.toString());
+    if (!confirmRemoval) {
+      console.log('NO REMOVAL SELECTED');
+    } else {
+      console.log('REMOVAL SELECTED');
+    }
+
+    // dump data
+    console.log('Determining unused language tokens');
+    [
+      require('./scripts/removeUnusedLanguageTokens')
+    ].forEach(function (installScript) {
+      runFunctions.push(installScript(confirmRemoval));
     });
   }
 };
