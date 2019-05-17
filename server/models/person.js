@@ -319,8 +319,8 @@ module.exports = function (Person) {
         return next();
       }
 
-      // if visual ID is sent; no need to do anything
-      if (data.target.visualId) {
+      // if visual ID is sent or instance already has it no need to do anything
+      if (data.target.visualId || data.source.all.visualId) {
         return next();
       }
 
@@ -1012,9 +1012,9 @@ module.exports = function (Person) {
    * @returns {Promise<any>}
    */
   Person.getAvailablePeople = function (
-      outbreakId,
-      personId,
-      filter
+    outbreakId,
+    personId,
+    filter
   ) {
     // attach our conditions
     filter.where = {
@@ -1232,7 +1232,7 @@ module.exports = function (Person) {
           type: 1,
           firstName: {
             $cond: {
-              if: { $eq: [ '$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT' ] },
+              if: {$eq: ['$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']},
               then: '$name',
               else: '$firstName'
             }
@@ -1240,14 +1240,14 @@ module.exports = function (Person) {
           lastName: 1,
           date: {
             $cond: {
-              if: { $eq: [ '$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT' ] },
+              if: {$eq: ['$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']},
               then: '$date',
               else: '$dateOfOnset'
             }
           },
           addresses: {
             $cond: {
-              if: { $eq: [ '$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT' ] },
+              if: {$eq: ['$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']},
               then: ['$address'],
               else: '$addresses'
             }
@@ -1369,9 +1369,9 @@ module.exports = function (Person) {
                 ) && (
                   rel.persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ||
                   rel.persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
-                )&& (
-                  ( rel.persons[0].source && rel.persons[0].id === recordData.id ) ||
-                  ( rel.persons[1].source && rel.persons[1].id === recordData.id )
+                ) && (
+                  (rel.persons[0].source && rel.persons[0].id === recordData.id) ||
+                  (rel.persons[1].source && rel.persons[1].id === recordData.id)
                 )
               ) {
                 // determine if we need to initialize the list of target cases / events for our source case / event
