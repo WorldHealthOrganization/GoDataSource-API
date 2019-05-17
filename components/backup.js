@@ -364,21 +364,16 @@ const removeBackup = function (backup, callback) {
 /**
  * Used to clean up older backups
  * It deletes records in the database and archives on the disk
- * @param currentDate
+ * @param filter Filter for the resources that need to be removed
  */
-const removeBackups = function (currentDate) {
+const removeBackups = function (filter = {}) {
   const backupModel = app.models.backup;
 
   // retrieve all backups that are older
   backupModel
-    .find({
-      where: {
-        date: {
-          lt: currentDate
-        }
-      }
-    })
-    .then((olderBackups) => olderBackups.forEach((backup) => removeBackup(backup)));
+    .find(filter)
+    .then((olderBackups) => olderBackups.forEach((backup) => removeBackup(backup, () => {
+    })));
 };
 
 /**

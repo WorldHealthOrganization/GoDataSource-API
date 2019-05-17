@@ -32,6 +32,11 @@
     },
     "error": {
       "type": "string"
+    },
+    "automatic": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flag specifying if the backup was created automatically through scheduled task"
     }
   },
   "validations": [],

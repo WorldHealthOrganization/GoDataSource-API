@@ -124,7 +124,8 @@ module.exports = function (app) {
               modules: backupSettings.modules,
               location: null,
               userId: null,
-              status: backupModel.status.PENDING
+              status: backupModel.status.PENDING,
+              automatic: true
             })
             .then((record) => {
               // start the backup process
@@ -185,8 +186,15 @@ module.exports = function (app) {
           // save the last execution time to now
           backupRoutineConfig.lastExecutedTime = moment();
 
-          // remove older backups
-          backup.removeBackups(new Date());
+          // remove backups which are older than the configured retention interval
+          backup.removeBackups({
+            where: {
+              date: {
+                lt: new Date(baseTime)
+              },
+              automatic: true
+            }
+          });
         }
         return done();
       });
