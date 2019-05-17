@@ -226,7 +226,21 @@ module.exports = function (Language) {
 
     // construct where condition
     let where = {
-      languageId: this.id
+      $and: [
+        // retrieve only records from a specific language
+        { languageId: this.id },
+
+        // retrieve only non-deleted records
+        {
+          $or: [{
+            deleted: false
+          }, {
+            deleted: {
+              $eq: null
+            }
+          }]
+        }
+      ]
     };
     if (!_.isEmpty(whereFilter)) {
       where = {
