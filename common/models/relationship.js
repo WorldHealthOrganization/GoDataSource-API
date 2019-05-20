@@ -414,19 +414,36 @@ module.exports = function (Relationship) {
     let filterPeople = Promise.resolve();
     // if a people query is provided
     if (peopleQuery) {
-      // find the people that match the query
-      filterPeople = app.models.person
-        .rawFind({
-          and: [
-            peopleQuery,
-            {outbreakId: outbreakId}
-          ]
-        }, {projection: {_id: 1}})
-        .then(function (people) {
-          // return a list of people ids
-          return people.map(person => person.id);
-        });
+      peopleQuery = {
+        and: [
+          peopleQuery,
+          {
+            outbreakId: outbreakId,
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+            classification: {
+              $nin: app.models.case.discardedCaseClassifications
+            }
+          }
+        ]
+      };
+    } else {
+      peopleQuery = {
+        outbreakId: outbreakId,
+        type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+        classification: {
+          $nin: app.models.case.discardedCaseClassifications
+        }
+      };
     }
+
+    // find the people that match the query
+    filterPeople = app.models.person
+      .rawFind(peopleQuery, {projection: {_id: 1}})
+      .then(function (people) {
+        // return a list of people ids
+        return people.map((person) => person.id);
+      });
+
     // first filter people
     return filterPeople
       .then(function (peopleIds) {
@@ -440,13 +457,12 @@ module.exports = function (Relationship) {
             ]
           }
         };
-        // if people ids were specified
-        if (peopleIds) {
-          // update filter to include the ids
-          _filter.where['persons.id'] = {
-            inq: peopleIds
-          };
-        }
+
+        // update filter to include the ids
+        _filter.where['persons.id'] = {
+          inq: peopleIds
+        };
+
         // get all relationships between cases and contacts
         return app.models.relationship
           .rawFind(
@@ -464,7 +480,7 @@ module.exports = function (Relationship) {
             // Note: This loop will only add the cases that have relationships. Will need to do another query to get the cases without relationships
             relationships.forEach(function (relationship) {
               // get case index from persons
-              let caseIndex = relationship.persons.findIndex(elem => elem.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE');
+              let caseIndex = relationship.persons.findIndex((elem) => elem.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE');
               // get caseId, contactId
               // there are only 2 persons so the indexes are 0 or 1
               let caseId = relationship.persons[caseIndex].id;
@@ -502,47 +518,20 @@ module.exports = function (Relationship) {
                 result.contactsCount++;
               }
             });
-
-            // Note: in order to get the full results we need to also get the cases that don't have contacts
-            // however if the filter included a scope filter for the "people" relation, the cases were filtered so no need to get cases that don't have relationships
-            // checking if a filter was sent for cases
-            // initialize casesFiltered flag
-            let casesFiltered = false;
-            if (filter && filter.include) {
-              // normalize filter.include
-              let includeFilter = Array.isArray(filter.include) ? filter.include : [filter.include];
-              // checking for an include item that has relation = people and has a scope
-              casesFiltered = includeFilter.findIndex(function (relation) {
-                return typeof relation === 'object' && relation.relation === 'people' && relation.scope;
-              }) !== -1;
-            }
-
-            if (!casesFiltered) {
-              // get cases without relationships
-              return app.models.case.rawFind({
-                outbreakId: outbreakId,
-                id: {
-                  nin: Object.keys(result.cases)
-                }
-              }, {
-                projection: {_id: 1}
-              });
-            } else {
-              // no need to query for other cases; sending empty array to not affect result
-              return [];
-            }
           })
-          .then(function (cases) {
-            // loop through the found cases and add them to the result
-            cases.forEach(function (item) {
-              result.cases[item.id] = {
-                id: item.id,
-                contactsCount: 0,
-                contactIDs: []
-              };
+          .then(() => {
+            // in order to get the full results we need to also get the cases that don't have contacts
+            peopleIds.forEach((caseId) => {
+              if (!result.cases[caseId]) {
+                result.cases[caseId] = {
+                  id: caseId,
+                  contactsCount: 0,
+                  contactIDs: []
+                };
 
-              // increase total counter
-              result.casesCount++;
+                // increase total counter
+                result.casesCount++;
+              }
             });
 
             // return the entire result
