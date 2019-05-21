@@ -129,6 +129,9 @@ const getChunksForInterval = function (interval, chunk) {
       end.add(-1, 'd');
     }
 
+    // make sure end date is after or same as start date
+    end = end.isAfter(start) ? end : getDateEndOfDay(start);
+
     // create period identifier
     let identifier = start.toString() + ' - ' + end.toString();
 
@@ -1473,8 +1476,8 @@ const getPeriodIntervalForDate = function (fullPeriodInterval, periodType, date)
     fullPeriodInterval.length > 1
   ) {
     startDay = startDay.isAfter(fullPeriodInterval[0]) ? startDay : getDate(fullPeriodInterval[0]);
-    startDay = startDay.isBefore(fullPeriodInterval[1]) ? startDay : getDate(fullPeriodInterval[1]);
     endDay = endDay.isBefore(fullPeriodInterval[1]) ? endDay : getDateEndOfDay(fullPeriodInterval[1]);
+    endDay = endDay.isAfter(startDay) ? endDay : getDateEndOfDay(startDay);
   }
 
   // return period interval
