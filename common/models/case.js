@@ -396,9 +396,15 @@ module.exports = function (Case) {
       endDate = app.utils.helpers.getDateEndOfDay();
     }
 
+    // make sure end date is after start date
+    const startDate = moment(outbreak.startDate);
+    if (endDate.isBefore(startDate)) {
+      endDate = moment(startDate);
+    }
+
     // define period interval
     const periodInterval = [
-      outbreak.startDate,
+      startDate,
       endDate
     ];
 
@@ -436,6 +442,7 @@ module.exports = function (Case) {
                 where: {
                   outbreakId: outbreak.id,
                   [timePropertyName]: {
+                    gte: new Date(periodInterval[0]),
                     lte: new Date(periodInterval[1])
                   }
                 }
