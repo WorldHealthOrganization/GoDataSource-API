@@ -1448,38 +1448,37 @@ const paginateResultSet = function (filter, resultSet) {
  */
 const getPeriodIntervalForDate = function (fullPeriodInterval, periodType, date) {
   // get period in which the case needs to be included
-  let periodInterval, beginningOfDay, endOfDay, mondayStartOfDay, sundayEndOfDay, firstDayOfMonth, lastDayOfMonth;
-
+  let startDay, endDay;
   switch (periodType) {
     case 'day':
       // get day interval for date
-      beginningOfDay = getDate(date).toString();
-      endOfDay = getDateEndOfDay(date).toString();
-      periodInterval = [beginningOfDay, endOfDay];
+      startDay = getDate(date);
+      endDay = getDateEndOfDay(date);
       break;
     case 'week':
       // get week interval for date
-      mondayStartOfDay = getDate(date, 1);
-      sundayEndOfDay = getDateEndOfDay(date, 7);
-      // we should use monday only if it is later than the first date of the fullPeriodInterval; else use the first date of the period interval
-      mondayStartOfDay = (mondayStartOfDay.isAfter(fullPeriodInterval[0]) ? mondayStartOfDay : getDate(fullPeriodInterval[0])).toString();
-      // we should use sunday only if it is earlier than the last date of the fullPeriodInterval; else use the last date of the period interval
-      sundayEndOfDay = (sundayEndOfDay.isBefore(fullPeriodInterval[1]) ? sundayEndOfDay : getDateEndOfDay(fullPeriodInterval[1])).toString();
-      periodInterval = [mondayStartOfDay, sundayEndOfDay];
+      startDay = getDate(date, 1);
+      endDay = getDateEndOfDay(date, 7);
       break;
     case 'month':
       // get month period interval for date
-      firstDayOfMonth = getDate(date).startOf('month');
-      lastDayOfMonth = getDateEndOfDay(date).endOf('month');
-      // we should use first day of month only if it is later than the first date of the fullPeriodInterval; else use the first date of the period interval
-      firstDayOfMonth = (firstDayOfMonth.isAfter(fullPeriodInterval[0]) ? firstDayOfMonth : getDate(fullPeriodInterval[0])).toString();
-      // we should use last day of month only if it is earlier than the last date of the fullPeriodInterval; else use the last date of the period interval
-      lastDayOfMonth = (lastDayOfMonth.isBefore(fullPeriodInterval[1]) ? lastDayOfMonth : getDateEndOfDay(fullPeriodInterval[1])).toString();
-      periodInterval = [firstDayOfMonth, lastDayOfMonth];
+      startDay = getDate(date).startOf('month');
+      endDay = getDateEndOfDay(date).endOf('month');
       break;
   }
+
+  // make sure dates are in interval limits
+  if (
+    fullPeriodInterval &&
+    fullPeriodInterval.length > 1
+  ) {
+    startDay = startDay.isAfter(fullPeriodInterval[0]) ? startDay : getDate(fullPeriodInterval[0]);
+    startDay = startDay.isBefore(fullPeriodInterval[1]) ? startDay : getDate(fullPeriodInterval[1]);
+    endDay = endDay.isBefore(fullPeriodInterval[1]) ? endDay : getDateEndOfDay(fullPeriodInterval[1]);
+  }
+
   // return period interval
-  return periodInterval;
+  return [startDay.toString(), endDay.toString()];
 };
 
 /**
