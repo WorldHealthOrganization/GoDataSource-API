@@ -60,11 +60,26 @@ const worker = {
 
     // mongodb date between filter
     const filter = {
-      outbreakId: outbreakId,
-      date: {
-        $gte: startDate,
-        $lte: endDate
-      }
+      $and: [
+        {
+          outbreakId: outbreakId,
+          date: {
+            $gte: startDate,
+            $lte: endDate
+          }
+        }, {
+          $or: [
+            {
+              deleted: false
+            },
+            {
+              deleted: {
+                $eq: null
+              }
+            }
+          ]
+        }
+      ]
     };
 
     // get range of days
