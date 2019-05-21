@@ -126,11 +126,11 @@ const getChunksForInterval = function (interval, chunk) {
     // we use 23:59 hours for end so we need to get the end of day for the previous day except for the last day in the interval since we already send it at 23:59 hours
     let end = getDateEndOfDay(chunk.end);
     if (index !== chunks.length - 1) {
-      end.add(-1, 'd');
+      end.add(-1, 'd').endOf('day');
     }
 
     // make sure end date is after or same as start date
-    end = end.isAfter(start) ? end : getDateEndOfDay(start);
+    start = start.isBefore(end) ? start : getDate(end);
 
     // create period identifier
     let identifier = start.toString() + ' - ' + end.toString();
