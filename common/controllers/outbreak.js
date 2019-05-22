@@ -4190,18 +4190,24 @@ module.exports = function (Outbreak) {
               app.models.case
                 .findOne({
                   where: {
-                    id: labResult.personId,
+                    or: [
+                      { id: labResult.personId },
+                      { visualId: labResult.personId }
+                    ],
                     outbreakId: self.id
                   }
                 })
                 .then(function (caseInstance) {
                   // if the person was not found, don't sync the lab result, stop with error
                   if (!caseInstance) {
-                    throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+                    throw app.utils.apiError.getError('PERSON_NOT_FOUND', {
                       model: app.models.case.modelName,
                       id: labResult.personId
                     });
                   }
+
+                  // make sure we map it to the parent case in case we retrieved the case using visual id
+                  labResult.personId = caseInstance.id;
 
                   // set outbreakId
                   labResult.outbreakId = self.id;
