@@ -72,6 +72,16 @@ function isMonitoredModel(model) {
 }
 
 /**
+ * Check if we need to obfuscate a fields
+ * @param field
+ * @returns {boolean}
+ */
+function mustObfuscateField(field) {
+  return ['password'].indexOf(field) > -1;
+}
+
+
+/**
  * Check if an action is monitored for logging
  * @param context
  * @returns {boolean}
@@ -109,7 +119,14 @@ module.exports = function (Model) {
         if (context.data) {
           if (context.currentInstance) {
             Object.keys(context.data).forEach(function (field) {
-              if (isMonitoredField(field) && context.data[field] !== undefined && (context.currentInstance[field] !== context.data[field])) {
+              if (
+                isMonitoredField(field) &&
+                context.data[field] !== undefined &&
+                !_.isEqual(
+                  context.currentInstance[field] && context.currentInstance[field].toJSON ? context.currentInstance[field].toJSON() : context.currentInstance[field],
+                  context.data[field] && context.data[field].toJSON ? context.data[field].toJSON() : context.data[field]
+                )
+              ) {
                 // parse new value as for Moment instances Loopback doesn't parse them to date
                 let newValue = _.cloneDeepWith(context.data[field], function (value) {
                   if (value instanceof moment) {
@@ -119,8 +136,8 @@ module.exports = function (Model) {
 
                 changedFields.push({
                   field: field,
-                  oldValue: context.currentInstance[field],
-                  newValue: newValue
+                  oldValue: mustObfuscateField(field) ? '***' : context.currentInstance[field],
+                  newValue: mustObfuscateField(field) ? '*****' : newValue
                 });
               }
             });
@@ -158,7 +175,7 @@ module.exports = function (Model) {
             if (isMonitoredField(field) && instanceData[field] !== undefined) {
               logData.changedData.push({
                 field: field,
-                newValue: instanceData[field]
+                newValue: mustObfuscateField(field) ? '***' : instanceData[field]
               });
             }
           });
