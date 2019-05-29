@@ -72,7 +72,7 @@ function isMonitoredModel(model) {
 }
 
 /**
- * Check if we need to obfuscate a fields
+ * Check if we need to obfuscate a field
  * @param field
  * @returns {boolean}
  */
