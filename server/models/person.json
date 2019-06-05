@@ -144,6 +144,9 @@
     "date": {
       "type": "date",
       "description": "Event property; Defining it here as on sync we use the person model and not the event model"
+    },
+    "deletedByCase": {
+      "type": "string"
     }
   },
   "indexes": {

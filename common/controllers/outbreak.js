@@ -856,7 +856,102 @@ module.exports = function (Outbreak) {
         }
 
         // undo case delete
-        instance.undoDelete(options, callback);
+        instance.undoDelete(
+          options,
+          (err, result) => {
+            // an error occurred?
+            if (err) {
+              return callback(err);
+            }
+
+            // retrieve case relationships
+            app.models.relationship
+              .find({
+                deleted: true,
+                where: {
+                  $or: [
+                    {
+                      'persons.0.id': instance.id,
+                      'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                      deletedByCase: caseId
+                    },
+                    {
+                      'persons.1.id': instance.id,
+                      'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                      deletedByCase: caseId
+                    }
+                  ]
+                }
+              })
+              .then((relationships) => {
+                // determine the list of contacts that we need to check if they were deleted and we should retrieve them so we can restore them
+                const contactsAndRelationshipsJobs = [];
+                const contactIds = Array.from(new Set((relationships || []).map((rel) => {
+                  // determine if we need to restore relationship
+                  if (rel.deleted) {
+                    // restore relationship job
+                    contactsAndRelationshipsJobs.push((function (relationshipModel) {
+                      return (callback) => {
+                        relationshipModel.undoDelete(
+                          {
+                            extraProps: {
+                              deletedByCase: null
+                            }
+                          },
+                          callback
+                        );
+                      };
+                    })(rel));
+                  }
+
+                  // map to contact id
+                  const contact = rel.persons.find((p) => p.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
+                  return contact.id;
+                })));
+
+                // retrieve contacts that were deleted and were associated with this case
+                if (_.isEmpty(contactIds)) {
+                  callback(null, result);
+                } else {
+                  app.models.contact
+                    .find({
+                      deleted: true,
+                      where: {
+                        id: {
+                          inq: contactIds
+                        },
+                        deletedByCase: caseId,
+                        deleted: true
+                      }
+                    })
+                    .then((contacts) => {
+                      // construct the list of contacts that we need to restore
+                      (contacts || []).forEach((contact) => {
+                        contactsAndRelationshipsJobs.push((function (contactModel) {
+                          return (callback) => {
+                            contactModel.undoDelete(
+                              {
+                                extraProps: {
+                                  deletedByCase: null
+                                }
+                              },
+                              callback
+                            );
+                          };
+                        })(contact));
+                      });
+
+                      // restore contacts that were removed along with this case
+                      async.parallelLimit(contactsAndRelationshipsJobs, 10, function (error) {
+                        callback(error, result);
+                      });
+                    })
+                    .catch(callback);
+                }
+              })
+              .catch(callback);
+          }
+        );
       })
       .catch(callback);
   };
