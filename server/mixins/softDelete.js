@@ -43,6 +43,26 @@ module.exports = function (Model) {
         options: {}
       };
     }
+
+    // do we need to add update extra properties on restore ?
+    let props = {
+      [deletedFlag]: false,
+      [deletedAt]: null
+    };
+    if (
+      options &&
+      options.extraProps
+    ) {
+      // add extra properties
+      Object.assign(
+        props,
+        options.extraProps
+      );
+
+      // not used anymore
+      delete options.extraProps;
+    }
+
     // make context available for others
     const self = this;
     // build a before/after hook context
@@ -65,7 +85,7 @@ module.exports = function (Model) {
         callback(true);
       };
       // restore the instance
-      self.updateAttributes({[deletedFlag]: false, [deletedAt]: null}, options, function (error, result) {
+      self.updateAttributes(props, options, function (error, result) {
         // if error occurred, stop
         if (error) {
           return callback(error);
@@ -263,6 +283,21 @@ module.exports = function (Model) {
     // update the deletedAt property only if the action is not a sync or the property is missing from the instance
     if (!hasOptions || !options._sync || !this[deletedAt]) {
       props[deletedAt] = new Date();
+    }
+
+    // do we need to add update extra properties on soft deletion
+    if (
+      hasOptions &&
+      options.extraProps
+    ) {
+      // add extra properties
+      Object.assign(
+        props,
+        options.extraProps
+      );
+
+      // not used anymore
+      delete options.extraProps;
     }
 
     const promise = this

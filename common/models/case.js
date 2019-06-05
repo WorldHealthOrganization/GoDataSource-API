@@ -74,21 +74,84 @@ module.exports = function (Case) {
   };
 
   Case.observe('after delete', (context, next) => {
-    Case.getIsolatedContacts(context.instance.id, (err, isolatedContacts) => {
+    const caseId = context.instance.id;
+    Case.getIsolatedContacts(caseId, (err, isolatedContacts) => {
       if (err) {
         return next(err);
       }
 
-      // delete each isolated contact
-      // do not wait for this, just continue with the execution flow
+      // construct the list of contacts that we need to remove
+      const contactsAndRelationshipsJobs = [];
+      let contactIds = [];
       isolatedContacts.forEach((isolatedContact) => {
         if (isolatedContact.isValid) {
-          isolatedContact.contact.destroy();
+          // used to determine relationships that we need to remove
+          contactIds.push(isolatedContact.contact.id);
+
+          // remove contact job
+          contactsAndRelationshipsJobs.push((function (contactModel) {
+            return (callback) => {
+              contactModel.destroy(
+                {
+                  extraProps: {
+                    deletedByCase: caseId
+                  }
+                },
+                callback
+              );
+            };
+          })(isolatedContact.contact));
         }
       });
 
-      // fire and forget
-      return next();
+      // delete relationships too
+      if (_.isEmpty(contactIds)) {
+        next();
+      } else {
+        contactIds = Array.from(new Set(contactIds));
+        app.models.relationship
+          .find({
+            where: {
+              or: [
+                {
+                  'persons.0.id': {
+                    inq: contactIds
+                  },
+                  'persons.1.id': caseId
+                } , {
+                  'persons.0.id': caseId,
+                  'persons.1.id': {
+                    inq: contactIds
+                  }
+                }
+              ]
+            }
+          })
+          .then((relationships) => {
+            // delete relationships
+            relationships.forEach((relationship) => {
+              // remove relationship job
+              contactsAndRelationshipsJobs.push((function (relationshipModel) {
+                return (callback) => {
+                  relationshipModel.destroy(
+                    {
+                      extraProps: {
+                        deletedByCase: caseId
+                      }
+                    },
+                    callback
+                  );
+                };
+              })(relationship));
+
+              // delete each isolated contact & and its relationship
+              async.parallelLimit(contactsAndRelationshipsJobs, 10, function (error) {
+                next(error);
+              });
+            });
+          })
+          .catch(next);
+      }
     });
   });
 
