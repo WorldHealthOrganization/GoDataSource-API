@@ -18,6 +18,7 @@
     "ConvertNestedGeoPoints": true,
     "DateProperty": true,
     "RawFind": true,
+    "RawFindAggregate": true,
     "RawUpdateOne": true,
     "RawBulkInsert": true,
     "RawBulkDelete": true,
