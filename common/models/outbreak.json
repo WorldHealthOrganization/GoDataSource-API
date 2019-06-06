@@ -1263,6 +1263,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "findLabResultsAggregate"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "filteredCountLabResultsAggregate"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_outbreak",
       "permission": "ALLOW",
       "property": "restoreOutbreak"
@@ -5572,6 +5584,53 @@
       "http": {
         "verb": "get",
         "path": "/lab-results/filtered-count"
+      }
+    },
+    "prototype.findLabResultsAggregate": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, order, skip, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'case.field' conditions, case being another property from lab result"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "labResults",
+          "type": [
+            "labResult"
+          ],
+          "description": "List of labResults that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries labResults of outbreak.",
+      "http": {
+        "verb": "get",
+        "path": "/lab-results/aggregate"
+      }
+    },
+    "prototype.filteredCountLabResultsAggregate": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, order, skip, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'case.field' MongoDB compatible queries"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of lab results that pass the filter",
+          "required": true
+        }
+      ],
+      "description": "Counts the lab results that pass a filter",
+      "http": {
+        "verb": "get",
+        "path": "/lab-results/aggregate-filtered-count"
       }
     },
     "restoreOutbreak": {

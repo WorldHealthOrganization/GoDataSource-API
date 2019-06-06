@@ -8481,6 +8481,32 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Find outbreak lab results along with case information
+   * @param callback
+   */
+  Outbreak.prototype.findLabResultsAggregate = function (filter, callback) {
+    app.models.labResult.retrieveAggregateLabResults(
+      this.id,
+      filter,
+      false,
+      callback
+    );
+  };
+
+  /**
+   * Count outbreak lab-results
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountLabResultsAggregate = function (filter, callback) {
+    app.models.labResult.retrieveAggregateLabResults(
+      this.id,
+      filter,
+      true,
+      callback
+    );
+  };
+
+  /**
    * Backwards compatibility for find, filtered-count and per-classification count cases filters
    * @param context
    * @param modelInstance

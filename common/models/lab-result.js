@@ -175,6 +175,72 @@ module.exports = function (LabResult) {
   };
 
   /**
+   * Aggregate fiind lab-results
+   * @param outbreakId
+   * @param filter
+   * @param countOnly
+   * @param callback
+   */
+  LabResult.retrieveAggregateLabResults = (
+    outbreakId,
+    filter,
+    countOnly,
+    callback
+  ) => {
+    // make sure we have a default filter
+    filter = filter || {};
+
+    // retrieve records from this outbreak
+    const outbreakCondition = {
+      outbreakId: outbreakId
+    };
+    filter.where = _.isEmpty(filter.where) ?
+      outbreakCondition : {
+        and: [
+          outbreakCondition,
+          filter.where
+        ]
+      };
+
+    // filter lab results
+    app.models.labResult
+      .rawFindAggregate(
+        filter, {
+          countOnly: countOnly,
+          relations: [{
+            lookup: {
+              from: 'person',
+              localField: 'personId',
+              foreignField: '_id',
+              as: 'case'
+            },
+            unwind: true,
+            map: (record) => {
+              // remove deleted records - since this is a limitation of mongo and it can't be easily done with this version
+              if (
+                record.deleted &&
+                !filter.deleted
+              ) {
+                return null;
+              }
+
+              // replace id
+              record.id = record._id;
+              delete record._id;
+
+              // finished
+              return record;
+            }
+          }]
+        }
+      )
+      .then((labResults) => {
+        callback(null, labResults);
+      })
+      .catch(callback);
+  };
+
+  /**
    * Before save hooks
    */
   LabResult.observe('before save', function (context, next) {
