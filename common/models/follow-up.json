@@ -44,6 +44,9 @@
     },
     "comment": {
       "type": "string"
+    },
+    "deletedByParent": {
+      "type": "string"
     }
   },
   "indexes": {
