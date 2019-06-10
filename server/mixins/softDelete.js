@@ -58,9 +58,6 @@ module.exports = function (Model) {
         props,
         options.extraProps
       );
-
-      // not used anymore
-      delete options.extraProps;
     }
 
     // make context available for others
@@ -295,9 +292,6 @@ module.exports = function (Model) {
         props,
         options.extraProps
       );
-
-      // not used anymore
-      delete options.extraProps;
     }
 
     const promise = this

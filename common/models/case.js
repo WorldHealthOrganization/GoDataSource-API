@@ -81,20 +81,16 @@ module.exports = function (Case) {
       }
 
       // construct the list of contacts that we need to remove
-      const contactsAndRelationshipsJobs = [];
-      let contactIds = [];
+      const contactsJobs = [];
       isolatedContacts.forEach((isolatedContact) => {
         if (isolatedContact.isValid) {
-          // used to determine relationships that we need to remove
-          contactIds.push(isolatedContact.contact.id);
-
           // remove contact job
-          contactsAndRelationshipsJobs.push((function (contactModel) {
+          contactsJobs.push((function (contactModel) {
             return (callback) => {
               contactModel.destroy(
                 {
                   extraProps: {
-                    deletedByCase: caseId
+                    deletedByParent: caseId
                   }
                 },
                 callback
@@ -104,54 +100,10 @@ module.exports = function (Case) {
         }
       });
 
-      // delete relationships too
-      if (_.isEmpty(contactIds)) {
-        next();
-      } else {
-        contactIds = Array.from(new Set(contactIds));
-        app.models.relationship
-          .find({
-            where: {
-              or: [
-                {
-                  'persons.0.id': {
-                    inq: contactIds
-                  },
-                  'persons.1.id': caseId
-                } , {
-                  'persons.0.id': caseId,
-                  'persons.1.id': {
-                    inq: contactIds
-                  }
-                }
-              ]
-            }
-          })
-          .then((relationships) => {
-            // delete relationships
-            relationships.forEach((relationship) => {
-              // remove relationship job
-              contactsAndRelationshipsJobs.push((function (relationshipModel) {
-                return (callback) => {
-                  relationshipModel.destroy(
-                    {
-                      extraProps: {
-                        deletedByCase: caseId
-                      }
-                    },
-                    callback
-                  );
-                };
-              })(relationship));
-
-              // delete each isolated contact & and its relationship
-              async.parallelLimit(contactsAndRelationshipsJobs, 10, function (error) {
-                next(error);
-              });
-            });
-          })
-          .catch(next);
-      }
+      // delete each isolated contact & and its relationship
+      async.parallelLimit(contactsJobs, 10, function (error) {
+        next(error);
+      });
     });
   });
 

@@ -57,6 +57,9 @@
     },
     "testedFor": {
       "type": "string"
+    },
+    "deletedByParent": {
+      "type": "string"
     }
   },
   "validations": [],

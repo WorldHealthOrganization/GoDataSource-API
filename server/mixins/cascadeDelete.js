@@ -2,6 +2,8 @@
 
 const app = require('../server');
 const async = require('async');
+const _ = require('lodash');
+
 // define a list of available operations
 const availableOperationsMap = {
   /**
@@ -92,10 +94,31 @@ module.exports = function (Model, options) {
     let operations = [];
     // if the instance ID was found
     if (instanceId) {
+      // replace relation data keys with proper information
+      const replaceRelationInputVariables = (where) => {
+        return JSON.parse(
+          JSON.stringify(where)
+            .replace(/":FK_UUID"/g, `"${instanceId}"`)
+        );
+      };
+
+      // transform relation input to readable format
+      const formatRelationInput = (relationData) => {
+        // create relation object & replace variables
+        const relation = {
+          name: _.isString(relationData) ? relationData : relationData.relation,
+          operations: _.isObject(relationData) && !_.isEmpty(relationData.operations) ? replaceRelationInputVariables(relationData.operations) : {}
+        };
+
+        // finish
+        return relation;
+      };
+
       // go through all monitored relations
-      options.relations.forEach(function (relationName) {
+      options.relations.forEach(function (relationData) {
         // get relation definition
-        let relationDefinition = relationsDefinitions[relationName];
+        const relation = formatRelationInput(relationData);
+        let relationDefinition = relationsDefinitions[relation.name];
         if (relationDefinition) {
           // handle relations by type
           switch (relationDefinition.type) {
@@ -104,29 +127,40 @@ module.exports = function (Model, options) {
             case 'hasMany':
               // add operations for each relation
               operations.push(function (callback) {
-                availableOperationsMap[operation](relationDefinition.model, {
-                  [relationDefinition.foreignKey]: instanceId
-                }, context.options, function (error, count) {
-                  if (error) {
-                    // log error
-                    app.logger.error(`Cascade ${operation} failed for ${Model.modelName}. Relation ${relationName} ${operation} failed to be cascaded: ${JSON.stringify(error)}`);
-                  } else {
-                    // log success
-                    app.logger.debug(`Cascade ${operation} ${Model.modelName} relation ${relationName} completed successfully. Affected ${count} records`);
-                  }
-                  // move to the next operation
-                  callback(error, count);
-                });
+                availableOperationsMap[operation](
+                  relationDefinition.model,
+                  Object.assign(
+                    {
+                      [relationDefinition.foreignKey]: instanceId
+                    },
+                    relation.operations[operation] && !_.isEmpty(relation.operations[operation].where) ? relation.operations[operation].where : {}
+                  ),
+                  Object.assign(
+                    {},
+                    context.options,
+                    relation.operations[operation] && !_.isEmpty(relation.operations[operation].set) ? { extraProps: relation.operations[operation].set } : {}
+                  ),
+                  function (error, count) {
+                    if (error) {
+                      // log error
+                      app.logger.error(`Cascade ${operation} failed for ${Model.modelName}. Relation ${relation.name} ${operation} failed to be cascaded: ${JSON.stringify(error)}`);
+                    } else {
+                      // log success
+                      app.logger.debug(`Cascade ${operation} ${Model.modelName} relation ${relation.name} completed successfully. Affected ${count} records`);
+                    }
+                    // move to the next operation
+                    callback(error, count);
+                  });
               });
               break;
             default:
               // log unhandled relation type
-              app.logger.error(`Cascade ${operation} aborted for ${Model.modelName}. Could not handle relation type ${relationDefinition.type} for ${relationName}.`);
+              app.logger.error(`Cascade ${operation} aborted for ${Model.modelName}. Could not handle relation type ${relationDefinition.type} for ${relation.name}.`);
               break;
           }
         } else {
           // log unhandled relation definition
-          app.logger.error(`Cascade ${operation} aborted for ${Model.modelName}. Could not find relation definition for ${relationName}.`);
+          app.logger.error(`Cascade ${operation} aborted for ${Model.modelName}. Could not find relation definition for ${relation.name}.`);
         }
       });
     } else {

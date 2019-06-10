@@ -54,7 +54,7 @@
       "description": "Whether the relationship is active or not. A relationship becomes inactive if the case (if any) becomes discarded",
       "default": true
     },
-    "deletedByCase": {
+    "deletedByParent": {
       "type": "string"
     }
   },
