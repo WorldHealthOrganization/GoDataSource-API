@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const _ = require('lodash');
 const helpers = require('../../components/helpers');
+const uuid = require('uuid').v4;
 
 module.exports = function (HelpCategory) {
   // set flag to not get controller
@@ -29,6 +30,9 @@ module.exports = function (HelpCategory) {
     if (context.isNewInstance) {
       let instance = context.instance;
       let identifier = `LNG_${_.snakeCase(HelpCategory.modelName).toUpperCase()}_${_.snakeCase(instance.name).toUpperCase()}`;
+
+      // make sure the id is unique
+      identifier = `${identifier}_${uuid()}`;
 
       // set instance id, before setting the original context
       // because the setter takes in account the current instance id
