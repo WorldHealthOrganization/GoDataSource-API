@@ -6737,7 +6737,8 @@
         },
         {
           "arg": "date",
-          "type": "date"
+          "type": "object",
+          "description": "{ startDate: '2019-04-26T21:00:00.000Z', endDate: '2019-04-27T20:59:59.999Z' }"
         },
         {
           "arg": "contactId",

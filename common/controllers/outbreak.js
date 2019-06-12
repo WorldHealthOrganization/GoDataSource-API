@@ -7912,8 +7912,8 @@ module.exports = function (Outbreak) {
       // set them according to date
       if (date) {
         // determine start & end dates
-        startDate = genericHelpers.getDate(date);
-        endDate = genericHelpers.getDateEndOfDay(date);
+        startDate = genericHelpers.getDate(date.startDate);
+        endDate = genericHelpers.getDateEndOfDay(date.endDate);
 
         // determine date condition that will be added when retrieving follow-ups
         dateCondition = {
