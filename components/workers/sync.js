@@ -231,7 +231,7 @@ const worker = {
           // if this is not true, do not pack the main archive
           options.hasDataToExport = false;
 
-          // define general not deleted records filter
+          // define general records not deleted filter
           const notDeletedFilter = {
             $or: [
               {
@@ -581,6 +581,7 @@ const worker = {
           // check for filter locationsIds and filter teamIds; both of none will be present
           // when present we need to filter persons and all person related data based on location
           // initialize filter data gathering promise
+          // #TODO - merge this block of code into above block..., so we do less requests to mongo
           if (
             filter.where.locationsIds &&
             filter.where.teamsIds
