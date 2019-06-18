@@ -233,15 +233,9 @@ const worker = {
 
           // define general records not deleted filter
           const notDeletedFilter = {
-            $or: [
-              {
-                deleted: false
-              }, {
-                deleted: {
-                  $eq: null
-                }
-              }
-            ]
+            deleted: {
+              $ne: true
+            }
           };
 
           // retrieve active cases and all their related contacts
@@ -284,8 +278,6 @@ const worker = {
                   }
                 )
                 .toArray()
-
-                // map outbreaks
                 .then((outbreaks) => {
                   // define object to perpetuate data to other promises
                   return {
@@ -307,17 +299,17 @@ const worker = {
 
               // retrieve only persons that belong to one of our outbreaks
               // if no outbreaks are provided, then it means that we have access to all outbreaks, so we need to retrieve all persons
-              const outbreakFilter = _.get(options, 'filter.where.outbreakId');
-              if (!_.isEmpty(outbreakFilter)) {
-                personFilter = {
-                  $and: [
-                    {
-                      outbreakId: convertLoopbackFilterToMongo(outbreakFilter)
-                    },
-                    personFilter
-                  ]
-                };
-              }
+              const outbreakIds = Object.keys(response.outbreaks);
+              personFilter = {
+                $and: [
+                  {
+                    outbreakId: {
+                      $in: outbreakIds
+                    }
+                  },
+                  personFilter
+                ]
+              };
 
               // check for filter locationsIds and filter teamIds; both or none will be present
               // when present we need to filter persons and all person related data based on location
@@ -379,10 +371,13 @@ const worker = {
                 .then((personsRecords) => {
                   // loop through the personsIds to get contactIds / caseIds / eventIds
                   // & cache IDs on filter for future usage
+                  // - contacts is an object because we need to easily find later a contact by id ( dictionary )
+                  // - events is an object, because even if now we don't have duplicates, later we will add other event ids that could already be in the list of ids
+                  //    - so this is an easy way to remove duplicates
                   response.cases = [];
                   response.contacts = {};
                   response.events = {};
-                  (personsRecords || []).forEach((person) => {
+                  personsRecords.forEach((person) => {
                     switch (person.type) {
                       case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT':
                         response.contacts[person._id] = person;
@@ -412,7 +407,7 @@ const worker = {
               }
 
               // retrieve case connected relationships of type contacts
-              // since _ids are unique, there is no need to add outbreaks filter since we do that for cases, and here we retrieve only relationships for those cases
+              // since _ids are unique, there is no need to add outbreaks filter since we do that already for contacts, and here we retrieve only relationships for these contacts
               const contactRecordsIds = Object.keys(response.contacts);
               const relationshipFilters = {
                 $and: [
@@ -449,7 +444,7 @@ const worker = {
               response.caseContactsMap = {};
               response.contactEventsMap = {};
               response.relationshipMap = {};
-              (response.relationships || []).forEach((relationship) => {
+              response.relationships.forEach((relationship) => {
                 // something went wrong, we have invalid data
                 // jump over this record
                 if (
@@ -525,19 +520,13 @@ const worker = {
               response.activeCases = _.filter(
                 response.cases,
                 (caseData) => {
-                  // if outbreak doesn't exist anymore, then case is inactive :)
+                  // retrieve case outbreak
                   const outbreak = response.outbreaks[caseData.outbreakId];
-                  let periodOfFollowup;
-                  if (!outbreak) {
+
+                  // make sure that the number of followup days has a valid value
+                  let periodOfFollowup = outbreak.periodOfFollowup;
+                  if (!_.isNumber(periodOfFollowup)) {
                     return false;
-                  } else {
-                    // make sure that the number of followup days has a valid value
-                    periodOfFollowup = outbreak.periodOfFollowup;
-                    // eslint-disable-next-line no-empty
-                    try { periodOfFollowup = parseInt(periodOfFollowup); } catch(e) {}
-                    if (!_.isNumber(periodOfFollowup)) {
-                      return false;
-                    }
                   }
 
                   // case still active
@@ -584,7 +573,7 @@ const worker = {
                           ].indexOf(contact.followUp.status) > -1
                         )
                       ) {
-                        // case if active, so there is no point in checking the other contacts
+                        // case is active, so there is no point in checking the other contacts
                         caseIsActive = true;
                         return false;
                       }
@@ -626,7 +615,7 @@ const worker = {
 
               // determine events that should be retrieved
               // all matching search criteria + resulted from relationships with contacts
-              (filter.where.contactsIds || []).forEach((contactId) => {
+              filter.where.contactsIds.forEach((contactId) => {
                 // do we have events associated with this contact ?
                 if (response.contactEventsMap[contactId]) {
                   Object.assign(
