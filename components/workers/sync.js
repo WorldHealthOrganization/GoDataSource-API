@@ -8,11 +8,13 @@ const fs = require('fs');
 const Moment = require('moment');
 const path = require('path');
 const AdmZip = require('adm-zip');
+const _ = require('lodash');
 
 const logger = require('./../logger');
 const dbSync = require('./../dbSync');
 const workerRunner = require('./../workerRunner');
 const dbConfig = require('./../../server/datasources').mongoDb;
+const convertLoopbackFilterToMongo = require('../../components/convertLoopbackFilterToMongo');
 
 /**
  * Create ZIP archive of a file/dir
@@ -229,110 +231,423 @@ const worker = {
           // if this is not true, do not pack the main archive
           options.hasDataToExport = false;
 
-          // check for filter locationsIds and filter teamIds; both of none will be present
-          // when present we need to filter persons and all person related data based on location
-          // initialize filter data gathering promise
+          // define general records not deleted filter
+          const notDeletedFilter = {
+            deleted: {
+              $ne: true
+            }
+          };
+
+          // retrieve active cases and all their related contacts
+          // a case is active if one of the following conditions matches:
+          // - case.dateOfOnset is after or same as currentDate - outbreak.periodOfFollowup days
+          // - case has at least one contact that is still under follow-up. A contact is under follow-up if all of the following conditions match:
+          //    - contact.followUp.endDate is either empty or currentDate is between contact.followUp.startDate & contact.followUp.endDate
+          //    - contact.followUp.status is either LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP or LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP
+          //
+          // =======> #TBD: what about cases that are inactive but have a relationship to a case that is active ?
           let filterDataGathering = Promise.resolve();
-          if (filter.where.locationsIds && filter.where.teamsIds) {
-            // get person IDs for the location
-            filterDataGathering = dbConnection
-              .collection(dbSync.collectionsMap.person)
-              .find({
-                '$or': [{
-                  addresses: {
-                    '$elemMatch': {
-                      typeId: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
-                      locationId: {
-                        '$in': filter.where.locationsIds
+          filterDataGathering
+            // retrieve outbreaks
+            .then(() => {
+              // retrieve all outbreaks that aren't deleted
+              let outbreakFilter = notDeletedFilter;
+
+              // should we retrieve information about all outbreaks or just some of them
+              const outbreakIds = _.get(options, 'filter.where.outbreakId');
+              if (!_.isEmpty(outbreakIds)) {
+                outbreakFilter = {
+                  $and: [
+                    {
+                      _id: convertLoopbackFilterToMongo(outbreakIds)
+                    },
+                    outbreakFilter
+                  ]
+                };
+              }
+
+              // retrieve outbreaks
+              return dbConnection
+                .collection(dbSync.collectionsMap.outbreak)
+                .find(
+                  outbreakFilter, {
+                    projection: {
+                      _id: 1,
+                      periodOfFollowup: 1
+                    }
+                  }
+                )
+                .toArray()
+                .then((outbreaks) => {
+                  // define object to perpetuate data to other promises
+                  return {
+                    outbreaks: _.transform(
+                      outbreaks,
+                      (acc, outbreak) => {
+                        acc[outbreak._id] = outbreak;
+                      },
+                      {}
+                    )
+                  };
+                });
+            })
+
+            // retrieve outbreak cases
+            .then((response) => {
+              // retrieve all persons that aren't deleted
+              let personFilter = notDeletedFilter;
+
+              // retrieve only persons that belong to one of our outbreaks
+              // if no outbreaks are provided, then it means that we have access to all outbreaks, so we need to retrieve all persons
+              const outbreakIds = Object.keys(response.outbreaks);
+              personFilter = {
+                $and: [
+                  {
+                    outbreakId: {
+                      $in: outbreakIds
+                    }
+                  },
+                  personFilter
+                ]
+              };
+
+              // check for filter locationsIds and filter teamIds; both or none will be present
+              // when present we need to filter persons and all person related data based on location
+              // initialize filter data gathering promise
+              // IMPORTANT:
+              // - filters out contacts that aren't from these locations
+              // - it won't mark a case as being active even if one of its contacts is still under follow-up if that contact isn't from these locations
+              if (
+                filter.where.locationsIds &&
+                filter.where.teamsIds
+              ) {
+                personFilter = {
+                  $and: [
+                    {
+                      $or: [
+                        {
+                          addresses: {
+                            $elemMatch: {
+                              typeId: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
+                              locationId: {
+                                $in: filter.where.locationsIds
+                              }
+                            }
+                          }
+                        }, {
+                          'address.typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
+                          'address.locationId': {
+                            $in: filter.where.locationsIds
+                          }
+                        }
+                      ]
+                    },
+                    personFilter
+                  ]
+                };
+              }
+
+              // retrieve outbreak persons
+              // no need to retrieve them in bulk by bulk since we use projection which should reduce significantly the quantity of information retrieved from mongodb
+              return dbConnection
+                .collection(dbSync.collectionsMap.person)
+                .find(
+                  personFilter, {
+                    projection: {
+                      // common fields ( case / contact / event )
+                      _id: 1,
+                      outbreakId: 1,
+                      type: 1,
+
+                      // case fields
+                      dateOfOnset: 1,
+
+                      // contact fields
+                      followUp: 1
+                    }
+                  }
+                )
+                .toArray()
+                .then((personsRecords) => {
+                  // loop through the personsIds to get contactIds / caseIds / eventIds
+                  // & cache IDs on filter for future usage
+                  // - contacts is an object because we need to easily find later a contact by id ( dictionary )
+                  // - events is an object, because even if now we don't have duplicates, later we will add other event ids that could already be in the list of ids
+                  //    - so this is an easy way to remove duplicates
+                  response.cases = [];
+                  response.contacts = {};
+                  response.events = {};
+                  personsRecords.forEach((person) => {
+                    switch (person.type) {
+                      case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT':
+                        response.contacts[person._id] = person;
+                        break;
+                      case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
+                        response.cases.push(person);
+                        break;
+                      case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT':
+                        response.events[person._id] = true;
+                        break;
+                    }
+                  });
+
+                  // finished
+                  return response;
+                });
+            })
+
+            // retrieve case contacts relationships
+            .then((response) => {
+              // define object to perpetuate data to other promises
+              response.relationships = [];
+
+              // there is nothing to retrieve ?
+              if (_.isEmpty(response.contacts)) {
+                return response;
+              }
+
+              // retrieve case connected relationships of type contacts
+              // since _ids are unique, there is no need to add outbreaks filter since we do that already for contacts, and here we retrieve only relationships for these contacts
+              const contactRecordsIds = Object.keys(response.contacts);
+              const relationshipFilters = {
+                $and: [
+                  {
+                    'persons.id': {
+                      $in: contactRecordsIds
+                    }
+                  },
+                  notDeletedFilter
+                ]
+              };
+
+              // retrieve case contacts relationships that aren't deleted
+              return dbConnection
+                .collection(dbSync.collectionsMap.relationship)
+                .find(
+                  relationshipFilters, {
+                    projection: {
+                      _id: 1,
+                      persons: 1
+                    }
+                  }
+                )
+                .toArray()
+                .then((relationships) => {
+                  response.relationships = relationships;
+                  return response;
+                });
+            })
+
+            // map relationships
+            .then((response) => {
+              // map contacts to cases / events
+              response.caseContactsMap = {};
+              response.contactEventsMap = {};
+              response.relationshipMap = {};
+              response.relationships.forEach((relationship) => {
+                // something went wrong, we have invalid data
+                // jump over this record
+                if (
+                  !relationship.persons ||
+                  relationship.persons.length !== 2
+                ) {
+                  return;
+                }
+
+                // if relation is between a case & a contact, the case will be the parent
+                // otherwise, the contact will be the parent if related to an event
+                let parentId, childId, mapData;
+                if (
+                  relationship.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ||
+                  relationship.persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+                ) {
+                  if (relationship.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                    mapData = response.caseContactsMap;
+                    parentId = relationship.persons[1].id; // case
+                    childId = relationship.persons[0].id; // contact
+                  } else {
+                    mapData = response.caseContactsMap;
+                    parentId = relationship.persons[0].id; // case
+                    childId = relationship.persons[1].id; // contact
+                  }
+                } else if (
+                  relationship.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT' ||
+                  relationship.persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                ) {
+                  if (relationship.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                    mapData = response.contactEventsMap;
+                    parentId = relationship.persons[0].id; // contact
+                    childId = relationship.persons[1].id; // event
+                  } else {
+                    mapData = response.contactEventsMap;
+                    parentId = relationship.persons[1].id; // contact
+                    childId = relationship.persons[0].id; // event
+                  }
+                } else {
+                  // contact to contact relationship
+                  // we shouldn't have this kind of relationships
+                  return;
+                }
+
+                // map case / event to contact
+                _.set(
+                  mapData,
+                  `${parentId}.${childId}`,
+                  true
+                );
+
+                // map relationships - Parent
+                if (!response.relationshipMap[parentId]) {
+                  response.relationshipMap[parentId] = [];
+                }
+                response.relationshipMap[parentId].push(relationship._id);
+
+                // map relationships - Child
+                if (!response.relationshipMap[childId]) {
+                  response.relationshipMap[childId] = [];
+                }
+                response.relationshipMap[childId].push(relationship._id);
+              });
+
+              // finished
+              return response;
+            })
+
+            // determine active cases
+            .then((response) => {
+              // determine active cases
+              const endOfDay = Moment().endOf('day');
+              response.activeCases = _.filter(
+                response.cases,
+                (caseData) => {
+                  // retrieve case outbreak
+                  const outbreak = response.outbreaks[caseData.outbreakId];
+
+                  // make sure that the number of followup days has a valid value
+                  let periodOfFollowup = outbreak.periodOfFollowup;
+                  if (!_.isNumber(periodOfFollowup)) {
+                    return false;
+                  }
+
+                  // case still active
+                  // - case.dateOfOnset is after or same as currentDate - outbreak.periodOfFollowup days
+                  if (
+                    caseData.dateOfOnset &&
+                    Moment(caseData.dateOfOnset).isSameOrAfter(Moment().add(-periodOfFollowup, 'days').startOf('day'))
+                  ) {
+                    return true;
+                  }
+
+                  // does this case have contacts ?
+                  if (!response.caseContactsMap[caseData._id]) {
+                    // this case has no contacts
+                    return false;
+                  }
+
+                  // one of its contacts is still active ?
+                  // - case has at least one contact that is still under follow-up. A contact is under follow-up if all of the following conditions match:
+                  //    - contact.followUp.endDate is either empty or currentDate is between contact.followUp.startDate & contact.followUp.endDate
+                  //    - contact.followUp.status is either LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP or LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP
+                  let caseIsActive = false;
+                  _.each(
+                    response.caseContactsMap[caseData._id],
+                    (nothing, contactId) => {
+                      // check if contact is under follow-up
+                      const contact = response.contacts[contactId];
+                      if (
+                        contact &&
+                        contact.followUp && (
+                          !contact.followUp.endDate || (
+                            endOfDay.isBetween(
+                              Moment(contact.followUp.startDate).startOf('day'),
+                              Moment(contact.followUp.endDate).endOf('day'),
+                              null,
+                              '[]'
+                            )
+                          )
+                        ) && (
+                          !contact.followUp.status ||
+                          [
+                            'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP',
+                            'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP'
+                          ].indexOf(contact.followUp.status) > -1
+                        )
+                      ) {
+                        // case is active, so there is no point in checking the other contacts
+                        caseIsActive = true;
+                        return false;
                       }
                     }
-                  }
-                }, {
-                  'address.typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
-                  'address.locationId': {
-                    '$in': filter.where.locationsIds
-                  }
-                }]
-              }, {
-                projection: {
-                  _id: 1,
-                  type: 1
+                  );
+
+                  // case active / not active response
+                  return caseIsActive;
                 }
-              })
-              .toArray()
-              .then(function (persons) {
-                // loop through the personsIds to get contactIds/caseIds/eventIds
-                let contactsIds = [];
-                let casesIds = [];
-                let eventsIds = [];
-                let personsIds = [];
-                persons.forEach(function (person) {
-                  switch (person.type) {
-                    case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT':
-                      contactsIds.push(person._id);
-                      break;
-                    case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
-                      casesIds.push(person._id);
-                      break;
-                    case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT':
-                      eventsIds.push(person._id);
-                      break;
-                    default:
-                      break;
+              );
+
+              // finished
+              return response;
+            })
+
+            // prepare person & relationship arrays of ids to be used later by filters
+            .then((response) => {
+              // make sure where is initialized
+              filter.where = filter.where || {};
+
+              // active cases
+              const contactsIds = {};
+              filter.where.casesIds = (response.activeCases || [])
+                .map((caseData) => {
+                  // go through all case contacts
+                  if (response.caseContactsMap[caseData._id]) {
+                    Object.assign(
+                      contactsIds,
+                      response.caseContactsMap[caseData._id]
+                    );
                   }
-                  personsIds.push(person._id);
+
+                  // we need only the case id
+                  return caseData._id;
                 });
 
-                // cache IDs on filter for future usage
-                filter.where.contactsIds = contactsIds;
-                filter.where.casesIds = casesIds;
-                filter.where.eventsIds = eventsIds;
-                filter.where.personsIds = personsIds;
+              // all contacts related to active cases
+              filter.where.contactsIds = Object.keys(contactsIds);
 
-                // get contacts relationships IDs in order to get related cases IDs; there might be cases not already found (in other locations)
-                return dbConnection
-                  .collection(dbSync.collectionsMap.relationship)
-                  .find({
-                    'persons.id': {
-                      '$in': contactsIds
-                    }
-                  })
-                  .toArray();
-              })
-              .then(function (relationships) {
-                // loop through the relationships to get the IDs and the cases/events IDs
-                let relationshipsIds = [];
-                let casesIds = [];
-                let eventsIds = [];
-                let personsIds = [];
-
-                relationships.forEach(function (relationship) {
-                  // cache relationship ID
-                  relationshipsIds.push(relationship._id);
-                  // get the source person ID as the target is the contact
-                  let source = relationship.persons.filter(person => person.source === true)[0];
-                  // cache IDs
-                  personsIds.push(source.id);
-                  if (source.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
-                    casesIds.push(source.id);
-                  } else {
-                    eventsIds.push(source.id);
-                  }
-                });
-
-                // cache IDs on the filter
-                filter.where.relationshipsIds = relationshipsIds;
-                // get all unique personsIds
-                personsIds = personsIds.concat(filter.where.personsIds);
-                filter.where.personsIds = [...new Set(personsIds)];
-                // get all unique casesIds
-                casesIds = casesIds.concat(filter.where.casesIds);
-                filter.where.casesIds = [...new Set(casesIds)];
-                // get all unique eventsIds
-                eventsIds = eventsIds.concat(filter.where.eventsIds);
-                filter.where.eventsIds = [...new Set(eventsIds)];
+              // determine events that should be retrieved
+              // all matching search criteria + resulted from relationships with contacts
+              filter.where.contactsIds.forEach((contactId) => {
+                // do we have events associated with this contact ?
+                if (response.contactEventsMap[contactId]) {
+                  Object.assign(
+                    response.events,
+                    response.contactEventsMap[contactId]
+                  );
+                }
               });
-          }
+              filter.where.eventsIds = Object.keys(response.events);
+
+              // determine all persons that we need to retrieve
+              filter.where.personsIds = [
+                ...filter.where.casesIds,
+                ...filter.where.contactsIds,
+                ...filter.where.eventsIds
+              ];
+
+              // determine all relationships that we need to retrieve
+              // IMPORTANT:
+              // - only relationships between a contact & a case or a contact & an event are retrieved
+              // - relationships between a case & an event, a case & a case or an event & an event aren't retrieved...
+              filter.where.relationshipsIds = [];
+              (filter.where.personsIds || []).forEach((personId) => {
+                if (response.relationshipMap[personId]) {
+                  filter.where.relationshipsIds.push(...response.relationshipMap[personId]);
+                }
+              });
+
+              // make ids unique
+              filter.where.relationshipsIds = [...new Set(filter.where.relationshipsIds)];
+            })
+            .catch(reject);
 
           // run data gathering at first
           filterDataGathering
