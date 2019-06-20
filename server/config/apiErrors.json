@@ -227,6 +227,14 @@
     "defaultStatusCode": 422,
     "messagePattern": "Invalid person type `<%= type %>` provided as relationship source."
   },
+  "CONTACT_CANT_BE_SOURCE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "A contact can't be the source in a relationship ( it can only be a target )"
+  },
+  "CIRCULAR_RELATIONSHIP": {
+    "defaultStatusCode": 422,
+    "messagePattern": "You can't have a relationship between the same records"
+  },
   "BULK_CREATE_RELATIONSHIP_ERRORS": {
     "defaultStatusCode": 422,
     "messagePattern": "At least one relationship failed to be created. Successfully created: <%= created.count %>. Failed to create: <%= failed.count %>"
