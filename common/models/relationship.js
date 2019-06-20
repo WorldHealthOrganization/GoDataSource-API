@@ -1170,20 +1170,11 @@ module.exports = function (Relationship) {
           });
       })
       .then((data) => {
-        // make sure we don't leave contact without exposures
-        // this might no be need since for contacts we wil move it to an event / case and not to a contact since this isn't possible
-        // NOTHING TO DO HERE, a contact will always have an exposure
-        // Actually it can, when we change target since target might be a contact, changing it might make the contact isolated
-        if (!changeSource) {
-          // changing target
-          // we must determine if we're changing contact relationships
-          // #TODO
-        }
-
         // prepare relationships for update
         const updateRelationshipsJobs = [];
         const sourceTargetModel = data.sourceTargetModel;
         const relationships = data.relationships;
+        const isolatedContactsData = {};
         relationships.forEach((relationship) => {
           // jump over invalid relationships
           if (
@@ -1204,6 +1195,22 @@ module.exports = function (Relationship) {
           // if same source / target jump over
           if (sourceTargetPerson.id === sourceTargetModel.id) {
             return;
+          }
+
+          // make sure we don't leave contact without exposures
+          // this might no be need since for contacts we wil move it to an event / case and not to a contact since this isn't possible
+          // NOTHING TO DO HERE, a contact will always have an exposure
+          // Actually it can, when we change target since target might be a contact, changing it might make the contact isolated
+          if (
+            !changeSource &&
+            sourceTargetPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          ) {
+            // changing target
+            // we must determine if we're changing contact relationships
+            if (!isolatedContactsData[sourceTargetPerson.id]) {
+              isolatedContactsData[sourceTargetPerson.id] = {};
+            }
+            isolatedContactsData[sourceTargetPerson.id][relationship.id] = true;
           }
 
           // switch person source / target id
@@ -1245,6 +1252,73 @@ module.exports = function (Relationship) {
           })(relationship));
         });
 
+        // finished
+        return {
+          updateRelationshipsJobs: updateRelationshipsJobs,
+          isolatedContactsData: isolatedContactsData
+        };
+      })
+      .then((data) => {
+        // we don't need to check for isolated cases ?
+        const isolatedContactsData = data.isolatedContactsData;
+        if (_.isEmpty(isolatedContactsData)) {
+          return data.updateRelationshipsJobs;
+        }
+
+        // check for isolated cases
+        return app.models.relationship
+          .rawFind({
+            deleted: {
+              $ne: true
+            },
+            'persons.id': {
+              $in: Object.keys(isolatedContactsData)
+            }
+          }, {
+            projection: {
+              _id: 1,
+              persons: 1
+            }
+          })
+          .then((contactRelationships) => {
+            // Retrieve contact id from a relationship ( return undefined if relationships is associated with a contact )
+            const getContactId = (persons) => {
+              let contactId;
+              if (persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                contactId = persons[0].id;
+              } else if (persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                contactId = persons[1].id;
+              }
+              return contactId;
+            };
+
+            // go through contacts & determine if one of them will become isolated
+            contactRelationships.forEach((relationship) => {
+              // do we have other exposures for this contact ?
+              const contactId = getContactId(relationship.persons);
+              if (
+                isolatedContactsData[contactId] &&
+                isolatedContactsData[contactId][relationship.id] === undefined
+              ) {
+                // case has exposure, so it isn't a isolated case anymore
+                delete isolatedContactsData[contactId];
+              }
+            });
+
+            // if we still have isolated contacts after the previous step, then it means that Houston we have a problem
+            if (!_.isEmpty(isolatedContactsData)) {
+              const contactIds = Object.keys(isolatedContactsData);
+              throw app.utils.apiError.getError('DELETE_CONTACT_LAST_RELATIONSHIP', {
+                contactIDs: contactIds.join(', '),
+                contactIDsArray: contactIds
+              });
+            }
+
+            // otherwise we're okay to change target / source
+            return data.updateRelationshipsJobs;
+          });
+      })
+      .then((updateRelationshipsJobs) => {
         // update source / target for each record
         return new Promise((resolve, reject) => {
           async.parallelLimit(

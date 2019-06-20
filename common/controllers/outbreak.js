@@ -10747,7 +10747,8 @@ module.exports = function (Outbreak) {
               _id: 1,
               persons: 1
             }
-          }).then((contactRelationships) => ({
+          })
+          .then((contactRelationships) => ({
             mappedData: mappedData,
             contactRelationships: contactRelationships
           }));
