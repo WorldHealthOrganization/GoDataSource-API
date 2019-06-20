@@ -3,6 +3,7 @@
 const transmissionChain = require('../../components/workerRunner').transmissionChain;
 const app = require('../../server/server');
 const _ = require('lodash');
+const async = require('async');
 
 module.exports = function (Relationship) {
   // set flag to not get controller
@@ -1101,6 +1102,165 @@ module.exports = function (Relationship) {
 
         // return updated filter
         return Object.assign(filter, {where: relationshipQuery});
+      });
+  };
+
+  /**
+   * Change source / target for all relationships matching specific conditions
+   * @param outbreakId Outbreak Id
+   * @param changeSource True if sourceTargetId is source, false otherwise
+   * @param sourceTargetId Case / Contact / Event
+   * @param where Mongo Query
+   */
+  Relationship.bulkChangeSourceOrTarget = function (outbreakId, changeSource, sourceTargetId, where) {
+    // validate input
+    // sourceTargetId & where are required
+    if (
+      _.isEmpty(sourceTargetId) ||
+      _.isEmpty(where)
+    ) {
+      return Promise.reject(app.utils.apiError.getError('VALIDATION_ERROR', {
+        model: app.models.relationship.modelName,
+        details: 'Where & source / target id are required'
+      }));
+    }
+
+    // retrieve source / target - case / contact / event
+    // it must be a valid one, otherwise we need to throw an error
+    return app.models.person
+      .findById(sourceTargetId)
+      .then((sourceTargetModel) => {
+        // source / target not found ?
+        if (_.isEmpty(sourceTargetModel)) {
+          throw app.utils.apiError.getError('VALIDATION_ERROR', {
+            model: app.models.relationship.modelName,
+            details: 'Source / Target id is invalid'
+          });
+        }
+
+        // contact can't become source
+        if (
+          changeSource &&
+          sourceTargetModel.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+        ) {
+          throw app.utils.apiError.getError('CONTACT_CANT_BE_SOURCE');
+        }
+
+        // finished
+        return sourceTargetModel;
+      })
+      .then((sourceTargetModel) => {
+        // retrieve relationships
+        return app.models.relationship
+          .find({
+            where: app.utils.remote.convertLoopbackFilterToMongo({
+              $and: [
+                {
+                  outbreakId: outbreakId
+                },
+                where
+              ]
+            })
+          })
+          .then((relationships) => {
+            return {
+              sourceTargetModel: sourceTargetModel,
+              relationships: relationships
+            };
+          });
+      })
+      .then((data) => {
+        // make sure we don't leave contact without exposures
+        // this might no be need since for contacts we wil move it to an event / case and not to a contact since this isn't possible
+        // NOTHING TO DO HERE, a contact will always have an exposure
+        // Actually it can, when we change target since target might be a contact, changing it might make the contact isolated
+        if (!changeSource) {
+          // changing target
+          // we must determine if we're changing contact relationships
+          // #TODO
+        }
+
+        // prepare relationships for update
+        const updateRelationshipsJobs = [];
+        const sourceTargetModel = data.sourceTargetModel;
+        const relationships = data.relationships;
+        relationships.forEach((relationship) => {
+          // jump over invalid relationships
+          if (
+            !relationship.persons ||
+            relationship.persons.length !== 2
+          ) {
+            return;
+          }
+
+          // determine source / target person that we need to update
+          const sourceTargetPerson = _.find(
+            relationship.persons,
+            changeSource ?
+              {source: true} :
+              {target: true}
+          );
+
+          // if same source / target jump over
+          if (sourceTargetPerson.id === sourceTargetModel.id) {
+            return;
+          }
+
+          // switch person source / target id
+          Object.assign(
+            sourceTargetPerson, {
+              id: sourceTargetModel.id,
+              type: sourceTargetModel.type
+            }
+          );
+
+          // make sure that at least one of the persons records isn't a contact
+          // either sourceTargetId, or the unaltered one
+          if (
+            relationship.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
+            relationship.persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          ) {
+            throw app.utils.apiError.getError('CONTACT_CANT_BE_SOURCE');
+          }
+
+          // make sure that we don't have circular relationships, both person records pointing to the same id
+          if (relationship.persons[0].id === relationship.persons[1].id) {
+            throw app.utils.apiError.getError('CIRCULAR_RELATIONSHIP');
+          }
+
+          // create jobs to update relationship source / target
+          updateRelationshipsJobs.push((function (relationshipModel) {
+            return (cb) => {
+              // update
+              relationshipModel
+                .updateAttributes({
+                  persons: relationshipModel.persons
+                })
+                .then(() => {
+                  // finished
+                  cb();
+                })
+                .catch(cb);
+            };
+          })(relationship));
+        });
+
+        // update source / target for each record
+        return new Promise((resolve, reject) => {
+          async.parallelLimit(
+            updateRelationshipsJobs,
+            10,
+            function (error) {
+              // an error occurred along the way of updating relationships...
+              if (!_.isEmpty(error)) {
+                return reject(error);
+              }
+
+              // finished
+              resolve(updateRelationshipsJobs.length);
+            }
+          );
+        });
       });
   };
 };

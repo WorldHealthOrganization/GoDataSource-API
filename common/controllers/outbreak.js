@@ -10641,8 +10641,8 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Delete all records matching specific conditions
-   * @param where
+   * Delete all relationships matching specific conditions
+   * @param where Mongo Query
    * @param callback
    */
   Outbreak.prototype.bulkDeleteRelationships = function (where, callback) {
@@ -10817,6 +10817,36 @@ module.exports = function (Outbreak) {
                 0
             );
           });
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Change target for all relationships matching specific conditions
+   * @param targetId Case / Contact / Event
+   * @param where Mongo Query
+   * @param callback
+   */
+  Outbreak.prototype.bulkChangeTargetRelationships = function (targetId, where, callback) {
+    app.models.relationship
+      .bulkChangeSourceOrTarget(this.id, false, targetId, where)
+      .then((changedCount) => {
+        callback(null, changedCount);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Change source for all relationships matching specific conditions
+   * @param sourceId Case / Contact / Event
+   * @param where Mongo Query
+   * @param callback
+   */
+  Outbreak.prototype.bulkChangeSourceRelationships = function (sourceId, where, callback) {
+    app.models.relationship
+      .bulkChangeSourceOrTarget(this.id, true, sourceId, where)
+      .then((changedCount) => {
+        callback(null, changedCount);
       })
       .catch(callback);
   };

@@ -1473,6 +1473,30 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "bulkChangeTargetRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "bulkChangeTargetRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "bulkChangeSourceRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_contact",
+      "permission": "ALLOW",
+      "property": "bulkChangeSourceRelationships"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "downloadCaseClassificationPerLocationLevelReport"
@@ -6377,7 +6401,7 @@
         {
           "arg": "where",
           "type": "object",
-          "description": "Criteria to match model instances",
+          "description": "Criteria to match filter thorough relationships",
           "required": true
         }
       ],
@@ -6391,6 +6415,58 @@
       "http": {
         "verb": "delete",
         "path": "/relationships/bulk"
+      }
+    },
+    "prototype.bulkChangeTargetRelationships": {
+      "accepts": [
+        {
+          "arg": "targetId",
+          "type": "string",
+          "description": "Case / Contact / Event id",
+          "required": true
+        }, {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match filter thorough relationships",
+          "required": true
+        }
+      ],
+      "returns": {
+        "arg": "count",
+        "type": "integer",
+        "required": true,
+        "description": "Number of records updated"
+      },
+      "description": "Bulk change target relationships.",
+      "http": {
+        "verb": "post",
+        "path": "/relationships/bulk-change-target"
+      }
+    },
+    "prototype.bulkChangeSourceRelationships": {
+      "accepts": [
+        {
+          "arg": "sourceId",
+          "type": "string",
+          "description": "Case / Contact / Event id",
+          "required": true
+        }, {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match filter thorough relationships",
+          "required": true
+        }
+      ],
+      "returns": {
+        "arg": "count",
+        "type": "integer",
+        "required": true,
+        "description": "Number of records updated"
+      },
+      "description": "Bulk change source relationships.",
+      "http": {
+        "verb": "post",
+        "path": "/relationships/bulk-change-source"
       }
     },
     "prototype.downloadCaseClassificationPerLocationLevelReport": {
