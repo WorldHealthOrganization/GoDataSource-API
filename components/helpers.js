@@ -379,6 +379,16 @@ const extractImportableFields = function (Model, data) {
       // add the importable data (if it exists)
       if (data[importableProperty] !== undefined) {
         importableFields[importableProperty] = data[importableProperty];
+      } else {
+        // property is object path ?
+        const importValue = _.get(data, importableProperty);
+        if (importValue !== undefined) {
+          _.set(
+            importableFields,
+            importableProperty,
+            importValue
+          );
+        }
       }
     });
   }
