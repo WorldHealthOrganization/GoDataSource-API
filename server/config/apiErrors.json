@@ -45,6 +45,14 @@
     "defaultStatusCode": 500,
     "messagePattern": "Internal error: `<%= error %>`"
   },
+  "NO_ACTIVE_OUTBREAK": {
+    "defaultStatusCode": 422,
+    "messagePattern": "User `<%= username %>` doesn't have an active outbreak"
+  },
+  "NO_ACCESS_TO_ACTIVE_OUTBREAK": {
+    "defaultStatusCode": 422,
+    "messagePattern": "User `<%= username %>` doesn't have access to active outbreak through client outbreaks"
+  },
   "VALIDATION_ERROR": {
     "defaultStatusCode": 422,
     "messagePattern": "The `<%= model %>` instance is not valid. Details: <%= details %>"

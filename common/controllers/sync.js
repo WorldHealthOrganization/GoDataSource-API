@@ -171,6 +171,35 @@ module.exports = function (Sync) {
 
     // run user email logic at first
     userEmailLogic
+      // check if user active outbreak is one of the client outbreaks
+      .then(function () {
+        // if we don't have an user account, then there is nothing to check
+        if (_.isEmpty(userModel)) {
+          return;
+        }
+
+        // check if user has an active outbreak, otherwise we should throw an error
+        if (_.isEmpty(userModel.activeOutbreakId)) {
+          throw app.utils.apiError.getError('NO_ACTIVE_OUTBREAK', {
+            username: userModel.email
+          });
+        }
+
+        // if there aren't any outbreak limitations for this client then there is no point in checking if user has access
+        const allowedOutbreakIDs = _.get(options, 'remotingContext.req.authData.client.outbreakIDs', []);
+        if (_.isEmpty(allowedOutbreakIDs)) {
+          return;
+        }
+
+        // check if the active outbreak of the provided is one of the allowed client outbreaks
+        if (allowedOutbreakIDs.indexOf(userModel.activeOutbreakId) < 0) {
+          throw app.utils.apiError.getError('NO_ACCESS_TO_ACTIVE_OUTBREAK', {
+            username: userModel.email
+          });
+        }
+      })
+
+      // check if user has access to outbreaks for which we're trying to retrieve data
       .then(function () {
         // get asynchronous flag value; default: false
         asynchronous = asynchronous || false;
