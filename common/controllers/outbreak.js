@@ -7386,7 +7386,9 @@ module.exports = function (Outbreak) {
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
         // find follow-ups using filter
-        return app.models.followUp.findAggregate(filter);
+        return app.models.followUp.findAggregate(
+          filter
+        );
       })
       .then(function (followUps) {
         callback(null, followUps);
@@ -7405,7 +7407,12 @@ module.exports = function (Outbreak) {
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
         // count using query
-        return app.models.followUp.findAggregate({ where: filter.where }, true);
+        return app.models.followUp.findAggregate(
+          {
+            where: filter.where
+          },
+          true
+        );
       })
       .then(function (followUps) {
         callback(null, followUps);

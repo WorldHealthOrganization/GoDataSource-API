@@ -797,147 +797,43 @@ module.exports = function (FollowUp) {
     filter,
     countOnly
   ) => {
-    return new Promise((resolve, reject) => {
-      // convert filter to mongodb filter structure
-      filter = filter || {};
-      let whereFilter = filter.where ? app.utils.remote.convertLoopbackFilterToMongo(filter.where) : {};
-
-      // add other conditions
-      const whereAdditionalConditions = {
-        $or: [
-          {
-            deleted: false
-          },
-          {
-            deleted: {
-              $eq: null
-            }
-          }
-        ]
-      };
-
-      // construct the final query filter
-      whereFilter = _.isEmpty(whereFilter) ?
-        whereAdditionalConditions : {
-          $and: [
-            whereFilter,
-            whereAdditionalConditions
-          ]
-        };
-
-      // construct aggregate filters
-      const aggregatePipeline = [
-        {
-          $match: whereFilter
-        }
-      ];
-
-      // no need to retrieve contact data, sort & skip records if we just need to count
-      if (countOnly) {
-        aggregatePipeline.push({
-          $project: {
-            _id: 1
-          }
-        });
-      } else {
-        aggregatePipeline.push(...[
-          {
-            $lookup: {
+    return app.models.followUp
+      .rawFindAggregate(
+        filter, {
+          countOnly: countOnly,
+          relations: [{
+            lookup: {
               from: 'person',
               localField: 'personId',
               foreignField: '_id',
               as: 'contact'
-            }
-          }, {
-            $unwind: {
-              path: '$contact',
-              preserveNullAndEmptyArrays: true
-            }
-          }
-        ]);
-
-        // parse order props
-        const knownOrderTypes = {
-          ASC: 1,
-          DESC: -1
-        };
-        const orderProps = {};
-        if (Array.isArray(filter.order)) {
-          filter.order.forEach((pair) => {
-            // split prop and order type
-            const split = pair.split(' ');
-            // ignore if we don't receive a pair
-            if (split.length !== 2) {
-              return;
-            }
-            split[1] = split[1].toUpperCase();
-            // make sure the order type is known
-            if (!knownOrderTypes.hasOwnProperty(split[1])) {
-              return;
-            }
-            orderProps[split[0]] = knownOrderTypes[split[1]];
-          });
+            },
+            unwind: true
+          }]
+        }
+      ).then((followUps) => {
+        // nothing to do if we just want to count follow-ups
+        if (countOnly) {
+          return followUps;
         }
 
-        // do not add sort with 0 items, it will throw error
-        if (Object.keys(orderProps).length) {
-          aggregatePipeline.push({
-            $sort: orderProps
-          });
-        }
-
-        // we only add pagination fields if they are numbers
-        // otherwise aggregation will fail
-        if (!isNaN(filter.skip)) {
-          aggregatePipeline.push({
-            $skip: filter.skip
-          });
-        }
-        if (!isNaN(filter.limit)) {
-          aggregatePipeline.push({
-            $limit: filter.limit
-          });
-        }
-      }
-
-      // retrieve data
-      app.dataSources.mongoDb.connector
-        .collection('followUp')
-        .aggregate(aggregatePipeline)
-        .toArray()
-        .catch(reject)
-        .then((records) => {
-          // make sure we have an array
-          records = records || [];
-
-          // count records ?
-          if (countOnly) {
-            return resolve(records.length);
+        // format contact ids & addresses
+        (followUps || []).forEach((followUp) => {
+          // contact id
+          if (followUp.contact) {
+            followUp.contact.id = followUp.contact._id;
+            delete followUp.contact._id;
           }
 
-          // replace _id with id
-          // root._id & root.contact._id
-          records.forEach((record) => {
-            // root._id
-            record.id = record._id;
-            delete record._id;
-
-            // root.contact._id
-            if (record.contact) {
-              record.contact.id = record.contact._id;
-              delete record.contact._id;
-            }
-
-            // remap address lat & lng
-            FollowUp.prepareDataForRead({
-              data: record
-            });
+          // remap address lat & lng
+          FollowUp.prepareDataForRead({
+            data: followUp
           });
-
-          // finished
-          resolve(records);
         });
-    });
+
+        // finished
+        return followUps;
+      });
   };
 
   /**
