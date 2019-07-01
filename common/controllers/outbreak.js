@@ -9831,7 +9831,14 @@ module.exports = function (Outbreak) {
     // initialize default filter
     let defaultFilter = {
       where: {
+        // cases only from our outbreak
         outbreakId: outbreakId,
+
+        // exclude discarded cases
+        classification: {
+          nin: app.models.case.discardedCaseClassifications
+        },
+
         // get only the cases reported in the periodInterval
         or: [{
           and: [{
