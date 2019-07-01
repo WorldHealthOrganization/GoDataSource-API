@@ -1275,6 +1275,24 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "__findById__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "__updateById__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_case",
+      "permission": "ALLOW",
+      "property": "__destroyById__labResults"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "write_outbreak",
       "permission": "ALLOW",
       "property": "restoreOutbreak"
