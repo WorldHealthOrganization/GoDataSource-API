@@ -2888,9 +2888,25 @@ module.exports = function (Outbreak) {
       };
     }
 
-    // get all the followups for the filtered period
-    app.models.followUp.find(app.utils.remote
-      .mergeFilters(defaultFilter, filter || {}))
+    // retrieve all teams to make sure that follow-ups teams still exist
+    let existingTeamsMap = {};
+    app.models.team
+      .find()
+      .then(function (teams) {
+        // map teams
+        teams.forEach((team) => {
+          existingTeamsMap[team.id] = team;
+        });
+
+        // get all the followups for the filtered period
+        return app.models.followUp
+          .find(
+            app.utils.remote.mergeFilters(
+              defaultFilter,
+              filter || {}
+            )
+          );
+      })
       .then(function (followups) {
         // filter by relation properties
         followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
@@ -2901,11 +2917,21 @@ module.exports = function (Outbreak) {
 
         followups.forEach(function (followup) {
           // get contactId
-          let contactId = followup.personId;
+          const contactId = followup.personId;
+
           // get teamId; there might be no team id, set null
-          let teamId = followup.teamId || null;
+          let teamId;
+          if (
+            followup.teamId &&
+            existingTeamsMap[followup.teamId]
+          ) {
+            teamId = followup.teamId;
+          } else {
+            teamId = null;
+          }
+
           // get date; format it to UTC 00:00:00
-          let date = genericHelpers.getDate(followup.date).toString();
+          const date = genericHelpers.getDate(followup.date).toString();
 
           // initialize team entry if not already initialized
           if (!teamsMap[teamId]) {
@@ -2913,34 +2939,30 @@ module.exports = function (Outbreak) {
               id: teamId,
               totalFollowupsCount: 0,
               successfulFollowupsCount: 0,
-              dates: []
+              dates: {}
             };
 
             teamDateContactsMap[teamId] = {};
           }
 
-          // initialize variable that will keep the index of the date entry in the team.dates array
-          let dateIndexInTeam;
-
           // initialize date entry for the team if not already initialized
-          if ((dateIndexInTeam = teamsMap[teamId].dates.findIndex(dateEntry => dateEntry.date === date)) === -1) {
-            // push the entry in the array and keep the index
-            dateIndexInTeam = teamsMap[teamId].dates.push({
+          if (!teamsMap[teamId].dates[date]) {
+            teamsMap[teamId].dates[date] = {
               date: date,
               totalFollowupsCount: 0,
               successfulFollowupsCount: 0,
               contactIDs: []
-            }) - 1;
+            };
 
             teamDateContactsMap[teamId][date] = {};
           }
 
           // increase counters
-          teamsMap[teamId].dates[dateIndexInTeam].totalFollowupsCount++;
+          teamsMap[teamId].dates[date].totalFollowupsCount++;
           teamsMap[teamId].totalFollowupsCount++;
 
           if (app.models.followUp.isPerformed(followup)) {
-            teamsMap[teamId].dates[dateIndexInTeam].successfulFollowupsCount++;
+            teamsMap[teamId].dates[date].successfulFollowupsCount++;
             teamsMap[teamId].successfulFollowupsCount++;
             result.successfulFollowupsCount++;
           }
@@ -2949,13 +2971,16 @@ module.exports = function (Outbreak) {
           if (!teamDateContactsMap[teamId][date][contactId]) {
             // keep flag to not add contact twice for team
             teamDateContactsMap[teamId][date][contactId] = true;
-            teamsMap[teamId].dates[dateIndexInTeam].contactIDs.push(contactId);
+            teamsMap[teamId].dates[date].contactIDs.push(contactId);
           }
         });
 
         // update results; sending array with teams and contacts information
-        result.teams = Object.values(teamsMap);
         result.totalFollowupsCount = followups.length;
+        result.teams = _.map(teamsMap, (value) => {
+          value.dates = Object.values(value.dates);
+          return value;
+        });
 
         // send response
         callback(null, result);
