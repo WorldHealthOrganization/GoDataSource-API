@@ -7066,7 +7066,6 @@ module.exports = function (Outbreak) {
                   $in: allLocationsIds
                 }
               })
-              .catch(reject)
               .then((locations) => {
                 // map locations
                 const locationsMap = _.transform(
@@ -7091,7 +7090,8 @@ module.exports = function (Outbreak) {
 
                 // finished
                 resolve(contactGroups);
-              });
+              })
+              .catch(reject);
           }
           return resolve(contactGroups);
         });
@@ -10470,10 +10470,10 @@ module.exports = function (Outbreak) {
         caseId,
         filter
       )
-      .catch(callback)
       .then((records) => {
         callback(null, records);
-      });
+      })
+      .catch(callback);
   };
 
   /**
@@ -10490,10 +10490,10 @@ module.exports = function (Outbreak) {
         caseId,
         where
       )
-      .catch(callback)
       .then((counted) => {
         callback(null, counted);
-      });
+      })
+      .catch(callback);
   };
 
   /**
@@ -10510,10 +10510,10 @@ module.exports = function (Outbreak) {
         contactId,
         filter
       )
-      .catch(callback)
       .then((records) => {
         callback(null, records);
-      });
+      })
+      .catch(callback);
   };
 
   /**
@@ -10530,10 +10530,10 @@ module.exports = function (Outbreak) {
         contactId,
         where
       )
-      .catch(callback)
       .then((counted) => {
         callback(null, counted);
-      });
+      })
+      .catch(callback);
   };
 
   /**
@@ -10550,10 +10550,10 @@ module.exports = function (Outbreak) {
         eventId,
         filter
       )
-      .catch(callback)
       .then((records) => {
         callback(null, records);
-      });
+      })
+      .catch(callback);
   };
 
   /**
@@ -10570,10 +10570,10 @@ module.exports = function (Outbreak) {
         eventId,
         where
       )
-      .catch(callback)
       .then((counted) => {
         callback(null, counted);
-      });
+      })
+      .catch(callback);
   };
 
   /**
@@ -10616,7 +10616,6 @@ module.exports = function (Outbreak) {
           inq: [sourceTargetIds.sourceId, sourceTargetIds.targetId]
         }
       })
-      .catch(callback)
       .then((records) => {
         // find source & target
         const sourceModel = _.find(records, (r) => r.id === sourceTargetIds.sourceId);
@@ -10676,7 +10675,8 @@ module.exports = function (Outbreak) {
       .then((updatedRelationship) => {
         // finished
         callback(null, updatedRelationship);
-      });
+      })
+      .catch(callback);
   };
 
   /**

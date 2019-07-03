@@ -33,9 +33,6 @@ function run(callback) {
       }
     })
 
-    // handle errors
-    .catch(callback)
-
     // determine which language tokens exist already and include them for update
     .then((langTokens) => {
       // map tokens for which we need to update data
@@ -71,12 +68,12 @@ function run(callback) {
                 .updateAttributes({
                   translation: newTranslation
                 }, options)
-                .catch(cb)
                 .then(() => {
                   // finished
                   app.logger.debug(`Updated token ${langToken.token} => ${langToken.languageId}`);
                   cb();
-                });
+                })
+                .catch(cb);
             });
           })(langTokenModel, fileTranslation);
         }
@@ -101,12 +98,12 @@ function run(callback) {
                       languageId: newLanguageId,
                       translation: newTranslation
                     }, common.install.timestamps), options)
-                    .catch(cb)
                     .then(() => {
                       // finished
                       app.logger.debug(`Created token ${newToken} => ${newLanguageId}`);
                       cb();
-                    });
+                    })
+                    .catch(cb);
                 });
               })(token, languageId, defaultOutbreakTemplateDataJson.translations[token][languageId]);
             });
@@ -148,13 +145,13 @@ function run(callback) {
         const existingRefItems = {};
         referenceData
           .find({
+            deleted: true,
             where: {
               id: {
                 inq: Object.keys(referenceItemMap)
               }
             }
           })
-          .catch(reject)
           .then((refDataItems) => {
             (refDataItems || []).forEach((refDataItem) => {
               // add to list of existing items so we can exclude it from creation
@@ -183,14 +180,16 @@ function run(callback) {
                         value: data.value,
                         description: data.description,
                         colorCode: data.colorCode,
-                        order: data.order
+                        order: data.order,
+                        deleted: false,
+                        deletedAt: null
                       }, options)
-                      .catch(cb)
                       .then(() => {
                         // finished
                         app.logger.debug(`Updated reference data item ${updateRefItem.id}`);
                         cb();
-                      });
+                      })
+                      .catch(cb);
                   });
                 })(refDataItem, fileData);
               }
@@ -219,12 +218,12 @@ function run(callback) {
                       colorCode: newRefItem.colorCode,
                       order: newRefItem.order
                     }, common.install.timestamps), options)
-                    .catch(cb)
                     .then(() => {
                       // finished
                       app.logger.debug(`Created reference data item ${newRefItem.id}`);
                       cb();
-                    });
+                    })
+                    .catch(cb);
                 });
               })(fileData);
             });
@@ -239,7 +238,8 @@ function run(callback) {
               // finished
               resolve();
             });
-          });
+          })
+          .catch(reject);
       });
     })
 
@@ -264,13 +264,13 @@ function run(callback) {
         const existingTemplates = {};
         outbreakTemplate
           .find({
+            deleted: true,
             where: {
               id: {
                 inq: Object.keys(outbreakTemplatesMap)
               }
             }
           })
-          .catch(reject)
           .then((outbreakTemplateModels) => {
             (outbreakTemplateModels || []).forEach((outbreakTemplateModel) => {
               // add to list of existing items so we can exclude it from creation
@@ -299,14 +299,16 @@ function run(callback) {
                       noDaysNewContacts: data.noDaysNewContacts,
                       caseInvestigationTemplate: data.caseInvestigationTemplate,
                       contactFollowUpTemplate: data.contactFollowUpTemplate,
-                      labResultsTemplate: data.labResultsTemplate
+                      labResultsTemplate: data.labResultsTemplate,
+                      deleted: false,
+                      deletedAt: null
                     }, options)
-                    .catch(cb)
                     .then(() => {
                       // finished
                       app.logger.debug(`Updated outbreak template ${outbreakTemplateModel.id}`);
                       cb();
-                    });
+                    })
+                    .catch(cb);
                 });
               })(outbreakTemplateModel, fileData);
             });
@@ -343,12 +345,12 @@ function run(callback) {
                       contactFollowUpTemplate: newTemplateItem.contactFollowUpTemplate,
                       labResultsTemplate: newTemplateItem.labResultsTemplate
                     }, common.install.timestamps), options)
-                    .catch(cb)
                     .then(() => {
                       // finished
                       app.logger.debug(`Created outbreak template ${newTemplateItem.id}`);
                       cb();
-                    });
+                    })
+                    .catch(cb);
                 });
               })(oTemplateData);
             });
@@ -363,7 +365,8 @@ function run(callback) {
               // finished
               resolve();
             });
-          });
+          })
+          .catch(reject);
       });
     })
 
@@ -371,7 +374,10 @@ function run(callback) {
     .then(() => {
       console.log('Default Outbreak Template Data Installed');
       callback();
-    });
+    })
+
+    // handle errors
+    .catch(callback);
 }
 
 module.exports = run;

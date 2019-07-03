@@ -32,9 +32,6 @@ function run(callback) {
       }
     })
 
-    // handle errors
-    .catch(callback)
-
     // determine which language tokens exist already and include them for update
     .then((langTokens) => {
       // map tokens for which we need to update data
@@ -70,12 +67,12 @@ function run(callback) {
                 .updateAttributes({
                   translation: newTranslation
                 }, options)
-                .catch(cb)
                 .then(() => {
                   // finished
                   app.logger.debug(`Updated token ${langToken.token} => ${langToken.languageId}`);
                   cb();
-                });
+                })
+                .catch(cb);
             });
           })(langTokenModel, fileTranslation);
         }
@@ -100,12 +97,12 @@ function run(callback) {
                       languageId: newLanguageId,
                       translation: newTranslation
                     }, common.install.timestamps), options)
-                    .catch(cb)
                     .then(() => {
                       // finished
                       app.logger.debug(`Created token ${newToken} => ${newLanguageId}`);
                       cb();
-                    });
+                    })
+                    .catch(cb);
                 });
               })(token, languageId, defaultHelpDataJson.translations[token][languageId]);
             });
@@ -143,13 +140,13 @@ function run(callback) {
         const existingCategories = {};
         helpCategory
           .find({
+            deleted: true,
             where: {
               id: {
                 inq: categoryIds
               }
             }
           })
-          .catch(reject)
           .then((categoryModels) => {
             (categoryModels || []).forEach((categoryModel) => {
               // add to list of existing categories so we can exclude it from creation
@@ -177,14 +174,16 @@ function run(callback) {
                       .updateAttributes({
                         name: data.name,
                         order: data.order,
-                        description: data.description
+                        description: data.description,
+                        deleted: false,
+                        deletedAt: null
                       }, options)
-                      .catch(cb)
                       .then(() => {
                         // finished
                         app.logger.debug(`Updated category ${updateCategoryModel.id}`);
                         cb();
-                      });
+                      })
+                      .catch(cb);
                   });
                 })(categoryModel, fileCategory);
               }
@@ -212,12 +211,12 @@ function run(callback) {
                       order: newCategory.order,
                       description: newCategory.description
                     }, common.install.timestamps), options)
-                    .catch(cb)
                     .then(() => {
                       // finished
                       app.logger.debug(`Created category ${newCategory.id}`);
                       cb();
-                    });
+                    })
+                    .catch(cb);
                 });
               })(category);
             });
@@ -232,7 +231,8 @@ function run(callback) {
               // finished
               resolve();
             });
-          });
+          })
+          .catch(reject);
       });
     })
 
@@ -259,13 +259,13 @@ function run(callback) {
         const existingHelpItems = {};
         helpItem
           .find({
+            deleted: true,
             where: {
               id: {
                 inq: itemsIds
               }
             }
           })
-          .catch(reject)
           .then((helpItemModels) => {
             (helpItemModels || []).forEach((helpItemModel) => {
               // add to list of existing help items so we can exclude it from creation
@@ -296,14 +296,16 @@ function run(callback) {
                         comment: data.comment,
                         categoryId: data.categoryId,
                         order: data.order,
-                        approved: true
+                        approved: true,
+                        deleted: false,
+                        deletedAt: null
                       }, options)
-                      .catch(cb)
                       .then(() => {
                         // finished
                         app.logger.debug(`Updated help item ${updateHelpItemModel.id}`);
                         cb();
-                      });
+                      })
+                      .catch(cb);
                   });
                 })(helpItemModel, fileHelpItem);
               }
@@ -333,12 +335,12 @@ function run(callback) {
                       order: newHelpItem.order,
                       approved: true
                     }, common.install.timestamps), options)
-                    .catch(cb)
                     .then(() => {
                       // finished
                       app.logger.debug(`Created help item ${newHelpItem.id}`);
                       cb();
-                    });
+                    })
+                    .catch(cb);
                 });
               })(helpItemData);
             });
@@ -353,7 +355,8 @@ function run(callback) {
               // finished
               resolve();
             });
-          });
+          })
+          .catch(reject);
       });
     })
 
@@ -361,7 +364,10 @@ function run(callback) {
     .then(() => {
       console.log('Default Help Data Installed');
       callback();
-    });
+    })
+
+    // handle errors
+    .catch(callback);
 }
 
 module.exports = run;

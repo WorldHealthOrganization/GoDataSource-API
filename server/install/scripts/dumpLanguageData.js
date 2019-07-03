@@ -19,7 +19,6 @@ function run(callback) {
         languageId: languageId
       }
     })
-    .catch(callback)
 
     // put db values into language
     .then((languageTokens) => {
@@ -57,7 +56,8 @@ function run(callback) {
           callback();
         }
       );
-    });
+    })
+    .catch(callback);
 }
 
 module.exports = (resolvedPath) => {

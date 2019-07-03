@@ -35,7 +35,6 @@ function run(callback) {
             'name asc'
           ]
         })
-        .catch(callback)
 
         // retrieved items
         .then((outbreakTemplates) => {
@@ -147,7 +146,6 @@ function run(callback) {
                   }
                 }
               })
-              .catch(reject)
               .then((referenceDataItems) => {
                 (referenceDataItems || []).forEach((referenceDataItem) => {
                   // add item
@@ -172,7 +170,8 @@ function run(callback) {
 
                 // finished
                 resolve(data);
-              });
+              })
+              .catch(reject);
           });
         })
 
@@ -194,7 +193,6 @@ function run(callback) {
                   }
                 }
               })
-              .catch(reject)
               .then((languageTokens) => {
                 // add tokens to list
                 (languageTokens || []).forEach((languageToken) => {
@@ -209,7 +207,8 @@ function run(callback) {
 
                 // finished
                 resolve(data);
-              });
+              })
+              .catch(reject);
           });
         })
 
@@ -233,7 +232,9 @@ function run(callback) {
               callback();
             }
           );
-        });
+        })
+
+        .catch(callback);
     }
   );
 }
