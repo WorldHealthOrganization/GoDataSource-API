@@ -1549,7 +1549,6 @@ function migrateModelDataInBatches(
           }
         ]
       })
-      .catch(reject)
       .then((countedModels) => {
         // make changes in batches
         // retrieve batches until all are retrieve
@@ -1562,7 +1561,6 @@ function migrateModelDataInBatches(
               skip: handledNo,
               limit: handledPerBatch
             })
-            .catch(reject)
             .then((models) => {
               // create jobs to handle date in parallel
               const jobs = [];
@@ -1592,7 +1590,8 @@ function migrateModelDataInBatches(
                   }
                 }
               );
-            });
+            })
+            .catch(reject);
         };
 
         // start
@@ -1602,7 +1601,8 @@ function migrateModelDataInBatches(
           // finished
           resolve();
         }
-      });
+      })
+      .catch(reject);
   });
 }
 

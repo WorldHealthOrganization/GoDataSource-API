@@ -274,7 +274,6 @@ module.exports = function (HelpItem) {
         .collection('helpItem')
         .aggregate(aggregatePipeline)
         .toArray()
-        .catch(reject)
         .then((records) => {
           // make sure we have an array
           records = records || [];
@@ -300,7 +299,8 @@ module.exports = function (HelpItem) {
 
           // finished
           resolve(records);
-        });
+        })
+        .catch(reject);
     });
   };
 };

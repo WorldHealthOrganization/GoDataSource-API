@@ -866,18 +866,18 @@ module.exports = function (FollowUp) {
               .updateAttributes({
                 questionnaireAnswers: newQuestionnaireAnswers
               }, options)
-              .catch(cb)
-              .then(() => cb());
+              .then(() => cb())
+              .catch(cb);
           } else {
             // finished
             cb();
           }
         }
       )
-      .catch(callback)
       .then(() => {
         // finished
         callback();
-      });
+      })
+      .catch(callback);
   };
 };

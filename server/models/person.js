@@ -1110,7 +1110,6 @@ module.exports = function (Person) {
             persons: 1
           }
         })
-        .catch(reject)
         .then((relationshipsData) => {
           // match relationship data to people
           (relationshipsData || []).forEach((relData) => {
@@ -1138,7 +1137,8 @@ module.exports = function (Person) {
 
           // finished
           resolve(relatedPeopleData);
-        });
+        })
+        .catch(reject);
     });
   };
 

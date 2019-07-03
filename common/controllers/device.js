@@ -112,9 +112,9 @@ module.exports = function (Device) {
           physicalDeviceId: physicalDeviceId
         }
       })
-      .catch(callback)
       .then(function (device) {
         callback(null, device);
-      });
+      })
+      .catch(callback);
   };
 };

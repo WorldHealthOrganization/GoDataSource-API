@@ -34,7 +34,6 @@ function run(callback) {
             'order asc'
           ]
         })
-        .catch(callback)
 
         // retrieve help categories
         .then((helpCategories) => {
@@ -96,7 +95,6 @@ function run(callback) {
                   'order asc'
                 ]
               })
-              .catch(reject)
               .then((helpItems) => {
                 // go through help items and export needed data
                 (helpItems || []).forEach((helpItem) => {
@@ -119,7 +117,8 @@ function run(callback) {
 
                 // finished
                 resolve(data);
-              });
+              })
+              .catch(reject);
           });
         })
 
@@ -141,7 +140,6 @@ function run(callback) {
                   }
                 }
               })
-              .catch(reject)
               .then((languageTokens) => {
                 // add tokens to list
                 (languageTokens || []).forEach((languageToken) => {
@@ -156,7 +154,8 @@ function run(callback) {
 
                 // finished
                 resolve(data);
-              });
+              })
+              .catch(reject);
           });
         })
 
@@ -180,7 +179,9 @@ function run(callback) {
               callback();
             }
           );
-        });
+        })
+
+        .catch(callback);
     }
   );
 }

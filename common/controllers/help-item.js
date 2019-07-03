@@ -38,8 +38,8 @@ module.exports = function (HelpItem) {
     // retrieve items
     app.models.helpItem
       .findAggregate(filter)
-      .catch(callback)
-      .then((data) => callback(null, data));
+      .then((data) => callback(null, data))
+      .catch(callback);
   };
 
   /**
@@ -50,7 +50,7 @@ module.exports = function (HelpItem) {
   HelpItem.countHelpItems = (where, callback) => {
     app.models.helpItem
       .findAggregate({ where: where }, true)
-      .catch(callback)
-      .then((data) => callback(null, data));
+      .then((data) => callback(null, data))
+      .catch(callback);
   };
 };

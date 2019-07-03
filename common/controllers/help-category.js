@@ -146,8 +146,8 @@ module.exports = function (HelpCategory) {
               ],
             }
           }, filter))
-          .catch(callback)
-          .then((data) => callback(null, data));
+          .then((data) => callback(null, data))
+          .catch(callback);
       });
   };
 
