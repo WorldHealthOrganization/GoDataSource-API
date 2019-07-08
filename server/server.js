@@ -5,6 +5,7 @@ const ip = require('ip');
 const _ = require('lodash');
 const request = require('request');
 const config = require('./config');
+const path = require('path');
 const fs = require('fs');
 const url = require('url');
 
@@ -83,16 +84,20 @@ app.start = function () {
       _.set(config, 'public.port', urlData.port);
 
       // update configuration
-      const configPath = fs.existsSync('server/config.json') ?
-        'server/config.json' :
-        'config.json';
+      const configPath = fs.existsSync(path.resolve('server/config.json')) ?
+        path.resolve('server/config.json') :
+        path.resolve('config.json');
       fs.writeFileSync(
         configPath,
         JSON.stringify(config, null, 2)
       );
 
       // config saved
-      app.logger.info('Config file public data updated to: %s', JSON.stringify(config.public));
+      app.logger.info(
+        'Config file ( %s ) public data updated to: %s',
+        configPath,
+        JSON.stringify(config.public)
+      );
     });
   });
 };
