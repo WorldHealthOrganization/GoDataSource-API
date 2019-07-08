@@ -33,14 +33,14 @@ const cliArguments = {
       convertor: e => parseInt(e)
     }
   },
-  publicPort: {
+  publicProtocol: {
     source: sources.config,
-    paramPath: 'public.port',
+    paramPath: 'public.protocol',
     get: {
       convertor: e => e.toString()
     },
     set: {
-      allowed: true,
+      allowed: false,
       convertor: e => parseInt(e)
     }
   },
@@ -51,8 +51,19 @@ const cliArguments = {
       convertor: e => e
     },
     set: {
-      allowed: true,
+      allowed: false,
       convertor: e => e
+    }
+  },
+  publicPort: {
+    source: sources.config,
+    paramPath: 'public.port',
+    get: {
+      convertor: e => e.toString()
+    },
+    set: {
+      allowed: false,
+      convertor: e => parseInt(e)
     }
   },
   logLevel: {
