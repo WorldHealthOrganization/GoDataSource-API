@@ -84,9 +84,7 @@ app.start = function () {
       _.set(config, 'public.port', urlData.port);
 
       // update configuration
-      const configPath = fs.existsSync(path.resolve('server/config.json')) ?
-        path.resolve('server/config.json') :
-        path.resolve('config.json');
+      const configPath = path.resolve(__dirname + '/config.json');
       fs.writeFileSync(
         configPath,
         JSON.stringify(config, null, 2)
