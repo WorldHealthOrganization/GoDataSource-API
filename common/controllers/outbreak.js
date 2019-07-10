@@ -1104,25 +1104,12 @@ module.exports = function (Outbreak) {
         }
 
         // retrieve contacts for which we can generate follow-ups
-        return Promise
-          .all([
-            FollowupGeneration.getContactsEligibleForFollowup(
-              followupStartDate.toDate(),
-              followupEndDate.toDate(),
-              outbreakId,
-              allowedContactIds
-            ),
-            FollowupGeneration.getContactsWithInconclusiveLastFollowUp(
-              followupStartDate.toDate(),
-              outbreakId,
-              allowedContactIds
-            )
-          ]);
-      })
-      .then((contactLists) => {
-        // merge the lists of contacts
-        contactLists[0].push(...contactLists[1]);
-        return contactLists[0];
+        return FollowupGeneration.getContactsEligibleForFollowup(
+          followupStartDate.toDate(),
+          followupEndDate.toDate(),
+          outbreakId,
+          allowedContactIds
+        );
       })
       .then((contacts) => {
         if (!contacts.length) {
@@ -1159,8 +1146,7 @@ module.exports = function (Outbreak) {
                           },
                           outbreakFollowUpFreq,
                           outbreakFollowUpPerDay,
-                          targeted,
-                          contact.inconclusive
+                          targeted
                         );
 
                         promiseQueue.addFollowUps(generateResult.add);
@@ -9080,6 +9066,8 @@ module.exports = function (Outbreak) {
         followUp: {
           $ne: null
         },
+        // only contacts that are under follow up
+        'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP',
         $or: [
           {
             // eligible for follow ups
@@ -9165,22 +9153,8 @@ module.exports = function (Outbreak) {
                 ]
               }
             ]
-          },
-          {
-            // inconclusive follow up period
-            $and: [
-              {
-                'followUp.endDate': {
-                  $lt: startDate
-                }
-              },
-              {
-                'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
-              }
-            ]
           }
         ]
-
       }
     }, filter);
 
