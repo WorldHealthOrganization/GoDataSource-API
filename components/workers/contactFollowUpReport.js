@@ -56,7 +56,7 @@ const worker = {
   get(outbreakId, startDate, endDate) {
     // parse dates for mongodb conditions
     startDate = Helpers.getDate(startDate).toDate();
-    endDate = Helpers.getDateEndOfDay(endDate).toDate();
+    endDate = Helpers.getDateEndOfDay('2019-08-04T06:11:01.354Z').toDate();
 
     // mongodb date between filter
     const filter = {
@@ -148,10 +148,10 @@ const worker = {
                 });
 
                 for (let i = 0; i < days.length; i++) {
-                  const currentDate = Moment(days[i]);
+                  const currentDate = Helpers.getDate(days[i]);
 
                   // find all follow ups with same day
-                  const day = Object.keys(groupedByDayRecords).find(day => Moment(day).isSame(currentDate), 'day');
+                  const day = Object.keys(groupedByDayRecords).find(day => Helpers.getDate(day).isSame(currentDate), 'day');
                   if (day) {
                     // group them by contact
                     // as a contact may have multiple follow ups on same day

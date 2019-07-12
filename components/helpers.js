@@ -40,7 +40,7 @@ const nonModelObjects = {
  * @param dayOfWeek If not sent the day of the week will not be changed
  */
 const getDate = function (date, dayOfWeek) {
-  let momentDate = date ? moment(date).startOf('day') : moment().startOf('day');
+  let momentDate = date ? moment.utc(date).startOf('day') : moment.utc().startOf('day');
   return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
 };
 
@@ -51,7 +51,7 @@ const getDate = function (date, dayOfWeek) {
  * @param dayOfWeek If not sent the date will not be changed
  */
 const getDateEndOfDay = function (date, dayOfWeek) {
-  let momentDate = date ? moment(date).endOf('day') : moment().endOf('day');
+  let momentDate = date ? moment.utc(date).endOf('day') : moment.utc().endOf('day');
   return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
 };
 
