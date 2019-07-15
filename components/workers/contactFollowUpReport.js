@@ -50,13 +50,12 @@ const worker = {
    * Get total contacts followed up or not in the given date range
    * @param outbreakId
    * @param startDate
-   *
    * @param endDate
    */
   get(outbreakId, startDate, endDate) {
     // parse dates for mongodb conditions
     startDate = Helpers.getDate(startDate).toDate();
-    endDate = Helpers.getDateEndOfDay('2019-08-04T06:11:01.354Z').toDate();
+    endDate = Helpers.getDateEndOfDay(endDate).toDate();
 
     // mongodb date between filter
     const filter = {
