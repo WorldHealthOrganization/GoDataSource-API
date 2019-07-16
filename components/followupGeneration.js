@@ -30,43 +30,6 @@ const _createFollowUpEntry = function (props, contact) {
   return props;
 };
 
-// get contacts that has inconclusive follow up period
-module.exports.getContactsWithInconclusiveLastFollowUp = function (startDate, outbreakId, allowedContactIds) {
-  return App.models.contact
-    .rawFind({
-      $and: [
-        {
-          outbreakId: outbreakId
-        },
-        {
-          id: {
-            $in: allowedContactIds
-          }
-        },
-        {
-          followUp: {
-            $ne: null
-          }
-        },
-        {
-          'followUp.endDate': {
-            $lt: startDate
-          }
-        },
-        {
-          'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
-        }
-      ]
-    })
-    // filter out contacts whose last follow up is not completed or lost
-    .then((contacts) => {
-      return contacts.map((contact) => {
-        contact.inconclusive = true;
-        return contact;
-      });
-    });
-};
-
 // get contacts that have follow up period between the passed start/end dates
 module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId, allowedContactIds) {
   return App.models.contact
@@ -84,6 +47,10 @@ module.exports.getContactsEligibleForFollowup = function (startDate, endDate, ou
           followUp: {
             $ne: null
           }
+        },
+        // only contacts that are under follow up
+        {
+          'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
         },
         {
           $or: [
@@ -249,24 +216,19 @@ module.exports.getContactFollowupEligibleTeams = function (contact, teams) {
 };
 
 // generate follow ups for a given passed period
-// if ignore period flag is set, then contact's follow up period is no longer checked
-// and follow ups are generated for the passed period no matter what
-// this flag is used for generating follow ups for contacts whose last follow up was inconclusive
-module.exports.generateFollowupsForContact = function (contact, teams, period, freq, freqPerDay, targeted, ignorePeriod) {
+module.exports.generateFollowupsForContact = function (contact, teams, period, freq, freqPerDay, targeted) {
   let followUpsToAdd = [];
   let followUpsIdsToDelete = [];
 
-  if (!ignorePeriod) {
-    // if passed period is higher than contact's follow up period
-    // restrict follow up start/date to a maximum of contact's follow up period
-    let firstIncubationDay = Helpers.getDate(contact.followUp.startDate);
-    let lastIncubationDay = Helpers.getDate(contact.followUp.endDate);
-    if (period.endDate.isAfter(lastIncubationDay)) {
-      period.endDate = lastIncubationDay.clone();
-    }
-    if (period.startDate.isBefore(firstIncubationDay)) {
-      period.startDate = firstIncubationDay.clone();
-    }
+  // if passed period is higher than contact's follow up period
+  // restrict follow up start/date to a maximum of contact's follow up period
+  let firstIncubationDay = Helpers.getDate(contact.followUp.startDate);
+  let lastIncubationDay = Helpers.getDate(contact.followUp.endDate);
+  if (period.endDate.isAfter(lastIncubationDay)) {
+    period.endDate = lastIncubationDay.clone();
+  }
+  if (period.startDate.isBefore(firstIncubationDay)) {
+    period.startDate = firstIncubationDay.clone();
   }
 
   // generate follow up, starting from today
