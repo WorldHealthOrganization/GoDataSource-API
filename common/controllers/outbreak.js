@@ -5895,6 +5895,21 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Create multiple contacts for events
+   * @param eventId
+   * @param data
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.createEventMultipleContacts = function (eventId, data, options, callback) {
+    Outbreak.createPersonMultipleContacts(this, app.models.event.modelName, eventId, data, options)
+      .then(function (results) {
+        callback(null, results);
+      })
+      .catch(callback);
+  };
+
+  /**
    * Bulk modify contacts
    * @param existingContacts
    * @param callback
