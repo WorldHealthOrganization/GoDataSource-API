@@ -50,7 +50,6 @@ const worker = {
    * Get total contacts followed up or not in the given date range
    * @param outbreakId
    * @param startDate
-   *
    * @param endDate
    */
   get(outbreakId, startDate, endDate) {
@@ -148,10 +147,10 @@ const worker = {
                 });
 
                 for (let i = 0; i < days.length; i++) {
-                  const currentDate = Moment(days[i]);
+                  const currentDate = Helpers.getDate(days[i]);
 
                   // find all follow ups with same day
-                  const day = Object.keys(groupedByDayRecords).find(day => Moment(day).isSame(currentDate), 'day');
+                  const day = Object.keys(groupedByDayRecords).find(day => Helpers.getDate(day).isSame(currentDate), 'day');
                   if (day) {
                     // group them by contact
                     // as a contact may have multiple follow ups on same day
