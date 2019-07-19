@@ -262,16 +262,16 @@ module.exports = function (Contact) {
         // if active relationships found
         if (relationshipInstance) {
           // set follow-up start date to be the same as relationship contact date
-          propsToUpdate.startDate = helpers.getUTCDate(relationshipInstance.contactDate).add(1, 'days');
+          propsToUpdate.startDate = helpers.getDate(relationshipInstance.contactDate).add(1, 'days');
           // if follow-up original start date was not previously set
           if (!propsToUpdate.originalStartDate) {
             // flag as an update
             shouldUpdate = true;
             // set it as follow-up start date
-            propsToUpdate.originalStartDate = helpers.getUTCDate(propsToUpdate.startDate);
+            propsToUpdate.originalStartDate = helpers.getDate(propsToUpdate.startDate);
           }
           // set follow-up end date
-          propsToUpdate.endDate = helpers.getUTCDate(propsToUpdate.startDate).add(outbreak.periodOfFollowup - 1, 'days');
+          propsToUpdate.endDate = helpers.getDate(propsToUpdate.startDate).add(outbreak.periodOfFollowup - 1, 'days');
         }
         // check if contact instance should be updated (check if any property changed value)
         !shouldUpdate && ['startDate', 'endDate']
@@ -344,11 +344,11 @@ module.exports = function (Contact) {
     // process date interval
     let dateInterval = [];
     if (typeof date === 'object' && date.startDate && date.endDate) {
-      dateInterval = [helpers.getUTCDate(date.startDate), helpers.getUTCDateEndOfDay(date.endDate)];
+      dateInterval = [helpers.getDate(date.startDate), helpers.getDateEndOfDay(date.endDate)];
     } else if (typeof date === 'string') {
-      dateInterval = [helpers.getUTCDate(date), helpers.getUTCDateEndOfDay(date)];
+      dateInterval = [helpers.getDate(date), helpers.getDateEndOfDay(date)];
     } else {
-      dateInterval = [helpers.getUTCDate(), helpers.getUTCDateEndOfDay()];
+      dateInterval = [helpers.getDate(), helpers.getDateEndOfDay()];
     }
 
     if (groupBy === 'case') {

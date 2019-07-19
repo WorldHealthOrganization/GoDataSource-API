@@ -1724,30 +1724,6 @@ const convertQuestionnaireAnswersToNewFormat = function (answers) {
   return result;
 };
 
-/**
- * Convert a Date object into Moment date and reset time to start of the day
- * Note: Date will be converted to UTC!
- * Additionally if dayOfWeek is sent the function will return the date for the date's corresponding day of the week
- * @param date If no date is given, the current datetime is returned
- * @param dayOfWeek If not sent the day of the week will not be changed
- */
-const getUTCDate = function (date, dayOfWeek) {
-  let momentDate = date ? moment.utc(date).startOf('day') : moment.utc().startOf('day');
-  return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
-};
-
-/**
- * Convert a Date object into Moment date and reset time to end of the day
- * Note: Date will be converted to UTC!
- * Additionally if dayOfWeek is sent the function will return the date for the date's corresponding day of the week
- * @param date If no date is given, the current datetime is returned
- * @param dayOfWeek If not sent the date will not be changed
- */
-const getUTCDateEndOfDay = function (date, dayOfWeek) {
-  let momentDate = date ? moment.utc(date).endOf('day') : moment.utc().endOf('day');
-  return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
-};
-
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1790,7 +1766,5 @@ module.exports = {
   convertQuestionAnswerToOldFormat: convertQuestionAnswerToOldFormat,
   convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat,
   convertQuestionnaireAnswersToNewFormat: convertQuestionnaireAnswersToNewFormat,
-  retrieveQuestionnaireVariables: retrieveQuestionnaireVariables,
-  getUTCDate: getUTCDate,
-  getUTCDateEndOfDay: getUTCDateEndOfDay
+  retrieveQuestionnaireVariables: retrieveQuestionnaireVariables
 };
