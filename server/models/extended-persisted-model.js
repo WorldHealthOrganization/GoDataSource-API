@@ -222,7 +222,7 @@ module.exports = function (ExtendedPersistedModel) {
           // send further data to be processed
           _.set(
             context,
-            'req.options._userRelations',
+            'options._userRelations',
             createUpdateRelations
           );
         }
@@ -231,7 +231,7 @@ module.exports = function (ExtendedPersistedModel) {
       } else if (_.get(context, 'req.query.retrieveCreatedUpdatedBy')) {
         _.set(
           context,
-          'req.options._userRelations',
+          'options._userRelations',
           _.map(
             ExtendedPersistedModel.userSupportedRelations,
             (relName) => ({ relation: relName })
@@ -251,13 +251,13 @@ module.exports = function (ExtendedPersistedModel) {
    */
   app.remotes().after('**', function (context, next) {
     // check if we need to retrieve user data
-    const userRelations = _.get(context, 'req.options._userRelations');
+    const userRelations = _.get(context, 'options._userRelations');
     if (
       userRelations &&
       userRelations.length > 0
     ) {
       // cleanup
-      delete context.req.options._userRelations;
+      delete context.options._userRelations;
 
       // determine relations for which we need to retrieve data
       const includeCreatedByUser = !!_.find(userRelations, { relation: 'createdByUser' });
