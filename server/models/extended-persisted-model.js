@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const dbSync = require('../../components/dbSync');
+const _ = require('lodash');
 
 module.exports = function (ExtendedPersistedModel) {
   // shortcut to Extended Persisted Model
@@ -22,6 +23,12 @@ module.exports = function (ExtendedPersistedModel) {
   // some models can be referenced by other models and they have restrictions on actions like delete
   // build a map of usages that can be checked later
   ExtendedPersistedModel.possibleRecordUsage = {};
+
+  // define custom relations related to user ( create & modified by user ) supported by all extended models
+  ExtendedPersistedModel.userSupportedRelations = [
+    'createdByUser',
+    'updatedByUser'
+  ];
 
   // after the application started (all models finished loading)
   app.on('started', function () {
@@ -180,5 +187,166 @@ module.exports = function (ExtendedPersistedModel) {
       .catch(function (err) {
         app.logger.debug(`Failed to get the system settings to check if any upstream server is configured for sync on every change. Error: ${err}`);
       });
+  });
+
+  /**
+   * Retrieve createdByUser, updatedByUser relations
+   * - At this point this works only for the first level includes, later this can be extended to take in scan relations scopes to see if we want to include user data in child relations as well
+   * - At this point filters on user relationships don't work, in case we need to add support for this then we will need to allow inclusion on all count methods as well
+   */
+  app.remotes().before('**', function (context, next) {
+    // including user relations apply only to GET requests
+    if (_.get(context, 'req.method') === 'GET') {
+      // determine if this request tries to include create / update user data
+      // retrieveCreatedUpdatedBy can be used to retrieve all relationships
+      const includeFilter = _.get(context, 'args.filter.include') || {};
+      const createUpdateRelations = _.filter(includeFilter, (rel) => ExtendedPersistedModel.userSupportedRelations.indexOf(rel.relation) > -1);
+      if (createUpdateRelations.length > 0) {
+        // we have user relations, so we need to do some cleanup before allowing request to retrieve data
+        // filter out user relations since these will be handled later in after remote
+        _.set(
+          context,
+          'args.filter.include',
+          _.filter(
+            includeFilter,
+            (rel) => ExtendedPersistedModel.userSupportedRelations.indexOf(rel.relation) < 0
+          )
+        );
+
+        // there is no point in retrieving
+        if (
+          _.get(context, 'method.returns.0.arg') === 'count'
+        ) {
+          // nothing to do when counting records
+        } else {
+          // send further data to be processed
+          _.set(
+            context,
+            'req.options._userRelations',
+            createUpdateRelations
+          );
+        }
+
+      // retrieveCreatedUpdatedBy can be used to retrieve all relationships
+      } else if (_.get(context, 'req.query.retrieveCreatedUpdatedBy')) {
+        _.set(
+          context,
+          'req.options._userRelations',
+          _.map(
+            ExtendedPersistedModel.userSupportedRelations,
+            (relName) => ({ relation: relName })
+          )
+        );
+      }
+    }
+
+    // nothing to do here anymore, we can continue to the next step
+    next();
+  });
+
+  /**
+   * Retrieve createdByUser, updatedByUser relations
+   * - At this point this works only for the first level includes, later this can be extended to take in scan relations scopes to see if we want to include user data in child relations as well
+   * - At this point filters on user relationships don't work, in case we need to add support for this then we will need to allow inclusion on all count methods as well
+   */
+  app.remotes().after('**', function (context, next) {
+    // check if we need to retrieve user data
+    const userRelations = _.get(context, 'req.options._userRelations');
+    if (
+      userRelations &&
+      userRelations.length > 0
+    ) {
+      // cleanup
+      delete context.req.options._userRelations;
+
+      // determine relations for which we need to retrieve data
+      const includeCreatedByUser = !!_.find(userRelations, { relation: 'createdByUser' });
+      const includeUpdatedByUser = !!_.find(userRelations, { relation: 'updatedByUser' });
+
+      // determine results for which we need to map the user data
+      const result = _.isArray(context.result) ?
+        context.result :
+        [context.result];
+
+      // determine the user for which we need to retrieve data
+      const userIds = [];
+      _.each(
+        result,
+        (record) => {
+          // created by user
+          if (
+            includeCreatedByUser &&
+            record.createdBy
+          ) {
+            userIds.push(record.createdBy);
+          }
+
+          // updated by user
+          if (
+            includeUpdatedByUser &&
+            record.updatedBy
+          ) {
+            userIds.push(record.updatedBy);
+          }
+        }
+      );
+
+      // there is no point to retrieve user if we have nothing to retrieve
+      if (!_.isEmpty(userIds)) {
+        // retrieve user data
+        app.models.user
+          .find({
+            where: {
+              id: {
+                inq: userIds
+              }
+            }
+          })
+          .then((users) => {
+            // clean user models of  sensitive data like password hashes etc
+            users = _.transform(
+              users,
+              (acc, user) => {
+                acc[user.id] = user.toJSON();
+              },
+              {}
+            );
+
+            // map user data to models
+            _.each(
+              result,
+              (record) => {
+                // created by user
+                if (
+                  includeCreatedByUser &&
+                  record.createdBy &&
+                  users[record.createdBy]
+                ) {
+                  record.createdByUser = users[record.createdBy];
+                }
+
+                // updated by user
+                if (
+                  includeUpdatedByUser &&
+                  record.updatedBy &&
+                  users[record.updatedBy]
+                ) {
+                  record.updatedByUser = users[record.updatedBy];
+                }
+              }
+            );
+
+            // finished
+            next();
+          });
+
+        // finished
+        return;
+      }
+
+    }
+
+    // nothing to do here anymore, we can continue to the next step
+    next();
   });
 };
