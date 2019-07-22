@@ -1482,7 +1482,7 @@ const getPeriodIntervalForDate = function (fullPeriodInterval, periodType, date)
       break;
     case 'month':
       // get month period interval for date
-      startDay = getDate(date);
+      startDay = getDate(date).startOf('month');
       endDay = getDateEndOfDay(date).endOf('month');
       break;
   }
