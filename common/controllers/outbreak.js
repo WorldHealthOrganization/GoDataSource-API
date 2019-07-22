@@ -2865,12 +2865,10 @@ module.exports = function (Outbreak) {
     if (!filter || !filter.where || JSON.stringify(filter.where).indexOf('date') === -1) {
       // to get the entire day today, filter between today 00:00 and tomorrow 00:00
       let today = genericHelpers.getDate().toString();
-      let tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow = genericHelpers.getDate(tomorrow).toString();
+      let todayEndOfDay = genericHelpers.getDateEndOfDay().toString();
 
       defaultFilter.where.date = {
-        between: [today, tomorrow]
+        between: [today, todayEndOfDay]
       };
     }
 

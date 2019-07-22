@@ -8,21 +8,12 @@ const Moment = require('moment');
 const _ = require('lodash');
 const PromiseQueue = require('p-queue');
 
-/**
- *
- * @param startDate
- * @param endDate
- */
-const _daysSince = function (startDate, endDate) {
-  return (Helpers.getDate(endDate)).diff(Helpers.getDate(startDate), 'days');
-};
-
 // attach author timestamps (createdAt, updatedAt, createdBy, updatedBy)
 // attach follow up index and address
 const _createFollowUpEntry = function (props, contact) {
   // set index based on the difference in days from start date until the follow up set date
   // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
-  props.index = _daysSince(Moment(contact.followUp.startDate), props.date) + 1;
+  props.index = Helpers.getDaysSince(Moment(contact.followUp.startDate), props.date) + 1;
 
   // set follow up address to match contact's current address
   props.address = App.models.person.getCurrentAddress(contact);

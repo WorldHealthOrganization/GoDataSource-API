@@ -200,7 +200,7 @@ module.exports = function (FollowUp) {
         }
         // set index based on the difference in days from start date until the follow up set date
         // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
-        context.instance.index = daysSince(moment(person.followUp.startDate), context.instance.date) + 1;
+        context.instance.index = helpers.getDaysSince(moment(person.followUp.startDate), context.instance.date) + 1;
       });
   }
 
@@ -258,15 +258,6 @@ module.exports = function (FollowUp) {
       .then(() => next())
       .catch(next);
   });
-
-  /**
-   *
-   * @param startDate
-   * @param endDate
-   */
-  const daysSince = function (startDate, endDate) {
-    return (moment(endDate).startOf('day')).diff(moment(startDate).startOf('day'), 'days');
-  };
 
   /**
    * Count contacts on follow-up lists on a specific day (default day: current day)
@@ -609,7 +600,7 @@ module.exports = function (FollowUp) {
         .then(() => {
           return app.models.contact.rawFind(
             app.utils.remote.convertLoopbackFilterToMongo(contactQuery),
-            { projection: { _id: 1 } });
+            {projection: {_id: 1}});
         });
     }
 
@@ -685,7 +676,7 @@ module.exports = function (FollowUp) {
           // structure after grouping (_id -> personId, followUps -> list of follow ups)
           {
             $group: {
-              _id : '$personId',
+              _id: '$personId',
               followUps: {
                 $push: '$$ROOT'
               }
