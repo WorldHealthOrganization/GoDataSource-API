@@ -222,7 +222,7 @@ module.exports = function (ExtendedPersistedModel) {
           // send further data to be processed
           _.set(
             context,
-            'options._userRelations',
+            'req.options._userRelations',
             createUpdateRelations
           );
         }
@@ -231,7 +231,7 @@ module.exports = function (ExtendedPersistedModel) {
       } else if (_.get(context, 'req.query.retrieveCreatedUpdatedBy')) {
         _.set(
           context,
-          'options._userRelations',
+          'req.options._userRelations',
           _.map(
             ExtendedPersistedModel.userSupportedRelations,
             (relName) => ({ relation: relName })
@@ -251,13 +251,13 @@ module.exports = function (ExtendedPersistedModel) {
    */
   app.remotes().after('**', function (context, next) {
     // check if we need to retrieve user data
-    const userRelations = _.get(context, 'options._userRelations');
+    const userRelations = _.get(context, 'req.options._userRelations');
     if (
       userRelations &&
       userRelations.length > 0
     ) {
       // cleanup
-      delete context.options._userRelations;
+      delete context.req.options._userRelations;
 
       // determine relations for which we need to retrieve data
       const includeCreatedByUser = !!_.find(userRelations, { relation: 'createdByUser' });
@@ -269,24 +269,26 @@ module.exports = function (ExtendedPersistedModel) {
         [context.result];
 
       // determine the user for which we need to retrieve data
-      const userIds = [];
+      const userIds = {};
       _.each(
         result,
         (record) => {
           // created by user
           if (
             includeCreatedByUser &&
-            record.createdBy
+            record.createdBy &&
+            record.createdBy !== 'unavailable'
           ) {
-            userIds.push(record.createdBy);
+            userIds[record.createdBy] = true;
           }
 
           // updated by user
           if (
             includeUpdatedByUser &&
-            record.updatedBy
+            record.updatedBy &&
+            record.updatedBy !== 'unavailable'
           ) {
-            userIds.push(record.updatedBy);
+            userIds[record.updatedBy] = true;
           }
         }
       );
@@ -296,9 +298,10 @@ module.exports = function (ExtendedPersistedModel) {
         // retrieve user data
         app.models.user
           .find({
+            deleted: true,
             where: {
               id: {
-                inq: userIds
+                inq: Object.keys(userIds)
               }
             }
           })
@@ -343,7 +346,6 @@ module.exports = function (ExtendedPersistedModel) {
         // finished
         return;
       }
-
     }
 
     // nothing to do here anymore, we can continue to the next step
