@@ -28,7 +28,6 @@
     "archiver": "^3.0.0",
     "async": "2.6.1",
     "bcrypt": "2.0.1",
-    "chunk-date-range": "0.1.0",
     "compression": "1.7.3",
     "cors": "2.8.4",
     "es6-promise-pool": "^2.5.0",

@@ -1,8 +1,9 @@
 'use strict';
 
 // dependencies
-const moment = require('moment');
-const chunkDateRange = require('chunk-date-range');
+const momentLib = require('moment');
+const momentRange = require('moment-range');
+const moment = momentRange.extendMoment(momentLib);
 const _ = require('lodash');
 const apiError = require('./apiError');
 const xml2js = require('xml2js');
@@ -31,6 +32,15 @@ const nonModelObjects = {
     lat: 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LAT',
     lng: 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LNG'
   }
+};
+
+/**
+ * Convert a date to UTC by always keeping the current day no matter the timezone
+ * @param date
+ * @returns {moment.Moment}
+ */
+const getPreciseUTCDate = function (date) {
+  return moment.utc(date.local().format('YYYY-MM-DD'));
 };
 
 /**
@@ -77,12 +87,47 @@ const getAsciiString = function (string) {
 
 /**
  * Split a date interval into chunks of specified length
+ * @param start Interval start date
+ * @param end Interval end date
+ * @param chunkType String Length of each resulted chunk; Can be a (day, week, month)
+ */
+const getDateChunks = function (start, end, chunkType) {
+  let result = [];
+  switch (chunkType) {
+    case 'day':
+      let range = moment.range(start, end);
+      result = Array.from(range.by('day')).map(day => ({ start: getDate(day), end: getDateEndOfDay(day) }));
+      break;
+    case 'week':
+    case 'month':
+      let date = start.clone();
+      while (date.isBefore(end)) {
+        if (!date.isSame(start)) {
+          date.add(1, 'day');
+        }
+        let lastDate = getPreciseUTCDate(date.clone().endOf(chunkType));
+        if (lastDate.isSameOrAfter(end)) {
+          lastDate = end;
+        }
+        result.push({
+          start: date.clone().startOf('day'),
+          end: lastDate.clone().endOf('day')
+        });
+        date = lastDate;
+      }
+      break;
+  }
+  return result;
+};
+
+/**
+ * Split a date interval into chunks of specified length
  * @param interval Array containing the margin dates of the interval
  * @param chunk String Length of each resulted chunk; Can be a daily/weekly/monthly
  * @returns {{}} Map of chunks
  */
 const getChunksForInterval = function (interval, chunk) {
-  // initialize map for chunkDateRange chunk values
+  // initialize map of chunk values
   let chunkMap = {
     day: 'day',
     week: 'week',
@@ -96,58 +141,20 @@ const getChunksForInterval = function (interval, chunk) {
   interval[1] = getDateEndOfDay(interval[1]);
 
   // get chunks
-  let chunks = chunkDateRange(interval[0], interval[1], chunk);
-
-  // chunk-date-range does not correctly handle date differences between on 'month' chunks for consecutive months
-  if (
-    // check if chunk is month
-    chunk === 'month' &&
-    // if the module returned just one chunk
-    chunks.length === 1 &&
-    // but interval months are different and should return more than 1 chunk
-    interval[0].get('month') !== interval[1].get('month')
-  ) {
-    // manually build chunks
-    chunks = [
-      {
-        // first chunk is from the interval start date
-        start: interval[0],
-        // end is start of next month (one day gets subtracted later)
-        end: getDateEndOfDay(interval[1]).startOf('month')
-      },
-      {
-        // second chunk starts from the first day of the month for interval end date
-        start: getDate(interval[1]).startOf('month'),
-        // end date is interval end date
-        end: interval[1]
-      }
-    ];
-  }
+  let chunks = getDateChunks(interval[0], interval[1], chunk);
 
   // initialize result
   let result = {};
 
   // parse the chunks and create map with UTC dates
-  chunks.forEach(function (chunk, index) {
-    // get the chunk margins and format to UTC
-    let start = getDate(chunk.start);
-    // chunkDateRange uses for both start and end 00:00 hours;
-    // we use 23:59 hours for end so we need to get the end of day for the previous day except for the last day in the interval since we already send it at 23:59 hours
-    let end = getDateEndOfDay(chunk.end);
-    if (index !== chunks.length - 1) {
-      end.add(-1, 'd').endOf('day');
-    }
-
-    // make sure end date is after or same as start date
-    start = start.isBefore(end) ? start : getDate(end);
-
+  chunks.forEach(chunk => {
     // create period identifier
-    let identifier = start.toString() + ' - ' + end.toString();
+    let identifier = chunk.start.toString() + ' - ' + chunk.end.toString();
 
     // store period entry in the map
     result[identifier] = {
-      start: start,
-      end: end
+      start: chunk.start,
+      end: chunk.end
     };
   });
 
@@ -1776,5 +1783,6 @@ module.exports = {
   convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat,
   convertQuestionnaireAnswersToNewFormat: convertQuestionnaireAnswersToNewFormat,
   retrieveQuestionnaireVariables: retrieveQuestionnaireVariables,
+  getDateChunks: getDateChunks,
   getDaysSince: getDaysSince
 };
