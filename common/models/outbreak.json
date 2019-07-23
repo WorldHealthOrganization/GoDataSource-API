@@ -3795,7 +3795,8 @@
           "arg": "nk",
           "type": "string",
           "description": "relationship id"
-        }, {
+        },
+        {
           "arg": "body",
           "required": true,
           "type": "object",
@@ -6442,7 +6443,8 @@
           "type": "string",
           "description": "Case / Contact / Event id",
           "required": true
-        }, {
+        },
+        {
           "arg": "where",
           "type": "object",
           "description": "Criteria to match filter thorough relationships",
@@ -6468,7 +6470,8 @@
           "type": "string",
           "description": "Case / Contact / Event id",
           "required": true
-        }, {
+        },
+        {
           "arg": "where",
           "type": "object",
           "description": "Criteria to match filter thorough relationships",
@@ -6874,7 +6877,10 @@
         {
           "arg": "groupBy",
           "type": "string",
-          "enum": ["place", "case"]
+          "enum": [
+            "place",
+            "case"
+          ]
         },
         {
           "arg": "filter",
@@ -7104,7 +7110,9 @@
       "returns": [
         {
           "arg": "duplicates",
-          "type": ["contact"],
+          "type": [
+            "contact"
+          ],
           "description": "List of contacts that are duplicates",
           "required": true
         }
@@ -7141,7 +7149,9 @@
       "returns": [
         {
           "arg": "duplicates",
-          "type": ["case"],
+          "type": [
+            "case"
+          ],
           "description": "List of cases that are duplicates",
           "required": true
         }
@@ -7189,6 +7199,15 @@
     },
     "prototype.getContactFollowUpReport": {
       "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})",
+          "http": {
+            "source": "query"
+          },
+          "required": true
+        },
         {
           "arg": "body",
           "type": "object",
