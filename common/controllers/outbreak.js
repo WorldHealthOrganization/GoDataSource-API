@@ -4239,8 +4239,8 @@ module.exports = function (Outbreak) {
                 .findOne({
                   where: {
                     or: [
-                      { id: labResult.personId },
-                      { visualId: labResult.personId }
+                      {id: labResult.personId},
+                      {visualId: labResult.personId}
                     ],
                     outbreakId: self.id
                   }
@@ -4578,7 +4578,7 @@ module.exports = function (Outbreak) {
     const models = app.models;
 
     // create a temporary directory to store generated pdfs that are included in the final archive
-    const tmpDir = tmp.dirSync({ unsafeCleanup: true });
+    const tmpDir = tmp.dirSync({unsafeCleanup: true});
     const tmpDirName = tmpDir.name;
 
     // current user language
@@ -9725,9 +9725,13 @@ module.exports = function (Outbreak) {
    * @param dateRange
    * @param callback
    */
-  Outbreak.prototype.getContactFollowUpReport = function (dateRange, callback) {
+  Outbreak.prototype.getContactFollowUpReport = function (filter, dateRange, callback) {
+    // endData can be received from filter or body
+    // body has priority
+    let endDate = dateRange.endDate || _.get(filter, 'where.endDate', null);
+
     WorkerRunner
-      .getContactFollowUpReport(this.id, dateRange.startDate, dateRange.endDate)
+      .getContactFollowUpReport(this.id, dateRange.startDate, endDate)
       .then(result => callback(null, result))
       .catch(callback);
   };
@@ -10000,7 +10004,8 @@ module.exports = function (Outbreak) {
       // execute callback
       callback(error, result);
       // replace callback with no-op to prevent calling it multiple times
-      callback = () => {};
+      callback = () => {
+      };
     };
 
     // get list of contacts based on the filter passed on request
@@ -10181,8 +10186,7 @@ module.exports = function (Outbreak) {
 
             // finished
             return contactsMap;
-          })
-        ;
+          });
       })
       .then((contactsMap) => {
         // generate pdf
@@ -10407,7 +10411,7 @@ module.exports = function (Outbreak) {
           // no records left to be processed
           if (currentSetSize === 0) {
             // all records processed, inform the worker that is time to finish
-            return pdfBuilder.send({ fn: 'finish', args: [] });
+            return pdfBuilder.send({fn: 'finish', args: []});
           } else if (currentSetSize > 100) {
             // too many records left, limit batch size to 100
             currentSetSize = 100;
