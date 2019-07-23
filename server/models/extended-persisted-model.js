@@ -196,7 +196,15 @@ module.exports = function (ExtendedPersistedModel) {
    */
   app.remotes().before('**', function (context, next) {
     // including user relations apply only to GET requests
-    if (_.get(context, 'req.method') === 'GET') {
+    if (
+      _.get(context, 'req.method') === 'GET' || (
+        (
+          _.get(context, 'req.method') === 'PUT' ||
+          _.get(context, 'req.method') === 'PATCH'
+        ) &&
+        _.get(context, 'req.query.retrieveCreatedUpdatedBy')
+      )
+    ) {
       // determine if this request tries to include create / update user data
       // retrieveCreatedUpdatedBy can be used to retrieve all relationships
       const includeFilter = _.get(context, 'args.filter.include') || {};
