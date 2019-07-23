@@ -555,7 +555,8 @@
       "LNG_DIALOG_CONFIRM_WIPE_DEVICE": "Are you sure you want to wipe this device?",
       "LNG_DIALOG_CONFIRM_REVERSE_PERSONS": "Are you sure you want to reverse persons?",
       "LNG_DIALOG_CONFIRM_COPY_QUESTIONNAIRE_DATE": "Are you sure you want to copy this date to all empty date fields ?",
-      "LNG_DIALOG_CONFIRM_COPY_PARENT_ENTITY_ADDRESS": "Are you sure you want to copy address from the parent entity?"
+      "LNG_DIALOG_CONFIRM_COPY_PARENT_ENTITY_ADDRESS": "Are you sure you want to copy address from the parent entity?",
+      "LNG_DIALOG_CONFIRM_DELETE_RELATIONSHIPS": "Are you sure you want to delete selected relationships?"
     },
     "uiLoginPage": {
       "LNG_PAGE_LOGIN_ACTION_LOGIN_BUTTON": "Entrar",
@@ -588,7 +589,10 @@
       "LNG_API_ERROR_CODE_MODEL_IN_USE": "A função {{userRoleName}} está em uso e não pode ser excluída. ** Role= Função ou Papel",
       "LNG_API_ERROR_CODE_REQUEST_VALIDATION_ERROR_DUPLICATE_CLIENT_IDS": "Client IDs must be unique",
       "LNG_API_ERROR_CODE_REQUEST_VALIDATION_ERROR_DUPLICATE_SERVER_IDS": "Server URLs must be unique",
-      "LNG_API_ERROR_CODE_REQUEST_VALIDATION_ERROR_INVALID_BACKUP_LOCATION": "Configured backup location is not accessible for read/write"
+      "LNG_API_ERROR_CODE_REQUEST_VALIDATION_ERROR_INVALID_BACKUP_LOCATION": "Configured backup location is not accessible for read/write",
+      "LNG_API_ERROR_CODE_DELETE_CONTACT_LAST_RELATIONSHIP": "Cannot delete a contact's last relationship with a case or event. The contact doesn't have an additional relationship with a case or event.",
+      "LNG_API_ERROR_CODE_INVALID_CASE_RELATIONSHIP": "Case needs to be related to another case in order to be able to convert it to a contact",
+      "LNG_API_ERROR_CODE_INVALID_PASSWORD": "Invalid current password"
     },
     "uiCommonFields": {
       "LNG_COMMON_FIELD_LABEL_CURRENT_PASSWORD": "Senha atual",
@@ -692,7 +696,15 @@
       "LNG_OUTBREAK_FIELD_LABEL_NAME": "Nome do surto",
       "LNG_OUTBREAK_FIELD_LABEL_NAME_DESCRIPTION": "",
       "LNG_OUTBREAK_FIELD_LABEL_START_DATE": "Data de início",
-      "LNG_OUTBREAK_FIELD_LABEL_START_DATE_DESCRIPTION": "Para somente obter informações "
+      "LNG_OUTBREAK_FIELD_LABEL_START_DATE_DESCRIPTION": "Para somente obter informações ",
+      "LNG_OUTBREAK_FIELD_LABEL_CREATED_BY": "Created by",
+      "LNG_OUTBREAK_FIELD_LABEL_CREATED_BY_DESCRIPTION": "",
+      "LNG_OUTBREAK_FIELD_LABEL_CREATED_AT": "Created at ( utc )",
+      "LNG_OUTBREAK_FIELD_LABEL_CREATED_AT_DESCRIPTION": "",
+      "LNG_OUTBREAK_FIELD_LABEL_UPDATED_BY": "Updated by",
+      "LNG_OUTBREAK_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
+      "LNG_OUTBREAK_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
+      "LNG_OUTBREAK_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
     },
     "uiEntityFields": {
       "LNG_ENTITY_FIELD_LABEL_ID": "UID",
@@ -747,8 +759,6 @@
       "LNG_CASE_FIELD_LABEL_CLASSIFICATION_DESCRIPTION": "",
       "LNG_CASE_FIELD_LABEL_CLUSTER": "Cluster",
       "LNG_CASE_FIELD_LABEL_CLUSTER_NAME": "Nome",
-      "LNG_CASE_FIELD_LABEL_CREATED_AT": "Criado em",
-      "LNG_CASE_FIELD_LABEL_CREATED_BY": "Criado por",
       "LNG_CASE_FIELD_LABEL_DATE_BECOME_CASE": "Data para torna-se caso",
       "LNG_CASE_FIELD_LABEL_DATE_BECOME_CASE_DESCRIPTION": "",
       "LNG_CASE_FIELD_LABEL_DATE_OF_BIRTH_BUTTON": "Data de nascimento",
@@ -817,8 +827,6 @@
       "LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED": "Transferência recusada para unidade de tratamento",
       "LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED_DESCRIPTION": "",
       "LNG_CASE_FIELD_LABEL_TYPE": "Tipo",
-      "LNG_CASE_FIELD_LABEL_UPDATED_AT": "Atualizado em",
-      "LNG_CASE_FIELD_LABEL_UPDATED_BY": "Atualizado por",
       "LNG_CASE_FIELD_LABEL_VISUAL_ID": "Identificador do caso",
       "LNG_CASE_FIELD_LABEL_VISUAL_ID_DESCRIPTION": "Identificador do caso deve corresponder a: {{mask}}",
       "LNG_CASE_FIELD_LABEL_WAS_CONTACT": "Foi um contato",
@@ -829,7 +837,15 @@
       "LNG_CASE_FIELD_LABEL_DATE_OF_BURIAL_DESCRIPTION": "",
       "LNG_CASE_FIELD_LABEL_DATE_RANGE_FROM_DESCRIPTION": "",
       "LNG_CASE_FIELD_LABEL_DATE_RANGE_TO_DESCRIPTION": "",
-      "LNG_CASE_FIELD_LABEL_DATE_RANGES": "Dates"
+      "LNG_CASE_FIELD_LABEL_DATE_RANGES": "Dates",
+      "LNG_CASE_FIELD_LABEL_CREATED_BY": "Created by",
+      "LNG_CASE_FIELD_LABEL_CREATED_BY_DESCRIPTION": "",
+      "LNG_CASE_FIELD_LABEL_CREATED_AT": "Created at ( utc )",
+      "LNG_CASE_FIELD_LABEL_CREATED_AT_DESCRIPTION": "",
+      "LNG_CASE_FIELD_LABEL_UPDATED_BY": "Updated by",
+      "LNG_CASE_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
+      "LNG_CASE_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
+      "LNG_CASE_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
     },
     "uiCasesListPage": {
       "LNG_PAGE_LIST_CASES_ACTION_ADD_LAB_RESULT": "Adicionar resultado de laboratório",
@@ -893,7 +909,8 @@
       "LNG_PAGE_MODIFY_CASE_TAB_PERSONAL_TITLE": "Pessoal",
       "LNG_PAGE_MODIFY_CASE_TAB_QUESTIONNAIRE_TITLE": "Questionário",
       "LNG_PAGE_MODIFY_CASE_TITLE": "Modificar {{name}}",
-      "LNG_PAGE_VIEW_CASE_TITLE": "Ver {{name}}"
+      "LNG_PAGE_VIEW_CASE_TITLE": "Ver {{name}}",
+      "LNG_PAGE_MODIFY_CASE_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details"
     },
     "uiCaseLabResultsFields": {
       "LNG_CASE_LAB_RESULT_FIELD_LABEL_CASE_FIRST_NAME": "Primeiro nome do caso",
@@ -930,7 +947,15 @@
       "LNG_CASE_LAB_RESULT_FIELD_LABEL_TEST_TYPE": "Tipo de teste",
       "LNG_CASE_LAB_RESULT_FIELD_LABEL_TEST_TYPE_DESCRIPTION": "",
       "LNG_CASE_LAB_RESULT_FIELD_LABEL_TESTED_FOR": "Tested for",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_TESTED_FOR_DESCRIPTION": ""
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_TESTED_FOR_DESCRIPTION": "",
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CREATED_BY": "Created by",
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CREATED_BY_DESCRIPTION": "",
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CREATED_AT": "Created at ( utc )",
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CREATED_AT_DESCRIPTION": "",
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_UPDATED_BY": "Updated by",
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
     },
     "uiCaseLabResultsListPage": {
       "LNG_PAGE_LIST_CASE_LAB_RESULTS_ACTION_ADD_LAB_RESULT": "Adicionar",
@@ -952,7 +977,9 @@
       "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_EXPOSURES_TITLE": "Exposures",
       "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_CONTACTS_TITLE": "Contacts",
       "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_GROUP_ACTION_SHARE_SELECTED_EXPOSURES": "Share selected exposures",
-      "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_GROUP_ACTION_SHARE_SELECTED_CONTACTS": "Share selected contacts"
+      "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_GROUP_ACTION_SHARE_SELECTED_CONTACTS": "Share selected contacts",
+      "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_GROUP_ACTION_DELETE_SELECTED_RELATIONSHIPS": "Delete selected relationships",
+      "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_GROUP_ACTION_DELETE_SELECTED_RELATIONSHIPS_SUCCESS_MESSAGE": "Relationships deleted"
     },
     "uiModifyEntityRelationshipPage": {
       "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_ACTION_MODIFY_RELATIONSHIP_SUCCESS_MESSAGE": "Relacionamento modificado",
@@ -960,7 +987,8 @@
       "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_TITLE": "Modificar {{name}}",
       "LNG_PAGE_VIEW_RELATIONSHIP_TITLE": "Ver {{name}}",
       "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_ACTION_REVERSE_RELATIONSHIP": "Reverse persons",
-      "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_ACTION_REVERSE_RELATIONSHIP_TOOLTIP": "You can reverse a relationship only if is not involving a contact"
+      "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_ACTION_REVERSE_RELATIONSHIP_TOOLTIP": "You can reverse a relationship only if is not involving a contact",
+      "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details"
     },
     "uiAvailableEntitiesForRelationshipPage": {
       "LNG_LOCATION_FIELD_LABEL_GEOGRAPHICAL_LEVEL": "Nível geográfico",
@@ -988,8 +1016,6 @@
       "LNG_CONTACT_FIELD_LABEL_AGE_DESCRIPTION": "",
       "LNG_CONTACT_FIELD_LABEL_AGE_MONTHS": "Idade (meses)",
       "LNG_CONTACT_FIELD_LABEL_AGE_YEARS": "Idade (Anos)",
-      "LNG_CONTACT_FIELD_LABEL_CREATED_AT": "Criado em",
-      "LNG_CONTACT_FIELD_LABEL_CREATED_BY": "Criado por",
       "LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT": "Data que tornou-se um contato",
       "LNG_CONTACT_FIELD_LABEL_DATE_OF_BIRTH": "Data de nascimento",
       "LNG_CONTACT_FIELD_LABEL_DATE_OF_BIRTH_BUTTON": "Data de nascimento",
@@ -1041,14 +1067,20 @@
       "LNG_CONTACT_FIELD_LABEL_RISK_REASON_DESCRIPTION": "",
       "LNG_CONTACT_FIELD_LABEL_SAFE_BURIAL": "Funeral realizado com segurança.",
       "LNG_CONTACT_FIELD_LABEL_TYPE": "Tipo",
-      "LNG_CONTACT_FIELD_LABEL_UPDATED_AT": "Atualizado em",
-      "LNG_CONTACT_FIELD_LABEL_UPDATED_BY": "Atualizado por",
       "LNG_CONTACT_FIELD_LABEL_VISUAL_ID": "Identificador de contato",
       "LNG_CONTACT_FIELD_LABEL_VISUAL_ID_DESCRIPTION": "The ID should match the pattern defined for this outbreak: {{mask}}",
       "LNG_CONTACT_FIELD_LABEL_WAS_CASE": "Foi caso",
       "LNG_CONTACT_FIELD_RELATIONSHIP_LABEL_FOLLOW_UPS": "Acompanhamento",
       "LNG_CONTACT_FIELD_RELATIONSHIP_LABEL_RELATIONSHIP_CASES": "Casos",
-      "LNG_CONTACT_FIELD_LABEL_DATE_OF_START_OF_FOLLOWUP": "Follow-up start date"
+      "LNG_CONTACT_FIELD_LABEL_DATE_OF_START_OF_FOLLOWUP": "Follow-up start date",
+      "LNG_CONTACT_FIELD_LABEL_CREATED_BY": "Created by",
+      "LNG_CONTACT_FIELD_LABEL_CREATED_BY_DESCRIPTION": "",
+      "LNG_CONTACT_FIELD_LABEL_CREATED_AT": "Created at ( utc )",
+      "LNG_CONTACT_FIELD_LABEL_CREATED_AT_DESCRIPTION": "",
+      "LNG_CONTACT_FIELD_LABEL_UPDATED_BY": "Updated by",
+      "LNG_CONTACT_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
+      "LNG_CONTACT_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
+      "LNG_CONTACT_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
     },
     "uiContactsListPage": {
       "LNG_PAGE_LIST_CONTACTS_ACTION_ADD_FOLLOW_UP": "Adicionar acompanhamento",
@@ -1111,7 +1143,8 @@
       "LNG_PAGE_MODIFY_CONTACT_TAB_PERSONAL_TITLE": "Pessoal",
       "LNG_PAGE_MODIFY_CONTACT_TITLE": "Modificar {{name}}",
       "LNG_PAGE_VIEW_CONTACT_TITLE": "Ver {{name}}",
-      "LNG_PAGE_MODIFY_CONTACT_ACTION_VIEW_EXPOSURE": "View exposure"
+      "LNG_PAGE_MODIFY_CONTACT_ACTION_VIEW_EXPOSURE": "View exposure",
+      "LNG_PAGE_MODIFY_CONTACT_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details"
     },
     "uiRelationshipFields": {
       "LNG_RELATIONSHIP_FIELD_LABEL_CERTAINTY_LEVEL": "Nível de certeza",
@@ -1146,7 +1179,15 @@
       "LNG_RELATIONSHIP_FIELD_LABEL_TYPE": "Tipo de relacionamento",
       "LNG_RELATIONSHIP_FIELD_VALUE_TYPE_CONTACT": "Contato De",
       "LNG_RELATIONSHIP_FIELD_VALUE_TYPE_EXPOSURE": "Exposição",
-      "LNG_RELATIONSHIP_FIELD_LABEL_PERSON_VISUAL_ID": "Case / Contact ID"
+      "LNG_RELATIONSHIP_FIELD_LABEL_PERSON_VISUAL_ID": "Case / Contact ID",
+      "LNG_RELATIONSHIP_FIELD_LABEL_CREATED_BY": "Created by",
+      "LNG_RELATIONSHIP_FIELD_LABEL_CREATED_BY_DESCRIPTION": "",
+      "LNG_RELATIONSHIP_FIELD_LABEL_CREATED_AT": "Created at ( utc )",
+      "LNG_RELATIONSHIP_FIELD_LABEL_CREATED_AT_DESCRIPTION": "",
+      "LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_BY": "Updated by",
+      "LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
+      "LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
+      "LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
     },
     "uiFollowUpfields": {
       "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS": "Endereço",
@@ -1181,7 +1222,15 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_WEEK_NUMBER": "Número de semanas",
       "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_VISUAL_ID": "Contact ID",
       "LNG_FOLLOW_UP_FIELD_LABEL_NOT_TARGETED": "Not targeted",
-      "LNG_FOLLOW_UP_FIELD_LABEL_NOT_TARGETED_DESCRIPTION": ""
+      "LNG_FOLLOW_UP_FIELD_LABEL_NOT_TARGETED_DESCRIPTION": "",
+      "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY": "Created by",
+      "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_DESCRIPTION": "",
+      "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_AT": "Created at ( utc )",
+      "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_AT_DESCRIPTION": "",
+      "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY": "Updated by",
+      "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
+      "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
+      "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
     },
     "uiTermsOfUsePage": {
       "LNG_PAGE_TERMS_OF_USE_TITLE": "Terms of use",
@@ -1246,7 +1295,8 @@
       "LNG_PAGE_MODIFY_FOLLOW_UP_TAB_DETAILS_TITLE": "Detalhes",
       "LNG_PAGE_MODIFY_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE": "Questionário",
       "LNG_PAGE_MODIFY_FOLLOW_UP_TITLE": "Modificar acompanhamento {{dateFormatted}}",
-      "LNG_PAGE_VIEW_FOLLOW_UP_TITLE": "Ver {{dateFormatted}}"
+      "LNG_PAGE_VIEW_FOLLOW_UP_TITLE": "Ver {{dateFormatted}}",
+      "LNG_PAGE_MODIFY_FOLLOW_UP_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details"
     },
     "uiEventFields": {
       "LNG_EVENT_FIELD_LABEL_ADDRESS": "Endereço",
@@ -1261,7 +1311,15 @@
       "LNG_EVENT_FIELD_LABEL_DESCRIPTION_DESCRIPTION": "",
       "LNG_EVENT_FIELD_LABEL_NAME": "Nome",
       "LNG_EVENT_FIELD_LABEL_NAME_DESCRIPTION": "",
-      "LNG_EVENT_FIELD_LABEL_PHONE_NUMBER": "Phone number"
+      "LNG_EVENT_FIELD_LABEL_PHONE_NUMBER": "Phone number",
+      "LNG_EVENT_FIELD_LABEL_CREATED_BY": "Created by",
+      "LNG_EVENT_FIELD_LABEL_CREATED_BY_DESCRIPTION": "",
+      "LNG_EVENT_FIELD_LABEL_CREATED_AT": "Created at ( utc )",
+      "LNG_EVENT_FIELD_LABEL_CREATED_AT_DESCRIPTION": "",
+      "LNG_EVENT_FIELD_LABEL_UPDATED_BY": "Updated by",
+      "LNG_EVENT_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
+      "LNG_EVENT_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
+      "LNG_EVENT_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
     },
     "uiCreateEventPage": {
       "LNG_PAGE_CREATE_EVENT_ACTION_CREATE_EVENT_BUTTON": "Criar evento",
@@ -1294,7 +1352,15 @@
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_VALUE": "Rótulo",
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_VALUE_DESCRIPTION": "",
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ORDER": "Order",
-      "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ORDER_DESCRIPTION": ""
+      "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ORDER_DESCRIPTION": "",
+      "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CREATED_BY": "Created by",
+      "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CREATED_BY_DESCRIPTION": "",
+      "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CREATED_AT": "Created at ( utc )",
+      "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CREATED_AT_DESCRIPTION": "",
+      "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_UPDATED_BY": "Updated by",
+      "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
+      "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
+      "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
     },
     "uiReferenceDataCategoriesListPage": {
       "LNG_PAGE_REFERENCE_DATA_CATEGORIES_LIST_EXPORT_BUTTON": "Exportar dados de referência",
@@ -1320,7 +1386,8 @@
     },
     "uiModifyReferenceDataEntryPage": {
       "LNG_PAGE_MODIFY_REFERENCE_DATA_ENTRY_ACTION_MODIFY_ENTRY_SUCCESS_MESSAGE": "Entrada dados de referência modificada",
-      "LNG_PAGE_MODIFY_REFERENCE_DATA_ENTRY_LABEL_NO_COLOR": "Nenhum ícone"
+      "LNG_PAGE_MODIFY_REFERENCE_DATA_ENTRY_LABEL_NO_COLOR": "Nenhum ícone",
+      "LNG_PAGE_MODIFY_REFERENCE_DATA_ENTRY_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details"
     },
     "uiOutbreakTemplates": {
       "LNG_TEMPLATE_QUESTION_ANSWER_BADGE": "UMA",
@@ -1405,7 +1472,8 @@
       "LNG_PAGE_MODIFY_OUTBREAK_TAB_DETAILS": "Detalhes",
       "LNG_PAGE_MODIFY_OUTBREAK_TAB_LAB_RESULTS": "Resultados de laboratório",
       "LNG_PAGE_MODIFY_OUTBREAK_TAB_MAP_SERVERS": "Servidores de Mapas",
-      "LNG_PAGE_VIEW_OUTBREAK_TITLE": "Ver {{name}}"
+      "LNG_PAGE_VIEW_OUTBREAK_TITLE": "Ver {{name}}",
+      "LNG_PAGE_MODIFY_OUTBREAK_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details"
     },
     "uiFormRangeFields": {
       "LNG_FORM_RANGE_FIELD_LABEL_FROM": "De",
@@ -2004,7 +2072,10 @@
       "LNG_PAGE_MODIFY_CASE_LAB_RESULT_TITLE": "Modificar o resultado {{sampleIdentifier}}",
       "LNG_PAGE_VIEW_CASE_LAB_RESULT_TITLE": "Ver resultado {{sampleIdentifier}}",
       "LNG_PAGE_VIEW_CASE_LAB_RESULT_FIELD_LABEL_CASE": "Case",
-      "LNG_PAGE_VIEW_CASE_LAB_RESULT_WARNING_CASE_DATEOFONSET_AFTER_SAMPLE_TAKEN": "Warning: Date of onset is after sample taken date"
+      "LNG_PAGE_VIEW_CASE_LAB_RESULT_WARNING_CASE_DATEOFONSET_AFTER_SAMPLE_TAKEN": "Warning: Date of onset is after sample taken date",
+      "LNG_PAGE_MODIFY_CASE_LAB_RESULT_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details",
+      "LNG_PAGE_VIEW_CASE_LAB_RESULT_FIELD_LABEL_CONTACT": "Contact",
+      "LNG_PAGE_VIEW_CASE_LAB_RESULT_FIELD_LABEL_CONTACT_WITH_INFO": "* This person is now a contact and lab tests were performed at the time when '{{ caseName }}' was registered as a case"
     },
     "uiClusterFields": {
       "LNG_CLUSTER_FIELD_LABEL_DESCRIPTION": "Descrição",
@@ -2048,7 +2119,15 @@
       "LNG_LOCATION_FIELD_LABEL_IDENTIFIER_CODE": "Code",
       "LNG_LOCATION_FIELD_LABEL_IDENTIFIER_CODE_DESCRIPTION": "",
       "LNG_LOCATION_FIELD_LABEL_IDENTIFIER_DESCRIPTION": "Description",
-      "LNG_LOCATION_FIELD_LABEL_IDENTIFIER_DESCRIPTION_DESCRIPTION": ""
+      "LNG_LOCATION_FIELD_LABEL_IDENTIFIER_DESCRIPTION_DESCRIPTION": "",
+      "LNG_LOCATION_FIELD_LABEL_CREATED_BY": "Created by",
+      "LNG_LOCATION_FIELD_LABEL_CREATED_BY_DESCRIPTION": "",
+      "LNG_LOCATION_FIELD_LABEL_CREATED_AT": "Created at ( utc )",
+      "LNG_LOCATION_FIELD_LABEL_CREATED_AT_DESCRIPTION": "",
+      "LNG_LOCATION_FIELD_LABEL_UPDATED_BY": "Updated by",
+      "LNG_LOCATION_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
+      "LNG_LOCATION_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
+      "LNG_LOCATION_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
     },
     "uiLocationsListPage": {
       "LNG_PAGE_LIST_LOCATIONS_ACTION_DELETE_SUCCESS_MESSAGE": "Localização exclúida",
@@ -2081,7 +2160,8 @@
       "LNG_PAGE_MODIFY_LOCATION_TITLE": "Modificar {{name}}",
       "LNG_PAGE_VIEW_LOCATION_NAME": "{{nome}}",
       "LNG_PAGE_VIEW_LOCATION_TITLE": "Ver {{name}}",
-      "LNG_PAGE_MODIFY_LOCATION_ACTION_PROPAGATE_LOCATION_GEO_LOCATION_SUCCESS_MESSAGE": "Location coordinates were propagated to all addresses that are using this location"
+      "LNG_PAGE_MODIFY_LOCATION_ACTION_PROPAGATE_LOCATION_GEO_LOCATION_SUCCESS_MESSAGE": "Location coordinates were propagated to all addresses that are using this location",
+      "LNG_PAGE_MODIFY_LOCATION_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details"
     },
     "uiLocationsUsageListPage": {
       "LNG_PAGE_LIST_USAGE_LOCATIONS_LABEL_MORE_RECORDS": "Apenas o primeiro {{displayed}} de {{total}} registros são exibidos",
@@ -2176,7 +2256,9 @@
       "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_SELECTED_CONTACTS": "Selected contacts:",
       "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_CHANGES_FOR_SELECTED_FOLLOW_UPS": "The following changes will be made to the selected follow-ups:",
       "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_CHANGES_FOR_SELECTED_FOLLOW_UPS_QUESTIONNAIRE": "Questionnaire:",
-      "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_ACTION_MODIFY_MULTIPLE_FOLLOW_UPS_SUCCESS_MESSAGE": "Relacionamentos criados"
+      "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_ACTION_MODIFY_MULTIPLE_FOLLOW_UPS_SUCCESS_MESSAGE": "Relacionamentos criados",
+      "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_FOLLOW_UPS_DATES": "Follow-ups dates:",
+      "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_MODIFY_DATA_INFO_LABEL": "*The system will replace only data that is changed. If you don't enter any data, then the system won't update the data to any of the selected follow-ups"
     },
     "uiEventsListPage": {
       "LNG_PAGE_LIST_EVENTS_ACTION_DELETE_SUCCESS_MESSAGE": "Evento excluído",
@@ -2197,7 +2279,8 @@
       "LNG_PAGE_MODIFY_EVENT_TAB_ADDRESS_TITLE": "Endereço",
       "LNG_PAGE_MODIFY_EVENT_TAB_DETAILS_TITLE": "Detalhes",
       "LNG_PAGE_MODIFY_EVENT_TITLE": "Modificar {{name}}",
-      "LNG_PAGE_VIEW_EVENT_TITLE": "Ver {{name}}"
+      "LNG_PAGE_VIEW_EVENT_TITLE": "Ver {{name}}",
+      "LNG_PAGE_MODIFY_EVENT_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details"
     },
     "uiIconFields": {
       "LNG_ICON_FIELD_LABEL_ICON": "Ícone",
@@ -2689,7 +2772,8 @@
       "LNG_PAGE_BULK_ADD_CONTACTS_TAB_PICK_LOCATIONS": "Pick locations",
       "LNG_PAGE_BULK_ADD_CONTACTS_TAB_ADD_CONTACTS": "Add contacts",
       "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_LOCATIONS": "Locations",
-      "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_LOCATIONS_DESCRIPTION": "Select the locations to be assigned to contacts in the next step"
+      "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_LOCATIONS_DESCRIPTION": "Select the locations to be assigned to contacts in the next step",
+      "LNG_PAGE_BULK_ADD_CONTACTS_VISUAL_ID_INFO_LABEL": "* 'Contact ID' cell must follow this pattern: {{mask}}"
     },
     "uiExcelLikeSheetWidget": {
       "LNG_SHEET_CONTEXT_MENU_COPY": "Copiar",
@@ -3009,7 +3093,8 @@
     "uiTeamsWorkload": {
       "LNG_PAGE_TEAMS_WORKLOAD_TABLE_OF_LABEL": "{{done}} de {{total}}",
       "LNG_PAGE_TEAMS_WORKLOAD_TEAM_LABEL": "Equipe",
-      "LNG_PAGE_TEAMS_WORKLOAD_TITLE": "Carga de trabajo de las equipos "
+      "LNG_PAGE_TEAMS_WORKLOAD_TITLE": "Carga de trabajo de las equipos ",
+      "LNG_PAGE_TEAMS_WORKLOAD_NO_TEAM_LABEL": "--- NO TEAM ---"
     },
     "uiMyProfilePage": {
       "LNG_PAGE_MY_PROFILE_TITLE": "Meu perfil"
