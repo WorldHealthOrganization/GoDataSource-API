@@ -66,6 +66,15 @@ const getDateEndOfDay = function (date, dayOfWeek) {
 };
 
 /**
+ * Get difference between dates in days
+ * @param startDate
+ * @param endDate
+ */
+const getDaysSince = function (startDate, endDate) {
+  return (getDate(endDate)).diff(getDate(startDate), 'days');
+};
+
+/**
  * Remove non-ASCII chars from a string
  * @param string
  * @return {*}
@@ -1774,5 +1783,6 @@ module.exports = {
   convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat,
   convertQuestionnaireAnswersToNewFormat: convertQuestionnaireAnswersToNewFormat,
   retrieveQuestionnaireVariables: retrieveQuestionnaireVariables,
-  getDateChunks: getDateChunks
+  getDateChunks: getDateChunks,
+  getDaysSince: getDaysSince
 };

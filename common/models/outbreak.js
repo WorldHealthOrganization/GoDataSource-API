@@ -335,7 +335,30 @@ module.exports = function (Outbreak) {
             contextId: personId
           });
         }
-        callback(null, relationship);
+
+        // retrieve person information
+        app.models.relationship.retrieveUserSupportedRelations(
+          {
+            req: {
+              options: {
+                _userRelations: _.map(
+                  app.models.relationship.userSupportedRelations,
+                  (relName) => ({relation: relName})
+                )
+              }
+            }
+          },
+          relationship,
+          (err) => {
+            // an error occurred ?
+            if (err) {
+              return callback(err);
+            }
+
+            // finished mapping user relations
+            callback(null, relationship);
+          }
+        );
       })
       .catch(callback);
   };

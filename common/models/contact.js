@@ -2,8 +2,8 @@
 
 const app = require('../../server/server');
 const dateParser = app.utils.helpers.getDateDisplayValue;
-const moment = require('moment');
 const _ = require('lodash');
+const helpers = require('../../components/helpers');
 
 module.exports = function (Contact) {
   // set flag to not get controller
@@ -262,16 +262,16 @@ module.exports = function (Contact) {
         // if active relationships found
         if (relationshipInstance) {
           // set follow-up start date to be the same as relationship contact date
-          propsToUpdate.startDate = moment(relationshipInstance.contactDate).add(1, 'days');
+          propsToUpdate.startDate = helpers.getDate(relationshipInstance.contactDate).add(1, 'days');
           // if follow-up original start date was not previously set
           if (!propsToUpdate.originalStartDate) {
             // flag as an update
             shouldUpdate = true;
             // set it as follow-up start date
-            propsToUpdate.originalStartDate = propsToUpdate.startDate;
+            propsToUpdate.originalStartDate = helpers.getDate(propsToUpdate.startDate);
           }
           // set follow-up end date
-          propsToUpdate.endDate = moment(propsToUpdate.startDate).add(outbreak.periodOfFollowup, 'days');
+          propsToUpdate.endDate = helpers.getDate(propsToUpdate.startDate).add(outbreak.periodOfFollowup - 1, 'days');
         }
         // check if contact instance should be updated (check if any property changed value)
         !shouldUpdate && ['startDate', 'endDate']
@@ -344,11 +344,11 @@ module.exports = function (Contact) {
     // process date interval
     let dateInterval = [];
     if (typeof date === 'object' && date.startDate && date.endDate) {
-      dateInterval = [moment(date.startDate).startOf('day'), moment(date.endDate).endOf('day')];
+      dateInterval = [helpers.getDate(date.startDate), helpers.getDateEndOfDay(date.endDate)];
     } else if (typeof date === 'string') {
-      dateInterval = [moment(date).startOf('day'), moment(date).endOf('day')];
+      dateInterval = [helpers.getDate(date), helpers.getDateEndOfDay(date)];
     } else {
-      dateInterval = [moment(new Date()).startOf('day'), moment(new Date()).endOf('day')];
+      dateInterval = [helpers.getDate(), helpers.getDateEndOfDay()];
     }
 
     if (groupBy === 'case') {
