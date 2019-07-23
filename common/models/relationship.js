@@ -682,77 +682,113 @@ module.exports = function (Relationship) {
     return app.models.relationship
       .find({where: relationshipQuery})
       .then(function (relationships) {
-        // keep a map of people and their relationships
-        const personRelationshipMap = {};
-        // build a list of other people (in the relationship) IDs
-        const otherPeopleIds = [];
-        // go through all relationships
-        relationships.forEach(function (relationship) {
-          // go trough all the people in the relationships
-          Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
-            // store other person's ID
-            if (person.id !== personId) {
-              otherPeopleIds.push(person.id);
-              // init the map for current person, if not already inited
-              if (!personRelationshipMap[person.id]) {
-                personRelationshipMap[person.id] = [];
-              }
-              // map relationship to current person
-              personRelationshipMap[person.id].push(relationship);
-            }
-          });
-        });
-        // build a filer for the other people
-        const peopleFilter = app.utils.remote
-          .mergeFilters({
-            where: {
-              outbreakId: outbreakId,
-              id: {
-                inq: otherPeopleIds
+        // map relationship models to JSON objects
+        relationships = relationships.map((rel) => rel.toJSON());
+
+        // retrieve user information
+        return new Promise(function (resolve, reject) {
+          // if we just want to count records..then we don't need to retrieve user data
+          if (onlyCount) {
+            resolve(relationships);
+            return;
+          }
+
+          // check if we need to retrieve user data
+          Relationship.retrieveUserSupportedRelations(
+            {
+              req: {
+                options: {
+                  _userRelations: _.map(
+                    Relationship.userSupportedRelations,
+                    (relName) => ({relation: relName})
+                  )
+                }
               }
             },
-          }, filter || {});
+            relationships,
+            (err) => {
+              // an error occurred ?
+              if (err) {
+                reject(err);
+              }
 
-
-        // find other people
-        return app.models.person
-          .find(peopleFilter)
-          .then(function (people) {
-            // build result
-            let result = [];
-            // go through all the people
-            people.forEach(function (person) {
-              // go through all their relations
-              if (Array.isArray(personRelationshipMap[person.id])) {
-                personRelationshipMap[person.id].forEach(function (relationship) {
-                  // clone person record
-                  const record = JSON.parse(JSON.stringify(person));
-                  // attach relationship info
-                  record.relationship = relationship;
-                  // add record to the result
-                  result.push(record);
-                });
+              // finished mapping user relations
+              resolve(relationships);
+            }
+          );
+        }).then((relationships) => {
+          // keep a map of people and their relationships
+          const personRelationshipMap = {};
+          // build a list of other people (in the relationship) IDs
+          const otherPeopleIds = [];
+          // go through all relationships
+          relationships.forEach(function (relationship) {
+            // go trough all the people in the relationships
+            Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
+              // store other person's ID
+              if (person.id !== personId) {
+                otherPeopleIds.push(person.id);
+                // init the map for current person, if not already inited
+                if (!personRelationshipMap[person.id]) {
+                  personRelationshipMap[person.id] = [];
+                }
+                // map relationship to current person
+                personRelationshipMap[person.id].push(relationship);
               }
             });
-
-            if (onlyCount) {
-              return result.length;
-            }
-
-            // custom pagination
-            const skip = _.get(filter, 'skip', 0);
-            let limit = _.get(filter, 'limit');
-            // update limit
-            if (limit !== undefined) {
-              limit = limit + skip;
-            }
-            // apply pagination if needed
-            if (skip !== undefined || limit !== undefined) {
-              result = result.slice(skip, limit);
-            }
-            // return result
-            return result;
           });
+
+          // build a filer for the other people
+          const peopleFilter = app.utils.remote
+            .mergeFilters({
+              where: {
+                outbreakId: outbreakId,
+                id: {
+                  inq: otherPeopleIds
+                }
+              },
+            }, filter || {});
+
+          // find other people
+          return app.models.person
+            .find(peopleFilter)
+            .then(function (people) {
+              // build result
+              let result = [];
+              // go through all the people
+              people.forEach(function (person) {
+                // go through all their relations
+                if (Array.isArray(personRelationshipMap[person.id])) {
+                  personRelationshipMap[person.id].forEach(function (relationship) {
+                    // clone person record
+                    const record = JSON.parse(JSON.stringify(person));
+                    // attach relationship info
+                    record.relationship = relationship;
+                    // add record to the result
+                    result.push(record);
+                  });
+                }
+              });
+
+              if (onlyCount) {
+                return result.length;
+              }
+
+              // custom pagination
+              const skip = _.get(filter, 'skip', 0);
+              let limit = _.get(filter, 'limit');
+              // update limit
+              if (limit !== undefined) {
+                limit = limit + skip;
+              }
+              // apply pagination if needed
+              if (skip !== undefined || limit !== undefined) {
+                result = result.slice(skip, limit);
+              }
+              // return result
+              return result;
+            });
+        });
       });
   };
 

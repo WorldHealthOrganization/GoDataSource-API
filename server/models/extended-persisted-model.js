@@ -251,6 +251,21 @@ module.exports = function (ExtendedPersistedModel) {
    */
   app.remotes().after('**', function (context, next) {
     // check if we need to retrieve user data
+    ExtendedPersistedModel.retrieveUserSupportedRelations(
+      context,
+      context.result,
+      next
+    );
+  });
+
+  /**
+   * Retrieve and map createdByUser, updatedByUser relations data
+   * @param context
+   * @param returnedResult
+   * @param next
+   */
+  ExtendedPersistedModel.retrieveUserSupportedRelations = function (context, returnedResult, next) {
+    // check if we need to retrieve user data
     const userRelations = _.get(context, 'req.options._userRelations');
     if (
       userRelations &&
@@ -264,9 +279,9 @@ module.exports = function (ExtendedPersistedModel) {
       const includeUpdatedByUser = !!_.find(userRelations, { relation: 'updatedByUser' });
 
       // determine results for which we need to map the user data
-      const result = _.isArray(context.result) ?
-        context.result :
-        [context.result];
+      const result = _.isArray(returnedResult) ?
+        returnedResult :
+        [returnedResult];
 
       // determine the user for which we need to retrieve data
       const userIds = {};
@@ -350,5 +365,5 @@ module.exports = function (ExtendedPersistedModel) {
 
     // nothing to do here anymore, we can continue to the next step
     next();
-  });
+  };
 };
