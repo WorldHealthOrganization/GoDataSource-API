@@ -36,7 +36,7 @@ module.exports = function (Case) {
               .then((contacts) => {
                 // contact missing ?
                 if (_.isEmpty(contacts)) {
-                  cb(null, { isValid: false });
+                  cb(null, {isValid: false});
                   return;
                 }
 
@@ -60,7 +60,7 @@ module.exports = function (Case) {
                       }
                     ]
                   })
-                  .then((relationships) => cb(null, { contact: contact, isValid: !relationships.length }));
+                  .then((relationships) => cb(null, {contact: contact, isValid: !relationships.length}));
               })
               .catch((error) => cb(error));
           };
@@ -412,9 +412,9 @@ module.exports = function (Case) {
     }
 
     // make sure end date is after start date
-    const startDate = moment(outbreak.startDate);
+    const startDate = app.utils.helpers.getDate(outbreak.startDate);
     if (endDate.isBefore(startDate)) {
-      endDate = moment(startDate);
+      endDate = app.utils.helpers.getDateEndOfDay(startDate);
     }
 
     // define period interval

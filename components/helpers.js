@@ -35,15 +35,6 @@ const nonModelObjects = {
 };
 
 /**
- * Convert a date to UTC by always keeping the current day no matter the timezone
- * @param date
- * @returns {moment.Moment}
- */
-const getPreciseUTCDate = function (date) {
-  return moment.utc(date.local().format('YYYY-MM-DD'));
-};
-
-/**
  * Convert a Date object into moment date and reset time to start of the day
  * Additionally if dayOfWeek is sent the function will return the date for the date's corresponding day of the week
  * @param date If no date is given, the current datetime is returned
@@ -92,6 +83,8 @@ const getAsciiString = function (string) {
  * @param chunkType String Length of each resulted chunk; Can be a (day, week, month)
  */
 const getDateChunks = function (start, end, chunkType) {
+  start = getDate(start);
+  end = getDateEndOfDay(end);
   let result = [];
   switch (chunkType) {
     case 'day':
@@ -105,13 +98,13 @@ const getDateChunks = function (start, end, chunkType) {
         if (!date.isSame(start)) {
           date.add(1, 'day');
         }
-        let lastDate = getPreciseUTCDate(date.clone().endOf(chunkType));
+        let lastDate = date.clone().endOf(chunkType === 'week' ? 'isoWeek' : chunkType);
         if (lastDate.isSameOrAfter(end)) {
           lastDate = end;
         }
         result.push({
-          start: date.clone().startOf('day'),
-          end: lastDate.clone().endOf('day')
+          start: getDate(date.clone()),
+          end: lastDate.clone()
         });
         date = lastDate;
       }
