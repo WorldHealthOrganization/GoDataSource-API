@@ -2508,7 +2508,7 @@
       "LNG_PAGE_DASHBOARD_KPI_CONTACTS_PER_CASE_MEAN_TITLE": "Contatos por caso (média)",
       "LNG_PAGE_DASHBOARD_KPI_CONTACTS_PER_CASE_MEDIAN_TITLE": "Contatos por caso (mediana)",
       "LNG_PAGE_DASHBOARD_KPI_CONTACTS_SEEN_EACH_DAY": "Contatos vistos",
-      "LNG_PAGE_DASHBOARD_KPI_CONTACTS_WITH_SUCCESSFUL_FOLLOW_UP": "Contatos com acompanhamento bem-sucedido",
+      "LNG_PAGE_DASHBOARD_KPI_CONTACTS_WITH_SUCCESSFUL_FOLLOW_UP": "Contatos com acompanhamento bem-sucedido ( {{date}} )",
       "LNG_PAGE_DASHBOARD_KPI_DASHLET_MENU_HIDE_LABEL": "Ocultar",
       "LNG_PAGE_DASHBOARD_KPI_DASHLET_MENU_MOVE_AFTER_LABEL": "Mover após",
       "LNG_PAGE_DASHBOARD_KPI_DASHLET_MENU_MOVE_BEFORE_LABEL": "Mover antes",
