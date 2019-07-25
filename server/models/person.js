@@ -1283,6 +1283,7 @@ module.exports = function (Person) {
               },
               as: 'lab',
               in: {
+                dateOfResult: '$$lab.dateOfResult',
                 dateSampleTaken: '$$lab.dateSampleTaken',
                 testType: '$$lab.testType',
                 result: '$$lab.result'
@@ -1336,7 +1337,7 @@ module.exports = function (Person) {
             return -1;
           } else {
             // compare dates
-            return moment(date1).diff(moment(date2));
+            return helpers.getDate(date1).diff(helpers.getDate(date2));
           }
         };
 
@@ -1390,11 +1391,11 @@ module.exports = function (Person) {
 
           // determine lastGraphDate
           // - should be the most recent date from case.dateOfOnset / case.dateRanges.endDate / case.labResults.dateSampleTaken / event.date
-          recordData.lastGraphDate = moment(recordData.date);
+          recordData.lastGraphDate = helpers.getDate(recordData.date);
 
           // determine firstGraphDate
           // - should be the oldest date from case.dateOfOnset / case.dateRanges.endDate / case.labResults.dateSampleTaken / event.date
-          recordData.firstGraphDate = moment(recordData.date);
+          recordData.firstGraphDate = helpers.getDate(recordData.date);
 
           // determine lastGraphDate starting with lab results
           // applies only for cases, since events don't have lab results
@@ -1402,27 +1403,52 @@ module.exports = function (Person) {
             const labResults = recordData.labResults || [];
             recordData.labResults = [];
             labResults.forEach((lab) => {
-              // ignore lab results without result date
-              if (!lab.dateSampleTaken) {
+              // ignore lab results without result date or sample taken
+              if (
+                !lab.dateOfResult &&
+                !lab.dateSampleTaken
+              ) {
                 return;
               }
 
-              // determine lastGraphDate
-              const dateSampleTaken = moment(lab.dateSampleTaken);
-              recordData.lastGraphDate = !recordData.lastGraphDate ?
-                dateSampleTaken : (
-                  dateSampleTaken.isAfter(recordData.lastGraphDate) ?
-                    dateSampleTaken :
-                    recordData.lastGraphDate
-                );
+              // actions only if we have date of result
+              if (lab.dateOfResult) {
+                // determine lastGraphDate
+                const dateOfResult = helpers.getDate(lab.dateOfResult);
+                recordData.lastGraphDate = !recordData.lastGraphDate ?
+                  dateOfResult : (
+                    dateOfResult.isAfter(recordData.lastGraphDate) ?
+                      dateOfResult :
+                      recordData.lastGraphDate
+                  );
 
-              // determine min graph date
-              recordData.firstGraphDate = !recordData.firstGraphDate ?
-                dateSampleTaken : (
-                  dateSampleTaken.isBefore(recordData.firstGraphDate) ?
-                    dateSampleTaken :
-                    recordData.firstGraphDate
-                );
+                // determine min graph date
+                recordData.firstGraphDate = !recordData.firstGraphDate ?
+                  dateOfResult : (
+                    dateOfResult.isBefore(recordData.firstGraphDate) ?
+                      dateOfResult :
+                      recordData.firstGraphDate
+                  );
+
+              // fallback to dateSampleTaken
+              } else {
+                // determine lastGraphDate
+                const dateSampleTaken = helpers.getDate(lab.dateSampleTaken);
+                recordData.lastGraphDate = !recordData.lastGraphDate ?
+                  dateSampleTaken : (
+                    dateSampleTaken.isAfter(recordData.lastGraphDate) ?
+                      dateSampleTaken :
+                      recordData.lastGraphDate
+                  );
+
+                // determine min graph date
+                recordData.firstGraphDate = !recordData.firstGraphDate ?
+                  dateSampleTaken : (
+                    dateSampleTaken.isBefore(recordData.firstGraphDate) ?
+                      dateSampleTaken :
+                      recordData.firstGraphDate
+                  );
+              }
 
               // since we have dateSampleTaken, lets add it to the list
               recordData.labResults.push(lab);
@@ -1441,10 +1467,10 @@ module.exports = function (Person) {
               }
 
               // make sure we have start date
-              dateRange.startDate = dateRange.startDate ? moment(dateRange.startDate) : moment(recordData.date);
+              dateRange.startDate = dateRange.startDate ? helpers.getDate(dateRange.startDate) : helpers.getDate(recordData.date);
 
               // if we don't have an end date then we need to set the current date since this is still in progress
-              dateRange.endDate = dateRange.endDate ? moment(dateRange.endDate) : moment();
+              dateRange.endDate = dateRange.endDate ? helpers.getDate(dateRange.endDate) : helpers.getDate();
 
               // determine min graph date
               if (dateRange.startDate) {

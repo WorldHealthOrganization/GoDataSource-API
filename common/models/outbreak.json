@@ -3037,6 +3037,9 @@
                         "dateOfResult": {
                           "type": "date"
                         },
+                        "dateSampleTaken": {
+                          "type": "date"
+                        },
                         "testType": {
                           "type": "string"
                         },
