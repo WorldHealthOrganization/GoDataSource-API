@@ -217,9 +217,59 @@ function processMapLists(flatMap, prefix) {
  * @param processedMap
  * @param valuesMap
  * @param parentPath
+ * @param dontRemoveEmptyData
  * @return {Array}
  */
-function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, parentPath) {
+function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, parentPath, dontRemoveEmptyData) {
+  // remove empty object since these aren't relevant
+  // clean array ( remove empty objects... )
+  const removeEmptyObjectsAndArrays = (data) => {
+    // check if there is a point in doing something here
+    if (_.isArray(data)) {
+      // construct a new array with only valid objects
+      const newArray = [];
+      data.forEach((value) => {
+        // clean objects
+        const isObjectOrArray = _.isArray(value) || _.isObject(value);
+        if (isObjectOrArray) {
+          // clean object / arrays
+          value = removeEmptyObjectsAndArrays(value);
+
+          // check if we need to remove item from array
+          if (!_.isEmpty(value)) {
+            newArray.push(value);
+          }
+        } else {
+          newArray.push(value);
+        }
+
+        // replace old array with the new one
+        data = newArray;
+      });
+    } else if (_.isObject(data)) {
+      _.each(
+        data,
+        (value, property) => {
+          if (value === undefined) {
+            delete data[property];
+          } else if (_.isArray(value)) {
+            data[property] = removeEmptyObjectsAndArrays(value);
+          } else if (_.isObject(value)) {
+            value = removeEmptyObjectsAndArrays(value);
+            if (_.isEmpty(value)) {
+              delete data[property];
+            } else {
+              data[property] = value;
+            }
+          }
+        }
+      );
+    }
+
+    // finished
+    return data;
+  };
+
   // process only if there's something to process
   if (Array.isArray(dataSet)) {
     // initialize results container
@@ -250,7 +300,9 @@ function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, pare
                 processedMap.map[sourcePath],
                 valuesMap,
                 // build path to the item that's being processed (will be used by values mapper)
-                `${parentPathPrefix}${sourcePath}[]`
+                `${parentPathPrefix}${sourcePath}[]`,
+                // no need to remove empty data, since we will do that recursively at the parent level
+                true
               )
             );
             // simple mapping, no arrays
@@ -328,10 +380,10 @@ function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, pare
           }
         });
         // store the result
-        results.push(result);
+        results.push(dontRemoveEmptyData ? result : removeEmptyObjectsAndArrays(result));
       } else {
         // nothing to process, copy as is
-        results.push(item);
+        results.push(dontRemoveEmptyData ? item : removeEmptyObjectsAndArrays(item));
       }
     });
     return results;
