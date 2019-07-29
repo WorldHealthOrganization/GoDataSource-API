@@ -1245,6 +1245,10 @@ module.exports = function (Person) {
               else: '$dateOfOnset'
             }
           },
+          outcomeId: 1,
+          dateOfOutcome: 1,
+          safeBurial: 1,
+          dateOfBurial: 1,
           addresses: {
             $cond: {
               if: {$eq: ['$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']},
@@ -1260,7 +1264,8 @@ module.exports = function (Person) {
                 typeId: '$$dateRange.typeId',
                 locationId: '$$dateRange.locationId',
                 startDate: '$$dateRange.startDate',
-                endDate: '$$dateRange.endDate'
+                endDate: '$$dateRange.endDate',
+                centerName: '$$dateRange.centerName'
               }
             }
           },
@@ -1493,6 +1498,50 @@ module.exports = function (Person) {
               // since we have either start date or end date we can use it for the graph
               recordData.dateRanges.push(dateRange);
             });
+          }
+
+          // determine min & max dates taking in consideration dateOfOutcome
+          if (recordData.dateOfOutcome) {
+            // determine dateOfOutcome
+            const dateOfOutcome = helpers.getDate(recordData.dateOfOutcome);
+
+            // determine min graph date
+            recordData.firstGraphDate = !recordData.firstGraphDate ?
+              dateOfOutcome : (
+                dateOfOutcome.isBefore(recordData.firstGraphDate) ?
+                  dateOfOutcome :
+                  recordData.firstGraphDate
+              );
+
+            // determine last graph date
+            recordData.lastGraphDate = !recordData.lastGraphDate ?
+              dateOfOutcome : (
+                dateOfOutcome.isAfter(recordData.lastGraphDate) ?
+                  dateOfOutcome :
+                  recordData.lastGraphDate
+              );
+          }
+
+          // determine min & max dates taking in consideration dateOfBurial
+          if (recordData.dateOfBurial) {
+            // determine dateOfBurial
+            const dateOfBurial = helpers.getDate(recordData.dateOfBurial);
+
+            // determine min graph date
+            recordData.firstGraphDate = !recordData.firstGraphDate ?
+              dateOfBurial : (
+                dateOfBurial.isBefore(recordData.firstGraphDate) ?
+                  dateOfBurial :
+                  recordData.firstGraphDate
+              );
+
+            // determine last graph date
+            recordData.lastGraphDate = !recordData.lastGraphDate ?
+              dateOfBurial : (
+                dateOfBurial.isAfter(recordData.lastGraphDate) ?
+                  dateOfBurial :
+                  recordData.lastGraphDate
+              );
           }
 
           // determine oldest case onset date / event date
