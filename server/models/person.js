@@ -1495,6 +1495,15 @@ module.exports = function (Person) {
                     recordData.lastGraphDate
                 );
 
+              // add center name to list
+              if (!recordData.centerNames) {
+                recordData.centerNames = {};
+              }
+              const centerName = dateRange.centerName ? dateRange.centerName.trim() : null;
+              if (centerName) {
+                recordData.centerNames[centerName.toLowerCase()] = centerName;
+              }
+
               // since we have either start date or end date we can use it for the graph
               recordData.dateRanges.push(dateRange);
             });
@@ -1560,6 +1569,13 @@ module.exports = function (Person) {
                 response.maxGraphDate
             );
 
+          // convert center names object to array
+          // & sort them by name
+          recordData.centerNames = recordData.centerNames ?
+            Object.values(recordData.centerNames).sort() :
+            [];
+          recordData.centerNamesSortBy = recordData.centerNames.map((item) => item.toLowerCase()).join();
+
           // add response case / event
           delete recordData._id;
           response.personsMap[recordData.id] = recordData;
@@ -1569,10 +1585,25 @@ module.exports = function (Person) {
         response.personsOrder = Object
           .values(response.personsMap)
           .sort((person1, person2) => {
+            // compare center names
+            // items with no center names should be put at the  end of the list
+            const centerNames1 = person1.centerNamesSortBy ? person1.centerNamesSortBy : 'zzzzzzzzzzzzzzzzzzzz';
+            const centerNames2 = person2.centerNamesSortBy ? person2.centerNamesSortBy : 'zzzzzzzzzzzzzzzzzzzz';
+            const centerNameCompareResult = centerNames1.localeCompare(centerNames2);
+            if (centerNameCompareResult !== 0) {
+              return centerNameCompareResult;
+            }
+
             // compare missing dates & dates
             return compareDates(person1.date, person2.date);
           })
           .map((personData) => personData.id);
+
+        // remove unused properties
+        _.each(response.personsMap, (item) => {
+          // remove properties
+          delete item.centerNamesSortBy;
+        });
 
         // return results
         return callback(
