@@ -3001,6 +3001,22 @@
                     "type": "date",
                     "description": "Case dateOfOnset / Event date"
                   },
+                  "outcomeId": {
+                    "type": "string",
+                    "description": "Outcome id"
+                  },
+                  "dateOfOutcome": {
+                    "type": "date",
+                    "description": "Outcome date"
+                  },
+                  "safeBurial": {
+                    "type": "boolean",
+                    "description": "Burial properly safe?"
+                  },
+                  "dateOfBurial": {
+                    "type": "date",
+                    "description": "Burial date"
+                  },
                   "firstGraphDate": {
                     "type": "date",
                     "description": "Min graph date for this case / event"
@@ -3027,9 +3043,16 @@
                         "locationId": {
                           "type": "string",
                           "description": "Date location UID"
+                        },
+                        "centerName": {
+                          "type": "string",
+                          "description": "Treatment center name"
                         }
                       }
                     }
+                  ],
+                  "centerNames": [
+                    "string"
                   ],
                   "labResults": [
                     {
