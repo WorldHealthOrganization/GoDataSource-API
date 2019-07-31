@@ -361,9 +361,10 @@ module.exports = function (Location) {
    * Build hierarchical list of locations
    * @param locationsList
    * @param [removeIdentifiers] {boolean} If true, id and parentLocationId are omitted from the record
+   * @param baseLevel
    * @return {*[]}
    */
-  Location.buildHierarchicalLocationsList = function (locationsList, removeIdentifiers) {
+  Location.buildHierarchicalLocationsList = function (locationsList, removeIdentifiers, baseLevel) {
     // by default keep identifiers
     if (removeIdentifiers === undefined) {
       removeIdentifiers = false;
@@ -445,7 +446,7 @@ module.exports = function (Location) {
       }
 
       // if this is a top level location
-      if (location.parentLocationId == null) {
+      if (location.parentLocationId == null || location.geographicalLevelId === baseLevel) {
         // if it was not just processed
         if (!justProcessed) {
           // add it to the list on the top level
