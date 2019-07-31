@@ -4,6 +4,8 @@ const app = require('../../server/server');
 const moment = require('moment');
 const _ = require('lodash');
 const helpers = require('../../components/helpers');
+const FollowupGeneration = require('../../components/followupGeneration');
+const RoundRobin = require('rr');
 
 module.exports = function (FollowUp) {
   // set flag to not get controller
@@ -246,6 +248,47 @@ module.exports = function (FollowUp) {
   }
 
   /**
+   * Set follow-up team, if needed
+   * @param context
+   */
+  function setFollowUpTeamIfNeeded(context) {
+    // get data from context
+    const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
+    // if we have team id in the request, don't do anything
+    const teamId = _.get(data, 'source.all.teamId');
+    if (teamId) {
+      return;
+    }
+    // make sure we have person id (bulk delete/updates are missing this info)
+    const personId = _.get(data, 'source.all.personId');
+    // if there is no person id
+    if (!personId) {
+      // stop here
+      return Promise.resolve();
+    }
+    // get follow up's contact
+    return app.models.person
+      .findById(personId)
+      .then((person) => {
+        // if the contact was not found, just continue (maybe this is a sync and contact was not synced yet)
+        if (!person) {
+          return;
+        }
+        // get all teams and their locations to get eligible teams for each contact
+        return FollowupGeneration
+          .getAllTeamsWithLocationsIncluded()
+          .then((teams) => {
+            return FollowupGeneration
+              .getContactFollowupEligibleTeams(person, teams)
+              .then((eligibleTeams) => {
+                // choose a random team
+                _.set(data, 'target.teamId', RoundRobin(eligibleTeams));
+              });
+          });
+      });
+  }
+
+  /**
    * Before save hooks
    */
   FollowUp.observe('before save', function (ctx, next) {
@@ -255,6 +298,7 @@ module.exports = function (FollowUp) {
     setFollowUpIndexIfNeeded(ctx)
     // set follow-up address (if needed)
       .then(() => setFollowUpAddressIfNeeded(ctx))
+      .then(() => setFollowUpTeamIfNeeded(ctx))
       .then(() => next())
       .catch(next);
   });
