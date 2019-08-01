@@ -252,12 +252,16 @@ module.exports = function (FollowUp) {
    * @param context
    */
   function setFollowUpTeamIfNeeded(context) {
+    // this needs to be done only for new instances (and not for sync)
+    if (!context.isNewInstance || (context.options && context.options._sync)) {
+      return Promise.resolve();
+    }
     // get data from context
     const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
     // if we have team id in the request, don't do anything
     const teamId = _.get(data, 'source.all.teamId');
     if (teamId) {
-      return;
+      return Promise.resolve();
     }
     // make sure we have person id (bulk delete/updates are missing this info)
     const personId = _.get(data, 'source.all.personId');
