@@ -2571,10 +2571,9 @@ module.exports = function (Outbreak) {
     let outbreakId = this.id;
 
     // get current date
-    let now = new Date();
+    let now = genericHelpers.getDate();
     // get date from noDaysNotSeen days ago
-    let xDaysAgo = new Date((new Date()).setHours(0, 0, 0, 0));
-    xDaysAgo.setDate(now.getDate() - noDaysNotSeen);
+    let xDaysAgo = now.clone().subtract(noDaysNotSeen, 'day');
 
     // get contact query
     let contactQuery = app.utils.remote.searchByRelationProperty
@@ -2632,13 +2631,21 @@ module.exports = function (Outbreak) {
             // order by date as we need to check the follow-ups from the oldest to the most new
             order: {date: 1}
           })
-          .then(function (followUps) {
-            // get contact ids (duplicates are removed) from all follow ups
-            let contactIDs = [...new Set(followUps.map((followUp) => followUp.personId))];
+          .then(followUps => {
+            const resultContactsList = [];
+            // group follow ups per contact
+            const groupedByContact = _.groupBy(followUps, (f) => f.personId);
+            for (let contactId in groupedByContact) {
+              // keep one follow up per day
+              const contactFollowUps = [...new Set(groupedByContact[contactId].map((f) => f.index))];
+              if (contactFollowUps.length === noDaysNotSeen) {
+                resultContactsList.push(contactId);
+              }
+            }
             // send response
-            callback(null, {
-              contactsCount: contactIDs.length,
-              contactIDs: contactIDs
+            return callback(null, {
+              contactsCount: resultContactsList.length,
+              contactIDs: resultContactsList
             });
           });
       })
