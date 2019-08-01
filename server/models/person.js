@@ -642,7 +642,7 @@ module.exports = function (Person) {
           })
           .then((reportingLocations) => {
             let reportingLocationIds = reportingLocations.map(location => location.id);
-            let locationHierarchy = app.models.location.buildHierarchicalLocationsList(allLocations);
+            let locationHierarchy = app.models.location.buildHierarchicalLocationsList(allLocations, null, outbreak.reportingGeographicalLevelId);
             let locationCorelationMap = {};
 
             // Initiate peopleDistribution as an object so we can add locations/people to it easier
