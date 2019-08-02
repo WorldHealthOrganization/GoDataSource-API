@@ -1329,6 +1329,9 @@ module.exports = function (Outbreak) {
       filter = {};
     }
 
+    // get outbreak id
+    const outbreakId = this.id;
+
     // check if contacts should be included
     const includeContacts = _.get(filter, 'where.includeContacts', false);
     // if present remove it from the main filter
@@ -1402,7 +1405,17 @@ module.exports = function (Outbreak) {
         if (personFilter) {
           // find people that match the filter
           return app.models.person
-            .rawFind(personFilter, {projection: {_id: 1}})
+            .rawFind(
+              app.utils.remote.convertLoopbackFilterToMongo({
+                and: [
+                  {
+                    outbreakId: outbreakId
+                  },
+                  personFilter
+                ]
+              }),
+              {projection: {_id: 1}}
+            )
             .then(function (people) {
               // return their IDs
               return people.map(person => person.id);
