@@ -9752,9 +9752,17 @@ module.exports = function (Outbreak) {
     // endData can be received from filter or body
     // body has priority
     let endDate = dateRange.endDate || _.get(filter, 'where.endDate', null);
+    if (_.get(filter, 'where.endDate')) {
+      delete filter.where.endDate;
+    }
 
     WorkerRunner
-      .getContactFollowUpReport(this.id, dateRange.startDate, endDate)
+      .getContactFollowUpReport(
+        this.id,
+        dateRange.startDate,
+        endDate,
+        _.get(filter, 'where')
+      )
       .then(result => callback(null, result))
       .catch(callback);
   };

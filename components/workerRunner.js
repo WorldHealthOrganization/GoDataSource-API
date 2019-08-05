@@ -285,9 +285,14 @@ module.exports = {
       });
     }
   },
-  getContactFollowUpReport: function (outbreakId, startDate, endDate) {
+  getContactFollowUpReport: function (
+    outbreakId,
+    startDate,
+    endDate,
+    whereFilter
+  ) {
     return new Promise(function (resolve, reject) {
-      invokeWorkerMethod('contactFollowUpReport', 'get', [outbreakId, startDate, endDate], (error, result) => {
+      invokeWorkerMethod('contactFollowUpReport', 'get', [outbreakId, startDate, endDate, whereFilter], (error, result) => {
         if (error) {
           return reject(error);
         }
