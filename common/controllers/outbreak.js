@@ -2034,6 +2034,9 @@ module.exports = function (Outbreak) {
             _id: {
               nin: Object.keys(casesIndex)
             },
+            classification: {
+              nin: app.models.case.discardedCaseClassifications
+            }
           }, {
             projection: {
               dateOfReporting: 1
