@@ -7,6 +7,7 @@ const MomentLibrary = require('moment');
 const MomentRange = require('moment-range');
 const _ = require('lodash');
 const Helpers = require('../../components/helpers');
+const convertLoopbackFilterToMongo = require('../../components/convertLoopbackFilterToMongo');
 
 // add moment-range plugin
 const Moment = MomentRange.extendMoment(MomentLibrary);
@@ -51,11 +52,23 @@ const worker = {
    * @param outbreakId
    * @param startDate
    * @param endDate
+   * @param whereFilter
    */
-  get(outbreakId, startDate, endDate) {
+  get(
+    outbreakId,
+    startDate,
+    endDate,
+    whereFilter
+  ) {
     // parse dates for mongodb conditions
     startDate = Helpers.getDate(startDate).toDate();
     endDate = Helpers.getDateEndOfDay(endDate).toDate();
+
+    // filter by classification ?
+    const classification = _.get(whereFilter, 'classification');
+    if (classification) {
+      delete whereFilter.classification;
+    }
 
     // mongodb date between filter
     const filter = {
@@ -81,6 +94,11 @@ const worker = {
       ]
     };
 
+    // attach client filter if necessary
+    if (!_.isEmpty(whereFilter)) {
+      filter.$and.push(whereFilter);
+    }
+
     // get range of days
     const range = Moment.range(startDate, endDate);
     const days = Array.from(range.by('days')).map((m => m.toString()));
@@ -105,6 +123,97 @@ const worker = {
     // initialize mongodb connection
     return new Promise((resolve) => {
       getMongoDBConnection()
+        .then((dbConnection) => {
+          // retrieve cases with provided classifications ?
+          if (!_.isEmpty(classification)) {
+            return dbConnection
+              .collection('person')
+              .find({
+                outbreakId: outbreakId,
+                type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                deleted: {
+                  $ne: true
+                },
+                classification: convertLoopbackFilterToMongo(classification)
+              }, {
+                projection: {
+                  _id: 1
+                }
+              })
+              .toArray()
+              .then((caseData) => {
+                if (_.isEmpty(caseData)) {
+                  // there is nothing to retrieve further
+                  filter.$and.push({
+                    personId: {
+                      $in: []
+                    }
+                  });
+
+                  // finished
+                  return dbConnection;
+                } else {
+                  // retrieve list of cases for which we need to retrieve contacts
+                  const caseIds = caseData.map((caseModel) => caseModel._id);
+
+                  // retrieve contact relationships
+                  return dbConnection
+                    .collection('relationship')
+                    .find({
+                      outbreakId: outbreakId,
+                      deleted: {
+                        $ne: true
+                      },
+                      $or: [
+                        {
+                          'persons.0.source': true,
+                          'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                          'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                          'persons.0.id': {
+                            $in: caseIds
+                          }
+                        }, {
+                          'persons.1.source': true,
+                          'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                          'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                          'persons.1.id': {
+                            $in: caseIds
+                          }
+                        }
+                      ]
+                    }, {
+                      projection: {
+                        persons: 1
+                      }
+                    })
+                    .toArray()
+                    .then((relationshipData) => {
+                      // determine contact ids
+                      let contactIds = {};
+                      (relationshipData || []).forEach((contact) => {
+                        const id = contact.persons[0].target ?
+                          contact.persons[0].id :
+                          contact.persons[1].id;
+                        contactIds[id] = true;
+                      });
+                      contactIds = Object.keys(contactIds);
+
+                      // set filter by person id
+                      filter.$and.push({
+                        personId: {
+                          $in: contactIds
+                        }
+                      });
+
+                      // finished
+                      return dbConnection;
+                    });
+                }
+              });
+          } else {
+            return dbConnection;
+          }
+        })
         .then((dbConnection) => {
           // process records in batches
           (function getNextBatch(skip = 0) {
