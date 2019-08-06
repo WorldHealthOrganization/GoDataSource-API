@@ -1908,6 +1908,12 @@ module.exports = function (Outbreak) {
     // get outbreakId
     let outbreakId = this.id;
 
+    // filter by classification ?
+    const classification = _.get(filter, 'where.classification');
+    if (classification) {
+      delete filter.where.classification;
+    }
+
     // create filter as we need to use it also after the relationships are found
     let _filter = app.utils.remote
       .mergeFilters({
@@ -1920,14 +1926,89 @@ module.exports = function (Outbreak) {
         }
       }, filter || {});
 
-    // get all relationships between events and contacts, where the contacts were created sooner than 'noDaysNewContacts' ago
-    return app.models.contact
-      .rawFind(_filter.where)
-      .then(function (contacts) {
-        return {
-          contactsLostToFollowupCount: contacts.length,
-          contactIDs: contacts.map((contact) => contact.id)
-        };
+    // do we need to filter contacts by case classification ?
+    let promise = Promise.resolve();
+    if (classification) {
+      // retrieve cases
+      promise = promise
+        .then(() => {
+          return app.models.case
+            .rawFind({
+              outbreakId: this.id,
+              deleted: {
+                $ne: true
+              },
+              classification: app.utils.remote.convertLoopbackFilterToMongo(classification)
+            }, {projection: {'_id': 1}});
+        })
+        .then((caseData) => {
+          // no case data, so there is no need to retrieve relationships
+          if (_.isEmpty(caseData)) {
+            return  [];
+          }
+
+          // retrieve list of cases for which we need to retrieve contacts relationships
+          const caseIds = caseData.map((caseModel) => caseModel.id);
+
+          // retrieve relationships
+          return app.models.relationship
+            .rawFind({
+              outbreakId: this.id,
+              deleted: {
+                $ne: true
+              },
+              $or: [
+                {
+                  'persons.0.source': true,
+                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                  'persons.0.id': {
+                    $in: caseIds
+                  }
+                }, {
+                  'persons.1.source': true,
+                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                  'persons.1.id': {
+                    $in: caseIds
+                  }
+                }
+              ]
+            }, {projection: {persons: 1}});
+        })
+        .then((relationshipData) => {
+          // determine contacts which can be retrieved
+          const contactIds = relationshipData.map((contact) => {
+            return contact.persons[0].target ?
+              contact.persons[0].id :
+              contact.persons[1].id;
+          });
+
+          // filter contacts
+          _filter.where = {
+            $and: [
+              _filter.where, {
+                _id: {
+                  $in: contactIds
+                }
+              }
+            ]
+          };
+        });
+    }
+
+    // get contacts that are available for follow up generation
+    return promise
+      .then(() => {
+        // get all relationships between events and contacts, where the contacts were created sooner than 'noDaysNewContacts' ago
+        return app.models.contact
+          .rawFind(_filter.where)
+          .then(function (contacts) {
+            return {
+              contactsLostToFollowupCount: contacts.length,
+              contactIDs: contacts.map((contact) => contact.id)
+            };
+          });
       });
   };
 
