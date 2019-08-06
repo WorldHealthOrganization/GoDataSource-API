@@ -886,7 +886,7 @@ module.exports = function (Outbreak) {
           // retrieve relationships
           return app.models.relationship
             .rawFind({
-              outbreakId: this.id,
+              outbreakId: options.outbreakId,
               deleted: {
                 $ne: true
               },
