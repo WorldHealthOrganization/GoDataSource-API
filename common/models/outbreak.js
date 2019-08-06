@@ -844,22 +844,119 @@ module.exports = function (Outbreak) {
       teams: []
     };
 
+    // retrieve relations queries
+    const relationsQueries = app.utils.remote.searchByRelationProperty
+      .convertIncludeQueryToFilterQuery(filter);
+
     // get contact query, if any
-    let contactQuery = app.utils.remote.searchByRelationProperty
-      .convertIncludeQueryToFilterQuery(filter).contact;
+    let contactQuery = relationsQueries.contact;
+
+    // get case query, if any
+    const caseQuery = relationsQueries.case;
 
     // by default, find contacts does not perform any action
     let findContacts = Promise.resolve();
-    // if there is a contact query
-    if (contactQuery) {
-      // find the contacts that match the query
-      findContacts = app.models.contact
-        .rawFind({and: [contactQuery, {outbreakId: options.outbreakId}]}, {projection: {_id: 1}})
-        .then(function (contacts) {
-          // return a list of contact ids
-          return contacts.map(contact => contact.id);
+
+    // do we need to filter contacts by case classification ?
+    if (caseQuery) {
+      // retrieve cases
+      findContacts = findContacts
+        .then(() => {
+          return app.models.case
+            .rawFind({
+              and: [
+                caseQuery, {
+                  outbreakId: options.outbreakId,
+                  deleted: {
+                    $ne: true
+                  }
+                }
+              ]
+            }, {projection: {'_id': 1}});
+        })
+        .then((caseData) => {
+          // no case data, so there is no need to retrieve relationships
+          if (_.isEmpty(caseData)) {
+            return  [];
+          }
+
+          // retrieve list of cases for which we need to retrieve contacts relationships
+          const caseIds = caseData.map((caseModel) => caseModel.id);
+
+          // retrieve relationships
+          return app.models.relationship
+            .rawFind({
+              outbreakId: this.id,
+              deleted: {
+                $ne: true
+              },
+              $or: [
+                {
+                  'persons.0.source': true,
+                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                  'persons.0.id': {
+                    $in: caseIds
+                  }
+                }, {
+                  'persons.1.source': true,
+                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                  'persons.1.id': {
+                    $in: caseIds
+                  }
+                }
+              ]
+            }, {projection: {persons: 1}});
+        })
+        .then((relationshipData) => {
+          // determine contacts which can be retrieved
+          let contactIds = {};
+          (relationshipData || []).forEach((contact) => {
+            const id = contact.persons[0].target ?
+              contact.persons[0].id :
+              contact.persons[1].id;
+            contactIds[id] = true;
+          });
+          contactIds = Object.keys(contactIds);
+
+          // filter contacts
+          if (contactQuery) {
+            contactQuery = {
+              and: [
+                contactQuery, {
+                  id: {
+                    inq: contactIds
+                  }
+                }
+              ]
+            };
+          } else {
+            contactQuery = {
+              id: {
+                inq: contactIds
+              }
+            };
+          }
         });
     }
+
+    // find the contacts
+    findContacts = findContacts
+      .then(() => {
+        // no contact query
+        if (!contactQuery) {
+          return;
+        }
+
+        // if a contact query was specified
+        return app.models.contact
+          .rawFind({and: [contactQuery, {outbreakId: options.outbreakId}]}, {projection: {_id: 1}})
+          .then(function (contacts) {
+            // return a list of contact ids
+            return contacts.map(contact => contact.id);
+          });
+      });
 
     // find contacts
     findContacts

@@ -1479,11 +1479,6 @@
       "LNG_FORM_RANGE_FIELD_LABEL_FROM": "De",
       "LNG_FORM_RANGE_FIELD_LABEL_TO": "UNE"
     },
-    "uiDasboardPage": {
-      "LNG_PAGE_DASHBOARD_KPI_CONTACTS_FOLLOWUP_LIST_TITLE": "Contacts sur la liste de suivi",
-      "LNG_PAGE_DASHBOARD_KPI_TITLE": "Autres KPI",
-      "LNG_PAGE_DASHBOARD_TITLE": "Tableau de bord"
-    },
     "uiTransmissionChainsListPage": {
       "LNG_PAGE_LIST_TRANSMISSION_CHAINS_ACTION_LIST_BUTTON": "liste",
       "LNG_PAGE_LIST_TRANSMISSION_CHAINS_LABEL_DURATION_DAYS": "journées",
@@ -2537,7 +2532,10 @@
       "LNG_PAGE_DASHBOARD_CASES_CONTACT_STATUS_REPORT_PERCENTAGE_LABEL": "Pourcentage de cas de la liste de contacts",
       "LNG_PAGE_DASHBOARD_CASES_CONTACT_STATUS_REPORT_X_AXIS_LABEL": "Date",
       "LNG_PAGE_DASHBOARD_CASES_CONTACT_STATUS_REPORT_Y_AXIS_LABEL": "Nombre de cas",
-      "LNG_PAGE_DASHBOARD_CASES_CONTACT_STATUS_REPORT_Y2_AXIS_LABEL": "Pourcentage"
+      "LNG_PAGE_DASHBOARD_CASES_CONTACT_STATUS_REPORT_Y2_AXIS_LABEL": "Pourcentage",
+      "LNG_PAGE_DASHBOARD_KPI_CONTACTS_FOLLOWUP_LIST_TITLE": "Contacts sur la liste de suivi",
+      "LNG_PAGE_DASHBOARD_KPI_TITLE": "Autres KPI",
+      "LNG_PAGE_DASHBOARD_TITLE": "Tableau de bord"
     },
     "uiChainsOfTransmission": {
       "LNG_PAGE_DASHBOARD_CHAINS_OF_TRANSMISSION_ACTION_VIEW_FULL_RESOURCE": "Voir la ressource complète",

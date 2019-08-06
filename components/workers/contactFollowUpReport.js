@@ -189,11 +189,14 @@ const worker = {
                     .toArray()
                     .then((relationshipData) => {
                       // determine contact ids
-                      const contactIds = relationshipData.map((contact) => {
-                        return contact.persons[0].target ?
+                      let contactIds = {};
+                      (relationshipData || []).forEach((contact) => {
+                        const id = contact.persons[0].target ?
                           contact.persons[0].id :
                           contact.persons[1].id;
+                        contactIds[id] = true;
                       });
+                      contactIds = Object.keys(contactIds);
 
                       // set filter by person id
                       filter.$and.push({

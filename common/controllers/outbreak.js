@@ -1978,11 +1978,14 @@ module.exports = function (Outbreak) {
         })
         .then((relationshipData) => {
           // determine contacts which can be retrieved
-          const contactIds = relationshipData.map((contact) => {
-            return contact.persons[0].target ?
+          let contactIds = {};
+          (relationshipData || []).forEach((contact) => {
+            const id = contact.persons[0].target ?
               contact.persons[0].id :
               contact.persons[1].id;
+            contactIds[id] = true;
           });
+          contactIds = Object.keys(contactIds);
 
           // filter contacts
           _filter.where = {
@@ -2736,11 +2739,14 @@ module.exports = function (Outbreak) {
         })
         .then((relationshipData) => {
           // determine contacts which can be retrieved
-          const contactIds = relationshipData.map((contact) => {
-            return contact.persons[0].target ?
+          let contactIds = {};
+          (relationshipData || []).forEach((contact) => {
+            const id = contact.persons[0].target ?
               contact.persons[0].id :
               contact.persons[1].id;
+            contactIds[id] = true;
           });
+          contactIds = Object.keys(contactIds);
 
           // filter contacts
           if (contactQuery) {
@@ -9425,11 +9431,14 @@ module.exports = function (Outbreak) {
         })
         .then((relationshipData) => {
           // determine contacts which can be retrieved
-          const contactIds = relationshipData.map((contact) => {
-            return contact.persons[0].target ?
+          let contactIds = {};
+          (relationshipData || []).forEach((contact) => {
+            const id = contact.persons[0].target ?
               contact.persons[0].id :
               contact.persons[1].id;
+            contactIds[id] = true;
           });
+          contactIds = Object.keys(contactIds);
 
           // filter contacts
           mergedFilter.where = {
