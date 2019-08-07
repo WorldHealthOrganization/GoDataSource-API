@@ -446,7 +446,12 @@ module.exports = function (Location) {
       }
 
       // if this is a top level location
-      if (location.parentLocationId == null || location.geographicalLevelId === baseLevel) {
+      if (
+        location.parentLocationId == null || (
+          location.geographicalLevelId !== undefined &&
+          location.geographicalLevelId === baseLevel
+        )
+      ) {
         // if it was not just processed
         if (!justProcessed) {
           // add it to the list on the top level
