@@ -216,10 +216,48 @@ module.exports = function (Sync) {
 
         // check for received outbreakIDs in filter
         let outbreakIDFilter = _.get(filter, 'where.outbreakId');
-        // get allowed outbreaks IDs; if userEmail was sent get the outbreaks IDs for the requested user else get the outbreaks IDs for the client
-        let allowedOutbreakIDs = userModel ?
-          _.get(userModel, 'outbreakIds', []) :
-          _.get(options, 'remotingContext.req.authData.client.outbreakIDs', []);
+
+        // retrieve client application & user restricted outbreaks
+        // empty means that there are no restrictions
+        const clientOutbreaks = _.get(options, 'remotingContext.req.authData.client.outbreakIDs', []);
+        const userOutbreaks = _.get(userModel, 'outbreakIds', []);
+
+        // determine allowed outbreaks accordingly to what client application allows and user limitations
+        let allowedOutbreakIDs = [];
+        if (!_.isEmpty(clientOutbreaks)) {
+          // we have client application outbreaks, so we need to make sure we restrict access
+          // check if we have user restrictions two
+          if (!_.isEmpty(userOutbreaks)) {
+            // we have both client application & user restrictions, so the proper way to limit them is to do an intersection between these two
+            allowedOutbreakIDs = _.intersection(
+              clientOutbreaks,
+              userOutbreaks
+            );
+
+            // since intersection didn't return anything then we should throw an error because user doesn't actually have access to anything
+            // since he uses client application credentials that aren't configured properly for his user account
+            if (_.isEmpty(allowedOutbreakIDs)) {
+              return done(app.utils.apiError.getError('ACCESS_DENIED', {
+                accessErrors: 'Client is not allowed to access any outbreaks with the provided credentials'
+              }, 403));
+            }
+          } else {
+            // there are no user restrictions, so user has access to all client application outbreaks
+            allowedOutbreakIDs = clientOutbreaks;
+          }
+        } else {
+          // there are no client outbreaks limitations
+          // check if there are limitations per user
+          if (!_.isEmpty(userOutbreaks)) {
+            // we don't have client application but we have user restrictions, so user has access to all his outbreaks
+            allowedOutbreakIDs = userOutbreaks;
+          } else {
+            // there are no limitations for this use
+            // nothing to do anymore
+            // allowedOutbreakIDs = [];
+          }
+        }
+
         // initialize list of IDs for the outbreaks that will be exported
         let exportedOutbreakIDs = [];
 
