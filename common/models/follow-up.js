@@ -826,49 +826,4 @@ module.exports = function (FollowUp) {
         return followUps;
       });
   };
-
-  /**
-   * Migrate data
-   * @param callback
-   */
-  FollowUp.migrate = (options, callback) => {
-    // determine how many follow-ups we have so we can update them in batches
-    helpers
-      .migrateModelDataInBatches(
-        FollowUp,
-        (modelData, cb) => {
-          // check if we have questionnaire answer and is we need to update data
-          if (
-            !_.isEmpty(modelData.questionnaireAnswers) && (
-              !_.isArray(modelData.questionnaireAnswers[Object.keys(modelData.questionnaireAnswers)[0]]) ||
-              !_.isObject(modelData.questionnaireAnswers[Object.keys(modelData.questionnaireAnswers)[0]][0])
-            )
-          ) {
-            // migrate questionnaire answers
-            const newQuestionnaireAnswers = {};
-            _.each(modelData.questionnaireAnswers, (value, variable) => {
-              newQuestionnaireAnswers[variable] = [{
-                value: value
-              }];
-            });
-
-            // update case questionnaire answers
-            modelData
-              .updateAttributes({
-                questionnaireAnswers: newQuestionnaireAnswers
-              }, options)
-              .then(() => cb())
-              .catch(cb);
-          } else {
-            // finished
-            cb();
-          }
-        }
-      )
-      .then(() => {
-        // finished
-        callback();
-      })
-      .catch(callback);
-  };
 };
