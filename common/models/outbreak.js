@@ -1033,7 +1033,10 @@ module.exports = function (Outbreak) {
       {
         where: {
           outbreakId: outbreak.id,
-          wasContact: true
+          wasContact: true,
+          classification: {
+            nin: app.models.case.discardedCaseClassifications
+          }
         },
         fields: ['id', 'relationships', 'dateBecomeCase'],
         include: [
@@ -1046,6 +1049,22 @@ module.exports = function (Outbreak) {
           }
         ]
       };
+
+    // input case filter
+    const caseFilter = _.get(filter, 'where.case');
+    if (caseFilter) {
+      // remove from original filter
+      delete filter.where.case;
+
+      // add to case filters
+      _filter.where = {
+        and: [
+          _filter.where,
+          caseFilter
+        ]
+      };
+    }
+
     // find the cases
     app.models.case
       .rawFind(_filter.where, {projection: {dateBecomeCase: 1}})
