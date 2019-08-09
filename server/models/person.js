@@ -1501,7 +1501,7 @@ module.exports = function (Person) {
               }
               const centerName = dateRange.centerName ? dateRange.centerName.trim() : null;
               if (centerName) {
-                recordData.centerNames[centerName.toLowerCase()] = centerName;
+                recordData.centerNames[_.camelCase(centerName)] = centerName;
               }
 
               // since we have either start date or end date we can use it for the graph
@@ -1574,7 +1574,7 @@ module.exports = function (Person) {
           recordData.centerNames = recordData.centerNames ?
             Object.values(recordData.centerNames).sort() :
             [];
-          recordData.centerNamesSortBy = recordData.centerNames.map((item) => item.toLowerCase()).join();
+          recordData.centerNamesSortBy = recordData.centerNames.map((item) => _.camelCase(item)).join();
 
           // add response case / event
           delete recordData._id;
@@ -1587,9 +1587,12 @@ module.exports = function (Person) {
           .sort((person1, person2) => {
             // compare center names
             // items with no center names should be put at the  end of the list
-            const centerNames1 = person1.centerNamesSortBy ? person1.centerNamesSortBy : 'zzzzzzzzzzzzzzzzzzzz';
-            const centerNames2 = person2.centerNamesSortBy ? person2.centerNamesSortBy : 'zzzzzzzzzzzzzzzzzzzz';
-            const centerNameCompareResult = centerNames1.localeCompare(centerNames2);
+            const centerNameCompareResult = !person1.centerNamesSortBy && !person2.centerNamesSortBy ? 0 : (
+              !person1.centerNamesSortBy ? 1 : (
+                !person2.centerNamesSortBy ? -1 :
+                  person1.centerNamesSortBy.localeCompare(person2.centerNamesSortBy)
+              )
+            );
             if (centerNameCompareResult !== 0) {
               return centerNameCompareResult;
             }
