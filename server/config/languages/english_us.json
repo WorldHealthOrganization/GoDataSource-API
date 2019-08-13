@@ -1203,7 +1203,7 @@
       "LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
       "LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
     },
-    "uiFollowUpfields": {
+    "uiFollowUpFields": {
       "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS": "Address",
       "LNG_FOLLOW_UP_FIELD_LABEL_AREA": "Area",
       "LNG_FOLLOW_UP_FIELD_LABEL_COMMENT": "Comment",
