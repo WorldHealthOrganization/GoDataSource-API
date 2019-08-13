@@ -1681,7 +1681,11 @@ function migrateModelDataInBatches(
  */
 function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}) {
   // check if modelInstance has address/addresses; nothing to do in case an address is not set
-  if (!modelInstance.address && !modelInstance.addresses) {
+  if (
+    !modelInstance.address &&
+    !modelInstance.addresses &&
+    !modelInstance.fillLocation
+  ) {
     return;
   }
 
@@ -1691,6 +1695,15 @@ function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}) {
     addressesToUpdate = [modelInstance.address];
   } else {
     addressesToUpdate = modelInstance.addresses;
+  }
+
+  // do we need to convert fill location two ?
+  // make sure we don't alter the original array
+  if (!_.isEmpty(modelInstance.fillLocation)) {
+    addressesToUpdate = [
+      ...addressesToUpdate,
+      modelInstance.fillLocation
+    ];
   }
 
   // loop through the addresses and update then if needed
