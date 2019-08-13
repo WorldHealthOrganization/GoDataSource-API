@@ -1127,7 +1127,10 @@
       "LNG_PAGE_LIST_CONTACTS_EXPORT_DAILY_FOLLOW_UP_LIST_TITLE": "Suivi quotidien des contacts",
       "LNG_PAGE_LIST_CONTACTS_EXPORT_DAILY_FOLLOW_UPS_FORM_BUTTON": "Imprimer le formulaire de suivi quotidien",
       "LNG_PAGE_LIST_CONTACTS_EXPORT_DAILY_FOLLOW_UPS_FORM_TITLE": "Formulaire de suivi quotidien des contacts",
-      "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_MODIFY_CONTACTS": "Modifier les contacts sélectionnés"
+      "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_MODIFY_CONTACTS": "Modifier les contacts sélectionnés",
+      "LNG_PAGE_LIST_CONTACTS_ACTION_CHANGE_CONTACT_FINAL_FOLLOW_UP_STATUS": "Change Contact Final Follow-Up Status",
+      "LNG_PAGE_LIST_CONTACTS_ACTION_CHANGE_CONTACT_FINAL_FOLLOW_UP_STATUS_DIALOG_TITLE": "Are you sure you want to change the 'Final Follow-Up Status' for {{count}} contact(s)?",
+      "LNG_PAGE_LIST_CONTACTS_ACTION_CHANGE_CONTACT_FINAL_FOLLOW_UP_STATUS_DIALOG_SUCCESS_MSG": "Final status updated for {{count}} contact(s)"
     },
     "uiCreateContactPage": {
       "LNG_PAGE_CREATE_CONTACT_ACTION_CREATE_CONTACT_BUTTON": "Créer contact",
@@ -1242,7 +1245,8 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
       "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
       "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_AT_DESCRIPTION": "",
-      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_LOCATION": "Fill location"
+      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_LOCATION": "Fill location",
+      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_LOCATION_NO_LOCATION": "Not available"
     },
     "uiTermsOfUsePage": {
       "LNG_PAGE_TERMS_OF_USE_TITLE": "Conditions d'utilisation",
@@ -3555,7 +3559,14 @@
       "LNG_FOLLOW_UPS_SINGLE_SCREEN_ACTION_EDIT_CONTACT": "Edit contact",
       "LNG_DIALOG_SAVE_ANYWAY_LABEL": "Save anyway",
       "LNG_CASE_FIELD_LABEL_CASE_ID": "Case ID",
-      "LNG_CONTACT_FIELD_LABEL_CONTACT_ID": "Contact ID"
+      "LNG_CONTACT_FIELD_LABEL_CONTACT_ID": "Contact ID",
+      "LNG_DIALOG_ALERT_MESSAGE_ARE_YOU_SURE_YOU_WANT_TO_COPY_THE_ADDRESS_FROM_THE_PARENT_ENTITY": "Are you sure you want to copy the address from the parent entity?",
+      "LNG_PERSON_LIST_ITEM_DAY_OF_FOLLOW_UP": "Day of follow-up: ",
+      "LNG_ADDRESS_FIELD_LABEL_IS_THE_PERSON_NEXT_TO_YOU": "Capture coordinates",
+      "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP": "Follow-up",
+      "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_STATUS": "Status",
+      "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_QUESTIONNAIRE": "Questionnaire",
+      "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_ADDRESS": "Address"
     },
     "reportDailyFollowUpList": {
       "LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS": "Adresse",
@@ -3586,7 +3597,11 @@
       "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_COLLAPSE_ALL": "Réduire tout",
       "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_EXPAND": "Développer",
       "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_EXPAND_ALL": "Développer tout",
-      "LNG_LIST_PAGES_COLLAPSED_ITEMS_NUMBER": "{{valeur}} éléments"
+      "LNG_LIST_PAGES_COLLAPSED_ITEMS_NUMBER": "{{valeur}} éléments",
+      "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_HIDE": "Hide",
+      "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_HIDE_ALL": "Hide All",
+      "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_SHOW": "Show",
+      "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_SHOW_ALL": "Show All"
     },
     "uiFormErrorsWarningsAndSuccessMessages": {
       "LNG_FORM_ERROR_FORM_INVALID_WITH_FIELDS": "Les champs suivants ne sont pas valides: {{fields}}",
