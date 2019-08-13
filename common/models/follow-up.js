@@ -71,9 +71,6 @@ module.exports = function (FollowUp) {
     'address.geoLocation.lng': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LNG',
     'address.geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
     'address.date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
-    'fillGeolocation': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION',
-    'fillGeolocation.lat': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LAT',
-    'fillGeolocation.lng': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG',
     'index': 'LNG_FOLLOW_UP_FIELD_LABEL_INDEX',
     'teamId': 'LNG_FOLLOW_UP_FIELD_LABEL_TEAM',
     'statusId': 'LNG_FOLLOW_UP_FIELD_LABEL_STATUSID',
@@ -92,7 +89,8 @@ module.exports = function (FollowUp) {
 
   // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
   FollowUp.nestedGeoPoints = [
-    'address.geoLocation'
+    'address.geoLocation',
+    'fillLocation.geoLocation'
   ];
 
   FollowUp.printFieldsinOrder = [

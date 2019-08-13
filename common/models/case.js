@@ -222,7 +222,6 @@ module.exports = function (Case) {
     'addresses[].date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
     'addresses[].phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
     'visualId': 'LNG_CASE_FIELD_LABEL_VISUAL_ID',
-    'fillGeoLocation': 'LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION',
     'isDateOfReportingApproximate': 'LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
     'questionnaireAnswers': 'LNG_CASE_FIELD_LABEL_QUESTIONNAIRE_ANSWERS',
     'safeBurial': 'LNG_CASE_FIELD_LABEL_SAFE_BURIAL',
