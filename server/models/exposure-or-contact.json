@@ -49,9 +49,6 @@
     "addresses": [
       "address"
     ],
-    "fillGeoLocation": {
-      "type": "geopoint"
-    },
     "dateOfReporting": {
       "type": "date",
       "required": true

@@ -69,9 +69,6 @@
     "addresses": [
       "address"
     ],
-    "fillGeoLocation": {
-      "type": "geopoint"
-    },
     "dateOfReporting": {
       "type": "date",
       "required": true
@@ -176,9 +173,6 @@
     },
     "addresses_locationId_index": {
       "addresses.locationId": 1
-    },
-    "fillGeoLocation_index": {
-      "fillGeoLocation": "2dsphere"
     },
     "dateOfReporting_index": {
       "dateOfReporting": 1

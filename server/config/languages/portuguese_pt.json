@@ -624,6 +624,14 @@
       "LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER": "Phone number",
       "LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER_DESCRIPTION": ""
     },
+    "uiFillLocationFields": {
+      "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION": "Geolocalização",
+      "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_DESCRIPTION": "",
+      "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT": "Latitude",
+      "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT_DESCRIPTION": "",
+      "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG": "Longitude",
+      "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG_DESCRIPTION": ""
+    },
     "uiQuestionnaire": {
       "LNG_QUESTIONNAIRE_BUTTON_BROWSE": "Procurar",
       "LNG_QUESTIONNAIRE_BUTTON_DOWNLOAD": "Baixar",
@@ -790,7 +798,6 @@
       "LNG_CASE_FIELD_LABEL_DOCUMENTS": "Documentos",
       "LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER": "Número do documento",
       "LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE": "Tipo de Documento",
-      "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION": "Preencha geolocalização",
       "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "Preencha a latitude da geolocalização ",
       "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "Preencha a longitude da geolocalização",
       "LNG_CASE_FIELD_LABEL_FIRST_NAME": "Primeiro nome",
@@ -1036,7 +1043,6 @@
       "LNG_CONTACT_FIELD_LABEL_DOCUMENTS": "Documentos",
       "LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER": "Número de documento",
       "LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE": "Tipo de documento",
-      "LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION": "Preencher geolocalização",
       "LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "Preencher a latitude da geolocalização",
       "LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "Preencher a longitude da geolocalização",
       "LNG_CONTACT_FIELD_LABEL_FIRST_NAME": "Primeiro nome",
@@ -1197,7 +1203,7 @@
       "LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
       "LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
     },
-    "uiFollowUpfields": {
+    "uiFollowUpFields": {
       "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS": "Endereço",
       "LNG_FOLLOW_UP_FIELD_LABEL_AREA": "Área",
       "LNG_FOLLOW_UP_FIELD_LABEL_COMMENT": "Comentário",
@@ -1206,9 +1212,6 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_LAST_NAME": "Sobrenome",
       "LNG_FOLLOW_UP_FIELD_LABEL_DATE": "Data",
       "LNG_FOLLOW_UP_FIELD_LABEL_DELETED": "Exclusão",
-      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION": "Preencha a geolocalização",
-      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "Preencha latitude de geolocalização",
-      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "Preencha longitude de geolocalização",
       "LNG_FOLLOW_UP_FIELD_LABEL_INDEX": "Índice",
       "LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED": "É gerado",
       "LNG_FOLLOW_UP_FIELD_LABEL_LOST_TO_FOLLOW_UP": "Perdidos para acompanhar",
@@ -1238,7 +1241,8 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY": "Updated by",
       "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
       "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
-      "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
+      "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_AT_DESCRIPTION": "",
+      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_LOCATION": "Fill location"
     },
     "uiTermsOfUsePage": {
       "LNG_PAGE_TERMS_OF_USE_TITLE": "Terms of use",
