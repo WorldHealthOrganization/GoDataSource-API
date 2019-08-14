@@ -738,6 +738,12 @@ module.exports = function (Relationship) {
             });
           });
 
+          // custom pagination
+          const skip = _.get(filter, 'skip', 0);
+          delete filter.skip;
+          let limit = _.get(filter, 'limit');
+          delete filter.limit;
+
           // build a filer for the other people
           const peopleFilter = app.utils.remote
             .mergeFilters({
@@ -774,9 +780,6 @@ module.exports = function (Relationship) {
                 return result.length;
               }
 
-              // custom pagination
-              const skip = _.get(filter, 'skip', 0);
-              let limit = _.get(filter, 'limit');
               // update limit
               if (limit !== undefined) {
                 limit = limit + skip;
