@@ -50,19 +50,10 @@ module.exports = function (Model) {
    */
   function getUserContextInformation(context) {
     let loggedInUser = getLoggedInUserFromOptions(context.options);
-    // get the ID; initialize as unavailable
-    let id = 'unavailable';
-    // check for client instance or user
-    if (loggedInUser) {
-      if (loggedInUser.credentials) {
-        id = `Sync. Client Id: ${loggedInUser.credentials.clientId}`;
-      } else if (loggedInUser.id) {
-        id = loggedInUser.id;
-      }
-    }
-
     return {
-      id: id
+      id: loggedInUser ?
+        loggedInUser.id :
+        undefined
     };
   }
 
@@ -101,19 +92,36 @@ module.exports = function (Model) {
         if (!context.instance.createdAt || (!context.options._init && !context.options._sync)) {
           context.instance.createdAt = new Date();
         }
-        context.instance.createdBy = user.id;
+        context.instance.createdBy = user.id ?
+          user.id : (
+            context.instance.createdBy ?
+              context.instance.createdBy :
+              'unavailable'
+          );
       }
+
+
       // update updatedAt property if it's not a init, sync or the property is missing from the instance
       if (!context.instance.updatedAt || (!context.options._init && !context.options._sync)) {
         context.instance.updatedAt = new Date();
       }
-      context.instance.updatedBy = user.id;
+      context.instance.updatedBy = user.id ?
+        user.id : (
+          context.instance.updatedBy ?
+            context.instance.updatedBy :
+            'unavailable'
+        );
     } else {
       // update updatedAt property if it's not a init, sync or the property is missing from the instance
       if (!context.data.updatedAt || (!context.options._init && !context.options._sync)) {
         context.data.updatedAt = new Date();
       }
-      context.data.updatedBy = user.id;
+      context.data.updatedBy = user.id ?
+        user.id : (
+          context.data.updatedBy ?
+            context.data.updatedBy :
+            'unavailable'
+        );
     }
     return next();
   });
