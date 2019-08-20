@@ -55,6 +55,7 @@ module.exports = function (FollowUp) {
   // map language token labels for model properties
   FollowUp.fieldLabelsMap = Object.assign({}, FollowUp.fieldLabelsMap, {
     'personId': 'LNG_FOLLOW_UP_FIELD_LABEL_PERSON_ID',
+    'contact': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT',
     'contact.firstName': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FIRST_NAME',
     'contact.lastName': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_LAST_NAME',
     'date': 'LNG_FOLLOW_UP_FIELD_LABEL_DATE',
