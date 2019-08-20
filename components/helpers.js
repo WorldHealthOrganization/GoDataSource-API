@@ -1531,8 +1531,8 @@ const getPeriodIntervalForDate = function (fullPeriodInterval, periodType, date)
       break;
     case 'week':
       // get week interval for date
-      startDay = getDate(date, 1);
-      endDay = getDateEndOfDay(date, 7);
+      startDay = getDate(date).startOf('isoWeek');
+      endDay = getDateEndOfDay(date).endOf('isoWeek');
       break;
     case 'month':
       // get month period interval for date
