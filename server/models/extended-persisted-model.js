@@ -254,9 +254,10 @@ module.exports = function (ExtendedPersistedModel) {
 
           // config saved
           app.logger.info(
-            'Config file ( %s ) public data updated to: %s',
+            'Config file ( %s ) public data updated to: %s taken FROM %s',
             configPath,
-            JSON.stringify(config.public)
+            JSON.stringify(config.public),
+            JSON.stringify(urlInfo)
           );
         }
       }
