@@ -220,8 +220,9 @@ module.exports = function (ExtendedPersistedModel) {
           _.get(config, 'public.host').toLowerCase() !== urlInfo.hostname.toLowerCase();
 
         // port changed ?
-        const portChanged = urlInfo.port &&
-          _.get(config, 'public.port').toString().toLowerCase() !== urlInfo.port.toString().toLowerCase();
+        const port = urlInfo.port === null ? '80' : urlInfo.port;
+        const portChanged = port &&
+          _.get(config, 'public.port').toString().toLowerCase() !== port.toString().toLowerCase();
 
         // check if we need to update host information
         if (
@@ -241,7 +242,7 @@ module.exports = function (ExtendedPersistedModel) {
 
           // change port
           if (portChanged) {
-            _.set(config, 'public.port', urlInfo.port);
+            _.set(config, 'public.port', port);
           }
 
           // save data into file
