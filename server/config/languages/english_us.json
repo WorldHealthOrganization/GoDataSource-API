@@ -1936,6 +1936,7 @@
     "passwordReset": {
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1": "You've requested a password reset for your account.",
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2": "Click <a href='{{resetHref}}'>here</a> to reset your password.",
+      "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_HEADING": "Password reset",
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT": "Password reset"
     },
     "backupStatus": {

@@ -3,6 +3,10 @@
 const app = require('../../server/server');
 const dbSync = require('../../components/dbSync');
 const _ = require('lodash');
+const url = require('url');
+const config = require('../config');
+const path = require('path');
+const fs = require('fs');
 
 module.exports = function (ExtendedPersistedModel) {
   // shortcut to Extended Persisted Model
@@ -195,6 +199,69 @@ module.exports = function (ExtendedPersistedModel) {
    * - At this point filters on user relationships don't work, in case we need to add support for this then we will need to allow inclusion on all count methods as well
    */
   app.remotes().before('**', function (context, next) {
+    // retrieve domain from client url
+    const origin = context.req.get('origin');
+    if (!_.isEmpty(origin)) {
+      // retrieve url info
+      const urlInfo = url.parse(origin);
+      if (
+        urlInfo && (
+          urlInfo.hostname &&
+          urlInfo.hostname.toLowerCase() !== 'localhost' &&
+          urlInfo.hostname.toLowerCase() !== '127.0.0.1'
+        )
+      ) {
+        // protocol changed?
+        const protocolChanged = urlInfo.protocol &&
+          _.get(config, 'public.protocol').toLowerCase() !== urlInfo.protocol.replace(':', '').toLowerCase();
+
+        // host changed
+        const hostChanged = urlInfo.hostname &&
+          _.get(config, 'public.host').toLowerCase() !== urlInfo.hostname.toLowerCase();
+
+        // port changed ?
+        const portChanged = urlInfo.port &&
+          _.get(config, 'public.port').toString().toLowerCase() !== urlInfo.port.toString().toLowerCase();
+
+        // check if we need to update host information
+        if (
+          protocolChanged ||
+          hostChanged ||
+          portChanged
+        ) {
+          // change protocol ?
+          if (protocolChanged) {
+            _.set(config, 'public.protocol', urlInfo.protocol.replace(':', ''));
+          }
+
+          // change host ?
+          if (hostChanged) {
+            _.set(config, 'public.host', urlInfo.hostname);
+          }
+
+          // change port
+          if (portChanged) {
+            _.set(config, 'public.port', urlInfo.port);
+          }
+
+          // save data into file
+          // update configuration
+          const configPath = path.resolve(__dirname + '/../config.json');
+          fs.writeFileSync(
+            configPath,
+            JSON.stringify(config, null, 2)
+          );
+
+          // config saved
+          app.logger.info(
+            'Config file ( %s ) public data updated to: %s',
+            configPath,
+            JSON.stringify(config.public)
+          );
+        }
+      }
+    }
+
     // including user relations apply only to GET requests
     if (
       _.get(context, 'req.method') === 'GET' || (

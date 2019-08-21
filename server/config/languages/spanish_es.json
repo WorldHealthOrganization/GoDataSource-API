@@ -1936,6 +1936,7 @@
     "passwordReset": {
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1": "Ha solicitado un restablecimiento de contraseña para su cuenta.",
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2": "Haga clic en <a href='{entasresetHref}}'> aquí </a> para restablecer la contraseña.",
+      "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_HEADING": "Restablecer la contraseña",
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT": "Restablecer la contraseña"
     },
     "backupStatus": {
