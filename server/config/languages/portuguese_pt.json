@@ -1936,6 +1936,7 @@
     "passwordReset": {
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1": "Você solicitou uma redefinição de senha para sua conta.",
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2": "Clique <a href='{{resetHref}}'> aqui </a> para redefinir sua senha.",
+      "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_HEADING": "Resetar a senha",
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT": "Resetar a senha"
     },
     "backupStatus": {

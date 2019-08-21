@@ -1936,6 +1936,7 @@
     "passwordReset": {
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1": "Vous avez demandé une réinitialisation du mot de passe pour votre compte.",
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2": "Cliquez <a href='{{resetHref}}'>ici</a> pour réinitialiser votre mot de passe.",
+      "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_HEADING": "Réinitialiser le mot de passe",
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT": "Réinitialiser le mot de passe"
     },
     "backupStatus": {
