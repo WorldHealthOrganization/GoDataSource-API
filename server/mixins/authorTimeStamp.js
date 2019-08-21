@@ -96,7 +96,7 @@ module.exports = function (Model) {
           user.id : (
             context.instance.createdBy ?
               context.instance.createdBy :
-              'unavailable'
+              'system'
           );
       }
 
@@ -109,19 +109,22 @@ module.exports = function (Model) {
         user.id : (
           context.instance.updatedBy ?
             context.instance.updatedBy :
-            'unavailable'
+            'system'
         );
     } else {
-      // update updatedAt property if it's not a init, sync or the property is missing from the instance
-      if (!context.data.updatedAt || (!context.options._init && !context.options._sync)) {
-        context.data.updatedAt = new Date();
+      // don't update on sync since it is might be updated by sistem and not by current user which in turn might cause us to loose information
+      if (!context.options._sync) {
+        // update updatedAt property if it's not a init, sync or the property is missing from the instance
+        if (!context.data.updatedAt) {
+          context.data.updatedAt = new Date();
+        }
+        context.data.updatedBy = user.id ?
+          user.id : (
+            context.data.updatedBy ?
+              context.data.updatedBy :
+              'system'
+          );
       }
-      context.data.updatedBy = user.id ?
-        user.id : (
-          context.data.updatedBy ?
-            context.data.updatedBy :
-            'unavailable'
-        );
     }
     return next();
   });
