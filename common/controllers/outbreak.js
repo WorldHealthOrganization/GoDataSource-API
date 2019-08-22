@@ -10255,7 +10255,6 @@ module.exports = function (Outbreak) {
           }]
         }, {
           and: [{
-            wasContact: true,
             dateBecomeCase: {
               // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
               between: periodInterval.slice()
