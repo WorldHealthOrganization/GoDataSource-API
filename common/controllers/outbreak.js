@@ -10244,23 +10244,18 @@ module.exports = function (Outbreak) {
 
         // get only the cases reported in the periodInterval
         or: [{
-          and: [{
-            dateOfReporting: {
-              // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
-              between: periodInterval.slice()
-            },
-            dateBecomeCase: {
-              eq: null
-            }
-          }]
+          dateOfReporting: {
+            // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
+            between: periodInterval.slice()
+          },
+          dateBecomeCase: {
+            eq: null
+          }
         }, {
-          and: [{
-            wasContact: true,
-            dateBecomeCase: {
-              // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
-              between: periodInterval.slice()
-            }
-          }]
+          dateBecomeCase: {
+            // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
+            between: periodInterval.slice()
+          }
         }]
       },
       order: 'dateOfReporting ASC'
