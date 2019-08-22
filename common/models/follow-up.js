@@ -605,10 +605,10 @@ module.exports = function (FollowUp) {
             app.utils.remote.convertLoopbackFilterToMongo(contactQuery),
             {projection: {_id: 1}});
         });
-    }
 
-    // no need to send contact filter further, since this one is handled separately
-    delete filter.where.contact;
+      // no need to send contact filter further, since this one is handled separately
+      delete filter.where.contact;
+    }
 
     // retrieve range follow-ups
     buildQuery
@@ -762,11 +762,23 @@ module.exports = function (FollowUp) {
                 count: records.length
               });
             }
+
             // replace _id with id, to be consistent
+            // & determine locations
+            let locationIds = {};
             records.forEach((record) => {
               if (record.contact) {
+                // replace _id
                 record.contact.id = record.contact._id;
                 delete record.contact._id;
+
+                // determine current address & get location
+                if (!_.isEmpty(record.contact.addresses)) {
+                  const contactResidence = record.contact.addresses.find((address) => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
+                  if (!_.isEmpty(contactResidence.locationId)) {
+                    locationIds[contactResidence.locationId] = true;
+                  }
+                }
               }
               if (Array.isArray(record.followUps)) {
                 record.followUps.forEach((followUp) => {
@@ -775,8 +787,44 @@ module.exports = function (FollowUp) {
                 });
               }
             });
-            // return results
-            return callback(null, records);
+
+            // retrieve current location for each contact
+            locationIds = Object.keys(locationIds);
+            if (_.isEmpty(locationIds)) {
+              // there are no locations to retrieve so we can send response to client
+              return callback(null, records);
+            }
+
+            // retrieve locations
+            return app.models.location
+              .rawFind({
+                id: {
+                  $in: locationIds
+                }
+              })
+              .then((locations) => {
+                // map locations
+                const locationsMap = _.transform(locations, (acc, location) => {
+                  acc[location.id] = location;
+                }, {});
+
+                // set locations
+                records.forEach((record) => {
+                  // determine current address & get location
+                  if (!_.isEmpty(record.contact.addresses)) {
+                    const contactResidence = record.contact.addresses.find((address) => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
+                    if (
+                      !_.isEmpty(contactResidence.locationId) &&
+                      locationsMap[contactResidence.locationId]
+                    ) {
+                      contactResidence.location = locationsMap[contactResidence.locationId];
+                    }
+                  }
+                });
+
+                // finished mapping locations
+                return callback(null, records);
+              });
           })
           .catch(callback);
       });
