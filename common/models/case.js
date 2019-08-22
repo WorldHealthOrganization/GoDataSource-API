@@ -225,7 +225,9 @@ module.exports = function (Case) {
     'isDateOfReportingApproximate': 'LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
     'questionnaireAnswers': 'LNG_CASE_FIELD_LABEL_QUESTIONNAIRE_ANSWERS',
     'safeBurial': 'LNG_CASE_FIELD_LABEL_SAFE_BURIAL',
-    'dateOfBurial': 'LNG_CASE_FIELD_LABEL_DATE_OF_BURIAL'
+    'dateOfBurial': 'LNG_CASE_FIELD_LABEL_DATE_OF_BURIAL',
+    'burialLocationId': 'LNG_CASE_FIELD_LABEL_BURIAL_LOCATION_ID',
+    'burialPlaceName': 'LNG_CASE_FIELD_LABEL_BURIAL_PLACE_NAME'
   });
 
   Case.referenceDataFieldsToCategoryMap = {
@@ -274,15 +276,22 @@ module.exports = function (Case) {
     'dateRanges',
     'transferRefused',
     'safeBurial',
-    'dateOfBurial'
+    'dateOfBurial',
+    'burialLocationId',
+    'burialPlaceName'
   ];
 
   Case.locationFields = [
     'addresses[].locationId',
-    'dateRanges[].locationId'
+    'dateRanges[].locationId',
+    'burialLocationId'
   ];
 
   Case.foreignKeyResolverMap = {
+    'burialLocationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
     'addresses[].locationId': {
       modelName: 'location',
       useProperty: 'name'
