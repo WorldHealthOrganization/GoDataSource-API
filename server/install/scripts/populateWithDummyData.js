@@ -438,9 +438,9 @@ function run(callback) {
           }
 
           // determine dates
-          const dateOfOnset = outbreakStartDate.add(randomFloatBetween(1, 120, 0), 'days');
-          const dateOfReporting = dateOfOnset.add(1, 'days');
-          const dateOfOutcome = dateOfReporting.add(1, 'days');
+          const dateOfOnset = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
+          const dateOfReporting = dateOfOnset.clone().add(1, 'days');
+          const dateOfOutcome = dateOfReporting.clone().add(1, 'days');
 
           // determine outcome
           let outcomeId = 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED';
@@ -470,7 +470,7 @@ function run(callback) {
             outcomeId === 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED' &&
             Math.random() >= 0.3
           ) {
-            dateOfBurial = dateOfOutcome.add(7, 'days');
+            dateOfBurial = dateOfOutcome.clone().add(7, 'days');
           }
 
           // determine risk level
@@ -627,7 +627,7 @@ function run(callback) {
           }
 
           // determine dates
-          const dateOfReporting = outbreakStartDate.add(randomFloatBetween(1, 120, 0), 'days');
+          const dateOfReporting = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
 
           // determine risk level
           const riskLevel = [
@@ -753,8 +753,8 @@ function run(callback) {
           }
 
           // determine dates
-          const date = outbreakStartDate.add(randomFloatBetween(1, 120, 0), 'days');
-          const dateOfReporting = date.add(5, 'days');
+          const date = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
+          const dateOfReporting = date.clone().add(5, 'days');
 
           // display log
           app.logger.debug(`Creating event '${name}'`);
@@ -925,7 +925,7 @@ function run(callback) {
           existingRelationships[persons[0].id][persons[1].id] = true;
 
           // determine dates
-          const contactDate = outbreakStartDate.add(randomFloatBetween(1, 120, 0), 'days');
+          const contactDate = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
 
           // determine certainty
           const certaintyLevelId = [
