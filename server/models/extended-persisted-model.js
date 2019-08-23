@@ -4,7 +4,6 @@ const app = require('../../server/server');
 const dbSync = require('../../components/dbSync');
 const _ = require('lodash');
 const url = require('url');
-const config = require('../config');
 const path = require('path');
 const fs = require('fs');
 
@@ -211,6 +210,11 @@ module.exports = function (ExtendedPersistedModel) {
           urlInfo.hostname.toLowerCase() !== '127.0.0.1'
         )
       ) {
+        // make sure we always check the latest values
+        const filename = path.resolve(`${__dirname}/../config.json`);
+        delete require.cache[filename];
+        const config = require('../config');
+
         // protocol changed?
         const protocolChanged = urlInfo.protocol &&
           _.get(config, 'public.protocol').toLowerCase() !== urlInfo.protocol.replace(':', '').toLowerCase();
