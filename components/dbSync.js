@@ -417,6 +417,11 @@ const syncRecord = function (logger, model, record, options, done) {
     (function setDateProps(obj, map) {
       // go through each date properties and parse date properties
       for (let prop in map) {
+        // skip createdAt, updatedAt properties from formatting
+        if (['createdAt', 'updatedAt', 'deletedAt'].indexOf(prop) !== -1) {
+          continue;
+        }
+
         if (map.hasOwnProperty(prop)) {
           // this is an array prop
           if (typeof map[prop] === 'object') {
