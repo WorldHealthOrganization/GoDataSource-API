@@ -132,7 +132,10 @@ function exportFilteredModelsList(
         const fieldLabelsMap = Model.helpers && Model.helpers.sanitizeFieldLabelsMapForExport ? Model.helpers.sanitizeFieldLabelsMapForExport() : Model.fieldLabelsMap;
         Object.keys(fieldLabelsMap).forEach(function (propertyName) {
           // if a flat file is exported, data needs to be flattened, include 3 elements for each array
-          if (!['json', 'xml'].includes(exportType) && /(\[]|\.)/.test(propertyName)) {
+          if (!['json', 'xml'].includes(exportType) &&
+            !/(\[]|\.)/.test(propertyName) &&
+            Model.arrayProps[propertyName]
+          ) {
             // determine if we need to include parent token
             let parentToken;
             if (options.prependObjectNames) {
@@ -143,6 +146,9 @@ function exportFilteredModelsList(
               }
             }
 
+            // array properties map
+            const map = Model.arrayProps[propertyName];
+
             // create headers
             let maxElements = 3;
             // pdf has a limited width, include only one element
@@ -150,15 +156,18 @@ function exportFilteredModelsList(
               maxElements = 1;
             }
             for (let i = 1; i <= maxElements; i++) {
-              headers.push({
-                id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
-                // use correct label translation for user language
-                header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(fieldLabelsMap[propertyName])}${/\[]/.test(propertyName) ? ' [' + i + ']' : ''}`
-              });
+              for (let prop in map) {
+                headers.push({
+                  id: `${propertyName} ${i} ${prop}`,
+                  // use correct label translation for user language
+                  header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} [${i}]`
+                });
+              }
             }
           } else {
             if (
               !['json', 'xml'].includes(exportType) &&
+              !/(\[]|\.)/.test(propertyName) &&
               modelPropertiesExpandOnFlatFiles &&
               modelPropertiesExpandOnFlatFiles[propertyName]
             ) {
