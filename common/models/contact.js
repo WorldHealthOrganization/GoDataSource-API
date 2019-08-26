@@ -100,6 +100,28 @@ module.exports = function (Contact) {
     'dateOfBurial': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_BURIAL'
   });
 
+  Contact.arrayProps = {
+    addresses: {
+      'typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
+      'country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
+      'city': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY',
+      'addressLine1': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1',
+      'addressLine2': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_2',
+      'postalCode': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE',
+      'locationId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID',
+      'geoLocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
+      'geoLocation.lat': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT',
+      'geoLocation.lng': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG',
+      'geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
+      'date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
+      'phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
+    },
+    documents: {
+      'type': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE',
+      'number': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER'
+    }
+  };
+
   Contact.sectionsFieldLabels = {
     personalInformation: {
       title: 'LNG_CONTACT_PERSONAL_SECTION',

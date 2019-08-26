@@ -164,11 +164,13 @@ function exportFilteredModelsList(
             return;
           }
 
+          // do not handle array properties from field labels map when we have arrayProps set on the model
+          if (!isJSONXMLExport && /(\[]|\.)/.test(propertyName) && ignoreArrayFieldLabels) {
+            return;
+          }
+
           // if a flat file is exported, data needs to be flattened, include 3 elements for each array
           if (!isJSONXMLExport && /(\[]|\.)/.test(propertyName)) {
-            if (ignoreArrayFieldLabels) {
-              return;
-            }
             // determine if we need to include parent token
             let parentToken;
             if (options.prependObjectNames) {
