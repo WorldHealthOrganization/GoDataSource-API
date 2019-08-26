@@ -130,20 +130,17 @@ function exportFilteredModelsList(
         const headers = [];
         // headers come from model
         const fieldLabelsMap = Model.helpers && Model.helpers.sanitizeFieldLabelsMapForExport ? Model.helpers.sanitizeFieldLabelsMapForExport() : Model.fieldLabelsMap;
+
+        const isJSONXMLExport = ['json', 'xml'].includes(exportType);
+        const ignoreArrayFieldLabels = Model.hasOwnProperty('arrayProps');
+
         Object.keys(fieldLabelsMap).forEach(function (propertyName) {
-          // if a flat file is exported, data needs to be flattened, include 3 elements for each array
-          if (!['json', 'xml'].includes(exportType) &&
-            !/(\[]|\.)/.test(propertyName) &&
-            Model.arrayProps[propertyName]
-          ) {
+          // new functionality, not supported by all models
+          if (!isJSONXMLExport && ignoreArrayFieldLabels && Model.arrayProps[propertyName]) {
             // determine if we need to include parent token
             let parentToken;
             if (options.prependObjectNames) {
-              const parentIndex = propertyName.indexOf('.');
-              if (parentIndex >= -1) {
-                const parentKey = propertyName.substr(0, parentIndex);
-                parentToken = fieldLabelsMap[parentKey];
-              }
+              parentToken = fieldLabelsMap[propertyName];
             }
 
             // array properties map
@@ -164,10 +161,40 @@ function exportFilteredModelsList(
                 });
               }
             }
+            return;
+          }
+
+          // if a flat file is exported, data needs to be flattened, include 3 elements for each array
+          if (!isJSONXMLExport && /(\[]|\.)/.test(propertyName)) {
+            if (ignoreArrayFieldLabels) {
+              return;
+            }
+            // determine if we need to include parent token
+            let parentToken;
+            if (options.prependObjectNames) {
+              const parentIndex = propertyName.indexOf('.');
+              if (parentIndex >= -1) {
+                const parentKey = propertyName.substr(0, parentIndex);
+                parentToken = fieldLabelsMap[parentKey];
+              }
+            }
+
+            // create headers
+            let maxElements = 3;
+            // pdf has a limited width, include only one element
+            if (exportType === 'pdf') {
+              maxElements = 1;
+            }
+            for (let i = 1; i <= maxElements; i++) {
+              headers.push({
+                id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
+                // use correct label translation for user language
+                header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(fieldLabelsMap[propertyName])}${/\[]/.test(propertyName) ? ' [' + i + ']' : ''}`
+              });
+            }
           } else {
             if (
-              !['json', 'xml'].includes(exportType) &&
-              !/(\[]|\.)/.test(propertyName) &&
+              !isJSONXMLExport &&
               modelPropertiesExpandOnFlatFiles &&
               modelPropertiesExpandOnFlatFiles[propertyName]
             ) {
