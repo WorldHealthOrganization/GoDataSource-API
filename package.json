@@ -1,6 +1,6 @@
 {
   "name": "go-data-api",
-  "version": "2.30.3",
+  "version": "2.30.4",
   "main": "server/server.js",
   "engines": {
     "node": ">=8"
