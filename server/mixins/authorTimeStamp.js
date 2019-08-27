@@ -57,6 +57,29 @@ module.exports = function (Model) {
     };
   }
 
+  /**
+   * On sync increment updatedAt with 1 millisecond if there were "before save" changes
+   * This is done in order for mobile to notice the "before save" changes
+   * @param context
+   */
+  function incrementUpdatedAtIfNeeded(context) {
+    // get target
+    let target = context.instance || context.data;
+
+    // check for "before save" changes
+    if (context.options && context.options._syncActionBeforeSaveChanges) {
+      // get updatedAt
+      let updatedAt = new Date(target.updatedAt);
+
+      // increment updatedAt with 1 millisecond
+      updatedAt.setMilliseconds(updatedAt.getMilliseconds() + 1);
+      target.updatedAt = updatedAt;
+
+      // reset flag
+      context.options._syncActionBeforeSaveChanges = false;
+    }
+  }
+
   Model.defineProperty('createdAt', {
     type: Date,
     readOnly: true,
@@ -82,47 +105,61 @@ module.exports = function (Model) {
   });
 
   Model.observe('before save', function (context, next) {
+    // initialize system author info
+    const systemAuthor = 'system';
+
     // normalize context options
     context.options = context.options || {};
     // get user information
     let user = getUserContextInformation(context);
     if (context.instance) {
       if (context.isNewInstance) {
-        // update createdAt property if it's not a init, sync or the property is missing from the instance
+        // update createdAt property if it is missing from the instance
+        // or it's not an init / sync action
         if (!context.instance.createdAt || (!context.options._init && !context.options._sync)) {
           context.instance.createdAt = new Date();
         }
+
         context.instance.createdBy = user.id ?
           user.id : (
             context.instance.createdBy ?
               context.instance.createdBy :
-              'system'
+              systemAuthor
           );
       }
 
-
-      // update updatedAt property if it's not a init, sync or the property is missing from the instance
+      // update updatedAt property if it is missing from the instance
+      // or it's not an init / sync action
       if (!context.instance.updatedAt || (!context.options._init && !context.options._sync)) {
         context.instance.updatedAt = new Date();
       }
+
+      // increment updatedAt if needed
+      incrementUpdatedAtIfNeeded(context);
+
       context.instance.updatedBy = user.id ?
         user.id : (
           context.instance.updatedBy ?
             context.instance.updatedBy :
-            'system'
+            systemAuthor
         );
     } else {
-      // don't update on sync since it is might be updated by sistem and not by current user which in turn might cause us to loose information
+      // update updatedAt property if it is missing from the update payload
+      // or it's not an init / sync action
+      if (!context.data.updatedAt || (!context.options._init && !context.options._sync)) {
+        context.data.updatedAt = new Date();
+      }
+
+      // increment updatedAt if needed
+      incrementUpdatedAtIfNeeded(context);
+
+      // don't change updatedBy on sync since it might be updated by system and not by current user which in turn might cause us to loose information
       if (!context.options._sync) {
-        // update updatedAt property if it's not a init, sync or the property is missing from the instance
-        if (!context.data.updatedAt) {
-          context.data.updatedAt = new Date();
-        }
         context.data.updatedBy = user.id ?
           user.id : (
             context.data.updatedBy ?
               context.data.updatedBy :
-              'system'
+              systemAuthor
           );
       }
     }
