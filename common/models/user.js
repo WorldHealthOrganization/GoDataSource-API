@@ -24,6 +24,31 @@ module.exports = function (User) {
   };
 
   /**
+   * Override loopback password setter (node_modules/loopback/common/model/user) as the check for already encrypted password is obsolete
+   * (Wiki) As of February 2014 bcrypt generates hashes starting with '$2b$' instead of '$2a$'
+   * Added additional check for '$2b$' hash start
+   * @param plain
+   */
+  User.setter.password = function (plain) {
+    if (typeof plain !== 'string') {
+      return;
+    }
+    if (
+      (
+        plain.indexOf('$2a$') === 0 ||
+        // additional check
+        plain.indexOf('$2b$') === 0
+      ) && plain.length === 60
+    ) {
+      // The password is already hashed. It can be the case
+      // when the instance is loaded from DB
+      this.$password = plain;
+    } else {
+      this.$password = this.constructor.hashPassword(plain);
+    }
+  };
+
+  /**
    * Validate security questions
    * @param questions
    * @param callback
@@ -118,7 +143,7 @@ module.exports = function (User) {
       // second parameter should also be resolved as a template
       // it contains the reset password url
       const url = `${config.public.protocol}://${config.public.host}:${config.public.port}${config.passwordReset.path}`;
-      paragraph2 = _.template(paragraph2, { interpolate: /{{([\s\S]+?)}}/g })({ resetHref: `${url}?token=${info.accessToken.id}` });
+      paragraph2 = _.template(paragraph2, {interpolate: /{{([\s\S]+?)}}/g})({resetHref: `${url}?token=${info.accessToken.id}`});
 
       // load the html email template
       const template = _.template(fs.readFileSync(path.resolve(`${__dirname}/../../server/views/passwordResetEmail.ejs`)));
