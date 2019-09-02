@@ -1337,9 +1337,10 @@ const getSourceAndTargetFromModelHookContext = function (context) {
  * @param questionnaire
  * @param idHeaderPrefix
  * @param dictionary
+ * @param useVariable
  * @returns {[{id, header}]}
  */
-const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary) => {
+const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary, useVariable) => {
   // no questions
   if (_.isEmpty(questionnaire)) {
     return [];
@@ -1357,7 +1358,7 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
           _.each(question.answers, (answer, answerIndex) => {
             result.push({
               id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable + ' ' + (answerIndex + 1),
-              header: dictionary.getTranslation(question.text) + ' ' + (answerIndex + 1)
+              header: (useVariable ? question.variable : dictionary.getTranslation(question.text)) + ' ' + (answerIndex + 1)
             });
           });
         }
@@ -1365,7 +1366,7 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
         // add parent question
         result.push({
           id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable,
-          header: dictionary.getTranslation(question.text)
+          header: useVariable ? question.variable : dictionary.getTranslation(question.text)
         });
       }
 
@@ -1376,7 +1377,8 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
             result.push(...retrieveQuestionnaireVariables(
               answer.additionalQuestions,
               idHeaderPrefix,
-              dictionary
+              dictionary,
+              useVariable
             ));
           }
         });

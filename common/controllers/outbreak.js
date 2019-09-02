@@ -7795,7 +7795,8 @@ module.exports = function (Outbreak) {
             questionnaireAnswers: genericHelpers.retrieveQuestionnaireVariables(
               self.contactFollowUpTemplate,
               'questionnaireAnswers',
-              dictionary
+              dictionary,
+              filter.useQuestionVariable
             )
           },
           filter.where,
@@ -8951,7 +8952,8 @@ module.exports = function (Outbreak) {
             questionnaireAnswers: genericHelpers.retrieveQuestionnaireVariables(
               self.caseInvestigationTemplate,
               'questionnaireAnswers',
-              dictionary
+              dictionary,
+              filter.useQuestionVariable
             )
           },
           filter.where,
