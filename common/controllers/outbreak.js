@@ -1116,7 +1116,7 @@ module.exports = function (Outbreak) {
           return 0;
         }
 
-        // // get all teams and their locations to get eligible teams for each contact
+        // get all teams and their locations to get eligible teams for each contact
         return FollowupGeneration
           .getAllTeamsWithLocationsIncluded()
           .then((teams) => {
