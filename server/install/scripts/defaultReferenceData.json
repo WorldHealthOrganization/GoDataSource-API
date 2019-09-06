@@ -270,6 +270,9 @@
     },
     "File Upload": {
       "readOnly": true
+    },
+    "Markup": {
+      "readOnly": true
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY": {
