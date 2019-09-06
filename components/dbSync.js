@@ -412,6 +412,37 @@ const syncRecord = function (logger, model, record, options, done) {
   // mark this operation as a sync (if not specified otherwise)
   options._sync = options._sync !== undefined ? options._sync : true;
 
+  // go through date type fields and convert them to a proper date
+  if (!_.isEmpty(model._parsedDateProperties)) {
+    (function setDateProps(obj, map) {
+      // go through each date properties and parse date properties
+      for (let prop in map) {
+        // skip createdAt, updatedAt properties from formatting
+        if (['createdAt', 'updatedAt', 'deletedAt'].indexOf(prop) !== -1) {
+          continue;
+        }
+
+        if (map.hasOwnProperty(prop)) {
+          // this is an array prop
+          if (typeof map[prop] === 'object') {
+            if (Array.isArray(obj[prop])) {
+              obj[prop].forEach((item) => setDateProps(item, map[prop]));
+            }
+          } else {
+            let recordPropValue = _.get(obj, prop);
+            if (recordPropValue) {
+              // try to convert the string value to date, if valid, replace the old value
+              let convertedDate = helpers.getDate(recordPropValue);
+              if (convertedDate.isValid()) {
+                _.set(obj, prop, convertedDate.toDate());
+              }
+            }
+          }
+        }
+      }
+    })(record, model._parsedDateProperties);
+  }
+
   let findRecord;
   // check if a record with the given id exists if record.id exists
   if (record.id !== undefined) {

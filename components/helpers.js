@@ -1337,9 +1337,10 @@ const getSourceAndTargetFromModelHookContext = function (context) {
  * @param questionnaire
  * @param idHeaderPrefix
  * @param dictionary
+ * @param useVariable
  * @returns {[{id, header}]}
  */
-const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary) => {
+const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary, useVariable) => {
   // no questions
   if (_.isEmpty(questionnaire)) {
     return [];
@@ -1357,7 +1358,7 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
           _.each(question.answers, (answer, answerIndex) => {
             result.push({
               id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable + ' ' + (answerIndex + 1),
-              header: dictionary.getTranslation(question.text) + ' ' + (answerIndex + 1)
+              header: (useVariable ? question.variable : dictionary.getTranslation(question.text)) + ' ' + (answerIndex + 1)
             });
           });
         }
@@ -1365,7 +1366,7 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
         // add parent question
         result.push({
           id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable,
-          header: dictionary.getTranslation(question.text)
+          header: useVariable ? question.variable : dictionary.getTranslation(question.text)
         });
       }
 
@@ -1376,7 +1377,8 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
             result.push(...retrieveQuestionnaireVariables(
               answer.additionalQuestions,
               idHeaderPrefix,
-              dictionary
+              dictionary,
+              useVariable
             ));
           }
         });
@@ -1531,8 +1533,8 @@ const getPeriodIntervalForDate = function (fullPeriodInterval, periodType, date)
       break;
     case 'week':
       // get week interval for date
-      startDay = getDate(date, 1);
-      endDay = getDateEndOfDay(date, 7);
+      startDay = getDate(date).startOf('isoWeek');
+      endDay = getDateEndOfDay(date).endOf('isoWeek');
       break;
     case 'month':
       // get month period interval for date
@@ -1681,7 +1683,11 @@ function migrateModelDataInBatches(
  */
 function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}) {
   // check if modelInstance has address/addresses; nothing to do in case an address is not set
-  if (!modelInstance.address && !modelInstance.addresses) {
+  if (
+    !modelInstance.address &&
+    !modelInstance.addresses &&
+    !modelInstance.fillLocation
+  ) {
     return;
   }
 
@@ -1691,6 +1697,15 @@ function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}) {
     addressesToUpdate = [modelInstance.address];
   } else {
     addressesToUpdate = modelInstance.addresses;
+  }
+
+  // do we need to convert fill location two ?
+  // make sure we don't alter the original array
+  if (!_.isEmpty(modelInstance.fillLocation)) {
+    addressesToUpdate = [
+      ...addressesToUpdate,
+      modelInstance.fillLocation
+    ];
   }
 
   // loop through the addresses and update then if needed

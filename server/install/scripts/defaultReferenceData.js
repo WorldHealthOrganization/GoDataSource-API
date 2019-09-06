@@ -29,7 +29,12 @@ function run(callback) {
       setUpReferenceData.push(
         function (cb) {
           referenceData
-            .findById(referenceDataItemKey)
+            .findOne({
+              deleted: true,
+              where: {
+                id: referenceDataItemKey
+              }
+            })
             .then(function (foundReferenceData) {
               if (!foundReferenceData) {
                 return referenceData

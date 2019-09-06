@@ -171,14 +171,6 @@ module.exports = function (LabResult) {
             },
             unwind: true,
             map: (record) => {
-              // remove deleted records - since this is a limitation of mongo and it can't be easily done with this version
-              if (
-                record.deleted &&
-                !filter.deleted
-              ) {
-                return null;
-              }
-
               // replace id
               record.id = record._id;
               delete record._id;

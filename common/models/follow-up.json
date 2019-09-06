@@ -22,9 +22,6 @@
     "address": {
       "type": "address"
     },
-    "fillGeoLocation": {
-      "type": "geopoint"
-    },
     "questionnaireAnswers": {
       "type": "object"
     },
@@ -47,6 +44,9 @@
     },
     "deletedByParent": {
       "type": "string"
+    },
+    "fillLocation": {
+      "type": "fillLocation"
     }
   },
   "indexes": {
@@ -65,8 +65,8 @@
     "address_geoLocation_index": {
       "address.geoLocation": "2dsphere"
     },
-    "fillGeoLocation_index": {
-      "fillGeoLocation": "2dsphere"
+    "fillLocation_geoLocation_index": {
+      "fillLocation.geoLocation": "2dsphere"
     },
     "date_index": {
       "date": 1

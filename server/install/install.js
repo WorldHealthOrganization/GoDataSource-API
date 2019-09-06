@@ -5,9 +5,37 @@ const _ = require('lodash');
 const args = process.argv;
 const path = require('path');
 // keep a list of supported install arguments
-const supportedArguments = ['init-database', 'migrate-database', 'reset-admin-password', 'install-script', 'dump-help-data', 'dump-language-data', 'dump-outbreak-template-data', 'remove-unused-language-tokens'];
+const supportedArguments = ['init-database', 'migrate-database', 'reset-admin-password', 'install-script', 'dump-help-data', 'dump-language-data', 'dump-outbreak-template-data', 'remove-unused-language-tokens', 'populate-with-dummy-data'];
 // keep a list of functions that will be run
 const runFunctions = [];
+
+// retrieve argument values
+const parseArgumentValues = (argsToRetrieve) => {
+  // determine arguments values
+  const argValues = {};
+  (argsToRetrieve || []).forEach((argKey) => {
+    // construct regex for this argument
+    const argRegex = new RegExp(`^${argKey}=(.+)`, 'i');
+
+    // check if we have a match
+    (args || []).forEach((argValue) => {
+      // check argument value
+      if (argRegex.test(argValue)) {
+        const result = argRegex.exec(argValue);
+        if (
+          result &&
+          result.length >= 1
+        ) {
+          argValues[argKey] = result[1];
+        }
+      }
+    });
+  });
+
+  // finished
+  return argValues;
+};
+
 // define a list of supported routines
 const routines = {
   initDatabase: function () {
@@ -133,6 +161,41 @@ const routines = {
       require('./scripts/removeUnusedLanguageTokens')
     ].forEach(function (installScript) {
       runFunctions.push(installScript(confirmRemoval));
+    });
+  },
+  populateWithDummyData: function () {
+    // need outbreak name & data amount
+    const requiredArgs = [
+      'outbreakName',
+      'casesNo',
+      'contactsNo',
+      'eventsNo',
+      'locationsNo',
+      'subLocationsPerLocationNo',
+      'minNoRelationshipsForEachRecord',
+      'maxNoRelationshipsForEachRecord'
+    ];
+    const methodRelevantArgs = parseArgumentValues(requiredArgs);
+
+    // all above arg are required
+    let stop = false;
+    _.each(requiredArgs, (argKey) => {
+      if (!methodRelevantArgs[argKey]) {
+        console.log(`The following arguments are required: ${requiredArgs.join(', ')}`);
+        stop = true;
+        return false;
+      }
+    });
+    if (stop) {
+      return;
+    }
+
+    // populate database
+    console.log('Populating database');
+    [
+      require('./scripts/populateWithDummyData')
+    ].forEach(function (installScript) {
+      runFunctions.push(installScript(methodRelevantArgs));
     });
   }
 };

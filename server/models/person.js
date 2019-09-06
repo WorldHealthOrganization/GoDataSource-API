@@ -249,10 +249,22 @@ module.exports = function (Person) {
      * @param address
      */
     function normalizeAddressCoordinates(address) {
-      // Check if both coordinates are available and make sure they are numbers
-      if (address.geoLocation && address.geoLocation.lat && address.geoLocation.lng) {
+      // check if both coordinates are available and not numbers; make sure they are numbers
+      if (address.geoLocation &&
+        address.geoLocation.lat &&
+        address.geoLocation.lng &&
+        (
+          isNaN(address.geoLocation.lat) ||
+          isNaN(address.geoLocation.lng)
+        )
+      ) {
         address.geoLocation.lat = parseFloat(address.geoLocation.lat);
         address.geoLocation.lng = parseFloat(address.geoLocation.lng);
+
+        // if sync action set flag for sync "before save" changes
+        if (context.options && context.options._sync) {
+          context.options._syncActionBeforeSaveChanges = true;
+        }
       }
     }
 
@@ -346,6 +358,10 @@ module.exports = function (Person) {
         })
         .then(function (resolvedVisualId) {
           data.target.visualId = resolvedVisualId;
+
+          // set flag for sync "before save" changes
+          context.options._syncActionBeforeSaveChanges = true;
+
           next();
         })
         .catch(function (err) {
@@ -1435,7 +1451,7 @@ module.exports = function (Person) {
                       recordData.firstGraphDate
                   );
 
-              // fallback to dateSampleTaken
+                // fallback to dateSampleTaken
               } else {
                 // determine lastGraphDate
                 const dateSampleTaken = helpers.getDate(lab.dateSampleTaken);

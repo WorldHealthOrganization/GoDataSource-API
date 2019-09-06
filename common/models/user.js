@@ -110,6 +110,7 @@ module.exports = function (User) {
       }
 
       // translate email body params
+      let heading = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_HEADING');
       let subject = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT');
       let paragraph1 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1');
       let paragraph2 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2');
@@ -124,7 +125,7 @@ module.exports = function (User) {
 
       // resolve template params
       let resolvedTemplate = template({
-        heading: subject,
+        heading: heading,
         paragraph1: paragraph1,
         paragraph2: paragraph2
       });
@@ -132,7 +133,7 @@ module.exports = function (User) {
       app.models.Email.send({
         to: info.email,
         from: config.passwordReset.from,
-        subject: config.passwordReset.subject,
+        subject: subject,
         html: resolvedTemplate
       });
     });

@@ -20,6 +20,7 @@ function passwordResetErrorHandler(error, request, response, next) {
     // fail silently (do not inform the client about missing user)
     error = null;
   }
+
   // if an error was found
   if (error) {
     // continue normal flow

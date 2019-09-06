@@ -626,6 +626,14 @@
       "LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER": "Phone number",
       "LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER_DESCRIPTION": ""
     },
+    "uiFillLocationFields": {
+      "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION": "Geolocation",
+      "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_DESCRIPTION": "",
+      "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT": "Latitude",
+      "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT_DESCRIPTION": "",
+      "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG": "Longitude",
+      "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG_DESCRIPTION": ""
+    },
     "uiQuestionnaire": {
       "LNG_QUESTIONNAIRE_BUTTON_BROWSE": "Browse",
       "LNG_QUESTIONNAIRE_BUTTON_DOWNLOAD": "Download",
@@ -727,7 +735,8 @@
       "LNG_ENTITY_FIELD_LABEL_PLACE": "Place",
       "LNG_ENTITY_FIELD_LABEL_RISK": "Risk",
       "LNG_ENTITY_FIELD_LABEL_TYPE": "Type",
-      "LNG_ENTITY_FIELD_LABEL_VISUAL_ID": "Case / Contact ID"
+      "LNG_ENTITY_FIELD_LABEL_VISUAL_ID": "Case / Contact ID",
+      "LNG_ENTITY_FIELD_LABEL_DATE_OF_ONSET": "Date of onset"
     },
     "addressFields": {
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1": "Address line 1",
@@ -792,7 +801,6 @@
       "LNG_CASE_FIELD_LABEL_DOCUMENTS": "Documents",
       "LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER": "Document number",
       "LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE": "Document type",
-      "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION": "Fill geolocation",
       "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "Fill geolocation latitude",
       "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "Fill geolocation longitude",
       "LNG_CASE_FIELD_LABEL_FIRST_NAME": "First name",
@@ -847,7 +855,9 @@
       "LNG_CASE_FIELD_LABEL_UPDATED_BY": "Updated by",
       "LNG_CASE_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
       "LNG_CASE_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
-      "LNG_CASE_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
+      "LNG_CASE_FIELD_LABEL_UPDATED_AT_DESCRIPTION": "",
+      "LNG_CASE_FIELD_LABEL_BURIAL_LOCATION_ID": "Burial Location",
+      "LNG_CASE_FIELD_LABEL_BURIAL_PLACE_NAME": "Burial Place Name"
     },
     "uiCasesListPage": {
       "LNG_PAGE_LIST_CASES_ACTION_ADD_LAB_RESULT": "Add lab result",
@@ -1038,7 +1048,6 @@
       "LNG_CONTACT_FIELD_LABEL_DOCUMENTS": "Documents",
       "LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER": "Document number",
       "LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE": "Document type",
-      "LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION": "Fill geolocation",
       "LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "Fill geolocation latitude",
       "LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "Fill geolocation longitude",
       "LNG_CONTACT_FIELD_LABEL_FIRST_NAME": "First name",
@@ -1090,7 +1099,8 @@
       "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_START_DATE": "Start of the followup",
       "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_START_DATE_DESCRIPTION": "",
       "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_ORIGINAL_START_DATE": "Original Start of the followup",
-      "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_ORIGINAL_START_DATE_DESCRIPTION": ""
+      "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_ORIGINAL_START_DATE_DESCRIPTION": "",
+      "LNG_CONTACT_FIELD_LABEL_ADDRESS_LOCATION": "Area"
     },
     "uiContactsListPage": {
       "LNG_PAGE_LIST_CONTACTS_ACTION_ADD_FOLLOW_UP": "Add follow-up",
@@ -1123,7 +1133,10 @@
       "LNG_PAGE_LIST_CONTACTS_EXPORT_DAILY_FOLLOW_UP_LIST_TITLE": "Daily contact follow-ups status",
       "LNG_PAGE_LIST_CONTACTS_EXPORT_DAILY_FOLLOW_UPS_FORM_BUTTON": "Print daily follow-ups form",
       "LNG_PAGE_LIST_CONTACTS_EXPORT_DAILY_FOLLOW_UPS_FORM_TITLE": "Daily contact follow-ups form",
-      "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_MODIFY_CONTACTS": "Modify selected contacts"
+      "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_MODIFY_CONTACTS": "Modify selected contacts",
+      "LNG_PAGE_LIST_CONTACTS_ACTION_CHANGE_CONTACT_FINAL_FOLLOW_UP_STATUS": "Change Contact Final Follow-Up Status",
+      "LNG_PAGE_LIST_CONTACTS_ACTION_CHANGE_CONTACT_FINAL_FOLLOW_UP_STATUS_DIALOG_TITLE": "Are you sure you want to change the 'Final Follow-Up Status' for {{count}} contact(s)?",
+      "LNG_PAGE_LIST_CONTACTS_ACTION_CHANGE_CONTACT_FINAL_FOLLOW_UP_STATUS_DIALOG_SUCCESS_MSG": "Final status updated for {{count}} contact(s)"
     },
     "uiCreateContactPage": {
       "LNG_PAGE_CREATE_CONTACT_ACTION_CREATE_CONTACT_BUTTON": "Create contact",
@@ -1199,7 +1212,7 @@
       "LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
       "LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
     },
-    "uiFollowUpfields": {
+    "uiFollowUpFields": {
       "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS": "Address",
       "LNG_FOLLOW_UP_FIELD_LABEL_AREA": "Area",
       "LNG_FOLLOW_UP_FIELD_LABEL_COMMENT": "Comment",
@@ -1208,9 +1221,6 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_LAST_NAME": "Last Name",
       "LNG_FOLLOW_UP_FIELD_LABEL_DATE": "Date",
       "LNG_FOLLOW_UP_FIELD_LABEL_DELETED": "Deleted",
-      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION": "Fill geolocation",
-      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LAT": "Fill geolocation latitude",
-      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG": "Fill geolocation longitude",
       "LNG_FOLLOW_UP_FIELD_LABEL_INDEX": "Index",
       "LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED": "Is generated",
       "LNG_FOLLOW_UP_FIELD_LABEL_LOST_TO_FOLLOW_UP": "Lost to follow-up",
@@ -1240,7 +1250,9 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY": "Updated by",
       "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
       "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
-      "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
+      "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_AT_DESCRIPTION": "",
+      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_LOCATION": "Fill location",
+      "LNG_FOLLOW_UP_FIELD_LABEL_FILL_LOCATION_NO_LOCATION": "Not available"
     },
     "uiTermsOfUsePage": {
       "LNG_PAGE_TERMS_OF_USE_TITLE": "Terms of use",
@@ -1930,6 +1942,7 @@
     "passwordReset": {
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1": "You've requested a password reset for your account.",
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2": "Click <a href='{{resetHref}}'>here</a> to reset your password.",
+      "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_HEADING": "Password reset",
       "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT": "Password reset"
     },
     "backupStatus": {
@@ -3553,7 +3566,14 @@
       "LNG_FOLLOW_UPS_SINGLE_SCREEN_ACTION_EDIT_CONTACT": "Edit contact",
       "LNG_DIALOG_SAVE_ANYWAY_LABEL": "Save anyway",
       "LNG_CASE_FIELD_LABEL_CASE_ID": "Case ID",
-      "LNG_CONTACT_FIELD_LABEL_CONTACT_ID": "Contact ID"
+      "LNG_CONTACT_FIELD_LABEL_CONTACT_ID": "Contact ID",
+      "LNG_DIALOG_ALERT_MESSAGE_ARE_YOU_SURE_YOU_WANT_TO_COPY_THE_ADDRESS_FROM_THE_PARENT_ENTITY": "Are you sure you want to copy the address from the parent entity?",
+      "LNG_PERSON_LIST_ITEM_DAY_OF_FOLLOW_UP": "Day of follow-up: ",
+      "LNG_ADDRESS_FIELD_LABEL_IS_THE_PERSON_NEXT_TO_YOU": "Capture coordinates",
+      "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP": "Follow-up",
+      "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_STATUS": "Status",
+      "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_QUESTIONNAIRE": "Questionnaire",
+      "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_ADDRESS": "Address"
     },
     "reportDailyFollowUpList": {
       "LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS": "Address",
@@ -3584,7 +3604,11 @@
       "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_COLLAPSE_ALL": "Collapse All",
       "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_EXPAND": "Expand",
       "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_EXPAND_ALL": "Expand All",
-      "LNG_LIST_PAGES_COLLAPSED_ITEMS_NUMBER": "{{value}} items"
+      "LNG_LIST_PAGES_COLLAPSED_ITEMS_NUMBER": "{{value}} items",
+      "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_HIDE": "Hide",
+      "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_HIDE_ALL": "Hide All",
+      "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_SHOW": "Show",
+      "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_SHOW_ALL": "Show All"
     },
     "uiFormErrorsWarningsAndSuccessMessages": {
       "LNG_FORM_ERROR_FORM_INVALID_WITH_FIELDS": "The following fields are invalid: {{fields}}",

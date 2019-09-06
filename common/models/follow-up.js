@@ -4,6 +4,8 @@ const app = require('../../server/server');
 const moment = require('moment');
 const _ = require('lodash');
 const helpers = require('../../components/helpers');
+const FollowupGeneration = require('../../components/followupGeneration');
+const RoundRobin = require('rr');
 
 module.exports = function (FollowUp) {
   // set flag to not get controller
@@ -55,6 +57,7 @@ module.exports = function (FollowUp) {
   // map language token labels for model properties
   FollowUp.fieldLabelsMap = Object.assign({}, FollowUp.fieldLabelsMap, {
     'personId': 'LNG_FOLLOW_UP_FIELD_LABEL_PERSON_ID',
+    'contact': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT',
     'contact.firstName': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FIRST_NAME',
     'contact.lastName': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_LAST_NAME',
     'date': 'LNG_FOLLOW_UP_FIELD_LABEL_DATE',
@@ -71,9 +74,10 @@ module.exports = function (FollowUp) {
     'address.geoLocation.lng': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LNG',
     'address.geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
     'address.date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
-    'fillGeolocation': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION',
-    'fillGeolocation.lat': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LAT',
-    'fillGeolocation.lng': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_GEO_LOCATION_LNG',
+    'fillLocation': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_LOCATION',
+    'fillLocation.geoLocation': 'LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION',
+    'fillLocation.geoLocation.lat': 'LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT',
+    'fillLocation.geoLocation.lng': 'LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG',
     'index': 'LNG_FOLLOW_UP_FIELD_LABEL_INDEX',
     'teamId': 'LNG_FOLLOW_UP_FIELD_LABEL_TEAM',
     'statusId': 'LNG_FOLLOW_UP_FIELD_LABEL_STATUSID',
@@ -92,7 +96,8 @@ module.exports = function (FollowUp) {
 
   // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
   FollowUp.nestedGeoPoints = [
-    'address.geoLocation'
+    'address.geoLocation',
+    'fillLocation.geoLocation'
   ];
 
   FollowUp.printFieldsinOrder = [
@@ -246,6 +251,51 @@ module.exports = function (FollowUp) {
   }
 
   /**
+   * Set follow-up team, if needed
+   * @param context
+   */
+  function setFollowUpTeamIfNeeded(context) {
+    // this needs to be done only for new instances (and not for sync)
+    if (!context.isNewInstance || (context.options && context.options._sync)) {
+      return Promise.resolve();
+    }
+    // get data from context
+    const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
+    // if we have team id in the request, don't do anything
+    const teamId = _.get(data, 'source.all.teamId');
+    if (teamId) {
+      return Promise.resolve();
+    }
+    // make sure we have person id (bulk delete/updates are missing this info)
+    const personId = _.get(data, 'source.all.personId');
+    // if there is no person id
+    if (!personId) {
+      // stop here
+      return Promise.resolve();
+    }
+    // get follow up's contact
+    return app.models.person
+      .findById(personId)
+      .then((person) => {
+        // if the contact was not found, just continue (maybe this is a sync and contact was not synced yet)
+        if (!person) {
+          return;
+        }
+        // get all teams and their locations to get eligible teams for each contact
+        return FollowupGeneration
+          .getAllTeamsWithLocationsIncluded()
+          .then((teams) => {
+            return FollowupGeneration
+              .getContactFollowupEligibleTeams(person, teams)
+              .then((eligibleTeams) => {
+                // choose a random team
+                _.set(data, 'target.teamId', RoundRobin(eligibleTeams));
+              });
+          });
+      });
+  }
+
+  /**
    * Before save hooks
    */
   FollowUp.observe('before save', function (ctx, next) {
@@ -255,6 +305,7 @@ module.exports = function (FollowUp) {
     setFollowUpIndexIfNeeded(ctx)
     // set follow-up address (if needed)
       .then(() => setFollowUpAddressIfNeeded(ctx))
+      .then(() => setFollowUpTeamIfNeeded(ctx))
       .then(() => next())
       .catch(next);
   });
@@ -602,10 +653,10 @@ module.exports = function (FollowUp) {
             app.utils.remote.convertLoopbackFilterToMongo(contactQuery),
             {projection: {_id: 1}});
         });
-    }
 
-    // no need to send contact filter further, since this one is handled separately
-    delete filter.where.contact;
+      // no need to send contact filter further, since this one is handled separately
+      delete filter.where.contact;
+    }
 
     // retrieve range follow-ups
     buildQuery
@@ -759,11 +810,23 @@ module.exports = function (FollowUp) {
                 count: records.length
               });
             }
+
             // replace _id with id, to be consistent
+            // & determine locations
+            let locationIds = {};
             records.forEach((record) => {
               if (record.contact) {
+                // replace _id
                 record.contact.id = record.contact._id;
                 delete record.contact._id;
+
+                // determine current address & get location
+                if (!_.isEmpty(record.contact.addresses)) {
+                  const contactResidence = record.contact.addresses.find((address) => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
+                  if (!_.isEmpty(contactResidence.locationId)) {
+                    locationIds[contactResidence.locationId] = true;
+                  }
+                }
               }
               if (Array.isArray(record.followUps)) {
                 record.followUps.forEach((followUp) => {
@@ -772,8 +835,44 @@ module.exports = function (FollowUp) {
                 });
               }
             });
-            // return results
-            return callback(null, records);
+
+            // retrieve current location for each contact
+            locationIds = Object.keys(locationIds);
+            if (_.isEmpty(locationIds)) {
+              // there are no locations to retrieve so we can send response to client
+              return callback(null, records);
+            }
+
+            // retrieve locations
+            return app.models.location
+              .rawFind({
+                id: {
+                  $in: locationIds
+                }
+              })
+              .then((locations) => {
+                // map locations
+                const locationsMap = _.transform(locations, (acc, location) => {
+                  acc[location.id] = location;
+                }, {});
+
+                // set locations
+                records.forEach((record) => {
+                  // determine current address & get location
+                  if (!_.isEmpty(record.contact.addresses)) {
+                    const contactResidence = record.contact.addresses.find((address) => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
+                    if (
+                      !_.isEmpty(contactResidence.locationId) &&
+                      locationsMap[contactResidence.locationId]
+                    ) {
+                      contactResidence.location = locationsMap[contactResidence.locationId];
+                    }
+                  }
+                });
+
+                // finished mapping locations
+                return callback(null, records);
+              });
           })
           .catch(callback);
       });

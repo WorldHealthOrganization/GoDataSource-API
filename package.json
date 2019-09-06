@@ -18,7 +18,8 @@
     "dump-help-data": "node ./server/install/install.js dump-help-data",
     "dump-language-data": "node ./server/install/install.js dump-language-data",
     "dump-outbreak-template-data": "node ./server/install/install.js dump-outbreak-template-data",
-    "remove-unused-language-tokens": "node ./server/install/install.js remove-unused-language-tokens"
+    "remove-unused-language-tokens": "node ./server/install/install.js remove-unused-language-tokens",
+    "populate-with-dummy-data": "node ./server/install/install.js populate-with-dummy-data"
   },
   "dependencies": {
     "@google/maps": "0.5.5",
