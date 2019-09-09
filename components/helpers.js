@@ -1349,6 +1349,13 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
   // go through each question
   const result = [];
   _.each(questionnaire, (question) => {
+    if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP') {
+      result.push({
+        id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable,
+        header: useVariable ? question.variable : dictionary.getTranslation(question.text)
+      });
+      return;
+    }
     // add question
     if (!_.isEmpty(question.variable)) {
       // can have multiple answers ?
