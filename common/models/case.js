@@ -185,8 +185,6 @@ module.exports = function (Case) {
     'age.months': 'LNG_CASE_FIELD_LABEL_AGE_MONTHS',
     'dob': 'LNG_CASE_FIELD_LABEL_DOB',
     'classification': 'LNG_CASE_FIELD_LABEL_CLASSIFICATION',
-    'documents[].type': 'LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE',
-    'documents[].number': 'LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER',
     'dateBecomeCase': 'LNG_CASE_FIELD_LABEL_DATE_BECOME_CASE',
     'wasContact': 'LNG_CASE_FIELD_LABEL_WAS_CONTACT',
     'dateOfInfection': 'LNG_CASE_FIELD_LABEL_DATE_OF_INFECTION',
@@ -206,6 +204,8 @@ module.exports = function (Case) {
     'dateRanges[].locationId': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_LOCATION',
     'dateRanges[].comments': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_COMMENTS',
     'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
+    'documents[].type': 'LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE',
+    'documents[].number': 'LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER',
     'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
     'addresses[].typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
@@ -229,6 +229,36 @@ module.exports = function (Case) {
     'burialLocationId': 'LNG_CASE_FIELD_LABEL_BURIAL_LOCATION_ID',
     'burialPlaceName': 'LNG_CASE_FIELD_LABEL_BURIAL_PLACE_NAME'
   });
+
+  Case.arrayProps = {
+    dateRanges: {
+      'typeId': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_TYPE_ID',
+      'startDate': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_START_DATE',
+      'endDate': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_END_DATE',
+      'centerName': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_CENTER_NAME',
+      'locationId': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_LOCATION',
+      'comments': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_COMMENTS',
+    },
+    addresses: {
+      'typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
+      'country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
+      'city': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY',
+      'addressLine1': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1',
+      'addressLine2': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_2',
+      'postalCode': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE',
+      'locationId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID',
+      'geoLocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
+      'geoLocation.lat': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT',
+      'geoLocation.lng': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG',
+      'geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
+      'date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
+      'phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
+    },
+    documents: {
+      'type': 'LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE',
+      'number': 'LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER'
+    }
+  };
 
   Case.referenceDataFieldsToCategoryMap = {
     type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE',
