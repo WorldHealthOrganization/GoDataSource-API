@@ -97,7 +97,12 @@ module.exports = function (Contact) {
     'addresses[].phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
     'isDateOfReportingApproximate': 'LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
     'safeBurial': 'LNG_CONTACT_FIELD_LABEL_SAFE_BURIAL',
-    'dateOfBurial': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_BURIAL'
+    'dateOfBurial': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_BURIAL',
+    'vaccinationStatus': 'LNG_CONTACT_FIELD_LABEL_VACCINATION_STATUS',
+    'vaccinationDate': 'LNG_CONTACT_FIELD_LABEL_VACCINATION_DATE',
+    'vaccinesReceived': 'LNG_CONTACT_FIELD_LABEL_VACCINES_RECEIVED',
+    'vaccinesReceived[].id': 'LNG_CONTACT_FIELD_LABEL_VACCINE',
+    'pregnancyStatus': 'LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS'
   });
 
   Contact.arrayProps = {
@@ -119,6 +124,9 @@ module.exports = function (Contact) {
     documents: {
       'type': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE',
       'number': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER'
+    },
+    vaccinesReceived: {
+      'id': 'LNG_CONTACT_FIELD_LABEL_VACCINE'
     }
   };
 
@@ -174,7 +182,10 @@ module.exports = function (Contact) {
     occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
     outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
     'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
-    'addresses[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE'
+    'addresses[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE',
+    'vaccinesReceived[].id': 'LNG_REFERENCE_DATA_CATEGORY_VACCINE',
+    vaccinationStatus: 'LNG_REFERENCE_DATA_CATEGORY_VACCINATION_STATUS',
+    pregnancyStatus: 'LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS'
   };
 
   Contact.referenceDataFields = Object.keys(Contact.referenceDataFieldsToCategoryMap);
@@ -208,7 +219,11 @@ module.exports = function (Contact) {
     'dateOfOutcome',
     'dateBecomeContact',
     'safeBurial',
-    'dateOfBurial'
+    'dateOfBurial',
+    'vaccinationStatus',
+    'vaccinationDate',
+    'vaccinesReceived',
+    'pregnancyStatus'
   ];
 
   Contact.locationFields = [

@@ -119,6 +119,20 @@
     },
     "questionnaireAnswers": {
       "type": "object"
+    },
+    "vaccinationStatus": {
+      "type": "string"
+    },
+    "vaccinationDate": {
+      "type": "date"
+    },
+    "vaccinesReceived": {
+      "type": [
+        "vaccine"
+      ]
+    },
+    "pregnancyStatus": {
+      "type": "string"
     }
   },
   "excludeBaseProperties": [
