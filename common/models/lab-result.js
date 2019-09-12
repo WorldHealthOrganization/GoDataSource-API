@@ -191,7 +191,55 @@ module.exports = function (LabResult) {
    * Before save hooks
    */
   LabResult.observe('before save', function (context, next) {
-    helpers.sortMultiAnswerQuestions(context.isNewInstance ? context.instance : context.data);
-    next();
+    // sort multi answer questions
+    const data = context.isNewInstance ? context.instance : context.data;
+    helpers.sortMultiAnswerQuestions(data);
+
+    // convert date fields to date before saving them in database
+    helpers
+      .convertQuestionStringDatesToDates(data)
+      .then(() => {
+        // finished
+        next();
+      })
+      .catch(next);
   });
+
+  /**
+   * Migrate lab results
+   * @param options
+   * @param next
+   */
+  LabResult.migrate = (options, next) => {
+    // migrate dates
+    helpers.migrateModelDataInBatches(LabResult, (modelData, cb) => {
+      if (!_.isEmpty(modelData.questionnaireAnswers)) {
+        // convert dates
+        const questionnaireAnswersClone = _.cloneDeep(modelData.questionnaireAnswers);
+        helpers
+          .convertQuestionStringDatesToDates(modelData)
+          .then(() => {
+            // check if we have something to change
+            if (_.isEqual(modelData.questionnaireAnswers, questionnaireAnswersClone)) {
+              // nothing to change
+              cb();
+            } else {
+              // migrate
+              modelData
+                .updateAttributes({
+                  questionnaireAnswers: modelData.questionnaireAnswers
+                }, options)
+                .then(() => cb())
+                .catch(cb);
+            }
+          })
+          .catch(cb);
+      } else {
+        // nothing to do
+        cb();
+      }
+    })
+    .then(() => next())
+    .catch(next);
+  };
 };

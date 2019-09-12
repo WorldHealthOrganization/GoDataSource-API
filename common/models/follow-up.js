@@ -299,14 +299,22 @@ module.exports = function (FollowUp) {
    * Before save hooks
    */
   FollowUp.observe('before save', function (ctx, next) {
-    helpers.sortMultiAnswerQuestions(ctx.isNewInstance ? ctx.instance : ctx.data);
+    // sort multi answer questions
+    const data = ctx.isNewInstance ? ctx.instance : ctx.data;
+    helpers.sortMultiAnswerQuestions(data);
 
-    // set follow-up index (if needed)
-    setFollowUpIndexIfNeeded(ctx)
-    // set follow-up address (if needed)
-      .then(() => setFollowUpAddressIfNeeded(ctx))
-      .then(() => setFollowUpTeamIfNeeded(ctx))
-      .then(() => next())
+    // convert date fields to date before saving them in database
+    helpers
+      .convertQuestionStringDatesToDates(data)
+      .then(() => {
+        // set follow-up index (if needed)
+        setFollowUpIndexIfNeeded(ctx)
+        // set follow-up address (if needed)
+          .then(() => setFollowUpAddressIfNeeded(ctx))
+          .then(() => setFollowUpTeamIfNeeded(ctx))
+          .then(() => next())
+          .catch(next);
+      })
       .catch(next);
   });
 
@@ -924,5 +932,43 @@ module.exports = function (FollowUp) {
         // finished
         return followUps;
       });
+  };
+
+  /**
+   * Migrate follow-ups
+   * @param options
+   * @param next
+   */
+  FollowUp.migrate = (options, next) => {
+    // migrate dates
+    helpers.migrateModelDataInBatches(FollowUp, (modelData, cb) => {
+      if (!_.isEmpty(modelData.questionnaireAnswers)) {
+        // convert dates
+        const questionnaireAnswersClone = _.cloneDeep(modelData.questionnaireAnswers);
+        helpers
+          .convertQuestionStringDatesToDates(modelData)
+          .then(() => {
+            // check if we have something to change
+            if (_.isEqual(modelData.questionnaireAnswers, questionnaireAnswersClone)) {
+              // nothing to change
+              cb();
+            } else {
+              // migrate
+              modelData
+                .updateAttributes({
+                  questionnaireAnswers: modelData.questionnaireAnswers
+                }, options)
+                .then(() => cb())
+                .catch(cb);
+            }
+          })
+          .catch(cb);
+      } else {
+        // nothing to do
+        cb();
+      }
+    })
+      .then(() => next())
+      .catch(next);
   };
 };
