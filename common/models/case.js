@@ -396,9 +396,21 @@ module.exports = function (Case) {
    * Before save hooks
    */
   Case.observe('before save', function (context, next) {
+    // archive
     archiveClassificationChanges(context);
-    helpers.sortMultiAnswerQuestions(context.isNewInstance ? context.instance : context.data);
-    next();
+
+    // sort multi answer questions
+    const data = context.isNewInstance ? context.instance : context.data;
+    helpers.sortMultiAnswerQuestions(data);
+
+    // convert date fields to date before saving them in database
+    helpers
+      .convertQuestionStringDatesToDates(data)
+      .then(() => {
+        // finished
+        next();
+      })
+      .catch(next);
   });
 
   /**

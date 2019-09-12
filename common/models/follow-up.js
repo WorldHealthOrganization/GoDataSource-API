@@ -299,14 +299,22 @@ module.exports = function (FollowUp) {
    * Before save hooks
    */
   FollowUp.observe('before save', function (ctx, next) {
-    helpers.sortMultiAnswerQuestions(ctx.isNewInstance ? ctx.instance : ctx.data);
+    // sort multi answer questions
+    const data = ctx.isNewInstance ? ctx.instance : ctx.data;
+    helpers.sortMultiAnswerQuestions(data);
 
-    // set follow-up index (if needed)
-    setFollowUpIndexIfNeeded(ctx)
-    // set follow-up address (if needed)
-      .then(() => setFollowUpAddressIfNeeded(ctx))
-      .then(() => setFollowUpTeamIfNeeded(ctx))
-      .then(() => next())
+    // convert date fields to date before saving them in database
+    helpers
+      .convertQuestionStringDatesToDates(data)
+      .then(() => {
+        // set follow-up index (if needed)
+        setFollowUpIndexIfNeeded(ctx)
+        // set follow-up address (if needed)
+          .then(() => setFollowUpAddressIfNeeded(ctx))
+          .then(() => setFollowUpTeamIfNeeded(ctx))
+          .then(() => next())
+          .catch(next);
+      })
       .catch(next);
   });
 

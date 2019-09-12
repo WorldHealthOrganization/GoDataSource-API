@@ -191,7 +191,17 @@ module.exports = function (LabResult) {
    * Before save hooks
    */
   LabResult.observe('before save', function (context, next) {
-    helpers.sortMultiAnswerQuestions(context.isNewInstance ? context.instance : context.data);
-    next();
+    // sort multi answer questions
+    const data = context.isNewInstance ? context.instance : context.data;
+    helpers.sortMultiAnswerQuestions(data);
+
+    // convert date fields to date before saving them in database
+    helpers
+      .convertQuestionStringDatesToDates(data)
+      .then(() => {
+        // finished
+        next();
+      })
+      .catch(next);
   });
 };

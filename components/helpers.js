@@ -411,7 +411,6 @@ const convertPropsToDate = function (obj) {
       if (typeof obj[prop] == 'object' && obj[prop] !== null) {
         convertPropsToDate(obj[prop]);
       } else {
-
         // we're only looking for strings properties that have a date format to convert
         if (typeof obj[prop] === 'string' && isValidDate(obj[prop])) {
           // try to convert the string value to date, if valid, replace the old value
@@ -1230,7 +1229,7 @@ const getBuildInformation = function () {
  * @return {boolean}
  */
 const isValidDate = function (date) {
-  return /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}\.\d{3}Z*)?$/.test(date);
+  return /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}(\.\d{3})?Z*)?$/.test(date);
 };
 
 /**
@@ -1749,6 +1748,26 @@ const sortMultiAnswerQuestions = function (model) {
 };
 
 /**
+ * Convert questionnaire questions string date answers to date answers
+ * @param modelChanges ( changed keys )
+ */
+const convertQuestionStringDatesToDates = function (
+  modelChanges
+) {
+  // the proper way to do it is to retrieve the outbreak template and to map dates accordingly to questionnaire template
+  // but since in other place we don't take this is account, we will be consistent by implementing it the same way ( replace all strings that follow Date format to dates )
+  return new Promise(function (resolve) {
+    // nothing to do ?
+    if (modelChanges.questionnaireAnswers) {
+      convertPropsToDate(modelChanges.questionnaireAnswers);
+    }
+
+    // finished
+    resolve();
+  });
+};
+
+/**
  * Convert questionnaire answers from new format ([ { date: Date, value: Question answer } ]) to old
  * @param answer
  */
@@ -1839,6 +1858,7 @@ module.exports = {
   migrateModelDataInBatches: migrateModelDataInBatches,
   covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat,
   sortMultiAnswerQuestions: sortMultiAnswerQuestions,
+  convertQuestionStringDatesToDates: convertQuestionStringDatesToDates,
   convertQuestionAnswerToOldFormat: convertQuestionAnswerToOldFormat,
   convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat,
   convertQuestionnaireAnswersToNewFormat: convertQuestionnaireAnswersToNewFormat,
