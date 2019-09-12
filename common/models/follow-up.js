@@ -933,4 +933,42 @@ module.exports = function (FollowUp) {
         return followUps;
       });
   };
+
+  /**
+   * Migrate follow-ups
+   * @param options
+   * @param next
+   */
+  FollowUp.migrate = (options, next) => {
+    // migrate dates
+    helpers.migrateModelDataInBatches(FollowUp, (modelData, cb) => {
+      if (!_.isEmpty(modelData.questionnaireAnswers)) {
+        // convert dates
+        const questionnaireAnswersClone = _.cloneDeep(modelData.questionnaireAnswers);
+        helpers
+          .convertQuestionStringDatesToDates(modelData)
+          .then(() => {
+            // check if we have something to change
+            if (_.isEqual(modelData.questionnaireAnswers, questionnaireAnswersClone)) {
+              // nothing to change
+              cb();
+            } else {
+              // migrate
+              modelData
+                .updateAttributes({
+                  questionnaireAnswers: modelData.questionnaireAnswers
+                }, options)
+                .then(() => cb())
+                .catch(cb);
+            }
+          })
+          .catch(cb);
+      } else {
+        // nothing to do
+        cb();
+      }
+    })
+      .then(() => next())
+      .catch(next);
+  };
 };

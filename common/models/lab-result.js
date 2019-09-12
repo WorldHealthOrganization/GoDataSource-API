@@ -204,4 +204,42 @@ module.exports = function (LabResult) {
       })
       .catch(next);
   });
+
+  /**
+   * Migrate lab results
+   * @param options
+   * @param next
+   */
+  LabResult.migrate = (options, next) => {
+    // migrate dates
+    helpers.migrateModelDataInBatches(LabResult, (modelData, cb) => {
+      if (!_.isEmpty(modelData.questionnaireAnswers)) {
+        // convert dates
+        const questionnaireAnswersClone = _.cloneDeep(modelData.questionnaireAnswers);
+        helpers
+          .convertQuestionStringDatesToDates(modelData)
+          .then(() => {
+            // check if we have something to change
+            if (_.isEqual(modelData.questionnaireAnswers, questionnaireAnswersClone)) {
+              // nothing to change
+              cb();
+            } else {
+              // migrate
+              modelData
+                .updateAttributes({
+                  questionnaireAnswers: modelData.questionnaireAnswers
+                }, options)
+                .then(() => cb())
+                .catch(cb);
+            }
+          })
+          .catch(cb);
+      } else {
+        // nothing to do
+        cb();
+      }
+    })
+    .then(() => next())
+    .catch(next);
+  };
 };

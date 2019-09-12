@@ -862,4 +862,42 @@ module.exports = function (Case) {
         return Object.assign(filter, {where: casesQuery});
       });
   };
+
+  /**
+   * Migrate cases
+   * @param options
+   * @param next
+   */
+  Case.migrate = (options, next) => {
+    // migrate dates
+    helpers.migrateModelDataInBatches(Case, (modelData, cb) => {
+      if (!_.isEmpty(modelData.questionnaireAnswers)) {
+        // convert dates
+        const questionnaireAnswersClone = _.cloneDeep(modelData.questionnaireAnswers);
+        helpers
+          .convertQuestionStringDatesToDates(modelData)
+          .then(() => {
+            // check if we have something to change
+            if (_.isEqual(modelData.questionnaireAnswers, questionnaireAnswersClone)) {
+              // nothing to change
+              cb();
+            } else {
+              // migrate
+              modelData
+                .updateAttributes({
+                  questionnaireAnswers: modelData.questionnaireAnswers
+                }, options)
+                .then(() => cb())
+                .catch(cb);
+            }
+          })
+          .catch(cb);
+      } else {
+        // nothing to do
+        cb();
+      }
+    })
+      .then(() => next())
+      .catch(next);
+  };
 };
