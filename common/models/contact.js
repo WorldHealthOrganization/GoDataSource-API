@@ -98,10 +98,10 @@ module.exports = function (Contact) {
     'isDateOfReportingApproximate': 'LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
     'safeBurial': 'LNG_CONTACT_FIELD_LABEL_SAFE_BURIAL',
     'dateOfBurial': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_BURIAL',
-    'vaccinationStatus': 'LNG_CONTACT_FIELD_LABEL_VACCINATION_STATUS',
-    'vaccinationDate': 'LNG_CONTACT_FIELD_LABEL_VACCINATION_DATE',
     'vaccinesReceived': 'LNG_CONTACT_FIELD_LABEL_VACCINES_RECEIVED',
-    'vaccinesReceived[].id': 'LNG_CONTACT_FIELD_LABEL_VACCINE',
+    'vaccinesReceived[].vaccine': 'LNG_CONTACT_FIELD_LABEL_VACCINE',
+    'vaccinesReceived[].date': 'LNG_CONTACT_FIELD_LABEL_VACCINE_DATE',
+    'vaccinesReceived[].status': 'LNG_CONTACT_FIELD_LABEL_VACCINE_STATUS',
     'pregnancyStatus': 'LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS'
   });
 
@@ -126,7 +126,9 @@ module.exports = function (Contact) {
       'number': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER'
     },
     vaccinesReceived: {
-      'id': 'LNG_CONTACT_FIELD_LABEL_VACCINE'
+      'vaccine': 'LNG_CONTACT_FIELD_LABEL_VACCINE',
+      'date': 'LNG_CONTACT_FIELD_LABEL_VACCINE_DATE',
+      'status': 'LNG_CONTACT_FIELD_LABEL_VACCINE_STATUS',
     }
   };
 
@@ -183,8 +185,8 @@ module.exports = function (Contact) {
     outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
     'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
     'addresses[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE',
-    'vaccinesReceived[].id': 'LNG_REFERENCE_DATA_CATEGORY_VACCINE',
-    vaccinationStatus: 'LNG_REFERENCE_DATA_CATEGORY_VACCINATION_STATUS',
+    'vaccinesReceived[].vaccine': 'LNG_REFERENCE_DATA_CATEGORY_VACCINE',
+    'vaccinesReceived[].status': 'LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS',
     pregnancyStatus: 'LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS'
   };
 
@@ -220,8 +222,6 @@ module.exports = function (Contact) {
     'dateBecomeContact',
     'safeBurial',
     'dateOfBurial',
-    'vaccinationStatus',
-    'vaccinationDate',
     'vaccinesReceived',
     'pregnancyStatus'
   ];

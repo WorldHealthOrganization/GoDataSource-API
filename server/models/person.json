@@ -145,12 +145,6 @@
     "deletedByParent": {
       "type": "string"
     },
-    "vaccinationStatus": {
-      "type": "string"
-    },
-    "vaccinationDate": {
-      "type": "date"
-    },
     "vaccinesReceived": {
       "type": [
         "vaccine"

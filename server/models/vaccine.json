@@ -6,9 +6,14 @@
     "validateUpsert": true
   },
   "properties": {
-    "id": {
-      "type": "string",
-      "id": true
+    "vaccine": {
+      "type": "string"
+    },
+    "date": {
+      "type": "date"
+    },
+    "status": {
+      "type": "string"
     }
   },
   "validations": [],
