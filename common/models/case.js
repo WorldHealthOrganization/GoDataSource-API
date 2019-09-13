@@ -227,7 +227,12 @@ module.exports = function (Case) {
     'safeBurial': 'LNG_CASE_FIELD_LABEL_SAFE_BURIAL',
     'dateOfBurial': 'LNG_CASE_FIELD_LABEL_DATE_OF_BURIAL',
     'burialLocationId': 'LNG_CASE_FIELD_LABEL_BURIAL_LOCATION_ID',
-    'burialPlaceName': 'LNG_CASE_FIELD_LABEL_BURIAL_PLACE_NAME'
+    'burialPlaceName': 'LNG_CASE_FIELD_LABEL_BURIAL_PLACE_NAME',
+    'vaccinesReceived': 'LNG_CASE_FIELD_LABEL_VACCINES_RECEIVED',
+    'vaccinesReceived[].vaccine': 'LNG_CASE_FIELD_LABEL_VACCINE',
+    'vaccinesReceived[].date': 'LNG_CASE_FIELD_LABEL_VACCINE_DATE',
+    'vaccinesReceived[].status': 'LNG_CASE_FIELD_LABEL_VACCINE_STATUS',
+    'pregnancyStatus': 'LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS'
   });
 
   Case.arrayProps = {
@@ -257,6 +262,11 @@ module.exports = function (Case) {
     documents: {
       'type': 'LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE',
       'number': 'LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER'
+    },
+    vaccinesReceived: {
+      'vaccine': 'LNG_CASE_FIELD_LABEL_VACCINE',
+      'date': 'LNG_CASE_FIELD_LABEL_VACCINE_DATE',
+      'status': 'LNG_CASE_FIELD_LABEL_VACCINE_STATUS',
     }
   };
 
@@ -269,7 +279,10 @@ module.exports = function (Case) {
     outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
     'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
     'addresses[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE',
-    'dateRanges[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE'
+    'dateRanges[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE',
+    'vaccinesReceived[].vaccine': 'LNG_REFERENCE_DATA_CATEGORY_VACCINE',
+    'vaccinesReceived[].status': 'LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS',
+    pregnancyStatus: 'LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS'
   };
 
   Case.referenceDataFields = Object.keys(Case.referenceDataFieldsToCategoryMap);
@@ -308,7 +321,9 @@ module.exports = function (Case) {
     'safeBurial',
     'dateOfBurial',
     'burialLocationId',
-    'burialPlaceName'
+    'burialPlaceName',
+    'vaccinesReceived',
+    'pregnancyStatus'
   ];
 
   Case.locationFields = [

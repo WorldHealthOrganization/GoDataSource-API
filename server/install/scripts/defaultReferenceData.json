@@ -971,5 +971,8 @@
     "Lost To Follow-up": {
       "readOnly": true
     }
-  }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_VACCINE": {},
+  "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS": {},
+  "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS": {}
 }

@@ -97,7 +97,12 @@ module.exports = function (Contact) {
     'addresses[].phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
     'isDateOfReportingApproximate': 'LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
     'safeBurial': 'LNG_CONTACT_FIELD_LABEL_SAFE_BURIAL',
-    'dateOfBurial': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_BURIAL'
+    'dateOfBurial': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_BURIAL',
+    'vaccinesReceived': 'LNG_CONTACT_FIELD_LABEL_VACCINES_RECEIVED',
+    'vaccinesReceived[].vaccine': 'LNG_CONTACT_FIELD_LABEL_VACCINE',
+    'vaccinesReceived[].date': 'LNG_CONTACT_FIELD_LABEL_VACCINE_DATE',
+    'vaccinesReceived[].status': 'LNG_CONTACT_FIELD_LABEL_VACCINE_STATUS',
+    'pregnancyStatus': 'LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS'
   });
 
   Contact.arrayProps = {
@@ -119,6 +124,11 @@ module.exports = function (Contact) {
     documents: {
       'type': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE',
       'number': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER'
+    },
+    vaccinesReceived: {
+      'vaccine': 'LNG_CONTACT_FIELD_LABEL_VACCINE',
+      'date': 'LNG_CONTACT_FIELD_LABEL_VACCINE_DATE',
+      'status': 'LNG_CONTACT_FIELD_LABEL_VACCINE_STATUS',
     }
   };
 
@@ -174,7 +184,10 @@ module.exports = function (Contact) {
     occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
     outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
     'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
-    'addresses[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE'
+    'addresses[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE',
+    'vaccinesReceived[].vaccine': 'LNG_REFERENCE_DATA_CATEGORY_VACCINE',
+    'vaccinesReceived[].status': 'LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS',
+    pregnancyStatus: 'LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS'
   };
 
   Contact.referenceDataFields = Object.keys(Contact.referenceDataFieldsToCategoryMap);
@@ -208,7 +221,9 @@ module.exports = function (Contact) {
     'dateOfOutcome',
     'dateBecomeContact',
     'safeBurial',
-    'dateOfBurial'
+    'dateOfBurial',
+    'vaccinesReceived',
+    'pregnancyStatus'
   ];
 
   Contact.locationFields = [

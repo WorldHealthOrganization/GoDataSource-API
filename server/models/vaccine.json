@@ -1,0 +1,23 @@
+{
+  "name": "vaccine",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "vaccine": {
+      "type": "string"
+    },
+    "date": {
+      "type": "date"
+    },
+    "status": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

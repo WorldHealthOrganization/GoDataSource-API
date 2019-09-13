@@ -144,6 +144,14 @@
     },
     "deletedByParent": {
       "type": "string"
+    },
+    "vaccinesReceived": {
+      "type": [
+        "vaccine"
+      ]
+    },
+    "pregnancyStatus": {
+      "type": "string"
     }
   },
   "indexes": {

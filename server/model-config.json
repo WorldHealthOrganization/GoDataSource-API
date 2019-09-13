@@ -335,5 +335,9 @@
   "fillLocation": {
     "dataSource": null,
     "public": false
+  },
+  "vaccine": {
+    "dataSource": null,
+    "public": false
   }
 }
