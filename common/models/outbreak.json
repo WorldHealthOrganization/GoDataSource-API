@@ -2900,7 +2900,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, limit and useQuestionVariable - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'useQuestionVariable' is used to display question variables as column headers."
         },
         {
           "arg": "type",
@@ -5365,7 +5365,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, limit and useQuestionVariable - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'useQuestionVariable' is used to display question variables as column headers."
         },
         {
           "arg": "type",

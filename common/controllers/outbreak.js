@@ -7752,6 +7752,17 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.exportFilteredFollowups = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
     let self = this;
+    // set a default filter
+    filter = filter || {};
+    filter.where = filter.where || {};
+    // parse useQuestionVariable query param
+    let useQuestionVariable = false;
+    // if found, remove it form main query
+    if (filter.where.hasOwnProperty('useQuestionVariable')) {
+      useQuestionVariable = filter.where.useQuestionVariable;
+      delete filter.where.useQuestionVariable;
+    }
+
     new Promise((resolve, reject) => {
       // load user language dictionary
       const contextUser = app.utils.remote.getUserFromOptions(options);
@@ -7796,7 +7807,7 @@ module.exports = function (Outbreak) {
               self.contactFollowUpTemplate,
               'questionnaireAnswers',
               dictionary,
-              filter.useQuestionVariable
+              useQuestionVariable
             )
           },
           filter.where,
@@ -8909,6 +8920,17 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
     const self = this;
+    // set a default filter
+    filter = filter || {};
+    filter.where = filter.where || {};
+    // parse useQuestionVariable query param
+    let useQuestionVariable = false;
+    // if found, remove it form main query
+    if (filter.where.hasOwnProperty('useQuestionVariable')) {
+      useQuestionVariable = filter.where.useQuestionVariable;
+      delete filter.where.useQuestionVariable;
+    }
+
     new Promise((resolve, reject) => {
       // load user language dictionary
       const contextUser = app.utils.remote.getUserFromOptions(options);
@@ -8953,7 +8975,7 @@ module.exports = function (Outbreak) {
               self.caseInvestigationTemplate,
               'questionnaireAnswers',
               dictionary,
-              filter.useQuestionVariable
+              useQuestionVariable
             )
           },
           filter.where,
