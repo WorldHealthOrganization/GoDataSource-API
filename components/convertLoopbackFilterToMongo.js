@@ -66,6 +66,9 @@ function convert(loopbackFilter) {
       .replace(/"eq"/g, '"$eq"')
       .replace(/"neq"/g, '"$ne"')
       .replace(/"ne"/g, '"$ne"')
+      .replace(/"exists"/g, '"$exists"')
+      .replace(/"not"/g, '"$not"')
+      .replace(/"type":"null"/g, '"$type":"null"')
   );
   // dates need to be date object
   convertProps(mongoFilter);
