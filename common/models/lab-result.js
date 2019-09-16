@@ -195,9 +195,22 @@ module.exports = function (LabResult) {
     const data = context.isNewInstance ? context.instance : context.data;
     helpers.sortMultiAnswerQuestions(data);
 
+    // retrieve outbreak data
+    let model = _.get(context, 'options.remotingContext.instance');
+    if (model) {
+      if (!(model instanceof app.models.outbreak)) {
+        model = undefined;
+      }
+    }
+
     // convert date fields to date before saving them in database
     helpers
-      .convertQuestionStringDatesToDates(data)
+      .convertQuestionStringDatesToDates(
+        data,
+        model ?
+          model.labResultsTemplate :
+          null
+      )
       .then(() => {
         // finished
         next();
@@ -211,35 +224,58 @@ module.exports = function (LabResult) {
    * @param next
    */
   LabResult.migrate = (options, next) => {
-    // migrate dates
-    helpers.migrateModelDataInBatches(LabResult, (modelData, cb) => {
-      if (!_.isEmpty(modelData.questionnaireAnswers)) {
-        // convert dates
-        const questionnaireAnswersClone = _.cloneDeep(modelData.questionnaireAnswers);
-        helpers
-          .convertQuestionStringDatesToDates(modelData)
-          .then(() => {
-            // check if we have something to change
-            if (_.isEqual(modelData.questionnaireAnswers, questionnaireAnswersClone)) {
-              // nothing to change
-              cb();
-            } else {
-              // migrate
-              modelData
-                .updateAttributes({
-                  questionnaireAnswers: modelData.questionnaireAnswers
-                }, options)
-                .then(() => cb())
-                .catch(cb);
-            }
-          })
-          .catch(cb);
-      } else {
-        // nothing to do
-        cb();
-      }
-    })
-    .then(() => next())
-    .catch(next);
+    // retrieve outbreaks data so we can migrate questionnaires accordingly to outbreak template definitiuon
+    app.models.outbreak
+      .find({}, {
+        projection: {
+          _id: 1,
+          labResultsTemplate: 1
+        }
+      })
+      .then((outbreakData) => {
+        // map outbreak data
+        const outbreakTemplates = _.transform(
+          outbreakData,
+          (a, m) => {
+            a[m.id] = m.labResultsTemplate;
+          },
+          {}
+        );
+
+        // migrate dates & numbers
+        helpers.migrateModelDataInBatches(LabResult, (modelData, cb) => {
+          if (!_.isEmpty(modelData.questionnaireAnswers)) {
+            // convert dates
+            const questionnaireAnswersClone = _.cloneDeep(modelData.questionnaireAnswers);
+            helpers
+              .convertQuestionStringDatesToDates(
+                modelData,
+                outbreakTemplates[modelData.outbreakId]
+              )
+              .then(() => {
+                // check if we have something to change
+                if (_.isEqual(modelData.questionnaireAnswers, questionnaireAnswersClone)) {
+                  // nothing to change
+                  cb();
+                } else {
+                  // migrate
+                  modelData
+                    .updateAttributes({
+                      questionnaireAnswers: modelData.questionnaireAnswers
+                    }, options)
+                    .then(() => cb())
+                    .catch(cb);
+                }
+              })
+              .catch(cb);
+          } else {
+            // nothing to do
+            cb();
+          }
+        })
+          .then(() => next())
+          .catch(next);
+      })
+      .catch(next);
   };
 };
