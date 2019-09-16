@@ -1750,16 +1750,72 @@ const sortMultiAnswerQuestions = function (model) {
 /**
  * Convert questionnaire questions string date answers to date answers
  * @param modelChanges ( changed keys )
+ * @param template ( Outbreak questionnaire template => caseInvestigationTemplate / contactFollowUpTemplate / labResultsTemplate )
  */
 const convertQuestionStringDatesToDates = function (
-  modelChanges
+  modelChanges,
+  template
 ) {
   // the proper way to do it is to retrieve the outbreak template and to map dates accordingly to questionnaire template
   // but since in other place we don't take this is account, we will be consistent by implementing it the same way ( replace all strings that follow Date format to dates )
   return new Promise(function (resolve) {
     // nothing to do ?
     if (modelChanges.questionnaireAnswers) {
+      // convert dates
       convertPropsToDate(modelChanges.questionnaireAnswers);
+
+      // do we have questionnaire template so we can check the format we're importing ?
+      if (!_.isEmpty(template)) {
+        // go through questionnaire template and map questions types to variables
+        const mappedQuestionTypes = {};
+        const mapQuestions = (questions) => {
+          (questions || []).forEach((question) => {
+            mappedQuestionTypes[question.variable] = question.answerType;
+
+            // make sure we add sub-questions as well
+            if (!_.isEmpty(question.answers)) {
+              (question.answers || []).forEach((answer) => {
+                if (!_.isEmpty(answer.additionalQuestions)) {
+                  mapQuestions(answer.additionalQuestions);
+                }
+              });
+            }
+          });
+        };
+
+        // map
+        mapQuestions(template);
+
+        // convert invalid answers to proper answers accordingly to template definitions
+        _.each(
+          modelChanges.questionnaireAnswers,
+          (answerData, questionVariable) => {
+            // check if this is a type that we need to convert
+            if (mappedQuestionTypes[questionVariable]) {
+              // must convert to number ?
+              if (mappedQuestionTypes[questionVariable] === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_NUMERIC') {
+                (answerData || []).forEach((answer) => {
+                  if (
+                    answer.value !== undefined &&
+                    answer.value !== null &&
+                    typeof answer.value !== 'number'
+                  ) {
+                    try {
+                      answer.value = parseFloat(answer.value);
+                    } catch (e) {
+                      answer.value = null;
+                    }
+                  }
+                });
+              }
+
+              // must convert to date ?
+              // handled partially above by calling convertPropsToDate
+              // for now there is no need to over-complicate things
+            }
+          }
+        );
+      }
     }
 
     // finished
