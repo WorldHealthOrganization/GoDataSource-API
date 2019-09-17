@@ -129,6 +129,7 @@ module.exports = function (Model) {
       if (!Array.isArray(nestedGeoPoint)) {
         nestedGeoPoint = [nestedGeoPoint];
       }
+
       // go through each nested GeoPoint
       nestedGeoPoint.forEach(function (nestedPoint) {
         // data available in read format
@@ -137,9 +138,29 @@ module.exports = function (Model) {
           nestedPoint.value.lng != null &&
           nestedPoint.value.lat != null
         ) {
+          // ge lng & lat
+          let lat = nestedPoint.value.lat;
+          let lng = nestedPoint.value.lng;
+
+          // check if numbers are coming as string then we need to convert them
+          if (typeof lat === 'string') {
+            try {
+              lat = parseFloat(lat);
+            } catch (e) {
+              // NOTHING
+            }
+          }
+          if (typeof lng === 'string') {
+            try {
+              lng = parseFloat(lng);
+            } catch (e) {
+              // NOTHING
+            }
+          }
+
           // convert it
           _.set(data.target, nestedPoint.exactPath, {
-            coordinates: [nestedPoint.value.lng, nestedPoint.value.lat],
+            coordinates: [lng, lat],
             type: 'Point'
           });
         } else if (
