@@ -1,0 +1,115 @@
+{
+  "System administrator": {
+    "id": "ROLE_SYSTEM_ADMINISTRATOR",
+    "description": "This is a built in role that manages user accounts, and configuration of the system.",
+    "permissionIds": [
+      "read_sys_config",
+      "write_sys_config",
+      "read_role",
+      "write_role",
+      "read_user_account",
+      "write_user_account",
+      "read_outbreak"
+    ]
+  },
+  "GO.Data administrator": {
+    "id": "ROLE_GO_DATA_ADMINISTRATOR",
+    "description": "This role has access to configuration of the Go.Data for specific outbreak.",
+    "permissionIds": [
+      "read_outbreak",
+      "write_outbreak",
+      "write_reference_data",
+      "read_sys_config",
+      "write_sys_config"
+    ]
+  },
+  "Epidemiologist": {
+    "id": "ROLE_EPIDEMIOLOGIST",
+    "description": "This is a built in role that analyses data to understand disease evolution and inform response.",
+    "permissionIds": [
+      "read_outbreak",
+      "read_case",
+      "write_case",
+      "read_contact",
+      "write_contact",
+      "read_followup",
+      "write_followup",
+      "read_sys_config",
+      "read_report"
+    ]
+  },
+  "Data manager": {
+    "id": "ROLE_DATA_MANAGER",
+    "description": "This is a built in role that provides support and coordinates the collection of all data related to the outbreak.",
+    "permissionIds": [
+      "read_outbreak",
+      "read_case",
+      "write_case",
+      "read_contact",
+      "write_contact",
+      "read_followup",
+      "write_followup",
+      "read_sys_config",
+      "read_report"
+    ]
+  },
+  "Contact tracing coordinator": {
+    "id": "ROLE_CONTACT_TRACING_COORDINATOR",
+    "description": "This is a built in role that coordinates the work of multiple Contact Tracers.",
+    "permissionIds": [
+      "read_case",
+      "write_case",
+      "read_contact",
+      "write_contact",
+      "read_followup",
+      "write_followup",
+      "read_outbreak",
+      "read_sys_config",
+      "read_team",
+      "write_team",
+      "read_report",
+      "read_user_account"
+    ]
+  },
+  "Contact tracer": {
+    "id": "ROLE_CONTACT_TRACER",
+    "description": "This is a built in role that follows up with contacts and monitors their health.",
+    "permissionIds": [
+      "read_case",
+      "write_case",
+      "read_contact",
+      "write_contact",
+      "read_followup",
+      "write_followup",
+      "read_outbreak",
+      "read_sys_config"
+    ]
+  },
+  "Help content manager": {
+    "id": "ROLE_HELP_CONTENT_MANAGER",
+    "description": "This is a built in role that manages content.",
+    "permissionIds": [
+      "write_help",
+      "approve_help"
+    ]
+  },
+  "Language manager": {
+    "id": "ROLE_LANGUAGE_MANAGER",
+    "description": "This is a built in role that manages languages.",
+    "permissionIds": [
+      "read_sys_config",
+      "write_sys_config"
+    ]
+  },
+  "Reports and data viewer": {
+    "id": "ROLE_REPORTS_AND_DATA_VIEWER",
+    "description": "This is a built in role that manages reports.",
+    "permissionIds": [
+      "read_report",
+      "read_case",
+      "read_contact",
+      "read_outbreak",
+      "read_sys_config"
+    ]
+  }
+}

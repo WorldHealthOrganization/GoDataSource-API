@@ -63,7 +63,8 @@ const routines = {
       require('./scripts/defaultReferenceData'),
       require('./scripts/defaultHelpData'),
       require('./scripts/defaultOutbreakTemplateData'),
-      require('./scripts/migrateModelData')
+      require('./scripts/migrateModelData'),
+      require('./scripts/migrateRolesAndUsers')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });
