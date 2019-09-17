@@ -45,7 +45,8 @@ function migrateRoles(mongoDBConnection) {
         // role has old ID; need to update its ID with the hardcoded value and also add the role in the updated roles map
         // Note: MongoDB doesn't allow updating the ID. Need to create a new instance with the new ID and remove the old instance
         return Role
-          .insertOne(Object.assign(roleInstance, {
+          .insertOne(
+            Object.assign(roleInstance, {
               _id: rolesMap[roleName].id
             })
           )
@@ -188,6 +189,7 @@ function migrateUsers(mongoDBConnection, updatedRoles = {}) {
 
 /**
  * Run migration
+ * Note: Migration will not stop on failed resource; it will try to migrate all resources no mather if some of them return errors
  * @param callback
  */
 function run(callback) {
@@ -209,11 +211,9 @@ function run(callback) {
     })
     .then(() => {
       console.log(`Migration complete ${migrationErrors.length ? `with errors: \n${migrationErrors.join('\n')}` : ''}.`);
+      return callback();
     })
-    .catch(err => {
-      // shouldn't get here
-      console.log('Migration error', err);
-    });
+    .catch(callback);
 }
 
 module.exports = run;
