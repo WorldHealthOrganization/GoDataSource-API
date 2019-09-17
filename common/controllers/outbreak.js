@@ -9024,9 +9024,6 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        // we need to add target & source label to differentiate between their properties ( e.g. firstName, lastName... )
-        options.prependObjectNames = true;
-
         // export list of relationships
         app.utils.remote.helpers.exportFilteredModelsList(
           app,

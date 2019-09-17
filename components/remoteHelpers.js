@@ -138,10 +138,7 @@ function exportFilteredModelsList(
           // new functionality, not supported by all models
           if (!isJSONXMLExport && ignoreArrayFieldLabels && Model.arrayProps[propertyName]) {
             // determine if we need to include parent token
-            let parentToken;
-            if (options.prependObjectNames) {
-              parentToken = fieldLabelsMap[propertyName];
-            }
+            const parentToken = fieldLabelsMap[propertyName];
 
             // array properties map
             const map = Model.arrayProps[propertyName];
@@ -173,12 +170,10 @@ function exportFilteredModelsList(
           if (!isJSONXMLExport && /(\[]|\.)/.test(propertyName)) {
             // determine if we need to include parent token
             let parentToken;
-            if (options.prependObjectNames) {
-              const parentIndex = propertyName.indexOf('.');
-              if (parentIndex >= -1) {
-                const parentKey = propertyName.substr(0, parentIndex);
-                parentToken = fieldLabelsMap[parentKey];
-              }
+            const parentIndex = propertyName.indexOf('.');
+            if (parentIndex >= -1) {
+              const parentKey = propertyName.substr(0, parentIndex);
+              parentToken = fieldLabelsMap[parentKey];
             }
 
             // create headers
