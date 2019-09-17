@@ -58,6 +58,8 @@ module.exports = function (FollowUp) {
   FollowUp.fieldLabelsMap = Object.assign({}, FollowUp.fieldLabelsMap, {
     'personId': 'LNG_FOLLOW_UP_FIELD_LABEL_PERSON_ID',
     'contact': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT',
+    'contact.id': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_ID',
+    'contact.visualId': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_VISUAL_ID',
     'contact.firstName': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FIRST_NAME',
     'contact.lastName': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_LAST_NAME',
     'date': 'LNG_FOLLOW_UP_FIELD_LABEL_DATE',
@@ -120,7 +122,12 @@ module.exports = function (FollowUp) {
     },
     'personId': {
       modelName: 'contact',
-      useProperty: ['firstName', 'lastName']
+      useProperty: [
+        'id',
+        'visualId',
+        'firstName',
+        'lastName'
+      ]
     },
     'teamId': {
       modelName: 'team',
