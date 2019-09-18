@@ -9,7 +9,6 @@ const fs = require('fs');
 const moment = require('moment');
 
 let platform = 'windows-x86';
-let type = 'hub';
 let version;
 
 /**
@@ -20,9 +19,6 @@ gulp.task('prepare-build', function (callback) {
   process.argv.forEach(function (arg, index) {
     if (arg === '--platform') {
       platform = process.argv[index + 1];
-    }
-    if (arg === '--type') {
-      type = process.argv[index + 1];
     }
     if (arg === '--version') {
       version = process.argv[index + 1];
@@ -38,18 +34,13 @@ gulp.task('prepare-build', function (callback) {
     errors.push(`Invalid platform: ${platform}. Supported platforms: ${supportedPlatforms.join(', ')}`);
   }
 
-  // validate type
-  const supportedTypes = ['hub', 'consolidation-server'];
-  if (!supportedTypes.includes(type)) {
-    errors.push(`Invalid platform: ${type}. Supported platforms: ${supportedTypes.join(', ')}`);
-  }
-
   // check if there are errors
   if (errors.length) {
     return callback(errors);
   }
+
   // output build information
-  process.stdout.write(`\nBuilding ${type} for ${platform}.\nYou can specify other types and platforms by sending arguments. E.g.: npm run build -- --version 1.1.1 --type hub --platform windows-x86\n\n`);
+  process.stdout.write(`\nBuilding instance for ${platform}.\nYou can specify other types and platforms by sending arguments. E.g.: npm run build -- --version 1.1.1 --platform windows-x86\n\n`);
   callback();
 });
 
@@ -124,7 +115,6 @@ gulp.task('update-build-info', ['install-dependencies'], function (callback) {
   }
   // set build information
   packageJson.build.platform = platform;
-  packageJson.build.type = type;
   packageJson.build.version = version || packageJson.version;
   packageJson.build.build = moment().format('YYMMDDHHmm');
   packageJson.build.arch = packageJson.build.arch || 'x64';

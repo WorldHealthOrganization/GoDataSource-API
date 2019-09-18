@@ -1216,7 +1216,6 @@ const includeSubLocationsInLocationFilter = function (app, filter, callback) {
 const getBuildInformation = function () {
   return {
     platform: _.get(packageJson, 'build.platform', '-'),
-    type: _.get(packageJson, 'build.type', 'hub'),
     version: _.get(packageJson, 'build.version', _.get(packageJson, 'version')),
     build: _.get(packageJson, 'build.build', 'development'),
     arch: _.get(packageJson, 'build.arch', 'x64')
