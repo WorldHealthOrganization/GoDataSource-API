@@ -224,7 +224,7 @@ function exportFilteredModelsList(
                 // map properties to labels
                 const propertyMap = {};
                 (modelPropertiesExpandOnFlatFiles[propertyName] || []).forEach((headerData) => {
-                  propertyMap[headerData.expandKey ? headerData.expandKey : headerData.id] = headerData.header;
+                  propertyMap[headerData.expandKey ? headerData.expandKey : headerData.id] = headerData.expandHeader ? headerData.expandHeader : headerData.header;
                 });
 
                 // convert record data
