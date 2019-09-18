@@ -180,7 +180,6 @@ module.exports = function (SystemSettings) {
       uri: `${basePath}/check-for-updates`,
       qs: {
         platform: packageJson.build.platform,
-        type: packageJson.build.type,
         version: packageJson.version
       },
       json: true

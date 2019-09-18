@@ -176,17 +176,6 @@ const cliArguments = {
       convertor: e => e
     }
   },
-  buildType: {
-    source: sources.package,
-    paramPath: 'build.type',
-    get: {
-      convertor: e => e
-    },
-    set: {
-      allowed: true,
-      convertor: e => e
-    }
-  },
   buildPlatform: {
     source: sources.package,
     paramPath: 'build.platform',

@@ -82,7 +82,6 @@
   "license": "UNLICENSED",
   "description": "WHO's Go.Data API",
   "build": {
-    "platform": "-",
-    "type": "hub"
+    "platform": "-"
   }
 }
