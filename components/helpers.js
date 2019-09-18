@@ -1349,6 +1349,7 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
   _.each(questionnaire, (question) => {
     if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP') {
       result.push({
+        expandKey: question.variable,
         id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable,
         header: useVariable ? question.variable : dictionary.getTranslation(question.text)
       });
@@ -1362,6 +1363,7 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
         if (!_.isEmpty(question.answers)) {
           _.each(question.answers, (answer, answerIndex) => {
             result.push({
+              expandKey: question.variable,
               id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable + ' ' + (answerIndex + 1),
               header: (useVariable ? question.variable : dictionary.getTranslation(question.text)) + ' ' + (answerIndex + 1)
             });
@@ -1370,6 +1372,7 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
       } else {
         // add parent question
         result.push({
+          expandKey: question.variable,
           id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable,
           header: useVariable ? question.variable : dictionary.getTranslation(question.text)
         });
