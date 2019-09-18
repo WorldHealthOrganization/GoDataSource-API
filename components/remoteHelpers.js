@@ -4,6 +4,7 @@ const helpers = require('./helpers');
 const formidable = require('formidable');
 const apiError = require('./apiError');
 const path = require('path');
+const _ = require('lodash');
 
 /**
  * Offer a file to be downloaded
@@ -99,6 +100,10 @@ function exportFilteredModelsList(
     // by default before export is a no-op function that returns a promise
     beforeExport = noOp;
   }
+
+  // retrieve keys for expandable properties
+  const modelPropertiesExpandOnFlatFilesKeys = modelPropertiesExpandOnFlatFiles ?
+    Object.keys(modelPropertiesExpandOnFlatFiles) : [];
 
   // find results
   Model.rawFind(query)
@@ -211,6 +216,44 @@ function exportFilteredModelsList(
           .then(function (results) {
             // execute before export hook
             return beforeExport(results, dictionary);
+          })
+          .then(function (results) {
+            // expand sub items for non-flat files
+            if (isJSONXMLExport) {
+              modelPropertiesExpandOnFlatFilesKeys.forEach((propertyName) => {
+                // map properties to labels
+                const propertyMap = {};
+                (modelPropertiesExpandOnFlatFiles[propertyName] || []).forEach((headerData) => {
+                  propertyMap[headerData.expandKey ? headerData.expandKey : headerData.id] = headerData.header;
+                });
+
+                // convert record data
+                (results || []).forEach((record) => {
+                  // for now we handle only object expanses ( e.g. questionnaireAnswers ) and not array of objects
+                  if (
+                    record[propertyName] &&
+                    _.isObject(record[propertyName]) &&
+                    !_.isEmpty(record[propertyName])
+                  ) {
+                    // construct the new object
+                    const newValue = {};
+                    Object.keys(record[propertyName]).forEach((childPropName) => {
+                      if (propertyMap[childPropName] !== undefined) {
+                        newValue[propertyMap[childPropName]] = record[propertyName][childPropName];
+                      } else {
+                        newValue[childPropName] = record[propertyName][childPropName];
+                      }
+                    });
+
+                    // replace the old object
+                    record[propertyName] = newValue;
+                  }
+                });
+              });
+            }
+
+            // finished
+            return results;
           })
           .then(function (results) {
             // if a there are fields to be anonymized
