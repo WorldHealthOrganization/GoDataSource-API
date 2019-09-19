@@ -4570,7 +4570,8 @@ module.exports = function (Outbreak) {
                   createErrors.push({
                     message: `Failed to import lab result ${index + 1}`,
                     error: error,
-                    recordNo: index + 1
+                    recordNo: index + 1,
+                    data: labResult
                   });
                   callback(null, null);
                 });
@@ -4675,7 +4676,8 @@ module.exports = function (Outbreak) {
                   createErrors.push({
                     message: `Failed to import case ${index + 1}`,
                     error: error,
-                    recordNo: index + 1
+                    recordNo: index + 1,
+                    data: caseData
                   });
                   callback(null, null);
                 });
@@ -4813,7 +4815,11 @@ module.exports = function (Outbreak) {
                   createErrors.push({
                     message: `Failed to import contact ${index + 1}`,
                     error: error,
-                    recordNo: index + 1
+                    recordNo: index + 1,
+                    data: {
+                      contact: contactData,
+                      relationship: relationshipData
+                    }
                   });
                   callback(null, null);
                 });
@@ -6004,7 +6010,8 @@ module.exports = function (Outbreak) {
                   syncErrors.push({
                     message: `Failed to import reference data ${index + 1}`,
                     error: error,
-                    recordNo: index + 1
+                    recordNo: index + 1,
+                    data: referenceDataItem
                   });
                   callback(null, null);
                 });

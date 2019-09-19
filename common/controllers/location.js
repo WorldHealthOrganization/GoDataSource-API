@@ -157,7 +157,8 @@ module.exports = function (Location) {
                   syncErrors.push({
                     message: `Failed to import location data ${index + 1}`,
                     error: error,
-                    recordNo: index + 1
+                    recordNo: index + 1,
+                    data: locationItem
                   });
                   callback(null, null);
                 });
