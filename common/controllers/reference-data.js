@@ -163,7 +163,10 @@ module.exports = function (ReferenceData) {
                     message: `Failed to import reference data ${index + 1}`,
                     error: error,
                     recordNo: index + 1,
-                    data: referenceDataItem
+                    data: {
+                      file: rawReferenceDataList[index],
+                      save: referenceDataItem
+                    }
                   });
                   callback(null, null);
                 });

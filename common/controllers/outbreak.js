@@ -4571,7 +4571,10 @@ module.exports = function (Outbreak) {
                     message: `Failed to import lab result ${index + 1}`,
                     error: error,
                     recordNo: index + 1,
-                    data: labResult
+                    data: {
+                      file: rawlabResultsList[index],
+                      save: labResult
+                    }
                   });
                   callback(null, null);
                 });
@@ -4677,7 +4680,10 @@ module.exports = function (Outbreak) {
                     message: `Failed to import case ${index + 1}`,
                     error: error,
                     recordNo: index + 1,
-                    data: caseData
+                    data: {
+                      file: rawCasesList[index],
+                      save: caseData
+                    }
                   });
                   callback(null, null);
                 });
@@ -4817,8 +4823,11 @@ module.exports = function (Outbreak) {
                     error: error,
                     recordNo: index + 1,
                     data: {
-                      contact: contactData,
-                      relationship: relationshipData
+                      file: rawContactList[index],
+                      save: {
+                        contact: contactData,
+                        relationship: relationshipData
+                      }
                     }
                   });
                   callback(null, null);
@@ -6011,7 +6020,10 @@ module.exports = function (Outbreak) {
                     message: `Failed to import reference data ${index + 1}`,
                     error: error,
                     recordNo: index + 1,
-                    data: referenceDataItem
+                    data: {
+                      file: rawReferenceDataList[index],
+                      save: referenceDataItem
+                    }
                   });
                   callback(null, null);
                 });

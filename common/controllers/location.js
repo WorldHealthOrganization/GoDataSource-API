@@ -158,7 +158,10 @@ module.exports = function (Location) {
                     message: `Failed to import location data ${index + 1}`,
                     error: error,
                     recordNo: index + 1,
-                    data: locationItem
+                    data: {
+                      file: rawLocationsList[index],
+                      save: locationItem
+                    }
                   });
                   callback(null, null);
                 });
