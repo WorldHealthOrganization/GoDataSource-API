@@ -699,4 +699,75 @@ module.exports = function (Contact) {
         return Object.assign(filter, {where: contactQuery});
       });
   };
+
+  /**
+   * Archive contact follow-up status changes, when detected
+   * @param context
+   */
+  function archiveFollowUpStatusChanges(context) {
+    // get data from context
+    const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
+
+    // get data source
+    const dataSource = data.source.all;
+
+    // if we don't have followUp data then there is no point in continuing
+    if (!dataSource.followUp) {
+      return;
+    }
+
+    // start with unknown last followUp status
+    let lastKnownFollowStatus;
+
+    // if there is a non-empty followUp status history
+    if (Array.isArray(dataSource.followUpHistory) && dataSource.followUpHistory.length) {
+      // find the last known contact followUp status
+      lastKnownFollowStatus = dataSource.followUpHistory.find((followUpItem) => followUpItem.endDate == null);
+    }
+
+    // if the last known followUp status was found
+    if (lastKnownFollowStatus) {
+      // if it's different than current followUp status
+      if (dataSource.followUp.status !== lastKnownFollowStatus.status) {
+        // end last known followUp status entry
+        lastKnownFollowStatus.endDate = new Date();
+
+        // add the new followUp status in the history
+        dataSource.followUpHistory.push({
+          status: dataSource.followUp.status,
+          startDate: lastKnownFollowStatus.endDate
+        });
+      }
+
+      // update followUp status history
+      data.target.followUpHistory = dataSource.followUpHistory;
+
+    } else {
+      // no last known followUp status, get existing followUp status history (if any)
+      data.target.followUpHistory = dataSource.followUpHistory;
+
+      // if there is no followUp status history
+      if (!Array.isArray(data.target.followUpHistory)) {
+        // start it now
+        data.target.followUpHistory = [];
+      }
+
+      // add current followUp status to history
+      data.target.followUpHistory.push({
+        status: dataSource.followUp.status,
+        startDate: new Date()
+      });
+    }
+  }
+
+  /**
+   * Before save hooks
+   */
+  Contact.observe('before save', function (context, next) {
+    // archive contact follow-up status
+    archiveFollowUpStatusChanges(context);
+
+    // finished
+    next();
+  });
 };

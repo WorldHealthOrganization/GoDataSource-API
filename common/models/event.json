@@ -85,6 +85,7 @@
     "dateBecomeCase",
     "dateRanges",
     "classificationHistory",
+    "followUpHistory",
     "dateOfOutcome",
     "dateOfBurial",
     "dateBecomeContact",

@@ -276,6 +276,10 @@
     "dataSource": null,
     "public": false
   },
+  "followUpHistoryHistoryItem": {
+    "dataSource": null,
+    "public": false
+  },
   "fileAttachment": {
     "dataSource": "mongoDb",
     "public": false

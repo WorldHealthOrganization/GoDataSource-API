@@ -154,6 +154,7 @@ function run(callback) {
     followUp: undefined,
     riskReason: undefined,
     isDateOfReportingApproximate: false,
+    followUpHistory: []
   };
 
   // default event template
