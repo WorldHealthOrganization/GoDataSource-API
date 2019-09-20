@@ -134,6 +134,7 @@
     "description",
     "dateBecomeContact",
     "followUp",
+    "followUpHistory",
     "date"
   ],
   "validations": [],

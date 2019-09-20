@@ -105,6 +105,13 @@
       "readOnly": true,
       "description": "Case property; Defining it here as on sync we use the person model and not the case model"
     },
+    "followUpHistory": {
+      "type": [
+        "followUpHistoryHistoryItem"
+      ],
+      "readOnly": true,
+      "description": "Contact property; Defining it here as on sync we use the person model and not the contact model"
+    },
     "dateOfOutcome": {
       "type": "date",
       "description": "Case/Contact property; Defining it here as on sync we use the person model and not the case/contact model"

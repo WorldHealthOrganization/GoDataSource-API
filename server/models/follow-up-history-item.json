@@ -1,0 +1,28 @@
+{
+  "name": "followUpHistoryHistoryItem",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "status": {
+      "type": "string",
+      "required": true
+    },
+    "startDate": {
+      "type": "date",
+      "required": true
+    },
+    "endDate": {
+      "type": "date"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

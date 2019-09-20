@@ -1166,7 +1166,8 @@ module.exports = function (Outbreak) {
       'riskLevel',
       'riskReason',
       'wasCase',
-      'dateBecomeContact'
+      'dateBecomeContact',
+      'followUpHistory'
     ];
     const caseProps = [
       'dateOfInfection',
@@ -1186,6 +1187,12 @@ module.exports = function (Outbreak) {
       'dateOfReporting',
       'isDateOfReportingApproximate'
     ];
+
+    // the following contact props are array and should be treated differently
+    const contactArrayProps = [
+      'followUpHistory'
+    ];
+
     // the following case props are array and should be treated differently
     const caseArrayProps = [
       'dateRanges',
@@ -1225,6 +1232,18 @@ module.exports = function (Outbreak) {
     // merge all case array props
     if (type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
       caseArrayProps.forEach((arrayProp) => {
+        baseProps[arrayProp] = baseProps[arrayProp] || [];
+        baseProps[arrayProp] = baseProps[arrayProp].concat(...
+          people
+            .filter((item) => item[arrayProp])
+            .map((item) => item[arrayProp])
+        );
+      });
+    }
+
+    // merge all contact array props
+    if (type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+      contactArrayProps.forEach((arrayProp) => {
         baseProps[arrayProp] = baseProps[arrayProp] || [];
         baseProps[arrayProp] = baseProps[arrayProp].concat(...
           people
