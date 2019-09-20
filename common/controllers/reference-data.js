@@ -162,7 +162,11 @@ module.exports = function (ReferenceData) {
                   syncErrors.push({
                     message: `Failed to import reference data ${index + 1}`,
                     error: error,
-                    recordNo: index + 1
+                    recordNo: index + 1,
+                    data: {
+                      file: rawReferenceDataList[index],
+                      save: referenceDataItem
+                    }
                   });
                   callback(null, null);
                 });

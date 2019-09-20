@@ -4570,7 +4570,11 @@ module.exports = function (Outbreak) {
                   createErrors.push({
                     message: `Failed to import lab result ${index + 1}`,
                     error: error,
-                    recordNo: index + 1
+                    recordNo: index + 1,
+                    data: {
+                      file: rawlabResultsList[index],
+                      save: labResult
+                    }
                   });
                   callback(null, null);
                 });
@@ -4675,7 +4679,11 @@ module.exports = function (Outbreak) {
                   createErrors.push({
                     message: `Failed to import case ${index + 1}`,
                     error: error,
-                    recordNo: index + 1
+                    recordNo: index + 1,
+                    data: {
+                      file: rawCasesList[index],
+                      save: caseData
+                    }
                   });
                   callback(null, null);
                 });
@@ -4813,7 +4821,14 @@ module.exports = function (Outbreak) {
                   createErrors.push({
                     message: `Failed to import contact ${index + 1}`,
                     error: error,
-                    recordNo: index + 1
+                    recordNo: index + 1,
+                    data: {
+                      file: rawContactList[index],
+                      save: {
+                        contact: contactData,
+                        relationship: relationshipData
+                      }
+                    }
                   });
                   callback(null, null);
                 });
@@ -6004,7 +6019,11 @@ module.exports = function (Outbreak) {
                   syncErrors.push({
                     message: `Failed to import reference data ${index + 1}`,
                     error: error,
-                    recordNo: index + 1
+                    recordNo: index + 1,
+                    data: {
+                      file: rawReferenceDataList[index],
+                      save: referenceDataItem
+                    }
                   });
                   callback(null, null);
                 });
