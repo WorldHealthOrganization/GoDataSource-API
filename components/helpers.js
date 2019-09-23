@@ -1336,9 +1336,10 @@ const getSourceAndTargetFromModelHookContext = function (context) {
  * @param idHeaderPrefix
  * @param dictionary
  * @param useVariable
+ * @param maxElements
  * @returns {[{id, header}]}
  */
-const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary, useVariable) => {
+const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary, useVariable, maxElements) => {
   // no questions
   if (_.isEmpty(questionnaire)) {
     return [];
@@ -1358,27 +1359,57 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
     }
     // add question
     if (!_.isEmpty(question.variable)) {
+      const isMultiDate = question.multiAnswer;
+
       // can have multiple answers ?
       if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
         // add a column for each answer
         if (!_.isEmpty(question.answers)) {
-          _.each(question.answers, (answer, answerIndex) => {
-            result.push({
-              expandKey: question.variable,
-              expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
-              id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable + ' ' + (answerIndex + 1),
-              header: (useVariable ? question.variable : dictionary.getTranslation(question.text)) + ' ' + (answerIndex + 1)
-            });
-          });
+          if (isMultiDate) {
+            for (let i = 0; i < maxElements; i++) {
+              let elIndex = i + 1;
+              _.each(question.answers, (answer, answerIndex) => {
+                result.push({
+                  expandKey: question.variable,
+                  expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
+                  id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${elIndex} value ${(answerIndex + 1)}`,
+                  header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} ${(answerIndex + 1)} [M ${elIndex}]`
+                });
+              });
+              result.push({
+                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${elIndex} date`,
+                header: useVariable ? question.variable : `${dictionary.getTranslation(question.text)} ${dictionary.getTranslation('LNG_GLOBAL_FILTERS_FIELD_LABEL_DATE')} [M ${elIndex}]`
+              });
+            }
+          }
+
         }
       } else {
-        // add parent question
-        result.push({
-          expandKey: question.variable,
-          expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
-          id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable,
-          header: useVariable ? question.variable : dictionary.getTranslation(question.text)
-        });
+        if (isMultiDate) {
+          for (let i = 0; i < maxElements; i++) {
+            let answerIndex = i + 1;
+            result.push(
+              {
+                expandKey: question.variable,
+                expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
+                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${answerIndex} value`,
+                header: useVariable ? question.variable : `${dictionary.getTranslation(question.text)} [M ${answerIndex}]`
+              },
+              {
+                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${answerIndex} date`,
+                header: useVariable ? question.variable : `${dictionary.getTranslation(question.text)} ${dictionary.getTranslation('LNG_GLOBAL_FILTERS_FIELD_LABEL_DATE')} [M ${answerIndex}]`
+              }
+            );
+          }
+        } else {
+          // add parent question
+          result.push({
+            expandKey: question.variable,
+            expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
+            id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable + '1 value',
+            header: useVariable ? question.variable : dictionary.getTranslation(question.text)
+          });
+        }
       }
 
       // add children questions

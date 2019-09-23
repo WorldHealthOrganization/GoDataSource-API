@@ -114,6 +114,26 @@ function exportFilteredModelsList(
         helpers.covertAddressesGeoPointToLoopbackFormat(result);
       });
 
+      if (!modelPropertiesExpandOnFlatFiles.questionnaireAnswers) {
+        // get maximum number of multi date answers
+        const answersLengths = [];
+        results.forEach(record => {
+          for (let q in record.questionnaireAnswers) {
+            answersLengths.push(record.questionnaireAnswers[q].length);
+          }
+        });
+
+        const maxMultiDateAnswers = Math.max(...answersLengths);
+
+        modelPropertiesExpandOnFlatFiles.questionnaireAnswers = helpers.retrieveQuestionnaireVariables(
+          options.questionnaire,
+          'questionnaireAnswers',
+          options.dictionary,
+          options.useQuestionVariable,
+          maxMultiDateAnswers
+        );
+      }
+
       // by default export CSV
       if (!exportType) {
         exportType = 'json';

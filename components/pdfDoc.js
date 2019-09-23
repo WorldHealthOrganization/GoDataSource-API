@@ -410,118 +410,226 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
       // display type
       const displayVertical = item.answersDisplay === 'LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL';
 
-      // if this is a markup question, just display the text
-      if (item.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP') {
-        doc.moveDown().text(`${item.question}`, questionMargin);
-        return;
-      }
-
       // question test
       doc.moveDown().text(`${item.order}. ${item.question}`, questionMargin);
 
-      // answers type are written differently into the doc
-      switch (item.answerType) {
-        default:
-          doc.moveDown(0.5);
-          if (withData) {
-            if (item.value) {
-              doc.text('Answer: ' + item.value, questionMargin);
-            } else {
-              // in case the user did not answer this questions, we prevent printing 'undefined'
-              doc.text('Answer: ', questionMargin);
-            }
-          } else {
-            doc.text(`Answer: ${'_'.repeat(options.underlineCount)}`, questionMargin);
-          }
-          doc.moveDown(0.5);
-          break;
-        // File uploads are not handled when printing a pdf
-        case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD':
-          break;
-        case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER':
-        case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS':
-          // flag that indicates this is the first answer
-          let firstAnswer = true;
-          const getRectY = function (doc, displayVertical) {
-            return displayVertical ? doc.y - 5 : doc.y;
-          };
+      if (item.multiAnswers) {
+        item.multiAnswers.forEach((multiAnswer, index) => {
+          const answerIndex = index + 1;
 
-          let answerXMargin = questionMargin;
+          // answers type are written differently into the doc
+          switch (item.answerType) {
+            default:
+              doc.moveDown(0.5);
+              if (withData) {
+                if (multiAnswer.value) {
+                  doc.text(`Answer ${answerIndex} (${multiAnswer.date}): ${multiAnswer.value}`, questionMargin);
+                } else {
+                  // in case the user did not answer this questions, we prevent printing 'undefined'
+                  doc.text('Answer: ', questionMargin);
+                }
+              } else {
+                doc.text(`Answer: ${'_'.repeat(options.underlineCount)}`, questionMargin);
+              }
+              doc.moveDown(0.5);
+              break;
+            // File uploads are not handled when printing a pdf
+            case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD':
+              break;
+            case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER':
+            case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS':
+              // flag that indicates this is the first answer
+              let firstAnswer = true;
+              const getRectY = function (doc, displayVertical) {
+                return displayVertical ? doc.y - 5 : doc.y;
+              };
 
-          // answers of type checkbox should be moved on line below
-          // for text answers we use doc.text() that already moves one line below
-          if (displayVertical) {
-            doc.moveDown();
-          } else {
-            doc.moveDown(0.5);
-          }
+              let answerXMargin = questionMargin;
 
-          let horizontalAnswerX = doc.x;
-
-          item.answers.forEach((answer) => {
-            if (!firstAnswer) {
+              // answers of type checkbox should be moved on line below
+              // for text answers we use doc.text() that already moves one line below
               if (displayVertical) {
                 doc.moveDown();
               } else {
-                // horizontal gap between each answers
-                answerXMargin = horizontalAnswerX + 10;
+                doc.moveDown(0.5);
               }
-            }
 
-            let labelWidth = doc.widthOfString(answer.label);
+              let horizontalAnswerX = doc.x;
 
-            if (!displayVertical) {
-              const computedWidth = answerXMargin + labelWidth + 45;
-              // check that we don't reach the maximum width of the document
-              // otherwise pdfkit library just breaks when executing .text()
-              if (computedWidth > 500) {
-                answerXMargin = questionMargin;
-                doc.moveDown(1.5);
+              doc.text(`Answer ${answerIndex} (${multiAnswer.date})`, questionMargin);
+              doc.moveDown();
+
+              multiAnswer.answers.forEach(answer => {
+                if (!firstAnswer) {
+                  if (displayVertical) {
+                    doc.moveDown();
+                  } else {
+                    // horizontal gap between each answers
+                    answerXMargin = horizontalAnswerX + 10;
+                  }
+                }
+
+                let labelWidth = doc.widthOfString(answer.label);
+
+                if (!displayVertical) {
+                  const computedWidth = answerXMargin + labelWidth + 45;
+                  // check that we don't reach the maximum width of the document
+                  // otherwise pdfkit library just breaks when executing .text()
+                  if (computedWidth > 500) {
+                    answerXMargin = questionMargin;
+                    doc.moveDown(1.5);
+                  }
+                }
+
+                // calculate the checkbox height
+                const rectY = getRectY(doc, displayVertical);
+
+                // we need to reduce rectangle height to be on the same height as the text
+                if (withData && answer.selected) {
+                  doc
+                    .rect(answerXMargin, rectY, 10, 10)
+                    .moveTo(answerXMargin, rectY)
+                    .lineTo(answerXMargin + 10, rectY + 10)
+                    .moveTo(answerXMargin + 10, rectY)
+                    .lineTo(answerXMargin, rectY + 10)
+                    .stroke();
+                } else {
+                  doc.rect(answerXMargin, rectY, 10, 10).stroke();
+                }
+
+                doc.text(answer.label, answerXMargin + 15, rectY);
+                horizontalAnswerX = answerXMargin + labelWidth + 15;
+                doc.moveUp();
+
+                if (displayVertical) {
+                  doc.moveDown();
+                }
+
+                // handle additional questions
+                if (answer.additionalQuestions.length) {
+                  doc.moveDown(0.5);
+                  addQuestions(answer.additionalQuestions, questionMargin, level + 1);
+                }
+
+                // no longer first questions
+                firstAnswer = false;
+              });
+
+              // horizontal answers gap, after all the answers are displayed
+              if (!displayVertical) {
+                doc.moveDown();
+              } else {
+                doc.moveDown(0.5);
               }
-            }
 
-            // calculate the checkbox height
-            const rectY = getRectY(doc, displayVertical);
-
-            // we need to reduce rectangle height to be on the same height as the text
-            if (withData && answer.selected) {
-              doc
-                .rect(answerXMargin, rectY, 10, 10)
-                .moveTo(answerXMargin, rectY)
-                .lineTo(answerXMargin + 10, rectY + 10)
-                .moveTo(answerXMargin + 10, rectY)
-                .lineTo(answerXMargin, rectY + 10)
-                .stroke();
+              break;
+          }
+        });
+      } else {
+        // answers type are written differently into the doc
+        switch (item.answerType) {
+          default:
+            doc.moveDown(0.5);
+            if (withData) {
+              if (item.value) {
+                doc.text('Answer: ' + item.value, questionMargin);
+              } else {
+                // in case the user did not answer this questions, we prevent printing 'undefined'
+                doc.text('Answer: ', questionMargin);
+              }
             } else {
-              doc.rect(answerXMargin, rectY, 10, 10).stroke();
+              doc.text(`Answer: ${'_'.repeat(options.underlineCount)}`, questionMargin);
             }
+            doc.moveDown(0.5);
+            break;
+          // File uploads are not handled when printing a pdf
+          case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD':
+            break;
+          case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER':
+          case 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS':
+            // flag that indicates this is the first answer
+            let firstAnswer = true;
+            const getRectY = function (doc, displayVertical) {
+              return displayVertical ? doc.y - 5 : doc.y;
+            };
 
-            doc.text(answer.label, answerXMargin + 15, rectY);
-            horizontalAnswerX = answerXMargin + labelWidth + 15;
-            doc.moveUp();
+            let answerXMargin = questionMargin;
 
+            // answers of type checkbox should be moved on line below
+            // for text answers we use doc.text() that already moves one line below
             if (displayVertical) {
               doc.moveDown();
-            }
-
-            // handle additional questions
-            if (answer.additionalQuestions.length) {
+            } else {
               doc.moveDown(0.5);
-              addQuestions(answer.additionalQuestions, questionMargin, level + 1);
             }
 
-            // no longer first questions
-            firstAnswer = false;
-          });
+            let horizontalAnswerX = doc.x;
 
-          // horizontal answers gap, after all the answers are displayed
-          if (!displayVertical) {
-            doc.moveDown();
-          } else {
-            doc.moveDown(0.5);
-          }
+            item.answers.forEach((answer) => {
+              if (!firstAnswer) {
+                if (displayVertical) {
+                  doc.moveDown();
+                } else {
+                  // horizontal gap between each answers
+                  answerXMargin = horizontalAnswerX + 10;
+                }
+              }
 
-          break;
+              let labelWidth = doc.widthOfString(answer.label);
+
+              if (!displayVertical) {
+                const computedWidth = answerXMargin + labelWidth + 45;
+                // check that we don't reach the maximum width of the document
+                // otherwise pdfkit library just breaks when executing .text()
+                if (computedWidth > 500) {
+                  answerXMargin = questionMargin;
+                  doc.moveDown(1.5);
+                }
+              }
+
+              // calculate the checkbox height
+              const rectY = getRectY(doc, displayVertical);
+
+              // we need to reduce rectangle height to be on the same height as the text
+              if (withData && answer.selected) {
+                doc
+                  .rect(answerXMargin, rectY, 10, 10)
+                  .moveTo(answerXMargin, rectY)
+                  .lineTo(answerXMargin + 10, rectY + 10)
+                  .moveTo(answerXMargin + 10, rectY)
+                  .lineTo(answerXMargin, rectY + 10)
+                  .stroke();
+              } else {
+                doc.rect(answerXMargin, rectY, 10, 10).stroke();
+              }
+
+              doc.text(answer.label, answerXMargin + 15, rectY);
+              horizontalAnswerX = answerXMargin + labelWidth + 15;
+              doc.moveUp();
+
+              if (displayVertical) {
+                doc.moveDown();
+              }
+
+              // handle additional questions
+              if (answer.additionalQuestions.length) {
+                doc.moveDown(0.5);
+                addQuestions(answer.additionalQuestions, questionMargin, level + 1);
+              }
+
+              // no longer first questions
+              firstAnswer = false;
+            });
+
+            // horizontal answers gap, after all the answers are displayed
+            if (!displayVertical) {
+              doc.moveDown();
+            } else {
+              doc.moveDown(0.5);
+            }
+
+            break;
+        }
       }
     });
   })(questions, false, 0);
