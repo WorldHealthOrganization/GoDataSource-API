@@ -7817,7 +7817,7 @@ module.exports = function (Outbreak) {
 
         options.questionnaire = self.contactFollowUpTemplate;
         options.dictionary = dictionary;
-        options.useQuestionVariable = filter.useQuestionVariable;
+        options.useQuestionVariable = useQuestionVariable;
 
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
@@ -8976,7 +8976,7 @@ module.exports = function (Outbreak) {
 
         options.questionnaire = self.caseInvestigationTemplate;
         options.dictionary = dictionary;
-        options.useQuestionVariable = filter.useQuestionVariable;
+        options.useQuestionVariable = useQuestionVariable;
 
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
