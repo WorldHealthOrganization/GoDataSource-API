@@ -1365,7 +1365,7 @@ module.exports = function (Person) {
         // determine center name used for determining same centers
         const centerNameToCompareValue = (centerName) => {
           return centerName ?
-            centerName.trim().toLowerCase().replace(/\s\s+/g, ' ') :
+            centerName.trim().toLowerCase().replace(/[^a-z0-9\s]/gi, '').replace(/\s\s+/g, ' ') :
             centerName;
         };
 
