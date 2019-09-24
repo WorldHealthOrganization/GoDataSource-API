@@ -1393,11 +1393,11 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
                 expandKey: question.variable,
                 expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
                 id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${answerIndex} value`,
-                header: useVariable ? question.variable : `${dictionary.getTranslation(question.text)} [M ${answerIndex}]`
+                header: useVariable ? question.variable : `${dictionary.getTranslation(question.text)} [MV ${answerIndex}]`
               },
               {
                 id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${answerIndex} date`,
-                header: useVariable ? question.variable : `${dictionary.getTranslation(question.text)} ${dictionary.getTranslation('LNG_GLOBAL_FILTERS_FIELD_LABEL_DATE')} [M ${answerIndex}]`
+                header: useVariable ? question.variable : `${dictionary.getTranslation(question.text)} [MD ${answerIndex}]`
               }
             );
           }

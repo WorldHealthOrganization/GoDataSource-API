@@ -101,9 +101,7 @@ function exportFilteredModelsList(
     beforeExport = noOp;
   }
 
-  // retrieve keys for expandable properties
-  const modelPropertiesExpandOnFlatFilesKeys = modelPropertiesExpandOnFlatFiles ?
-    Object.keys(modelPropertiesExpandOnFlatFiles) : [];
+  let modelPropertiesExpandOnFlatFilesKeys = [];
 
   // find results
   Model.rawFind(query)
@@ -133,6 +131,10 @@ function exportFilteredModelsList(
           maxMultiDateAnswers
         );
       }
+
+      // retrieve keys for expandable properties
+      const modelPropertiesExpandOnFlatFilesKeys = modelPropertiesExpandOnFlatFiles ?
+        Object.keys(modelPropertiesExpandOnFlatFiles) : [];
 
       // by default export CSV
       if (!exportType) {

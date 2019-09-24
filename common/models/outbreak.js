@@ -1459,7 +1459,7 @@ module.exports = function (Outbreak) {
             clonedQ.multiAnswerDate = answer.date;
             mapStandardAnswerToQuestion(answers, answer, clonedQ);
             question.multiAnswers.push({
-              date: answer.date,
+              date: genericHelpers.getDate(answer.date).format('YYYY-MM-DD'),
               answers: clonedQ.answers,
               value: clonedQ.value
             });
