@@ -133,7 +133,7 @@ function exportFilteredModelsList(
       }
 
       // retrieve keys for expandable properties
-      const modelPropertiesExpandOnFlatFilesKeys = modelPropertiesExpandOnFlatFiles ?
+      modelPropertiesExpandOnFlatFilesKeys = modelPropertiesExpandOnFlatFiles ?
         Object.keys(modelPropertiesExpandOnFlatFiles) : [];
 
       // by default export CSV
