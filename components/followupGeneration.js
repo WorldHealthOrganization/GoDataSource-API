@@ -227,32 +227,27 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     // number of follow ups to be generated per day
     let numberOfFollowUpsPerDay = freqPerDay;
 
+    // ids to delete for the current date
+    let followUpIdsToDeleteForDate = [];
+
     // get list of follow ups that are on the same day as the day we want to generate
     let followUpsInThisDay = contact.followUpsList.filter((followUp) => Helpers.getDate(followUp.date).isSame(followUpDate, 'd'));
     let followUpsInThisDayCount = followUpsInThisDay.length;
 
-    // if there are follow ups on the same day and day is in the future
-    // and frequency per day is less than the count of follow ups in that day
-    // delete follow ups until the length is the same as the frequency
-    if (followUpDate.isAfter(Helpers.getDateEndOfDay())) {
-      // get number of follow ups that should be deleted
-      let dustCount = followUpsInThisDayCount - freqPerDay;
-      if (dustCount > 0) {
-        followUpsIdsToDelete.push(...followUpsInThisDay.splice(0, dustCount).map((f) => f.id));
-        // number of follow ups exceeds the frequency per day
-        // we no longer need to generate any follow ups on this day
-        numberOfFollowUpsPerDay = 0;
-      } else {
-        // doing this so we can covert negative to positive
-        // when frequency per day is bigger than number of follow ups
-        numberOfFollowUpsPerDay = Math.abs(dustCount);
-      }
-    } else {
-      // otherwise if the day is in the past, do not delete any follow ups
-      // just generate until the limit per day is reached
-      // if the result of the operation below is 0 or negative, nothing is generated (limit is reached already)
-      numberOfFollowUpsPerDay -= followUpsInThisDayCount;
+    // do not generate over the daily quota
+    numberOfFollowUpsPerDay -= followUpsInThisDayCount;
+
+    // for today and in the future,
+    // recreate the follow ups that are not performed
+    // and generate follow ups until the quota is reached
+    if (followUpDate.isSameOrAfter(Helpers.getDateEndOfDay())) {
+      followUpIdsToDeleteForDate.push(followUpsInThisDay
+        .filter(f => f.statusId === 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED')
+      );
     }
+
+    // also create follow ups for deleted follow ups
+    numberOfFollowUpsPerDay += followUpIdsToDeleteForDate.length;
 
     for (let i = 0; i < numberOfFollowUpsPerDay; i++) {
       let followUp = _createFollowUpEntry({
@@ -268,6 +263,9 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
 
       followUpsToAdd.push(followUp);
     }
+
+    // add ids to be deleted to the total pool of ids
+    followUpsIdsToDelete.push(...followUpIdsToDeleteForDate);
   }
 
   return {
@@ -284,7 +282,7 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
  */
 module.exports.createPromiseQueue = function (reqOpts) {
   let queue = new PromiseQueue({
-    autoStart: true,
+    autoStart: false,
     concurrency: 10 // we do 10 parallel operation across the entire app
   });
 
