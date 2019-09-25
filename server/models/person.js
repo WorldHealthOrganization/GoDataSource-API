@@ -1362,6 +1362,13 @@ module.exports = function (Person) {
           }
         };
 
+        // determine center name used for determining same centers
+        const centerNameToCompareValue = (centerName) => {
+          return centerName ?
+            centerName.trim().toLowerCase().replace(/[^a-z0-9\s]/gi, '').replace(/\s\s+/g, ' ') :
+            centerName;
+        };
+
         // sanitize records & determine other things :)
         const response = {
           personsMap: {},
@@ -1517,7 +1524,7 @@ module.exports = function (Person) {
               }
               const centerName = dateRange.centerName ? dateRange.centerName.trim() : null;
               if (centerName) {
-                recordData.centerNames[_.camelCase(centerName)] = centerName;
+                recordData.centerNames[centerNameToCompareValue(centerName)] = centerName;
               }
 
               // since we have either start date or end date we can use it for the graph
@@ -1590,7 +1597,7 @@ module.exports = function (Person) {
           recordData.centerNames = recordData.centerNames ?
             Object.values(recordData.centerNames).sort() :
             [];
-          recordData.centerNamesSortBy = recordData.centerNames.map((item) => _.camelCase(item)).join();
+          recordData.centerNamesSortBy = recordData.centerNames.map((item) => centerNameToCompareValue(item)).join();
 
           // add response case / event
           delete recordData._id;
