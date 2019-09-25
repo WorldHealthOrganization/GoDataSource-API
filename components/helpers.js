@@ -1339,7 +1339,7 @@ const getSourceAndTargetFromModelHookContext = function (context) {
  * @param maxElements
  * @returns {[{id, header}]}
  */
-const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary, useVariable, maxElements) => {
+const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary, useVariable, maxElements, isNestedMultiDate) => {
   // no questions
   if (_.isEmpty(questionnaire)) {
     return [];
@@ -1359,7 +1359,7 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
     }
     // add question
     if (!_.isEmpty(question.variable)) {
-      const isMultiDate = question.multiAnswer;
+      const isMultiDate = question.multiAnswer || isNestedMultiDate;
 
       // can have multiple answers ?
       if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
@@ -1373,16 +1373,24 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
                   expandKey: question.variable,
                   expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
                   id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${elIndex} value ${(answerIndex + 1)}`,
-                  header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} ${(answerIndex + 1)} [M ${elIndex}]`
+                  header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} ${(answerIndex + 1)} [MV ${elIndex}]`
                 });
               });
               result.push({
                 id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${elIndex} date`,
-                header: useVariable ? question.variable : `${dictionary.getTranslation(question.text)} ${dictionary.getTranslation('LNG_GLOBAL_FILTERS_FIELD_LABEL_DATE')} [M ${elIndex}]`
+                header: useVariable ? question.variable : `${dictionary.getTranslation(question.text)} [MD ${elIndex}]`
               });
             }
+          } else {
+            _.each(question.answers, (answer, answerIndex) => {
+              result.push({
+                expandKey: question.variable,
+                expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
+                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} 1 value ${(answerIndex + 1)}`,
+                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} ${(answerIndex + 1)}`
+              });
+            });
           }
-
         }
       } else {
         if (isMultiDate) {
@@ -1406,7 +1414,7 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
           result.push({
             expandKey: question.variable,
             expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
-            id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable + '1 value',
+            id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable + ' 1 value',
             header: useVariable ? question.variable : dictionary.getTranslation(question.text)
           });
         }
@@ -1420,7 +1428,9 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
               answer.additionalQuestions,
               idHeaderPrefix,
               dictionary,
-              useVariable
+              useVariable,
+              maxElements,
+              isMultiDate
             ));
           }
         });
