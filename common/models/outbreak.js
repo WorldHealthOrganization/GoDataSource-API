@@ -1412,7 +1412,7 @@ module.exports = function (Outbreak) {
       qAnswer.length &&
       qAnswer[0].date) {
       // find the answer that matches the date the question has
-      qAnswer = qAnswer.find(a => a.date === question.multiAnswerDate);
+      qAnswer = qAnswer.find(a => genericHelpers.getDate(a.date).format('YYYY-MM-DD') === question.multiAnswerDate);
     } else {
       if (Array.isArray(qAnswer) && qAnswer.length) {
         qAnswer = qAnswer[0];
@@ -1456,10 +1456,10 @@ module.exports = function (Outbreak) {
           qAnswer.forEach(answer => {
             const clonedQ = _.cloneDeep(question);
             clonedQ.value = null;
-            clonedQ.multiAnswerDate = answer.date;
+            clonedQ.multiAnswerDate = genericHelpers.getDate(answer.date).format('YYYY-MM-DD');
             mapStandardAnswerToQuestion(answers, answer, clonedQ);
             question.multiAnswers.push({
-              date: genericHelpers.getDate(answer.date).format('YYYY-MM-DD'),
+              date: clonedQ.multiAnswerDate,
               answers: clonedQ.answers,
               value: clonedQ.value
             });
