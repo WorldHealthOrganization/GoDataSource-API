@@ -150,7 +150,8 @@ module.exports.getContactFollowups = function (startDate, endDate, contactIds) {
       projection: {
         _id: 1,
         date: 1,
-        personId: 1
+        personId: 1,
+        statusId: 1
       }
     })
     .then((followUps) => _.groupBy(followUps, (f) => f.personId));
@@ -241,8 +242,9 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     // recreate the follow ups that are not performed
     // and generate follow ups until the quota is reached
     if (followUpDate.isSameOrAfter(Helpers.getDateEndOfDay())) {
-      followUpIdsToDeleteForDate.push(followUpsInThisDay
+      followUpIdsToDeleteForDate.push(...followUpsInThisDay
         .filter(f => f.statusId === 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED')
+        .map(f => f.id)
       );
     }
 
@@ -282,7 +284,7 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
  */
 module.exports.createPromiseQueue = function (reqOpts) {
   let queue = new PromiseQueue({
-    autoStart: false,
+    autoStart: true,
     concurrency: 10 // we do 10 parallel operation across the entire app
   });
 
@@ -304,6 +306,9 @@ module.exports.createPromiseQueue = function (reqOpts) {
       .then(result => {
         count += result.insertedCount;
         return Promise.resolve();
+      })
+      .catch(err => {
+        let a = 1;
       });
   };
 
