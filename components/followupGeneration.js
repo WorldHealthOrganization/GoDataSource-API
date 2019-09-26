@@ -306,9 +306,6 @@ module.exports.createPromiseQueue = function (reqOpts) {
       .then(result => {
         count += result.insertedCount;
         return Promise.resolve();
-      })
-      .catch(err => {
-        let a = 1;
       });
   };
 
