@@ -1011,8 +1011,8 @@ module.exports = function (Outbreak) {
     }
 
     // parse start/end dates from request
-    let followupStartDate = moment(data.startDate);
-    let followupEndDate = moment(data.endDate);
+    let followupStartDate = genericHelpers.getDate(data.startDate);
+    let followupEndDate = genericHelpers.getDateEndOfDay(data.endDate);
 
     // sanity checks for dates
     let invalidFollowUpDates = [];

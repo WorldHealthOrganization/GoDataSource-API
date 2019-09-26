@@ -241,7 +241,7 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     // for today and in the future,
     // recreate the follow ups that are not performed
     // and generate follow ups until the quota is reached
-    if (followUpDate.isSameOrAfter(Helpers.getDateEndOfDay())) {
+    if (followUpDate.isSameOrAfter(Helpers.getDateEndOfDay(), 'day')) {
       followUpIdsToDeleteForDate.push(...followUpsInThisDay
         .filter(f => f.statusId === 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED')
         .map(f => f.id)
