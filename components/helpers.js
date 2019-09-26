@@ -1378,7 +1378,7 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
               });
               result.push({
                 id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${elIndex} date`,
-                header: useVariable ? question.variable : `${dictionary.getTranslation(question.text)} [MD ${elIndex}]`
+                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} [MD ${elIndex}]`
               });
             }
           } else {
@@ -1401,11 +1401,11 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
                 expandKey: question.variable,
                 expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
                 id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${answerIndex} value`,
-                header: useVariable ? question.variable : `${dictionary.getTranslation(question.text)} [MV ${answerIndex}]`
+                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} [MV ${answerIndex}]`
               },
               {
                 id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${answerIndex} date`,
-                header: useVariable ? question.variable : `${dictionary.getTranslation(question.text)} [MD ${answerIndex}]`
+                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} [MD ${answerIndex}]`
               }
             );
           }
