@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const templateParser = require('./../../components/templateParser');
+const helpers = require('./../../components/helpers');
 const _ = require('lodash');
 const async = require('async');
 const path = require('path');
@@ -42,9 +43,10 @@ function getModelNamesFor(modelName) {
  * @param headers
  * @param normalizedHeaders
  * @param languageDictionary
+ * @param dataset
  * @return {Promise.<T>}
  */
-function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, modelName, headers, normalizedHeaders, languageDictionary) {
+function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, modelName, headers, normalizedHeaders, languageDictionary, dataset) {
   // make sure we have a valid type
   importType = importType ? importType.toLowerCase() : '.json';
 
@@ -54,7 +56,8 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
     modelProperties: {
       [app.models[modelName].extendedForm.containerProperty]: {}
     },
-    modelPropertyValues: {}
+    modelPropertyValues: {},
+    modelArrayProperties: {}
   };
   // get outbreak
   return app.models.outbreak
@@ -117,6 +120,26 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
           }
         });
       }
+
+      // calculate maximum number of answers for each multi date question based on the dataset of records
+      let questionnaire = (function addTranslation(questions) {
+        return questions
+          .map(question => {
+            question = question.toJSON ? question.toJSON() : question;
+            question.translation = stripSpecialCharsToLowerCase(languageDictionary.getTranslation(question.text));
+
+            question.answers = question.answers || [];
+            question.answers = question.answers.map(answer => {
+              answer.additionalQuestions = addTranslation(answer.additionalQuestions);
+              return answer;
+            });
+
+            return question;
+          });
+      })(outbreak[app.models[modelName].extendedForm.template].filter(q => q.multiAnswer));
+
+      result.modelArrayProperties = helpers.getQuestionnaireMaxAnswersMap(questionnaire, dataset, true);
+
       return result;
     });
 }
@@ -349,7 +372,8 @@ module.exports = function (ImportableFile) {
           results[modelName] = {
             modelProperties: {},
             suggestedFieldMapping: {},
-            modelPropertyValues: {}
+            modelPropertyValues: {},
+            modelArrayProperties: {}
           };
 
           // if a valid model was provided, and file headers were found
@@ -474,14 +498,15 @@ module.exports = function (ImportableFile) {
               }
               // get mapping suggestions for extended form
               steps.push(function (callback) {
-                getMappingSuggestionsForModelExtendedForm(outbreakId, extension, modelName, result.fileHeaders, normalizedHeaders, languageDictionary)
+                getMappingSuggestionsForModelExtendedForm(outbreakId, extension, modelName, result.fileHeaders, normalizedHeaders, languageDictionary, dataSet)
                   .then(function (_result) {
                     // update result
                     results[modelName] = Object.assign(
                       {}, results[modelName],
                       {suggestedFieldMapping: Object.assign(results[modelName].suggestedFieldMapping, _result.suggestedFieldMapping)},
                       {modelProperties: Object.assign(results[modelName].modelProperties, _result.modelProperties)},
-                      {modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, _result.modelPropertyValues)}
+                      {modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, _result.modelPropertyValues)},
+                      {modelArrayProperties: Object.assign(results[modelName].modelArrayProperties, _result.modelArrayProperties)}
                     );
                     callback(null, results[modelName]);
                   })

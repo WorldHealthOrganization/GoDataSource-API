@@ -1336,10 +1336,11 @@ const getSourceAndTargetFromModelHookContext = function (context) {
  * @param idHeaderPrefix
  * @param dictionary
  * @param useVariable
- * @param maxElements
+ * @param multiDateLengthsMap
+ * @param isNestedMultiDate
  * @returns {[{id, header}]}
  */
-const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary, useVariable, maxElements, isNestedMultiDate) => {
+const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary, useVariable, multiDateLengthsMap, isNestedMultiDate) => {
   // no questions
   if (_.isEmpty(questionnaire)) {
     return [];
@@ -1360,13 +1361,14 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
     // add question
     if (!_.isEmpty(question.variable)) {
       const isMultiDate = question.multiAnswer || isNestedMultiDate;
+      multiDateLengthsMap[question.variable] = multiDateLengthsMap[question.variable] || 0;
 
       // can have multiple answers ?
       if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
         // add a column for each answer
         if (!_.isEmpty(question.answers)) {
           if (isMultiDate) {
-            for (let i = 0; i < maxElements; i++) {
+            for (let i = 0; i < multiDateLengthsMap[question.variable]; i++) {
               let elIndex = i + 1;
               _.each(question.answers, (answer, answerIndex) => {
                 result.push({
@@ -1394,7 +1396,7 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
         }
       } else {
         if (isMultiDate) {
-          for (let i = 0; i < maxElements; i++) {
+          for (let i = 0; i < multiDateLengthsMap[question.variable]; i++) {
             let answerIndex = i + 1;
             result.push(
               {
@@ -1429,7 +1431,7 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
               idHeaderPrefix,
               dictionary,
               useVariable,
-              maxElements,
+              multiDateLengthsMap,
               isMultiDate
             ));
           }
@@ -1928,6 +1930,43 @@ const convertQuestionnaireAnswersToNewFormat = function (answers) {
   return result;
 };
 
+const getQuestionnaireMaxAnswersMap = function (questionnaire, records, useTranslation) {
+  questionnaire = questionnaire.filter(q => q.multiAnswer);
+
+  // get a map of all the multi date answer questions and their nested questions
+  let multiDateQuestionsMap = {};
+
+  (function parseQuestion (questions = []) {
+    questions.forEach(question => {
+      multiDateQuestionsMap[question.variable] = [];
+      (question.answers || []).forEach(answer => parseQuestion(answer.additionalQuestions));
+    });
+  })(questionnaire);
+
+  // get maximum number of multi date answers
+  records.forEach(record => {
+    for (let q in record.questionnaireAnswers) {
+      if (record.questionnaireAnswers.hasOwnProperty(q)) {
+        if (multiDateQuestionsMap[q]) {
+          multiDateQuestionsMap[q].push(record.questionnaireAnswers[q].length);
+        }
+      }
+    }
+  });
+
+  for (let q in multiDateQuestionsMap) {
+    if (multiDateQuestionsMap.hasOwnProperty(q)) {
+      let max = 0;
+      if (multiDateQuestionsMap[q].length) {
+        max = Math.max(...multiDateQuestionsMap[q]);
+      }
+      multiDateQuestionsMap[q] = max;
+    }
+  }
+
+  return multiDateQuestionsMap;
+};
+
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1973,5 +2012,6 @@ module.exports = {
   convertQuestionnaireAnswersToNewFormat: convertQuestionnaireAnswersToNewFormat,
   retrieveQuestionnaireVariables: retrieveQuestionnaireVariables,
   getDateChunks: getDateChunks,
-  getDaysSince: getDaysSince
+  getDaysSince: getDaysSince,
+  getQuestionnaireMaxAnswersMap: getQuestionnaireMaxAnswersMap
 };
