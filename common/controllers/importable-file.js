@@ -137,8 +137,7 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
                 translation: languageDictionary.getTranslation(question.text)
               });
 
-              question.answers = question.answers || [];
-              question.answers = question.answers.map(answer => {
+              (question.answers || []).forEach(answer => {
                 addTranslation(answer.additionalQuestions || []);
               });
             });
@@ -161,7 +160,7 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
               }
             }
 
-            if (Array.isArray(r[propToChange])) {
+            if (Array.isArray(r[propToChange]) && r[propToChange].length) {
               r[propToChange] = r[propToChange][0];
             }
 
