@@ -1930,7 +1930,10 @@ const convertQuestionnaireAnswersToNewFormat = function (answers) {
   return result;
 };
 
-const getQuestionnaireMaxAnswersMap = function (questionnaire, records, useTranslation) {
+const getQuestionnaireMaxAnswersMap = function (questionnaire, records, translationOpts) {
+  translationOpts = translationOpts || {
+    questionToTranslationMap: []
+  };
   questionnaire = questionnaire.filter(q => q.multiAnswer);
 
   // get a map of all the multi date answer questions and their nested questions
@@ -1945,10 +1948,24 @@ const getQuestionnaireMaxAnswersMap = function (questionnaire, records, useTrans
 
   // get maximum number of multi date answers
   records.forEach(record => {
-    for (let q in record.questionnaireAnswers) {
-      if (record.questionnaireAnswers.hasOwnProperty(q)) {
+    let propToIterate = 'questionnaireAnswers';
+    if (!record[propToIterate]) {
+      if (record[translationOpts.containerPropTranslation]) {
+        propToIterate = translationOpts.containerPropTranslation;
+      } else {
+        // it doesn't have any questions, skip it
+        return;
+      }
+    }
+    for (let q in record[propToIterate]) {
+      if (record[propToIterate].hasOwnProperty(q)) {
         if (multiDateQuestionsMap[q]) {
-          multiDateQuestionsMap[q].push(record.questionnaireAnswers[q].length);
+          multiDateQuestionsMap[q].push(record[propToIterate][q].length);
+        } else {
+          const foundMap = translationOpts.questionToTranslationMap.find(qMap => qMap.translation === q);
+          if (foundMap) {
+            multiDateQuestionsMap[foundMap.variable].push(record[propToIterate][q].length);
+          }
         }
       }
     }

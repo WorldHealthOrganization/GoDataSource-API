@@ -46,7 +46,7 @@ function getModelNamesFor(modelName) {
  * @param dataset
  * @return {Promise.<T>}
  */
-function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, modelName, headers, normalizedHeaders, languageDictionary, dataset) {
+function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, modelName, headers, normalizedHeaders, languageDictionary, dataset, fieldsMap) {
   // make sure we have a valid type
   importType = importType ? importType.toLowerCase() : '.json';
 
@@ -121,24 +121,61 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
         });
       }
 
-      // calculate maximum number of answers for each multi date question based on the dataset of records
-      let questionnaire = (function addTranslation(questions) {
-        return questions
-          .map(question => {
-            question = question.toJSON ? question.toJSON() : question;
-            question.translation = stripSpecialCharsToLowerCase(languageDictionary.getTranslation(question.text));
+      if (['.json', '.xml'].includes(importType)) {
+        const multiDateQuestions = outbreak[app.models[modelName].extendedForm.template].filter(q => q.multiAnswer);
 
-            question.answers = question.answers || [];
-            question.answers = question.answers.map(answer => {
-              answer.additionalQuestions = addTranslation(answer.additionalQuestions);
-              return answer;
+        // create a question variable to translation map
+        // in order to be able to calculate maximum number of answers for datasets that use translations as field names
+        const questionToTranslationMap = [];
+        (function addTranslation(questions) {
+          return questions
+            .forEach(question => {
+              question = question.toJSON ? question.toJSON() : question;
+
+              questionToTranslationMap.push({
+                variable: question.variable,
+                translation: languageDictionary.getTranslation(question.text)
+              });
+
+              question.answers = question.answers || [];
+              question.answers = question.answers.map(answer => {
+                addTranslation(answer.additionalQuestions || []);
+              });
             });
+        })(multiDateQuestions);
 
-            return question;
-          });
-      })(outbreak[app.models[modelName].extendedForm.template].filter(q => q.multiAnswer));
+        // also get extended form container property translation
+        // as the JSON file might contain actual translation of the fields and we need to match it against the variable
+        const containerProp = app.models[modelName].extendedForm.containerProperty;
+        const containerPropTranslation = languageDictionary.getTranslation(fieldsMap[containerProp]);
 
-      result.modelArrayProperties = helpers.getQuestionnaireMaxAnswersMap(questionnaire, dataset, true);
+        const maxAnswersMap = helpers.getQuestionnaireMaxAnswersMap(
+          multiDateQuestions,
+          importType === '.xml' ? dataset.map(r => {
+            let propToChange = containerProp;
+            if (!r[containerProp]) {
+              if (!r[containerPropTranslation]) {
+                return r;
+              } else {
+                propToChange = containerPropTranslation;
+              }
+            }
+
+            if (Array.isArray(r[propToChange])) {
+              r[propToChange] = r[propToChange][0];
+            }
+
+            return r;
+          }) : dataset,
+          { containerPropTranslation, questionToTranslationMap }
+        );
+
+        for (let variable in maxAnswersMap) {
+          result.modelArrayProperties[`${containerProp}.${variable}`] = {
+            maxItems: maxAnswersMap[variable]
+          };
+        }
+      }
 
       return result;
     });
@@ -498,7 +535,7 @@ module.exports = function (ImportableFile) {
               }
               // get mapping suggestions for extended form
               steps.push(function (callback) {
-                getMappingSuggestionsForModelExtendedForm(outbreakId, extension, modelName, result.fileHeaders, normalizedHeaders, languageDictionary, dataSet)
+                getMappingSuggestionsForModelExtendedForm(outbreakId, extension, modelName, result.fileHeaders, normalizedHeaders, languageDictionary, dataSet, fieldLabelsMap)
                   .then(function (_result) {
                     // update result
                     results[modelName] = Object.assign(
