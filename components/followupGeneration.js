@@ -376,7 +376,7 @@ module.exports.createUpdateQueue = function (reqOpts) {
 
   const _remove = function (arr, ignore) {
     return () => App.models.followUp
-      .rawBulkDelete({
+      .rawBulkHardDelete({
         _id: {
           $in: arr
         }
