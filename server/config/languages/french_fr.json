@@ -426,7 +426,9 @@
       "LNG_COMMON_LABEL_NONE": "Aucun",
       "LNG_COMMON_LABEL_NO_RECORDS_SELECTED": "Rien de sélectionné",
       "LNG_COMMON_LABEL_RECORDS_NUMBER": "{{value}} RESULTS",
-      "LNG_COMMON_LABEL_YES": "Oui"
+      "LNG_COMMON_LABEL_YES": "Oui",
+      "LNG_COMMON_LABEL_EXPORT_USE_QUESTION_VARIABLE": "Use question variable",
+      "LNG_COMMON_LABEL_EXPORT_USE_QUESTION_VARIABLE_DESCRIPTION": "When checked, questionnaire column headers will use question variables instead of question text"
     },
     "uiGeneralActions": {
       "LNG_PAGE_ACTION_ADD_CONTACT": "Ajouter un contact",
@@ -469,7 +471,8 @@
       "LNG_COMMON_BUTTON_SHOW_FILTERS": "Afficher les filtres",
       "LNG_COMMON_BUTTON_HIDE_FILTERS": "Masquer les filtres",
       "LNG_COMMON_BUTTON_RESET_FILTERS": "Réinitialiser les filtres",
-      "LNG_COMMON_BUTTON_APPLY_FILTERS": "Appliquer des filtres"
+      "LNG_COMMON_BUTTON_APPLY_FILTERS": "Appliquer des filtres",
+      "LNG_COMMON_BUTTON_ADD_VACCINE": "Add another vaccine"
     },
     "uiDialogs": {
       "LNG_DIALOG_CONFIRM_ADD_USER_TEAM": "Cet utilisateur est déjà affecté aux équipes suivantes: {{teamNames}}. Êtes-vous sûr de vouloir l'ajouter à cette équipe?",
@@ -558,7 +561,10 @@
       "LNG_DIALOG_CONFIRM_REVERSE_PERSONS": "Are you sure you want to reverse persons?",
       "LNG_DIALOG_CONFIRM_COPY_QUESTIONNAIRE_DATE": "Are you sure you want to copy this date to all empty date fields ?",
       "LNG_DIALOG_CONFIRM_COPY_PARENT_ENTITY_ADDRESS": "Are you sure you want to copy address from the parent entity?",
-      "LNG_DIALOG_CONFIRM_DELETE_RELATIONSHIPS": "Are you sure you want to delete selected relationships?"
+      "LNG_DIALOG_CONFIRM_DELETE_RELATIONSHIPS": "Are you sure you want to delete selected relationships?",
+      "LNG_DIALOG_CONFIRM_CHANGE_CASE_EPI_CLASSIFICATION": "Are you sure you want to change '{{ caseName }}' classification to '{{ classification }}'?",
+      "LNG_DIALOG_CONFIRM_DELETE_VACCINE": "Are you sure you want to delete this vaccine?",
+      "LNG_DIALOG_CONFIRM_CHANGE_SOURCE": "Are you sure you want to set this entity as source for selected contacts?"
     },
     "uiLoginPage": {
       "LNG_PAGE_LOGIN_ACTION_LOGIN_BUTTON": "S'identifier",
@@ -736,7 +742,10 @@
       "LNG_ENTITY_FIELD_LABEL_RISK": "Risqué",
       "LNG_ENTITY_FIELD_LABEL_TYPE": "Type",
       "LNG_ENTITY_FIELD_LABEL_VISUAL_ID": "Cas / ID de contact",
-      "LNG_ENTITY_FIELD_LABEL_DATE_OF_ONSET": "Date of onset"
+      "LNG_ENTITY_FIELD_LABEL_DATE_OF_ONSET": "Date of onset",
+      "LNG_ENTITY_FIELD_LABEL_VACCINE": "Vaccine",
+      "LNG_ENTITY_FIELD_LABEL_VACCINE_DATE": "Vaccine date",
+      "LNG_ENTITY_FIELD_LABEL_VACCINE_STATUS": "Vaccine status"
     },
     "addressFields": {
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1": "Adresse 1",
@@ -862,7 +871,14 @@
       "LNG_CASE_FIELD_LABEL_VACCINE": "Vaccine",
       "LNG_CASE_FIELD_LABEL_VACCINE_DATE": "Vaccine Date",
       "LNG_CASE_FIELD_LABEL_VACCINE_STATUS": "Vaccine Status",
-      "LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS": "Pregnancy Status"
+      "LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS": "Pregnancy Status",
+      "LNG_CASE_FIELD_LABEL_PLACE_OF_BURIAL": "Place of burial",
+      "LNG_CASE_FIELD_LABEL_PLACE_OF_BURIAL_DESCRIPTION": "",
+      "LNG_CASE_FIELD_LABEL_BURIAL_PLACE_NAME_DESCRIPTION": "",
+      "LNG_CASE_FIELD_LABEL_ADDRESS_LOCATION": "Area",
+      "LNG_CASE_FIELD_LABEL_VACCINES_RECEIVED_DETAILS": "Vaccines received",
+      "LNG_CASE_FIELD_LABEL_DATE_OF_EXPOSURE": "Exposure Date ( {{exposureName}} )",
+      "LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS_DESCRIPTION": ""
     },
     "uiCasesListPage": {
       "LNG_PAGE_LIST_CASES_ACTION_ADD_LAB_RESULT": "Ajouter un résultat de laboratoire",
@@ -972,7 +988,10 @@
       "LNG_CASE_LAB_RESULT_FIELD_LABEL_UPDATED_BY": "Updated by",
       "LNG_CASE_LAB_RESULT_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
       "LNG_CASE_LAB_RESULT_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_UPDATED_AT_DESCRIPTION": "",
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CASE_CLASSIFICATION": "Classification",
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CASE_CLASSIFICATION_DESCRIPTION": "",
+      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CASE_CLASSIFICATION_INFO": "Current classification of the case:"
     },
     "uiCaseLabResultsListPage": {
       "LNG_PAGE_LIST_CASE_LAB_RESULTS_ACTION_ADD_LAB_RESULT": "Ajouter",
@@ -996,7 +1015,8 @@
       "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_GROUP_ACTION_SHARE_SELECTED_EXPOSURES": "Partager les expositions sélectionnées",
       "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_GROUP_ACTION_SHARE_SELECTED_CONTACTS": "Partager les contacts sélectionnés",
       "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_GROUP_ACTION_DELETE_SELECTED_RELATIONSHIPS": "Delete selected relationships",
-      "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_GROUP_ACTION_DELETE_SELECTED_RELATIONSHIPS_SUCCESS_MESSAGE": "Relationships deleted"
+      "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_GROUP_ACTION_DELETE_SELECTED_RELATIONSHIPS_SUCCESS_MESSAGE": "Relationships deleted",
+      "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_ACTION_CHANGE_SOURCE": "Change source for selected items"
     },
     "uiModifyEntityRelationshipPage": {
       "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_ACTION_MODIFY_RELATIONSHIP_SUCCESS_MESSAGE": "Relation modifiée",
@@ -1076,7 +1096,6 @@
       "LNG_CONTACT_FIELD_LABEL_OUTCOME_ID": "Résultat",
       "LNG_CONTACT_FIELD_LABEL_OUTCOME_ID_DESCRIPTION": "",
       "LNG_CONTACT_FIELD_LABEL_PHONE_NUMBER": "Téléphone",
-      "LNG_CONTACT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS": "Réponses au questionnaire",
       "LNG_CONTACT_FIELD_LABEL_RELATIONSHIP": "Relation",
       "LNG_CONTACT_FIELD_LABEL_RELATIONSHIP_PERSONS": "Des personnes",
       "LNG_CONTACT_FIELD_LABEL_RISK_LEVEL": "Niveau de risque",
@@ -1110,7 +1129,10 @@
       "LNG_CONTACT_FIELD_LABEL_VACCINE": "Vaccine",
       "LNG_CONTACT_FIELD_LABEL_VACCINE_DATE": "Vaccine Date",
       "LNG_CONTACT_FIELD_LABEL_VACCINE_STATUS": "Vaccine Status",
-      "LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS": "Pregnancy Status"
+      "LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS": "Pregnancy Status",
+      "LNG_CONTACT_FIELD_LABEL_DATE_OF_EXPOSURE": "Exposure Date ( {{exposureName}} )",
+      "LNG_CONTACT_FIELD_LABEL_VACCINES_RECEIVED_DETAILS": "Vaccines received",
+      "LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS_DESCRIPTION": ""
     },
     "uiContactsListPage": {
       "LNG_PAGE_LIST_CONTACTS_ACTION_ADD_FOLLOW_UP": "Ajouter un suivi",
@@ -1310,7 +1332,8 @@
       "LNG_PAGE_LIST_FOLLOW_UPS_EXPORT_CONTACT_BUTTON": "Contact",
       "LNG_PAGE_LIST_FOLLOW_UPS_TITLE": "Suivis",
       "LNG_PAGE_LIST_FOLLOW_UPS_FOR_RELATED_CONTACTS_TITLE": "Suivi des contacts associés",
-      "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_MODIFY_QUESTIONNAIRE": "Modification rapide, suivi"
+      "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_MODIFY_QUESTIONNAIRE": "Modification rapide, suivi",
+      "LNG_PAGE_LIST_FOLLOW_UPS_NO_TEAM_LABEL": "No Team"
     },
     "uiCreateFollowUpPage": {
       "LNG_PAGE_CREATE_FOLLOW_UP_ACTION_CREATE_FOLLOW_UP_BUTTON": "Créer suivi",
@@ -2269,7 +2292,9 @@
     },
     "uiChronologyContactPage": {
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_TITLE": "Contact \"{{name}}\" chronologie",
-      "LNG_PAGE_VIEW_CHRONOLOGY_CHRONOLOGY_ITEM_TYPE_FOLLOW_UP": "Suivre:"
+      "LNG_PAGE_VIEW_CHRONOLOGY_CHRONOLOGY_ITEM_TYPE_FOLLOW_UP": "Suivre:",
+      "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_FOLLOW_UP_HISTORY_END_DATE": "Follow-up status '{{ status }}' End Date",
+      "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_FOLLOW_UP_HISTORY_START_DATE": "Follow-up status '{{ status }}' Start Date"
     },
     "uiProgressOptions": {
       "LNG_PROGRESS_OPTION_LABEL_COMPLETED": "Terminé",
@@ -2670,7 +2695,16 @@
       "LNG_SIDE_FILTERS_SAVE_FILTER_BUTTON": "Enregistrer le filtre",
       "LNG_SIDE_FILTERS_LOAD_FILTER_LABEL": "Charger le filtre",
       "LNG_SIDE_FILTERS_SAVE_FILTER_SUCCESS_MESSAGE": "Filtre enregistré",
-      "LNG_SIDE_FILTERS_MODIFY_FILTER_SUCCESS_MESSAGE": "Filtre mis à jour"
+      "LNG_SIDE_FILTERS_MODIFY_FILTER_SUCCESS_MESSAGE": "Filtre mis à jour",
+      "LNG_SIDE_FILTERS_COMPARATOR_LABEL_QUESTION": "Question",
+      "LNG_SIDE_FILTERS_COMPARATOR_LABEL_QUESTION_WHICH_ANSWER": "Which answer",
+      "LNG_SIDE_FILTERS_COMPARATOR_LABEL_QUESTION_WHICH_ANSWER_ANY": "Any of the answers",
+      "LNG_SIDE_FILTERS_COMPARATOR_LABEL_QUESTION_WHICH_ANSWER_LAST": "Last Answer",
+      "LNG_SIDE_FILTERS_COMPARATOR_LABEL_QUESTION_WHICH_ANSWER_DATE_FROM": "Answer date - from",
+      "LNG_SIDE_FILTERS_COMPARATOR_LABEL_QUESTION_WHICH_ANSWER_DATE_TO": "Answer date - to",
+      "LNG_SIDE_FILTERS_COMPARATOR_LABEL_HAS_VALUE": "Has value",
+      "LNG_SIDE_FILTERS_COMPARATOR_LABEL_DOESNT_HAVE_VALUE": "Doesn't have value",
+      "LNG_SIDE_FILTERS_COMPARATOR_LABEL_SELECT_HAS_AT_LEAST_ONE": "Has at least one of these values"
     },
     "uiSideColumn": {
       "LNG_SIDE_COLUMNS_APPLY_FILTERS_BUTTON": "Appliquer",
@@ -2713,13 +2747,6 @@
       "LNG_PAGE_IMPORT_DATA_LABEL_DECRYPT_PASSWORD": "Déchiffrer le mot de passe",
       "LNG_PAGE_IMPORT_DATA_LABEL_DECRYPT_PASSWORD_DESTINATION": "Requis si le fichier téléchargé est crypté",
       "LNG_PAGE_IMPORT_DATA_LABEL_DRAG_AND_DROP_FILE_HERE": "Faites glisser un fichier des types suivants: {{types}}",
-      "LNG_PAGE_IMPORT_DATA_LABEL_LEVEL_1": "1",
-      "LNG_PAGE_IMPORT_DATA_LABEL_LEVEL_2": "2",
-      "LNG_PAGE_IMPORT_DATA_LABEL_LEVEL_3": "3",
-      "LNG_PAGE_IMPORT_DATA_LABEL_LEVEL_4": "4",
-      "LNG_PAGE_IMPORT_DATA_LABEL_LEVEL_5": "5",
-      "LNG_PAGE_IMPORT_DATA_LABEL_LEVEL_6": "6",
-      "LNG_PAGE_IMPORT_DATA_LABEL_LEVEL_7": "7",
       "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_INFORMATION": "Informations sur le modèle",
       "LNG_PAGE_IMPORT_DATA_LABEL_OR": "OU cliquez sur",
       "LNG_PAGE_IMPORT_DATA_LABEL_SELECT_DESTINATION": "Sélectionner la destination",
@@ -2730,7 +2757,13 @@
       "LNG_PAGE_IMPORT_DATA_BUTTON_SAVE_IMPORT_MAPPING": "Enregistrer le mappage d'importation",
       "LNG_PAGE_IMPORT_DATA_LOAD_SAVED_IMPORT_MAPPING_LABEL": "Charger le mappage d'importation",
       "LNG_PAGE_IMPORT_DATA_LOAD_SAVED_IMPORT_MAPPING_SUCCESS_MESSAGE": "Le mappage d'importation enregistré est chargé",
-      "LNG_PAGE_IMPORT_DATA_BUTTON_RESET_IMPORT_MAPPING": "Réinitialiser le mappage d'importation"
+      "LNG_PAGE_IMPORT_DATA_BUTTON_RESET_IMPORT_MAPPING": "Réinitialiser le mappage d'importation",
+      "LNG_PAGE_IMPORT_DATA_BUTTON_SHOW_ERR_RECORD_DETAILS": "Show details",
+      "LNG_PAGE_IMPORT_DATA_BUTTON_HIDE_ERR_RECORD_DETAILS": "Hide details",
+      "LNG_PAGE_IMPORT_DATA_BUTTON_ERR_RECORD_DETAILS_FILE_TITLE": "File input",
+      "LNG_PAGE_IMPORT_DATA_BUTTON_ERR_RECORD_DETAILS_MODEL_TITLE": "Data to be saved in database",
+      "LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE": "Date",
+      "LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_VALUE": "Value"
     },
     "uiImportHierarchicalLocations": {
       "LNG_PAGE_IMPORT_HIERARCHICAL_LOCATIONS_TITLE": "Importateur des emplacements hiérarchiques"
@@ -2805,7 +2838,9 @@
       "LNG_PAGE_BULK_ADD_CONTACTS_TAB_ADD_CONTACTS": "Add contacts",
       "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_LOCATIONS": "Locations",
       "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_LOCATIONS_DESCRIPTION": "Select the locations to be assigned to contacts in the next step",
-      "LNG_PAGE_BULK_ADD_CONTACTS_VISUAL_ID_INFO_LABEL": "* 'Contact ID' cell must follow this pattern: {{mask}}"
+      "LNG_PAGE_BULK_ADD_CONTACTS_VISUAL_ID_INFO_LABEL": "* 'Contact ID' cell must follow this pattern: {{mask}}",
+      "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_API_ERROR_MSG": " - row {{row}} is invalid: {{err}}",
+      "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_PARTIAL_ERROR_MSG": " - records that were created with success were removed from the spreadsheet so we don't create duplicates"
     },
     "uiExcelLikeSheetWidget": {
       "LNG_SHEET_CONTEXT_MENU_COPY": "Copie",
@@ -3111,7 +3146,8 @@
       "LNG_PAGE_LIST_LAB_RESULTS_ACTION_DELETE_SUCCESS_MESSAGE": "Résultat de laboratoire supprimé!",
       "LNG_PAGE_LIST_LAB_RESULTS_ACTION_RESTORE_LAB_RESULT_SUCCESS_MESSAGE": "Résultat de laboratoire restauré",
       "LNG_PAGE_LIST_LAB_RESULTS_IMPORT_BUTTON": "Importer des données de laboratoire",
-      "LNG_PAGE_LIST_LAB_RESULTS_TITLE": "Résultats de laboratoire"
+      "LNG_PAGE_LIST_LAB_RESULTS_TITLE": "Résultats de laboratoire",
+      "LNG_PAGE_LIST_LAB_RESULTS_ACTION_CHANGE_CASE_EPI_CLASSIFICATION_SUCCESS_MESSAGE": "Case classification modified!"
     },
     "uiEntityRelationshipsListShareAssignCreatePages": {
       "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_BULK_SUCCESS_MESSAGE": "Les relations créées!",
@@ -3766,7 +3802,8 @@
       "LNG_APP_PAGE_PEOPLE_TO_SHARE_RELATIONSHIPS_WITH": "Relations d'entité / Attribuer à",
       "LNG_APP_PAGE_INDIVIDUAL_CONTACT_FOLLOW_UPS": "Suivi individuel de contact",
       "LNG_APP_PAGE_CASES": "Cas",
-      "LNG_APP_PAGE_CONTACTS": "Contacts"
+      "LNG_APP_PAGE_CONTACTS": "Contacts",
+      "LNG_APP_PAGE_AVAILABLE_ENTITIES_FOR_SWITCH": "Available entities for switch"
     },
     "uiSavedImportMappingsListPage": {
       "LNG_PAGE_LIST_SAVED_IMPORT_MAPPING_TITLE": "Mappages d'importation enregistrés",
@@ -3889,6 +3926,12 @@
       "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS_DESCRIPTION": "",
       "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS": "Pregnancy Status",
       "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_DESCRIPTION": ""
+    },
+    "uiAvailableEntitiesForSwitchRelationshipPage": {
+      "LNG_PAGE_LIST_AVAILABLE_ENTITIES_FOR_SWITCH_RELATIONSHIP_TITLE": "Available people for switch",
+      "LNG_PAGE_LIST_AVAILABLE_ENTITIES_FOR_SWITCH_RELATIONSHIP_NO_CONTACTS_SELECTED": "No contacts were selected",
+      "LNG_PAGE_LIST_AVAILABLE_ENTITIES_FOR_SWITCH_RELATIONSHIP_SET_SOURCE_BUTTON": "Set as source",
+      "LNG_PAGE_LIST_AVAILABLE_ENTITIES_FOR_SWITCH_RELATIONSHIP_ACTION_SET_SOURCE_SUCCESS_MESSAGE": "Source set successful"
     }
   }
 }
