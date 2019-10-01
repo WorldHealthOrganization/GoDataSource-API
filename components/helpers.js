@@ -1939,8 +1939,8 @@ const getQuestionnaireMaxAnswersMap = function (questionnaire, records, translat
   // get a map of all the multi date answer questions and their nested questions
   let multiDateQuestionsMap = {};
 
-  (function parseQuestion (questions = []) {
-    questions.forEach(question => {
+  (function parseQuestion (questions) {
+    (questions || []).forEach(question => {
       multiDateQuestionsMap[question.variable] = [];
       (question.answers || []).forEach(answer => parseQuestion(answer.additionalQuestions));
     });
