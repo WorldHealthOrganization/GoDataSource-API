@@ -210,7 +210,7 @@ module.exports.getContactFollowupEligibleTeams = function (contact, teams) {
 // generate follow ups for a given passed period
 module.exports.generateFollowupsForContact = function (contact, teams, period, freq, freqPerDay, targeted) {
   let followUpsToAdd = [];
-  let followUpsIdsToDelete = [];
+  let followUpsToUpdate = {};
 
   // if passed period is higher than contact's follow up period
   // restrict follow up start/date to a maximum of contact's follow up period
@@ -229,7 +229,7 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     let numberOfFollowUpsPerDay = freqPerDay;
 
     // ids to delete for the current date
-    let followUpIdsToDeleteForDate = [];
+    let followUpIdsToUpdateForDate = [];
 
     // get list of follow ups that are on the same day as the day we want to generate
     let followUpsInThisDay = contact.followUpsList.filter((followUp) => Helpers.getDate(followUp.date).isSame(followUpDate, 'd'));
@@ -242,15 +242,28 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     // recreate the follow ups that are not performed
     // and generate follow ups until the quota is reached
     if (followUpDate.isSameOrAfter(Helpers.getDateEndOfDay(), 'day')) {
-      followUpIdsToDeleteForDate.push(...followUpsInThisDay
+      followUpIdsToUpdateForDate.push(...followUpsInThisDay
         .filter(f => f.statusId === 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED')
         .map(f => f.id)
       );
     }
 
-    // also create follow ups for deleted follow ups
-    numberOfFollowUpsPerDay += followUpIdsToDeleteForDate.length;
+    // recreate deleted follow ups, by retaining the UID
+    followUpIdsToUpdateForDate.forEach(id => {
+      followUpsToUpdate[id] = _createFollowUpEntry({
+        // used to easily trace all follow ups for a given outbreak
+        outbreakId: contact.outbreakId,
+        id: id,
+        personId: contact.id,
+        date: followUpDate.toDate(),
+        targeted: targeted,
+        // split the follow ups work equally across teams
+        teamId: RoundRobin(teams),
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
+      }, contact);
+    });
 
+    // add brand new follow ups, until the daily quota is reached
     for (let i = 0; i < numberOfFollowUpsPerDay; i++) {
       let followUp = _createFollowUpEntry({
         // used to easily trace all follow ups for a given outbreak
@@ -265,62 +278,55 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
 
       followUpsToAdd.push(followUp);
     }
-
-    // add ids to be deleted to the total pool of ids
-    followUpsIdsToDelete.push(...followUpIdsToDeleteForDate);
   }
 
   return {
     add: followUpsToAdd,
-    remove: followUpsIdsToDelete
+    update: followUpsToUpdate
   };
 };
 
 /**
  * Creates a promise queue for handling database operations
  * This is needed because delete operations with more than 1000 ids in the query will throw an error on the driver
- * @param reqOpts
  * @returns {*}
  */
-module.exports.createPromiseQueue = function (reqOpts) {
+const _createPromiseQueue = function () {
   let queue = new PromiseQueue({
     autoStart: true,
     concurrency: 10 // we do 10 parallel operation across the entire app
   });
 
   // count of inserted items into database
-  let count = 0;
+  queue.count = 0;
 
   // we do insert operations in database in batches of 100000
-  const insertBatchSize = 1e5;
+  queue.insertBatchSize = 1e5;
   // for remove operations we need to use at most 1000 operations
   // otherwise mongodb throw error because $in operator is too long
-  const deleteBatchSize = 900;
+  queue.deleteBatchSize = 900;
+
+  return queue;
+};
+
+module.exports.createInsertQueue = function (reqOpts) {
+  const queue = _createPromiseQueue();
 
   let followUpsToAdd = [];
-  let followUpsToDelete = [];
 
   const _insert = function (arr) {
     return () => App.models.followUp
       .rawBulkInsert(arr, null, reqOpts)
       .then(result => {
-        count += result.insertedCount;
+        queue.count += result.insertedCount;
         return Promise.resolve();
       });
-  };
-
-  const _remove = function (arr) {
-    return () => App.models.followUp.rawBulkDelete({
-      _id: {
-        $in: arr
-      }
-    });
   };
 
   return {
     // count of follow ups inserted into database
     insertedCount() {
-      return count;
+      return queue.count;
     },
     // internal queue reference, needed to check when the queue is empty
     internalQueue: queue,
@@ -331,26 +337,13 @@ module.exports.createPromiseQueue = function (reqOpts) {
         queue.add(_insert(items));
       } else {
         followUpsToAdd.push(...items);
-        if (followUpsToAdd.length >= insertBatchSize) {
+        if (followUpsToAdd.length >= queue.insertBatchSize) {
           queue.add(_insert(followUpsToAdd));
           followUpsToAdd = [];
         }
       }
     },
-    // adds follow ups into remove queue
-    // if the batch size is not reached it waits
-    removeFollowUps(items, ignore) {
-      if (ignore) {
-        queue.add(_remove(items));
-      } else {
-        followUpsToDelete.push(...items);
-        if (followUpsToDelete.length >= deleteBatchSize) {
-          queue.add(_remove(followUpsToDelete));
-          followUpsToDelete = [];
-        }
-      }
-    },
-    // settle remaining follow ups to be inserted/removed from database
+    // settle remaining follow ups to be inserted from database
     // this is needed because at the end there might be follow ups left in the list and the limit is not reached
     // those should be processed as well
     settleRemaining() {
@@ -360,10 +353,103 @@ module.exports.createPromiseQueue = function (reqOpts) {
       if (followUpsToAdd.length) {
         this.addFollowUps(followUpsToAdd, true);
       }
+      return queue.onIdle();
+    }
+  };
+};
+
+module.exports.createUpdateQueue = function (reqOpts) {
+  const queue = _createPromiseQueue();
+
+  let followUpsInWaiting = {};
+  let followUpsToAdd = [];
+  let followUpsToDelete = [];
+
+  const _insert = function (arr) {
+    return () => App.models.followUp
+      .rawBulkInsert(arr, null, reqOpts)
+      .then(result => {
+        queue.count += result.insertedCount;
+        return Promise.resolve();
+      });
+  };
+
+  const _remove = function (arr, ignore) {
+    return () => App.models.followUp
+      .rawBulkDelete({
+        _id: {
+          $in: arr
+        }
+      })
+      .then(() => {
+        const records = [];
+        arr.forEach(id => {
+          records.push(followUpsInWaiting[id]);
+          delete followUpsInWaiting[id];
+        });
+        _addFollowUps(records, ignore);
+      });
+  };
+
+  // adds follow ups into queue to be inserted
+  // if the batch size is not reached it waits
+  const _addFollowUps = function (items, ignore) {
+    if (ignore) {
+      queue.add(_insert(items));
+    } else {
+      followUpsToAdd.push(...items);
+      if (followUpsToAdd.length >= queue.insertBatchSize) {
+        queue.add(_insert(followUpsToAdd));
+        followUpsToAdd = [];
+      }
+    }
+  };
+
+  // adds follow ups into remove queue
+  // if the batch size is not reached it waits
+  const _removeFollowUps = function (items, ignore) {
+    if (ignore) {
+      queue.add(_remove(items, ignore));
+    } else {
+      followUpsToDelete.push(...items);
+      if (followUpsToDelete.length >= queue.deleteBatchSize) {
+        queue.add(_remove(followUpsToDelete));
+        followUpsToDelete = [];
+      }
+    }
+  };
+
+  return {
+    // count of follow ups inserted into database
+    insertedCount() {
+      return queue.count;
+    },
+    enqueueFollowUps(list) {
+      const ids = [];
+      for (let id in list) {
+        followUpsInWaiting[id] = list[id];
+        ids.push(id);
+      }
+      _removeFollowUps(ids);
+    },
+    // internal queue reference, needed to check when the queue is empty
+    internalQueue: queue,
+    // adds follow ups into queue to be inserted
+    // if the batch size is not reached it waits
+    addFollowUps: _addFollowUps,
+    // adds follow ups into remove queue
+    // if the batch size is not reached it waits
+    removeFollowUps: _removeFollowUps,
+    // settle remaining follow ups to be inserted from database
+    // this is needed because at the end there might be follow ups left in the list and the limit is not reached
+    // those should be processed as well
+    settleRemaining() {
+      // make sure there are not left item to process
+      // doing this to avoid case when the number of follow ups didn't reach the treshold
+      // and were never processed
       if (followUpsToDelete.length) {
         this.removeFollowUps(followUpsToDelete, true);
       }
-
       return queue.onIdle();
     }
   };

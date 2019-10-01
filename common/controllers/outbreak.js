@@ -1124,8 +1124,9 @@ module.exports = function (Outbreak) {
             return FollowupGeneration
               .getContactFollowups(followupStartDate.toDate(), followupEndDate.toDate(), contacts.map(c => c.id))
               .then((followUpGroups) => {
-                // create a promise queue for handling database operations
-                const promiseQueue = FollowupGeneration.createPromiseQueue(options);
+                // create promise queues for handling database operations
+                const insertQueue = FollowupGeneration.createInsertQueue(options);
+                const updateQueue = FollowupGeneration.createUpdateQueue(options);
 
                 let pool = new PromisePool(
                   contacts.map((contact) => {
@@ -1149,8 +1150,8 @@ module.exports = function (Outbreak) {
                           targeted
                         );
 
-                        promiseQueue.addFollowUps(generateResult.add);
-                        promiseQueue.removeFollowUps(generateResult.remove);
+                        insertQueue.addFollowUps(generateResult.add);
+                        updateQueue.enqueueFollowUps(generateResult.update);
                       });
                   }),
                   100 // concurrency limit
@@ -1159,11 +1160,13 @@ module.exports = function (Outbreak) {
                 let poolPromise = pool.start();
 
                 return poolPromise
-                // make sure the queue has emptied
-                  .then(() => promiseQueue.internalQueue.onIdle())
+                  // make sure the queue has emptied
+                  .then(() => insertQueue.internalQueue.onIdle())
                   // settle any remaining items that didn't reach the batch size
-                  .then(() => promiseQueue.settleRemaining())
-                  .then(() => promiseQueue.insertedCount());
+                  .then(() => insertQueue.settleRemaining())
+                  .then(() => updateQueue.internalQueue.onIdle())
+                  .then(() => updateQueue.settleRemaining())
+                  .then(() => insertQueue.insertedCount() + updateQueue.insertedCount());
               });
           });
       })
