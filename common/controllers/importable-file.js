@@ -73,7 +73,8 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
 
       // construct variable name
       const getVarName = (variable) => {
-        return variable.name
+        return variable.name;
+          /*
           // multi answers need to be basic data arrays which aren't handled by flat file types ( non flat file should work properly without this functionality )
           + (
             !['.json', '.xml'].includes(importType) &&
@@ -82,6 +83,7 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
               '_____A' :
               ''
           );
+           */
       };
 
       // extract variables from template

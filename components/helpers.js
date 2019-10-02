@@ -314,9 +314,9 @@ function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, pare
             const mapValues = (localValue, addToArray) => {
               // get source path
               let actualMapPath = processedMap.map[sourcePath];
-              const isBasicArray = processedMap.map[sourcePath].endsWith('_____A');
+              const isBasicArray = processedMap.map[sourcePath].includes('_____A');
               if (isBasicArray) {
-                actualMapPath = actualMapPath.substr(0, actualMapPath.length - '_____A'.length);
+                actualMapPath = actualMapPath.replace('_____A', '');
               }
 
               // initialize array if necessary
@@ -1984,6 +1984,43 @@ const getQuestionnaireMaxAnswersMap = function (questionnaire, records, translat
   return multiDateQuestionsMap;
 };
 
+const convertQuestionnairePropsToDate = function (questions) {
+  const parseProp = function (prop) {
+    if (prop === null || prop === 'undefined') {
+      return prop;
+    }
+    // try to convert the string value to date, if valid, replace the old value
+    let convertedDate = getDate(prop);
+    if (convertedDate.isValid()) {
+      return convertedDate.toDate();
+    }
+    return prop;
+  };
+
+  for (let variable in questions) {
+    questions[variable] = questions[variable].map(answer => {
+      if (answer.date) {
+        answer.date = parseProp(answer.date);
+      }
+      if (Array.isArray(answer.value)) {
+        const resultValues = [];
+        answer.value.forEach(a => {
+          if (a === null || a === undefined) {
+            return false;
+          }
+          resultValues.push(parseProp(a));
+        });
+        answer.value = resultValues;
+      } else {
+        answer.value = parseProp(answer.value);
+      }
+      return answer;
+    });
+  }
+
+  return questions;
+};
+
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -2030,5 +2067,6 @@ module.exports = {
   retrieveQuestionnaireVariables: retrieveQuestionnaireVariables,
   getDateChunks: getDateChunks,
   getDaysSince: getDaysSince,
-  getQuestionnaireMaxAnswersMap: getQuestionnaireMaxAnswersMap
+  getQuestionnaireMaxAnswersMap: getQuestionnaireMaxAnswersMap,
+  convertQuestionnairePropsToDate: convertQuestionnairePropsToDate
 };

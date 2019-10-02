@@ -4659,9 +4659,9 @@ module.exports = function (Outbreak) {
               }
 
               // sanitize questionnaire answers
-              // convert to new format if necessary
               if (caseData.questionnaireAnswers) {
-                caseData.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToNewFormat(caseData.questionnaireAnswers);
+                // convert properties that should be date to actual date objects
+                caseData.questionnaireAnswers = genericHelpers.convertQuestionnairePropsToDate(caseData.questionnaireAnswers);
               }
 
               // sanitize visual ID
