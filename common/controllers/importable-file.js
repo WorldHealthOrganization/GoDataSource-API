@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const templateParser = require('./../../components/templateParser');
+const helpers = require('./../../components/helpers');
 const _ = require('lodash');
 const async = require('async');
 const path = require('path');
@@ -42,9 +43,10 @@ function getModelNamesFor(modelName) {
  * @param headers
  * @param normalizedHeaders
  * @param languageDictionary
+ * @param dataset
  * @return {Promise.<T>}
  */
-function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, modelName, headers, normalizedHeaders, languageDictionary) {
+function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, modelName, headers, normalizedHeaders, languageDictionary, dataset, fieldsMap) {
   // make sure we have a valid type
   importType = importType ? importType.toLowerCase() : '.json';
 
@@ -54,7 +56,8 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
     modelProperties: {
       [app.models[modelName].extendedForm.containerProperty]: {}
     },
-    modelPropertyValues: {}
+    modelPropertyValues: {},
+    modelArrayProperties: {}
   };
   // get outbreak
   return app.models.outbreak
@@ -70,7 +73,8 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
 
       // construct variable name
       const getVarName = (variable) => {
-        return variable.name
+        return variable.name;
+          /*
           // multi answers need to be basic data arrays which aren't handled by flat file types ( non flat file should work properly without this functionality )
           + (
             !['.json', '.xml'].includes(importType) &&
@@ -79,6 +83,7 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
               '_____A' :
               ''
           );
+           */
       };
 
       // extract variables from template
@@ -117,6 +122,62 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
           }
         });
       }
+
+      if (['.json', '.xml'].includes(importType)) {
+        const multiDateQuestions = outbreak[app.models[modelName].extendedForm.template].filter(q => q.multiAnswer);
+
+        // create a question variable to translation map
+        // in order to be able to calculate maximum number of answers for datasets that use translations as field names
+        const questionToTranslationMap = [];
+        (function addTranslation(questions) {
+          return questions
+            .forEach(question => {
+              question = question.toJSON ? question.toJSON() : question;
+
+              questionToTranslationMap.push({
+                variable: question.variable,
+                translation: languageDictionary.getTranslation(question.text)
+              });
+
+              (question.answers || []).forEach(answer => {
+                addTranslation(answer.additionalQuestions || []);
+              });
+            });
+        })(multiDateQuestions);
+
+        // also get extended form container property translation
+        // as the JSON file might contain actual translation of the fields and we need to match it against the variable
+        const containerProp = app.models[modelName].extendedForm.containerProperty;
+        const containerPropTranslation = languageDictionary.getTranslation(fieldsMap[containerProp]);
+
+        const maxAnswersMap = helpers.getQuestionnaireMaxAnswersMap(
+          multiDateQuestions,
+          importType === '.xml' ? dataset.map(r => {
+            let propToChange = containerProp;
+            if (!r[containerProp]) {
+              if (!r[containerPropTranslation]) {
+                return r;
+              } else {
+                propToChange = containerPropTranslation;
+              }
+            }
+
+            if (Array.isArray(r[propToChange]) && r[propToChange].length) {
+              r[propToChange] = r[propToChange][0];
+            }
+
+            return r;
+          }) : dataset,
+          { containerPropTranslation, questionToTranslationMap }
+        );
+
+        for (let variable in maxAnswersMap) {
+          result.modelArrayProperties[`${containerProp}.${variable}`] = {
+            maxItems: maxAnswersMap[variable]
+          };
+        }
+      }
+
       return result;
     });
 }
@@ -349,7 +410,8 @@ module.exports = function (ImportableFile) {
           results[modelName] = {
             modelProperties: {},
             suggestedFieldMapping: {},
-            modelPropertyValues: {}
+            modelPropertyValues: {},
+            modelArrayProperties: {}
           };
 
           // if a valid model was provided, and file headers were found
@@ -474,14 +536,15 @@ module.exports = function (ImportableFile) {
               }
               // get mapping suggestions for extended form
               steps.push(function (callback) {
-                getMappingSuggestionsForModelExtendedForm(outbreakId, extension, modelName, result.fileHeaders, normalizedHeaders, languageDictionary)
+                getMappingSuggestionsForModelExtendedForm(outbreakId, extension, modelName, result.fileHeaders, normalizedHeaders, languageDictionary, dataSet, fieldLabelsMap)
                   .then(function (_result) {
                     // update result
                     results[modelName] = Object.assign(
                       {}, results[modelName],
                       {suggestedFieldMapping: Object.assign(results[modelName].suggestedFieldMapping, _result.suggestedFieldMapping)},
                       {modelProperties: Object.assign(results[modelName].modelProperties, _result.modelProperties)},
-                      {modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, _result.modelPropertyValues)}
+                      {modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, _result.modelPropertyValues)},
+                      {modelArrayProperties: Object.assign(results[modelName].modelArrayProperties, _result.modelArrayProperties)}
                     );
                     callback(null, results[modelName]);
                   })

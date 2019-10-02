@@ -1406,34 +1406,69 @@ module.exports = function (Outbreak) {
     }
   };
 
+  const mapStandardAnswerToQuestion = function (answers, qAnswer, question) {
+    if (!question.multiAnswer &&
+      Array.isArray(qAnswer) &&
+      qAnswer.length &&
+      qAnswer[0].date) {
+      // find the answer that matches the date the question has
+      qAnswer = qAnswer.find(a => genericHelpers.getDate(a.date).format('YYYY-MM-DD') === question.multiAnswerDate);
+    } else {
+      if (Array.isArray(qAnswer) && qAnswer.length) {
+        qAnswer = qAnswer[0];
+      }
+    }
+    qAnswer = qAnswer ? qAnswer.value : null;
+    if (Array.isArray(question.answers) && question.answers.length && !Array.isArray(qAnswer)) {
+      qAnswer = [qAnswer];
+    }
+    if (Array.isArray(qAnswer) && qAnswer.length) {
+      question.answers.forEach((answer) => {
+        if (qAnswer.indexOf(answer.value) !== -1) {
+          answer.selected = true;
+        }
+        if (answer.additionalQuestions && answer.additionalQuestions.length) {
+          answer.additionalQuestions = Outbreak.helpers.prepareQuestionsForPrint(answers, answer.additionalQuestions, question.multiAnswerDate);
+        }
+      });
+    } else {
+      if (qAnswer instanceof Date || genericHelpers.isValidDate(qAnswer)) {
+        question.value = genericHelpers.getDateDisplayValue(qAnswer);
+      } else {
+        question.value = qAnswer;
+      }
+    }
+  };
+
   /**
    * Format the questions object for easier printing
    * @param answers
    * @param questions
+   * @param multiAnswerDate
    */
-  Outbreak.helpers.prepareQuestionsForPrint = function (answers, questions) {
+  Outbreak.helpers.prepareQuestionsForPrint = function (answers, questions, multiAnswerDate) {
     questions.forEach((question) => {
       let qAnswer = answers[question.variable];
 
       if (qAnswer) {
-        if (Array.isArray(question.answers) && question.answers.length && !Array.isArray(qAnswer)) {
-          qAnswer = [qAnswer];
-        }
-        if (Array.isArray(qAnswer) && qAnswer.length) {
-          question.answers.forEach((answer) => {
-            if (qAnswer.indexOf(answer.value) !== -1) {
-              answer.selected = true;
-            }
-            if (answer.additionalQuestions && answer.additionalQuestions.length) {
-              answer.additionalQuestions = Outbreak.helpers.prepareQuestionsForPrint(answers, answer.additionalQuestions);
-            }
+        if (question.multiAnswer) {
+          question.multiAnswers = [];
+          qAnswer.forEach(answer => {
+            const clonedQ = _.cloneDeep(question);
+            clonedQ.value = null;
+            clonedQ.multiAnswerDate = genericHelpers.getDate(answer.date).format('YYYY-MM-DD');
+            mapStandardAnswerToQuestion(answers, answer, clonedQ);
+            question.multiAnswers.push({
+              date: clonedQ.multiAnswerDate,
+              answers: clonedQ.answers,
+              value: clonedQ.value
+            });
           });
         } else {
-          if (qAnswer instanceof Date || genericHelpers.isValidDate(qAnswer)) {
-            question.value = genericHelpers.getDateDisplayValue(qAnswer);
-          } else {
-            question.value = qAnswer;
+          if (multiAnswerDate) {
+            question.multiAnswerDate = multiAnswerDate;
           }
+          mapStandardAnswerToQuestion(answers, qAnswer, question);
         }
       }
     });

@@ -4659,9 +4659,9 @@ module.exports = function (Outbreak) {
               }
 
               // sanitize questionnaire answers
-              // convert to new format if necessary
               if (caseData.questionnaireAnswers) {
-                caseData.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToNewFormat(caseData.questionnaireAnswers);
+                // convert properties that should be date to actual date objects
+                caseData.questionnaireAnswers = genericHelpers.convertQuestionnairePropsToDate(caseData.questionnaireAnswers);
               }
 
               // sanitize visual ID
@@ -5042,7 +5042,6 @@ module.exports = function (Outbreak) {
 
                 // convert questionnaire answers to old format, before doing anything
                 let labResultAnswers = labResult.questionnaireAnswers || {};
-                labResultAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(labResultAnswers);
 
                 // since we are presenting all the answers, mark the one that was selected, for each question
                 labResultsQuestions = Outbreak.helpers.prepareQuestionsForPrint(labResultAnswers, labResultsQuestions);
@@ -5062,7 +5061,6 @@ module.exports = function (Outbreak) {
 
               // convert questionnaire answers to old format, before doing anything
               let personAnswers = person.questionnaireAnswers || {};
-              personAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(personAnswers);
 
               // since we are presenting all the answers, mark the one that was selected, for each question
               caseInvestigationQuestions = Outbreak.helpers.prepareQuestionsForPrint(personAnswers, caseInvestigationQuestions);
@@ -5314,7 +5312,6 @@ module.exports = function (Outbreak) {
 
                 // translate follow up questionnaire answers to general format
                 let followUpAnswers = followUp.questionnaireAnswers || {};
-                followUpAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(followUpAnswers);
 
                 // Since we are presenting all the answers, mark the one that was selected, for each question
                 questions = Outbreak.helpers.prepareQuestionsForPrint(followUpAnswers, questions);
@@ -7818,17 +7815,14 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
+        options.questionnaire = self.contactFollowUpTemplate;
+        options.dictionary = dictionary;
+        options.useQuestionVariable = useQuestionVariable;
+
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
           app.models.followUp,
-          {
-            questionnaireAnswers: genericHelpers.retrieveQuestionnaireVariables(
-              self.contactFollowUpTemplate,
-              'questionnaireAnswers',
-              dictionary,
-              useQuestionVariable
-            )
-          },
+          {},
           filter.where,
           exportType,
           'Follow-Up List',
@@ -7836,12 +7830,6 @@ module.exports = function (Outbreak) {
           anonymizeFields,
           options,
           function (results) {
-            // Prepare questionnaire answers for printing
-            results.forEach((followUp) => {
-              if (followUp.questionnaireAnswers) {
-                followUp.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(followUp.questionnaireAnswers);
-              }
-            });
             return Promise.resolve(results);
           },
           callback
@@ -8986,17 +8974,14 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
+        options.questionnaire = self.caseInvestigationTemplate;
+        options.dictionary = dictionary;
+        options.useQuestionVariable = useQuestionVariable;
+
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
           app.models.case,
-          {
-            questionnaireAnswers: genericHelpers.retrieveQuestionnaireVariables(
-              self.caseInvestigationTemplate,
-              'questionnaireAnswers',
-              dictionary,
-              useQuestionVariable
-            )
-          },
+          {},
           filter.where,
           exportType,
           'Case List',
@@ -9004,12 +8989,6 @@ module.exports = function (Outbreak) {
           anonymizeFields,
           options,
           function (results) {
-            // Prepare questionnaire answers for printing
-            results.forEach((caseModel) => {
-              if (caseModel.questionnaireAnswers) {
-                caseModel.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(caseModel.questionnaireAnswers);
-              }
-            });
             return Promise.resolve(results);
           },
           callback

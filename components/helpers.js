@@ -314,9 +314,9 @@ function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, pare
             const mapValues = (localValue, addToArray) => {
               // get source path
               let actualMapPath = processedMap.map[sourcePath];
-              const isBasicArray = processedMap.map[sourcePath].endsWith('_____A');
+              const isBasicArray = processedMap.map[sourcePath].includes('_____A');
               if (isBasicArray) {
-                actualMapPath = actualMapPath.substr(0, actualMapPath.length - '_____A'.length);
+                actualMapPath = actualMapPath.replace('_____A', '');
               }
 
               // initialize array if necessary
@@ -1336,9 +1336,11 @@ const getSourceAndTargetFromModelHookContext = function (context) {
  * @param idHeaderPrefix
  * @param dictionary
  * @param useVariable
+ * @param multiDateLengthsMap
+ * @param isNestedMultiDate
  * @returns {[{id, header}]}
  */
-const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary, useVariable) => {
+const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary, useVariable, multiDateLengthsMap, isNestedMultiDate) => {
   // no questions
   if (_.isEmpty(questionnaire)) {
     return [];
@@ -1358,27 +1360,66 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
     }
     // add question
     if (!_.isEmpty(question.variable)) {
+      const isMultiDate = question.multiAnswer || isNestedMultiDate;
+      multiDateLengthsMap[question.variable] = multiDateLengthsMap[question.variable] || 0;
+
       // can have multiple answers ?
       if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
         // add a column for each answer
         if (!_.isEmpty(question.answers)) {
-          _.each(question.answers, (answer, answerIndex) => {
-            result.push({
-              expandKey: question.variable,
-              expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
-              id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable + ' ' + (answerIndex + 1),
-              header: (useVariable ? question.variable : dictionary.getTranslation(question.text)) + ' ' + (answerIndex + 1)
+          if (isMultiDate) {
+            for (let i = 0; i < multiDateLengthsMap[question.variable]; i++) {
+              let elIndex = i + 1;
+              _.each(question.answers, (answer, answerIndex) => {
+                result.push({
+                  expandKey: question.variable,
+                  expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
+                  id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${elIndex} value ${(answerIndex + 1)}`,
+                  header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} ${(answerIndex + 1)} [MV ${elIndex}]`
+                });
+              });
+              result.push({
+                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${elIndex} date`,
+                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} [MD ${elIndex}]`
+              });
+            }
+          } else {
+            _.each(question.answers, (answer, answerIndex) => {
+              result.push({
+                expandKey: question.variable,
+                expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
+                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} 1 value ${(answerIndex + 1)}`,
+                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} ${(answerIndex + 1)}`
+              });
             });
-          });
+          }
         }
       } else {
-        // add parent question
-        result.push({
-          expandKey: question.variable,
-          expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
-          id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable,
-          header: useVariable ? question.variable : dictionary.getTranslation(question.text)
-        });
+        if (isMultiDate) {
+          for (let i = 0; i < multiDateLengthsMap[question.variable]; i++) {
+            let answerIndex = i + 1;
+            result.push(
+              {
+                expandKey: question.variable,
+                expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
+                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${answerIndex} value`,
+                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} [MV ${answerIndex}]`
+              },
+              {
+                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${answerIndex} date`,
+                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} [MD ${answerIndex}]`
+              }
+            );
+          }
+        } else {
+          // add parent question
+          result.push({
+            expandKey: question.variable,
+            expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
+            id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable + ' 1 value',
+            header: useVariable ? question.variable : dictionary.getTranslation(question.text)
+          });
+        }
       }
 
       // add children questions
@@ -1389,7 +1430,9 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
               answer.additionalQuestions,
               idHeaderPrefix,
               dictionary,
-              useVariable
+              useVariable,
+              multiDateLengthsMap,
+              isMultiDate
             ));
           }
         });
@@ -1887,6 +1930,97 @@ const convertQuestionnaireAnswersToNewFormat = function (answers) {
   return result;
 };
 
+const getQuestionnaireMaxAnswersMap = function (questionnaire, records, translationOpts) {
+  translationOpts = translationOpts || {
+    questionToTranslationMap: []
+  };
+  questionnaire = questionnaire.filter(q => q.multiAnswer);
+
+  // get a map of all the multi date answer questions and their nested questions
+  let multiDateQuestionsMap = {};
+
+  (function parseQuestion (questions) {
+    (questions || []).forEach(question => {
+      multiDateQuestionsMap[question.variable] = [];
+      (question.answers || []).forEach(answer => parseQuestion(answer.additionalQuestions));
+    });
+  })(questionnaire);
+
+  // get maximum number of multi date answers
+  records.forEach(record => {
+    let propToIterate = 'questionnaireAnswers';
+    if (!record[propToIterate]) {
+      if (record[translationOpts.containerPropTranslation]) {
+        propToIterate = translationOpts.containerPropTranslation;
+      } else {
+        // it doesn't have any questions, skip it
+        return;
+      }
+    }
+    for (let q in record[propToIterate]) {
+      if (record[propToIterate].hasOwnProperty(q)) {
+        if (multiDateQuestionsMap[q]) {
+          multiDateQuestionsMap[q].push(record[propToIterate][q].length);
+        } else {
+          const foundMap = translationOpts.questionToTranslationMap.find(qMap => qMap.translation === q);
+          if (foundMap) {
+            multiDateQuestionsMap[foundMap.variable].push(record[propToIterate][q].length);
+          }
+        }
+      }
+    }
+  });
+
+  for (let q in multiDateQuestionsMap) {
+    if (multiDateQuestionsMap.hasOwnProperty(q)) {
+      let max = 0;
+      if (multiDateQuestionsMap[q].length) {
+        max = Math.max(...multiDateQuestionsMap[q]);
+      }
+      multiDateQuestionsMap[q] = max;
+    }
+  }
+
+  return multiDateQuestionsMap;
+};
+
+const convertQuestionnairePropsToDate = function (questions) {
+  const parseProp = function (prop) {
+    if (prop === null || prop === 'undefined') {
+      return prop;
+    }
+    // try to convert the string value to date, if valid, replace the old value
+    let convertedDate = getDate(prop);
+    if (convertedDate.isValid()) {
+      return convertedDate.toDate();
+    }
+    return prop;
+  };
+
+  for (let variable in questions) {
+    questions[variable] = questions[variable].map(answer => {
+      if (answer.date) {
+        answer.date = parseProp(answer.date);
+      }
+      if (Array.isArray(answer.value)) {
+        const resultValues = [];
+        answer.value.forEach(a => {
+          if (a === null || a === undefined) {
+            return false;
+          }
+          resultValues.push(parseProp(a));
+        });
+        answer.value = resultValues;
+      } else {
+        answer.value = parseProp(answer.value);
+      }
+      return answer;
+    });
+  }
+
+  return questions;
+};
+
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -1932,5 +2066,7 @@ module.exports = {
   convertQuestionnaireAnswersToNewFormat: convertQuestionnaireAnswersToNewFormat,
   retrieveQuestionnaireVariables: retrieveQuestionnaireVariables,
   getDateChunks: getDateChunks,
-  getDaysSince: getDaysSince
+  getDaysSince: getDaysSince,
+  getQuestionnaireMaxAnswersMap: getQuestionnaireMaxAnswersMap,
+  convertQuestionnairePropsToDate: convertQuestionnairePropsToDate
 };

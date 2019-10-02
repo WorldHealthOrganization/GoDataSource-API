@@ -101,9 +101,7 @@ function exportFilteredModelsList(
     beforeExport = noOp;
   }
 
-  // retrieve keys for expandable properties
-  const modelPropertiesExpandOnFlatFilesKeys = modelPropertiesExpandOnFlatFiles ?
-    Object.keys(modelPropertiesExpandOnFlatFiles) : [];
+  let modelPropertiesExpandOnFlatFilesKeys = [];
 
   // find results
   Model.rawFind(query)
@@ -113,6 +111,20 @@ function exportFilteredModelsList(
       results.forEach(function (result) {
         helpers.covertAddressesGeoPointToLoopbackFormat(result);
       });
+
+      if (!modelPropertiesExpandOnFlatFiles.questionnaireAnswers) {
+        modelPropertiesExpandOnFlatFiles.questionnaireAnswers = helpers.retrieveQuestionnaireVariables(
+          options.questionnaire,
+          'questionnaireAnswers',
+          options.dictionary,
+          options.useQuestionVariable,
+          helpers.getQuestionnaireMaxAnswersMap(options.questionnaire, results)
+        );
+      }
+
+      // retrieve keys for expandable properties
+      modelPropertiesExpandOnFlatFilesKeys = modelPropertiesExpandOnFlatFiles ?
+        Object.keys(modelPropertiesExpandOnFlatFiles) : [];
 
       // by default export CSV
       if (!exportType) {
