@@ -1125,8 +1125,7 @@ module.exports = function (Outbreak) {
               .getContactFollowups(followupStartDate.toDate(), followupEndDate.toDate(), contacts.map(c => c.id))
               .then((followUpGroups) => {
                 // create promise queues for handling database operations
-                const insertQueue = FollowupGeneration.createInsertQueue(options);
-                const updateQueue = FollowupGeneration.createUpdateQueue(options);
+                const dbOpsQueue = FollowupGeneration.dbOperationsQueue(options);
 
                 let pool = new PromisePool(
                   contacts.map((contact) => {
@@ -1150,8 +1149,8 @@ module.exports = function (Outbreak) {
                           targeted
                         );
 
-                        insertQueue.addFollowUps(generateResult.add);
-                        updateQueue.enqueueFollowUps(generateResult.update);
+                        dbOpsQueue.enqueueForInsert(generateResult.add);
+                        dbOpsQueue.enqueueForRecreate(generateResult.update);
                       });
                   }),
                   100 // concurrency limit
@@ -1161,12 +1160,10 @@ module.exports = function (Outbreak) {
 
                 return poolPromise
                   // make sure the queue has emptied
-                  .then(() => insertQueue.internalQueue.onIdle())
+                  .then(() => dbOpsQueue.internalQueue.onIdle())
                   // settle any remaining items that didn't reach the batch size
-                  .then(() => insertQueue.settleRemaining())
-                  .then(() => updateQueue.internalQueue.onIdle())
-                  .then(() => updateQueue.settleRemaining())
-                  .then(() => insertQueue.insertedCount() + updateQueue.insertedCount());
+                  .then(() => dbOpsQueue.settleRemaining())
+                  .then(() => dbOpsQueue.insertedCount());
               });
           });
       })

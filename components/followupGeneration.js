@@ -286,13 +286,8 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
   };
 };
 
-/**
- * Creates a promise queue for handling database operations
- * This is needed because delete operations with more than 1000 ids in the query will throw an error on the driver
- * @returns {*}
- */
-const _createPromiseQueue = function () {
-  let queue = new PromiseQueue({
+module.exports.dbOperationsQueue = function (opts) {
+  const queue = new PromiseQueue({
     autoStart: true,
     concurrency: 10 // we do 10 parallel operation across the entire app
   });
@@ -302,79 +297,28 @@ const _createPromiseQueue = function () {
 
   // we do insert operations in database in batches of 100000
   queue.insertBatchSize = 1e5;
+
   // for remove operations we need to use at most 1000 operations
   // otherwise mongodb throw error because $in operator is too long
   queue.deleteBatchSize = 900;
 
-  return queue;
-};
+  // temporary lists of follow ups to be deleted and added in database
+  let addList = [];
+  let delList = [];
 
-module.exports.createInsertQueue = function (reqOpts) {
-  const queue = _createPromiseQueue();
-
-  let followUpsToAdd = [];
+  // list of records waiting to be added after the deletion of existing record with the same id
+  let waitingList = {};
 
   const _insert = function (arr) {
     return () => App.models.followUp
-      .rawBulkInsert(arr, null, reqOpts)
+      .rawBulkInsert(arr, null, opts)
       .then(result => {
         queue.count += result.insertedCount;
         return Promise.resolve();
       });
   };
 
-  return {
-    // count of follow ups inserted into database
-    insertedCount() {
-      return queue.count;
-    },
-    // internal queue reference, needed to check when the queue is empty
-    internalQueue: queue,
-    // adds follow ups into queue to be inserted
-    // if the batch size is not reached it waits
-    addFollowUps(items, ignore) {
-      if (ignore) {
-        queue.add(_insert(items));
-      } else {
-        followUpsToAdd.push(...items);
-        if (followUpsToAdd.length >= queue.insertBatchSize) {
-          queue.add(_insert(followUpsToAdd));
-          followUpsToAdd = [];
-        }
-      }
-    },
-    // settle remaining follow ups to be inserted from database
-    // this is needed because at the end there might be follow ups left in the list and the limit is not reached
-    // those should be processed as well
-    settleRemaining() {
-      // make sure there are not left item to process
-      // doing this to avoid case when the number of follow ups didn't reach the treshold
-      // and were never processed
-      if (followUpsToAdd.length) {
-        this.addFollowUps(followUpsToAdd, true);
-      }
-      return queue.onIdle();
-    }
-  };
-};
-
-module.exports.createUpdateQueue = function (reqOpts) {
-  const queue = _createPromiseQueue();
-
-  let followUpsInWaiting = {};
-  let followUpsToAdd = [];
-  let followUpsToDelete = [];
-
-  const _insert = function (arr) {
-    return () => App.models.followUp
-      .rawBulkInsert(arr, null, reqOpts)
-      .then(result => {
-        queue.count += result.insertedCount;
-        return Promise.resolve();
-      });
-  };
-
-  const _remove = function (arr, ignore) {
+  const _recreate = function (arr, ignore) {
     return () => App.models.followUp
       .rawBulkHardDelete({
         _id: {
@@ -384,37 +328,33 @@ module.exports.createUpdateQueue = function (reqOpts) {
       .then(() => {
         const records = [];
         arr.forEach(id => {
-          records.push(followUpsInWaiting[id]);
-          delete followUpsInWaiting[id];
+          records.push(waitingList[id]);
+          delete waitingList[id];
         });
-        _addFollowUps(records, ignore);
+        _enqueueForInsert(records, ignore);
       });
   };
 
-  // adds follow ups into queue to be inserted
-  // if the batch size is not reached it waits
-  const _addFollowUps = function (items, ignore) {
+  const _enqueueForInsert = function (items, ignore) {
     if (ignore) {
       queue.add(_insert(items));
     } else {
-      followUpsToAdd.push(...items);
-      if (followUpsToAdd.length >= queue.insertBatchSize) {
-        queue.add(_insert(followUpsToAdd));
-        followUpsToAdd = [];
+      addList.push(...items);
+      if (addList.length >= queue.insertBatchSize) {
+        queue.add(_insert(addList));
+        addList = [];
       }
     }
   };
 
-  // adds follow ups into remove queue
-  // if the batch size is not reached it waits
-  const _removeFollowUps = function (items, ignore) {
+  const _enqueueForRecreate = function (items, ignore) {
     if (ignore) {
-      queue.add(_remove(items, ignore));
+      queue.add(_recreate(items, ignore));
     } else {
-      followUpsToDelete.push(...items);
-      if (followUpsToDelete.length >= queue.deleteBatchSize) {
-        queue.add(_remove(followUpsToDelete));
-        followUpsToDelete = [];
+      delList.push(...items);
+      if (delList.length >= queue.deleteBatchSize) {
+        queue.add(_recreate(delList));
+        delList = [];
       }
     }
   };
@@ -424,31 +364,33 @@ module.exports.createUpdateQueue = function (reqOpts) {
     insertedCount() {
       return queue.count;
     },
-    enqueueFollowUps(list) {
+    // adds records into queue to be recreated
+    // if the batch size is not reached it waits
+    enqueueForRecreate(list) {
       const ids = [];
       for (let id in list) {
-        followUpsInWaiting[id] = list[id];
+        waitingList[id] = list[id];
         ids.push(id);
       }
-      _removeFollowUps(ids);
+      _enqueueForRecreate(ids);
     },
+    // adds records into queue to be inserted
+    // if the batch size is not reached it waits
+    enqueueForInsert: _enqueueForInsert,
     // internal queue reference, needed to check when the queue is empty
     internalQueue: queue,
-    // adds follow ups into queue to be inserted
-    // if the batch size is not reached it waits
-    addFollowUps: _addFollowUps,
-    // adds follow ups into remove queue
-    // if the batch size is not reached it waits
-    removeFollowUps: _removeFollowUps,
-    // settle remaining follow ups to be inserted from database
-    // this is needed because at the end there might be follow ups left in the list and the limit is not reached
+    // settle remaining record to be inserted from database
+    // this is needed because at the end there might be records left in the list and the limit is not reached
     // those should be processed as well
     settleRemaining() {
       // make sure there are not left item to process
-      // doing this to avoid case when the number of follow ups didn't reach the treshold
+      // doing this to avoid case when the number of follow ups didn't reach the threshold
       // and were never processed
-      if (followUpsToDelete.length) {
-        this.removeFollowUps(followUpsToDelete, true);
+      if (delList.length) {
+        _enqueueForRecreate(delList, true);
+      }
+      if (addList.length) {
+        _enqueueForInsert(addList, true);
       }
       return queue.onIdle();
     }
