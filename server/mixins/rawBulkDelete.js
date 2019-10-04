@@ -108,5 +108,5 @@ module.exports = function (Model) {
         App.logger.debug(`[QueryId: ${queryId}] MongoDB bulk delete completed after ${timer.getElapsedMilliseconds()} msec`);
         return result;
       });
-  }
+  };
 };
