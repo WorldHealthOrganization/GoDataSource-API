@@ -182,6 +182,44 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
     });
 }
 
+function getArrayPropertiesMaxLength({ fieldsMap, arrayProps, dataset, dictionary }) {
+  const result = {};
+
+  // translate the array fields, cause dataset contains translations as property names
+  const arrayFieldsTranslationsMap = {};
+  for (let propName in arrayProps) {
+    if (arrayProps.hasOwnProperty(propName)) {
+      result[propName] = [];
+      arrayFieldsTranslationsMap[dictionary.getTranslation(fieldsMap[propName])] = propName;
+    }
+  }
+
+  // go through each record, store array props lengths
+  for (let record of dataset) {
+    for (let propName in arrayFieldsTranslationsMap) {
+      if (arrayFieldsTranslationsMap.hasOwnProperty(propName)) {
+        if (Array.isArray(record[propName])) {
+          result[arrayFieldsTranslationsMap[propName]].push(record[propName].length);
+        }
+      }
+    }
+  }
+
+  // keep only the highest length in the map
+  for (let prop in result) {
+    if (result.hasOwnProperty(prop)) {
+      let max = 0;
+      if (result[prop].length) {
+        max = Math.max(...result[prop]);
+      }
+      result[prop] = {
+        maxItems: max
+      };
+    }
+  }
+  return result;
+}
+
 /**
  * Get a list of distinct values for each property of the dataset
  * @param dataSet
@@ -549,6 +587,22 @@ module.exports = function (ImportableFile) {
                     callback(null, results[modelName]);
                   })
                   .catch(callback);
+              });
+            }
+
+            // get array properties maximum length for non-flat files and models that actually support this
+            if (['.json', '.xml'].includes(extension) && app.models[modelName].arrayProps) {
+              steps.push(callback => {
+                results[modelName].modelArrayProperties = Object.assign(
+                  results[modelName].modelArrayProperties,
+                  getArrayPropertiesMaxLength({
+                    fieldsMap: fieldLabelsMap,
+                    arrayProps: app.models[modelName].arrayProps,
+                    dataset: dataSet,
+                    dictionary: languageDictionary
+                  })
+                );
+                return callback(null, results[modelName]);
               });
             }
 
