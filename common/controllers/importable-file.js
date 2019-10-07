@@ -182,6 +182,13 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
     });
 }
 
+/**
+ * Calculate maxim number of items an array properties has across multiple records
+ * @param fieldsMap
+ * @param arrayProps
+ * @param dataset
+ * @param dictionary
+ */
 function getArrayPropertiesMaxLength({ fieldsMap, arrayProps, dataset, dictionary }) {
   const result = {};
 
