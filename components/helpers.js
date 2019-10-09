@@ -1990,9 +1990,11 @@ const convertQuestionnairePropsToDate = function (questions) {
       return prop;
     }
     // try to convert the string value to date, if valid, replace the old value
-    let convertedDate = getDate(prop);
-    if (convertedDate.isValid()) {
-      return convertedDate.toDate();
+    if (isValidDate(prop)) {
+      let convertedDate = getDate(prop);
+      if (convertedDate.isValid()) {
+        return convertedDate.toDate();
+      }
     }
     return prop;
   };
