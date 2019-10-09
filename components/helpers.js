@@ -1934,7 +1934,7 @@ const getQuestionnaireMaxAnswersMap = function (questionnaire, records, translat
   translationOpts = translationOpts || {
     questionToTranslationMap: []
   };
-  questionnaire = questionnaire.filter(q => q.multiAnswer);
+  questionnaire = (questionnaire || []).filter(q => q.multiAnswer);
 
   // get a map of all the multi date answer questions and their nested questions
   let multiDateQuestionsMap = {};
