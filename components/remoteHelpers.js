@@ -112,7 +112,7 @@ function exportFilteredModelsList(
         helpers.covertAddressesGeoPointToLoopbackFormat(result);
       });
 
-      if (!modelPropertiesExpandOnFlatFiles.questionnaireAnswers) {
+      if (!modelPropertiesExpandOnFlatFiles.questionnaireAnswers && options.questionnaire) {
         modelPropertiesExpandOnFlatFiles.questionnaireAnswers = helpers.retrieveQuestionnaireVariables(
           options.questionnaire,
           'questionnaireAnswers',
@@ -169,7 +169,7 @@ function exportFilteredModelsList(
             for (let i = 1; i <= maxElements; i++) {
               for (let prop in map) {
                 headers.push({
-                  id: `${propertyName} ${i} ${prop}`,
+                  id: `${propertyName} ${i} ${prop.replace(/\./g, ' ')}`,
                   // use correct label translation for user language
                   header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} [${i}]`
                 });
@@ -179,12 +179,12 @@ function exportFilteredModelsList(
           }
 
           // do not handle array properties from field labels map when we have arrayProps set on the model
-          if (!isJSONXMLExport && /(\[]|\.)/.test(propertyName) && ignoreArrayFieldLabels) {
+          if (!isJSONXMLExport && propertyName.indexOf('[]') > -1 && ignoreArrayFieldLabels) {
             return;
           }
 
           // if a flat file is exported, data needs to be flattened, include 3 elements for each array
-          if (!isJSONXMLExport && /(\[]|\.)/.test(propertyName)) {
+          if (!isJSONXMLExport && propertyName.indexOf('[]') > -1) {
             // determine if we need to include parent token
             let parentToken;
             const parentIndex = propertyName.indexOf('.');
@@ -215,7 +215,7 @@ function exportFilteredModelsList(
               headers.push(...modelPropertiesExpandOnFlatFiles[propertyName]);
             } else {
               headers.push({
-                id: propertyName,
+                id: propertyName.replace(/\./g, ' '),
                 // use correct label translation for user language
                 header: dictionary.getTranslation(fieldLabelsMap[propertyName])
               });
