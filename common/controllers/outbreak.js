@@ -8851,6 +8851,15 @@ module.exports = function (Outbreak) {
     app.models.case
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
+        // fix for some filter options received from web ( e.g $elemMatch search in array properties )
+        filter = filter || {};
+        Object.assign(
+          filter,
+          app.utils.remote.convertLoopbackFilterToMongo({
+            where: filter.where || {}
+          })
+        );
+
         // find follow-ups using filter
         return app.models.case.find(filter);
       })
@@ -8870,6 +8879,15 @@ module.exports = function (Outbreak) {
     app.models.case
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
+        // fix for some filter options received from web ( e.g $elemMatch search in array properties )
+        filter = filter || {};
+        Object.assign(
+          filter,
+          app.utils.remote.convertLoopbackFilterToMongo({
+            where: filter.where || {}
+          })
+        );
+
         // count using query
         return app.models.case.count(filter.where);
       })
