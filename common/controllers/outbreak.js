@@ -1011,8 +1011,8 @@ module.exports = function (Outbreak) {
     }
 
     // parse start/end dates from request
-    let followupStartDate = moment(data.startDate);
-    let followupEndDate = moment(data.endDate);
+    let followupStartDate = genericHelpers.getDate(data.startDate);
+    let followupEndDate = genericHelpers.getDateEndOfDay(data.endDate);
 
     // sanity checks for dates
     let invalidFollowUpDates = [];
@@ -1124,8 +1124,8 @@ module.exports = function (Outbreak) {
             return FollowupGeneration
               .getContactFollowups(followupStartDate.toDate(), followupEndDate.toDate(), contacts.map(c => c.id))
               .then((followUpGroups) => {
-                // create a promise queue for handling database operations
-                const promiseQueue = FollowupGeneration.createPromiseQueue(options);
+                // create promise queues for handling database operations
+                const dbOpsQueue = FollowupGeneration.dbOperationsQueue(options);
 
                 let pool = new PromisePool(
                   contacts.map((contact) => {
@@ -1149,8 +1149,8 @@ module.exports = function (Outbreak) {
                           targeted
                         );
 
-                        promiseQueue.addFollowUps(generateResult.add);
-                        promiseQueue.removeFollowUps(generateResult.remove);
+                        dbOpsQueue.enqueueForInsert(generateResult.add);
+                        dbOpsQueue.enqueueForRecreate(generateResult.update);
                       });
                   }),
                   100 // concurrency limit
@@ -1159,11 +1159,11 @@ module.exports = function (Outbreak) {
                 let poolPromise = pool.start();
 
                 return poolPromise
-                // make sure the queue has emptied
-                  .then(() => promiseQueue.internalQueue.onIdle())
+                  // make sure the queue has emptied
+                  .then(() => dbOpsQueue.internalQueue.onIdle())
                   // settle any remaining items that didn't reach the batch size
-                  .then(() => promiseQueue.settleRemaining())
-                  .then(() => promiseQueue.insertedCount());
+                  .then(() => dbOpsQueue.settleRemaining())
+                  .then(() => dbOpsQueue.insertedCount());
               });
           });
       })

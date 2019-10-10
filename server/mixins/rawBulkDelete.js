@@ -76,4 +76,37 @@ module.exports = function (Model) {
         return result;
       });
   };
+
+  Model.rawBulkHardDelete = function (query) {
+    // query id and timer (for logging purposes)
+    const queryId = Uuid.v4();
+    const timer = new Timer();
+    timer.start();
+
+
+    // if there is a default scope query
+    if (defaultScopeQuery) {
+      // merge it in the sent query
+      query = {
+        $and: [
+          defaultScopeQuery,
+          query
+        ]
+      };
+    }
+
+    query = App.utils.remote.convertLoopbackFilterToMongo(query);
+
+    // log usage
+    App.logger.debug(`[QueryId: ${queryId}] Performing MongoDB operation on collection '${collectionName}': hard delete ${JSON.stringify(query)}`);
+
+    // perform a bulk update on the mongodb native driver
+    // with 'deleted: true' operation (soft delete)
+    return App.dataSources.mongoDb.connector.collection(collectionName)
+      .deleteMany(query)
+      .then((result) => {
+        App.logger.debug(`[QueryId: ${queryId}] MongoDB bulk delete completed after ${timer.getElapsedMilliseconds()} msec`);
+        return result;
+      });
+  };
 };

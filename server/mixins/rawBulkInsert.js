@@ -40,7 +40,7 @@ module.exports = function (Model) {
     // get through each record and attach author fields (timestamps and 'by' fields)
     data = data.map((record) => {
       // create unique id
-      record._id = Uuid();
+      record._id = record.id || Uuid();
 
       // enable soft delete feature
       record.deleted = false;
