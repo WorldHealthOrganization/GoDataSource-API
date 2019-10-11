@@ -183,6 +183,53 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
 }
 
 /**
+ * Calculate maxim number of items an array properties has across multiple records
+ * @param records
+ */
+function getArrayPropertiesMaxLength(records) {
+  const result = {};
+
+  // go through each field in each record, build a map of all array properties and nested array properties
+  // and their lengths
+  for (let record of records) {
+    (function traverse(obj, ref) {
+      for (let prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+          const resultPropRef = `${ref ? ref + '.' : ''}${prop}`;
+          if (Array.isArray(obj[prop])) {
+            result[resultPropRef] = result[resultPropRef] || [];
+            result[resultPropRef].push(obj[prop].length);
+
+            for (let arrProp of obj[prop]) {
+              if (typeof arrProp === 'object' && arrProp !== null && !Array.isArray(obj[prop])) {
+                traverse(arrProp, `${resultPropRef}[]`);
+              }
+            }
+          }
+          if (typeof obj[prop] === 'object' && obj[prop] !== null && !Array.isArray(obj[prop])) {
+            traverse(obj[prop], resultPropRef);
+          }
+        }
+      }
+    })(record);
+  }
+
+  // keep only the highest length in the map
+  for (let prop in result) {
+    if (result.hasOwnProperty(prop)) {
+      let max = 0;
+      if (result[prop].length) {
+        max = Math.max(...result[prop]);
+      }
+      result[prop] = {
+        maxItems: max
+      };
+    }
+  }
+  return result;
+}
+
+/**
  * Get a list of distinct values for each property of the dataset
  * @param dataSet
  */
@@ -549,6 +596,14 @@ module.exports = function (ImportableFile) {
                     callback(null, results[modelName]);
                   })
                   .catch(callback);
+              });
+            }
+
+            // get array properties maximum length for non-flat files
+            if (['.json', '.xml'].includes(extension)) {
+              steps.push(callback => {
+                results[modelName].fileArrayHeaders = getArrayPropertiesMaxLength(dataSet);
+                return callback(null, results[modelName]);
               });
             }
 
