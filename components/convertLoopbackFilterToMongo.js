@@ -68,6 +68,7 @@ function convert(loopbackFilter) {
       .replace(/"ne"/g, '"$ne"')
       .replace(/"exists"/g, '"$exists"')
       .replace(/"not"/g, '"$not"')
+      .replace(/"elemMatch"/g, '"$elemMatch"')
       .replace(/"type":"null"/g, '"$type":"null"')
   );
   // dates need to be date object
