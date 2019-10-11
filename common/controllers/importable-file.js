@@ -184,32 +184,34 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
 
 /**
  * Calculate maxim number of items an array properties has across multiple records
- * @param fieldsMap
- * @param arrayProps
- * @param dataset
- * @param dictionary
+ * @param records
  */
-function getArrayPropertiesMaxLength({ fieldsMap, arrayProps, dataset, dictionary }) {
+function getArrayPropertiesMaxLength(records) {
   const result = {};
 
-  // translate the array fields, cause dataset contains translations as property names
-  const arrayFieldsTranslationsMap = {};
-  for (let propName in arrayProps) {
-    if (arrayProps.hasOwnProperty(propName)) {
-      result[propName] = [];
-      arrayFieldsTranslationsMap[dictionary.getTranslation(fieldsMap[propName])] = propName;
-    }
-  }
+  // go through each field in each record, build a map of all array properties and nested array properties
+  // and their lengths
+  for (let record of records) {
+    (function traverse(obj, ref) {
+      for (let prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+          const resultPropRef = `${ref ? ref + '.' : ''}${prop}`;
+          if (Array.isArray(obj[prop])) {
+            result[resultPropRef] = result[resultPropRef] || [];
+            result[resultPropRef].push(obj[prop].length);
 
-  // go through each record, store array props lengths
-  for (let record of dataset) {
-    for (let propName in arrayFieldsTranslationsMap) {
-      if (arrayFieldsTranslationsMap.hasOwnProperty(propName)) {
-        if (Array.isArray(record[propName])) {
-          result[arrayFieldsTranslationsMap[propName]].push(record[propName].length);
+            for (let arrProp of obj[prop]) {
+              if (typeof arrProp === 'object' && arrProp !== null && !Array.isArray(obj[prop])) {
+                traverse(arrProp, `${resultPropRef}[]`);
+              }
+            }
+          }
+          if (typeof obj[prop] === 'object' && obj[prop] !== null && !Array.isArray(obj[prop])) {
+            traverse(obj[prop], resultPropRef);
+          }
         }
       }
-    }
+    })(record);
   }
 
   // keep only the highest length in the map
@@ -597,18 +599,10 @@ module.exports = function (ImportableFile) {
               });
             }
 
-            // get array properties maximum length for non-flat files and models that actually support this
-            if (['.json', '.xml'].includes(extension) && app.models[modelName].arrayProps) {
+            // get array properties maximum length for non-flat files
+            if (['.json', '.xml'].includes(extension)) {
               steps.push(callback => {
-                results[modelName].modelArrayProperties = Object.assign(
-                  results[modelName].modelArrayProperties,
-                  getArrayPropertiesMaxLength({
-                    fieldsMap: fieldLabelsMap,
-                    arrayProps: app.models[modelName].arrayProps,
-                    dataset: dataSet,
-                    dictionary: languageDictionary
-                  })
-                );
+                results[modelName].fileArrayHeaders = getArrayPropertiesMaxLength(dataSet);
                 return callback(null, results[modelName]);
               });
             }
