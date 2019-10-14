@@ -4,7 +4,6 @@ const app = require('../../server/server');
 const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
-const config = require('../../server/config.json');
 const bcrypt = require('bcrypt');
 
 module.exports = function (User) {
@@ -142,6 +141,7 @@ module.exports = function (User) {
 
       // second parameter should also be resolved as a template
       // it contains the reset password url
+      const config = JSON.parse(fs.readFileSync(path.resolve(`${__dirname}/../../server/config.json`)));
       const url = `${config.public.protocol}://${config.public.host}:${config.public.port}${config.passwordReset.path}`;
       paragraph2 = _.template(paragraph2, {interpolate: /{{([\s\S]+?)}}/g})({resetHref: `${url}?token=${info.accessToken.id}`});
 
