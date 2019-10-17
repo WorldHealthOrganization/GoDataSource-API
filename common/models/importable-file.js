@@ -96,7 +96,7 @@ module.exports = function (ImportableFile) {
     };
 
     const arrayProps = app.models[modelName].arrayProps;
-    if (arrayProps) {
+    if (arrayProps || questionnaire) {
       parserOpts.explicitArray = false;
     }
 
@@ -114,6 +114,8 @@ module.exports = function (ImportableFile) {
       if (typeof records === 'object' && !Array.isArray(records)) {
         records = [records];
       }
+
+      // parse questionnaire template
 
       // build a list of headers
       const headers = [];
@@ -236,7 +238,7 @@ module.exports = function (ImportableFile) {
    * @param dictionary
    * @return {*}
    */
-  ImportableFile.storeFileAndGetHeaders = function (file, decryptPassword, modelName, dictionary, callback) {
+  ImportableFile.storeFileAndGetHeaders = function (file, decryptPassword, modelName, dictionary, questionnaire, callback) {
     // get file extension
     const extension = path.extname(file.name);
     // if extension is invalid
@@ -282,7 +284,7 @@ module.exports = function (ImportableFile) {
       decryptFile
         .then(function (buffer) {
           // get file headers
-          getHeaders({ data: buffer, modelName, dictionary }, function (error, result) {
+          getHeaders({ data: buffer, modelName, dictionary, questionnaire }, function (error, result) {
             // handle error
             if (error) {
               return callback(error);
