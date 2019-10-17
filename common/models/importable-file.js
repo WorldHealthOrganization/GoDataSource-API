@@ -8,6 +8,7 @@ const xlsx = require('xlsx');
 const os = require('os');
 const uuid = require('uuid');
 const sort = require('alphanum-sort');
+const templateParser = require('../../components/templateParser');
 
 module.exports = function (ImportableFile) {
 
@@ -95,9 +96,22 @@ module.exports = function (ImportableFile) {
       explicitRoot: false
     };
 
+    const questionsTypeMap = {};
     const arrayProps = app.models[modelName].arrayProps;
-    if (arrayProps || questionnaire) {
+    if (arrayProps && questionnaire) {
       parserOpts.explicitArray = false;
+
+      // build a map of questions and their types
+      (function traverse(questions) {
+        return (questions || []).map(q => {
+          questionsTypeMap[q.variable] = q.answerType;
+          if (Array.isArray(q.answers) && q.answers.length) {
+            for (let a of q.answers) {
+              traverse(a.additionalQuestions);
+            }
+          }
+        });
+      })(questionnaire.toJSON());
     }
 
     // parse XML string
@@ -115,8 +129,6 @@ module.exports = function (ImportableFile) {
         records = [records];
       }
 
-      // parse questionnaire template
-
       // build a list of headers
       const headers = [];
       records = records.map(record => {
@@ -130,6 +142,33 @@ module.exports = function (ImportableFile) {
             }
           }
         }
+
+        // parse questions from XML
+        // make sure multi answers/multi date questions are of type array
+        if (record.questionnaireAnswers && Object.keys(questionsTypeMap).length) {
+          for (let q in record.questionnaireAnswers) {
+            if (record.questionnaireAnswers.hasOwnProperty(q)) {
+              const questionType = questionsTypeMap[q];
+
+              // make sure answers is an array
+              if (!Array.isArray(record.questionnaireAnswers[q])) {
+                record.questionnaireAnswers[q] = [record.questionnaireAnswers[q]];
+              }
+              if (questionType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
+                // go through each answers, make sure value is array
+                record.questionnaireAnswers[q] = record.questionnaireAnswers[q].map(a => {
+                  if (!Array.isArray(a.value)) {
+                    a.value = [a.value];
+                  }
+                  return a;
+                });
+              }
+            }
+          }
+        }
+
+        // in XML files, we can't specify null values
+        // so we have to convert invalid dates (empty strings) into null
 
         // go through all properties of flatten item
         Object.keys(app.utils.helpers.getFlatObject(record))
