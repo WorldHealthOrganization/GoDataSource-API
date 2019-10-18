@@ -166,9 +166,6 @@ module.exports = function (ImportableFile) {
           }
         }
 
-        // in XML files, we can't specify null values
-        // so we have to convert invalid dates (empty strings) into null
-
         // go through all properties of flatten item
         Object.keys(app.utils.helpers.getFlatObject(record))
           .forEach(function (property) {
