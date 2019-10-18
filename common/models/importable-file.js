@@ -8,7 +8,6 @@ const xlsx = require('xlsx');
 const os = require('os');
 const uuid = require('uuid');
 const sort = require('alphanum-sort');
-const templateParser = require('../../components/templateParser');
 
 module.exports = function (ImportableFile) {
 
@@ -184,7 +183,6 @@ module.exports = function (ImportableFile) {
               headers.push(sanitizedProperty);
             }
         });
-
         return record;
       });
       // send back the parsed object and its headers

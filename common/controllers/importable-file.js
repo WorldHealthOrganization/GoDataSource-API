@@ -451,247 +451,247 @@ module.exports = function (ImportableFile) {
                 // questionnaire template
                 outbreak[app.models[modelName].extendedForm.template],
                 function (error, result) {
-                // handle errors
-                if (error) {
-                  return callback(error);
-                }
-
-                // get file extension
-                const extension = path.extname(file.name);
-
-                // keep e reference to parsed content
-                const dataSet = result.jsonObj;
-                // define main result
-                result = {
-                  id: result.id,
-                  fileHeaders: result.headers,
-                  distinctFileColumnValues: {}
-                };
-                // store results for multiple models
-                const results = {};
-                // define language dictionary, it will be updated (conditionally) later
-                let languageDictionary = {};
-                // define normalized headers, they will be updated (conditionally) later
-                let normalizedHeaders = {};
-                // store a list of steps that will be executed
-                const steps = [];
-                // store main model name
-                const mainModelName = modelName;
-
-                // go through the list of models associated with the passed model name
-                getModelNamesFor(modelName).forEach(function (modelName) {
-
-                  // each model has its own results
-                  results[modelName] = {
-                    modelProperties: {},
-                    suggestedFieldMapping: {},
-                    modelPropertyValues: {},
-                    modelArrayProperties: {}
-                  };
-
-                  // if a valid model was provided, and file headers were found
-                  if (modelName && app.models[modelName] && result.fileHeaders.length) {
-
-                    // normalize the headers if they were not previously normalized
-                    if (!Object.keys(normalizedHeaders).length) {
-                      // normalize file headers
-                      normalizedHeaders = result.fileHeaders.map(function (header) {
-                        return stripSpecialCharsToLowerCase(header);
-                      });
-                    }
-
-                    // if the model has importable properties or the model uses extended form, load up language dictionary (if it was not previously loaded)
-                    // it will be used for mapping suggestions
-                    if (
-                      languageDictionary.getTranslation === undefined &&
-                      (
-                        app.models[modelName]._importableProperties && app.models[modelName]._importableProperties.length ||
-                        outbreakId !== undefined && app.models[modelName].extendedForm && app.models[modelName].extendedForm.template
-                      )
-                    ) {
-                      steps.push(function (callback) {
-                        // get user information from request options
-                        const contextUser = app.utils.remote.getUserFromOptions(options);
-                        // load language dictionary for the user
-                        app.models.language
-                          .getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-                            // handle error
-                            if (error) {
-                              return callback(error);
-                            }
-                            languageDictionary = dictionary;
-                            callback(null, dictionary);
-                          });
-                      });
-                    }
-
-                    // get model's field labels map
-                    const fieldLabelsMap = app.models[modelName].fieldLabelsMap || {};
-                    // if the model has importable properties, get their headers and try to suggest some mappings
-                    if (app.models[modelName]._importableProperties && app.models[modelName]._importableProperties.length) {
-                      steps.push(function (callback) {
-                        // normalize model headers (property labels)
-                        const normalizedModelProperties = app.models[modelName]._importableProperties.map(function (property) {
-                          // split the property in sub components
-                          const propertyComponents = property.split('.');
-                          // if there are sub components
-                          if (propertyComponents.length > 1) {
-                            // define parent component
-                            if (!results[modelName].modelProperties[propertyComponents[0]]) {
-                              results[modelName].modelProperties[propertyComponents[0]] = {};
-                            }
-                            // 3rd nested level (geo-locations)
-                            if (propertyComponents.length > 2) {
-                              // define parent (sub)component
-                              if (!results[modelName].modelProperties[propertyComponents[0]][propertyComponents[1]]) {
-                                results[modelName].modelProperties[propertyComponents[0]][propertyComponents[1]] = {};
-                              }
-                              // store the sub component under parent (sub)component
-                              results[modelName].modelProperties[propertyComponents[0]][propertyComponents[1]][propertyComponents[2]] = fieldLabelsMap[property];
-                            } else {
-                              // store the sub component under parent component
-                              results[modelName].modelProperties[propertyComponents[0]][propertyComponents[1]] = fieldLabelsMap[property];
-                            }
-                          } else {
-                            // no sub components, store property directly
-                            results[modelName].modelProperties[property] = fieldLabelsMap[property];
-                          }
-                          return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(fieldLabelsMap[property]));
-                        });
-
-                        // try to find mapping suggestions between file headers and model headers (property labels)
-                        normalizedHeaders.forEach(function (normalizedHeader, index) {
-                          let propIndex = normalizedModelProperties.indexOf(normalizedHeader);
-                          if (propIndex !== -1) {
-                            results[modelName].suggestedFieldMapping[result.fileHeaders[index]] = app.models[modelName]._importableProperties[propIndex];
-                          }
-                        });
-                        callback(null, results[modelName]);
-                      });
-                    }
-
-                    // if the model uses reference data for its properties
-                    if (app.models[modelName].referenceDataFieldsToCategoryMap) {
-                      // get distinct property values
-                      result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
-                      steps.push(function (callback) {
-                        // get reference data
-                        getReferenceDataAvailableValuesForModel(outbreakId, modelName)
-                          .then(function (referenceDataValues) {
-                            // update result
-                            results[modelName] = Object.assign({}, results[modelName], {modelPropertyValues: _.merge(results[modelName].modelPropertyValues, referenceDataValues)});
-                            callback(null, results[modelName]);
-                          })
-                          .catch(callback);
-                      });
-                    }
-                    // if the model uses locations for its properties
-                    if (app.models[modelName].locationFields) {
-                      // get distinct property values (if not taken already)
-                      if (!Object.keys(result.distinctFileColumnValues).length) {
-                        result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
-                      }
-                      steps.push(function (callback) {
-                        // get location values
-                        getLocationAvailableValuesForModel(outbreakId, modelName)
-                          .then(function (locationValues) {
-                            // update result
-                            results[modelName] = Object.assign({}, results[modelName], {modelPropertyValues: _.merge(results[modelName].modelPropertyValues, locationValues)});
-                            callback(null, results[modelName]);
-                          })
-                          .catch(callback);
-                      });
-                    }
-
-                    // if outbreakId was sent (templates are stored at outbreak level) and the model uses extended form template
-                    if (outbreakId !== undefined && app.models[modelName].extendedForm && app.models[modelName].extendedForm.template) {
-                      // get distinct property values (if not taken already)
-                      if (!Object.keys(result.distinctFileColumnValues).length) {
-                        result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
-                      }
-                      // get mapping suggestions for extended form
-                      steps.push(function (callback) {
-                        getMappingSuggestionsForModelExtendedForm(outbreakId, extension, modelName, result.fileHeaders, normalizedHeaders, languageDictionary, dataSet, fieldLabelsMap)
-                          .then(function (_result) {
-                            // update result
-                            results[modelName] = Object.assign(
-                              {}, results[modelName],
-                              {suggestedFieldMapping: Object.assign(results[modelName].suggestedFieldMapping, _result.suggestedFieldMapping)},
-                              {modelProperties: Object.assign(results[modelName].modelProperties, _result.modelProperties)},
-                              {modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, _result.modelPropertyValues)},
-                              {modelArrayProperties: Object.assign(results[modelName].modelArrayProperties, _result.modelArrayProperties)}
-                            );
-                            callback(null, results[modelName]);
-                          })
-                          .catch(callback);
-                      });
-                    }
-
-                    // get array properties maximum length for non-flat files
-                    if (['.json', '.xml'].includes(extension)) {
-                      steps.push(callback => {
-                        results[modelName].fileArrayHeaders = getArrayPropertiesMaxLength(dataSet);
-                        return callback(null, results[modelName]);
-                      });
-                    }
-
-                    // reference data has categoryId as a 'reference data' type but is not related to other reference data, it is reference data
-                    if (modelName === app.models.referenceData.modelName) {
-                      steps.push(function (callback) {
-                        // get distinct column values (if not taken already) (to map categoyId)
-                        if (!Object.keys(result.distinctFileColumnValues).length) {
-                          result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
-                        }
-                        // add categoryId as a reference data item
-                        results[modelName] = Object.assign({}, results[modelName], {
-                          modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, {
-                            categoryId: app.models.referenceData.availableCategories.map(item => Object.assign({label: item.name}, item))
-                          })
-                        });
-                        callback();
-                      });
-                    }
-                  }
-                });
-
-                // execute the list of steps
-                async.series(steps, function (error) {
                   // handle errors
                   if (error) {
                     return callback(error);
                   }
 
-                  // when everything is done, merge the results
-                  Object.keys(results).forEach(function (modelName) {
-                    // if the model in not the main one, store its results in a container with its name
-                    if (modelName !== mainModelName) {
+                  // get file extension
+                  const extension = path.extname(file.name);
 
-                      // rebuild suggestions for result
-                      const suggestedFieldMapping = {};
-                      // prefix all suggestions with model (container) name
-                      Object.keys(results[modelName].suggestedFieldMapping).forEach(function (fileHeader) {
-                        suggestedFieldMapping[fileHeader] = `${modelName}.${results[modelName].suggestedFieldMapping[fileHeader]}`;
-                      });
+                  // keep e reference to parsed content
+                  const dataSet = result.jsonObj;
+                  // define main result
+                  result = {
+                    id: result.id,
+                    fileHeaders: result.headers,
+                    distinctFileColumnValues: {}
+                  };
+                  // store results for multiple models
+                  const results = {};
+                  // define language dictionary, it will be updated (conditionally) later
+                  let languageDictionary = {};
+                  // define normalized headers, they will be updated (conditionally) later
+                  let normalizedHeaders = {};
+                  // store a list of steps that will be executed
+                  const steps = [];
+                  // store main model name
+                  const mainModelName = modelName;
 
-                      // update result
-                      result = Object.assign(
-                        {},
-                        result,
-                        // main model takes precedence on mapping
-                        {suggestedFieldMapping: Object.assign(suggestedFieldMapping, result.suggestedFieldMapping)},
-                        {modelProperties: Object.assign(result.modelProperties, {[modelName]: results[modelName].modelProperties})},
-                        {modelPropertyValues: Object.assign(result.modelPropertyValues, {[modelName]: results[modelName].modelPropertyValues})}
-                      );
-                    } else {
-                      // main model results stay on first level
-                      result = Object.assign({}, result, results[modelName]);
+                  // go through the list of models associated with the passed model name
+                  getModelNamesFor(modelName).forEach(function (modelName) {
+
+                    // each model has its own results
+                    results[modelName] = {
+                      modelProperties: {},
+                      suggestedFieldMapping: {},
+                      modelPropertyValues: {},
+                      modelArrayProperties: {}
+                    };
+
+                    // if a valid model was provided, and file headers were found
+                    if (modelName && app.models[modelName] && result.fileHeaders.length) {
+
+                      // normalize the headers if they were not previously normalized
+                      if (!Object.keys(normalizedHeaders).length) {
+                        // normalize file headers
+                        normalizedHeaders = result.fileHeaders.map(function (header) {
+                          return stripSpecialCharsToLowerCase(header);
+                        });
+                      }
+
+                      // if the model has importable properties or the model uses extended form, load up language dictionary (if it was not previously loaded)
+                      // it will be used for mapping suggestions
+                      if (
+                        languageDictionary.getTranslation === undefined &&
+                        (
+                          app.models[modelName]._importableProperties && app.models[modelName]._importableProperties.length ||
+                          outbreakId !== undefined && app.models[modelName].extendedForm && app.models[modelName].extendedForm.template
+                        )
+                      ) {
+                        steps.push(function (callback) {
+                          // get user information from request options
+                          const contextUser = app.utils.remote.getUserFromOptions(options);
+                          // load language dictionary for the user
+                          app.models.language
+                            .getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+                              // handle error
+                              if (error) {
+                                return callback(error);
+                              }
+                              languageDictionary = dictionary;
+                              callback(null, dictionary);
+                            });
+                        });
+                      }
+
+                      // get model's field labels map
+                      const fieldLabelsMap = app.models[modelName].fieldLabelsMap || {};
+                      // if the model has importable properties, get their headers and try to suggest some mappings
+                      if (app.models[modelName]._importableProperties && app.models[modelName]._importableProperties.length) {
+                        steps.push(function (callback) {
+                          // normalize model headers (property labels)
+                          const normalizedModelProperties = app.models[modelName]._importableProperties.map(function (property) {
+                            // split the property in sub components
+                            const propertyComponents = property.split('.');
+                            // if there are sub components
+                            if (propertyComponents.length > 1) {
+                              // define parent component
+                              if (!results[modelName].modelProperties[propertyComponents[0]]) {
+                                results[modelName].modelProperties[propertyComponents[0]] = {};
+                              }
+                              // 3rd nested level (geo-locations)
+                              if (propertyComponents.length > 2) {
+                                // define parent (sub)component
+                                if (!results[modelName].modelProperties[propertyComponents[0]][propertyComponents[1]]) {
+                                  results[modelName].modelProperties[propertyComponents[0]][propertyComponents[1]] = {};
+                                }
+                                // store the sub component under parent (sub)component
+                                results[modelName].modelProperties[propertyComponents[0]][propertyComponents[1]][propertyComponents[2]] = fieldLabelsMap[property];
+                              } else {
+                                // store the sub component under parent component
+                                results[modelName].modelProperties[propertyComponents[0]][propertyComponents[1]] = fieldLabelsMap[property];
+                              }
+                            } else {
+                              // no sub components, store property directly
+                              results[modelName].modelProperties[property] = fieldLabelsMap[property];
+                            }
+                            return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(fieldLabelsMap[property]));
+                          });
+
+                          // try to find mapping suggestions between file headers and model headers (property labels)
+                          normalizedHeaders.forEach(function (normalizedHeader, index) {
+                            let propIndex = normalizedModelProperties.indexOf(normalizedHeader);
+                            if (propIndex !== -1) {
+                              results[modelName].suggestedFieldMapping[result.fileHeaders[index]] = app.models[modelName]._importableProperties[propIndex];
+                            }
+                          });
+                          callback(null, results[modelName]);
+                        });
+                      }
+
+                      // if the model uses reference data for its properties
+                      if (app.models[modelName].referenceDataFieldsToCategoryMap) {
+                        // get distinct property values
+                        result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
+                        steps.push(function (callback) {
+                          // get reference data
+                          getReferenceDataAvailableValuesForModel(outbreakId, modelName)
+                            .then(function (referenceDataValues) {
+                              // update result
+                              results[modelName] = Object.assign({}, results[modelName], {modelPropertyValues: _.merge(results[modelName].modelPropertyValues, referenceDataValues)});
+                              callback(null, results[modelName]);
+                            })
+                            .catch(callback);
+                        });
+                      }
+                      // if the model uses locations for its properties
+                      if (app.models[modelName].locationFields) {
+                        // get distinct property values (if not taken already)
+                        if (!Object.keys(result.distinctFileColumnValues).length) {
+                          result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
+                        }
+                        steps.push(function (callback) {
+                          // get location values
+                          getLocationAvailableValuesForModel(outbreakId, modelName)
+                            .then(function (locationValues) {
+                              // update result
+                              results[modelName] = Object.assign({}, results[modelName], {modelPropertyValues: _.merge(results[modelName].modelPropertyValues, locationValues)});
+                              callback(null, results[modelName]);
+                            })
+                            .catch(callback);
+                        });
+                      }
+
+                      // if outbreakId was sent (templates are stored at outbreak level) and the model uses extended form template
+                      if (outbreakId !== undefined && app.models[modelName].extendedForm && app.models[modelName].extendedForm.template) {
+                        // get distinct property values (if not taken already)
+                        if (!Object.keys(result.distinctFileColumnValues).length) {
+                          result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
+                        }
+                        // get mapping suggestions for extended form
+                        steps.push(function (callback) {
+                          getMappingSuggestionsForModelExtendedForm(outbreakId, extension, modelName, result.fileHeaders, normalizedHeaders, languageDictionary, dataSet, fieldLabelsMap)
+                            .then(function (_result) {
+                              // update result
+                              results[modelName] = Object.assign(
+                                {}, results[modelName],
+                                {suggestedFieldMapping: Object.assign(results[modelName].suggestedFieldMapping, _result.suggestedFieldMapping)},
+                                {modelProperties: Object.assign(results[modelName].modelProperties, _result.modelProperties)},
+                                {modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, _result.modelPropertyValues)},
+                                {modelArrayProperties: Object.assign(results[modelName].modelArrayProperties, _result.modelArrayProperties)}
+                              );
+                              callback(null, results[modelName]);
+                            })
+                            .catch(callback);
+                        });
+                      }
+
+                      // get array properties maximum length for non-flat files
+                      if (['.json', '.xml'].includes(extension)) {
+                        steps.push(callback => {
+                          results[modelName].fileArrayHeaders = getArrayPropertiesMaxLength(dataSet);
+                          return callback(null, results[modelName]);
+                        });
+                      }
+
+                      // reference data has categoryId as a 'reference data' type but is not related to other reference data, it is reference data
+                      if (modelName === app.models.referenceData.modelName) {
+                        steps.push(function (callback) {
+                          // get distinct column values (if not taken already) (to map categoyId)
+                          if (!Object.keys(result.distinctFileColumnValues).length) {
+                            result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
+                          }
+                          // add categoryId as a reference data item
+                          results[modelName] = Object.assign({}, results[modelName], {
+                            modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, {
+                              categoryId: app.models.referenceData.availableCategories.map(item => Object.assign({label: item.name}, item))
+                            })
+                          });
+                          callback();
+                        });
+                      }
                     }
                   });
 
-                  // send back the result
-                  callback(null, result);
+                  // execute the list of steps
+                  async.series(steps, function (error) {
+                    // handle errors
+                    if (error) {
+                      return callback(error);
+                    }
+
+                    // when everything is done, merge the results
+                    Object.keys(results).forEach(function (modelName) {
+                      // if the model in not the main one, store its results in a container with its name
+                      if (modelName !== mainModelName) {
+
+                        // rebuild suggestions for result
+                        const suggestedFieldMapping = {};
+                        // prefix all suggestions with model (container) name
+                        Object.keys(results[modelName].suggestedFieldMapping).forEach(function (fileHeader) {
+                          suggestedFieldMapping[fileHeader] = `${modelName}.${results[modelName].suggestedFieldMapping[fileHeader]}`;
+                        });
+
+                        // update result
+                        result = Object.assign(
+                          {},
+                          result,
+                          // main model takes precedence on mapping
+                          {suggestedFieldMapping: Object.assign(suggestedFieldMapping, result.suggestedFieldMapping)},
+                          {modelProperties: Object.assign(result.modelProperties, {[modelName]: results[modelName].modelProperties})},
+                          {modelPropertyValues: Object.assign(result.modelPropertyValues, {[modelName]: results[modelName].modelPropertyValues})}
+                        );
+                      } else {
+                        // main model results stay on first level
+                        result = Object.assign({}, result, results[modelName]);
+                      }
+                    });
+
+                    // send back the result
+                    callback(null, result);
+                  });
                 });
-              });
             });
 
         });
