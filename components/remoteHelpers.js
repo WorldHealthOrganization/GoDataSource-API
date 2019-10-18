@@ -214,11 +214,8 @@ function exportFilteredModelsList(
             ) {
               headers.push(...modelPropertiesExpandOnFlatFiles[propertyName]);
             } else {
-              if (!isJSONXMLExport) {
-                propertyName = propertyName.replace(/\./g, ' ');
-              }
               headers.push({
-                id: propertyName,
+                id: !isJSONXMLExport ? propertyName.replace(/\./g, ' ') : propertyName,
                 // use correct label translation for user language
                 header: dictionary.getTranslation(fieldLabelsMap[propertyName])
               });
