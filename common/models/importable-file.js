@@ -182,7 +182,7 @@ module.exports = function (ImportableFile) {
             if (!headers.includes(sanitizedProperty)) {
               headers.push(sanitizedProperty);
             }
-        });
+          });
         return record;
       });
       // send back the parsed object and its headers
