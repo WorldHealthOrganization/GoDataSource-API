@@ -133,11 +133,11 @@ module.exports = function (ImportableFile) {
    */
   function getSpreadSheetHeaders(fileContent, callback) {
     // parse XLS data
-    const parsedData = xlsx.read(fileContent, {cellDates: true, cellNF: false, cellText: false});
+    const parsedData = xlsx.read(fileContent, { raw: true, cellText: false });
     // extract first sheet name (we only care about first sheet)
     let sheetName = parsedData.SheetNames.shift();
     // convert data to JSON
-    let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName], {dateNF: 'YYYY-MM-DD\'T\'hh:mm:ss.000\'Z\''});
+    let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName]);
     // get columns by walking through the keys and using only the first row
     const columns = sort(Object.keys(parsedData.Sheets[sheetName]).filter(function (item) {
       // ignore ref property
