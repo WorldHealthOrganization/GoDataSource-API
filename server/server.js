@@ -99,9 +99,9 @@ app.start = function () {
     });
   });
 
-  // remove default socket timeout and set it to unlimited
+  // remove default socket timeout and set it 12 hours
   // ref: https://nodejs.org/dist/latest-v12.x/docs/api/http.html#http_server_timeout
-  server.timeout = 0;
+  server.timeout = 43200000;
 
   return server;
 };
