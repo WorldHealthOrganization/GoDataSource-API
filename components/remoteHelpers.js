@@ -214,10 +214,25 @@ function exportFilteredModelsList(
             ) {
               headers.push(...modelPropertiesExpandOnFlatFiles[propertyName]);
             } else {
+              let headerTranslation = dictionary.getTranslation(fieldLabelsMap[propertyName]);
+
+              if (!isJSONXMLExport) {
+                // determine if we need to include parent token
+                let parentToken;
+                const parentIndex = propertyName.indexOf('.');
+                if (parentIndex >= -1) {
+                  const parentKey = propertyName.substr(0, parentIndex);
+                  parentToken = fieldLabelsMap[parentKey];
+                }
+                if (parentToken) {
+                  headerTranslation = dictionary.getTranslation(parentToken) + ' ' + headerTranslation;
+                }
+              }
+
               headers.push({
                 id: !isJSONXMLExport ? propertyName.replace(/\./g, ' ') : propertyName,
                 // use correct label translation for user language
-                header: dictionary.getTranslation(fieldLabelsMap[propertyName])
+                header: headerTranslation
               });
             }
           }
