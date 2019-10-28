@@ -10688,9 +10688,7 @@ module.exports = function (Outbreak) {
                 },
                 {
                   label: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE'),
-                  value: contactData.age && (contactData.age.years > 0 || contactData.age.months > 0) ?
-                    `${contactData.age.years} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${contactData.age.months} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}` :
-                    ''
+                  value: pdfUtils.displayAge(contactData, dictionary)
                 },
                 {
                   label: dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE'),

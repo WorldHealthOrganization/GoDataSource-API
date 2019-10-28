@@ -1058,8 +1058,8 @@ const displayResourceLabels = function (doc, labels, title, options) {
  */
 const displayAge = function (record, dictionary) {
   let age = '';
-  let years = _.get(record, 'contact.age.years', 0);
-  let months = _.get(record, 'contact.age.months', 0);
+  let years = _.get(record, 'age.years', 0);
+  let months = _.get(record, 'age.months', 0);
   if (months > 0) {
     age = `${displayValue(months)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`;
   } else {
