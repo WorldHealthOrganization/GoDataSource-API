@@ -151,7 +151,20 @@ function exportFilteredModelsList(
         const isJSONXMLExport = ['json', 'xml'].includes(exportType);
         const ignoreArrayFieldLabels = Model.hasOwnProperty('arrayProps');
 
-        Object.keys(fieldLabelsMap).forEach(function (propertyName) {
+        // some models may have a specific order for headers
+        let originalFieldsList = Object.keys(fieldLabelsMap);
+        let fieldsList = [];
+        if (Model.exportFieldsOrder) {
+          fieldsList = Model.exportFieldsOrder;
+          // sometimes the order list contains only a subset of the actual fields list
+          if (Model.exportFieldsOrder.length !== originalFieldsList.length) {
+            fieldsList.push(...originalFieldsList.filter(f => Model.exportFieldsOrder.indexOf(f) === -1));
+          }
+        } else {
+          fieldsList = originalFieldsList;
+        }
+
+        fieldsList.forEach(function (propertyName) {
           // new functionality, not supported by all models
           if (!isJSONXMLExport && ignoreArrayFieldLabels && Model.arrayProps[propertyName]) {
             // determine if we need to include parent token
