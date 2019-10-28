@@ -8533,7 +8533,7 @@ module.exports = function (Outbreak) {
                         lastName: _.get(record, 'contact.lastName', ''),
                         firstName: _.get(record, 'contact.firstName', ''),
                         middleName: _.get(record, 'contact.middleName', ''),
-                        age: `${_.get(record, 'contact.age.years', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(record, 'contact.age.months', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
+                        age: pdfUtils.displayAge(record, dictionary),
                         gender: record.gender,
                         location: record.address && record.address.locationId && record.address.locationId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION' && locationsMap[record.address.locationId] ?
                           locationsMap[record.address.locationId].name :
@@ -9922,7 +9922,7 @@ module.exports = function (Outbreak) {
                             lastName: _.get(record, 'lastName', ''),
                             firstName: _.get(record, 'firstName', ''),
                             middleName: _.get(record, 'middleName', ''),
-                            age: `${_.get(record, 'age.years', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(record, 'contact.age.months', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
+                            age: pdfUtils.displayAge(record, dictionary),
                             gender: dictionary.getTranslation(_.get(record, 'gender')),
                             location: record.currentAddress && record.currentAddress.locationId && record.currentAddress.locationId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION' && locationsMap[record.currentAddress.locationId] ?
                               locationsMap[record.currentAddress.locationId].name :
