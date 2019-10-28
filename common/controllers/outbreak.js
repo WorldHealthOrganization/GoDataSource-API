@@ -7721,6 +7721,15 @@ module.exports = function (Outbreak) {
     app.models.followUp
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
+        // replace nested geo points filters
+        filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.followUp,
+          filter.where || {},
+          true,
+          undefined,
+          true
+        );
+
         // find follow-ups using filter
         return app.models.followUp.findAggregate(
           filter
@@ -7742,6 +7751,15 @@ module.exports = function (Outbreak) {
     app.models.followUp
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
+        // replace nested geo points filters
+        filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.followUp,
+          filter.where || {},
+          true,
+          undefined,
+          true
+        );
+
         // count using query
         return app.models.followUp.findAggregate(
           {
@@ -8860,6 +8878,13 @@ module.exports = function (Outbreak) {
           })
         );
 
+        // replace nested geo points filters
+        app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.case,
+          filter.where,
+          true
+        );
+
         // find follow-ups using filter
         return app.models.case.find(filter);
       })
@@ -8886,6 +8911,15 @@ module.exports = function (Outbreak) {
           app.utils.remote.convertLoopbackFilterToMongo({
             where: filter.where || {}
           })
+        );
+
+        // replace nested geo points filters
+        app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.case,
+          filter.where,
+          true,
+          undefined,
+          true
         );
 
         // count using query
@@ -9225,6 +9259,16 @@ module.exports = function (Outbreak) {
     app.models.contact
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
+        // replace nested geo points filters
+        filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.contact,
+          filter.where || {},
+          true,
+          undefined,
+          true,
+          true
+        );
+
         // count using query
         return app.models.contact.count(filter.where);
       })
