@@ -7725,6 +7725,8 @@ module.exports = function (Outbreak) {
         filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
           app.models.followUp,
           filter.where || {},
+          true,
+          undefined,
           true
         );
 
@@ -7753,6 +7755,8 @@ module.exports = function (Outbreak) {
         filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
           app.models.followUp,
           filter.where || {},
+          true,
+          undefined,
           true
         );
 
@@ -8913,6 +8917,8 @@ module.exports = function (Outbreak) {
         app.utils.remote.convertNestedGeoPointsFilterToMongo(
           app.models.case,
           filter.where,
+          true,
+          undefined,
           true
         );
 
@@ -9253,6 +9259,16 @@ module.exports = function (Outbreak) {
     app.models.contact
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
+        // replace nested geo points filters
+        filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.contact,
+          filter.where || {},
+          true,
+          undefined,
+          true,
+          true
+        );
+
         // count using query
         return app.models.contact.count(filter.where);
       })

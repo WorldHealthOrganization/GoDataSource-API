@@ -4,15 +4,15 @@ const _ = require('lodash');
 
 /**
  * Convert nested geo points filters to mongo
- * @param Model
- * @param loopbackWhere
  * @return {any} A new filter ( doesn't change the old one )
  */
 function convert(
   Model,
   loopbackWhere,
   dontClone,
-  listOfGeoPoints
+  listOfGeoPoints,
+  forAggregateQuery,
+  dontUseMongoKeys
 ) {
   // nothing to change ?
   const newWhere = dontClone ? loopbackWhere : _.cloneDeep(loopbackWhere);
@@ -51,12 +51,15 @@ function convert(
             value.near
           ) {
             // add mongo near search criteria
+            const nearKey = forAggregateQuery ?
+              (dontUseMongoKeys ? 'geoNear' : '$geoNear') :
+              (dontUseMongoKeys ? 'near' : '$near');
             if (
               value.near &&
               value.near.lat !== undefined &&
               value.near.lng !== undefined
             ) {
-              value.$near = {
+              value[nearKey] = {
                 $geometry: {
                   type: 'Point',
                   coordinates: [
@@ -72,18 +75,18 @@ function convert(
             } else {
               // either lat & lng are missing, or already a mongo filter
               // in case lat & lng are missing then this will throw an error which is okay because this means that we have a bug somewhere
-              value.$near = value.near;
+              value[nearKey] = value.near;
             }
 
             // add distance limits
-            if (value.$near) {
+            if (value[nearKey]) {
               if (value.maxDistance !== undefined) {
-                value.$near.$maxDistance = typeof value.maxDistance === 'string' ?
+                value[nearKey].$maxDistance = typeof value.maxDistance === 'string' ?
                   parseFloat(value.maxDistance) :
                   value.maxDistance;
               }
               if (value.minDistance !== undefined) {
-                value.$near.$minDistance = typeof value.minDistance === 'string' ?
+                value[nearKey].$minDistance = typeof value.minDistance === 'string' ?
                   parseFloat(value.minDistance) :
                   value.minDistance;
               }
@@ -99,7 +102,9 @@ function convert(
             Model,
             value,
             true,
-            listOfGeoPoints
+            listOfGeoPoints,
+            forAggregateQuery,
+            dontUseMongoKeys
           );
         }
       }
