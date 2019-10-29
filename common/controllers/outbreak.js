@@ -10688,7 +10688,12 @@ module.exports = function (Outbreak) {
                 const firstFollowUpDay = contactData.lastContactDate.clone().add(1, 'days');
 
                 // calculate end day of follow up by taking the last contact day and adding the outbreak period of follow up to it
-                const lastFollowUpDay = genericHelpers.getDateEndOfDay(firstFollowUpDay.clone().add(outbreak.periodOfFollowup, 'days'));
+                const lastFollowUpDay = genericHelpers.getDateEndOfDay(
+                  firstFollowUpDay.clone().add(
+                    // last contact date is inclusive
+                    outbreak.periodOfFollowup > 0 ? outbreak.periodOfFollowup - 1 : 0, 'days'
+                  )
+                );
 
                 // dates headers
                 let dayIndex = 1;
