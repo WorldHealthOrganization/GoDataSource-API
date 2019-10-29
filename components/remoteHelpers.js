@@ -155,13 +155,13 @@ function exportFilteredModelsList(
         let originalFieldsList = Object.keys(fieldLabelsMap);
         let fieldsList = [];
         if (Model.exportFieldsOrder) {
-          fieldsList = Model.exportFieldsOrder;
+          fieldsList = [...Model.exportFieldsOrder];
           // sometimes the order list contains only a subset of the actual fields list
           if (Model.exportFieldsOrder.length !== originalFieldsList.length) {
             fieldsList.push(...originalFieldsList.filter(f => Model.exportFieldsOrder.indexOf(f) === -1));
           }
         } else {
-          fieldsList = originalFieldsList;
+          fieldsList = [...originalFieldsList];
         }
 
         fieldsList.forEach(function (propertyName) {
