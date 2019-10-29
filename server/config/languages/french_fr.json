@@ -3620,7 +3620,16 @@
       "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP": "Follow-up",
       "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_STATUS": "Status",
       "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_QUESTIONNAIRE": "Questionnaire",
-      "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_ADDRESS": "Address"
+      "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_ADDRESS": "Address",
+      "LNG_CONTACT_LIST_SCREEN_NO_CONTACTS": "There are no contacts to display",
+      "LNG_CASE_LIST_SCREEN_NO_CASES": "There are no cases to display",
+      "LNG_CASE_LIST_SCREEN_SEE_CONTACTS": "Contacts",
+      "LNG_SORT_CRITERIA_CREATED_AT": "Date Created",
+      "LNG_SORT_CRITERIA_UPDATED_AT": "Date Updated",
+      "LNG_SORT_CRITERIA_VISUAL_ID": "ID",
+      "LNG_MOBILE_LAYOUT_LIST_DEFAULT_FILTER_PLACEHOLDER": "More Filters",
+      "LNG_MOBILE_CASE_FIELD_LABEL_PREGNANCY_STATUS": "Pregnancy status",
+      "LNG_MOBILE_CONTACT_FIELD_LABEL_FOLLOW_UP_STATUS_DESCRIPTION": "Follow-up final status"
     },
     "reportDailyFollowUpList": {
       "LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS": "Adresse",
