@@ -104,44 +104,46 @@ module.exports = function (Model) {
     const matchWhereBeforeAnythingElse = {
       $and: []
     };
-    const listOfGeoPoints = [];
-    Model.nestedGeoPoints.forEach((property) => {
-      listOfGeoPoints.push(property);
-      if (property.indexOf('[]') > -1) {
-        listOfGeoPoints.push(property.replace(/\[]/g, ''));
-      }
-    });
-    const checkPropertiesForGeoLocationCondition = (filterData) => {
-      _.each(filterData, (value, property) => {
-        if (
-          typeof property === 'string' &&
-          listOfGeoPoints.includes(property) &&
-          value.$geoNear
-        ) {
-          // add condition to list
-          matchWhereBeforeAnythingElse.$and.push({
-            [property]: {
-              $geoNear: value.$geoNear
-            }
-          });
-
-          // remove search criteria since will be handled separately
-          delete value.$geoNear;
-
-          // remove the entire filter ?
-          if (_.isEmpty(filterData[property])) {
-            delete filterData[property];
-          }
-        } else if (
-          _.isArray(value) ||
-          _.isObject(value)
-        ) {
-          // check depper
-          checkPropertiesForGeoLocationCondition(value);
+    if (Model.nestedGeoPoints) {
+      const listOfGeoPoints = [];
+      Model.nestedGeoPoints.forEach((property) => {
+        listOfGeoPoints.push(property);
+        if (property.indexOf('[]') > -1) {
+          listOfGeoPoints.push(property.replace(/\[]/g, ''));
         }
       });
-    };
-    checkPropertiesForGeoLocationCondition(whereFilter);
+      const checkPropertiesForGeoLocationCondition = (filterData) => {
+        _.each(filterData, (value, property) => {
+          if (
+            typeof property === 'string' &&
+            listOfGeoPoints.includes(property) &&
+            value.$geoNear
+          ) {
+            // add condition to list
+            matchWhereBeforeAnythingElse.$and.push({
+              [property]: {
+                $geoNear: value.$geoNear
+              }
+            });
+
+            // remove search criteria since will be handled separately
+            delete value.$geoNear;
+
+            // remove the entire filter ?
+            if (_.isEmpty(filterData[property])) {
+              delete filterData[property];
+            }
+          } else if (
+            _.isArray(value) ||
+            _.isObject(value)
+          ) {
+            // check depper
+            checkPropertiesForGeoLocationCondition(value);
+          }
+        });
+      };
+      checkPropertiesForGeoLocationCondition(whereFilter);
+    }
 
     // apply filter before doing anything else
     if (!_.isEmpty(matchWhereBeforeAnythingElse.$and)) {
