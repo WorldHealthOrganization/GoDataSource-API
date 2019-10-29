@@ -20,7 +20,7 @@ const buildTableForContact = function (headers, partialRecord, followUpStatusMap
   // additional tables for many days
   let additionalTables = [];
   // allow only 10 days be displayed on the same table with contact information
-  let mainTableMaxCount = 10;
+  let mainTableMaxCount = 24;
   // check to know that main table count threshold is overcome
   let isMainTableFull = false;
   // allow only 20 days per additional table to be displayed
