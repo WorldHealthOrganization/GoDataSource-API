@@ -1063,7 +1063,7 @@ const displayAge = function (record, dictionary) {
   if (months > 0) {
     age = `${displayValue(months)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`;
   } else {
-    age = `${displayValue(years)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')}`
+    age = `${displayValue(years)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')}`;
   }
   return age;
 };
