@@ -9999,37 +9999,49 @@ module.exports = function (Outbreak) {
                     translatedFollowUpAcronymsAndIds[translatedProp] = translatedValue;
                   }
 
+                  // used to fit the table on one page
+                  const standardHeaderSize = 40;
+
                   // build table headers
                   const headers = [
                     ...([{
                       id: 'firstName',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME'),
+                      width: standardHeaderSize
                     }, {
                       id: 'lastName',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME'),
+                      width: standardHeaderSize
                     }, {
                       id: 'middleName',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME'),
+                      width: standardHeaderSize + 10
                     }, {
                       id: 'age',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE'),
+                      width: standardHeaderSize
                     }, {
                       id: 'gender',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER'),
+                      width: standardHeaderSize
                     }]),
                     ...(groupBy === 'case' ? [{
                       id: 'location',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION'),
+                      width: standardHeaderSize
                     }] : []),
                     ...([{
                       id: 'address',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS'),
+                      width: standardHeaderSize
                     }, {
                       id: 'from',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM'),
+                      width: standardHeaderSize - 5
                     }, {
                       id: 'to',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO'),
+                      width: standardHeaderSize - 5
                     }])
                   ];
 
