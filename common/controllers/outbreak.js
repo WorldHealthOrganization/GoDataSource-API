@@ -10708,7 +10708,7 @@ module.exports = function (Outbreak) {
 
               // add question to pdf form
               const addQuestionToForm = (question) => {
-                // ignore irelevant questions
+                // ignore irrelevant questions
                 if (
                   [
                     'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD'
