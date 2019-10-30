@@ -70,7 +70,7 @@ module.exports = function (Model) {
     const data = getSourceAndTargetFromContext(context);
 
     // convert each (declared) nested GeoPoint
-    Model.nestedGeoPoints.forEach(function (property) {
+    (Model.nestedGeoPoints || []).forEach(function (property) {
       // get current value and path
       let nestedGeoPoint = app.utils.helpers.getReferencedValue(data.source, property);
 
@@ -121,7 +121,7 @@ module.exports = function (Model) {
     const data = getSourceAndTargetFromContext(context);
 
     // convert each (declared) nested GeoPoint
-    Model.nestedGeoPoints.forEach(function (property) {
+    (Model.nestedGeoPoints || []).forEach(function (property) {
       // get current value and path
       let nestedGeoPoint = app.utils.helpers.getReferencedValue(data.source, property);
 

@@ -105,6 +105,13 @@ module.exports = function (Contact) {
     'pregnancyStatus': 'LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS'
   });
 
+  Contact.exportFieldsOrder = [
+    'id',
+    'visualId',
+    'dateOfReporting',
+    'isDateOfReportingApproximate'
+  ];
+
   Contact.arrayProps = {
     addresses: {
       'typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',

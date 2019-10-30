@@ -7721,6 +7721,15 @@ module.exports = function (Outbreak) {
     app.models.followUp
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
+        // replace nested geo points filters
+        filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.followUp,
+          filter.where || {},
+          true,
+          undefined,
+          true
+        );
+
         // find follow-ups using filter
         return app.models.followUp.findAggregate(
           filter
@@ -7742,6 +7751,15 @@ module.exports = function (Outbreak) {
     app.models.followUp
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
+        // replace nested geo points filters
+        filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.followUp,
+          filter.where || {},
+          true,
+          undefined,
+          true
+        );
+
         // count using query
         return app.models.followUp.findAggregate(
           {
@@ -8533,7 +8551,7 @@ module.exports = function (Outbreak) {
                         lastName: _.get(record, 'contact.lastName', ''),
                         firstName: _.get(record, 'contact.firstName', ''),
                         middleName: _.get(record, 'contact.middleName', ''),
-                        age: `${_.get(record, 'contact.age.years', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(record, 'contact.age.months', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
+                        age: pdfUtils.displayAge(record, dictionary),
                         gender: record.gender,
                         location: record.address && record.address.locationId && record.address.locationId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION' && locationsMap[record.address.locationId] ?
                           locationsMap[record.address.locationId].name :
@@ -8860,6 +8878,13 @@ module.exports = function (Outbreak) {
           })
         );
 
+        // replace nested geo points filters
+        app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.case,
+          filter.where,
+          true
+        );
+
         // find follow-ups using filter
         return app.models.case.find(filter);
       })
@@ -8886,6 +8911,15 @@ module.exports = function (Outbreak) {
           app.utils.remote.convertLoopbackFilterToMongo({
             where: filter.where || {}
           })
+        );
+
+        // replace nested geo points filters
+        app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.case,
+          filter.where,
+          true,
+          undefined,
+          true
         );
 
         // count using query
@@ -9225,6 +9259,16 @@ module.exports = function (Outbreak) {
     app.models.contact
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
+        // replace nested geo points filters
+        filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.contact,
+          filter.where || {},
+          true,
+          undefined,
+          true,
+          true
+        );
+
         // count using query
         return app.models.contact.count(filter.where);
       })
@@ -9922,7 +9966,7 @@ module.exports = function (Outbreak) {
                             lastName: _.get(record, 'lastName', ''),
                             firstName: _.get(record, 'firstName', ''),
                             middleName: _.get(record, 'middleName', ''),
-                            age: `${_.get(record, 'age.years', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(record, 'contact.age.months', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
+                            age: pdfUtils.displayAge(record, dictionary),
                             gender: dictionary.getTranslation(_.get(record, 'gender')),
                             location: record.currentAddress && record.currentAddress.locationId && record.currentAddress.locationId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION' && locationsMap[record.currentAddress.locationId] ?
                               locationsMap[record.currentAddress.locationId].name :
@@ -9955,37 +9999,49 @@ module.exports = function (Outbreak) {
                     translatedFollowUpAcronymsAndIds[translatedProp] = translatedValue;
                   }
 
+                  // used to fit the table on one page
+                  const standardHeaderSize = 40;
+
                   // build table headers
                   const headers = [
                     ...([{
                       id: 'firstName',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME'),
+                      width: standardHeaderSize
                     }, {
                       id: 'lastName',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME'),
+                      width: standardHeaderSize
                     }, {
                       id: 'middleName',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME'),
+                      width: standardHeaderSize + 10
                     }, {
                       id: 'age',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE'),
+                      width: standardHeaderSize
                     }, {
                       id: 'gender',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER'),
+                      width: standardHeaderSize
                     }]),
                     ...(groupBy === 'case' ? [{
                       id: 'location',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION'),
+                      width: standardHeaderSize
                     }] : []),
                     ...([{
                       id: 'address',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS'),
+                      width: standardHeaderSize
                     }, {
                       id: 'from',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM'),
+                      width: standardHeaderSize - 5
                     }, {
                       id: 'to',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO'),
+                      width: standardHeaderSize - 5
                     }])
                   ];
 
@@ -10644,7 +10700,12 @@ module.exports = function (Outbreak) {
                 const firstFollowUpDay = contactData.lastContactDate.clone().add(1, 'days');
 
                 // calculate end day of follow up by taking the last contact day and adding the outbreak period of follow up to it
-                const lastFollowUpDay = genericHelpers.getDateEndOfDay(firstFollowUpDay.clone().add(outbreak.periodOfFollowup, 'days'));
+                const lastFollowUpDay = genericHelpers.getDateEndOfDay(
+                  firstFollowUpDay.clone().add(
+                    // last contact date is inclusive
+                    outbreak.periodOfFollowup > 0 ? outbreak.periodOfFollowup - 1 : 0, 'days'
+                  )
+                );
 
                 // dates headers
                 let dayIndex = 1;
@@ -10688,9 +10749,7 @@ module.exports = function (Outbreak) {
                 },
                 {
                   label: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE'),
-                  value: contactData.age && (contactData.age.years > 0 || contactData.age.months > 0) ?
-                    `${contactData.age.years} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${contactData.age.months} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}` :
-                    ''
+                  value: pdfUtils.displayAge(contactData, dictionary)
                 },
                 {
                   label: dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE'),
@@ -10710,7 +10769,7 @@ module.exports = function (Outbreak) {
 
               // add question to pdf form
               const addQuestionToForm = (question) => {
-                // ignore irelevant questions
+                // ignore irrelevant questions
                 if (
                   [
                     'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD'

@@ -235,6 +235,13 @@ module.exports = function (Case) {
     'pregnancyStatus': 'LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS'
   });
 
+  Case.exportFieldsOrder = [
+    'id',
+    'visualId',
+    'dateOfReporting',
+    'isDateOfReportingApproximate'
+  ];
+
   Case.arrayProps = {
     dateRanges: {
       'typeId': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_TYPE_ID',

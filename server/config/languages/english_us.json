@@ -2061,7 +2061,8 @@
       "LNG_FORM_VALIDATION_PAGE_UNIQUE": "Page name already exists",
       "LNG_FORM_VALIDATION_ERROR_GENERAL_HAS_PROPERTY": "Property exists",
       "LNG_FORM_VALIDATION_ERROR_FIELD_URL": "Invalid URL, either it contains 'localhost' or the path is not good",
-      "LNG_FORM_VALIDATION_ERROR_OUTBREAK_NAME_NOT_UNIQUE": "This name is already in use"
+      "LNG_FORM_VALIDATION_ERROR_OUTBREAK_NAME_NOT_UNIQUE": "This name is already in use",
+      "LNG_FORM_VALIDATION_ERROR_FIELD_NOT_NUMBER": "Can't be number"
     },
     "uiDocumentFields": {
       "LNG_DOCUMENT_FIELD_LABEL_DOCUMENT_NUMBER": "Document number",
@@ -2582,7 +2583,6 @@
       "LNG_PAGE_DASHBOARD_CONTACT_FOLLOW_UP_REPORT_NOT_PERCENTAGE_LABEL": "Percentage",
       "LNG_PAGE_DASHBOARD_CONTACT_FOLLOW_UP_REPORT_X_AXIS_LABEL": "Date",
       "LNG_PAGE_DASHBOARD_CONTACT_FOLLOW_UP_REPORT_Y_AXIS_LABEL": "Number of Contacts",
-      "LNG_PAGE_DASHBOARD_CONTACT_FOLLOW_UP_REPORT_Y2_AXIS_LABEL": "Percentage cases from contact list",
       "LNG_PAGE_DASHBOARD_CASES_CONTACT_STATUS_REPORT_TITLE": "Cases based on contact status",
       "LNG_PAGE_DASHBOARD_CASES_CONTACT_STATUS_REPORT_NOT_FROM_CONTACT_LABEL": "Cases not from contact",
       "LNG_PAGE_DASHBOARD_CASES_CONTACT_STATUS_REPORT_FROM_CONTACT_WITH_FOLLOW_UP_COMPLETE_LABEL": "Cases from contact with follow-up complete",
@@ -2594,7 +2594,8 @@
       "LNG_PAGE_DASHBOARD_KPI_TITLE": "Other KPIs",
       "LNG_PAGE_DASHBOARD_TITLE": "Dashboard",
       "LNG_PAGE_DASHBOARD_KPI_CONTACTS_FOLLOWUP_LIST_TITLE": "Contacts on the follow-up list ( {{date}} )",
-      "LNG_PAGE_DASHBOARD_KPI_CONTACTS_SEEN_EACH_DAY": "Contacts seen ( {{date}} )"
+      "LNG_PAGE_DASHBOARD_KPI_CONTACTS_SEEN_EACH_DAY": "Contacts seen ( {{date}} )",
+      "LNG_PAGE_DASHBOARD_CONTACT_FOLLOW_UP_REPORT_Y2_AXIS_LABEL": "% cases from contact"
     },
     "uiChainsOfTransmission": {
       "LNG_PAGE_DASHBOARD_CHAINS_OF_TRANSMISSION_ACTION_VIEW_FULL_RESOURCE": "View full resource",
@@ -2642,10 +2643,10 @@
       "LNG_PAGE_LIST_FILTER_CASES_WITHOUT_DATE_OF_REPORTING_CHAIN": "Cases without date of reporting",
       "LNG_PAGE_LIST_FILTER_CONTACTS_WITHOUT_DATE_OF_REPORTING_CHAIN": "Contacts without date of reporting",
       "LNG_PAGE_LIST_FILTER_EVENTS_WITHOUT_DATE_OF_REPORTING_CHAIN": "Events without date of reporting",
-      "LNG_PAGE_LIST_FILTER_CASES_OUTSIDE_THE_TRANSMISSION_CHAINS": "Cases in the previous {{x}} days outside the transmission chains",
       "LNG_PAGE_DASHBOARD_CASE_SUMMARY": "Case summary",
       "LNG_PAGE_LIST_FILTER_CASES_NOT_HOSPITALISED": "Cases not hospitalized",
-      "LNG_PAGE_DASHBOARD_CASE_BY_LOCATION": "Cases by geographic location"
+      "LNG_PAGE_DASHBOARD_CASE_BY_LOCATION": "Cases by geographic location",
+      "LNG_PAGE_LIST_FILTER_CASES_IN_THE_TRANSMISSION_CHAINS": "Cases in the previous {{x}} days in known transmission chains"
     },
     "uiTransmissionChainFields": {
       "LNG_TRANSMISSION_CHAIN_FIELD_LABEL_ACTIVE": "Active",
@@ -3086,7 +3087,12 @@
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_DELETE_RELATIONSHIP": "Delete ",
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_VIEW_RELATIONSHIP": "View Resource",
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_REVERSE_RELATIONSHIP": "Reverse persons",
-      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_REVERSE_RELATIONSHIP_TOOLTIP": "You can reverse a relationship only if is not involving a contact"
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_REVERSE_RELATIONSHIP_TOOLTIP": "You can reverse a relationship only if is not involving a contact",
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_TITLE": "{{type}}",
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_EDGE_TITLE": "Relationship",
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_RELATIONSHIP_LABEL": "{{item1}} - {{item2}}",
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_GROUP_DIALOG_MARKER_SECTION_TITLE": "Entities",
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_GROUP_DIALOG_PATHS_SECTION_TITLE": "Relationships"
     },
     "uiInconsistencyLabels": {
       "LNG_PAGE_INCONSISTENCY_LABEL_BIGGER": "\"{{date1}}\" is later than \"{{date2}}\"",
@@ -3331,7 +3337,8 @@
       "LNG_PAGE_WORLD_MAP_DISCLAIMER_DATA_SOURCE_TEXT": "(to be completed)",
       "LNG_PAGE_WORLD_MAP_DISCLAIMER_MAP_PRODUCTION_LABEL": "Map production: ",
       "LNG_PAGE_WORLD_MAP_DISCLAIMER_MAP_PRODUCTION_TEXT": "(to be completed)",
-      "LNG_PAGE_WORLD_MAP_DISCLAIMER_WHO_LABEL": "World Health Organization"
+      "LNG_PAGE_WORLD_MAP_DISCLAIMER_WHO_LABEL": "World Health Organization",
+      "LNG_PAGE_WORLD_MAP_GROUP_DIALOG_TITLE": "Grouped items"
     },
     "uiWorldMapMovement": {
       "LNG_WORLD_MAP_MOVEMENT_FIT_MARKER_BOUNDS_BUTTON": "View all addresses",
@@ -3620,7 +3627,16 @@
       "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP": "Follow-up",
       "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_STATUS": "Status",
       "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_QUESTIONNAIRE": "Questionnaire",
-      "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_ADDRESS": "Address"
+      "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_ADDRESS": "Address",
+      "LNG_CONTACT_LIST_SCREEN_NO_CONTACTS": "There are no contacts to display",
+      "LNG_CASE_LIST_SCREEN_NO_CASES": "There are no cases to display",
+      "LNG_CASE_LIST_SCREEN_SEE_CONTACTS": "Contacts",
+      "LNG_SORT_CRITERIA_CREATED_AT": "Date Created",
+      "LNG_SORT_CRITERIA_UPDATED_AT": "Date Updated",
+      "LNG_SORT_CRITERIA_VISUAL_ID": "ID",
+      "LNG_MOBILE_LAYOUT_LIST_DEFAULT_FILTER_PLACEHOLDER": "More Filters",
+      "LNG_MOBILE_CASE_FIELD_LABEL_PREGNANCY_STATUS": "Pregnancy status",
+      "LNG_MOBILE_CONTACT_FIELD_LABEL_FOLLOW_UP_STATUS_DESCRIPTION": "Follow-up final status"
     },
     "reportDailyFollowUpList": {
       "LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS": "Address",
@@ -3724,7 +3740,9 @@
       "LNG_PAGE_SYSTEM_BACKUPS_EXPORT_SYNC_PACKAGE": "Download sync package",
       "LNG_PAGE_SYSTEM_BACKUPS_EXPORT_SYNC_PACKAGE_BUTTON": "Export sync package",
       "LNG_PAGE_SYSTEM_BACKUPS_IMPORT_SYNC_PACKAGE_BUTTON": "Import sync package",
-      "LNG_PAGE_SYSTEM_BACKUPS_TITLE": "System Backups"
+      "LNG_PAGE_SYSTEM_BACKUPS_TITLE": "System Backups",
+      "LNG_PAGE_SYSTEM_BACKUPS_ACTION_VIEW_BACKUP_PATH": "View backups folder",
+      "LNG_PAGE_SYSTEM_BACKUPS_VIEW_BACKUP_DIALOG_TITLE": "Backup info"
     },
     "uiCreateSystemClientApplicationPage": {
       "LNG_PAGE_CREATE_SYSTEM_CLIENT_APPLICATION_ACTION_CREATE_CLIENT_APPLICATION_SUCCESS_MESSAGE": "Client application created",

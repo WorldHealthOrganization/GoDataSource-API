@@ -7,6 +7,7 @@ const disableCommonExtraRoutes = require('../../components/disableCommonExtraRou
 const searchByRelationProperty = require('../../components/searchByRelationProperty');
 const mergeFilters = require('../../components/mergeFilters');
 const convertLoopbackFilterToMongo = require('../../components/convertLoopbackFilterToMongo');
+const convertNestedGeoPointsFilterToMongo = require('../../components/convertNestedGeoPointsFilterToMongo');
 const apiError = require('../../components/apiError');
 const anonymizeDatasetFields = require('../../components/anonymizeDatasetFields');
 const maskField = require('../../components/maskField');
@@ -29,6 +30,7 @@ function init(app, callback) {
       disableCommonExtraRoutes: disableCommonExtraRoutes,
       mergeFilters: mergeFilters,
       convertLoopbackFilterToMongo: convertLoopbackFilterToMongo,
+      convertNestedGeoPointsFilterToMongo: convertNestedGeoPointsFilterToMongo,
       helpers: remoteHelpers,
       /**
        * Get user from options (context)
