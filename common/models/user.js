@@ -243,8 +243,11 @@ module.exports = function (User) {
         // update user's id
         updateJobs.push(
           callback => Async.series([
-            callback => userCollection.deleteOne({ _id: result._id }, err => callback(err)),
-            callback => userCollection.insertOne(Object.assign({}, result, { _id: ADMIN_ID }), err => callback(err))
+            callback => userCollection.deleteOne({_id: result._id}, err => callback(err)),
+            callback => userCollection.insertOne(
+              Object.assign({}, result, {_id: ADMIN_ID, oldId: result._id}),
+              err => callback(err)
+            )
           ], err => callback(err))
         );
 
@@ -271,7 +274,7 @@ module.exports = function (User) {
               }
             },
             err => callback(err)
-          )
+          );
         });
 
         return Async.series(updateJobs, err => next(err));
