@@ -226,18 +226,17 @@ module.exports = function (User) {
 
         // used to update createdBy, updateBy fields
         const updateAuthorField = function (collectionName, field, callback) {
-          return db.collection(collectionName)
-            .updateMany(
-              {
-                [field]: result._id
-              },
-              {
-                $set: {
-                  [field]: ADMIN_ID
-                }
-              },
-              err => callback(err)
-            );
+          return db.collection(collectionName).updateMany(
+            {
+              [field]: result._id
+            },
+            {
+              $set: {
+                [field]: ADMIN_ID
+              }
+            },
+            err => callback(err)
+          );
         };
 
         // update user's id
