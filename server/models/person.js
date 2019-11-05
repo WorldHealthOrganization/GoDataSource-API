@@ -1649,4 +1649,42 @@ module.exports = function (Person) {
       .replace(/YYYY/g, moment().format('YYYY'))
       .replace(/\*/g, '');
   };
+
+  /**
+   * Count contacts/exposures for a list of records
+   * @param outbreakId
+   * @param peopleIds
+   */
+  Person.getPeopleContactsAndExposures = function (outbreakId, peopleIds) {
+    const peopleMap = {};
+    for (let id of peopleIds) {
+      peopleMap[id] = {
+        numberOfContacts: 0,
+        numberOfExposures: 0
+      };
+    }
+
+    return app.models.relationship
+      .find({
+        outbreakId: outbreakId,
+        'persons.id': {
+          inq: peopleIds
+        }
+      })
+      .then(relations => {
+        for (let relation of relations) {
+          const relationParticipants = relation.persons;
+          for (let participant of relationParticipants) {
+            if (peopleMap[participant.id]) {
+              if (participant.source) {
+                peopleMap[participant.id].numberOfContacts++;
+              } else {
+                peopleMap[participant.id].numberOfExposures++;
+              }
+            }
+          }
+        }
+      })
+      .then(() => peopleMap);
+  };
 };
