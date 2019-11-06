@@ -11409,10 +11409,10 @@ module.exports = function (Outbreak) {
         async.series(
           records.map(r => doneRecord => r.undoDelete(options, doneRecord)),
           (err, updatedRecords) => {
-          if (err) {
-            return callback(err);
-          }
-          return callback(null, updatedRecords);
+            if (err) {
+              return callback(err);
+            }
+            return callback(null, updatedRecords);
         });
       })
       .catch(callback);
