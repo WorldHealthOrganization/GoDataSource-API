@@ -11406,14 +11406,7 @@ module.exports = function (Outbreak) {
         }
       })
       .then(records => {
-        async.series(
-          records.map(r => doneRecord => r.undoDelete(options, doneRecord)),
-          (err, updatedRecords) => {
-            if (err) {
-              return callback(err);
-            }
-            return callback(null, updatedRecords);
-        });
+        async.series(records.map(r => doneRecord => r.undoDelete(options, doneRecord)), callback);
       })
       .catch(callback);
   };
