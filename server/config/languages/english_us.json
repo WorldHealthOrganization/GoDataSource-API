@@ -10,6 +10,19 @@
       "LNG_AUDIT_LOG_ACTIONS_RESTORED": "Record restored"
     },
     "availablePermissions": {
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT": "Event - list",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_DESCRIPTION": "This permission allows listing event information.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_EVENT": "Event - view",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_EVENT_DESCRIPTION": "This permission allows viewing full event information.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_EVENT": "Event - create",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_EVENT_DESCRIPTION": "This permission allows creating events.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_EVENT": "Event - modify",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_EVENT_DESCRIPTION": "This permission allows modifying event information.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_EVENT": "Event - delete",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_EVENT_DESCRIPTION": "This permission allows removing event information.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_EVENT": "Event - restore",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_EVENT_DESCRIPTION": "This permission allows restoring deleted event information.",
+
       "LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP": "Approve help items",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP_DESCRIPTION": "This permission allows the approval of help items.",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_READ_CASE": "Read case",
