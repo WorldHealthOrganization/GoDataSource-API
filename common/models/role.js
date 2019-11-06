@@ -31,34 +31,44 @@ module.exports = function (Role) {
 
   Role.availablePermissions = [
     {
-      id: 'view_event',
+      id: 'event_view',
       label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_EVENT',
       description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_VIEW_DESCRIPTION'
     },
     {
-      id: 'list_event',
+      id: 'event_list',
       label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT',
       description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_DESCRIPTION'
     },
     {
-      id: 'create_event',
+      id: 'event_create',
       label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_EVENT',
       description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_EVENT_DESCRIPTION'
     },
     {
-      id: 'modify_event',
+      id: 'event_modify',
       label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_EVENT',
       description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_EVENT_DESCRIPTION'
     },
     {
-      id: 'delete_event',
+      id: 'event_delete',
       label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_EVENT',
       description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_EVENT_DESCRIPTION'
     },
     {
-      id: 'restore_event',
+      id: 'event_restore',
       label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_EVENT',
       description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_EVENT_DESCRIPTION'
+    },
+    {
+      id: 'event_create_contact',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_FROM_EVENT',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_FROM_EVENT_DESCRIPTION'
+    },
+    {
+      id: 'event_create_bulk_contact',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_FROM_EVENT',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_FROM_EVENT_DESCRIPTION'
     },
 
 

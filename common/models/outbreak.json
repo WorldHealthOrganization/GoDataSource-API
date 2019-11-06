@@ -597,13 +597,13 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "restore_event",
+      "principalId": "event_restore",
       "permission": "ALLOW",
       "property": "restoreEvent"
     },
     {
       "principalType": "ROLE",
-      "principalId": "list_event",
+      "principalId": "event_list",
       "permission": "ALLOW",
       "property": "__get__events"
     },
@@ -615,37 +615,37 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "create_event",
+      "principalId": "event_create",
       "permission": "ALLOW",
       "property": "__create__events"
     },
     {
       "principalType": "ROLE",
-      "principalId": "view_event",
+      "principalId": "event_view",
       "permission": "ALLOW",
       "property": "__findById__events"
     },
     {
       "principalType": "ROLE",
-      "principalId": "modify_event",
+      "principalId": "event_modify",
       "permission": "ALLOW",
       "property": "__findById__events"
     },
     {
       "principalType": "ROLE",
-      "principalId": "modify_event",
+      "principalId": "event_modify",
       "permission": "ALLOW",
       "property": "__updateById__events"
     },
     {
       "principalType": "ROLE",
-      "principalId": "delete_event",
+      "principalId": "event_delete",
       "permission": "ALLOW",
       "property": "__destroyById__events"
     },
     {
       "principalType": "ROLE",
-      "principalId": "list_event",
+      "principalId": "event_list",
       "permission": "ALLOW",
       "property": "__count__events"
     },
@@ -1245,7 +1245,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "event_create_bulk_contact",
       "permission": "ALLOW",
       "property": "createEventMultipleContacts"
     },
