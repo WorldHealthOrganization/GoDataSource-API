@@ -1355,12 +1355,6 @@
       "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
-      "property": "findEventRelationshipExposures"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
       "property": "getEventRelationshipsAvailablePeople"
     },
     {
@@ -1371,19 +1365,25 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "event_list_relationship_exposures",
+      "permission": "ALLOW",
+      "property": "findEventRelationshipExposures"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_list_relationship_exposures",
       "permission": "ALLOW",
       "property": "countEventRelationshipExposures"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "event_list_relationship_contacts",
       "permission": "ALLOW",
       "property": "findEventRelationshipContacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "event_list_relationship_contacts",
       "permission": "ALLOW",
       "property": "countEventRelationshipContacts"
     },

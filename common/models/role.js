@@ -30,6 +30,7 @@ module.exports = function (Role) {
   };
 
   Role.availablePermissions = [
+    // Event
     {
       id: 'event_view',
       label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_EVENT',
@@ -69,6 +70,43 @@ module.exports = function (Role) {
       id: 'event_create_bulk_contact',
       label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_FROM_EVENT',
       description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_FROM_EVENT_DESCRIPTION'
+    },
+    {
+      id: 'event_list_relationship_contacts',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_RELATIONSHIP_CONTACTS',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_RELATIONSHIP_CONTACTS_DESCRIPTION'
+    },
+    {
+      id: 'event_list_relationship_exposures',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_RELATIONSHIP_EXPOSURES',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_RELATIONSHIP_EXPOSURES_DESCRIPTION'
+    },
+
+    // Relationship
+    {
+      id: 'relationship_view',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_RELATIONSHIP',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_RELATIONSHIP_DESCRIPTION'
+    },
+    {
+      id: 'relationship_list',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_RELATIONSHIP',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_RELATIONSHIP_DESCRIPTION'
+    },
+    {
+      id: 'relationship_create',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_RELATIONSHIP',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_RELATIONSHIP_DESCRIPTION'
+    },
+    {
+      id: 'relationship_modify',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_RELATIONSHIP',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_RELATIONSHIP_DESCRIPTION'
+    },
+    {
+      id: 'relationship_delete',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_RELATIONSHIP',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_RELATIONSHIP_DESCRIPTION'
     },
 
 

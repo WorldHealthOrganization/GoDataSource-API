@@ -23,9 +23,24 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_EVENT": "Event - restore",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_EVENT_DESCRIPTION": "This permission allows restoring deleted event information.",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_FROM_EVENT": "Event - create contact",
-      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_FROM_EVENT_DESCRIPTION": "This permission allows creating contacts from events ( You need Contact - create permission as well ).",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_FROM_EVENT_DESCRIPTION": "This permission allows creating contacts from events ( You need 'Contact - create' permission as well ).",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_FROM_EVENT": "Event - bulk create contacts",
-      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_FROM_EVENT_DESCRIPTION": "This permission allows bulk creating contacts from events ( You need Contact - bulk create permission as well ).",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_FROM_EVENT_DESCRIPTION": "This permission allows bulk creating contacts from events ( You need 'Contact - bulk create' permission as well ).",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_RELATIONSHIP_CONTACTS": "Event - list relationship contacts",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_RELATIONSHIP_CONTACTS_DESCRIPTION": "This permission allows viewing event contacts ( You need 'Relationship - list' permission as well ).",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_RELATIONSHIP_EXPOSURES": "Event - list relationship exposures",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_RELATIONSHIP_EXPOSURES_DESCRIPTION": "This permission allows viewing event exposures ( You need 'Relationship - list' permission as well ).",
+
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_RELATIONSHIP": "Relationship - view",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_RELATIONSHIP_DESCRIPTION": "This permission allows viewing full relationship information.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_RELATIONSHIP": "Relationship - list",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_RELATIONSHIP_DESCRIPTION": "This permission allows listing relationship information.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_RELATIONSHIP": "Relationship - create",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_RELATIONSHIP_DESCRIPTION": "This permission allows creating relationships.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_RELATIONSHIP": "Relationship - modify",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_RELATIONSHIP_DESCRIPTION": "This permission allows modifying relationships.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_RELATIONSHIP": "Relationship - delete",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_RELATIONSHIP_DESCRIPTION": "This permission allows removing relationships information.",
 
 
 
