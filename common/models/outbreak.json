@@ -447,19 +447,19 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_case",
+      "principalId": "relationship_create",
       "permission": "ALLOW",
       "property": "createCaseRelationship"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "relationship_create",
       "permission": "ALLOW",
       "property": "createContactRelationship"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_case",
+      "principalId": "relationship_create",
       "permission": "ALLOW",
       "property": "createEventRelationship"
     },
@@ -489,7 +489,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "relationship_view",
       "permission": "ALLOW",
       "property": "getEventRelationship"
     },
@@ -507,7 +507,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_case",
+      "principalId": "relationship_modify",
       "permission": "ALLOW",
       "property": "updateEventRelationship"
     },
@@ -525,7 +525,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_case",
+      "principalId": "relationship_delete",
       "permission": "ALLOW",
       "property": "deleteEventRelationship"
     },
@@ -1065,6 +1065,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "event_list",
+      "permission": "ALLOW",
+      "property": "__get__people"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "__count__people"
@@ -1353,13 +1359,13 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "relationship_create",
       "permission": "ALLOW",
       "property": "getEventRelationshipsAvailablePeople"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "relationship_create",
       "permission": "ALLOW",
       "property": "countEventRelationshipsAvailablePeople"
     },
@@ -2255,7 +2261,7 @@
       "description": "Counts people of a event",
       "http": {
         "verb": "get",
-        "path": "/event/:nk/relationships/available-people/count"
+        "path": "/events/:nk/relationships/available-people/count"
       }
     },
     "prototype.createEventRelationship": {
