@@ -31,6 +31,39 @@ module.exports = function (Role) {
 
   Role.availablePermissions = [
     {
+      id: 'view_event',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_EVENT',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_VIEW_DESCRIPTION'
+    },
+    {
+      id: 'list_event',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_DESCRIPTION'
+    },
+    {
+      id: 'create_event',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_EVENT',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_EVENT_DESCRIPTION'
+    },
+    {
+      id: 'modify_event',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_EVENT',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_EVENT_DESCRIPTION'
+    },
+    {
+      id: 'delete_event',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_EVENT',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_EVENT_DESCRIPTION'
+    },
+    {
+      id: 'restore_event',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_EVENT',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_EVENT_DESCRIPTION'
+    },
+
+
+
+    {
       id: 'read_sys_config',
       label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_SYS_CONFIG',
       description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_SYS_CONFIG_DESCRIPTION'
@@ -109,36 +142,6 @@ module.exports = function (Role) {
       id: 'write_contact',
       label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_CONTACT',
       description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_CONTACT_DESCRIPTION'
-    },
-    {
-      id: 'view_event',
-      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_EVENT',
-      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_VIEW_DESCRIPTION'
-    },
-    {
-      id: 'list_event',
-      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT',
-      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_DESCRIPTION'
-    },
-    {
-      id: 'create_event',
-      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_EVENT',
-      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_EVENT_DESCRIPTION'
-    },
-    {
-      id: 'modify_event',
-      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_EVENT',
-      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_EVENT_DESCRIPTION'
-    },
-    {
-      id: 'delete_event',
-      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_EVENT',
-      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_EVENT_DESCRIPTION'
-    },
-    {
-      id: 'restore_event',
-      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_EVENT',
-      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_EVENT_DESCRIPTION'
     },
     {
       id: 'read_followup',
