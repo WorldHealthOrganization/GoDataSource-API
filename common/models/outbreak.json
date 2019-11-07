@@ -465,13 +465,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "setTargetAndSourceForRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "relationship_reverse",
       "permission": "ALLOW",
       "property": "setTargetAndSourceForRelationship"
     },

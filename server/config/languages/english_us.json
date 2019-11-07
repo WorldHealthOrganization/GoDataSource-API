@@ -46,6 +46,8 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_EVENT_RELATIONSHIP_EXPOSURES_DESCRIPTION": "This permission allows modifying event exposures ( You need 'Relationship - modify' permission as well ).",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_EVENT_RELATIONSHIP_EXPOSURES": "Event - delete relationship exposure",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_EVENT_RELATIONSHIP_EXPOSURES_DESCRIPTION": "This permission allows deleting event exposures ( You need 'Relationship - delete' permission as well ).",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_REVERSE_EVENT_RELATIONSHIP": "Event - switch relationship persons",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_REVERSE_EVENT_RELATIONSHIP_DESCRIPTION": "This permission allows switching relationship persons ( You need 'Relationship - switch persons' permission as well ).",
 
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_RELATIONSHIP": "Relationship - view",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_RELATIONSHIP_DESCRIPTION": "This permission allows viewing full relationship information.",
@@ -57,6 +59,8 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_RELATIONSHIP_DESCRIPTION": "This permission allows modifying relationships.",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_RELATIONSHIP": "Relationship - delete",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_RELATIONSHIP_DESCRIPTION": "This permission allows removing relationships information.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_REVERSE_RELATIONSHIP": "Relationship - switch persons",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_REVERSE_RELATIONSHIP_DESCRIPTION": "This permission allows switching relationship persons.",
 
 
 
