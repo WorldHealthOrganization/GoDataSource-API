@@ -4932,17 +4932,14 @@ module.exports = function (Outbreak) {
       // an array with all the expected date type fields found in an extended case model (including relationships and labResults)
       const caseDossierDateFields = [
         'dob',
-        'dateRanges[].typeId',
         'dateRanges[].startDate',
         'dateRanges[].endDate',
-        'dateRanges[].centerName',
         'addresses[].date',
         'dateBecomeCase',
+        'dateOfReporting',
         'dateOfInfection',
         'dateOfOnset',
-        'outcomeId',
         'dateOfOutcome',
-        'safeBurial',
         'dateOfBurial',
         'relationships[].contactDate',
         'relationships[].people[].dob',

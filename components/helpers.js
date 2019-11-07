@@ -1038,6 +1038,23 @@ const isPathOK = function (path) {
 };
 
 /**
+ * Format a date
+ * If it fails, return empty string
+ * @param value
+ * @returns {string}
+ */
+const formatDate = function (value) {
+  let result = '';
+  if (value) {
+    let tmpDate = moment(getDateDisplayValue(value));
+    if (tmpDate.isValid()) {
+      result = tmpDate.format('YYYY-MM-DD');
+    }
+  }
+  return result;
+};
+
+/**
  * Format all the marked date type fields on the model
  * @param model
  * @param dateFieldsList
@@ -1050,10 +1067,10 @@ const formatDateFields = function (model, dateFieldsList) {
     let reference = getReferencedValue(model, field);
     if (Array.isArray(reference)) {
       reference.forEach((indicator) => {
-        _.set(model, indicator.exactPath, indicator.value ? moment(getDateDisplayValue(indicator.value)).format('YYYY-MM-DD') : '');
+        _.set(model, indicator.exactPath, formatDate(indicator.value));
       });
     } else {
-      _.set(model, reference.exactPath, reference.value ? moment(getDateDisplayValue(reference.value)).format('YYYY-MM-DD') : '');
+      _.set(model, reference.exactPath, formatDate(reference.value));
     }
   });
 };
