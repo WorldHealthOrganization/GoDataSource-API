@@ -318,6 +318,8 @@ module.exports = function (Case) {
     'riskLevel',
     'riskReason',
     'wasContact',
+    'dateOfReporting',
+    'isDateOfReportingApproximate',
     'dateBecomeCase',
     'dateOfInfection',
     'dateOfOnset',
