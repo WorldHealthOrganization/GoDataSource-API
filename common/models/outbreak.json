@@ -1503,13 +1503,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "bulkChangeSourceRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "event_change_source_relationships",
       "permission": "ALLOW",
       "property": "bulkChangeSourceRelationships"
     },
