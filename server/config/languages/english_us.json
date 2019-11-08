@@ -52,6 +52,8 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EVENT_WITHOUT_RELATIONSHIPS_DESCRIPTION": "This permission allows seeing events without relationships ( You need 'Relationship - list' permission as well ).",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_EVENT_RELATIONSHIP": "Event - export relationships",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_EVENT_RELATIONSHIP_DESCRIPTION": "This permission allows exporting of event relationships ( You need 'Relationship - export' permission as well ).",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_EVENT_RELATIONSHIP": "Event - share relationships",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_EVENT_RELATIONSHIP_DESCRIPTION": "This permission allows sharing of event relationships ( You need 'Relationship - share' permission as well ).",
 
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_RELATIONSHIP": "Relationship - view",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_RELATIONSHIP_DESCRIPTION": "This permission allows viewing full relationship information.",
@@ -67,6 +69,8 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_REVERSE_RELATIONSHIP_DESCRIPTION": "This permission allows switching relationship persons.",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_RELATIONSHIP": "Relationship - export",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_RELATIONSHIP_DESCRIPTION": "This permission allows exporting relationship information.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_RELATIONSHIP": "Relationship - share",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_RELATIONSHIP_DESCRIPTION": "This permission allows sharing relationship information.",
 
 
 
