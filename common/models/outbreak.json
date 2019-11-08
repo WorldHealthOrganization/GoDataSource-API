@@ -1479,13 +1479,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "bulkDeleteRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "relationship_bulk_delete",
       "permission": "ALLOW",
       "property": "bulkDeleteRelationships"
     },

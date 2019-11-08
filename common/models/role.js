@@ -146,6 +146,16 @@ module.exports = function (Role) {
       label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_SOURCE_EVENT_RELATIONSHIP',
       description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_SOURCE_EVENT_RELATIONSHIP_DESCRIPTION'
     },
+    {
+      id: 'event_bulk_delete_relationships_contacts',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_RELATIONSHIP_CONTACTS',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_RELATIONSHIP_CONTACTS_DESCRIPTION'
+    },
+    {
+      id: 'event_bulk_delete_relationships_exposures',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_RELATIONSHIP_EXPOSURES',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_RELATIONSHIP_EXPOSURES_DESCRIPTION'
+    },
 
     // Relationship
     {
@@ -187,6 +197,11 @@ module.exports = function (Role) {
       id: 'relationship_share',
       label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_RELATIONSHIP',
       description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_RELATIONSHIP_DESCRIPTION'
+    },
+    {
+      id: 'relationship_bulk_delete',
+      label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_RELATIONSHIP',
+      description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_RELATIONSHIP_DESCRIPTION'
     },
 
 

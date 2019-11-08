@@ -56,6 +56,10 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_EVENT_RELATIONSHIP_DESCRIPTION": "This permission allows sharing of event relationships ( You need 'Relationship - share' permission as well ).",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_SOURCE_EVENT_RELATIONSHIP": "Event - change source",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_SOURCE_EVENT_RELATIONSHIP_DESCRIPTION": "This permission allows changing relationship source person.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_RELATIONSHIP_CONTACTS": "Event - bulk delete contact relationships",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_RELATIONSHIP_CONTACTS_DESCRIPTION": "This permission allows deleting of event contact relationships ( You need 'Relationship - bulk delete' permission as well ).",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_RELATIONSHIP_EXPOSURES": "Event - bulk delete exposure relationships",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_RELATIONSHIP_EXPOSURES_DESCRIPTION": "This permission allows deleting of event exposure relationships ( You need 'Relationship - bulk delete' permission as well ).",
 
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_RELATIONSHIP": "Relationship - view",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_RELATIONSHIP_DESCRIPTION": "This permission allows viewing full relationship information.",
@@ -73,6 +77,8 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_RELATIONSHIP_DESCRIPTION": "This permission allows exporting relationship information.",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_RELATIONSHIP": "Relationship - share",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_RELATIONSHIP_DESCRIPTION": "This permission allows sharing relationship information.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_RELATIONSHIP": "Relationship - bulk delete",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_RELATIONSHIP_DESCRIPTION": "This permission allows bulk deleting relationship information.",
 
 
 
