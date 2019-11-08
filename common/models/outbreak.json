@@ -1011,13 +1011,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "exportFilteredRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "relationship_export",
       "permission": "ALLOW",
       "property": "exportFilteredRelationships"
     },
