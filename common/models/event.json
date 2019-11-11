@@ -54,12 +54,6 @@
       "type": "string",
       "required": true
     },
-    "date": {
-      "type": "date"
-    },
-    "dateOfReporting": {
-      "type": "date"
-    },
     "dateApproximate": {
       "type": "boolean"
     },
