@@ -410,6 +410,12 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
       // display type
       const displayVertical = item.answersDisplay === 'LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL';
 
+      // if this is a markup question, just display the text
+      if (item.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP') {
+        doc.moveDown().text(`${item.question}`, questionMargin);
+        return;
+      }
+
       // question test
       doc.moveDown().text(`${item.order}. ${item.question}`, questionMargin);
 

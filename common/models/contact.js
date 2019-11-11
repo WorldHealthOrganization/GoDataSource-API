@@ -253,6 +253,10 @@ module.exports = function (Contact) {
     'followUps[].teamId': {
       modelName: 'team',
       useProperty: 'name'
+    },
+    'relationships[].people[].address.locationId': {
+      modelName: 'location',
+      useProperty: 'name'
     }
   };
 
