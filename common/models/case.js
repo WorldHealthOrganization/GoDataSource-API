@@ -361,6 +361,10 @@ module.exports = function (Case) {
     'relationships[].people[].address.locationId': {
       modelName: 'location',
       useProperty: 'name'
+    },
+    'relationships[].clusterId': {
+      modelName: 'cluster',
+      useProperty: 'name'
     }
   };
 

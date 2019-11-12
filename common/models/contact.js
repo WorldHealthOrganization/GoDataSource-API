@@ -257,6 +257,10 @@ module.exports = function (Contact) {
     'relationships[].people[].address.locationId': {
       modelName: 'location',
       useProperty: 'name'
+    },
+    'relationships[].clusterId': {
+      modelName: 'cluster',
+      useProperty: 'name'
     }
   };
 

@@ -45,6 +45,7 @@ module.exports = function (Event) {
   Event.printFieldsinOrder = [
     'type',
     'name',
+    'date',
     'dateOfReporting',
     'isDateOfReportingApproximate',
     'description',

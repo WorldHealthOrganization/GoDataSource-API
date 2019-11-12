@@ -4913,9 +4913,14 @@ module.exports = function (Outbreak) {
         {
           relation: 'relationships',
           scope: {
-            include: {
-              relation: 'people'
-            }
+            include: [
+              {
+                relation: 'people'
+              },
+              {
+                relation: 'cluster'
+              }
+            ]
           }
         },
         {
@@ -5243,9 +5248,14 @@ module.exports = function (Outbreak) {
         {
           relation: 'relationships',
           scope: {
-            include: {
-              relation: 'people'
-            }
+            include: [
+              {
+                relation: 'people'
+              },
+              {
+                relation: 'cluster'
+              }
+            ]
           }
         },
         {
