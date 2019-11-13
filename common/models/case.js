@@ -354,6 +354,10 @@ module.exports = function (Case) {
       modelName: 'location',
       useProperty: 'name'
     },
+    'relationships[].clusterId': {
+      modelName: 'cluster',
+      useProperty: 'name'
+    },
     'relationships[].people[].addresses[].locationId': {
       modelName: 'location',
       useProperty: 'name'
@@ -362,8 +366,12 @@ module.exports = function (Case) {
       modelName: 'location',
       useProperty: 'name'
     },
-    'relationships[].clusterId': {
-      modelName: 'cluster',
+    'relationships[].people[].burialLocationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'relationships[].people[].dateRanges[].locationId': {
+      modelName: 'location',
       useProperty: 'name'
     }
   };

@@ -4934,32 +4934,6 @@ module.exports = function (Outbreak) {
 
       const sanitizedCases = [];
 
-      // an array with all the expected date type fields found in an extended case model (including relationships and labResults)
-      const caseDossierDateFields = [
-        'dob',
-        'dateRanges[].startDate',
-        'dateRanges[].endDate',
-        'addresses[].date',
-        'dateBecomeCase',
-        'dateOfReporting',
-        'dateOfInfection',
-        'dateOfOnset',
-        'dateOfOutcome',
-        'dateOfBurial',
-        'relationships[].contactDate',
-        'relationships[].people[].dob',
-        'relationships[].people[].addresses[].date',
-        'relationships[].people[].vaccinesReceived[].date',
-        'relationships[].people[].date',
-        'relationships[].people[].dateOfReporting',
-        'relationships[].people[].address.date',
-        'labResults[].dateSampleTaken',
-        'labResults[].dateSampleDelivered',
-        'labResults[].dateTesting',
-        'labResults[].dateOfResult',
-        'vaccinesReceived[].date'
-      ];
-
       // get the language dictionary
       app.models.language.getLanguageDictionary(languageId, (err, dictionary) => {
         if (err) {
@@ -5006,7 +4980,7 @@ module.exports = function (Outbreak) {
                 app.utils.anonymizeDatasetFields.anonymize(person, anonymousFields);
               }
 
-              app.utils.helpers.formatDateFields(person, caseDossierDateFields);
+              app.utils.helpers.formatDateFields(person, app.models.person.dossierDateFields);
               app.utils.helpers.formatUndefinedValues(person);
 
               // prepare the case's relationships for printing
@@ -5223,6 +5197,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.contactDossier = function (contacts, anonymousFields, options, callback) {
+    const models = app.models;
     const followUpQuestionnaire = this.contactFollowUpTemplate.toJSON();
     let questions = [];
     let tmpDir = tmp.dirSync({unsafeCleanup: true});
@@ -5260,32 +5235,6 @@ module.exports = function (Outbreak) {
       const pdfUtils = app.utils.pdfDoc;
       const languageId = options.remotingContext.req.authData.user.languageId;
       let sanitizedContacts = [];
-
-      // An array with all the expected date type fields found in an extended contact model (including relationships and followUps)
-      const contactDossierDateFields = [
-        'dob',
-        'addresses[].date',
-        'relationships[].contactDate',
-        'relationships[].people[].dob',
-        'relationships[].people[].dateBecomeCase',
-        'relationships[].people[].dateOfInfection',
-        'relationships[].people[].dateOfOnset',
-        'relationships[].people[].outcomeId',
-        'relationships[].people[].dateOfOutcome',
-        'relationships[].people[].dateRanges[].typeId',
-        'relationships[].people[].dateRanges[].startDate',
-        'relationships[].people[].dateRanges[].endDate',
-        'relationships[].people[].dateRanges[].centerName',
-        'relationships[].people[].addresses[].date',
-        'relationships[].people[].date',
-        'relationships[].people[].dateOfReporting',
-        'relationships[].people[].address.date',
-        'relationships[].people[].dateOfBurial',
-        'relationships[].people[].safeBurial',
-        'followUps[].date',
-        'followUps[].address.date',
-        'vaccinesReceived[].date'
-      ];
 
       // Get the language dictionary
       app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
@@ -5326,7 +5275,7 @@ module.exports = function (Outbreak) {
               if (anonymousFields) {
                 app.utils.anonymizeDatasetFields.anonymize(contact, anonymousFields);
               }
-              app.utils.helpers.formatDateFields(contact, contactDossierDateFields);
+              app.utils.helpers.formatDateFields(contact, app.models.person.dossierDateFields);
               app.utils.helpers.formatUndefinedValues(contact);
 
               // Prepare the contact's relationships for printing
@@ -5364,21 +5313,21 @@ module.exports = function (Outbreak) {
                 // translate the values of the fields marked as reference data fields on the case/contact/event model
                 app.utils.helpers.translateDataSetReferenceDataValues(
                   relationshipMember,
-                  app.models[models.person.typeToModelMap[relationshipMemberType]],
+                  models[models.person.typeToModelMap[relationshipMemberType]],
                   dictionary
                 );
 
                 relationshipMember = app.utils.helpers.translateFieldLabels(
                   app,
                   relationshipMember,
-                  app.models[models.person.typeToModelMap[relationshipMemberType]].modelName,
+                  models[models.person.typeToModelMap[relationshipMemberType]].modelName,
                   dictionary
                 );
 
                 // Translate the values of the fields marked as reference data fields on the relationship model
                 app.utils.helpers.translateDataSetReferenceDataValues(
                   relationship,
-                  app.models.relationship,
+                  models.relationship,
                   dictionary
                 );
 
@@ -5386,7 +5335,7 @@ module.exports = function (Outbreak) {
                 relationship = app.utils.helpers.translateFieldLabels(
                   app,
                   relationship,
-                  app.models.relationship.modelName,
+                  models.relationship.modelName,
                   dictionary
                 );
 
