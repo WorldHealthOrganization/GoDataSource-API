@@ -10,6 +10,18 @@
       "LNG_AUDIT_LOG_ACTIONS_RESTORED": "Record restored"
     },
     "availablePermissions": {
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_ALL": "All",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_ALL_DESCRIPTION": "All permissions under this group ( even those that will be added in the future under this group )",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_PARTIAL": "Partial {{permissions}}",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_PARTIAL_DESCRIPTION": "Some permissions from this group ( expand group to see granted permissions )",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_NONE": "None",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_NONE_DESCRIPTION": "No permissions granted under this group",
+
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_SYSTEM_VERSION": "System version",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_SYSTEM_VERSION_DESCRIPTION": "Permission required by all accounts",
+
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_EVENT": "Events",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_EVENT_DESCRIPTION": "Event permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT": "Event - list",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_DESCRIPTION": "This permission allows listing event information.",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_EVENT": "Event - view",
@@ -61,6 +73,8 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_RELATIONSHIP_EXPOSURES": "Event - bulk delete exposure relationships",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_RELATIONSHIP_EXPOSURES_DESCRIPTION": "This permission allows deleting of event exposure relationships ( You need 'Relationship - bulk delete' permission as well ).",
 
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_RELATIONSHIP": "Relationships",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_RELATIONSHIP_DESCRIPTION": "Relationship permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_RELATIONSHIP": "Relationship - view",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_RELATIONSHIP_DESCRIPTION": "This permission allows viewing full relationship information.",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_RELATIONSHIP": "Relationship - list",

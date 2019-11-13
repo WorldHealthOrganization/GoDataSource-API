@@ -441,7 +441,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "relationship_list",
       "permission": "ALLOW",
       "property": "findEventRelationships"
     },
@@ -549,13 +549,13 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "relationship_list",
       "permission": "ALLOW",
       "property": "countEventRelationships"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "relationship_list",
       "permission": "ALLOW",
       "property": "filteredCountEventRelationships"
     },

@@ -103,9 +103,18 @@
           "type": [
             {
               "type": {
-                "id": "string",
-                "label": "string",
-                "description": "string"
+                "groupAllId": "string",
+                "groupLabel": "string",
+                "groupDescription": "string",
+                "permissions": [
+                  {
+                    "type": {
+                      "id": "string",
+                      "label": "string",
+                      "description": "string"
+                    }
+                  }
+                ]
               }
             }
           ],
