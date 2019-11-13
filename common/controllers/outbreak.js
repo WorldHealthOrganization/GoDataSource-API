@@ -4913,9 +4913,14 @@ module.exports = function (Outbreak) {
         {
           relation: 'relationships',
           scope: {
-            include: {
-              relation: 'people'
-            }
+            include: [
+              {
+                relation: 'people'
+              },
+              {
+                relation: 'cluster'
+              }
+            ]
           }
         },
         {
@@ -4928,27 +4933,6 @@ module.exports = function (Outbreak) {
       }
 
       const sanitizedCases = [];
-
-      // an array with all the expected date type fields found in an extended case model (including relationships and labResults)
-      const caseDossierDateFields = [
-        'dob',
-        'dateRanges[].startDate',
-        'dateRanges[].endDate',
-        'addresses[].date',
-        'dateBecomeCase',
-        'dateOfReporting',
-        'dateOfInfection',
-        'dateOfOnset',
-        'dateOfOutcome',
-        'dateOfBurial',
-        'relationships[].contactDate',
-        'relationships[].people[].dob',
-        'relationships[].people[].addresses[].date',
-        'labResults[].dateSampleTaken',
-        'labResults[].dateSampleDelivered',
-        'labResults[].dateTesting',
-        'labResults[].dateOfResult'
-      ];
 
       // get the language dictionary
       app.models.language.getLanguageDictionary(languageId, (err, dictionary) => {
@@ -4996,7 +4980,7 @@ module.exports = function (Outbreak) {
                 app.utils.anonymizeDatasetFields.anonymize(person, anonymousFields);
               }
 
-              app.utils.helpers.formatDateFields(person, caseDossierDateFields);
+              app.utils.helpers.formatDateFields(person, app.models.person.dossierDateFields);
               app.utils.helpers.formatUndefinedValues(person);
 
               // prepare the case's relationships for printing
@@ -5013,7 +4997,8 @@ module.exports = function (Outbreak) {
                 }
 
                 // needed for checks below
-                const isEvent = relationshipMember.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT';
+                const relationshipMemberType = relationshipMember.type;
+                const isEvent = relationshipMemberType === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT';
 
                 // for events, keep only the properties needed to be printed
                 // because we don't ever fill inherited person's properties for events
@@ -5027,22 +5012,19 @@ module.exports = function (Outbreak) {
                   relationshipMember = tmpObject;
                 }
 
-                // translate the values of the fields marked as reference data fields on the case/contact model
+                // translate the values of the fields marked as reference data fields on the case/contact/event model
                 app.utils.helpers.translateDataSetReferenceDataValues(
                   relationshipMember,
-                  app.models[models.person.typeToModelMap[relationshipMember.type]],
+                  app.models[models.person.typeToModelMap[relationshipMemberType]],
                   dictionary
                 );
 
-                // assign the person to the relationship to be displayed as part of it
-                // for EVENT type, skip this until relationship model fields are being translated
-                // this is needed because of a technical debt related to the fact that EVENT is considered a Person
-                // in the API, but it doesn't use any of person's model fields
-                // and this causes some fields to be printed in the PDF but they will never have a value, nor they appear
-                // in the front-end
-                if (!isEvent) {
-                  relationship.person = relationshipMember;
-                }
+                relationshipMember = app.utils.helpers.translateFieldLabels(
+                  app,
+                  relationshipMember,
+                  models[models.person.typeToModelMap[relationshipMemberType]].modelName,
+                  dictionary
+                );
 
                 // translate the values of the fields marked as reference data fields on the relationship model
                 app.utils.helpers.translateDataSetReferenceDataValues(relationship, models.relationship, dictionary);
@@ -5050,20 +5032,7 @@ module.exports = function (Outbreak) {
                 // translate all remaining keys of the relationship model
                 relationship = app.utils.helpers.translateFieldLabels(app, relationship, models.relationship.modelName, dictionary);
 
-                // for EVENT translate the fields in a separate call
-                // to not inherit Person model properties
-                if (isEvent) {
-                  app.utils.helpers.formatDateFields(relationshipMember, app.models.event.dateFields);
-                  app.utils.helpers.formatUndefinedValues(relationshipMember);
-
-                  relationshipMember = app.utils.helpers.translateFieldLabels(
-                    app,
-                    relationshipMember,
-                    models.event.modelName,
-                    dictionary
-                  );
-                  relationship[dictionary.getTranslation('LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON')] = relationshipMember;
-                }
+                relationship[dictionary.getTranslation('LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON')] = relationshipMember;
 
                 // add the sanitized relationship to the object to be printed
                 sanitizedCases[caseIndex].relationships[relationshipIndex] = relationship;
@@ -5228,6 +5197,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.contactDossier = function (contacts, anonymousFields, options, callback) {
+    const models = app.models;
     const followUpQuestionnaire = this.contactFollowUpTemplate.toJSON();
     let questions = [];
     let tmpDir = tmp.dirSync({unsafeCleanup: true});
@@ -5243,9 +5213,14 @@ module.exports = function (Outbreak) {
         {
           relation: 'relationships',
           scope: {
-            include: {
-              relation: 'people'
-            }
+            include: [
+              {
+                relation: 'people'
+              },
+              {
+                relation: 'cluster'
+              }
+            ]
           }
         },
         {
@@ -5260,28 +5235,6 @@ module.exports = function (Outbreak) {
       const pdfUtils = app.utils.pdfDoc;
       const languageId = options.remotingContext.req.authData.user.languageId;
       let sanitizedContacts = [];
-
-      // An array with all the expected date type fields found in an extended contact model (including relationships and followUps)
-      const contactDossierDateFields = [
-        'dob',
-        'addresses[].date',
-        'relationships[].contactDate',
-        'relationships[].people[].dob',
-        'relationships[].people[].dateBecomeCase',
-        'relationships[].people[].dateOfInfection',
-        'relationships[].people[].dateOfOnset',
-        'relationships[].people[].outcomeId',
-        'relationships[].people[].dateOfOutcome',
-        'relationships[].people[].dateRanges[].typeId',
-        'relationships[].people[].dateRanges[].startDate',
-        'relationships[].people[].dateRanges[].endDate',
-        'relationships[].people[].dateRanges[].centerName',
-        'relationships[].people[].addresses[].date',
-        'relationships[].people[].dateOfBurial',
-        'relationships[].people[].safeBurial',
-        'followUps[].date',
-        'followUps[].address.date'
-      ];
 
       // Get the language dictionary
       app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
@@ -5322,7 +5275,7 @@ module.exports = function (Outbreak) {
               if (anonymousFields) {
                 app.utils.anonymizeDatasetFields.anonymize(contact, anonymousFields);
               }
-              app.utils.helpers.formatDateFields(contact, contactDossierDateFields);
+              app.utils.helpers.formatDateFields(contact, app.models.person.dossierDateFields);
               app.utils.helpers.formatUndefinedValues(contact);
 
               // Prepare the contact's relationships for printing
@@ -5341,6 +5294,7 @@ module.exports = function (Outbreak) {
                 }
 
                 // needed for checks below
+                const relationshipMemberType = relationshipMember.type;
                 const isEvent = relationshipMember.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT';
 
                 // for events, keep only the properties needed to be printed
@@ -5355,39 +5309,37 @@ module.exports = function (Outbreak) {
                   relationshipMember = tmpObject;
                 }
 
-                // Translate the values of the fields marked as reference data fields on the case/contact model
-                app.utils.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models[app.models.person.typeToModelMap[relationshipMember.type]], dictionary);
+                // translate the values of the fields marked as reference data fields on the case/contact/event model
+                // translate the values of the fields marked as reference data fields on the case/contact/event model
+                app.utils.helpers.translateDataSetReferenceDataValues(
+                  relationshipMember,
+                  models[models.person.typeToModelMap[relationshipMemberType]],
+                  dictionary
+                );
 
-                // assign the person to the relationship to be displayed as part of it
-                // for EVENT type, skip this until relationship model fields are being translated
-                // this is needed because of a technical debt related to the fact that EVENT is considered a Person
-                // in the API, but it doesn't use any of person's model fields
-                // and this causes some fields to be printed in the PDF but they will never have a value, nor they appear
-                // in the front-end
-                if (!isEvent) {
-                  relationship.person = relationshipMember;
-                }
+                relationshipMember = app.utils.helpers.translateFieldLabels(
+                  app,
+                  relationshipMember,
+                  models[models.person.typeToModelMap[relationshipMemberType]].modelName,
+                  dictionary
+                );
 
                 // Translate the values of the fields marked as reference data fields on the relationship model
-                app.utils.helpers.translateDataSetReferenceDataValues(relationship, app.models.relationship, dictionary);
+                app.utils.helpers.translateDataSetReferenceDataValues(
+                  relationship,
+                  models.relationship,
+                  dictionary
+                );
 
                 // Translate all remaining keys of the relationship model
-                relationship = app.utils.helpers.translateFieldLabels(app, relationship, app.models.relationship.modelName, dictionary);
+                relationship = app.utils.helpers.translateFieldLabels(
+                  app,
+                  relationship,
+                  models.relationship.modelName,
+                  dictionary
+                );
 
-                // for EVENT translate the fields in a separate call
-                // to not inherit Person model properties
-                if (isEvent) {
-                  app.utils.helpers.formatDateFields(relationshipMember, app.models.event.dateFields);
-                  app.utils.helpers.formatUndefinedValues(relationshipMember);
-
-                  relationshipMember = app.utils.helpers.translateFieldLabels(
-                    app,
-                    relationshipMember,
-                    app.models.event.modelName,
-                    dictionary
-                  );
-                  relationship[dictionary.getTranslation('LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON')] = relationshipMember;
-                }
+                relationship[dictionary.getTranslation('LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON')] = relationshipMember;
 
                 // Add the sanitized relationship to the object to be printed
                 sanitizedContacts[contactIndex].relationships[relationshipIndex] = relationship;

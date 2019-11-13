@@ -27,12 +27,6 @@ module.exports = function (Event) {
     'address.phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
   };
 
-  Event.dateFields = [
-    'address.date',
-    'date',
-    'dateOfReporting'
-  ];
-
   // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
   Event.nestedGeoPoints = [
     'address.geoLocation'
@@ -45,6 +39,7 @@ module.exports = function (Event) {
   Event.printFieldsinOrder = [
     'type',
     'name',
+    'date',
     'dateOfReporting',
     'isDateOfReportingApproximate',
     'description',

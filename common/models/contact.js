@@ -242,10 +242,6 @@ module.exports = function (Contact) {
       modelName: 'location',
       useProperty: 'name'
     },
-    'relationships[].people[].addresses[].locationId': {
-      modelName: 'location',
-      useProperty: 'name'
-    },
     'followUps[].address.locationId': {
       modelName: 'location',
       useProperty: 'name'
@@ -254,7 +250,23 @@ module.exports = function (Contact) {
       modelName: 'team',
       useProperty: 'name'
     },
+    'relationships[].clusterId': {
+      modelName: 'cluster',
+      useProperty: 'name'
+    },
+    'relationships[].people[].addresses[].locationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
     'relationships[].people[].address.locationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'relationships[].people[].burialLocationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'relationships[].people[].dateRanges[].locationId': {
       modelName: 'location',
       useProperty: 'name'
     }

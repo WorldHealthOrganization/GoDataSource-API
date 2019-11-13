@@ -125,6 +125,45 @@ module.exports = function (Person) {
     'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event'
   };
 
+  Person.dossierDateFields = [
+    'dob',
+    'dateRanges[].startDate',
+    'dateRanges[].endDate',
+    'addresses[].date',
+    'dateBecomeCase',
+    'dateOfReporting',
+    'dateOfInfection',
+    'dateOfOnset',
+    'dateOfOutcome',
+    'dateOfBurial',
+    'vaccinesReceived[].date',
+    // general relationship/person dates
+    'relationships[].contactDate',
+    'relationships[].people[].vaccinesReceived[].date',
+    // event dates
+    'relationships[].people[].date',
+    'relationships[].people[].address.date',
+    // case/contact specific dates
+    'relationships[].people[].dob',
+    'relationships[].people[].dateRanges[].startDate',
+    'relationships[].people[].dateRanges[].endDate',
+    'relationships[].people[].addresses[].date',
+    'relationships[].people[].dateOfReporting',
+    'relationships[].people[].dateOfReporting',
+    'relationships[].people[].dateOfInfection',
+    'relationships[].people[].dateOfOnset',
+    'relationships[].people[].dateOfOutcome',
+    'relationships[].people[].dateOfBurial',
+    // lab result dates
+    'labResults[].dateSampleTaken',
+    'labResults[].dateSampleDelivered',
+    'labResults[].dateTesting',
+    'labResults[].dateOfResult',
+    // follow up dates
+    'followUps[].date',
+    'followUps[].address.date'
+  ];
+
   /**
    * Construct and return the display name of the person
    */
