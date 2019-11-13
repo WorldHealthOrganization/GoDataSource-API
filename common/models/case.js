@@ -235,6 +235,13 @@ module.exports = function (Case) {
     'pregnancyStatus': 'LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS'
   });
 
+  Case.exportFieldsOrder = [
+    'id',
+    'visualId',
+    'dateOfReporting',
+    'isDateOfReportingApproximate'
+  ];
+
   Case.arrayProps = {
     dateRanges: {
       'typeId': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_TYPE_ID',
@@ -311,6 +318,8 @@ module.exports = function (Case) {
     'riskLevel',
     'riskReason',
     'wasContact',
+    'dateOfReporting',
+    'isDateOfReportingApproximate',
     'dateBecomeCase',
     'dateOfInfection',
     'dateOfOnset',
@@ -345,7 +354,23 @@ module.exports = function (Case) {
       modelName: 'location',
       useProperty: 'name'
     },
+    'relationships[].clusterId': {
+      modelName: 'cluster',
+      useProperty: 'name'
+    },
     'relationships[].people[].addresses[].locationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'relationships[].people[].address.locationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'relationships[].people[].burialLocationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'relationships[].people[].dateRanges[].locationId': {
       modelName: 'location',
       useProperty: 'name'
     }

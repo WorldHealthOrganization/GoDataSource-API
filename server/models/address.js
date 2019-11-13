@@ -33,7 +33,8 @@ module.exports = function (Address) {
     'locationId',
     'geoLocation',
     'geoLocationAccurate',
-    'date'
+    'date',
+    'phoneNumber'
   ];
 
 

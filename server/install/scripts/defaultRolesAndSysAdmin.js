@@ -6,6 +6,7 @@ const Role = app.models.role;
 const User = app.models.user;
 const rewrite = false;
 const defaultAdmin = {
+  id: 'sys_admin',
   firstName: 'System',
   lastName: 'Administrator',
   email: 'admin@who.int',

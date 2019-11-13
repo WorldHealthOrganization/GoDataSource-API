@@ -97,6 +97,61 @@ module.exports = function (Model) {
     // pipeline
     const aggregatePipeline = [];
 
+    // geoLocation distance filters need to be run before lookup ( they don't work otherwise - MongoDB )
+    // - this means that we won't be able to filter by related model geolocation distance ( duh...we don't have related data since it is added later )
+    // - also, this will work only for AND conditions, it won't work for OR conditions
+    // construct list of possible geo points filter properties for our model
+    const matchWhereBeforeAnythingElse = {
+      $and: []
+    };
+    if (Model.nestedGeoPoints) {
+      const listOfGeoPoints = [];
+      Model.nestedGeoPoints.forEach((property) => {
+        listOfGeoPoints.push(property);
+        if (property.indexOf('[]') > -1) {
+          listOfGeoPoints.push(property.replace(/\[]/g, ''));
+        }
+      });
+      const checkPropertiesForGeoLocationCondition = (filterData) => {
+        _.each(filterData, (value, property) => {
+          if (
+            typeof property === 'string' &&
+            listOfGeoPoints.includes(property) &&
+            value.$geoNear
+          ) {
+            // add condition to list
+            matchWhereBeforeAnythingElse.$and.push({
+              [property]: {
+                $geoNear: value.$geoNear
+              }
+            });
+
+            // remove search criteria since will be handled separately
+            delete value.$geoNear;
+
+            // remove the entire filter ?
+            if (_.isEmpty(filterData[property])) {
+              delete filterData[property];
+            }
+          } else if (
+            _.isArray(value) ||
+            _.isObject(value)
+          ) {
+            // check depper
+            checkPropertiesForGeoLocationCondition(value);
+          }
+        });
+      };
+      checkPropertiesForGeoLocationCondition(whereFilter);
+    }
+
+    // apply filter before doing anything else
+    if (!_.isEmpty(matchWhereBeforeAnythingElse.$and)) {
+      aggregatePipeline.push({
+        $match: matchWhereBeforeAnythingElse
+      });
+    }
+
     // include relations
     if (options.relations) {
       _.each(options.relations, (relation) => {

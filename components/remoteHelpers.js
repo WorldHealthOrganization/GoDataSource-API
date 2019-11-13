@@ -151,7 +151,20 @@ function exportFilteredModelsList(
         const isJSONXMLExport = ['json', 'xml'].includes(exportType);
         const ignoreArrayFieldLabels = Model.hasOwnProperty('arrayProps');
 
-        Object.keys(fieldLabelsMap).forEach(function (propertyName) {
+        // some models may have a specific order for headers
+        let originalFieldsList = Object.keys(fieldLabelsMap);
+        let fieldsList = [];
+        if (Model.exportFieldsOrder) {
+          fieldsList = [...Model.exportFieldsOrder];
+          // sometimes the order list contains only a subset of the actual fields list
+          if (Model.exportFieldsOrder.length !== originalFieldsList.length) {
+            fieldsList.push(...originalFieldsList.filter(f => Model.exportFieldsOrder.indexOf(f) === -1));
+          }
+        } else {
+          fieldsList = [...originalFieldsList];
+        }
+
+        fieldsList.forEach(function (propertyName) {
           // new functionality, not supported by all models
           if (!isJSONXMLExport && ignoreArrayFieldLabels && Model.arrayProps[propertyName]) {
             // determine if we need to include parent token
@@ -214,10 +227,25 @@ function exportFilteredModelsList(
             ) {
               headers.push(...modelPropertiesExpandOnFlatFiles[propertyName]);
             } else {
+              let headerTranslation = dictionary.getTranslation(fieldLabelsMap[propertyName]);
+
+              if (!isJSONXMLExport) {
+                // determine if we need to include parent token
+                let parentToken;
+                const parentIndex = propertyName.indexOf('.');
+                if (parentIndex >= -1) {
+                  const parentKey = propertyName.substr(0, parentIndex);
+                  parentToken = fieldLabelsMap[parentKey];
+                }
+                if (parentToken) {
+                  headerTranslation = dictionary.getTranslation(parentToken) + ' ' + headerTranslation;
+                }
+              }
+
               headers.push({
                 id: !isJSONXMLExport ? propertyName.replace(/\./g, ' ') : propertyName,
                 // use correct label translation for user language
-                header: dictionary.getTranslation(fieldLabelsMap[propertyName])
+                header: headerTranslation
               });
             }
           }

@@ -105,6 +105,13 @@ module.exports = function (Contact) {
     'pregnancyStatus': 'LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS'
   });
 
+  Contact.exportFieldsOrder = [
+    'id',
+    'visualId',
+    'dateOfReporting',
+    'isDateOfReportingApproximate'
+  ];
+
   Contact.arrayProps = {
     addresses: {
       'typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
@@ -223,7 +230,9 @@ module.exports = function (Contact) {
     'safeBurial',
     'dateOfBurial',
     'vaccinesReceived',
-    'pregnancyStatus'
+    'pregnancyStatus',
+    'dateOfReporting',
+    'isDateOfReportingApproximate'
   ];
 
   Contact.locationFields = [
@@ -235,16 +244,32 @@ module.exports = function (Contact) {
       modelName: 'location',
       useProperty: 'name'
     },
-    'relationships[].people[].addresses[].locationId': {
-      modelName: 'location',
-      useProperty: 'name'
-    },
     'followUps[].address.locationId': {
       modelName: 'location',
       useProperty: 'name'
     },
     'followUps[].teamId': {
       modelName: 'team',
+      useProperty: 'name'
+    },
+    'relationships[].clusterId': {
+      modelName: 'cluster',
+      useProperty: 'name'
+    },
+    'relationships[].people[].addresses[].locationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'relationships[].people[].address.locationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'relationships[].people[].burialLocationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'relationships[].people[].dateRanges[].locationId': {
+      modelName: 'location',
       useProperty: 'name'
     }
   };

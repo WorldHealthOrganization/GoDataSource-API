@@ -4913,9 +4913,14 @@ module.exports = function (Outbreak) {
         {
           relation: 'relationships',
           scope: {
-            include: {
-              relation: 'people'
-            }
+            include: [
+              {
+                relation: 'people'
+              },
+              {
+                relation: 'cluster'
+              }
+            ]
           }
         },
         {
@@ -4928,30 +4933,6 @@ module.exports = function (Outbreak) {
       }
 
       const sanitizedCases = [];
-
-      // an array with all the expected date type fields found in an extended case model (including relationships and labResults)
-      const caseDossierDateFields = [
-        'dob',
-        'dateRanges[].typeId',
-        'dateRanges[].startDate',
-        'dateRanges[].endDate',
-        'dateRanges[].centerName',
-        'addresses[].date',
-        'dateBecomeCase',
-        'dateOfInfection',
-        'dateOfOnset',
-        'outcomeId',
-        'dateOfOutcome',
-        'safeBurial',
-        'dateOfBurial',
-        'relationships[].contactDate',
-        'relationships[].people[].dob',
-        'relationships[].people[].addresses[].date',
-        'labResults[].dateSampleTaken',
-        'labResults[].dateSampleDelivered',
-        'labResults[].dateTesting',
-        'labResults[].dateOfResult'
-      ];
 
       // get the language dictionary
       app.models.language.getLanguageDictionary(languageId, (err, dictionary) => {
@@ -4967,6 +4948,9 @@ module.exports = function (Outbreak) {
         // we call the variable "person" only because "case" is a javascript reserved word
         results.forEach((person, caseIndex) => {
           results[caseIndex] = person.toJSON();
+          // this is needed because loopback doesn't return hidden fields from definition into the toJSON call
+          // might be removed later
+          results[caseIndex].type = person.type;
 
           // since relationships is a custom relation, the relationships collection is included differently in the case model,
           // and not converted by the initial toJSON method.
@@ -4996,7 +4980,7 @@ module.exports = function (Outbreak) {
                 app.utils.anonymizeDatasetFields.anonymize(person, anonymousFields);
               }
 
-              app.utils.helpers.formatDateFields(person, caseDossierDateFields);
+              app.utils.helpers.formatDateFields(person, app.models.person.dossierDateFields);
               app.utils.helpers.formatUndefinedValues(person);
 
               // prepare the case's relationships for printing
@@ -5012,21 +4996,43 @@ module.exports = function (Outbreak) {
                   return;
                 }
 
-                // translate the values of the fields marked as reference data fields on the case/contact model
+                // needed for checks below
+                const relationshipMemberType = relationshipMember.type;
+                const isEvent = relationshipMemberType === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT';
+
+                // for events, keep only the properties needed to be printed
+                // because we don't ever fill inherited person's properties for events
+                if (isEvent) {
+                  let tmpObject = {};
+                  for (let prop in relationshipMember) {
+                    if (app.models.event.printFieldsinOrder.indexOf(prop) !== -1) {
+                      tmpObject[prop] = relationshipMember[prop];
+                    }
+                  }
+                  relationshipMember = tmpObject;
+                }
+
+                // translate the values of the fields marked as reference data fields on the case/contact/event model
                 app.utils.helpers.translateDataSetReferenceDataValues(
                   relationshipMember,
-                  app.models[models.person.typeToModelMap[relationshipMember.type]],
+                  app.models[models.person.typeToModelMap[relationshipMemberType]],
                   dictionary
                 );
 
-                // assign the person to the relationship to be displayed as part of it
-                relationship.person = relationshipMember;
+                relationshipMember = app.utils.helpers.translateFieldLabels(
+                  app,
+                  relationshipMember,
+                  models[models.person.typeToModelMap[relationshipMemberType]].modelName,
+                  dictionary
+                );
 
                 // translate the values of the fields marked as reference data fields on the relationship model
                 app.utils.helpers.translateDataSetReferenceDataValues(relationship, models.relationship, dictionary);
 
                 // translate all remaining keys of the relationship model
                 relationship = app.utils.helpers.translateFieldLabels(app, relationship, models.relationship.modelName, dictionary);
+
+                relationship[dictionary.getTranslation('LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON')] = relationshipMember;
 
                 // add the sanitized relationship to the object to be printed
                 sanitizedCases[caseIndex].relationships[relationshipIndex] = relationship;
@@ -5191,6 +5197,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.contactDossier = function (contacts, anonymousFields, options, callback) {
+    const models = app.models;
     const followUpQuestionnaire = this.contactFollowUpTemplate.toJSON();
     let questions = [];
     let tmpDir = tmp.dirSync({unsafeCleanup: true});
@@ -5206,9 +5213,14 @@ module.exports = function (Outbreak) {
         {
           relation: 'relationships',
           scope: {
-            include: {
-              relation: 'people'
-            }
+            include: [
+              {
+                relation: 'people'
+              },
+              {
+                relation: 'cluster'
+              }
+            ]
           }
         },
         {
@@ -5224,14 +5236,6 @@ module.exports = function (Outbreak) {
       const languageId = options.remotingContext.req.authData.user.languageId;
       let sanitizedContacts = [];
 
-      // An array with all the expected date type fields found in an extended contact model (including relationships and followUps)
-      const contactDossierDateFields = ['dob', 'addresses[].date', 'relationships[].contactDate', 'relationships[].people[].dob',
-        'relationships[].people[].dateBecomeCase', 'relationships[].people[].dateOfInfection', 'relationships[].people[].dateOfOnset',
-        'relationships[].people[].outcomeId', 'relationships[].people[].dateOfOutcome', 'relationships[].people[].dateRanges[].typeId', 'relationships[].people[].dateRanges[].startDate',
-        'relationships[].people[].dateRanges[].endDate', 'relationships[].people[].dateRanges[].centerName', 'relationships[].people[].addresses[].date',
-        'relationships[].people[].dateOfBurial', 'relationships[].people[].safeBurial', 'followUps[].date', 'followUps[].address.date'
-      ];
-
       // Get the language dictionary
       app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
         // handle errors
@@ -5242,6 +5246,11 @@ module.exports = function (Outbreak) {
         // Transform all DB models into JSONs for better handling
         results.forEach((contact, contactIndex) => {
           results[contactIndex] = contact.toJSON();
+
+          // this is needed because loopback doesn't return hidden fields from definition into the toJSON call
+          // might be removed later
+          results[contactIndex].type = contact.type;
+
           // since relationships is a custom relation, the relationships collection is included differently in the case model,
           // and not converted by the initial toJSON method.
           contact.relationships.forEach((relationship, relationshipIndex) => {
@@ -5266,7 +5275,7 @@ module.exports = function (Outbreak) {
               if (anonymousFields) {
                 app.utils.anonymizeDatasetFields.anonymize(contact, anonymousFields);
               }
-              app.utils.helpers.formatDateFields(contact, contactDossierDateFields);
+              app.utils.helpers.formatDateFields(contact, app.models.person.dossierDateFields);
               app.utils.helpers.formatUndefinedValues(contact);
 
               // Prepare the contact's relationships for printing
@@ -5284,17 +5293,53 @@ module.exports = function (Outbreak) {
                   return;
                 }
 
-                // Translate the values of the fields marked as reference data fields on the case/contact model
-                app.utils.helpers.translateDataSetReferenceDataValues(relationshipMember, app.models[app.models.person.typeToModelMap[relationshipMember.type]], dictionary);
+                // needed for checks below
+                const relationshipMemberType = relationshipMember.type;
+                const isEvent = relationshipMember.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT';
 
-                // Assign the person to the relationship to be displayed as part of it
-                relationship.person = relationshipMember;
+                // for events, keep only the properties needed to be printed
+                // because we don't ever fill inherited person's properties for events
+                if (isEvent) {
+                  let tmpObject = {};
+                  for (let prop in relationshipMember) {
+                    if (app.models.event.printFieldsinOrder.indexOf(prop) !== -1) {
+                      tmpObject[prop] = relationshipMember[prop];
+                    }
+                  }
+                  relationshipMember = tmpObject;
+                }
+
+                // translate the values of the fields marked as reference data fields on the case/contact/event model
+                // translate the values of the fields marked as reference data fields on the case/contact/event model
+                app.utils.helpers.translateDataSetReferenceDataValues(
+                  relationshipMember,
+                  models[models.person.typeToModelMap[relationshipMemberType]],
+                  dictionary
+                );
+
+                relationshipMember = app.utils.helpers.translateFieldLabels(
+                  app,
+                  relationshipMember,
+                  models[models.person.typeToModelMap[relationshipMemberType]].modelName,
+                  dictionary
+                );
 
                 // Translate the values of the fields marked as reference data fields on the relationship model
-                app.utils.helpers.translateDataSetReferenceDataValues(relationship, app.models.relationship, dictionary);
+                app.utils.helpers.translateDataSetReferenceDataValues(
+                  relationship,
+                  models.relationship,
+                  dictionary
+                );
 
                 // Translate all remaining keys of the relationship model
-                relationship = app.utils.helpers.translateFieldLabels(app, relationship, app.models.relationship.modelName, dictionary);
+                relationship = app.utils.helpers.translateFieldLabels(
+                  app,
+                  relationship,
+                  models.relationship.modelName,
+                  dictionary
+                );
+
+                relationship[dictionary.getTranslation('LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON')] = relationshipMember;
 
                 // Add the sanitized relationship to the object to be printed
                 sanitizedContacts[contactIndex].relationships[relationshipIndex] = relationship;
@@ -7721,6 +7766,15 @@ module.exports = function (Outbreak) {
     app.models.followUp
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
+        // replace nested geo points filters
+        filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.followUp,
+          filter.where || {},
+          true,
+          undefined,
+          true
+        );
+
         // find follow-ups using filter
         return app.models.followUp.findAggregate(
           filter
@@ -7742,6 +7796,15 @@ module.exports = function (Outbreak) {
     app.models.followUp
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
+        // replace nested geo points filters
+        filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.followUp,
+          filter.where || {},
+          true,
+          undefined,
+          true
+        );
+
         // count using query
         return app.models.followUp.findAggregate(
           {
@@ -8533,7 +8596,7 @@ module.exports = function (Outbreak) {
                         lastName: _.get(record, 'contact.lastName', ''),
                         firstName: _.get(record, 'contact.firstName', ''),
                         middleName: _.get(record, 'contact.middleName', ''),
-                        age: `${_.get(record, 'contact.age.years', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(record, 'contact.age.months', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
+                        age: pdfUtils.displayAge(record, dictionary),
                         gender: record.gender,
                         location: record.address && record.address.locationId && record.address.locationId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION' && locationsMap[record.address.locationId] ?
                           locationsMap[record.address.locationId].name :
@@ -8860,6 +8923,13 @@ module.exports = function (Outbreak) {
           })
         );
 
+        // replace nested geo points filters
+        app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.case,
+          filter.where,
+          true
+        );
+
         // find follow-ups using filter
         return app.models.case.find(filter);
       })
@@ -8886,6 +8956,15 @@ module.exports = function (Outbreak) {
           app.utils.remote.convertLoopbackFilterToMongo({
             where: filter.where || {}
           })
+        );
+
+        // replace nested geo points filters
+        app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.case,
+          filter.where,
+          true,
+          undefined,
+          true
         );
 
         // count using query
@@ -9225,6 +9304,16 @@ module.exports = function (Outbreak) {
     app.models.contact
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
+        // replace nested geo points filters
+        filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.contact,
+          filter.where || {},
+          true,
+          undefined,
+          true,
+          true
+        );
+
         // count using query
         return app.models.contact.count(filter.where);
       })
@@ -9922,7 +10011,7 @@ module.exports = function (Outbreak) {
                             lastName: _.get(record, 'lastName', ''),
                             firstName: _.get(record, 'firstName', ''),
                             middleName: _.get(record, 'middleName', ''),
-                            age: `${_.get(record, 'age.years', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(record, 'contact.age.months', 0)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
+                            age: pdfUtils.displayAge(record, dictionary),
                             gender: dictionary.getTranslation(_.get(record, 'gender')),
                             location: record.currentAddress && record.currentAddress.locationId && record.currentAddress.locationId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION' && locationsMap[record.currentAddress.locationId] ?
                               locationsMap[record.currentAddress.locationId].name :
@@ -9955,37 +10044,49 @@ module.exports = function (Outbreak) {
                     translatedFollowUpAcronymsAndIds[translatedProp] = translatedValue;
                   }
 
+                  // used to fit the table on one page
+                  const standardHeaderSize = 40;
+
                   // build table headers
                   const headers = [
                     ...([{
                       id: 'firstName',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME'),
+                      width: standardHeaderSize
                     }, {
                       id: 'lastName',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME'),
+                      width: standardHeaderSize
                     }, {
                       id: 'middleName',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME'),
+                      width: standardHeaderSize + 10
                     }, {
                       id: 'age',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE'),
+                      width: standardHeaderSize
                     }, {
                       id: 'gender',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER'),
+                      width: standardHeaderSize
                     }]),
                     ...(groupBy === 'case' ? [{
                       id: 'location',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION'),
+                      width: standardHeaderSize
                     }] : []),
                     ...([{
                       id: 'address',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS'),
+                      width: standardHeaderSize
                     }, {
                       id: 'from',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM'),
+                      width: standardHeaderSize - 5
                     }, {
                       id: 'to',
-                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO')
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO'),
+                      width: standardHeaderSize - 5
                     }])
                   ];
 
@@ -10644,7 +10745,12 @@ module.exports = function (Outbreak) {
                 const firstFollowUpDay = contactData.lastContactDate.clone().add(1, 'days');
 
                 // calculate end day of follow up by taking the last contact day and adding the outbreak period of follow up to it
-                const lastFollowUpDay = genericHelpers.getDateEndOfDay(firstFollowUpDay.clone().add(outbreak.periodOfFollowup, 'days'));
+                const lastFollowUpDay = genericHelpers.getDateEndOfDay(
+                  firstFollowUpDay.clone().add(
+                    // last contact date is inclusive
+                    outbreak.periodOfFollowup > 0 ? outbreak.periodOfFollowup - 1 : 0, 'days'
+                  )
+                );
 
                 // dates headers
                 let dayIndex = 1;
@@ -10688,9 +10794,7 @@ module.exports = function (Outbreak) {
                 },
                 {
                   label: dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE'),
-                  value: contactData.age && (contactData.age.years > 0 || contactData.age.months > 0) ?
-                    `${contactData.age.years} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${contactData.age.months} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}` :
-                    ''
+                  value: pdfUtils.displayAge(contactData, dictionary)
                 },
                 {
                   label: dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE'),
@@ -10710,7 +10814,7 @@ module.exports = function (Outbreak) {
 
               // add question to pdf form
               const addQuestionToForm = (question) => {
-                // ignore irelevant questions
+                // ignore irrelevant questions
                 if (
                   [
                     'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD'

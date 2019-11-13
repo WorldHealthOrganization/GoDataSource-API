@@ -410,6 +410,12 @@ const createQuestionnaire = function (doc, questions, withData, title, options) 
       // display type
       const displayVertical = item.answersDisplay === 'LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL';
 
+      // if this is a markup question, just display the text
+      if (item.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP') {
+        doc.moveDown().text(`${item.question}`, questionMargin);
+        return;
+      }
+
       // question test
       doc.moveDown().text(`${item.order}. ${item.question}`, questionMargin);
 
@@ -1051,6 +1057,23 @@ const displayResourceLabels = function (doc, labels, title, options) {
   return doc;
 };
 
+/**
+ * Either show years or months, never both
+ * @param record
+ * @param dictionary
+ */
+const displayAge = function (record, dictionary) {
+  let age = '';
+  let years = _.get(record, 'age.years', 0);
+  let months = _.get(record, 'age.months', 0);
+  if (months > 0) {
+    age = `${displayValue(months)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`;
+  } else {
+    age = `${displayValue(years)} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')}`;
+  }
+  return age;
+};
+
 module.exports = {
   createPDFList: createPDFList,
   createImageDoc: createImageDoc,
@@ -1065,5 +1088,6 @@ module.exports = {
   downloadPdfDoc: downloadPdfDoc,
   displayValue: displayValue,
   displaySections: displaySections,
-  displayResourceLabels: displayResourceLabels
+  displayResourceLabels: displayResourceLabels,
+  displayAge: displayAge
 };

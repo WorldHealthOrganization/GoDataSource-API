@@ -42,7 +42,7 @@ app.logger = logger;
 
 app.start = function () {
   // start the web server
-  return app.listen(function () {
+  const server = app.listen(function () {
     app.emit('started');
 
     // try and figure out IP address
@@ -98,6 +98,12 @@ app.start = function () {
       );
     });
   });
+
+  // remove default socket timeout and set it 12 hours
+  // ref: https://nodejs.org/dist/latest-v12.x/docs/api/http.html#http_server_timeout
+  server.timeout = 43200000;
+
+  return server;
 };
 
 // run custom before boot initialisation
