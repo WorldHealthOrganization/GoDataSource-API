@@ -230,7 +230,9 @@ module.exports = function (Contact) {
     'safeBurial',
     'dateOfBurial',
     'vaccinesReceived',
-    'pregnancyStatus'
+    'pregnancyStatus',
+    'dateOfReporting',
+    'isDateOfReportingApproximate'
   ];
 
   Contact.locationFields = [
