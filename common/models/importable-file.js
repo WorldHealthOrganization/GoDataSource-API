@@ -194,7 +194,7 @@ module.exports = function (ImportableFile) {
    */
   function getSpreadSheetHeaders({ data }, callback) {
     // parse XLS data
-    const parsedData = xlsx.read(data, {cellDates: true, cellNF: false, cellText: false});
+    const parsedData = xlsx.read(data, { raw: true, cellText: false });
     // extract first sheet name (we only care about first sheet)
     let sheetName = parsedData.SheetNames.shift();
     // convert data to JSON
