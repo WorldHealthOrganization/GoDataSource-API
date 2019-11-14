@@ -157,6 +157,11 @@ module.exports = function (ReferenceData) {
       'name': 'LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS',
       'description': 'LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_DESCRIPTION'
     },
+    {
+      'id': 'LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME',
+      'name': 'LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME',
+      'description': 'LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME_DESCRIPTION'
+    }
   ];
 
   // map language token labels for model properties
