@@ -35,13 +35,13 @@ module.exports = function (ImportableFile) {
 
   /**
    * Get JSON content and headers
-   * @param stringifiedJson
+   * @param data
    * @param callback
    */
-  function getJsonHeaders(stringifiedJson, callback) {
+  function getJsonHeaders({ data }, callback) {
     // try and parse as a JSON
     try {
-      const jsonObj = JSON.parse(stringifiedJson);
+      const jsonObj = JSON.parse(data);
       // this needs to be a list (in order to get its headers)
       if (!Array.isArray(jsonObj)) {
         // error invalid content
@@ -84,56 +84,117 @@ module.exports = function (ImportableFile) {
   /**
    * Get XML string as JSON and its headers
    * @param xmlString
+   * @param modelName
+   * @param dictionary
+   * @param questionnaire
    * @param callback
    */
-  function getXmlHeaders(xmlString, callback) {
+  function getXmlHeaders({ data, modelName, dictionary, questionnaire }, callback) {
+    const parserOpts = {
+      explicitArray: true,
+      explicitRoot: false
+    };
+
+    const questionsTypeMap = {};
+    const arrayProps = app.models[modelName].arrayProps;
+    if (arrayProps && questionnaire) {
+      parserOpts.explicitArray = false;
+
+      // build a map of questions and their types
+      (function traverse(questions) {
+        return (questions || []).map(q => {
+          questionsTypeMap[q.variable] = q.answerType;
+          if (Array.isArray(q.answers) && q.answers.length) {
+            for (let a of q.answers) {
+              traverse(a.additionalQuestions);
+            }
+          }
+        });
+      })(questionnaire.toJSON());
+    }
+
     // parse XML string
-    xml2js.parseString(xmlString, {explicitRoot: false}, function (error, jsonObj) {
+    xml2js.parseString(data, parserOpts, function (error, jsonObj) {
       // handle parse errors
       if (error) {
         return callback(error);
       }
       // XML arrays are stored within a prop, get the first property of the object
       const firstProp = Object.keys(jsonObj).shift();
-      // this needs to be a list (in order to get its headers)
-      if (!Array.isArray(jsonObj[firstProp])) {
-        // error invalid content
-        return callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
-          contentType: 'XML',
-          details: 'it should contain an array'
-        }));
+
+      // list of records to parse
+      let records = jsonObj[firstProp];
+      if (typeof records === 'object' && !Array.isArray(records)) {
+        records = [records];
       }
+
       // build a list of headers
       const headers = [];
-      // build the list by looking at the properties of all elements (not all items have all properties)
-      jsonObj[firstProp].forEach(function (item) {
-        // go through all properties of flatten item
-        Object.keys(app.utils.helpers.getFlatObject(item)).forEach(function (property) {
-          const sanitizedProperty = property
-            // don't replace basic types arrays ( string, number, dates etc )
-            .replace(/\[\d+]$/g, '')
-            // sanitize arrays containing objects object
-            .replace(/\[\d+]/g, '[]')
-            .replace(/^\[]\.*/, '');
-          // add the header if not already included
-          if (!headers.includes(sanitizedProperty)) {
-            headers.push(sanitizedProperty);
+      records = records.map(record => {
+        // convert array properties to correct format
+        // this is needed because XML might contain a single element of type array props
+        // and the parser is converting it into object, rather than array, cause has only one
+        for (let propName in record) {
+          if (arrayProps[propName] || arrayProps[dictionary.getTranslation(propName)]) {
+            if (!Array.isArray(record[propName]) && typeof record[propName] === 'object') {
+              record[propName] = [record[propName]];
+            }
           }
-        });
+        }
+
+        // parse questions from XML
+        // make sure multi answers/multi date questions are of type array
+        if (record.questionnaireAnswers && Object.keys(questionsTypeMap).length) {
+          for (let q in record.questionnaireAnswers) {
+            if (record.questionnaireAnswers.hasOwnProperty(q)) {
+              const questionType = questionsTypeMap[q];
+
+              // make sure answers is an array
+              if (!Array.isArray(record.questionnaireAnswers[q])) {
+                record.questionnaireAnswers[q] = [record.questionnaireAnswers[q]];
+              }
+              if (questionType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
+                // go through each answers, make sure value is array
+                record.questionnaireAnswers[q] = record.questionnaireAnswers[q].map(a => {
+                  if (!Array.isArray(a.value)) {
+                    a.value = [a.value];
+                  }
+                  return a;
+                });
+              }
+            }
+          }
+        }
+
+        // go through all properties of flatten item
+        Object.keys(app.utils.helpers.getFlatObject(record))
+          .forEach(function (property) {
+            const sanitizedProperty = property
+              // don't replace basic types arrays ( string, number, dates etc )
+              .replace(/\[\d+]$/g, '')
+              // sanitize arrays containing objects object
+              .replace(/\[\d+]/g, '[]')
+              .replace(/^\[]\.*/, '');
+            // add the header if not already included
+            if (!headers.includes(sanitizedProperty)) {
+              headers.push(sanitizedProperty);
+            }
+          });
+        return record;
       });
       // send back the parsed object and its headers
-      callback(null, {obj: jsonObj[firstProp], headers: headers});
+      callback(null, {obj: records, headers: headers});
     });
   }
 
   /**
    * Get XLS/XLSX/CSV/ODS fileContent as JSON and its headers
-   * @param fileContent
+   * @param data
    * @param callback
    */
-  function getSpreadSheetHeaders(fileContent, callback) {
+  function getSpreadSheetHeaders({ data }, callback) {
     // parse XLS data
-    const parsedData = xlsx.read(fileContent, { raw: true, cellText: false });
+    const parsedData = xlsx.read(data, { raw: true, cellText: false });
     // extract first sheet name (we only care about first sheet)
     let sheetName = parsedData.SheetNames.shift();
     // convert data to JSON
@@ -207,9 +268,11 @@ module.exports = function (ImportableFile) {
    * @param file
    * @param callback
    * @param decryptPassword
+   * @param modelName
+   * @param dictionary
    * @return {*}
    */
-  ImportableFile.storeFileAndGetHeaders = function (file, decryptPassword, callback) {
+  ImportableFile.storeFileAndGetHeaders = function (file, decryptPassword, modelName, dictionary, questionnaire, callback) {
     // get file extension
     const extension = path.extname(file.name);
     // if extension is invalid
@@ -255,7 +318,7 @@ module.exports = function (ImportableFile) {
       decryptFile
         .then(function (buffer) {
           // get file headers
-          getHeaders(buffer, function (error, result) {
+          getHeaders({ data: buffer, modelName, dictionary, questionnaire }, function (error, result) {
             // handle error
             if (error) {
               return callback(error);
