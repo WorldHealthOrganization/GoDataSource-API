@@ -605,13 +605,13 @@
       "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
-      "property": "__get__events"
+      "property": "findEvents"
     },
     {
       "principalType": "ROLE",
       "principalId": "read_report",
       "permission": "ALLOW",
-      "property": "__get__events"
+      "property": "findEvents"
     },
     {
       "principalType": "ROLE",
@@ -6769,12 +6769,39 @@
         "path": "/people"
       }
     },
+    "prototype.findEvents": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). It also supports custom filter option: 'where.countRelations' for count number of exposures/contacts."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "events",
+          "type": [
+            "event"
+          ],
+          "description": "List of cases that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries events of outbreak.",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/events"
+        }
+      ]
+    },
     "prototype.findCases": {
       "accepts": [
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship', 'where.labResult' MongoDB compatible queries and 'where.noRelationships' query"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship', 'where.labResult' MongoDB compatible queries, 'where.noRelationships' query and 'where.countRelations' query."
         }
       ],
       "returns": [
@@ -6833,7 +6860,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries. It also supports custom filter option: 'where.countRelations' for count number of exposures/contacts."
         }
       ],
       "returns": [

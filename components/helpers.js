@@ -2040,6 +2040,20 @@ const convertQuestionnairePropsToDate = function (questions) {
   return questions;
 };
 
+/**
+ * Retrieve a custom filter option and remove the value afterwards
+ * @param filter
+ * @param option
+ * @returns {*}
+ */
+const getFilterCustomOption = function (filter, option) {
+  filter = filter || {};
+  filter.where = filter.where || {};
+  const optionValue = filter.where[option];
+  delete filter.where[option];
+  return optionValue;
+};
+
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -2087,5 +2101,6 @@ module.exports = {
   getDateChunks: getDateChunks,
   getDaysSince: getDaysSince,
   getQuestionnaireMaxAnswersMap: getQuestionnaireMaxAnswersMap,
-  convertQuestionnairePropsToDate: convertQuestionnairePropsToDate
+  convertQuestionnairePropsToDate: convertQuestionnairePropsToDate,
+  getFilterCustomOption: getFilterCustomOption
 };
