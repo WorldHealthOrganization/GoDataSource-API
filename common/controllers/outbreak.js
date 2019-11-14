@@ -11407,4 +11407,52 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Bulk delete a list of follow ups
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.bulkDeleteFollowUps = function (filter, callback) {
+    const outbreakId = this.id;
+    filter = filter || {};
+    filter.where = filter.where || {};
+    app.models.followUp.destroyAll({
+      and: [
+        {
+          outbreakId: outbreakId
+        },
+        filter.where
+      ]
+    }, callback);
+  };
+
+  /**
+   * Bulk restore a list of deleted follow ups
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.bulkRestoreFollowUps = function (filter, options, callback) {
+    const outbreakId = this.id;
+    filter = filter || {};
+    filter.where = filter.where || {};
+    app.models.followUp
+      .find({
+        deleted: true,
+        where: {
+          and: [
+            {
+              outbreakId: outbreakId,
+              deleted: true
+            },
+            filter.where
+          ]
+        }
+      })
+      .then(records => {
+        async.series(records.map(r => doneRecord => r.undoDelete(options, doneRecord)), callback);
+      })
+      .catch(callback);
+  };
 };
