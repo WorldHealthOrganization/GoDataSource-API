@@ -43,6 +43,12 @@
       "type": "boolean",
       "default": true
     },
+    "institutionName": {
+      "type": "string"
+    },
+    "telephoneNumbers": {
+      "type": "object"
+    },
     "settings": {
       "type": {
         "caseFields": [

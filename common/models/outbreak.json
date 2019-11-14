@@ -1626,6 +1626,18 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "exportDailyContactFollowUpForm"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_followup",
+      "permission": "ALLOW",
+      "property": "bulkDeleteFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "write_followup",
+      "permission": "ALLOW",
+      "property": "bulkRestoreFollowUps"
     }
   ],
   "methods": {
@@ -7518,6 +7530,55 @@
       "http": {
         "verb": "get",
         "path": "/contacts/export-daily-follow-up-form"
+      }
+    },
+    "prototype.bulkDeleteFollowUps": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "object",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Delete a list of follow ups.",
+      "http": {
+        "verb": "del",
+        "path": "/follow-ups/bulk"
+      }
+    },
+    "prototype.bulkRestoreFollowUps": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "data",
+          "type": "object",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restore a list of deleted follow ups.",
+      "http": {
+        "verb": "post",
+        "path": "/follow-ups/bulk/restore"
       }
     }
   }

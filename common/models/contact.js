@@ -230,7 +230,9 @@ module.exports = function (Contact) {
     'safeBurial',
     'dateOfBurial',
     'vaccinesReceived',
-    'pregnancyStatus'
+    'pregnancyStatus',
+    'dateOfReporting',
+    'isDateOfReportingApproximate'
   ];
 
   Contact.locationFields = [
@@ -242,16 +244,32 @@ module.exports = function (Contact) {
       modelName: 'location',
       useProperty: 'name'
     },
-    'relationships[].people[].addresses[].locationId': {
-      modelName: 'location',
-      useProperty: 'name'
-    },
     'followUps[].address.locationId': {
       modelName: 'location',
       useProperty: 'name'
     },
     'followUps[].teamId': {
       modelName: 'team',
+      useProperty: 'name'
+    },
+    'relationships[].clusterId': {
+      modelName: 'cluster',
+      useProperty: 'name'
+    },
+    'relationships[].people[].addresses[].locationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'relationships[].people[].address.locationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'relationships[].people[].burialLocationId': {
+      modelName: 'location',
+      useProperty: 'name'
+    },
+    'relationships[].people[].dateRanges[].locationId': {
+      modelName: 'location',
       useProperty: 'name'
     }
   };

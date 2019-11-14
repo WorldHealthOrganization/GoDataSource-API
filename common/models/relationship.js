@@ -124,6 +124,7 @@ module.exports = function (Relationship) {
     'exposureTypeId',
     'exposureFrequencyId',
     'exposureDurationId',
+    'clusterId',
     'socialRelationshipTypeId',
     'socialRelationshipDetail',
     'comment',
