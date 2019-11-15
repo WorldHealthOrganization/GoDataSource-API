@@ -19,10 +19,12 @@ module.exports = function (Role) {
           // if the role has a list of permission IDs
           if (instance.permissionIds && instance.permissionIds.length) {
             // go through the permissions and populate the list
-            Role.availablePermissions.forEach(function (permission) {
-              if (instance.permissionIds.indexOf(permission.id) !== -1) {
-                permissions.push(permission);
-              }
+            Role.availablePermissions.forEach(function (group) {
+              (group.permissions || []).forEach(function (permission) {
+                if (instance.permissionIds.indexOf(permission.id) !== -1) {
+                  permissions.push(permission);
+                }
+              });
             });
           }
           resolve(permissions);

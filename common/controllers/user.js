@@ -253,4 +253,26 @@ module.exports = function (User) {
         throw buildError('PASSWORD_RECOVERY_FAILED', {details: 'Security questions recovery is disabled'});
       });
   };
+
+  /**
+   * Attach the custom properties
+   */
+  User.afterRemote('findById', function (context, modelInstance, next) {
+    // attach the custom properties
+    User.helpers.attachCustomProperties(
+      modelInstance,
+      next
+    );
+  });
+
+  /**
+   * Attach the custom properties
+   */
+  User.afterRemote('prototype.patchAttributes', function (context, modelInstance, next) {
+    // attach the custom properties
+    User.helpers.attachCustomProperties(
+      modelInstance,
+      next
+    );
+  });
 };

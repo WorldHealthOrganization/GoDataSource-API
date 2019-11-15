@@ -124,6 +124,17 @@ module.exports = function (User) {
   };
 
   /**
+   * Attach custom data to user model
+   */
+  User.helpers.attachCustomProperties = function (userModel, callback) {
+    // available permissions
+    userModel.availablePermissions = app.models.role.availablePermissions;
+
+    // finished
+    return callback();
+  };
+
+  /**
    * Send password reset email
    */
   User.on('resetPasswordRequest', function (info) {
