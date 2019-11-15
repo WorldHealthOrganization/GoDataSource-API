@@ -430,6 +430,11 @@ const syncRecord = function (logger, model, record, options, done) {
             }
           } else {
             let recordPropValue = _.get(obj, prop);
+            // XML file don't have 'null' values, they use empty strings instead
+            if (recordPropValue === '') {
+              recordPropValue = null;
+              _.set(obj, prop, recordPropValue);
+            }
             if (recordPropValue) {
               // try to convert the string value to date, if valid, replace the old value
               let convertedDate = helpers.getDate(recordPropValue);

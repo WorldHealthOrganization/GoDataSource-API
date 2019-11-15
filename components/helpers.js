@@ -2040,6 +2040,102 @@ const convertQuestionnairePropsToDate = function (questions) {
   return questions;
 };
 
+/**
+ * Retrieve a custom filter option and remove the value afterwards
+ * @param filter
+ * @param option
+ * @returns {*}
+ */
+const getFilterCustomOption = function (filter, option) {
+  filter = filter || {};
+  filter.where = filter.where || {};
+  const optionValue = filter.where[option];
+  delete filter.where[option];
+  return optionValue;
+};
+
+/**
+ * Attach parent locations for each of the target model locations
+ * @param targetModel
+ * @param locationModel
+ * @param records
+ * @param callback
+ */
+const attachParentLocations = function (targetModel, locationModel, records, callback) {
+  const parentLocationsSuffix = '_parentLocations';
+
+  // get all the location ids from all the passed records
+  const allLocations = [];
+  const recordsLocationsMap = {};
+  for (let record of records) {
+    recordsLocationsMap[record.id] = [];
+    for (let field of (targetModel.locationFields || [])) {
+      let values = getReferencedValue(record, field);
+      if (!Array.isArray(values)) {
+        values = [values];
+      }
+      recordsLocationsMap[record.id].push(...values.filter(v => v.value));
+      for (let obj of values) {
+        if (obj.value) {
+          allLocations.push(obj.value);
+        }
+      }
+    }
+  }
+
+  if (!allLocations.length) {
+    return callback(null, records);
+  }
+
+  return locationModel.getParentLocationsWithDetails(
+    allLocations,
+    [],
+    (err, locations) => {
+      if (err) {
+        return callback(err);
+      }
+
+      const locationsMap = {};
+      for (let location of locations) {
+        location = location.toJSON();
+        locationsMap[location.id] = {
+          name: location.name,
+          parentLocationId: location.parentLocationId,
+          geographicalLevelId: location.geographicalLevelId,
+        };
+      }
+
+      // highest chain of parents
+      // used for flat files to know the highest number of columns needed
+      let highestParentsChain = 0;
+
+      // go through each of records location ides
+      // and build a list of each location's parents to be added into the print
+      for (let record of records) {
+        const recordLocationsMap = recordsLocationsMap[record.id];
+        for (let obj of recordLocationsMap) {
+          const parentLocations = [];
+          (function traverse(locationId) {
+            const locationMapDef = locationsMap[locationId];
+            if (!locationMapDef.parentLocationId) {
+              return null;
+            }
+            parentLocations.unshift(locationsMap[locationMapDef.parentLocationId].name);
+            traverse(locationMapDef.parentLocationId);
+          })(obj.value);
+
+          _.set(record, `${obj.exactPath}${parentLocationsSuffix}`, parentLocations);
+
+          if (parentLocations.length > highestParentsChain) {
+            highestParentsChain = parentLocations.length;
+          }
+        }
+      }
+      return callback(null, { records, highestParentsChain });
+    }
+  );
+};
+
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -2087,5 +2183,7 @@ module.exports = {
   getDateChunks: getDateChunks,
   getDaysSince: getDaysSince,
   getQuestionnaireMaxAnswersMap: getQuestionnaireMaxAnswersMap,
-  convertQuestionnairePropsToDate: convertQuestionnairePropsToDate
+  convertQuestionnairePropsToDate: convertQuestionnairePropsToDate,
+  getFilterCustomOption: getFilterCustomOption,
+  attachParentLocations: attachParentLocations
 };

@@ -60,7 +60,8 @@ module.exports = function (Outbreak) {
     'prototype.__get__followUps',
     'prototype.__get__labResults',
     'prototype.__get__cases',
-    'prototype.__get__contacts'
+    'prototype.__get__contacts',
+    'prototype.__get__events'
   ]);
 
   // attach search by relation property behavior on get contacts
@@ -8910,6 +8911,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.findCases = function (filter, callback) {
+    const outbreakId = this.outbreakId;
+    const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
+
     // pre-filter using related data (case)
     app.models.case
       .preFilterForOutbreak(this, filter)
@@ -8934,7 +8938,73 @@ module.exports = function (Outbreak) {
         return app.models.case.find(filter);
       })
       .then(function (cases) {
-        callback(null, cases);
+        if (countRelations) {
+          // create a map of ids and their corresponding record
+          // to easily manipulate the records below
+          const casesMap = {};
+          for (let record of cases) {
+            casesMap[record.id] = record;
+          }
+          // determine number of contacts/exposures for each case
+          app.models.person.getPeopleContactsAndExposures(outbreakId, Object.keys(casesMap))
+            .then(relationsCountMap => {
+              for (let recordId in relationsCountMap) {
+                const caseRecord = casesMap[recordId];
+                caseRecord.numberOfContacts = relationsCountMap[recordId].numberOfContacts;
+                caseRecord.numberOfExposures = relationsCountMap[recordId].numberOfExposures;
+              }
+              return callback(null, cases);
+            });
+        } else {
+          return callback(null, cases);
+        }
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find outbreak events
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findEvents = function (filter, callback) {
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    const outbreakId = this.outbreakId;
+    const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
+
+    app.models.event
+      .find({
+        and: [
+          filter.where,
+          {
+            outbreakId: outbreakId
+          }
+        ]
+      })
+      .then(records => {
+        if (countRelations) {
+          // create a map of ids and their corresponding record
+          // to easily manipulate the records below
+          const eventsMap = {};
+          for (let record of records) {
+            eventsMap[record.id] = record;
+          }
+
+          // determine number of contacts/exposures
+          app.models.person.getPeopleContactsAndExposures(outbreakId, Object.keys(eventsMap))
+            .then(relationsCountMap => {
+              for (let recordId in relationsCountMap) {
+                const record = eventsMap[recordId];
+                record.numberOfContacts = relationsCountMap[recordId].numberOfContacts;
+                record.numberOfExposures = relationsCountMap[recordId].numberOfExposures;
+              }
+              return callback(null, records);
+            });
+        } else {
+          return callback(null, records);
+        }
       })
       .catch(callback);
   };
@@ -9281,6 +9351,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.findContacts = function (filter, callback) {
+    const outbreakId = this.outbreakId;
+    const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
+
     // pre-filter using related data (case, followUps)
     app.models.contact
       .preFilterForOutbreak(this, filter)
@@ -9289,7 +9362,26 @@ module.exports = function (Outbreak) {
         return app.models.contact.find(filter);
       })
       .then(function (contacts) {
-        callback(null, contacts);
+        if (countRelations) {
+          // create a map of ids and their corresponding record
+          // to easily manipulate the records below
+          const contactsMap = {};
+          for (let contact of contacts) {
+            contactsMap[contact.id] = contact;
+          }
+          // determine number of contacts/exposures for each case
+          app.models.person.getPeopleContactsAndExposures(outbreakId, Object.keys(contactsMap))
+            .then(relationsCountMap => {
+              for (let recordId in relationsCountMap) {
+                const contactRecord = contactsMap[recordId];
+                contactRecord.numberOfContacts = relationsCountMap[recordId].numberOfContacts;
+                contactRecord.numberOfExposures = relationsCountMap[recordId].numberOfExposures;
+              }
+              return callback(null, contacts);
+            });
+        } else {
+          return callback(null, contacts);
+        }
       })
       .catch(callback);
   };
