@@ -2084,7 +2084,7 @@ const attachParentLocations = function (targetModel, locationModel, records, cal
   }
 
   if (!allLocations.length) {
-    return callback(null, records);
+    return callback(null, { records });
   }
 
   return locationModel.getParentLocationsWithDetails(
