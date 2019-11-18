@@ -66,7 +66,6 @@ module.exports = function (Outbreak) {
 
   // attach search by relation property behavior on get contacts
   app.utils.remote.searchByRelationProperty.attachOnRemotes(Outbreak, [
-    'prototype.__get__events',
     'prototype.findCaseRelationships',
     'prototype.findContactRelationships',
     'prototype.findEventRelationships'
@@ -107,7 +106,7 @@ module.exports = function (Outbreak) {
     filter = filter || {};
     // check if deep count should be used (this is expensive, should be avoided if possible)
     if (app.utils.remote.searchByRelationProperty.shouldUseDeepCount(filter)) {
-      this.__get__events(filter, function (err, res) {
+      this.findEvents(filter, function (err, res) {
         if (err) {
           return callback(err);
         }
@@ -132,7 +131,7 @@ module.exports = function (Outbreak) {
   /**
    * Attach before remote (GET outbreaks/{id}/events) hooks
    */
-  Outbreak.beforeRemote('prototype.__get__events', function (context, modelInstance, next) {
+  Outbreak.beforeRemote('prototype.findEvents', function (context, modelInstance, next) {
     // filter information based on available permissions
     Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', context);
     // Enhance events list request to support optional filtering of events that don't have any relations
@@ -8971,19 +8970,20 @@ module.exports = function (Outbreak) {
     filter = filter || {};
     filter.where = filter.where || {};
 
-    const outbreakId = this.outbreakId;
+    const outbreakId = this.id;
     const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
 
+    filter.where = {
+      and: [
+        filter.where, {
+          outbreakId: outbreakId
+        }
+      ]
+    };
+
     app.models.event
-      .find({
-        and: [
-          filter.where,
-          {
-            outbreakId: outbreakId
-          }
-        ]
-      })
-      .then(records => {
+      .find(filter)
+      .then((records) => {
         if (countRelations) {
           // create a map of ids and their corresponding record
           // to easily manipulate the records below
@@ -8994,7 +8994,7 @@ module.exports = function (Outbreak) {
 
           // determine number of contacts/exposures
           app.models.person.getPeopleContactsAndExposures(outbreakId, Object.keys(eventsMap))
-            .then(relationsCountMap => {
+            .then((relationsCountMap) => {
               for (let recordId in relationsCountMap) {
                 const record = eventsMap[recordId];
                 record.numberOfContacts = relationsCountMap[recordId].numberOfContacts;

@@ -1705,12 +1705,14 @@ module.exports = function (Person) {
 
     return app.models.relationship
       .find({
-        outbreakId: outbreakId,
-        'persons.id': {
-          inq: peopleIds
+        where: {
+          outbreakId: outbreakId,
+          'persons.id': {
+            inq: peopleIds
+          }
         }
       })
-      .then(relations => {
+      .then((relations) => {
         for (let relation of relations) {
           const relationParticipants = relation.persons;
           for (let participant of relationParticipants) {
