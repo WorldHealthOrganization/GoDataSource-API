@@ -6741,12 +6741,21 @@ module.exports = function (Outbreak) {
     const languageId = options.remotingContext.req.authData.user.languageId;
 
     // set default filter values
-    if (!filter) {
-      filter = {};
-      // set default dateOfFollowUp
-      if (!filter.dateOfFollowUp) {
-        filter.dateOfFollowUp = new Date();
-      }
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // set default dateOfFollowUp
+    if (
+      !filter.dateOfFollowUp &&
+      !filter.where.dateOfFollowUp
+    ) {
+      filter.dateOfFollowUp = new Date();
+    }
+
+    // got dateOfFollowUp in where as it should be and not under filter ?
+    if (filter.where.dateOfFollowUp) {
+      filter.dateOfFollowUp = filter.where.dateOfFollowUp;
+      delete filter.where.dateOfFollowUp;
     }
 
     // Get the date of the selected day for report to add to the pdf title (by default, current day)
