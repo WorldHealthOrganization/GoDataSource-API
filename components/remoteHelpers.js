@@ -195,7 +195,10 @@ function exportFilteredModelsList(
                       header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} [${i}]`
                     });
                     // include parent locations
-                    if (Model.locationFields.indexOf(`${propertyName}[].${prop}`) !== -1) {
+                    if (
+                      Model.locationFields &&
+                      Model.locationFields.indexOf(`${propertyName}[].${prop}`) !== -1
+                    ) {
                       for (let j = 1; j <= highestParentsChain; j++) {
                         headers.push({
                           id: `${propertyName} ${i} ${prop}_parentLocations ${j}`,
@@ -268,7 +271,10 @@ function exportFilteredModelsList(
                   });
 
                   // check if we need to include parent locations column
-                  if (Model.locationFields.indexOf(propertyName) !== -1) {
+                  if (
+                    Model.locationFields &&
+                    Model.locationFields.indexOf(propertyName) !== -1
+                  ) {
                     if (isJSONXMLExport) {
                       headers.push({
                         id: `${propertyName}_parentLocations`,
