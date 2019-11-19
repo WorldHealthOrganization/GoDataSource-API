@@ -1449,13 +1449,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "bulkCreateRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "relationship_share",
       "permission": "ALLOW",
       "property": "bulkCreateRelationships"
     },
