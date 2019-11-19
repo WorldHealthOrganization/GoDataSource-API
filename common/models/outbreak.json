@@ -195,7 +195,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_outbreak",
+      "principalId": "outbreak_list",
       "permission": "ALLOW",
       "property": "find"
     },
@@ -213,7 +213,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_outbreak",
+      "principalId": "outbreak_view",
       "permission": "ALLOW",
       "property": "findById"
     },
@@ -225,7 +225,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_outbreak",
+      "principalId": "outbreak_list",
       "permission": "ALLOW",
       "property": "count"
     },

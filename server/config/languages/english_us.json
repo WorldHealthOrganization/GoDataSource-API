@@ -10,6 +10,8 @@
       "LNG_AUDIT_LOG_ACTIONS_RESTORED": "Record restored"
     },
     "availablePermissions": {
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_NOT_AUTHORIZED_MESSAGE": "You're not authorized to access this page",
+
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_ALL": "All",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_ALL_DESCRIPTION": "All permissions under this group ( even those that will be added in the future under this group )",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_PARTIAL": "Partial {{permissions}}",
@@ -93,6 +95,19 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_RELATIONSHIP_DESCRIPTION": "This permission allows sharing relationship information.",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_RELATIONSHIP": "Relationship - bulk delete",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_RELATIONSHIP_DESCRIPTION": "This permission allows bulk deleting relationship information.",
+
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_OUTBREAK": "Outbreaks",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_OUTBREAK_DESCRIPTION": "Outbreak permissions",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_OUTBREAK": "Outbreak - view",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_OUTBREAK_DESCRIPTION": "This permission allows viewing full outbreak information.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_OUTBREAK": "Outbreak - list",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_OUTBREAK_DESCRIPTION": "This permission allows listing outbreak information.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK": "Outbreak - create",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_DESCRIPTION": "This permission allows creating outbreaks.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK": "Outbreak - modify",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_DESCRIPTION": "This permission allows modifying outbreaks.",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_OUTBREAK": "Outbreak - delete",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_OUTBREAK_DESCRIPTION": "This permission allows removing outbreaks information.",
 
 
 

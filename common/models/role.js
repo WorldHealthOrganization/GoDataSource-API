@@ -222,6 +222,59 @@ module.exports = function (Role) {
       ]
     },
 
+    // Outbreak
+    {
+      groupAllId: 'outbreak_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_OUTBREAK',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_OUTBREAK_DESCRIPTION',
+      permissions: [
+        {
+          id: 'outbreak_view',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_OUTBREAK',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_OUTBREAK_DESCRIPTION'
+        },
+        {
+          id: 'outbreak_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_OUTBREAK',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_OUTBREAK_DESCRIPTION'
+        },
+        {
+          id: 'outbreak_create',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_DESCRIPTION'
+        },
+        {
+          id: 'outbreak_modify',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_DESCRIPTION'
+        },
+        {
+          id: 'outbreak_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_OUTBREAK',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_OUTBREAK_DESCRIPTION'
+        },
+
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // - must delete TOKENS tooo
+        {
+          id: 'read_outbreak',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_OUTBREAK',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_OUTBREAK_DESCRIPTION'
+        },
+        {
+          id: 'write_outbreak',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_OUTBREAK',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_OUTBREAK_DESCRIPTION'
+        }
+      ]
+    },
+
+
+
     // TO BE CHANGED
     {
       groupAllId: '---_all',
@@ -262,16 +315,6 @@ module.exports = function (Role) {
           id: 'write_role',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_ROLE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_ROLE_DESCRIPTION'
-        },
-        {
-          id: 'read_outbreak',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_OUTBREAK',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_OUTBREAK_DESCRIPTION'
-        },
-        {
-          id: 'write_outbreak',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_OUTBREAK',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_OUTBREAK_DESCRIPTION'
         },
         {
           id: 'read_team',
