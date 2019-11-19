@@ -603,12 +603,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "findEvents"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "event_create",
       "permission": "ALLOW",
       "property": "__create__events"
@@ -807,13 +801,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "filteredCountEvents"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
+      "principalId": "event_list",
       "permission": "ALLOW",
       "property": "filteredCountEvents"
     },
