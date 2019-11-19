@@ -57,6 +57,7 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_DESCRIPTION',
           requires: [
+            // list needed to check for name duplicates
             'outbreak_list'
           ]
         },
@@ -65,7 +66,9 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_DESCRIPTION',
           requires: [
-            'outbreak_list'
+            // list needed to check for name duplicates
+            'outbreak_list',
+            'outbreak_view'
           ]
         },
         {
