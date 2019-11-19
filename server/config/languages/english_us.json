@@ -11,6 +11,8 @@
     },
     "availablePermissions": {
       "LNG_ROLE_AVAILABLE_PERMISSIONS_NOT_AUTHORIZED_MESSAGE": "You're not authorized to access this page",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_LABEL_MESSAGE": "{{label}}{{requirements}}",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LABEL_REQUIRE_MESSAGE": " <span style='color: #999;'>( {{labels}} )</span>",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_TOOLTIP_MESSAGE": "{{tooltip}}{{requirements}}",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_REQUIRES_MESSAGE": " - requires the following permissions: {{labels}}",
 
