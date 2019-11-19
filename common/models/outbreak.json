@@ -617,12 +617,6 @@
       "principalType": "ROLE",
       "principalId": "event_modify",
       "permission": "ALLOW",
-      "property": "__findById__events"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "event_modify",
-      "permission": "ALLOW",
       "property": "__updateById__events"
     },
     {
