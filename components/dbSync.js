@@ -418,7 +418,13 @@ const syncRecord = function (logger, model, record, options, done) {
       // go through each date properties and parse date properties
       for (let prop in map) {
         // skip createdAt, updatedAt properties from formatting
+        // but make sure they are valid dates before trying to import them into database
+        // because we might have cases where those values were altered outside of the system
         if (['createdAt', 'updatedAt', 'deletedAt'].indexOf(prop) !== -1) {
+          const convertedDate = helpers.getDate(prop);
+          if (!convertedDate.isValid()) {
+            delete obj[prop];
+          }
           continue;
         }
 
