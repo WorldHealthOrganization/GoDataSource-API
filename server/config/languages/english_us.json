@@ -18,7 +18,7 @@
 
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_ALL": "All",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_ALL_DESCRIPTION": "All permissions under this group ( even those that will be added in the future under this group )",
-      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_PARTIAL": "Partial {{permissions}}",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_PARTIAL": "Partial {{partialLabels}}",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_PARTIAL_DESCRIPTION": "Some permissions from this group ( expand group to see granted permissions )",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_NONE": "None",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_NONE_DESCRIPTION": "No permissions granted under this group",
