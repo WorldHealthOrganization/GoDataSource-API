@@ -192,9 +192,21 @@ module.exports = function (ImportableFile) {
    * @param data
    * @param callback
    */
-  function getSpreadSheetHeaders({ data }, callback) {
+  function getSpreadSheetHeaders({ data, extension }, callback) {
     // parse XLS data
-    const parsedData = xlsx.read(data, { raw: true, cellText: false });
+    const parseOptions = {
+      cellText: false
+    };
+    // for CSV do not parse the fields
+    // because it breaks number values like 0000008 -> 8
+    // or date values losing timestamp information
+    // this is needed because parser tries to format all the fields to date, no matter the value
+    if (extension === '.csv') {
+      parseOptions.raw = true;
+    } else {
+      parseOptions.cellDates = true;
+    }
+    const parsedData = xlsx.read(data, parseOptions);
     // extract first sheet name (we only care about first sheet)
     let sheetName = parsedData.SheetNames.shift();
     // convert data to JSON
@@ -318,7 +330,7 @@ module.exports = function (ImportableFile) {
       decryptFile
         .then(function (buffer) {
           // get file headers
-          getHeaders({ data: buffer, modelName, dictionary, questionnaire }, function (error, result) {
+          getHeaders({ data: buffer, modelName, dictionary, questionnaire, extension }, function (error, result) {
             // handle error
             if (error) {
               return callback(error);
