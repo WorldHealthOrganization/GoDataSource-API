@@ -201,7 +201,7 @@ module.exports = function (ImportableFile) {
     // because it breaks number values like 0000008 -> 8
     // or date values losing timestamp information
     // this is needed because parser tries to format all the fields to date, no matter the value
-    if (extension === '.csv') {
+    if (extension.toLowerCase() === '.csv') {
       parseOptions.raw = true;
     } else {
       parseOptions.cellDates = true;
