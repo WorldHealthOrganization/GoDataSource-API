@@ -201,7 +201,7 @@ module.exports = function (ImportableFile) {
     // because it breaks number values like 0000008 -> 8
     // or date values losing timestamp information
     // this is needed because parser tries to format all the fields to date, no matter the value
-    if (extension.toLowerCase() === '.csv') {
+    if (extension === '.csv') {
       parseOptions.raw = true;
     } else {
       parseOptions.cellDates = true;
@@ -286,7 +286,7 @@ module.exports = function (ImportableFile) {
    */
   ImportableFile.storeFileAndGetHeaders = function (file, decryptPassword, modelName, dictionary, questionnaire, callback) {
     // get file extension
-    const extension = path.extname(file.name);
+    const extension = path.extname(file.name).toLowerCase();
     // if extension is invalid
     if (!isExtensionSupported(extension)) {
       // send back the error
