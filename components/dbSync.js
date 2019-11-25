@@ -418,7 +418,21 @@ const syncRecord = function (logger, model, record, options, done) {
       // go through each date properties and parse date properties
       for (let prop in map) {
         // skip createdAt, updatedAt properties from formatting
+        // but make sure they are valid dates before trying to import them into database
+        // because we might have cases where those values were altered outside of the system
         if (['createdAt', 'updatedAt', 'deletedAt'].indexOf(prop) !== -1) {
+          let propValue = _.get(obj, prop);
+          // XML file don't have 'null' values, they use empty strings instead
+          if (propValue === '') {
+            propValue = null;
+            _.set(obj, prop, propValue);
+          }
+          if (propValue) {
+            const convertedDate = helpers.getDate(propValue);
+            if (!convertedDate.isValid()) {
+              _.set(obj, prop, null);
+            }
+          }
           continue;
         }
 

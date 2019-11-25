@@ -148,8 +148,12 @@ function exportFilteredModelsList(
           app.models.location,
           results,
           (err, result) => {
-            let results = result.records;
-            let highestParentsChain = result.highestParentsChain;
+            let highestParentsChain = 0;
+            if (!err) {
+              result = result || {};
+              results = result.records || results;
+              highestParentsChain = result.highestParentsChain || 0;
+            }
 
             // define a list of table headers
             const headers = [];
