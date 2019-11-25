@@ -1053,13 +1053,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "listInconsistenciesInKeyDates"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "outbreak_see_inconsistencies",
       "permission": "ALLOW",
       "property": "listInconsistenciesInKeyDates"
     },
@@ -1275,7 +1269,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_outbreak",
+      "principalId": "outbreak_restore",
       "permission": "ALLOW",
       "property": "restoreOutbreak"
     },

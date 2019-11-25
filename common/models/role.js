@@ -34,6 +34,62 @@ module.exports = function (Role) {
   };
 
   Role.availablePermissions = [
+    // User
+    {
+      groupAllId: 'user_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_USER',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_USER_DESCRIPTION',
+      permissions: [
+        {
+          id: 'user_view',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_USER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_USER_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'user_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'user_create',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_USER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_USER_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'user_modify',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'user_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER_DESCRIPTION',
+          requires: []
+        },
+
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // - must delete TOKENS tooo
+        {
+          id: 'read_user_account',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_USER_ACCOUNT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_USER_ACCOUNT_DESCRIPTION'
+        },
+        {
+          id: 'write_user_account',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_USER_ACCOUNT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_USER_ACCOUNT_DESCRIPTION'
+        }
+      ]
+    },
+
     // Outbreak
     {
       groupAllId: 'outbreak_all',
@@ -76,6 +132,62 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_OUTBREAK',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_OUTBREAK_DESCRIPTION',
           requires: []
+        },
+        {
+          id: 'outbreak_restore',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_OUTBREAK',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_OUTBREAK_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'outbreak_make_active',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MAKE_OUTBREAK_ACTIVE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MAKE_OUTBREAK_ACTIVE_DESCRIPTION',
+          requires: [
+            'user_modify'
+          ]
+        },
+        {
+          id: 'outbreak_see_inconsistencies',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SEE_OUTBREAK_INCONSISTENCIES',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SEE_OUTBREAK_INCONSISTENCIES_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'outbreak_modify_case_questionnaire',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CASE_QUESTIONNAIRE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CASE_QUESTIONNAIRE_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'outbreak_modify'
+          ]
+        },
+        {
+          id: 'outbreak_modify_contact_follow_up_questionnaire',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_FOLLOW_UP_QUESTIONNAIRE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_FOLLOW_UP_QUESTIONNAIRE_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'outbreak_modify'
+          ]
+        },
+        {
+          id: 'outbreak_modify_case_lab_result_questionnaire',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CASE_LAB_RESULT_QUESTIONNAIRE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CASE_LAB_RESULT_QUESTIONNAIRE_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'outbreak_modify'
+          ]
+        },
+        {
+          id: 'outbreak_create_clone',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_CLONE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_CLONE_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'outbreak_create'
+          ]
         },
 
         // OLD - MUST DELETE!!!!!!!!
@@ -513,16 +625,6 @@ module.exports = function (Role) {
           id: 'write_reference_data',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_REFERENCE_DATA',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_REFERENCE_DATA_DESCRIPTION'
-        },
-        {
-          id: 'read_user_account',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_USER_ACCOUNT',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_USER_ACCOUNT_DESCRIPTION'
-        },
-        {
-          id: 'write_user_account',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_USER_ACCOUNT',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_USER_ACCOUNT_DESCRIPTION'
         },
         {
           id: 'read_role',
