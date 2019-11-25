@@ -2117,11 +2117,13 @@ const attachParentLocations = function (targetModel, locationModel, records, cal
           const parentLocations = [];
           (function traverse(locationId) {
             const locationMapDef = locationsMap[locationId];
-            if (!locationMapDef.parentLocationId) {
-              return null;
+            if (locationMapDef) {
+              if (!locationMapDef.parentLocationId) {
+                return null;
+              }
+              parentLocations.unshift(locationsMap[locationMapDef.parentLocationId].name);
+              traverse(locationMapDef.parentLocationId);
             }
-            parentLocations.unshift(locationsMap[locationMapDef.parentLocationId].name);
-            traverse(locationMapDef.parentLocationId);
           })(obj.value);
 
           _.set(record, `${obj.exactPath}${parentLocationsSuffix}`, parentLocations);
