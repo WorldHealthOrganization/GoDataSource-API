@@ -442,6 +442,10 @@ module.exports = function (ImportableFile) {
                 return callback(error);
               }
 
+              // get model's extended form
+              // doing this in a ultra safe manner, as not all the models have a template
+              const modelExtendedForm = app.models[modelName].extendedForm || {};
+
               // store the file and get its headers
               ImportableFile.storeFileAndGetHeaders(
                 file,
@@ -449,7 +453,7 @@ module.exports = function (ImportableFile) {
                 modelName,
                 dictionary,
                 // questionnaire template
-                outbreak[app.models[modelName].extendedForm.template],
+                outbreak[modelExtendedForm.template],
                 function (error, result) {
                   // handle errors
                   if (error) {
