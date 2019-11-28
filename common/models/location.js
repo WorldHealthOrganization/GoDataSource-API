@@ -241,61 +241,62 @@ module.exports = function (Location) {
    * Check that the model's identifiers (name and synonyms) are unique/contain unique elements,
    * in the context (between models with the same parentLocationId).
    */
-  Location.validateModelIdentifiers = function (data, locationId) {
-    /** If there is no parentLocationId (the location is a top tier location) make sure that mongoDB returns
-     * only the locations with no parentLocationId field. If this conditional is not added and data.parentLocationId is undefined,
-     * the query will just skip that condition which will return an incorrect data set.
-     */
-    let parentLocationQuery = data.parentLocationId;
-    if (!data.parentLocationId) {
-      parentLocationQuery = {eq: null};
+  Location.validateModelIdentifiers = function (data, existingInstance) {
+    // modify requests might not send all the fields in the request body
+    // so we validate some fields using existing database instance values
+    let parentLocationId = null;
+    if (data.hasOwnProperty('parentLocationId')) {
+      parentLocationId = data.parentLocationId;
+    } else if (existingInstance) {
+      parentLocationId = existingInstance.parentLocationId
     }
 
-    /**
-     * Just like above, we make sure to sanitize the synonyms query input
-     */
-    let synonymsQuery = data.synonyms;
-    if (!data.synonyms) {
-      synonymsQuery = [];
+    let name = '';
+    if (data.hasOwnProperty('name')) {
+      name = data.name;
+    } else if (existingInstance) {
+      name = existingInstance.name
     }
 
-    /**
-     * This is a safety measure, in case the update request does not contain a `name` field.
-     * This way we make sure the underlying query does not return erroneous data.
-     */
-    let nameQuery = data.name;
-    if (!data.name) {
-      nameQuery = '';
+    let synonyms = [];
+    if (data.hasOwnProperty('synonyms')) {
+      synonyms = data.synonyms;
+    } else if (existingInstance) {
+      synonyms = existingInstance.synonyms
     }
 
     return Location.findOne({
       where: {
         id: {
-          neq: locationId ? locationId : ''
+          neq: existingInstance.id ? existingInstance.id : ''
         },
-        parentLocationId: parentLocationQuery,
+        parentLocationId: {
+          eq: parentLocationId
+        },
         or: [
-          {name: nameQuery},
+          {
+            name: {
+              eq: name
+            }
+          },
           {
             synonyms: {
-              in: synonymsQuery
+              in: synonyms
             }
           }
         ]
       }
     }).then((location) => {
       if (location) {
-        /**
-         * Create an error message that will identify all the invalid fields in the model.
-         */
+        // create an error message that will identify all the invalid fields in the model.
         let errors = [];
 
-        if (location.name === data.name) {
-          errors.push(`A location with name = '${data.name}' and the same parentLocationId already exists.`);
+        if (location.name === name) {
+          errors.push(`A location with name = '${name}' and the same parentLocationId already exists.`);
         }
 
-        if (location.synonyms && data.synonyms) {
-          data.synonyms.forEach((synonym) => {
+        if (location.synonyms && synonyms) {
+          synonyms.forEach((synonym) => {
             if (location.synonyms.indexOf(synonym) > -1) {
               errors.push(`A location with a '${synonym}' synonym and the same parentLocationId already exists.`);
             }
@@ -636,7 +637,7 @@ module.exports = function (Location) {
         .then(() => next())
         .catch(next);
     } else {
-      Location.validateModelIdentifiers(ctx.data, ctx.currentInstance.id)
+      Location.validateModelIdentifiers(ctx.data, ctx.currentInstance)
         .then(() => {
           if (ctx.data.active === false) {
             return Location.checkIfCanDeactivate(ctx.data, ctx.currentInstance.id);
