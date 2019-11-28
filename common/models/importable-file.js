@@ -97,6 +97,9 @@ module.exports = function (ImportableFile) {
 
     const questionsTypeMap = {};
     const arrayProps = app.models[modelName].arrayProps;
+    // some models don't own a questionnaire
+    // but surely we need an array map otherwise we can't decide which properties should be left as arrays
+    // after parser converts arrays with 1 element to object
     if (arrayProps || questionnaire) {
       parserOpts.explicitArray = false;
 
