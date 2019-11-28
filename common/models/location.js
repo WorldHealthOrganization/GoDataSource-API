@@ -267,7 +267,7 @@ module.exports = function (Location) {
 
     let id = '';
     if (existingInstance) {
-      id = existingInstance.id
+      id = existingInstance.id;
     }
 
     return Location.findOne({
