@@ -113,6 +113,13 @@ module.exports = function (Relationship) {
     }
   };
 
+  Relationship.foreignKeyResolverMap = {
+    clusterId: {
+      modelName: 'cluster',
+      useProperty: 'name'
+    }
+  };
+
   Relationship.relatedFieldLabelsMap = {
     'person': 'LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON'
   };

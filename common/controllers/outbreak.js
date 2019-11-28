@@ -9501,7 +9501,7 @@ module.exports = function (Outbreak) {
           encryptPassword,
           anonymizeFields,
           options,
-          (results) => {
+          (results, dictionary) => {
             return new Promise(function (resolve, reject) {
               // determine contacts for which we need to retrieve the first relationship
               const contactsMap = _.transform(
@@ -9531,6 +9531,7 @@ module.exports = function (Outbreak) {
               promise.catch(reject);
 
               // retrieve contacts relationships ( sorted by creation date )
+              const relationshipsPromises = [];
               promise.then((relationshipResults) => {
                 // keep only the first relationship
                 // assign relationships to contacts
@@ -9561,11 +9562,21 @@ module.exports = function (Outbreak) {
 
                     // set related ID
                     contactsMap[contactId].relationship.relatedId = relatedId;
+
+                    // resolve relationship foreign keys here
+                    relationshipsPromises.push(genericHelpers.resolveModelForeignKeys(
+                      app,
+                      app.models.relationship,
+                      [contactsMap[contactId].relationship],
+                      dictionary
+                    ).then(relationship => {
+                      contactsMap[contactId].relationship = relationship[0];
+                    }));
                   }
                 });
 
                 // finished
-                resolve(results);
+                return Promise.all(relationshipsPromises).then(() => resolve(results));
               });
 
             });
