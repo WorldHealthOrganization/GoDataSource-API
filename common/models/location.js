@@ -246,29 +246,34 @@ module.exports = function (Location) {
     // so we validate some fields using existing database instance values
     let parentLocationId = null;
     if (data.hasOwnProperty('parentLocationId')) {
-      parentLocationId = data.parentLocationId;
+      parentLocationId = data.parentLocationId || null;
     } else if (existingInstance) {
-      parentLocationId = existingInstance.parentLocationId
+      parentLocationId = existingInstance.parentLocationId || null;
     }
 
     let name = '';
     if (data.hasOwnProperty('name')) {
-      name = data.name;
+      name = data.name || '';
     } else if (existingInstance) {
-      name = existingInstance.name
+      name = existingInstance.name || '';
     }
 
     let synonyms = [];
     if (data.hasOwnProperty('synonyms')) {
-      synonyms = data.synonyms;
+      synonyms = data.synonyms || [];
     } else if (existingInstance) {
-      synonyms = existingInstance.synonyms
+      synonyms = existingInstance.synonyms || [];
+    }
+
+    let id = '';
+    if (existingInstance) {
+      id = existingInstance.id
     }
 
     return Location.findOne({
       where: {
         id: {
-          neq: existingInstance.id ? existingInstance.id : ''
+          neq: id
         },
         parentLocationId: {
           eq: parentLocationId
