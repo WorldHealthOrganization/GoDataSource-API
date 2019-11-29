@@ -4934,258 +4934,275 @@ module.exports = function (Outbreak) {
 
       const sanitizedCases = [];
 
-      // get the language dictionary
-      app.models.language.getLanguageDictionary(languageId, (err, dictionary) => {
-        if (err) {
-          return callback(err);
-        }
+      genericHelpers.attachParentLocations(
+        app.models.case,
+        app.models.location,
+        results,
+        (err, result) => {
+          if (!err) {
+            result = result || {};
+            results = result.records || results;
+          }
 
-        // translate lab results/case investigation questionnaires
-        const labResultsQuestionnaire = Outbreak.helpers.parseTemplateQuestions(labResultsTemplate, dictionary);
-        const caseInvestigationQuestionnaire = Outbreak.helpers.parseTemplateQuestions(caseInvestigationTemplate, dictionary);
+          // get the language dictionary
+          app.models.language.getLanguageDictionary(languageId, (err, dictionary) => {
+            if (err) {
+              return callback(err);
+            }
 
-        // transform all DB models into JSONs for better handling
-        // we call the variable "person" only because "case" is a javascript reserved word
-        results.forEach((person, caseIndex) => {
-          results[caseIndex] = person.toJSON();
-          // this is needed because loopback doesn't return hidden fields from definition into the toJSON call
-          // might be removed later
-          results[caseIndex].type = person.type;
+            // translate lab results/case investigation questionnaires
+            const labResultsQuestionnaire = Outbreak.helpers.parseTemplateQuestions(labResultsTemplate, dictionary);
+            const caseInvestigationQuestionnaire = Outbreak.helpers.parseTemplateQuestions(caseInvestigationTemplate, dictionary);
 
-          // since relationships is a custom relation, the relationships collection is included differently in the case model,
-          // and not converted by the initial toJSON method.
-          person.relationships.forEach((relationship, relationshipIndex) => {
-            person.relationships[relationshipIndex] = relationship.toJSON();
-            person.relationships[relationshipIndex].people.forEach((member, memberIndex) => {
-              person.relationships[relationshipIndex].people[memberIndex] = member.toJSON();
-            });
-          });
-        });
-
-        // replace all foreign keys with readable data
-        genericHelpers.resolveModelForeignKeys(app, models.case, results, dictionary)
-          .then((results) => {
-            // transform the model into a simple JSON
+            // transform all DB models into JSONs for better handling
+            // we call the variable "person" only because "case" is a javascript reserved word
             results.forEach((person, caseIndex) => {
-              // keep the initial data of the case (we currently use it to generate the QR code only)
-              sanitizedCases[caseIndex] = {
-                rawData: person,
-                relationships: [],
-                labResults: []
-              };
+              results[caseIndex] = person.toJSON();
+              // this is needed because loopback doesn't return hidden fields from definition into the toJSON call
+              // might be removed later
+              results[caseIndex].type = person.type;
 
-              // anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
-              // and formatting date type fields
-              if (anonymousFields) {
-                app.utils.anonymizeDatasetFields.anonymize(person, anonymousFields);
-              }
-
-              app.utils.helpers.formatDateFields(person, app.models.person.dossierDateFields);
-              app.utils.helpers.formatUndefinedValues(person);
-
-              // prepare the case's relationships for printing
+              // since relationships is a custom relation, the relationships collection is included differently in the case model,
+              // and not converted by the initial toJSON method.
               person.relationships.forEach((relationship, relationshipIndex) => {
-                // extract the person with which the case has a relationship
-                let relationshipMember = _.find(relationship.people, (member) => {
-                  return member.id !== person.id;
+                person.relationships[relationshipIndex] = relationship.toJSON();
+                person.relationships[relationshipIndex].people.forEach((member, memberIndex) => {
+                  person.relationships[relationshipIndex].people[memberIndex] = member.toJSON();
                 });
-
-                // if relationship member was not found
-                if (!relationshipMember) {
-                  // stop here (invalid relationship)
-                  return;
-                }
-
-                // needed for checks below
-                const relationshipMemberType = relationshipMember.type;
-                const isEvent = relationshipMemberType === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT';
-
-                // for events, keep only the properties needed to be printed
-                // because we don't ever fill inherited person's properties for events
-                if (isEvent) {
-                  let tmpObject = {};
-                  for (let prop in relationshipMember) {
-                    if (app.models.event.printFieldsinOrder.indexOf(prop) !== -1) {
-                      tmpObject[prop] = relationshipMember[prop];
-                    }
-                  }
-                  relationshipMember = tmpObject;
-                }
-
-                // translate the values of the fields marked as reference data fields on the case/contact/event model
-                app.utils.helpers.translateDataSetReferenceDataValues(
-                  relationshipMember,
-                  app.models[models.person.typeToModelMap[relationshipMemberType]],
-                  dictionary
-                );
-
-                relationshipMember = app.utils.helpers.translateFieldLabels(
-                  app,
-                  relationshipMember,
-                  models[models.person.typeToModelMap[relationshipMemberType]].modelName,
-                  dictionary
-                );
-
-                // translate the values of the fields marked as reference data fields on the relationship model
-                app.utils.helpers.translateDataSetReferenceDataValues(relationship, models.relationship, dictionary);
-
-                // translate all remaining keys of the relationship model
-                relationship = app.utils.helpers.translateFieldLabels(app, relationship, models.relationship.modelName, dictionary);
-
-                relationship[dictionary.getTranslation('LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON')] = relationshipMember;
-
-                // add the sanitized relationship to the object to be printed
-                sanitizedCases[caseIndex].relationships[relationshipIndex] = relationship;
               });
-
-              // prepare the case's lab results and lab results questionnaires for printing
-              person.labResults.forEach((labResult, labIndex) => {
-                // translate the values of the fields marked as reference data fields on the lab result model
-                app.utils.helpers.translateDataSetReferenceDataValues(labResult, models.labResult, dictionary);
-
-                // clone the questionnaires, as the function below is actually altering them
-                let labResultsQuestions = _.cloneDeep(labResultsQuestionnaire);
-
-                // convert questionnaire answers to old format, before doing anything
-                let labResultAnswers = labResult.questionnaireAnswers || {};
-
-                // since we are presenting all the answers, mark the one that was selected, for each question
-                labResultsQuestions = Outbreak.helpers.prepareQuestionsForPrint(labResultAnswers, labResultsQuestions);
-
-                // translate the remaining fields on the lab result model
-                labResult = app.utils.helpers.translateFieldLabels(app, labResult, models.labResult.modelName, dictionary);
-
-                // add the questionnaire separately (after field translations) because it will be displayed separately
-                labResult.questionnaire = labResultsQuestions;
-
-                // add the sanitized lab results to the object to be printed
-                sanitizedCases[caseIndex].labResults[labIndex] = labResult;
-              });
-
-              // clone the questionnaires, as the function below is actually altering them
-              let caseInvestigationQuestions = _.cloneDeep(caseInvestigationQuestionnaire);
-
-              // convert questionnaire answers to old format, before doing anything
-              let personAnswers = person.questionnaireAnswers || {};
-
-              // since we are presenting all the answers, mark the one that was selected, for each question
-              caseInvestigationQuestions = Outbreak.helpers.prepareQuestionsForPrint(personAnswers, caseInvestigationQuestions);
-
-              // translate all remaining keys
-              person = app.utils.helpers.translateFieldLabels(app, person, models.case.modelName, dictionary);
-
-              // add the questionnaire separately (after field translations) because it will be displayed separately
-              person.questionnaire = caseInvestigationQuestions;
-
-              // add the sanitized case to the object to be printed
-              sanitizedCases[caseIndex].data = person;
             });
 
-            // translate the pdf section titles
-            const caseDetailsTitle = dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS');
-            const caseQuestionnaireTitle = dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE');
-            const relationshipsTitle = dictionary.getTranslation('LNG_PAGE_ACTION_RELATIONSHIPS');
-            const labResultsTitle = dictionary.getTranslation('LNG_PAGE_LIST_CASE_LAB_RESULTS_TITLE');
-            const labResultsQuestionnaireTitle = dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE');
-
-            let pdfPromises = [];
-
-            // Print all the data
-            sanitizedCases.forEach((sanitizedCase) => {
-              pdfPromises.push(
-                new Promise((resolve, reject) => {
-                  // generate pdf document
-                  let doc = pdfUtils.createPdfDoc({
-                    fontSize: 7,
-                    layout: 'portrait',
-                    margin: 20,
-                    lineGap: 0,
-                    wordSpacing: 0,
-                    characterSpacing: 0,
-                    paragraphGap: 0
-                  });
-
-                  // add a top margin of 2 lines for each page
-                  doc.on('pageAdded', () => {
-                    doc.moveDown(2);
-                  });
-
-                  // set margin top for first page here, to not change the entire createPdfDoc functionality
-                  doc.moveDown(2);
-                  // write this as a separate function to easily remove it's listener
-                  let addQrCode = function () {
-                    app.utils.qrCode.addPersonQRCode(doc, sanitizedCase.rawData.outbreakId, 'case', sanitizedCase.rawData);
+            // replace all foreign keys with readable data
+            genericHelpers.resolveModelForeignKeys(app, models.case, results, dictionary)
+              .then((results) => {
+                // transform the model into a simple JSON
+                results.forEach((person, caseIndex) => {
+                  // keep the initial data of the case (we currently use it to generate the QR code only)
+                  sanitizedCases[caseIndex] = {
+                    rawData: person,
+                    relationships: [],
+                    labResults: []
                   };
 
-                  // add the QR code to the first page (this page has already been added and will not be covered by the next line)
-                  addQrCode();
+                  // anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
+                  // and formatting date type fields
+                  if (anonymousFields) {
+                    app.utils.anonymizeDatasetFields.anonymize(person, anonymousFields);
+                  }
 
-                  // set a listener on pageAdded to add the QR code to every new page
-                  doc.on('pageAdded', addQrCode);
+                  app.utils.helpers.formatDateFields(person, app.models.person.dossierDateFields);
+                  app.utils.helpers.formatUndefinedValues(person);
 
-                  // remove the questionnaire from case printing model
-                  const caseQuestionnaire = sanitizedCase.data.questionnaire;
-                  delete sanitizedCase.data.questionnaire;
+                  // prepare the case's relationships for printing
+                  person.relationships.forEach((relationship, relationshipIndex) => {
+                    // extract the person with which the case has a relationship
+                    let relationshipMember = _.find(relationship.people, (member) => {
+                      return member.id !== person.id;
+                    });
 
-                  // display case details
-                  pdfUtils.displayModelDetails(doc, sanitizedCase.data, true, caseDetailsTitle);
+                    // if relationship member was not found
+                    if (!relationshipMember) {
+                      // stop here (invalid relationship)
+                      return;
+                    }
 
-                  // display case investigation questionnaire
-                  doc.addPage();
-                  pdfUtils.createQuestionnaire(doc, caseQuestionnaire, true, caseQuestionnaireTitle);
+                    // needed for checks below
+                    const relationshipMemberType = relationshipMember.type;
+                    const isEvent = relationshipMemberType === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT';
 
-                  // display case's relationships
-                  pdfUtils.displayPersonRelationships(doc, sanitizedCase.relationships, relationshipsTitle);
+                    // for events, keep only the properties needed to be printed
+                    // because we don't ever fill inherited person's properties for events
+                    if (isEvent) {
+                      let tmpObject = {};
+                      for (let prop in relationshipMember) {
+                        if (app.models.event.printFieldsinOrder.indexOf(prop) !== -1) {
+                          tmpObject[prop] = relationshipMember[prop];
+                        }
+                      }
+                      relationshipMember = tmpObject;
+                    }
 
-                  // display lab results and questionnaires
-                  pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedCase.labResults, labResultsTitle, labResultsQuestionnaireTitle);
+                    // translate the values of the fields marked as reference data fields on the case/contact/event model
+                    app.utils.helpers.translateDataSetReferenceDataValues(
+                      relationshipMember,
+                      app.models[models.person.typeToModelMap[relationshipMemberType]],
+                      dictionary
+                    );
 
-                  // add an additional empty page that contains only the QR code as per requirements
-                  doc.addPage();
+                    relationshipMember = app.utils.helpers.translateFieldLabels(
+                      app,
+                      relationshipMember,
+                      models[models.person.typeToModelMap[relationshipMemberType]].modelName,
+                      dictionary
+                    );
 
-                  // stop adding this QR code. The next contact will need to have a different QR code
-                  doc.removeListener('pageAdded', addQrCode);
-                  doc.end();
+                    // translate the values of the fields marked as reference data fields on the relationship model
+                    app.utils.helpers.translateDataSetReferenceDataValues(relationship, models.relationship, dictionary);
 
-                  // convert pdf stream to buffer and send it as response
-                  genericHelpers.streamToBuffer(doc, (err, buffer) => {
-                    if (err) {
-                      reject(err);
-                    } else {
-                      const lastName = sanitizedCase.rawData.lastName ? sanitizedCase.rawData.lastName.replace(/\r|\n|\s/g, '').toUpperCase() + ' ' : '';
-                      const firstName = sanitizedCase.rawData.firstName ? sanitizedCase.rawData.firstName.replace(/\r|\n|\s/g, '') : '';
-                      fs.writeFile(`${tmpDirName}/${lastName}${firstName} - ${sanitizedCase.rawData.id}.pdf`, buffer, (err) => {
+                    // translate all remaining keys of the relationship model
+                    relationship = app.utils.helpers.translateFieldLabels(app, relationship, models.relationship.modelName, dictionary);
+
+                    relationship[dictionary.getTranslation('LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON')] = relationshipMember;
+
+                    // add the sanitized relationship to the object to be printed
+                    sanitizedCases[caseIndex].relationships[relationshipIndex] = relationship;
+                  });
+
+                  // prepare the case's lab results and lab results questionnaires for printing
+                  person.labResults.forEach((labResult, labIndex) => {
+                    // translate the values of the fields marked as reference data fields on the lab result model
+                    app.utils.helpers.translateDataSetReferenceDataValues(labResult, models.labResult, dictionary);
+
+                    // clone the questionnaires, as the function below is actually altering them
+                    let labResultsQuestions = _.cloneDeep(labResultsQuestionnaire);
+
+                    // convert questionnaire answers to old format, before doing anything
+                    let labResultAnswers = labResult.questionnaireAnswers || {};
+
+                    // since we are presenting all the answers, mark the one that was selected, for each question
+                    labResultsQuestions = Outbreak.helpers.prepareQuestionsForPrint(labResultAnswers, labResultsQuestions);
+
+                    // translate the remaining fields on the lab result model
+                    labResult = app.utils.helpers.translateFieldLabels(app, labResult, models.labResult.modelName, dictionary);
+
+                    // add the questionnaire separately (after field translations) because it will be displayed separately
+                    labResult.questionnaire = labResultsQuestions;
+
+                    // add the sanitized lab results to the object to be printed
+                    sanitizedCases[caseIndex].labResults[labIndex] = labResult;
+                  });
+
+                  // clone the questionnaires, as the function below is actually altering them
+                  let caseInvestigationQuestions = _.cloneDeep(caseInvestigationQuestionnaire);
+
+                  // convert questionnaire answers to old format, before doing anything
+                  let personAnswers = person.questionnaireAnswers || {};
+
+                  // since we are presenting all the answers, mark the one that was selected, for each question
+                  caseInvestigationQuestions = Outbreak.helpers.prepareQuestionsForPrint(personAnswers, caseInvestigationQuestions);
+
+                  // translate all remaining keys
+                  person = app.utils.helpers.translateFieldLabels(
+                    app,
+                    person,
+                    models.case.modelName,
+                    dictionary,
+                    true
+                  );
+
+                  // add the questionnaire separately (after field translations) because it will be displayed separately
+                  person.questionnaire = caseInvestigationQuestions;
+
+                  // add the sanitized case to the object to be printed
+                  sanitizedCases[caseIndex].data = person;
+                });
+
+                // translate the pdf section titles
+                const caseDetailsTitle = dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS');
+                const caseQuestionnaireTitle = dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE');
+                const relationshipsTitle = dictionary.getTranslation('LNG_PAGE_ACTION_RELATIONSHIPS');
+                const labResultsTitle = dictionary.getTranslation('LNG_PAGE_LIST_CASE_LAB_RESULTS_TITLE');
+                const labResultsQuestionnaireTitle = dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE');
+
+                let pdfPromises = [];
+
+                // Print all the data
+                sanitizedCases.forEach((sanitizedCase) => {
+                  pdfPromises.push(
+                    new Promise((resolve, reject) => {
+                      // generate pdf document
+                      let doc = pdfUtils.createPdfDoc({
+                        fontSize: 7,
+                        layout: 'portrait',
+                        margin: 20,
+                        lineGap: 0,
+                        wordSpacing: 0,
+                        characterSpacing: 0,
+                        paragraphGap: 0
+                      });
+
+                      // add a top margin of 2 lines for each page
+                      doc.on('pageAdded', () => {
+                        doc.moveDown(2);
+                      });
+
+                      // set margin top for first page here, to not change the entire createPdfDoc functionality
+                      doc.moveDown(2);
+                      // write this as a separate function to easily remove it's listener
+                      let addQrCode = function () {
+                        app.utils.qrCode.addPersonQRCode(doc, sanitizedCase.rawData.outbreakId, 'case', sanitizedCase.rawData);
+                      };
+
+                      // add the QR code to the first page (this page has already been added and will not be covered by the next line)
+                      addQrCode();
+
+                      // set a listener on pageAdded to add the QR code to every new page
+                      doc.on('pageAdded', addQrCode);
+
+                      // remove the questionnaire from case printing model
+                      const caseQuestionnaire = sanitizedCase.data.questionnaire;
+                      delete sanitizedCase.data.questionnaire;
+
+                      // display case details
+                      pdfUtils.displayModelDetails(doc, sanitizedCase.data, true, caseDetailsTitle);
+
+                      // display case investigation questionnaire
+                      doc.addPage();
+                      pdfUtils.createQuestionnaire(doc, caseQuestionnaire, true, caseQuestionnaireTitle);
+
+                      // display case's relationships
+                      pdfUtils.displayPersonRelationships(doc, sanitizedCase.relationships, relationshipsTitle);
+
+                      // display lab results and questionnaires
+                      pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedCase.labResults, labResultsTitle, labResultsQuestionnaireTitle);
+
+                      // add an additional empty page that contains only the QR code as per requirements
+                      doc.addPage();
+
+                      // stop adding this QR code. The next contact will need to have a different QR code
+                      doc.removeListener('pageAdded', addQrCode);
+                      doc.end();
+
+                      // convert pdf stream to buffer and send it as response
+                      genericHelpers.streamToBuffer(doc, (err, buffer) => {
                         if (err) {
                           reject(err);
                         } else {
-                          resolve();
+                          const lastName = sanitizedCase.rawData.lastName ? sanitizedCase.rawData.lastName.replace(/\r|\n|\s/g, '').toUpperCase() + ' ' : '';
+                          const firstName = sanitizedCase.rawData.firstName ? sanitizedCase.rawData.firstName.replace(/\r|\n|\s/g, '') : '';
+                          fs.writeFile(`${tmpDirName}/${lastName}${firstName} - ${sanitizedCase.rawData.id}.pdf`, buffer, (err) => {
+                            if (err) {
+                              reject(err);
+                            } else {
+                              resolve();
+                            }
+                          });
                         }
                       });
-                    }
-                  });
-                })
-              );
-            });
-            return Promise.all(pdfPromises);
-          })
-          .then(() => {
-            let archiveName = `caseDossiers_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
-            let archivePath = `${tmpDirName}/${archiveName}`;
-            let zip = new AdmZip();
+                    })
+                  );
+                });
+                return Promise.all(pdfPromises);
+              })
+              .then(() => {
+                let archiveName = `caseDossiers_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+                let archivePath = `${tmpDirName}/${archiveName}`;
+                let zip = new AdmZip();
 
-            zip.addLocalFolder(tmpDirName);
-            zip.writeZip(archivePath);
+                zip.addLocalFolder(tmpDirName);
+                zip.writeZip(archivePath);
 
-            fs.readFile(archivePath, (err, data) => {
-              if (err) {
-                callback(err);
-              } else {
-                tmpDir.removeCallback();
-                app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
-              }
-            });
+                fs.readFile(archivePath, (err, data) => {
+                  if (err) {
+                    callback(err);
+                  } else {
+                    tmpDir.removeCallback();
+                    app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
+                  }
+                });
+              });
           });
-      });
+        });
     });
   };
 
@@ -5236,237 +5253,254 @@ module.exports = function (Outbreak) {
       const languageId = options.remotingContext.req.authData.user.languageId;
       let sanitizedContacts = [];
 
-      // Get the language dictionary
-      app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
-        // handle errors
-        if (error) {
-          return callback(error);
-        }
+      genericHelpers.attachParentLocations(
+        app.models.case,
+        app.models.location,
+        results,
+        (err, result) => {
+          if (!err) {
+            result = result || {};
+            results = result.records || results;
+          }
 
-        // Transform all DB models into JSONs for better handling
-        results.forEach((contact, contactIndex) => {
-          results[contactIndex] = contact.toJSON();
+          // Get the language dictionary
+          app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
+            // handle errors
+            if (error) {
+              return callback(error);
+            }
 
-          // this is needed because loopback doesn't return hidden fields from definition into the toJSON call
-          // might be removed later
-          results[contactIndex].type = contact.type;
-
-          // since relationships is a custom relation, the relationships collection is included differently in the case model,
-          // and not converted by the initial toJSON method.
-          contact.relationships.forEach((relationship, relationshipIndex) => {
-            contact.relationships[relationshipIndex] = relationship.toJSON();
-            contact.relationships[relationshipIndex].people.forEach((member, memberIndex) => {
-              contact.relationships[relationshipIndex].people[memberIndex] = member.toJSON();
-            });
-          });
-        });
-
-        // Replace all foreign keys with readable data
-        genericHelpers.resolveModelForeignKeys(app, app.models.contact, results, dictionary)
-          .then((results) => {
+            // Transform all DB models into JSONs for better handling
             results.forEach((contact, contactIndex) => {
-              // keep the initial data of the contact (we currently use it to generate the QR code only)
-              sanitizedContacts[contactIndex] = {
-                rawData: contact
-              };
+              results[contactIndex] = contact.toJSON();
 
-              // Anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
-              // and format date type fields
-              if (anonymousFields) {
-                app.utils.anonymizeDatasetFields.anonymize(contact, anonymousFields);
-              }
-              app.utils.helpers.formatDateFields(contact, app.models.person.dossierDateFields);
-              app.utils.helpers.formatUndefinedValues(contact);
+              // this is needed because loopback doesn't return hidden fields from definition into the toJSON call
+              // might be removed later
+              results[contactIndex].type = contact.type;
 
-              // Prepare the contact's relationships for printing
+              // since relationships is a custom relation, the relationships collection is included differently in the case model,
+              // and not converted by the initial toJSON method.
               contact.relationships.forEach((relationship, relationshipIndex) => {
-                sanitizedContacts[contactIndex].relationships = [];
-
-                // extract the person with which the contact has a relationship
-                let relationshipMember = _.find(relationship.people, (member) => {
-                  return member.id !== contact.id;
+                contact.relationships[relationshipIndex] = relationship.toJSON();
+                contact.relationships[relationshipIndex].people.forEach((member, memberIndex) => {
+                  contact.relationships[relationshipIndex].people[memberIndex] = member.toJSON();
                 });
-
-                // if relationship member was not found
-                if (!relationshipMember) {
-                  // stop here (invalid relationship)
-                  return;
-                }
-
-                // needed for checks below
-                const relationshipMemberType = relationshipMember.type;
-                const isEvent = relationshipMember.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT';
-
-                // for events, keep only the properties needed to be printed
-                // because we don't ever fill inherited person's properties for events
-                if (isEvent) {
-                  let tmpObject = {};
-                  for (let prop in relationshipMember) {
-                    if (app.models.event.printFieldsinOrder.indexOf(prop) !== -1) {
-                      tmpObject[prop] = relationshipMember[prop];
-                    }
-                  }
-                  relationshipMember = tmpObject;
-                }
-
-                // translate the values of the fields marked as reference data fields on the case/contact/event model
-                // translate the values of the fields marked as reference data fields on the case/contact/event model
-                app.utils.helpers.translateDataSetReferenceDataValues(
-                  relationshipMember,
-                  models[models.person.typeToModelMap[relationshipMemberType]],
-                  dictionary
-                );
-
-                relationshipMember = app.utils.helpers.translateFieldLabels(
-                  app,
-                  relationshipMember,
-                  models[models.person.typeToModelMap[relationshipMemberType]].modelName,
-                  dictionary
-                );
-
-                // Translate the values of the fields marked as reference data fields on the relationship model
-                app.utils.helpers.translateDataSetReferenceDataValues(
-                  relationship,
-                  models.relationship,
-                  dictionary
-                );
-
-                // Translate all remaining keys of the relationship model
-                relationship = app.utils.helpers.translateFieldLabels(
-                  app,
-                  relationship,
-                  models.relationship.modelName,
-                  dictionary
-                );
-
-                relationship[dictionary.getTranslation('LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON')] = relationshipMember;
-
-                // Add the sanitized relationship to the object to be printed
-                sanitizedContacts[contactIndex].relationships[relationshipIndex] = relationship;
               });
-
-              // Prepare the contact's followUps for printing
-              contact.followUps.forEach((followUp, followUpIndex) => {
-                sanitizedContacts[contactIndex].followUps = [];
-
-                // Translate the values of the fields marked as reference data fields on the lab result model
-                app.utils.helpers.translateDataSetReferenceDataValues(followUp, app.models.followUp, dictionary);
-
-                // Translate the questions and the answers from the follow up
-                questions = Outbreak.helpers.parseTemplateQuestions(followUpQuestionnaire, dictionary);
-
-                // translate follow up questionnaire answers to general format
-                let followUpAnswers = followUp.questionnaireAnswers || {};
-
-                // Since we are presenting all the answers, mark the one that was selected, for each question
-                questions = Outbreak.helpers.prepareQuestionsForPrint(followUpAnswers, questions);
-
-                // Translate the remaining fields on the follow up model
-                followUp = app.utils.helpers.translateFieldLabels(app, followUp, app.models.followUp.modelName, dictionary);
-
-                // Add the questionnaire separately (after field translations) because it will be displayed separately
-                followUp.questionnaire = questions;
-
-                // Add the sanitized follow ups to the object to be printed
-                sanitizedContacts[contactIndex].followUps[followUpIndex] = followUp;
-              });
-
-              // Translate all remaining keys
-              contact = app.utils.helpers.translateFieldLabels(app, contact, app.models.contact.modelName, dictionary);
-
-              // Add the sanitized contact to the object to be printed
-              sanitizedContacts[contactIndex].data = contact;
             });
 
-            const relationshipsTitle = dictionary.getTranslation('LNG_PAGE_ACTION_RELATIONSHIPS');
-            const followUpsTitle = dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE');
-            const followUpQuestionnaireTitle = dictionary.getTranslation('LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE');
-
-            let pdfPromises = [];
-
-            // Print all the data
-            sanitizedContacts.forEach((sanitizedContact) => {
-              pdfPromises.push(
-                new Promise((resolve, reject) => {
-                  // generate pdf document
-                  let doc = pdfUtils.createPdfDoc({
-                    fontSize: 7,
-                    layout: 'portrait',
-                    margin: 20,
-                    lineGap: 0,
-                    wordSpacing: 0,
-                    characterSpacing: 0,
-                    paragraphGap: 0
-                  });
-
-                  // add a top margin of 2 lines for each page
-                  doc.on('pageAdded', () => {
-                    doc.moveDown(2);
-                  });
-
-                  // set margin top for first page here, to not change the entire createPdfDoc functionality
-                  doc.moveDown(2);
-                  // write this as a separate function to easily remove it's listener
-                  let addQrCode = function () {
-                    app.utils.qrCode.addPersonQRCode(doc, sanitizedContact.rawData.outbreakId, 'contact', sanitizedContact.rawData);
+            // Replace all foreign keys with readable data
+            genericHelpers.resolveModelForeignKeys(app, app.models.contact, results, dictionary)
+              .then((results) => {
+                results.forEach((contact, contactIndex) => {
+                  // keep the initial data of the contact (we currently use it to generate the QR code only)
+                  sanitizedContacts[contactIndex] = {
+                    rawData: contact
                   };
 
-                  // add the QR code to the first page (this page has already been added and will not be covered by the next line)
-                  addQrCode();
+                  // Anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
+                  // and format date type fields
+                  if (anonymousFields) {
+                    app.utils.anonymizeDatasetFields.anonymize(contact, anonymousFields);
+                  }
+                  app.utils.helpers.formatDateFields(contact, app.models.person.dossierDateFields);
+                  app.utils.helpers.formatUndefinedValues(contact);
 
-                  // set a listener on pageAdded to add the QR code to every new page
-                  doc.on('pageAdded', addQrCode);
+                  // Prepare the contact's relationships for printing
+                  contact.relationships.forEach((relationship, relationshipIndex) => {
+                    sanitizedContacts[contactIndex].relationships = [];
 
-                  pdfUtils.displayModelDetails(doc, sanitizedContact.data, true, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
-                  pdfUtils.displayPersonRelationships(doc, sanitizedContact.relationships, relationshipsTitle);
-                  pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedContact.followUps, followUpsTitle, followUpQuestionnaireTitle);
+                    // extract the person with which the contact has a relationship
+                    let relationshipMember = _.find(relationship.people, (member) => {
+                      return member.id !== contact.id;
+                    });
 
-                  // add an additional empty page that contains only the QR code as per requirements
-                  doc.addPage();
+                    // if relationship member was not found
+                    if (!relationshipMember) {
+                      // stop here (invalid relationship)
+                      return;
+                    }
 
-                  // stop adding this QR code. The next contact will need to have a different QR code
-                  doc.removeListener('pageAdded', addQrCode);
-                  doc.end();
+                    // needed for checks below
+                    const relationshipMemberType = relationshipMember.type;
+                    const isEvent = relationshipMember.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT';
 
-                  // convert pdf stream to buffer and send it as response
-                  genericHelpers.streamToBuffer(doc, (err, buffer) => {
-                    if (err) {
-                      callback(err);
-                    } else {
-                      const lastName = sanitizedContact.rawData.lastName ? sanitizedContact.rawData.lastName.replace(/\r|\n|\s/g, '').toUpperCase() + ' ' : '';
-                      const firstName = sanitizedContact.rawData.firstName ? sanitizedContact.rawData.firstName.replace(/\r|\n|\s/g, '') : '';
-                      fs.writeFile(`${tmpDirName}/${lastName}${firstName} - ${sanitizedContact.rawData.id}.pdf`, buffer, (err) => {
+                    // for events, keep only the properties needed to be printed
+                    // because we don't ever fill inherited person's properties for events
+                    if (isEvent) {
+                      let tmpObject = {};
+                      for (let prop in relationshipMember) {
+                        if (app.models.event.printFieldsinOrder.indexOf(prop) !== -1) {
+                          tmpObject[prop] = relationshipMember[prop];
+                        }
+                      }
+                      relationshipMember = tmpObject;
+                    }
+
+                    // translate the values of the fields marked as reference data fields on the case/contact/event model
+                    // translate the values of the fields marked as reference data fields on the case/contact/event model
+                    app.utils.helpers.translateDataSetReferenceDataValues(
+                      relationshipMember,
+                      models[models.person.typeToModelMap[relationshipMemberType]],
+                      dictionary
+                    );
+
+                    relationshipMember = app.utils.helpers.translateFieldLabels(
+                      app,
+                      relationshipMember,
+                      models[models.person.typeToModelMap[relationshipMemberType]].modelName,
+                      dictionary
+                    );
+
+                    // Translate the values of the fields marked as reference data fields on the relationship model
+                    app.utils.helpers.translateDataSetReferenceDataValues(
+                      relationship,
+                      models.relationship,
+                      dictionary
+                    );
+
+                    // Translate all remaining keys of the relationship model
+                    relationship = app.utils.helpers.translateFieldLabels(
+                      app,
+                      relationship,
+                      models.relationship.modelName,
+                      dictionary
+                    );
+
+                    relationship[dictionary.getTranslation('LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON')] = relationshipMember;
+
+                    // Add the sanitized relationship to the object to be printed
+                    sanitizedContacts[contactIndex].relationships[relationshipIndex] = relationship;
+                  });
+
+                  // Prepare the contact's followUps for printing
+                  contact.followUps.forEach((followUp, followUpIndex) => {
+                    sanitizedContacts[contactIndex].followUps = [];
+
+                    // Translate the values of the fields marked as reference data fields on the lab result model
+                    app.utils.helpers.translateDataSetReferenceDataValues(followUp, app.models.followUp, dictionary);
+
+                    // Translate the questions and the answers from the follow up
+                    questions = Outbreak.helpers.parseTemplateQuestions(followUpQuestionnaire, dictionary);
+
+                    // translate follow up questionnaire answers to general format
+                    let followUpAnswers = followUp.questionnaireAnswers || {};
+
+                    // Since we are presenting all the answers, mark the one that was selected, for each question
+                    questions = Outbreak.helpers.prepareQuestionsForPrint(followUpAnswers, questions);
+
+                    // Translate the remaining fields on the follow up model
+                    followUp = app.utils.helpers.translateFieldLabels(app, followUp, app.models.followUp.modelName, dictionary);
+
+                    // Add the questionnaire separately (after field translations) because it will be displayed separately
+                    followUp.questionnaire = questions;
+
+                    // Add the sanitized follow ups to the object to be printed
+                    sanitizedContacts[contactIndex].followUps[followUpIndex] = followUp;
+                  });
+
+                  // Translate all remaining keys
+                  contact = app.utils.helpers.translateFieldLabels(
+                    app,
+                    contact,
+                    app.models.contact.modelName,
+                    dictionary,
+                    true
+                  );
+
+                  // Add the sanitized contact to the object to be printed
+                  sanitizedContacts[contactIndex].data = contact;
+                });
+
+                const relationshipsTitle = dictionary.getTranslation('LNG_PAGE_ACTION_RELATIONSHIPS');
+                const followUpsTitle = dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE');
+                const followUpQuestionnaireTitle = dictionary.getTranslation('LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE');
+
+                let pdfPromises = [];
+
+                // Print all the data
+                sanitizedContacts.forEach((sanitizedContact) => {
+                  pdfPromises.push(
+                    new Promise((resolve, reject) => {
+                      // generate pdf document
+                      let doc = pdfUtils.createPdfDoc({
+                        fontSize: 7,
+                        layout: 'portrait',
+                        margin: 20,
+                        lineGap: 0,
+                        wordSpacing: 0,
+                        characterSpacing: 0,
+                        paragraphGap: 0
+                      });
+
+                      // add a top margin of 2 lines for each page
+                      doc.on('pageAdded', () => {
+                        doc.moveDown(2);
+                      });
+
+                      // set margin top for first page here, to not change the entire createPdfDoc functionality
+                      doc.moveDown(2);
+                      // write this as a separate function to easily remove it's listener
+                      let addQrCode = function () {
+                        app.utils.qrCode.addPersonQRCode(doc, sanitizedContact.rawData.outbreakId, 'contact', sanitizedContact.rawData);
+                      };
+
+                      // add the QR code to the first page (this page has already been added and will not be covered by the next line)
+                      addQrCode();
+
+                      // set a listener on pageAdded to add the QR code to every new page
+                      doc.on('pageAdded', addQrCode);
+
+                      pdfUtils.displayModelDetails(doc, sanitizedContact.data, true, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
+                      pdfUtils.displayPersonRelationships(doc, sanitizedContact.relationships, relationshipsTitle);
+                      pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedContact.followUps, followUpsTitle, followUpQuestionnaireTitle);
+
+                      // add an additional empty page that contains only the QR code as per requirements
+                      doc.addPage();
+
+                      // stop adding this QR code. The next contact will need to have a different QR code
+                      doc.removeListener('pageAdded', addQrCode);
+                      doc.end();
+
+                      // convert pdf stream to buffer and send it as response
+                      genericHelpers.streamToBuffer(doc, (err, buffer) => {
                         if (err) {
-                          reject(err);
+                          callback(err);
                         } else {
-                          resolve();
+                          const lastName = sanitizedContact.rawData.lastName ? sanitizedContact.rawData.lastName.replace(/\r|\n|\s/g, '').toUpperCase() + ' ' : '';
+                          const firstName = sanitizedContact.rawData.firstName ? sanitizedContact.rawData.firstName.replace(/\r|\n|\s/g, '') : '';
+                          fs.writeFile(`${tmpDirName}/${lastName}${firstName} - ${sanitizedContact.rawData.id}.pdf`, buffer, (err) => {
+                            if (err) {
+                              reject(err);
+                            } else {
+                              resolve();
+                            }
+                          });
                         }
                       });
-                    }
-                  });
-                })
-              );
-            });
-            return Promise.all(pdfPromises);
-          })
-          .then(() => {
-            let archiveName = `contactDossiers_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
-            let archivePath = `${tmpDirName}/${archiveName}`;
-            let zip = new AdmZip();
+                    })
+                  );
+                });
+                return Promise.all(pdfPromises);
+              })
+              .then(() => {
+                let archiveName = `contactDossiers_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+                let archivePath = `${tmpDirName}/${archiveName}`;
+                let zip = new AdmZip();
 
-            zip.addLocalFolder(tmpDirName);
-            zip.writeZip(archivePath);
+                zip.addLocalFolder(tmpDirName);
+                zip.writeZip(archivePath);
 
-            fs.readFile(archivePath, (err, data) => {
-              if (err) {
-                callback(err);
-              } else {
-                tmpDir.removeCallback();
-                app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
-              }
-            });
+                fs.readFile(archivePath, (err, data) => {
+                  if (err) {
+                    callback(err);
+                  } else {
+                    tmpDir.removeCallback();
+                    app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
+                  }
+                });
+              });
           });
-      });
+        });
     });
   };
 

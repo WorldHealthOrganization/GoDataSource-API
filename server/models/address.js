@@ -37,6 +37,10 @@ module.exports = function (Address) {
     'phoneNumber'
   ];
 
+  // this is solely used for attaching parent locations custom fields in prints
+  Address.locationsFieldsMap = {
+    locationId: 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID'
+  };
 
   /**
    * Workaround for a loopbpack/mongo issue:

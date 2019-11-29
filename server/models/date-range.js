@@ -11,4 +11,9 @@ module.exports = function (DateRange) {
     'startDate',
     'endDate'
   ];
+
+  // this is solely used for attaching parent locations custom fields in prints
+  DateRange.locationsFieldsMap = {
+    locationId: 'LNG_CASE_FIELD_LABEL_DATE_RANGE_LOCATION'
+  };
 };
