@@ -1126,14 +1126,33 @@ const translateDataSetReferenceDataValues = function (dataSet, Model, dictionary
  * @param modelName
  * @param model
  * @param dictionary
+ * @param includeParentLocations
  */
-const translateFieldLabels = function (app, model, modelName, dictionary) {
+const translateFieldLabels = function (app, model, modelName, dictionary, includeParentLocations) {
+  includeParentLocations = includeParentLocations || false;
+
+  let parentLocationsMap = {};
+  let locationsFieldsMap = {};
   let fieldsToTranslate = {};
+
   if (!app.models[modelName]) {
     fieldsToTranslate = nonModelObjects[modelName];
   } else {
-    fieldsToTranslate = Object.assign(app.models[modelName].fieldLabelsMap, app.models[modelName].relatedFieldLabelsMap);
-    model = _.pick(model, app.models[modelName].printFieldsinOrder);
+    locationsFieldsMap = app.models[modelName].locationsFieldsMap || {};
+    Object.keys(locationsFieldsMap).forEach(field => {
+      parentLocationsMap[`${field}_parentLocations`] = locationsFieldsMap[field];
+    });
+
+    fieldsToTranslate = Object.assign(
+      app.models[modelName].fieldLabelsMap,
+      app.models[modelName].relatedFieldLabelsMap
+    );
+
+    let fieldsToPick = app.models[modelName].printFieldsinOrder;
+    if (includeParentLocations) {
+      fieldsToPick = [].concat(fieldsToPick, Object.keys(parentLocationsMap));
+    }
+    model = _.pick(model, fieldsToPick);
   }
 
   let translatedFieldsModel = {};
@@ -1144,14 +1163,26 @@ const translateFieldLabels = function (app, model, modelName, dictionary) {
       if (Array.isArray(value) && value.length && typeof (value[0]) === 'object' && arrayFields[key]) {
         newValue = [];
         value.forEach((element, index) => {
-          newValue[index] = translateFieldLabels(app, element, arrayFields[key], dictionary);
+          newValue[index] = translateFieldLabels(app, element, arrayFields[key], dictionary, includeParentLocations);
         });
       } else if (typeof (value) === 'object' && value !== null && Object.keys(value).length > 0) {
-        newValue = translateFieldLabels(app, value, arrayFields[key], dictionary);
+        newValue = translateFieldLabels(app, value, arrayFields[key], dictionary, includeParentLocations);
       }
       translatedFieldsModel[dictionary.getTranslation(app.models[modelName] ? fieldsToTranslate[key] : nonModelObjects[modelName][key])] = newValue;
+      if (includeParentLocations && locationsFieldsMap[key]) {
+        const parentLocationKey = `${key}_parentLocations`;
+        (model[parentLocationKey] || []).forEach((location, index) => {
+          const keyTranslation = dictionary.getTranslation(parentLocationsMap[parentLocationKey]);
+          const geoLevelTranslation = dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL');
+          const field = `${keyTranslation} ${geoLevelTranslation} ${index}`;
+          translatedFieldsModel[field] = location;
+        });
+        delete model[parentLocationKey];
+      }
     } else {
-      translatedFieldsModel[key] = value;
+      if (!parentLocationsMap[key] || !includeParentLocations) {
+        translatedFieldsModel[key] = value;
+      }
     }
   });
 

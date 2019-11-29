@@ -385,6 +385,12 @@ module.exports = function (Case) {
     'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_NOT_A_CASE_DISCARDED'
   ];
 
+  // this is solely used for attaching parent locations custom fields in prints
+  // addresses and dateRanges location ids are being handled inside their own models
+  Case.locationsFieldsMap = {
+    burialLocationId: 'LNG_CASE_FIELD_LABEL_BURIAL_LOCATION_ID'
+  };
+
   /**
    * Archive case classification changes, when detected
    * @param context
