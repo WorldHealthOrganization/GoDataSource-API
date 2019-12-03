@@ -97,20 +97,25 @@ module.exports = function (ImportableFile) {
 
     const questionsTypeMap = {};
     const arrayProps = app.models[modelName].arrayProps;
-    if (arrayProps && questionnaire) {
+    // some models don't own a questionnaire
+    // but surely we need an array map otherwise we can't decide which properties should be left as arrays
+    // after parser converts arrays with 1 element to object
+    if (arrayProps || questionnaire) {
       parserOpts.explicitArray = false;
 
-      // build a map of questions and their types
-      (function traverse(questions) {
-        return (questions || []).map(q => {
-          questionsTypeMap[q.variable] = q.answerType;
-          if (Array.isArray(q.answers) && q.answers.length) {
-            for (let a of q.answers) {
-              traverse(a.additionalQuestions);
+      if (questionnaire) {
+        // build a map of questions and their types
+        (function traverse(questions) {
+          return (questions || []).map(q => {
+            questionsTypeMap[q.variable] = q.answerType;
+            if (Array.isArray(q.answers) && q.answers.length) {
+              for (let a of q.answers) {
+                traverse(a.additionalQuestions);
+              }
             }
-          }
-        });
-      })(questionnaire.toJSON());
+          });
+        })(questionnaire.toJSON());
+      }
     }
 
     // parse XML string
