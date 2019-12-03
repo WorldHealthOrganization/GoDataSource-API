@@ -600,7 +600,8 @@
       "LNG_API_ERROR_CODE_REQUEST_VALIDATION_ERROR_INVALID_BACKUP_LOCATION": "Configured backup location is not accessible for read/write",
       "LNG_API_ERROR_CODE_DELETE_CONTACT_LAST_RELATIONSHIP": "Cannot delete a contact's last relationship with a case or event. The contact doesn't have an additional relationship with a case or event.",
       "LNG_API_ERROR_CODE_INVALID_CASE_RELATIONSHIP": "Case needs to be related to another case in order to be able to convert it to a contact",
-      "LNG_API_ERROR_CODE_INVALID_PASSWORD": "Invalid current password"
+      "LNG_API_ERROR_CODE_INVALID_PASSWORD": "Invalid current password",
+      "LNG_API_ERROR_CODE_DELETE_ACTIVE_OUTBREAK": "Can not delete the outbreak because it has at least one active user"
     },
     "uiCommonFields": {
       "LNG_COMMON_FIELD_LABEL_CURRENT_PASSWORD": "Contraseña actual",
