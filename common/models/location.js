@@ -257,7 +257,7 @@ module.exports = function (Location) {
     } else if (existingInstance) {
       name = existingInstance.name || '';
     }
-    name = new RegExp(["^", name, "$"].join(''), 'i');
+    name = new RegExp(['^', name, '$'].join(''), 'i');
 
     let synonyms = [];
     if (data.hasOwnProperty('synonyms')) {
@@ -265,7 +265,7 @@ module.exports = function (Location) {
     } else if (existingInstance) {
       synonyms = existingInstance.synonyms || [];
     }
-    synonyms = synonyms.map(item => new RegExp(["^", item, "$"].join(''), 'i'));
+    synonyms = synonyms.map(item => new RegExp(['^', item, '$'].join(''), 'i'));
 
     let id = '';
     if (existingInstance) {
