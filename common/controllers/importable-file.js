@@ -425,15 +425,25 @@ module.exports = function (ImportableFile) {
       // get user information from request options
       const contextUser = app.utils.remote.getUserFromOptions(options);
 
-      return app.models.outbreak
-        .findById(outbreakId)
-        .then(function (outbreak) {
-          if (!outbreak) {
-            return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
-              model: app.models.outbreak.modelName,
-              id: outbreakId
-            }));
+      return Promise.resolve()
+        .then(() => {
+          if (outbreakId) {
+            return app.models.outbreak
+              .findById(outbreakId)
+              .then(outbreak => {
+                if (!outbreak) {
+                  return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+                    model: app.models.outbreak.modelName,
+                    id: outbreakId
+                  }));
+                }
+                return Promise.resolve(outbreak);
+              });
+          } else {
+            return Promise.resolve({});
           }
+        })
+        .then(outbreak => {
           // load language dictionary for the user
           app.models.language
             .getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
@@ -697,7 +707,6 @@ module.exports = function (ImportableFile) {
                   });
                 });
             });
-
         });
     });
   };
