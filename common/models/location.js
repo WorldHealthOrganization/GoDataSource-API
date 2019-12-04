@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const _ = require('lodash');
 const async = require('async');
+const escapeRegExp = require('../../components/escapeRegExp');
 
 module.exports = function (Location) {
 
@@ -257,7 +258,7 @@ module.exports = function (Location) {
     } else if (existingInstance) {
       name = existingInstance.name || '';
     }
-    name = new RegExp(['^', name, '$'].join(''), 'i');
+    name = new RegExp(['^', escapeRegExp(name), '$'].join(''), 'i');
 
     let synonyms = [];
     if (data.hasOwnProperty('synonyms')) {
@@ -265,7 +266,7 @@ module.exports = function (Location) {
     } else if (existingInstance) {
       synonyms = existingInstance.synonyms || [];
     }
-    synonyms = synonyms.map(item => new RegExp(['^', item, '$'].join(''), 'i'));
+    synonyms = synonyms.map(item => new RegExp(['^', escapeRegExp(item), '$'].join(''), 'i'));
 
     let id = '';
     if (existingInstance) {
