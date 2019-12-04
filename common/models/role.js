@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const app = require('../../server/server');
 
 module.exports = function (Role) {
   // set flag to force using the controller
@@ -838,7 +839,7 @@ module.exports = function (Role) {
         // format & remove restricted fields
         if (includeUsers) {
           (roles || []).forEach((role) => {
-            // contact id
+            // users
             if (role.users) {
               role.users.forEach((user) => {
                 // id
@@ -846,9 +847,7 @@ module.exports = function (Role) {
                 delete user._id;
 
                 // remove restricted fields
-                delete user.password;
-                delete user.settings;
-                delete user.roleIds;
+                app.models.user.sanitize(user);
               });
             }
           });

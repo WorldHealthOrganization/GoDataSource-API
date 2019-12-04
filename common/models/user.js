@@ -291,4 +291,13 @@ module.exports = function (User) {
       });
     });
   };
+
+  /**
+   * Remove data
+   */
+  User.sanitize = function (userData) {
+    delete userData.password;
+    delete userData.settings;
+    delete userData.roleIds;
+  };
 };

@@ -74,4 +74,41 @@ module.exports = function (Role) {
       .then((data) => callback(null, data))
       .catch(callback);
   };
+
+  /**
+   * Retrieve user data
+   */
+  Role.afterRemote('findById', function (context, modelInstance, next) {
+    if (
+      !modelInstance ||
+      !modelInstance.id
+    ) {
+      next();
+    } else {
+      app.models.user
+        .find({
+          where: {
+            roleIds: {
+              inq: [modelInstance.id]
+            }
+          }
+        })
+        .then((users) => {
+          // users
+          if (users) {
+            users.forEach((user) => {
+              // remove restricted fields
+              app.models.user.sanitize(user);
+            });
+
+            // attach users
+            modelInstance.users = users;
+          }
+
+          // finished
+          next();
+        })
+        .catch(next);
+    }
+  });
 };
