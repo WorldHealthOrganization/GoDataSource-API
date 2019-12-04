@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const _ = require('lodash');
 const async = require('async');
+const escapeRegExp = require('../../components/escapeRegExp');
 
 module.exports = function (Location) {
 
@@ -257,6 +258,7 @@ module.exports = function (Location) {
     } else if (existingInstance) {
       name = existingInstance.name || '';
     }
+    name = new RegExp(['^', escapeRegExp(name), '$'].join(''), 'i');
 
     let synonyms = [];
     if (data.hasOwnProperty('synonyms')) {
@@ -264,6 +266,7 @@ module.exports = function (Location) {
     } else if (existingInstance) {
       synonyms = existingInstance.synonyms || [];
     }
+    synonyms = synonyms.map(item => new RegExp(['^', escapeRegExp(item), '$'].join(''), 'i'));
 
     let id = '';
     if (existingInstance) {
@@ -280,9 +283,7 @@ module.exports = function (Location) {
         },
         or: [
           {
-            name: {
-              eq: name
-            }
+            name: name
           },
           {
             synonyms: {
@@ -296,14 +297,15 @@ module.exports = function (Location) {
         // create an error message that will identify all the invalid fields in the model.
         let errors = [];
 
-        if (location.name === name) {
-          errors.push(`A location with name = '${name}' and the same parentLocationId already exists.`);
+        if (name.test(location.name)) {
+          errors.push(`A location with name = '${location.name}' and the same parentLocationId already exists.`);
         }
 
         if (location.synonyms && synonyms) {
           synonyms.forEach((synonym) => {
-            if (location.synonyms.indexOf(synonym) > -1) {
-              errors.push(`A location with a '${synonym}' synonym and the same parentLocationId already exists.`);
+            const synonymIndex = location.synonyms.findIndex(synonymToTest => synonym.test(synonymToTest));
+            if (synonymIndex > -1) {
+              errors.push(`A location with a '${location.synonyms[synonymIndex]}' synonym and the same parentLocationId already exists.`);
             }
           });
         }
