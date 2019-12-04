@@ -4,6 +4,12 @@ const app = require('../../server/server');
 
 module.exports = function (Role) {
 
+  // disable methods
+  app.utils.remote.disableRemoteMethods(Role, [
+    'count',
+    'find'
+  ]);
+
   // disable access to principals
   app.utils.remote.disableStandardRelationRemoteMethods(Role, 'principals');
 
@@ -43,5 +49,29 @@ module.exports = function (Role) {
    */
   Role.getAvailablePermissions = function (callback) {
     callback(null, Role.availablePermissions);
+  };
+
+  /**
+   * Retrieve roles
+   * @param filter
+   * @param callback
+   */
+  Role.getRoles = (filter, callback) => {
+    app.models.role
+      .findAggregate(filter)
+      .then((data) => callback(null, data))
+      .catch(callback);
+  };
+
+  /**
+   * Count roles
+   * @param where
+   * @param callback
+   */
+  Role.countRoles = (where, callback) => {
+    app.models.role
+      .findAggregate({ where }, true)
+      .then((data) => callback(null, data))
+      .catch(callback);
   };
 };

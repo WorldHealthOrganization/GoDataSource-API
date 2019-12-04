@@ -794,4 +794,68 @@ module.exports = function (Role) {
       });
     }
   }, {message: `at least one permission is invalid. Available permissions: "${Role.allAllowedPermissions.join('", "')}"`});
+
+  /**
+   * Retrieve roles using mongo aggregation directly
+   * @param filter
+   * @param countOnly Boolean
+   */
+  Role.findAggregate = (
+    filter,
+    countOnly
+  ) => {
+    // do we need to retrieved users that use these roles ?
+    filter = filter || {};
+    filter.where = filter.where || {
+      includeUsers: false
+    };
+    let includeUsers = false;
+    if (filter.where.includeUsers !== undefined) {
+      includeUsers = !!filter.where.includeUsers;
+      delete filter.where.includeUsers;
+    }
+
+    // execute query
+    return Role
+      .rawFindAggregate(
+        filter, {
+          countOnly: countOnly,
+          relations: includeUsers ? [{
+            lookup: {
+              from: 'user',
+              localField: '_id',
+              foreignField: 'roleIds',
+              as: 'users'
+            }
+          }] : []
+        }
+      ).then((roles) => {
+        // nothing to do if we just want to count follow-ups
+        if (countOnly) {
+          return roles;
+        }
+
+        // format & remove restricted fields
+        if (includeUsers) {
+          (roles || []).forEach((role) => {
+            // contact id
+            if (role.users) {
+              role.users.forEach((user) => {
+                // id
+                user.id = user._id;
+                delete user._id;
+
+                // remove restricted fields
+                delete user.password;
+                delete user.settings;
+                delete user.roleIds;
+              });
+            }
+          });
+        }
+
+        // finished
+        return roles;
+      });
+  };
 };

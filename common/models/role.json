@@ -41,7 +41,8 @@
     "SoftDelete": true,
     "AttachController": true,
     "IncludeCustomRelations": true,
-    "DateProperty": true
+    "DateProperty": true,
+    "RawFindAggregate": true
   },
   "validations": [],
   "relations": {},
@@ -55,7 +56,7 @@
       "principalType": "ROLE",
       "principalId": "read_role",
       "permission": "ALLOW",
-      "property": "find"
+      "property": "getRoles"
     },
     {
       "principalType": "ROLE",
@@ -91,7 +92,7 @@
       "principalType": "ROLE",
       "principalId": "read_role",
       "permission": "ALLOW",
-      "property": "count"
+      "property": "countRoles"
     }
   ],
   "methods": {
@@ -127,6 +128,50 @@
       "http": {
         "verb": "get",
         "path": "/available-permissions"
+      }
+    },
+    "getRoles": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "role",
+          "type": [
+            "role"
+          ],
+          "description": "List of roles",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries roles",
+      "http": {
+        "verb": "get",
+        "path": "/"
+      }
+    },
+    "countRoles": {
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": {
+        "arg": "count",
+        "type": "integer",
+        "required": true
+      },
+      "description": "Count roles",
+      "http": {
+        "verb": "get",
+        "path": "/count"
       }
     }
   }
