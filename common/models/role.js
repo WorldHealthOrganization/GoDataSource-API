@@ -229,7 +229,8 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_CLONE_DESCRIPTION',
           requires: [
             'outbreak_view',
-            'outbreak_create'
+            'outbreak_create',
+            'outbreak_list'
           ]
         },
 
