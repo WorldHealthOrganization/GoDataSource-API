@@ -71,6 +71,12 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER_DESCRIPTION',
           requires: []
         },
+        {
+          id: 'user_modify_own_account',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_OWN_ACCOUNT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_OWN_ACCOUNT_DESCRIPTION',
+          requires: []
+        },
 
         // OLD - MUST DELETE!!!!!!!!
         // OLD - MUST DELETE!!!!!!!!
@@ -188,7 +194,7 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MAKE_OUTBREAK_ACTIVE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MAKE_OUTBREAK_ACTIVE_DESCRIPTION',
           requires: [
-            'user_modify'
+            'user_modify_own_account'
           ]
         },
         {

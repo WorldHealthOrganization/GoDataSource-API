@@ -47,6 +47,8 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_DESCRIPTION": "This permission allows modifying users",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER": "User - delete",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER_DESCRIPTION": "This permission allows removing users information",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_OWN_ACCOUNT": "User - modify own account",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_OWN_ACCOUNT_DESCRIPTION": "This permission allows user to modify his own account ( data, security questions, change password )",
 
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_LOCATION": "Locations",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_LOCATION_DESCRIPTION": "Location permissions",
