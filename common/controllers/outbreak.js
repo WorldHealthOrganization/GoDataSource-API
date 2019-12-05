@@ -9376,6 +9376,9 @@ module.exports = function (Outbreak) {
     findAndFilteredCountContactsBackCompat(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.filteredCountContacts', function (context, modelInstance, next) {
+    // remove custom filtered options
+    _.unset(context, 'args.filter.where.countRelations');
+    
     findAndFilteredCountContactsBackCompat(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.countContactsPerRiskLevel', function (context, modelInstance, next) {
