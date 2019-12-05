@@ -559,6 +559,7 @@ module.exports = function (Outbreak) {
     const noRelationship = _.get(context, 'args.filter.where.noRelationships', false);
     // remove custom filter before it reaches the model
     _.unset(context, 'args.filter.where.noRelationships');
+    _.unset(context, 'args.filter.where.countRelations');
 
     if (noRelationship) {
       // Retrieve all relationships of requested type for the given outbreak
