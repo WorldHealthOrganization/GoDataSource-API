@@ -260,6 +260,84 @@ module.exports = function (Role) {
       ]
     },
 
+    // Outbreak Template
+    {
+      groupAllId: 'outbreak_template_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_OUTBREAK_TEMPLATE',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_OUTBREAK_TEMPLATE_DESCRIPTION',
+      permissions: [
+        {
+          id: 'outbreak_template_view',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_OUTBREAK_TEMPLATE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_OUTBREAK_TEMPLATE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'outbreak_template_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_OUTBREAK_TEMPLATE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_OUTBREAK_TEMPLATE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'outbreak_template_create',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_TEMPLATE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_TEMPLATE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'outbreak_template_modify',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_DESCRIPTION',
+          requires: [
+            'outbreak_template_view'
+          ]
+        },
+        {
+          id: 'outbreak_template_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_OUTBREAK_TEMPLATE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_OUTBREAK_TEMPLATE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'outbreak_template_modify_case_questionnaire',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CASE_QUESTIONNAIRE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CASE_QUESTIONNAIRE_DESCRIPTION',
+          requires: [
+            'outbreak_template_view',
+            'outbreak_template_modify'
+          ]
+        },
+        {
+          id: 'outbreak_template_modify_contact_follow_up_questionnaire',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_FOLLOW_UP_QUESTIONNAIRE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_TEMPLATE_FOLLOW_UP_QUESTIONNAIRE_DESCRIPTION',
+          requires: [
+            'outbreak_template_view',
+            'outbreak_template_modify'
+          ]
+        },
+        {
+          id: 'outbreak_template_modify_case_lab_result_questionnaire',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CASE_LAB_RESULT_QUESTIONNAIRE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CASE_LAB_RESULT_QUESTIONNAIRE_DESCRIPTION',
+          requires: [
+            'outbreak_template_view',
+            'outbreak_template_modify'
+          ]
+        },
+        {
+          id: 'outbreak_template_generate_outbreak',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_OUTBREAK_TEMPLATE_GENERATE_OUTBREAK',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_OUTBREAK_TEMPLATE_GENERATE_OUTBREAK_DESCRIPTION',
+          requires: [
+            'outbreak_template_view',
+            'outbreak_create',
+            'outbreak_list'
+          ]
+        }
+      ]
+    },
+
     // Event
     {
       groupAllId: 'event_all',
