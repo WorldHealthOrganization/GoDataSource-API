@@ -2169,6 +2169,24 @@ const attachParentLocations = function (targetModel, locationModel, records, cal
   );
 };
 
+const removeFilterOptions = function (filter, options) {
+  filter = filter || {};
+  filter.where = filter.where || {};
+  for (let opt of options) {
+    delete filter.where[opt];
+  }
+  return filter;
+};
+
+const attachCustomDeleteFilterOption = function (filter) {
+  filter = filter || {};
+  filter.where = filter.where || {};
+  if (filter.deleted) {
+    filter.where.includeDeletedRecords = true;
+  }
+  return filter;
+};
+
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -2218,5 +2236,7 @@ module.exports = {
   getQuestionnaireMaxAnswersMap: getQuestionnaireMaxAnswersMap,
   convertQuestionnairePropsToDate: convertQuestionnairePropsToDate,
   getFilterCustomOption: getFilterCustomOption,
-  attachParentLocations: attachParentLocations
+  attachParentLocations: attachParentLocations,
+  removeFilterOptions: removeFilterOptions,
+  attachCustomDeleteFilterOption: attachCustomDeleteFilterOption
 };
