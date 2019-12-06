@@ -38,6 +38,14 @@ module.exports = function (Location) {
     name: '-'
   };
 
+  Location.arrayProps = {
+    synonyms: 'LNG_LOCATION_FIELD_LABEL_SYNONYMS',
+    identifiers: {
+      code: 'LNG_LOCATION_FIELD_LABEL_IDENTIFIERS_CODE',
+      description: 'LNG_LOCATION_FIELD_LABEL_IDENTIFIERS_DESC'
+    }
+  };
+
   /**
    * Get sub-locations for a list of locations. Result is an array of location IDs
    * @param parentLocations Array of location Ids for which to get the sublocations

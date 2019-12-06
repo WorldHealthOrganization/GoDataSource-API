@@ -104,6 +104,7 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.filteredCountEvents = function (filter, callback) {
     // set default filter value
     filter = filter || {};
+    filter.where = filter.where || {};
     // check if deep count should be used (this is expensive, should be avoided if possible)
     if (app.utils.remote.searchByRelationProperty.shouldUseDeepCount(filter)) {
       this.findEvents(filter, function (err, res) {
@@ -113,8 +114,7 @@ module.exports = function (Outbreak) {
         callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
       });
     } else {
-      // use native count
-      this.__count__events(filter.where, callback);
+      return app.models.event.count(filter.where);
     }
   };
 
@@ -124,8 +124,16 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.findCases', function (context, modelInstance, next) {
     // filter information based on available permissions
     Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context);
-    // Enhance events list request to support optional filtering of events that don't have any relations
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
+    // enhance events list request to support optional filtering of events that don't have any relations
+    Outbreak.helpers.attachFilterPeopleWithoutRelation(
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+      context,
+      modelInstance,
+      next
+    );
+  });
+  Outbreak.beforeRemote('prototype.findCases', (context, modelInstance, next) => {
+    findAndFilteredCountCasesBackCompat(context, modelInstance, next);
   });
 
   /**
@@ -153,6 +161,13 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.filteredCountCases', function (context, modelInstance, next) {
     Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
   });
+  Outbreak.beforeRemote('prototype.filteredCountCases', (context, modelInstance, next) => {
+    // remove custom filter options
+    context.args = context.args || {};
+    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+
+    findAndFilteredCountCasesBackCompat(context, modelInstance, next);
+  });
 
   /**
    * Attach before remote (GET outbreaks/{id}/cases/per-classification/count) hooks
@@ -172,6 +187,12 @@ module.exports = function (Outbreak) {
    * Attach before remote (GET outbreaks/{id}/events/filtered-count) hooks
    */
   Outbreak.beforeRemote('prototype.filteredCountEvents', function (context, modelInstance, next) {
+    // remove custom filter options
+    context.args = context.args || {};
+    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+    // handle custom filter options
+    context.args.filter = genericHelpers.attachCustomDeleteFilterOption(context.args.filter);
+
     Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', context, modelInstance, next);
   });
 
@@ -8932,12 +8953,6 @@ module.exports = function (Outbreak) {
     next();
   }
 
-  Outbreak.beforeRemote('prototype.findCases', function (context, modelInstance, next) {
-    findAndFilteredCountCasesBackCompat(context, modelInstance, next);
-  });
-  Outbreak.beforeRemote('prototype.filteredCountCases', function (context, modelInstance, next) {
-    findAndFilteredCountCasesBackCompat(context, modelInstance, next);
-  });
   Outbreak.beforeRemote('prototype.countCasesPerClassification', function (context, modelInstance, next) {
     findAndFilteredCountCasesBackCompat(context, modelInstance, next);
   });
@@ -9077,6 +9092,9 @@ module.exports = function (Outbreak) {
           undefined,
           true
         );
+
+        // handle custom filter options
+        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
 
         // count using query
         return app.models.case.count(filter.where);
@@ -9374,8 +9392,9 @@ module.exports = function (Outbreak) {
     findAndFilteredCountContactsBackCompat(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.filteredCountContacts', function (context, modelInstance, next) {
-    // remove custom filtered options
-    _.unset(context, 'args.filter.where.countRelations');
+    // remove custom filter options
+    context.args = context.args || {};
+    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
 
     findAndFilteredCountContactsBackCompat(context, modelInstance, next);
   });
@@ -9449,6 +9468,9 @@ module.exports = function (Outbreak) {
           true,
           true
         );
+
+        // handle custom filter options
+        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
 
         // count using query
         return app.models.contact.count(filter.where);
