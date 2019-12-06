@@ -559,7 +559,6 @@ module.exports = function (Outbreak) {
     const noRelationship = _.get(context, 'args.filter.where.noRelationships', false);
     // remove custom filter before it reaches the model
     _.unset(context, 'args.filter.where.noRelationships');
-    _.unset(context, 'args.filter.where.countRelations');
 
     if (noRelationship) {
       // Retrieve all relationships of requested type for the given outbreak
@@ -2122,5 +2121,27 @@ module.exports = function (Outbreak) {
           });
         });
     });
+  };
+
+  /**
+   * Move 'deleted' filter option into 'where' container for handling some db operations that should work on deleted items
+   * @param filter
+   */
+  Outbreak.helpers.handleDeletedFilterOption = function (filter) {
+    filter = filter || {};
+    filter.where = filter.where || {};
+    if (filter.deleted) {
+      filter.where = {
+        and: [
+          filter.where,
+          {
+            deleted: {
+              neq: true
+            }
+          }
+        ]
+      };
+    }
+    return filter;
   };
 };

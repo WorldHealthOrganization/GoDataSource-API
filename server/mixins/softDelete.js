@@ -374,7 +374,6 @@ module.exports = function (Model) {
     return _findOne.call(Model, filter, ...args);
   };
 
-
   const _count = Model.count;
   /**
    * Overwrite count to count non-(soft)deleted records
@@ -383,9 +382,13 @@ module.exports = function (Model) {
    * @returns {*}
    */
   Model.count = function countDeleted(where = {}, ...args) {
-    // do we need to filter by deleted ?
     const whereStringified = where ? JSON.stringify(where) : '';
-    const filterDeleted = whereStringified.indexOf('"deleted":') > -1;
+    let filterDeleted = whereStringified.indexOf('"deleted":') > -1;
+
+    if (where.includeDeletedRecords) {
+      delete where.includeDeletedRecords;
+      filterDeleted = true;
+    }
 
     // filter
     const whereNotDeleted = filterDeleted ? where : {and: [where, filterNonDeleted]};
