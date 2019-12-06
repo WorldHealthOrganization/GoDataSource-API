@@ -338,6 +338,53 @@ module.exports = function (Role) {
       ]
     },
 
+    // Cluster
+    {
+      groupAllId: 'cluster_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CLUSTER',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CLUSTER_DESCRIPTION',
+      permissions: [
+        {
+          id: 'cluster_view',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CLUSTER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CLUSTER_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'cluster_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLUSTER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLUSTER_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'cluster_create',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CLUSTER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CLUSTER_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'cluster_modify',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CLUSTER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CLUSTER_DESCRIPTION',
+          requires: [
+            'cluster_view'
+          ]
+        },
+        {
+          id: 'cluster_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CLUSTER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CLUSTER_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'cluster_list_people',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLUSTER_PEOPLE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLUSTER_PEOPLE_DESCRIPTION',
+          requires: []
+        }
+      ]
+    },
+
     // Event
     {
       groupAllId: 'event_all',

@@ -693,61 +693,49 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_outbreak",
+      "principalId": "cluster_list",
       "permission": "ALLOW",
       "property": "__get__clusters"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_outbreak",
+      "principalId": "cluster_view",
       "permission": "ALLOW",
       "property": "__findById__clusters"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_outbreak",
+      "principalId": "cluster_create",
       "permission": "ALLOW",
       "property": "__create__clusters"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_outbreak",
+      "principalId": "cluster_modify",
       "permission": "ALLOW",
       "property": "__updateById__clusters"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_outbreak",
+      "principalId": "cluster_delete",
       "permission": "ALLOW",
       "property": "__destroyById__clusters"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_outbreak",
+      "principalId": "cluster_list",
       "permission": "ALLOW",
       "property": "__count__clusters"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "cluster_list_people",
       "permission": "ALLOW",
       "property": "__get__clusters__relationships"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "__get__clusters__relationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__count__clusters__relationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "cluster_list_people",
       "permission": "ALLOW",
       "property": "__count__clusters__relationships"
     },
@@ -1155,25 +1143,13 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "cluster_list_people",
       "permission": "ALLOW",
       "property": "findPeopleInCluster"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "findPeopleInCluster"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countPeopleInCluster"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "cluster_list_people",
       "permission": "ALLOW",
       "property": "countPeopleInCluster"
     },
