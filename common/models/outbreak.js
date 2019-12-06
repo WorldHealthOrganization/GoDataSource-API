@@ -2122,26 +2122,4 @@ module.exports = function (Outbreak) {
         });
     });
   };
-
-  /**
-   * Move 'deleted' filter option into 'where' container for handling some db operations that should work on deleted items
-   * @param filter
-   */
-  Outbreak.helpers.handleDeletedFilterOption = function (filter) {
-    filter = filter || {};
-    filter.where = filter.where || {};
-    if (filter.deleted) {
-      filter.where = {
-        and: [
-          filter.where,
-          {
-            deleted: {
-              neq: true
-            }
-          }
-        ]
-      };
-    }
-    return filter;
-  };
 };
