@@ -192,22 +192,35 @@ module.exports = function (SystemSettings) {
     return db.connect(() => {
       const collection = db.collection('systemSettings');
       return collection.findOne()
-        .then(instance => {
+        .then((instance) => {
           if (instance) {
             // get through system settings client apps
             // make sure each client has an id
+            let clientApplicationsChanged = false;
             instance.clientApplications = (instance.clientApplications || []).map(app => {
-              app.id = app.id || uuid.v4();
+              const id = app.id || uuid.v4();
+              if (app.id !== id) {
+                app.id = id;
+                clientApplicationsChanged = true;
+              }
               return app;
             });
 
-            return collection.updateOne({_id: instance.id}, {
-              $set: {
-                clientApplications: instance.clientApplications
-              }
-            }).then(next).catch(next);
+            if (!clientApplicationsChanged) {
+              next();
+            } else {
+              return collection
+                .updateOne({_id: instance.id}, {
+                  $set: {
+                    clientApplications: instance.clientApplications
+                  }
+                })
+                .then(() => { next(); })
+                .catch(next);
+            }
+          } else {
+            next();
           }
-          return next();
         });
     });
   };
