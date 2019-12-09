@@ -201,9 +201,11 @@ module.exports = function (SystemSettings) {
               return app;
             });
 
-            return collection.updateOne({ _id: instance.id }, instance)
-              .then(next)
-              .catch(next);
+            return collection.updateOne({_id: instance.id}, {
+              $set: {
+                clientApplications: instance.clientApplications
+              }
+            }).then(next).catch(next);
           }
           return next();
         });
