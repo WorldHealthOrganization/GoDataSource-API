@@ -125,13 +125,42 @@ module.exports = function (Role) {
           id: 'location_modify',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_LOCATION',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_LOCATION_DESCRIPTION',
-          requires: []
+          requires: [
+            'location_view'
+          ]
         },
         {
           id: 'location_delete',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_LOCATION',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_LOCATION_DESCRIPTION',
           requires: []
+        },
+        {
+          id: 'location_export',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_LOCATION',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_LOCATION_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'location_import',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LOCATION',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LOCATION_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'location_usage',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SEE_LOCATION_USAGE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SEE_LOCATION_USAGE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'location_propagate_geo_to_persons',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_PROPAGATE_LOCATION_GEO_TO_PERSONS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_PROPAGATE_LOCATION_GEO_TO_PERSONS_DESCRIPTION',
+          requires: [
+            'location_modify',
+            'location_usage'
+          ]
         }
       ]
     },
@@ -146,9 +175,7 @@ module.exports = function (Role) {
           id: 'outbreak_view',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_OUTBREAK',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_OUTBREAK_DESCRIPTION',
-          requires: [
-            'location_list'
-          ]
+          requires: []
         },
         {
           id: 'outbreak_list',
@@ -162,8 +189,7 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_DESCRIPTION',
           requires: [
             // list needed to check for name duplicates
-            'outbreak_list',
-            'location_list'
+            'outbreak_list'
           ]
         },
         {
@@ -173,8 +199,7 @@ module.exports = function (Role) {
           requires: [
             // list needed to check for name duplicates
             'outbreak_list',
-            'outbreak_view',
-            'location_list'
+            'outbreak_view'
           ]
         },
         {
@@ -396,8 +421,7 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_EVENT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_VIEW_DESCRIPTION',
           requires: [
-            'outbreak_view',
-            'location_list'
+            'outbreak_view'
           ]
         },
         {
@@ -405,8 +429,7 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_DESCRIPTION',
           requires: [
-            'outbreak_view',
-            'location_list'
+            'outbreak_view'
           ]
         },
         {
@@ -414,8 +437,7 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_EVENT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_EVENT_DESCRIPTION',
           requires: [
-            'outbreak_view',
-            'location_list'
+            'outbreak_view'
           ]
         },
         {
@@ -424,8 +446,7 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_EVENT_DESCRIPTION',
           requires: [
             'outbreak_view',
-            'event_view',
-            'location_list'
+            'event_view'
           ]
         },
         {
@@ -628,8 +649,7 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_DESCRIPTION',
           requires: [
-            'outbreak_view',
-            'location_list'
+            'outbreak_view'
           ]
         },
         {
@@ -637,8 +657,7 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_DESCRIPTION',
           requires: [
-            'outbreak_view',
-            'location_list'
+            'outbreak_view'
           ]
         },
         {
@@ -646,8 +665,7 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_DESCRIPTION',
           requires: [
-            'outbreak_view',
-            'location_list'
+            'outbreak_view'
           ]
         },
         {
@@ -656,8 +674,7 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_DESCRIPTION',
           requires: [
             'outbreak_view',
-            'contact_view',
-            'location_list'
+            'contact_view'
           ]
         },
         {
@@ -682,8 +699,7 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_CREATE_CONTACT_DESCRIPTION',
           requires: [
             'outbreak_view',
-            'contact_list',
-            'location_list'
+            'contact_list'
           ]
         },
 
