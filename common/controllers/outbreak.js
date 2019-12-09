@@ -105,6 +105,8 @@ module.exports = function (Outbreak) {
     // set default filter value
     filter = filter || {};
     filter.where = filter.where || {};
+    filter.where.outbreakId = this.id;
+
     // check if deep count should be used (this is expensive, should be avoided if possible)
     if (app.utils.remote.searchByRelationProperty.shouldUseDeepCount(filter)) {
       this.findEvents(filter, function (err, res) {
