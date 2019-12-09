@@ -180,6 +180,10 @@ module.exports = function (Outbreak) {
    * Attach before remote (GET outbreaks/{id}/cases/export) hooks
    */
   Outbreak.beforeRemote('prototype.exportFilteredCases', function (context, modelInstance, next) {
+    // remove custom filter options
+    context.args = context.args || {};
+    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+
     Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
   });
 
@@ -9402,10 +9406,24 @@ module.exports = function (Outbreak) {
     findAndFilteredCountContactsBackCompat(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.exportFilteredContacts', function (context, modelInstance, next) {
+    // remove custom filter options
+    context.args = context.args || {};
+    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+
     findAndFilteredCountContactsBackCompat(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.exportDailyContactFollowUpList', function (context, modelInstance, next) {
     findAndFilteredCountContactsBackCompat(context, modelInstance, next);
+  });
+
+  Outbreak.beforeRemote('prototype.exportFilteredRelationships', function (context, modelInstance, next) {
+    // remove custom filter options
+    context.args = context.args || {};
+    context.args.filter = context.args.filter || {};
+    context.args.filter.where = context.args.filter.where || {};
+    context.args.filter.where.person = context.args.filter.where.person || {};
+    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter.where.person, ['countRelations']);
+    return next();
   });
 
   /**
