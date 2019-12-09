@@ -5,6 +5,7 @@ const path = require('path');
 const _ = require('lodash');
 const fs = require('fs');
 const config = require('../../server/config');
+const uuid = require('uuid');
 
 module.exports = function (SystemSettings) {
 
@@ -184,5 +185,30 @@ module.exports = function (SystemSettings) {
       });
     }
     return arcGisServers;
+  };
+
+  SystemSettings.migrate = function (opts, next) {
+    const db = app.dataSources.mongoDb.connector;
+    return db.connect(() => {
+      const collection = db.collection('systemSettings');
+      return collection.findOne()
+        .then(instance => {
+          if (instance) {
+            // get through system settings client apps
+            // make sure each client has an id
+            instance.clientApplications = (instance.clientApplications || []).map(app => {
+              app.id = app.id || uuid.v4();
+              return app;
+            });
+
+            return collection.updateOne({_id: instance.id}, {
+              $set: {
+                clientApplications: instance.clientApplications
+              }
+            }).then(next).catch(next);
+          }
+          return next();
+        });
+    });
   };
 };
