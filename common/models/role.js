@@ -63,7 +63,9 @@ module.exports = function (Role) {
           id: 'user_modify',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_DESCRIPTION',
-          requires: []
+          requires: [
+            'user_view'
+          ]
         },
         {
           id: 'user_delete',
@@ -93,6 +95,67 @@ module.exports = function (Role) {
           id: 'write_user_account',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_USER_ACCOUNT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_USER_ACCOUNT_DESCRIPTION'
+        }
+      ]
+    },
+
+    // User Role
+    {
+      groupAllId: 'user_role_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_USER_ROLE',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_USER_ROLE_DESCRIPTION',
+      permissions: [
+        {
+          id: 'user_role_view',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_USER_ROLE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_USER_ROLE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'user_role_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_ROLE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_ROLE_DESCRIPTION',
+          requires: [
+            'user_list'
+          ]
+        },
+        {
+          id: 'user_role_create',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_USER_ROLE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_USER_ROLE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'user_role_modify',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_ROLE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_ROLE_DESCRIPTION',
+          requires: [
+            'user_role_view',
+            'user_list'
+          ]
+        },
+        {
+          id: 'user_role_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER_ROLE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER_ROLE_DESCRIPTION',
+          requires: []
+        },
+
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // - must delete TOKENS tooo
+        {
+          id: 'read_role',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_ROLE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_ROLE_DESCRIPTION'
+        },
+        {
+          id: 'write_role',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_ROLE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_ROLE_DESCRIPTION'
         }
       ]
     },
@@ -187,18 +250,13 @@ module.exports = function (Role) {
           id: 'outbreak_create',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_DESCRIPTION',
-          requires: [
-            // list needed to check for name duplicates
-            'outbreak_list'
-          ]
+          requires: []
         },
         {
           id: 'outbreak_modify',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_DESCRIPTION',
           requires: [
-            // list needed to check for name duplicates
-            'outbreak_list',
             'outbreak_view'
           ]
         },
@@ -261,8 +319,7 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_CLONE_DESCRIPTION',
           requires: [
             'outbreak_view',
-            'outbreak_create',
-            'outbreak_list'
+            'outbreak_create'
           ]
         },
 
@@ -356,8 +413,7 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_OUTBREAK_TEMPLATE_GENERATE_OUTBREAK_DESCRIPTION',
           requires: [
             'outbreak_template_view',
-            'outbreak_create',
-            'outbreak_list'
+            'outbreak_create'
           ]
         }
       ]
@@ -804,6 +860,64 @@ module.exports = function (Role) {
       ]
     },
 
+    // Follow-Up
+    {
+      groupAllId: 'follow_up_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_FOLLOW_UP',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_FOLLOW_UP_DESCRIPTION',
+      permissions: [
+        {
+          id: 'follow_up_view',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_FOLLOW_UP_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'follow_up_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_FOLLOW_UP_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'follow_up_create',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_FOLLOW_UP_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'follow_up_modify',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_FOLLOW_UP_DESCRIPTION',
+          requires: [
+            'follow_up_view'
+          ]
+        },
+        {
+          id: 'follow_up_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_FOLLOW_UP_DESCRIPTION',
+          requires: []
+        },
+
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // - must delete TOKENS tooo
+        {
+          id: 'read_followup',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_FOLLOW_UP_DESCRIPTION'
+        },
+        {
+          id: 'write_followup',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_FOLLOW_UP_DESCRIPTION'
+        }
+      ]
+    },
+
 
 
     // TO BE CHANGED
@@ -826,16 +940,6 @@ module.exports = function (Role) {
           id: 'write_reference_data',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_REFERENCE_DATA',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_REFERENCE_DATA_DESCRIPTION'
-        },
-        {
-          id: 'read_role',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_ROLE',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_ROLE_DESCRIPTION'
-        },
-        {
-          id: 'write_role',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_ROLE',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_ROLE_DESCRIPTION'
         },
         {
           id: 'read_team',
@@ -861,16 +965,6 @@ module.exports = function (Role) {
           id: 'write_case',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_CASE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_CASE_DESCRIPTION'
-        },
-        {
-          id: 'read_followup',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_FOLLOW_UP',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_FOLLOW_UP_DESCRIPTION'
-        },
-        {
-          id: 'write_followup',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_FOLLOW_UP',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_FOLLOW_UP_DESCRIPTION'
         },
         {
           id: 'write_help',

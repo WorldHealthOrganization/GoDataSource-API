@@ -54,45 +54,45 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_role",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "getRoles"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_role",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
-      "property": "create"
+      "property": "countRoles"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_role",
-      "permission": "ALLOW",
-      "property": "patchAttributes"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_role",
-      "permission": "ALLOW",
-      "property": "findById"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_role",
-      "permission": "ALLOW",
-      "property": "deleteById"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_role",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "getAvailablePermissions"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_role",
+      "principalId": "user_role_create",
       "permission": "ALLOW",
-      "property": "countRoles"
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_role_modify",
+      "permission": "ALLOW",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_role_view",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_role_delete",
+      "permission": "ALLOW",
+      "property": "deleteById"
     }
   ],
   "methods": {
