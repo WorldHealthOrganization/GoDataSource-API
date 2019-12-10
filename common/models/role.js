@@ -35,6 +35,59 @@ module.exports = function (Role) {
   };
 
   Role.availablePermissions = [
+    // Language
+    {
+      groupAllId: 'language_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_LANGUAGE',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_LANGUAGE_DESCRIPTION',
+      permissions: [
+        {
+          id: 'language_view',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_LANGUAGE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_LANGUAGE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'language_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_LANGUAGE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_LANGUAGE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'language_create',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_LANGUAGE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_LANGUAGE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'language_modify',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_LANGUAGE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_LANGUAGE_DESCRIPTION',
+          requires: [
+            'language_view'
+          ]
+        },
+        {
+          id: 'language_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_LANGUAGE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_LANGUAGE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'language_export_tokens',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_LANGUAGE_TOKENS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_LANGUAGE_TOKENS_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'language_import_tokens',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LANGUAGE_TOKENS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LANGUAGE_TOKENS_DESCRIPTION',
+          requires: []
+        }
+      ]
+    },
+
     // User
     {
       groupAllId: 'user_all',
@@ -169,7 +222,7 @@ module.exports = function (Role) {
         {
           id: 'location_view',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_LOCATION',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LOCATION_USER_DESCRIPTION',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_LOCATION_DESCRIPTION',
           requires: []
         },
         {
