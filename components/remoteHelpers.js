@@ -134,7 +134,16 @@ function exportFilteredModelsList(
         exportType = exportType.toLowerCase();
       }
 
+      const ignoreArrayFieldLabels = Model.hasOwnProperty('arrayProps');
+      const isJSONXMLExport = ['json', 'xml'].includes(exportType);
       const contextUser = app.utils.remote.getUserFromOptions(options);
+
+      // calculate maximum number of elements for array props
+      // do this only if export type is flat
+      let arrayPropsLengths = null;
+      if (!isJSONXMLExport && ignoreArrayFieldLabels) {
+        arrayPropsLengths = helpers.getMaximumLengthForArrays(results, Object.keys(Model.arrayProps));
+      }
 
       // load user language dictionary
       app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
@@ -160,9 +169,6 @@ function exportFilteredModelsList(
             // headers come from model
             const fieldLabelsMap = Model.helpers && Model.helpers.sanitizeFieldLabelsMapForExport ? Model.helpers.sanitizeFieldLabelsMapForExport() : Model.fieldLabelsMap;
 
-            const isJSONXMLExport = ['json', 'xml'].includes(exportType);
-            const ignoreArrayFieldLabels = Model.hasOwnProperty('arrayProps');
-
             // some models may have a specific order for headers
             let originalFieldsList = Object.keys(fieldLabelsMap);
             let fieldsList = [];
@@ -186,7 +192,7 @@ function exportFilteredModelsList(
                 const map = Model.arrayProps[propertyName];
 
                 // create headers
-                let maxElements = 3;
+                let maxElements = arrayPropsLengths[propertyName];
                 // pdf has a limited width, include only one element
                 if (exportType === 'pdf') {
                   maxElements = 1;
@@ -230,7 +236,6 @@ function exportFilteredModelsList(
                   const parentKey = propertyName.substr(0, parentIndex);
                   parentToken = fieldLabelsMap[parentKey];
                 }
-
 
                 // create headers
                 let maxElements = 3;

@@ -2187,6 +2187,33 @@ const attachCustomDeleteFilterOption = function (filter) {
   return filter;
 };
 
+const getMaximumLengthForArrays = function (items, props) {
+  const propsLengths = {};
+  props.forEach(prop => {
+    propsLengths[prop] = [];
+  });
+
+  items.forEach(item => {
+    props.forEach(prop => {
+      if (Array.isArray(item[prop])) {
+        propsLengths[prop].push(item[prop].length);
+      }
+    });
+  });
+
+  for (let p in propsLengths) {
+    if (propsLengths.hasOwnProperty(p)) {
+      let max = 0;
+      if (propsLengths[p].length) {
+        max = Math.max(...propsLengths[p]);
+      }
+      propsLengths[p] = max;
+    }
+  }
+
+  return propsLengths;
+};
+
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -2238,5 +2265,6 @@ module.exports = {
   getFilterCustomOption: getFilterCustomOption,
   attachParentLocations: attachParentLocations,
   removeFilterOptions: removeFilterOptions,
-  attachCustomDeleteFilterOption: attachCustomDeleteFilterOption
+  attachCustomDeleteFilterOption: attachCustomDeleteFilterOption,
+  getMaximumLengthForArrays: getMaximumLengthForArrays
 };
