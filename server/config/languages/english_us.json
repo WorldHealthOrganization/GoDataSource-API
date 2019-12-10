@@ -66,6 +66,8 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER_DESCRIPTION": "This permission allows removing user information",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_OWN_ACCOUNT": "User - modify own account",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_OWN_ACCOUNT_DESCRIPTION": "This permission allows user to modify his own account ( data, security questions, change password )",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_FOR_FILTERS": "User - list for filters",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_FOR_FILTERS_DESCRIPTION": "This permission allows listing users in dropdowns used to filter other list pages ( e.g. Created by, Modified By columns... ). Used also by some create and modify pages.",
 
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_USER_ROLE": "User Roles",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_USER_ROLE_DESCRIPTION": "User role permissions",

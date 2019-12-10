@@ -131,15 +131,27 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "user_view",
-      "permission": "ALLOW",
-      "property": "findById"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "user_list",
       "permission": "ALLOW",
       "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_list_for_filters",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_list_for_filters",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_view",
+      "permission": "ALLOW",
+      "property": "findById"
     },
     {
       "principalType": "ROLE",
