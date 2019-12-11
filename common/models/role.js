@@ -35,6 +35,29 @@ module.exports = function (Role) {
   };
 
   Role.availablePermissions = [
+    // System settings
+    {
+      groupAllId: 'system_settings_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_SYSTEM_SETTINGS',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_SYSTEM_SETTINGS_DESCRIPTION',
+      permissions: [
+        {
+          id: 'system_settings_view',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_SYSTEM_SETTINGS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_SYSTEM_SETTINGS_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'system_settings_modify',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_DESCRIPTION',
+          requires: [
+            'system_settings_view'
+          ]
+        }
+      ]
+    },
+
     // Language
     {
       groupAllId: 'language_all',
@@ -218,6 +241,57 @@ module.exports = function (Role) {
           id: 'write_role',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_ROLE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_ROLE_DESCRIPTION'
+        }
+      ]
+    },
+
+    // Backup
+    {
+      groupAllId: 'backup_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_BACKUP',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_BACKUP_DESCRIPTION',
+      permissions: [
+        {
+          id: 'backup_view',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_BACKUP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_BACKUP_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'backup_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_BACKUP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_BACKUP_DESCRIPTION',
+          requires: [
+            'user_list_for_filters',
+            'system_settings_view'
+          ]
+        },
+        {
+          id: 'backup_create',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BACKUP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BACKUP_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'backup_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_BACKUP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_BACKUP_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'backup_automatic_settings',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BACKUP_AUTOMATIC_SETTINGS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BACKUP_AUTOMATIC_SETTINGS_DESCRIPTION',
+          requires: [
+            'system_settings_view',
+            'system_settings_modify'
+          ]
+        },
+        {
+          id: 'backup_restore',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_BACKUP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_BACKUP_DESCRIPTION',
+          requires: []
         }
       ]
     },
