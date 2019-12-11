@@ -296,6 +296,62 @@ module.exports = function (Role) {
       ]
     },
 
+    // Sync log
+    {
+      groupAllId: 'sync_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_SYNC',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_SYNC_DESCRIPTION',
+      permissions: [
+        {
+          id: 'sync_log_view',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_SYNC_LOG',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_SYNC_LOG_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'sync_log_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_SYNC_LOG',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_SYNC_LOG_DESCRIPTION',
+          requires: [
+            'system_settings_view'
+          ]
+        },
+        {
+          id: 'sync_log_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYNC_LOG',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYNC_LOG_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'sync_log_bulk_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_SYNC_LOG',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_SYNC_LOG_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'sync_export_package',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_SYNC_PACKAGE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_SYNC_PACKAGE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'sync_import_package',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_SYNC_PACKAGE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_SYNC_PACKAGE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'sync_settings',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SYNC_SETTINGS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SYNC_SETTINGS_DESCRIPTION',
+          requires: [
+            'system_settings_view',
+            'system_settings_modify'
+          ]
+        }
+      ]
+    },
+
     // Location
     {
       groupAllId: 'location_all',
