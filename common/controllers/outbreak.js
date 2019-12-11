@@ -9420,11 +9420,13 @@ module.exports = function (Outbreak) {
 
   Outbreak.beforeRemote('prototype.exportFilteredRelationships', function (context, modelInstance, next) {
     // remove custom filter options
+    // technical debt from front end
     context.args = context.args || {};
     context.args.filter = context.args.filter || {};
     context.args.filter.where = context.args.filter.where || {};
     context.args.filter.where.person = context.args.filter.where.person || {};
-    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter.where.person, ['countRelations']);
+    delete context.args.filter.where.person.countRelations;
+
     return next();
   });
 
