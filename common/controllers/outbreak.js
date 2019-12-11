@@ -8895,6 +8895,9 @@ module.exports = function (Outbreak) {
     app.models.labResult
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
+        // handle custom filter options
+        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
+
         // count using query
         return app.models.labResult.count(filter.where);
       })
