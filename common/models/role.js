@@ -296,7 +296,7 @@ module.exports = function (Role) {
       ]
     },
 
-    // Sync log
+    // Sync ( and sync log )
     {
       groupAllId: 'sync_all',
       groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_SYNC',
@@ -344,6 +344,74 @@ module.exports = function (Role) {
           id: 'sync_settings',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SYNC_SETTINGS',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SYNC_SETTINGS_DESCRIPTION',
+          requires: [
+            'system_settings_view',
+            'system_settings_modify'
+          ]
+        },
+        {
+          id: 'sync_synchronize',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SYNC_SYNCHRONIZE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SYNC_SYNCHRONIZE_DESCRIPTION',
+          requires: []
+        }
+      ]
+    },
+
+    // Upstream Server
+    {
+      groupAllId: 'upstream_server_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_UPSTREAM_SERVER',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_UPSTREAM_SERVER_DESCRIPTION',
+      permissions: [
+        {
+          id: 'upstream_server_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_UPSTREAM_SERVER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_UPSTREAM_SERVER_DESCRIPTION',
+          requires: [
+            'system_settings_view'
+          ]
+        },
+        {
+          id: 'upstream_server_create',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_UPSTREAM_SERVER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_UPSTREAM_SERVER_DESCRIPTION',
+          requires: [
+            'system_settings_view',
+            'system_settings_modify'
+          ]
+        },
+        {
+          id: 'upstream_server_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_UPSTREAM_SERVER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_UPSTREAM_SERVER_DESCRIPTION',
+          requires: [
+            'system_settings_view',
+            'system_settings_modify'
+          ]
+        },
+        {
+          id: 'upstream_server_sync',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SYNC_UPSTREAM_SERVER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SYNC_UPSTREAM_SERVER_DESCRIPTION',
+          requires: [
+            'sync_log_view',
+            'sync_synchronize'
+          ]
+        },
+        {
+          id: 'upstream_server_enable_sync',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_ENABLE_UPSTREAM_SERVER_SYNC',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_ENABLE_UPSTREAM_SERVER_SYNC_DESCRIPTION',
+          requires: [
+            'system_settings_view',
+            'system_settings_modify'
+          ]
+        },
+        {
+          id: 'upstream_server_disable_sync',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DISABLE_UPSTREAM_SERVER_SYNC',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DISABLE_UPSTREAM_SERVER_SYNC_DESCRIPTION',
           requires: [
             'system_settings_view',
             'system_settings_modify'
