@@ -68,69 +68,57 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_sys_config",
+      "principalId": "device_list",
       "permissions": "ALLOW",
       "property": "find"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_sys_config",
+      "principalId": "device_list",
+      "permissions": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "device_modify",
       "permissions": "ALLOW",
       "property": "patchAttributes"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_sys_config",
+      "principalId": "device_view",
       "permissions": "ALLOW",
       "property": "findById"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_sys_config",
+      "principalId": "device_delete",
       "permissions": "ALLOW",
-      "property": "findByPhysicalDeviceId"
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "device_list_history",
+      "permissions": "ALLOW",
+      "property": "__get__history"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "device_list_history",
+      "permissions": "ALLOW",
+      "property": "__count__history"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "device_wipe",
+      "permissions": "ALLOW",
+      "property": "wipe"
     },
     {
       "principalType": "ROLE",
       "principalId": "$client_application",
       "permissions": "ALLOW",
       "property": "findByPhysicalDeviceId"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_sys_config",
-      "permissions": "ALLOW",
-      "property": "count"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_sys_config",
-      "permissions": "ALLOW",
-      "property": "deleteById"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_sys_config",
-      "permissions": "ALLOW",
-      "property": "__get__history"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_sys_config",
-      "permissions": "ALLOW",
-      "property": "__findById__history"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_sys_config",
-      "permissions": "ALLOW",
-      "property": "__count__history"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_sys_config",
-      "permissions": "ALLOW",
-      "property": "wipe"
     },
     {
       "principalType": "ROLE",

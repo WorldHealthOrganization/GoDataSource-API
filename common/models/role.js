@@ -420,6 +420,53 @@ module.exports = function (Role) {
       ]
     },
 
+    // Device
+    {
+      groupAllId: 'device_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_DEVICE',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_DEVICE_DESCRIPTION',
+      permissions: [
+        {
+          id: 'device_view',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DEVICE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DEVICE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'device_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_DEVICE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_DEVICE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'device_modify',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_DEVICE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_DEVICE_DESCRIPTION',
+          requires: [
+            'device_view'
+          ]
+        },
+        {
+          id: 'device_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_DEVICE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_DEVICE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'device_list_history',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_DEVICE_HISTORY',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_DEVICE_HISTORY_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'device_wipe',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WIPE_DEVICE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WIPE_DEVICE_DESCRIPTION',
+          requires: []
+        }
+      ]
+    },
+
     // Outbreak
     {
       groupAllId: 'outbreak_all',

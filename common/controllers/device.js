@@ -11,8 +11,9 @@ module.exports = function (Device) {
     // device history is read-only
     'prototype.__create__history',
     'prototype.__delete__history',
+    'prototype.__findById__history',
     'prototype.__updateById__history',
-    'prototype.__destroyById__history',
+    'prototype.__destroyById__history'
   ]);
 
   /**
