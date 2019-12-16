@@ -420,6 +420,65 @@ module.exports = function (Role) {
       ]
     },
 
+    // Client application
+    {
+      groupAllId: 'client_application_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CLIENT_APPLICATION',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CLIENT_APPLICATION_DESCRIPTION',
+      permissions: [
+        {
+          id: 'client_application_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLIENT_APPLICATION',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLIENT_APPLICATION_DESCRIPTION',
+          requires: [
+            'system_settings_view'
+          ]
+        },
+        {
+          id: 'client_application_create',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CLIENT_APPLICATION',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CLIENT_APPLICATION_DESCRIPTION',
+          requires: [
+            'system_settings_view',
+            'system_settings_modify'
+          ]
+        },
+        {
+          id: 'client_application_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CLIENT_APPLICATION',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CLIENT_APPLICATION_DESCRIPTION',
+          requires: [
+            'system_settings_view',
+            'system_settings_modify'
+          ]
+        },
+        {
+          id: 'client_application_download_conf_file',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CLIENT_APPLICATION_DOWNLOAD_CONF_FILE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CLIENT_APPLICATION_DOWNLOAD_CONF_FILE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'client_application_enable',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_ENABLE_CLIENT_APPLICATION',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_ENABLE_CLIENT_APPLICATION_DESCRIPTION',
+          requires: [
+            'system_settings_view',
+            'system_settings_modify'
+          ]
+        },
+        {
+          id: 'client_application_disable',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DISABLE_CLIENT_APPLICATION',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DISABLE_CLIENT_APPLICATION_DESCRIPTION',
+          requires: [
+            'system_settings_view',
+            'system_settings_modify'
+          ]
+        }
+      ]
+    },
+
     // Location
     {
       groupAllId: 'location_all',
