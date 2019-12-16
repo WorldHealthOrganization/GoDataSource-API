@@ -807,6 +807,81 @@ module.exports = function (Role) {
       ]
     },
 
+    // Team
+    {
+      groupAllId: 'team_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_TEAM',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_TEAM_DESCRIPTION',
+      permissions: [
+        {
+          id: 'team_view',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_TEAM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_TEAM_DESCRIPTION',
+          requires: [
+            'user_list_for_filters'
+          ]
+        },
+        {
+          id: 'team_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_TEAM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_TEAM_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'team_create',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_TEAM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_TEAM_DESCRIPTION',
+          requires: [
+            'user_list_for_filters'
+          ]
+        },
+        {
+          id: 'team_modify',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_TEAM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_TEAM_DESCRIPTION',
+          requires: [
+            'team_view',
+            'user_list_for_filters'
+          ]
+        },
+        {
+          id: 'team_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_TEAM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_TEAM_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'follow_up_list'
+          ]
+        },
+        {
+          id: 'team_list_workload',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_TEAM_WORKLOAD',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_TEAM_WORKLOAD_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'team_list'
+          ]
+        },
+
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // - must delete TOKENS tooo
+        {
+          id: 'read_team',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_TEAM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_TEAM_DESCRIPTION'
+        },
+        {
+          id: 'write_team',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_TEAM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_TEAM_DESCRIPTION'
+        }
+      ]
+    },
+
     // Cluster
     {
       groupAllId: 'cluster_all',
@@ -1349,16 +1424,6 @@ module.exports = function (Role) {
           id: 'write_reference_data',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_REFERENCE_DATA',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_REFERENCE_DATA_DESCRIPTION'
-        },
-        {
-          id: 'read_team',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_TEAM',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_TEAM_DESCRIPTION'
-        },
-        {
-          id: 'write_team',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_TEAM',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_TEAM_DESCRIPTION'
         },
         {
           id: 'read_report',
