@@ -58,6 +58,23 @@ module.exports = function (Role) {
       ]
     },
 
+    // Audit Logs
+    {
+      groupAllId: 'audit_log_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_AUDIT_LOG',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_AUDIT_LOG_DESCRIPTION',
+      permissions: [
+        {
+          id: 'audit_log_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_AUDIT_LOG',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_AUDIT_LOG_DESCRIPTION',
+          requires: [
+            'user_list_for_filters'
+          ]
+        }
+      ]
+    },
+
     // Language
     {
       groupAllId: 'language_all',

@@ -72,19 +72,13 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_sys_config",
+      "principalId": "audit_log_list",
       "permission": "ALLOW",
       "property": "find"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_sys_config",
-      "permission": "ALLOW",
-      "property": "__get__user"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_sys_config",
+      "principalId": "audit_log_list",
       "permission": "ALLOW",
       "property": "count"
     }
