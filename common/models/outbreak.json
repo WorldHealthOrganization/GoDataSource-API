@@ -633,36 +633,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "getReferenceData"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "__create__referenceData"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "__findById__referenceData"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "__updateById__referenceData"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "__destroyById__referenceData"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "write_case",
       "permission": "ALLOW",
       "property": "generateCaseVisualId"
@@ -1047,12 +1017,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "restoreReferenceData"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "importableFileUpload"
@@ -1128,18 +1092,6 @@
       "principalId": "read_followup",
       "permission": "ALLOW",
       "property": "exportFilteredContactFollowUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "exportFilteredReferenceData"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "importImportableReferenceDataFileUsingMap"
     },
     {
       "principalType": "ROLE",
@@ -2555,31 +2507,6 @@
       "http": {
         "verb": "post",
         "path": "/events/:nk/restore"
-      }
-    },
-    "prototype.getReferenceData": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "referenceData",
-          "type": [
-            "referenceData"
-          ],
-          "description": "System and outbreak specific reference data",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Queries system and outbreak specific reference data list.",
-      "http": {
-        "verb": "get",
-        "path": "/reference-data"
       }
     },
     "prototype.generateCaseVisualId": {
@@ -4470,36 +4397,6 @@
         "path": "/people/inconsistencies-in-key-dates"
       }
     },
-    "prototype.restoreReferenceData": {
-      "accepts": [
-        {
-          "arg": "nk",
-          "type": "string",
-          "description": "Foreign key for reference data"
-        },
-        {
-          "arg": "options",
-          "type": "object",
-          "http": "optionsFromRequest"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "referenceData",
-          "type": [
-            "referenceData"
-          ],
-          "description": "Reference Data",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Restores a deleted Reference Data.",
-      "http": {
-        "verb": "post",
-        "path": "/reference-data/:nk/restore"
-      }
-    },
     "prototype.importableFileUpload": {
       "accepts": [
         {
@@ -5031,94 +4928,6 @@
       "http": {
         "verb": "get",
         "path": "/contacts/follow-ups/export"
-      }
-    },
-    "prototype.exportFilteredReferenceData": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
-        },
-        {
-          "arg": "type",
-          "type": "string",
-          "enum": [
-            "json",
-            "xml",
-            "csv",
-            "xls",
-            "xlsx",
-            "ods",
-            "pdf"
-          ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
-        },
-        {
-          "arg": "options",
-          "type": "object",
-          "http": "optionsFromRequest"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "body",
-          "type": "file",
-          "root": true,
-          "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        }
-      ],
-      "description": "Export filtered list of reference data",
-      "http": {
-        "verb": "get",
-        "path": "/reference-data/export"
-      }
-    },
-    "prototype.importImportableReferenceDataFileUsingMap": {
-      "accepts": [
-        {
-          "arg": "body",
-          "type": "object",
-          "model": "importableFileWithFieldAndReferenceDataMap",
-          "http": {
-            "source": "body"
-          },
-          "root": true
-        },
-        {
-          "arg": "options",
-          "type": "object",
-          "http": "optionsFromRequest"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "referenceData",
-          "type": [
-            "referenceData"
-          ],
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Import a list of reference data from a file that was previously uploaded as an importable file",
-      "http": {
-        "verb": "post",
-        "path": "/reference-data/import-importable-file-using-map"
       }
     },
     "prototype.findPeopleInCluster": {
