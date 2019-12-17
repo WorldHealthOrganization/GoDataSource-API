@@ -414,7 +414,10 @@ module.exports = function (FollowUp) {
           where: {
             outbreakId: outbreakId
           }
-        }, filter || {}).where
+        }, filter || {}).where,
+        {
+          includeDeletedRecords: filter.deleted
+        }
       )
       .then(function (followUps) {
         // define result

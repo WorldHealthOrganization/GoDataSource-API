@@ -28,10 +28,13 @@ module.exports = function (Model) {
    * @param {number} [options.limit]
    * @param {object} [options.order]
    * @param {object} [options.projection]
+   * @param {object} [options.includeDeletedRecords]
    * @return {Promise<any>}
    */
   Model.rawFind = function (query, options = {}) {
+    options = options || {};
     query = query || {};
+
     // set query id and start timer (for logging purposes)
     const queryId = uuid.v4();
     const timer = new Timer();
@@ -48,9 +51,12 @@ module.exports = function (Model) {
       };
     }
 
+    // make sure filter is valid for mongodb
+    query = app.utils.remote.convertLoopbackFilterToMongo(query);
+
     // query only non deleted data
-    query = app.utils.remote.convertLoopbackFilterToMongo(
-      {
+    if (!options.includeDeletedRecords) {
+      query = {
         $and: [
           {
             $or: [
@@ -60,7 +66,8 @@ module.exports = function (Model) {
           },
           query
         ]
-      });
+      };
+    }
 
     // log usage
     app.logger.debug(`[QueryId: ${queryId}] Performing MongoDB request on collection '${collectionName}': find ${JSON.stringify(query)}`);
