@@ -410,11 +410,11 @@ module.exports = function (FollowUp) {
     // find follow-ups for current outbreak
     return FollowUp
       .rawFind(app.utils.remote
-        .mergeFilters({
-          where: {
-            outbreakId: outbreakId
-          }
-        }, filter || {}).where,
+          .mergeFilters({
+            where: {
+              outbreakId: outbreakId
+            }
+          }, filter || {}).where,
         {
           includeDeletedRecords: filter.deleted
         }
