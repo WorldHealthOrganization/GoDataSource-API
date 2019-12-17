@@ -128,6 +128,105 @@ module.exports = function (Role) {
       ]
     },
 
+    // Help
+    {
+      groupAllId: 'help_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_HELP',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_HELP_DESCRIPTION',
+      permissions: [
+        {
+          id: 'help_view_category',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_HELP_CATEGORY',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_HELP_CATEGORY_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'help_list_category',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_HELP_CATEGORY',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_HELP_CATEGORY_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'help_create_category',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_HELP_CATEGORY',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_HELP_CATEGORY_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'help_modify_category',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_HELP_CATEGORY',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_HELP_CATEGORY_DESCRIPTION',
+          requires: [
+            'help_view_category'
+          ]
+        },
+        {
+          id: 'help_delete_category',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_HELP_CATEGORY',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_HELP_CATEGORY_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'help_view_category_item',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_HELP_CATEGORY_ITEM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_HELP_CATEGORY_ITEM_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'help_list_category_item',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_HELP_CATEGORY_ITEM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_HELP_CATEGORY_ITEM_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'help_create_category_item',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_HELP_CATEGORY_ITEM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_HELP_CATEGORY_ITEM_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'help_modify_category_item',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_HELP_CATEGORY_ITEM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_HELP_CATEGORY_ITEM_DESCRIPTION',
+          requires: [
+            'help_view_category_item'
+          ]
+        },
+        {
+          id: 'help_delete_category_item',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_HELP_CATEGORY_ITEM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_HELP_CATEGORY_ITEM_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'help_approve_category_item',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP_CATEGORY_ITEM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP_CATEGORY_ITEM_DESCRIPTION',
+          requires: [
+            'help_view_category_item',
+            'help_modify_category_item'
+          ]
+        },
+
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // - must delete TOKENS tooo
+        {
+          id: 'write_help',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_HELP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_HELP_DESCRIPTION'
+        },
+        {
+          id: 'approve_help',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP_DESCRIPTION'
+        }
+      ]
+    },
+
     // User
     {
       groupAllId: 'user_all',
@@ -1439,16 +1538,6 @@ module.exports = function (Role) {
           id: 'write_case',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_CASE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_CASE_DESCRIPTION'
-        },
-        {
-          id: 'write_help',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_HELP',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_HELP_DESCRIPTION'
-        },
-        {
-          id: 'approve_help',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP_DESCRIPTION'
         }
       ]
     }

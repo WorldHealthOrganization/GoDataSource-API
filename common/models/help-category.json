@@ -47,15 +47,57 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "__get__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "__count__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "__findById__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "searchHelpCategory"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "searchHelpItem"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "$client_application",
       "permission": "ALLOW",
       "property": "find"
     },
     {
       "principalType": "ROLE",
-      "principalId": "$authenticated",
+      "principalId": "$client_application",
       "permission": "ALLOW",
-      "property": "findById"
+      "property": "count"
     },
     {
       "principalType": "ROLE",
@@ -65,117 +107,75 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_help",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "__get__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "__count__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "__findById__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "searchHelpCategory"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "searchHelpItem"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "help_create_category",
       "permission": "ALLOW",
       "property": "create"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_help",
+      "principalId": "help_modify_category",
       "permission": "ALLOW",
       "property": "patchAttributes"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_help",
+      "principalId": "help_delete_category",
       "permission": "ALLOW",
       "property": "deleteById"
     },
     {
       "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
-      "property": "count"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$client_application",
-      "permission": "ALLOW",
-      "property": "count"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
-      "property": "__get__helpItems"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$client_application",
-      "permission": "ALLOW",
-      "property": "__get__helpItems"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
-      "property": "__findById__helpItems"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$client_application",
-      "permission": "ALLOW",
-      "property": "__findById__helpItems"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_help",
+      "principalId": "help_create_category_item",
       "permission": "ALLOW",
       "property": "__create__helpItems"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_help",
+      "principalId": "help_modify_category_item",
       "permission": "ALLOW",
       "property": "__updateById__helpItems"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_help",
+      "principalId": "help_delete_category_item",
       "permission": "ALLOW",
       "property": "__destroyById__helpItems"
     },
     {
       "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
-      "property": "__count__helpItems"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$client_application",
-      "permission": "ALLOW",
-      "property": "__count__helpItems"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "approve_help",
+      "principalId": "help_approve_category_item",
       "permission": "ALLOW",
       "property": "approveHelpItem"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
-      "property": "searchHelpCategory"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$client_application",
-      "permission": "ALLOW",
-      "property": "searchHelpCategory"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
-      "property": "searchHelpItem"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$client_application",
-      "permission": "ALLOW",
-      "property": "searchHelpItem"
     }
   ],
   "methods": {
