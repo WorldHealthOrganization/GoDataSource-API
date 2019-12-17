@@ -408,57 +408,55 @@ module.exports = function (FollowUp) {
    */
   FollowUp.countByTeam = function (outbreakId, filter) {
     // find follow-ups for current outbreak
-    return FollowUp
-      .rawFind(app.utils.remote
-          .mergeFilters({
-            where: {
-              outbreakId: outbreakId
-            }
-          }, filter || {}).where,
-        {
-          includeDeletedRecords: filter.deleted
+    return FollowUp.rawFind(
+      app.utils.remote.mergeFilters({
+        where: {
+          outbreakId: outbreakId
         }
-      )
-      .then(function (followUps) {
-        // define result
-        const result = {
-          team: {},
-          count: followUps.length
-        };
-        // go through all followUps
-        followUps.forEach(function (followUp) {
-          // use empty string for not associated team
-          if (!followUp.teamId) {
-            followUp.teamId = '';
-          }
-          // init team container if not already inited
-          if (!result.team[followUp.teamId]) {
-            result.team[followUp.teamId] = {
-              followUpIds: [],
-              count: 0
-            };
-          }
-          // add follow-up ID per team
-          result.team[followUp.teamId].followUpIds.push(followUp.id);
-          // increment the number of follow-ups per team
-          result.team[followUp.teamId].count++;
-        });
-        // find the teams for for the follow-ups
-        return app.models.team
-          .rawFind({
-            id: {
-              inq: Object.keys(result.team)
-            }
-          })
-          .then(function (teams) {
-            // add team information to each section
-            teams.forEach(function (team) {
-              result.team[team.id].team = team;
-            });
-            // return built result
-            return result;
-          });
+      }, filter || {}).where,
+      {
+        includeDeletedRecords: filter.deleted
+      }
+    ).then(function (followUps) {
+      // define result
+      const result = {
+        team: {},
+        count: followUps.length
+      };
+      // go through all followUps
+      followUps.forEach(function (followUp) {
+        // use empty string for not associated team
+        if (!followUp.teamId) {
+          followUp.teamId = '';
+        }
+        // init team container if not already inited
+        if (!result.team[followUp.teamId]) {
+          result.team[followUp.teamId] = {
+            followUpIds: [],
+            count: 0
+          };
+        }
+        // add follow-up ID per team
+        result.team[followUp.teamId].followUpIds.push(followUp.id);
+        // increment the number of follow-ups per team
+        result.team[followUp.teamId].count++;
       });
+      // find the teams for for the follow-ups
+      return app.models.team
+        .rawFind({
+          id: {
+            inq: Object.keys(result.team)
+          }
+        })
+        .then(function (teams) {
+          // add team information to each section
+          teams.forEach(function (team) {
+            result.team[team.id].team = team;
+          });
+          // return built result
+          return result;
+        });
+    });
   };
 
   /**
