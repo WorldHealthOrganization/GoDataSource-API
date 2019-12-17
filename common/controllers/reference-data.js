@@ -14,67 +14,6 @@ module.exports = function (ReferenceData) {
   };
 
   /**
-   * Get usage for a reference data entry
-   * @param filter
-   * @param callback
-   */
-  ReferenceData.prototype.getUsage = function (filter, callback) {
-    ReferenceData
-      .findModelUsage(this.id, filter, false)
-      .then(function (usage) {
-        callback(null, usage);
-      })
-      .catch(callback);
-  };
-
-  /**
-   * Count usage for a reference data entry
-   * @param where
-   * @param callback
-   */
-  ReferenceData.prototype.countUsage = function (where, callback) {
-    ReferenceData
-      .findModelUsage(this.id, {where: where}, true)
-      .then(function (results) {
-        callback(null,
-          // count all of the results
-          Object.values(results).reduce(function (a, b) {
-            return a + b;
-          }));
-      })
-      .catch(callback);
-  };
-
-  /**
-   * Restore a deleted reference data
-   * @param id
-   * @param options
-   * @param callback
-   */
-  ReferenceData.restore = function (id, options, callback) {
-    ReferenceData
-      .findOne({
-        deleted: true,
-        where: {
-          id: id,
-          deleted: true
-        }
-      })
-      .then(function (instance) {
-        if (!instance) {
-          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
-            model: ReferenceData.modelName,
-            id: id
-          });
-        }
-
-        // undo reference data delete
-        instance.undoDelete(options, callback);
-      })
-      .catch(callback);
-  };
-
-  /**
    * Export filtered reference data to a file
    * @param filter
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json

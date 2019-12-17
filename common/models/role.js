@@ -227,6 +227,106 @@ module.exports = function (Role) {
       ]
     },
 
+    // Reference Data
+    {
+      groupAllId: 'reference_data_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_REFERENCE_DATA',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_REFERENCE_DATA_DESCRIPTION',
+      permissions: [
+        {
+          id: 'reference_data_list_category',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_REFERENCE_DATA_CATEGORY',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_REFERENCE_DATA_CATEGORY_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'reference_data_view_category_item',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_REFERENCE_DATA_CATEGORY_ITEM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_REFERENCE_DATA_CATEGORY_ITEM_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'reference_data_list_category_item',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_REFERENCE_DATA_CATEGORY_ITEM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_REFERENCE_DATA_CATEGORY_ITEM_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'reference_data_create_category_item',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_REFERENCE_DATA_CATEGORY_ITEM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_REFERENCE_DATA_CATEGORY_ITEM_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'reference_data_modify_category_item',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_REFERENCE_DATA_CATEGORY_ITEM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_REFERENCE_DATA_CATEGORY_ITEM_DESCRIPTION',
+          requires: [
+            'reference_data_view_category_item'
+          ]
+        },
+        {
+          id: 'reference_data_delete_category_item',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_REFERENCE_DATA_CATEGORY_ITEM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_REFERENCE_DATA_CATEGORY_ITEM_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'reference_data_export',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_REFERENCE_DATA_CATEGORY_ITEM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_REFERENCE_DATA_CATEGORY_ITEM_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'reference_data_import',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_REFERENCE_DATA_CATEGORY_ITEM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_REFERENCE_DATA_CATEGORY_ITEM_DESCRIPTION',
+          requires: []
+        },
+
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // OLD - MUST DELETE!!!!!!!!
+        // - must delete TOKENS tooo
+        {
+          id: 'write_reference_data',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_REFERENCE_DATA',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_REFERENCE_DATA_DESCRIPTION'
+        }
+      ]
+    },
+
+    // Icon ( e.g used by reference data )
+    {
+      groupAllId: 'icon_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_ICON',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_ICON_DESCRIPTION',
+      permissions: [
+        {
+          id: 'icon_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_ICON',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_ICON_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'icon_create',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_ICON',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_ICON_DESCRIPTION',
+          requires: [
+            'icon_list'
+          ]
+        },
+        {
+          id: 'icon_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_ICON',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_ICON_DESCRIPTION',
+          requires: []
+        }
+      ]
+    },
+
     // User
     {
       groupAllId: 'user_all',
@@ -1518,11 +1618,6 @@ module.exports = function (Role) {
           id: 'write_sys_config',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_SYS_CONFIG',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_SYS_CONFIG_DESCRIPTION'
-        },
-        {
-          id: 'write_reference_data',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_REFERENCE_DATA',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_REFERENCE_DATA_DESCRIPTION'
         },
         {
           id: 'read_report',
