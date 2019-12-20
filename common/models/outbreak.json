@@ -231,213 +231,165 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "case_list",
       "permission": "ALLOW",
       "property": "findCases"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "findCases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__create__cases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__findById__cases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__updateById__cases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__destroyById__cases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "case_list",
       "permission": "ALLOW",
       "property": "__count__cases"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "case_create",
+      "permission": "ALLOW",
+      "property": "__create__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_view",
+      "permission": "ALLOW",
+      "property": "__findById__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_modify",
+      "permission": "ALLOW",
+      "property": "__updateById__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_list",
       "permission": "ALLOW",
       "property": "findContacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "findContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "contact_list",
       "permission": "ALLOW",
       "property": "countContacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "contact_create",
       "permission": "ALLOW",
       "property": "__create__contacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "contact_view",
       "permission": "ALLOW",
       "property": "__findById__contacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "contact_modify",
       "permission": "ALLOW",
       "property": "__updateById__contacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "contact_delete",
       "permission": "ALLOW",
       "property": "__destroyById__contacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "__count__contacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "lab_result_list",
       "permission": "ALLOW",
       "property": "__get__cases__labResults"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__create__cases__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__findById__cases__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__updateById__cases__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__destroyById__cases__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "lab_result_list",
       "permission": "ALLOW",
       "property": "__count__cases__labResults"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_followup",
+      "principalId": "lab_result_create",
+      "permission": "ALLOW",
+      "property": "__create__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_view",
+      "permission": "ALLOW",
+      "property": "__findById__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_modify",
+      "permission": "ALLOW",
+      "property": "__updateById__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_list",
       "permission": "ALLOW",
       "property": "__get__contacts__followUps"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_followup",
-      "permission": "ALLOW",
-      "property": "__create__contacts__followUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "__findById__contacts__followUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_followup",
-      "permission": "ALLOW",
-      "property": "__updateById__contacts__followUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_followup",
-      "permission": "ALLOW",
-      "property": "__destroyById__contacts__followUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
+      "principalId": "follow_up_list",
       "permission": "ALLOW",
       "property": "__count__contacts__followUps"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_followup",
+      "principalId": "follow_up_create",
+      "permission": "ALLOW",
+      "property": "__create__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_view",
+      "permission": "ALLOW",
+      "property": "__findById__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_modify",
+      "permission": "ALLOW",
+      "property": "__updateById__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_restore",
       "permission": "ALLOW",
       "property": "restoreContactFollowUp"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "relationship_list",
       "permission": "ALLOW",
       "property": "findCaseRelationships"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "getCaseRelationshipsAvailablePeople"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCaseRelationshipsAvailablePeople"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "relationship_list",
       "permission": "ALLOW",
       "property": "findContactRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "getContactRelationshipsAvailablePeople"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactRelationshipsAvailablePeople"
     },
     {
       "principalType": "ROLE",
@@ -471,13 +423,13 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "relationship_view",
       "permission": "ALLOW",
       "property": "getCaseRelationship"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "relationship_view",
       "permission": "ALLOW",
       "property": "getContactRelationship"
     },
@@ -489,13 +441,13 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_case",
+      "principalId": "relationship_modify",
       "permission": "ALLOW",
       "property": "updateCaseRelationship"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "relationship_modify",
       "permission": "ALLOW",
       "property": "updateContactRelationship"
     },
@@ -507,13 +459,13 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_case",
+      "principalId": "relationship_delete",
       "permission": "ALLOW",
       "property": "deleteCaseRelationship"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "relationship_delete",
       "permission": "ALLOW",
       "property": "deleteContactRelationship"
     },
@@ -525,25 +477,25 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "relationship_list",
       "permission": "ALLOW",
       "property": "countCaseRelationships"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "relationship_list",
       "permission": "ALLOW",
       "property": "filteredCountCaseRelationships"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "relationship_list",
       "permission": "ALLOW",
       "property": "countContactRelationships"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "relationship_list",
       "permission": "ALLOW",
       "property": "filteredCountContactRelationships"
     },
@@ -558,6 +510,53 @@
       "principalId": "relationship_list",
       "permission": "ALLOW",
       "property": "filteredCountEventRelationships"
+    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "getCaseRelationshipsAvailablePeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_case",
+      "permission": "ALLOW",
+      "property": "countCaseRelationshipsAvailablePeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "getContactRelationshipsAvailablePeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "countContactRelationshipsAvailablePeople"
     },
     {
       "principalType": "ROLE",
@@ -759,15 +758,15 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_report",
+      "principalId": "cot_list",
       "permission": "ALLOW",
-      "property": "countIndependentTransmissionChains"
+      "property": "getIndependentTransmissionChains"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_report",
+      "principalId": "cot_list",
       "permission": "ALLOW",
-      "property": "getIndependentTransmissionChains"
+      "property": "countIndependentTransmissionChains"
     },
     {
       "principalType": "ROLE",
@@ -945,7 +944,7 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_report",
+      "principalId": "cot_view_bar_chart",
       "permission": "ALLOW",
       "property": "getBarsTransmissionChains"
     },

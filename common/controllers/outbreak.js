@@ -65,7 +65,8 @@ module.exports = function (Outbreak) {
     'prototype.__get__labResults',
     'prototype.__get__cases',
     'prototype.__get__contacts',
-    'prototype.__get__events'
+    'prototype.__get__events',
+    'prototype.__count__contacts'
   ]);
 
   // attach search by relation property behavior on get contacts
