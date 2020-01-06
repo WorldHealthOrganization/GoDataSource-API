@@ -1091,25 +1091,32 @@ module.exports = function (Role) {
           id: 'cluster_view',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CLUSTER',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CLUSTER_DESCRIPTION',
-          requires: []
+          requires: [
+            'outbreak_view'
+          ]
         },
         {
           id: 'cluster_list',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLUSTER',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLUSTER_DESCRIPTION',
-          requires: []
+          requires: [
+            'outbreak_view'
+          ]
         },
         {
           id: 'cluster_create',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CLUSTER',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CLUSTER_DESCRIPTION',
-          requires: []
+          requires: [
+            'outbreak_view'
+          ]
         },
         {
           id: 'cluster_modify',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CLUSTER',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CLUSTER_DESCRIPTION',
           requires: [
+            'outbreak_view',
             'cluster_view'
           ]
         },
@@ -1123,7 +1130,9 @@ module.exports = function (Role) {
           id: 'cluster_list_people',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLUSTER_PEOPLE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLUSTER_PEOPLE_DESCRIPTION',
-          requires: []
+          requires: [
+            'outbreak_view'
+          ]
         }
       ]
     },
@@ -2182,6 +2191,50 @@ module.exports = function (Role) {
             'event_modify_relationship_contacts',
             'case_view_relationship_contacts',
             'case_modify_relationship_contacts'
+          ]
+        }
+      ]
+    },
+
+    // Duplicate
+    {
+      groupAllId: 'duplicate_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_DUPLICATE',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_DUPLICATE_DESCRIPTION',
+      permissions: [
+        {
+          id: 'duplicate_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_DUPLICATE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_DUPLICATE_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'duplicate_merge_cases',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_CASES',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_CASES_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'duplicate_list'
+          ]
+        },
+        {
+          id: 'duplicate_merge_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_CONTACTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_CONTACTS_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'duplicate_list'
+          ]
+        },
+        {
+          id: 'duplicate_merge_events',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_EVENTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_EVENTS_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'duplicate_list'
           ]
         }
       ]

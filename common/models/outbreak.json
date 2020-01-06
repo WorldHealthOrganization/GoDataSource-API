@@ -926,13 +926,19 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_case",
+      "principalId": "duplicate_merge_cases",
       "permission": "ALLOW",
       "property": "mergePeople"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "duplicate_merge_contacts",
+      "permission": "ALLOW",
+      "property": "mergePeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "duplicate_merge_events",
       "permission": "ALLOW",
       "property": "mergePeople"
     },
@@ -1124,13 +1130,13 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "duplicate_list",
       "permission": "ALLOW",
       "property": "findPossiblePersonDuplicates"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "duplicate_list",
       "permission": "ALLOW",
       "property": "countPossiblePersonDuplicates"
     },

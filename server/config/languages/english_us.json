@@ -544,6 +544,19 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_COT_TIMELINE_NETWORK_DATE_OF_REPORTING": "Chains of transmission - modify timeline network - date of reporting",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_COT_TIMELINE_NETWORK_DATE_OF_REPORTING_DESCRIPTION": "This permission allows modifying nodes and edges",
 
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_DUPLICATE": "Duplicates",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_DUPLICATE_DESCRIPTION": "Case / Contact / Events duplicates permissions",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_DUPLICATE": "Duplicate - list",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_DUPLICATE_DESCRIPTION": "This permission allows listing case / contacts / events duplicates",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_CASES": "Duplicate - merge cases",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_CASES_DESCRIPTION": "This permission allows merging case duplicates",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_CONTACTS": "Duplicate - merge contacts",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_CONTACTS_DESCRIPTION": "This permission allows merging contact duplicates",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_EVENTS": "Duplicate - merge events",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_EVENTS_DESCRIPTION": "This permission allows merging event duplicates",
+
+
+
       "LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP": "Approve help items",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP_DESCRIPTION": "This permission allows the approval of help items",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_READ_CASE": "Read case",
