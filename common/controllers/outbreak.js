@@ -1221,39 +1221,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Get a resource link embedded in a QR Code Image (png) for a case
-   * @param caseId
-   * @param callback
-   */
-  Outbreak.prototype.getCaseQRResourceLink = function (caseId, callback) {
-    Outbreak.helpers.getPersonQRResourceLink(this, app.models.case.modelName, caseId, function (error, qrCode) {
-      callback(null, qrCode, 'image/png', `attachment;filename=case-${caseId}.png`);
-    });
-  };
-
-  /**
-   * Get a resource link embedded in a QR Code Image (png) for a contact
-   * @param contactId
-   * @param callback
-   */
-  Outbreak.prototype.getContactQRResourceLink = function (contactId, callback) {
-    Outbreak.helpers.getPersonQRResourceLink(this, app.models.contact.modelName, contactId, function (error, qrCode) {
-      callback(null, qrCode, 'image/png', `attachment;filename=contact-${contactId}.png`);
-    });
-  };
-
-  /**
-   * Get a resource link embedded in a QR Code Image (png) for a event
-   * @param eventId
-   * @param callback
-   */
-  Outbreak.prototype.getEventQRResourceLink = function (eventId, callback) {
-    Outbreak.helpers.getPersonQRResourceLink(this, app.models.event.modelName, eventId, function (error, qrCode) {
-      callback(null, qrCode, 'image/png', `attachment;filename=event-${eventId}.png`);
-    });
-  };
-
-  /**
    * Count the new contacts and groups them by exposure type
    * @param filter Besides the default filter properties this request also accepts 'noDaysNewContacts': number on the first level in 'where'
    * @param callback
