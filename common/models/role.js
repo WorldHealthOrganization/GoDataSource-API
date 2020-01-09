@@ -1405,7 +1405,8 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_DESCRIPTION',
           requires: [
             'outbreak_view',
-            'user_list_for_filters'
+            'user_list_for_filters',
+            'contact_grouped_by_risk'
           ]
         },
         {
@@ -1681,6 +1682,14 @@ module.exports = function (Role) {
           id: 'contact_export_dossier',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_DOSSIER',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_DOSSIER_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'contact_grouped_by_risk',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_BY_RISK',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_BY_RISK_DESCRIPTION',
           requires: [
             'outbreak_view'
           ]
@@ -2080,7 +2089,8 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_FOLLOW_UP_DESCRIPTION',
           requires: [
             'outbreak_view',
-            'user_list_for_filters'
+            'user_list_for_filters',
+            'team_list'
           ]
         },
         {
@@ -2089,7 +2099,10 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_FOLLOW_UP_DESCRIPTION',
           requires: [
             'outbreak_view',
-            'user_list_for_filters'
+            'user_list_for_filters',
+            'team_list',
+            'follow_up_grouped_by_team',
+            'contact_view'
           ]
         },
         {
@@ -2097,7 +2110,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_FOLLOW_UP',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_FOLLOW_UP_DESCRIPTION',
           requires: [
-            'outbreak_view'
+            'outbreak_view',
+            'contact_view'
           ]
         },
         {
@@ -2107,7 +2121,8 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'follow_up_view',
-            'user_list_for_filters'
+            'user_list_for_filters',
+            'team_list'
           ]
         },
         {
@@ -2130,6 +2145,74 @@ module.exports = function (Role) {
           id: 'follow_up_list_range',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_FOLLOW_UP_RANGE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_FOLLOW_UP_RANGE_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'team_list'
+          ]
+        },
+        {
+          id: 'follow_up_generate',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_FOLLOW_UP_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'team_list'
+          ]
+        },
+        {
+          id: 'follow_up_export',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_FOLLOW_UP_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'follow_up_export_range',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_FOLLOW_UP_RANGE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_FOLLOW_UP_RANGE_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'follow_up_export_daily_form',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_FOLLOW_UP_DAILY_FORM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_FOLLOW_UP_DAILY_FORM_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'follow_up_bulk_modify',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_FOLLOW_UP_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'follow_up_list',
+            'follow_up_modify'
+          ]
+        },
+        {
+          id: 'follow_up_bulk_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_FOLLOW_UP_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'follow_up_bulk_restore',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_FOLLOW_UP_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'follow_up_grouped_by_team',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_FOLLOW_UP_BY_TEAM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_FOLLOW_UP_BY_TEAM_DESCRIPTION',
           requires: [
             'outbreak_view'
           ]

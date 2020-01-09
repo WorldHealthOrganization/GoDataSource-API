@@ -991,36 +991,113 @@
       "permission": "ALLOW",
       "property": "exportDailyContactFollowUpForm"
     },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     {
       "principalType": "ROLE",
-      "principalId": "ceva_de_la_follow-ups?",
+      "principalId": "follow_up_generate",
+      "permission": "ALLOW",
+      "property": "generateFollowups"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_list",
+      "permission": "ALLOW",
+      "property": "findFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_list",
+      "permission": "ALLOW",
+      "property": "__count__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_view",
+      "permission": "ALLOW",
+      "property": "__findById__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_export",
+      "permission": "ALLOW",
+      "property": "exportFilteredFollowups"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_export",
+      "permission": "ALLOW",
+      "property": "exportFilteredContactFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_list",
+      "permission": "ALLOW",
+      "property": "filteredCountFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_bulk_delete",
+      "permission": "ALLOW",
+      "property": "bulkDeleteFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_bulk_restore",
+      "permission": "ALLOW",
+      "property": "bulkRestoreFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_export_daily_form",
       "permission": "ALLOW",
       "property": "exportContactFollowUpListPerDay"
     },
     {
       "principalType": "ROLE",
-      "principalId": "ceva_de_la_follow-ups?",
+      "principalId": "follow_up_grouped_by_team",
+      "permission": "ALLOW",
+      "property": "countFollowUpsByTeam"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_grouped_by_risk",
+      "permission": "ALLOW",
+      "property": "countContactsPerRiskLevel"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_export_range",
       "permission": "ALLOW",
       "property": "exportRangeListOfContacts"
     },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_list_range",
+      "permission": "ALLOW",
+      "property": "getFollowUpsGroupedByContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_list_range",
+      "permission": "ALLOW",
+      "property": "countFollowUpsGroupedByContact"
+    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     {
       "principalType": "ROLE",
       "principalId": "write_case",
@@ -1047,12 +1124,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_followup",
-      "permission": "ALLOW",
-      "property": "generateFollowups"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "filteredCountCases"
@@ -1062,24 +1133,6 @@
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "filteredCountCases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "findFollowUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "__findById__followUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "__count__followUps"
     },
     {
       "principalType": "ROLE",
@@ -1281,24 +1334,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "exportFilteredContactFollowUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "filteredCountFollowUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "exportFilteredFollowups"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "exportExistingEmptyCaseInvestigation"
@@ -1383,12 +1418,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactsPerRiskLevel"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "countCasesStratifiedByClassificationOverTime"
@@ -1404,12 +1433,6 @@
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "countCasesStratifiedByClassificationOverReportingTime"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countFollowUpsByTeam"
     },
     {
       "principalType": "ROLE",
@@ -1473,33 +1496,9 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "getFollowUpsGroupedByContact"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "countFollowUpsGroupedByContact"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "getCaseIsolatedContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_followup",
-      "permission": "ALLOW",
-      "property": "bulkDeleteFollowUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_followup",
-      "permission": "ALLOW",
-      "property": "bulkRestoreFollowUps"
     }
   ],
   "methods": {
