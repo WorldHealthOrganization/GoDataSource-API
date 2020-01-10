@@ -1647,11 +1647,22 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'contact_export_movement_map',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_MOVEMENT_MAP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_MOVEMENT_MAP_DESCRIPTION',
+          requires: [
+            'contact_view_movement_map'
+          ]
+        },
+        {
           id: 'contact_view_chronology_chart',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_CHRONOLOGY_CHART',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_CHRONOLOGY_CHART_DESCRIPTION',
           requires: [
-            'outbreak_view'
+            'outbreak_view',
+            'contact_view',
+            'relationship_list',
+            'follow_up_list'
           ]
         },
         {
@@ -1735,7 +1746,8 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_DESCRIPTION',
           requires: [
             'outbreak_view',
-            'user_list_for_filters'
+            'user_list_for_filters',
+            'case_grouped_by_classification'
           ]
         },
         {
@@ -1767,13 +1779,28 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CASE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CASE_DESCRIPTION',
           requires: [
-            'outbreak_view'
+            'outbreak_view',
+            'case_list_isolated_cases'
           ]
         },
         {
           id: 'case_restore',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CASE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CASE_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_export',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'case_import',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CASE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CASE_DESCRIPTION',
           requires: [
             'outbreak_view'
           ]
@@ -1969,6 +1996,98 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'relationship_bulk_delete'
+          ]
+        },
+        {
+          id: 'case_view_movement_map',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CASE_MOVEMENT_MAP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CASE_MOVEMENT_MAP_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_view'
+          ]
+        },
+        {
+          id: 'case_export_movement_map',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_MOVEMENT_MAP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_MOVEMENT_MAP_DESCRIPTION',
+          requires: [
+            'case_view_movement_map'
+          ]
+        },
+        {
+          id: 'case_view_chronology_chart',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CASE_CHRONOLOGY_CHART',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CASE_CHRONOLOGY_CHART_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_view',
+            'relationship_list',
+            'lab_result_list'
+          ]
+        },
+        {
+          id: 'case_convert_to_contact',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CASE_TO_CONTACT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CASE_TO_CONTACT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_export_dossier',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_DOSSIER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_DOSSIER_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_grouped_by_classification',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CASE_BY_CLASSIFICATION',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CASE_BY_CLASSIFICATION_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_list_onset_before_primary_case_report',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_ONSET_BEFORE_PRIMARY_CASE_REPORT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_ONSET_BEFORE_PRIMARY_CASE_REPORT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_list_long_period_between_onset_dates_report',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_LONG_PERIOD_BETWEEN_ONSET_DATES_REPORT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_LONG_PERIOD_BETWEEN_ONSET_DATES_REPORT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_list_isolated_cases',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_ISOLATED',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_ISOLATED_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_export_investigation_form',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_INVESTIGATION_FORM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_INVESTIGATION_FORM_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_export_empty_investigation_forms',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_EMPTY_INVESTIGATION_FORMS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_EMPTY_INVESTIGATION_FORMS_DESCRIPTION',
+          requires: [
+            'outbreak_view'
           ]
         },
 
@@ -2249,7 +2368,8 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_LAB_RESULT_DESCRIPTION',
           requires: [
             'outbreak_view',
-            'user_list_for_filters'
+            'user_list_for_filters',
+            'case_view'
           ]
         },
         {
@@ -2258,7 +2378,8 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_LAB_RESULT_DESCRIPTION',
           requires: [
             'outbreak_view',
-            'user_list_for_filters'
+            'user_list_for_filters',
+            'case_view'
           ]
         },
         {
@@ -2266,7 +2387,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_LAB_RESULT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_LAB_RESULT_DESCRIPTION',
           requires: [
-            'outbreak_view'
+            'outbreak_view',
+            'case_view'
           ]
         },
         {
@@ -2276,7 +2398,9 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'user_list_for_filters',
-            'lab_result_view'
+            'lab_result_view',
+            'case_view',
+            'lab_result_list'
           ]
         },
         {
@@ -2285,6 +2409,63 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_LAB_RESULT_DESCRIPTION',
           requires: [
             'outbreak_view'
+          ]
+        },
+        {
+          id: 'lab_result_restore',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'lab_result_import',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        }
+      ]
+    },
+
+    // Gantt Chart
+    {
+      groupAllId: 'gantt_chart_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_GANTT_CHART',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_GANTT_CHART_DESCRIPTION',
+      permissions: [
+        {
+          id: 'gantt_chart_view_delay_onset_lab_testing',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DELAY_BETWEEN_SYMPTOM_AND_LAB',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DELAY_BETWEEN_SYMPTOM_AND_LAB_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'gantt_chart_view_delay_onset_hospitalization',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DELAY_BETWEEN_ONSET_HOSPITALIZATION',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DELAY_BETWEEN_ONSET_HOSPITALIZATION_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'gantt_chart_export_delay_onset_lab_testing',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DELAY_BETWEEN_SYMPTOM_AND_LAB',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DELAY_BETWEEN_SYMPTOM_AND_LAB_DESCRIPTION',
+          requires: [
+            'gantt_chart_view_delay_onset_lab_testing'
+          ]
+        },
+        {
+          id: 'gantt_chart_export_delay_onset_hospitalization',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DELAY_BETWEEN_ONSET_HOSPITALIZATION',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DELAY_BETWEEN_ONSET_HOSPITALIZATION_DESCRIPTION',
+          requires: [
+            'gantt_chart_view_delay_onset_hospitalization'
           ]
         }
       ]
