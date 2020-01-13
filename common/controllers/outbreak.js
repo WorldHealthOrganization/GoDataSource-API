@@ -1369,6 +1369,13 @@ module.exports = function (Outbreak) {
     // get outbreak id
     const outbreakId = this.id;
 
+    // check if contacts should be counted as transmission chains
+    const noContactChains = _.get(filter, 'where.noContactChains', true);
+    // if present remove it from the main filter
+    if (noContactChains) {
+      delete filter.where.noContactChains;
+    }
+
     // check if contacts should be included
     const includeContacts = _.get(filter, 'where.includeContacts', false);
     // if present remove it from the main filter
@@ -1502,7 +1509,8 @@ module.exports = function (Outbreak) {
           includedPeopleFilter: includedPeopleFilter,
           size: sizeFilter,
           countContacts: countContacts,
-          includeContacts: includeContacts
+          includeContacts: includeContacts,
+          noContactChains: noContactChains
         };
       });
   };
@@ -1762,6 +1770,7 @@ module.exports = function (Outbreak) {
       const includedPeopleFilter = processedFilter.includedPeopleFilter;
       const sizeFilter = processedFilter.size;
       const includeContacts = processedFilter.includeContacts;
+      const noContactChains = processedFilter.noContactChains;
 
       // flag that indicates that contacts should be counted per chain
       const countContacts = processedFilter.countContacts;
@@ -1771,7 +1780,7 @@ module.exports = function (Outbreak) {
 
       // get transmission chains
       app.models.relationship
-        .getTransmissionChains(self.id, self.periodOfFollowup, filter, countContacts, function (error, transmissionChains) {
+        .getTransmissionChains(self.id, self.periodOfFollowup, filter, countContacts, noContactChains, function (error, transmissionChains) {
           if (error) {
             return callback(error);
           }
