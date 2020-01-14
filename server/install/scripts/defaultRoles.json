@@ -3,13 +3,20 @@
     "id": "ROLE_SYSTEM_ADMINISTRATOR",
     "description": "This is a built in role that manages user accounts, and configuration of the system.",
     "permissionIds": [
-      "read_sys_config",
-      "write_sys_config",
-      "read_role",
-      "write_role",
-      "read_user_account",
-      "write_user_account",
-      "read_outbreak"
+      "system_settings_all",
+      "audit_log_all",
+      "language_all",
+      "help_all",
+      "reference_data_all",
+      "icon_all",
+      "user_all",
+      "user_role_all",
+      "backup_all",
+      "sync_all",
+      "upstream_server_all",
+      "client_application_all",
+      "location_all",
+      "device_all"
     ]
   },
   "GO.Data administrator": {

@@ -3085,19 +3085,20 @@ module.exports = function (Role) {
    * Check the list of assigned permissionIds, make sure they are all valid
    */
   Role.validate('permissionIds', function available(error) {
-    const disallowedPermissions = [];
     if (
       this.permissionIds &&
       Array.isArray(this.permissionIds)
     ) {
+      const disallowedPermissions = [];
       this.permissionIds.forEach(function (permission) {
         if (Role.allAllowedPermissions.indexOf(permission) === -1) {
           disallowedPermissions.push(permission);
         }
-        if (disallowedPermissions.length) {
-          error();
-        }
       });
+
+      if (disallowedPermissions.length) {
+        error();
+      }
     }
   }, {message: `at least one permission is invalid. Available permissions: "${Role.allAllowedPermissions.join('", "')}"`});
 
