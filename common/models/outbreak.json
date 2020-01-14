@@ -1443,6 +1443,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "attachmentUpload"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "read_case",
       "permission": "ALLOW",
       "property": "attachmentDownload"
@@ -1450,6 +1456,12 @@
     {
       "principalType": "ROLE",
       "principalId": "read_contact",
+      "permission": "ALLOW",
+      "property": "attachmentDownload"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
       "permission": "ALLOW",
       "property": "attachmentDownload"
     },
