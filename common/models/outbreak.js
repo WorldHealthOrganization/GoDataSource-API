@@ -66,8 +66,10 @@ module.exports = function (Outbreak) {
 
   // The permissions that influence an user's ability to see a person's data
   Outbreak.personReadPermissions = [
-    'read_case',
-    'read_contact'
+    'case_list',
+    'case_view',
+    'contact_list',
+    'contact_view',
   ];
 
   // The fields that will be displayed when a user receives a person's data even though he does not

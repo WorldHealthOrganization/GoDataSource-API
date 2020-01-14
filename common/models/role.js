@@ -206,23 +206,6 @@ module.exports = function (Role) {
             'help_view_category_item',
             'help_modify_category_item'
           ]
-        },
-
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // - must delete TOKENS tooo
-        {
-          id: 'write_help',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_HELP',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_HELP_DESCRIPTION'
-        },
-        {
-          id: 'approve_help',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP_DESCRIPTION'
         }
       ]
     },
@@ -282,18 +265,6 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_REFERENCE_DATA_CATEGORY_ITEM',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_REFERENCE_DATA_CATEGORY_ITEM_DESCRIPTION',
           requires: []
-        },
-
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // - must delete TOKENS tooo
-        {
-          id: 'write_reference_data',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_REFERENCE_DATA',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_REFERENCE_DATA_DESCRIPTION'
         }
       ]
     },
@@ -376,24 +347,6 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_FOR_FILTERS',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_FOR_FILTERS_DESCRIPTION',
           requires: []
-        },
-
-
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // - must delete TOKENS tooo
-        {
-          id: 'read_user_account',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_USER_ACCOUNT',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_USER_ACCOUNT_DESCRIPTION'
-        },
-        {
-          id: 'write_user_account',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_USER_ACCOUNT',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_USER_ACCOUNT_DESCRIPTION'
         }
       ]
     },
@@ -440,23 +393,6 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER_ROLE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER_ROLE_DESCRIPTION',
           requires: []
-        },
-
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // - must delete TOKENS tooo
-        {
-          id: 'read_role',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_ROLE',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_ROLE_DESCRIPTION'
-        },
-        {
-          id: 'write_role',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_ROLE',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_ROLE_DESCRIPTION'
         }
       ]
     },
@@ -914,23 +850,6 @@ module.exports = function (Role) {
             'outbreak_view',
             'outbreak_create'
           ]
-        },
-
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // - must delete TOKENS tooo
-        {
-          id: 'read_outbreak',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_OUTBREAK',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_OUTBREAK_DESCRIPTION'
-        },
-        {
-          id: 'write_outbreak',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_OUTBREAK',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_OUTBREAK_DESCRIPTION'
         }
       ]
     },
@@ -1066,23 +985,6 @@ module.exports = function (Role) {
             'outbreak_view',
             'team_list'
           ]
-        },
-
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // - must delete TOKENS tooo
-        {
-          id: 'read_team',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_TEAM',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_TEAM_DESCRIPTION'
-        },
-        {
-          id: 'write_team',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_TEAM',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_TEAM_DESCRIPTION'
         }
       ]
     },
@@ -1766,25 +1668,6 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view'
           ]
-        },
-
-
-
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // - must delete TOKENS tooo
-        {
-          id: 'read_contact',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_CONTACT',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_CONTACT_DESCRIPTION'
-        },
-        {
-          id: 'write_contact',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_CONTACT',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_CONTACT_DESCRIPTION'
         }
       ]
     },
@@ -2233,23 +2116,6 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view'
           ]
-        },
-
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // - must delete TOKENS tooo
-        {
-          id: 'read_case',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_CASE',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_CASE_DESCRIPTION'
-        },
-        {
-          id: 'write_case',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_CASE',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_CASE_DESCRIPTION'
         }
       ]
     },
@@ -2479,23 +2345,6 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view'
           ]
-        },
-
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // OLD - MUST DELETE!!!!!!!!
-        // - must delete TOKENS tooo
-        {
-          id: 'read_followup',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_FOLLOW_UP',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_FOLLOW_UP_DESCRIPTION'
-        },
-        {
-          id: 'write_followup',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_FOLLOW_UP',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_FOLLOW_UP_DESCRIPTION'
         }
       ]
     },
@@ -3190,32 +3039,6 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view'
           ]
-        }
-      ]
-    },
-
-
-
-    // TO BE CHANGED
-    {
-      groupAllId: '---_all',
-      groupLabel: '---label',
-      groupDescription: '---D',
-      permissions: [
-        {
-          id: 'read_sys_config',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_SYS_CONFIG',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_SYS_CONFIG_DESCRIPTION'
-        },
-        {
-          id: 'write_sys_config',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_SYS_CONFIG',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_WRITE_SYS_CONFIG_DESCRIPTION'
-        },
-        {
-          id: 'read_report',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_REPORT',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_READ_REPORT_DESCRIPTION'
         }
       ]
     }
