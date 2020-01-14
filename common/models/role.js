@@ -1705,6 +1705,64 @@ module.exports = function (Role) {
             'outbreak_view'
           ]
         },
+        {
+          id: 'contact_view_follow_up_report',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_FOLLOW_UP_REPORT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_FOLLOW_UP_REPORT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'contact_count_from_follow_up',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CONTACT_FROM_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CONTACT_FROM_FOLLOW_UP_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'contact_count_lost_to_follow_up',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CONTACT_LOST_TO_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CONTACT_LOST_TO_FOLLOW_UP_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'contact_count_not_seen_in_x_days',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CONTACT_NOT_SEEN_IN_X_DAYS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CONTACT_NOT_SEEN_IN_X_DAYS_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'contact_count_seen',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CONTACT_SEEN',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CONTACT_SEEN_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'contact_count_successful_follow_ups',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CONTACT_SUCCESSFUL_FOLLOW_UPS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CONTACT_SUCCESSFUL_FOLLOW_UPS_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'contact_export_follow_up_success_rate_report',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_FOLLOW_UP_SUCCESS_RATE_REPORT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_FOLLOW_UP_SUCCESS_RATE_REPORT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+
+
 
         // OLD - MUST DELETE!!!!!!!!
         // OLD - MUST DELETE!!!!!!!!
@@ -2086,6 +2144,86 @@ module.exports = function (Role) {
           id: 'case_export_empty_investigation_forms',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_EMPTY_INVESTIGATION_FORMS',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_EMPTY_INVESTIGATION_FORMS_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_grouped_by_location_level',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CASE_BY_LOCATION_LEVEL',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CASE_BY_LOCATION_LEVEL_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_stratified_by_classification_over_time',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_STRATIFIED_BY_CLASSIFICATION_OVER_TIME',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_STRATIFIED_BY_CLASSIFICATION_OVER_TIME_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_stratified_by_outcome_over_time',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_STRATIFIED_BY_OUTCOME_OVER_TIME',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_STRATIFIED_BY_OUTCOME_OVER_TIME_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_stratified_by_classification_over_reporting_time',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_STRATIFIED_BY_CLASSIFICATION_OVER_REPORTING_TIME',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_STRATIFIED_BY_CLASSIFICATION_OVER_REPORTING_TIME_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_list_cases_by_period_and_contact_status',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_PER_PERIOD_AND_CONTACT_STATUS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_PER_PERIOD_AND_CONTACT_STATUS_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_list_cases_with_less_than_x_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_WITH_LESS_THAN_X_CONTACTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_WITH_LESS_THAN_X_CONTACTS_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_list_cases_new_in_previous_x_days_detected_among_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_NEW_IN_PREVIOUS_X_DAYS_DETECTED_AMONG_CONTACTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_NEW_IN_PREVIOUS_X_DAYS_DETECTED_AMONG_CONTACTS_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_list_cases_new_in_known_cot',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_NEW_IN_KNOWN_COT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_NEW_IN_KNOWN_COT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_count_case_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_CONTACTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_CONTACTS_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_export_classification_per_location_report',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_CLASSIFICATION_PER_LOCATION_REPORT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_CLASSIFICATION_PER_LOCATION_REPORT_DESCRIPTION',
           requires: [
             'outbreak_view'
           ]
@@ -2699,6 +2837,14 @@ module.exports = function (Role) {
             'case_view_relationship_contacts',
             'case_modify_relationship_contacts'
           ]
+        },
+        {
+          id: 'cot_list_new_from_contacts_became_cases',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_COT_NEW_FROM_CONTACTS_BECAME_CASES',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_COT_NEW_FROM_CONTACTS_BECAME_CASES_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
         }
       ]
     },
@@ -2742,6 +2888,301 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'duplicate_list'
+          ]
+        }
+      ]
+    },
+
+    // Dashboard
+    {
+      groupAllId: 'dashboard_all',
+      groupLabel: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_DASHBOARD',
+      groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_DASHBOARD_DESCRIPTION',
+      permissions: [
+        {
+          id: 'dashboard_view_case_summary_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_SUMMARY_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_SUMMARY_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_grouped_by_classification'
+          ]
+        },
+        {
+          id: 'dashboard_view_case_per_location_level_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_PER_LOCATION_LEVEL_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_PER_LOCATION_LEVEL_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_grouped_by_location_level'
+          ]
+        },
+        {
+          id: 'dashboard_view_case_hospitalized_pie_chart_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_HOSPITALIZED_PIE_CHART_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_HOSPITALIZED_PIE_CHART_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_list'
+          ]
+        },
+        {
+          id: 'dashboard_view_cot_size_histogram_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_COT_SIZE_HISTOGRAM_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_COT_SIZE_HISTOGRAM_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'cot_list'
+          ]
+        },
+        {
+          id: 'dashboard_view_epi_curve_classification_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_EPI_CURVE_CLASSIFICATION_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_EPI_CURVE_CLASSIFICATION_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_stratified_by_classification_over_time'
+          ]
+        },
+        {
+          id: 'dashboard_view_epi_curve_outcome_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_EPI_CURVE_OUTCOME_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_EPI_CURVE_OUTCOME_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_stratified_by_outcome_over_time'
+          ]
+        },
+        {
+          id: 'dashboard_view_epi_curve_reporting_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_EPI_CURVE_REPORTING_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_EPI_CURVE_REPORTING_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_stratified_by_classification_over_reporting_time'
+          ]
+        },
+        {
+          id: 'dashboard_view_contact_follow_up_report_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_FOLLOW_UP_REPORT_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_FOLLOW_UP_REPORT_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'contact_view_follow_up_report'
+          ]
+        },
+        {
+          id: 'dashboard_view_contact_status_report_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_STATUS_REPORT_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_STATUS_REPORT_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_list_cases_by_period_and_contact_status'
+          ]
+        },
+        {
+          id: 'dashboard_view_case_deceased_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_DECEASED_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_DECEASED_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_list'
+          ]
+        },
+        {
+          id: 'dashboard_view_case_hospitalized_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_HOSPITALIZED_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_HOSPITALIZED_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_list'
+          ]
+        },
+        {
+          id: 'dashboard_view_case_with_less_than_x_contacts_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_WITH_LESS_THAN_X_CONTACTS_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_WITH_LESS_THAN_X_CONTACTS_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_list_cases_with_less_than_x_contacts'
+          ]
+        },
+        {
+          id: 'dashboard_view_case_new_in_previous_x_days_detected_among_contacts_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NEW_IN_PREV_DAYS_AMONG_KNOWN_CONTACTS_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NEW_IN_PREV_DAYS_AMONG_KNOWN_CONTACTS_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_list_cases_new_in_previous_x_days_detected_among_contacts'
+          ]
+        },
+        {
+          id: 'dashboard_view_case_refusing_treatment_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_REFUSING_TREATMENT_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_REFUSING_TREATMENT_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_list'
+          ]
+        },
+        {
+          id: 'dashboard_view_case_new_known_cot_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NEW_IN_COT_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NEW_IN_COT_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_list_cases_new_in_known_cot'
+          ]
+        },
+        {
+          id: 'dashboard_view_case_with_pending_lab_results_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_WITH_PENDING_LAB_RESULTS_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_WITH_PENDING_LAB_RESULTS_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_list'
+          ]
+        },
+        {
+          id: 'dashboard_view_case_not_identified_through_contacts_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NOT_IDENTIFIED_THROUGH_CONTACTS_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NOT_IDENTIFIED_THROUGH_CONTACTS_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_list'
+          ]
+        },
+        {
+          id: 'dashboard_view_contacts_per_case_mean_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACTS_PER_CASE_MEAN_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACTS_PER_CASE_MEAN_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_count_case_contacts'
+          ]
+        },
+        {
+          id: 'dashboard_view_contacts_per_case_median_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACTS_PER_CASE_MEDIAN_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACTS_PER_CASE_MEDIAN_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_count_case_contacts'
+          ]
+        },
+        {
+          id: 'dashboard_view_contact_from_follow_up_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_FROM_FOLLOW_UP_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_FROM_FOLLOW_UP_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'contact_count_from_follow_up'
+          ]
+        },
+        {
+          id: 'dashboard_view_contact_lost_to_follow_up_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_LOST_TO_FOLLOW_UP_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_LOST_TO_FOLLOW_UP_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'contact_count_lost_to_follow_up'
+          ]
+        },
+        {
+          id: 'dashboard_view_contact_not_seen_in_x_days_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_NOT_SEEN_IN_X_DAYS_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_NOT_SEEN_IN_X_DAYS_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'contact_count_not_seen_in_x_days'
+          ]
+        },
+        {
+          id: 'dashboard_view_contact_become_case_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_BECOME_CASE_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_BECOME_CASE_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_list'
+          ]
+        },
+        {
+          id: 'dashboard_view_contact_seen_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_SEEN_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_SEEN_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'contact_count_seen'
+          ]
+        },
+        {
+          id: 'dashboard_view_contact_successful_follow_ups_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_SUCCESSFUL_FOLLOW_UPS_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_SUCCESSFUL_FOLLOW_UPS_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'contact_count_successful_follow_ups'
+          ]
+        },
+        {
+          id: 'dashboard_view_independent_cot_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_INDEPENDENT_COT_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_INDEPENDENT_COT_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'cot_list'
+          ]
+        },
+        {
+          id: 'dashboard_view_active_cot_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_ACTIVE_COT_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_ACTIVE_COT_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'cot_list'
+          ]
+        },
+        {
+          id: 'dashboard_view_new_chains_from_contacts_became_cases_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_NEW_CHAINS_FROM_CONTACTS_WHO_BECAME_CASES_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_NEW_CHAINS_FROM_CONTACTS_WHO_BECAME_CASES_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'cot_list_new_from_contacts_became_cases'
+          ]
+        },
+        {
+          id: 'dashboard_export_case_classification_per_location_report',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DASHBOARD_CASE_CLASSIFICATION_PER_LOCATION_REPORT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DASHBOARD_CASE_CLASSIFICATION_PER_LOCATION_REPORT_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_export_classification_per_location_report'
+          ]
+        },
+        {
+          id: 'dashboard_export_contact_follow_up_success_rate_report',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DASHBOARD_CONTACT_FOLLOW_UP_SUCCESS_RATE_REPORT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DASHBOARD_CONTACT_FOLLOW_UP_SUCCESS_RATE_REPORT_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'contact_export_follow_up_success_rate_report'
+          ]
+        },
+        {
+          id: 'dashboard_export_epi_curve',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DASHBOARD_EPI_CURVE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DASHBOARD_EPI_CURVE_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'dashboard_export_kpi',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DASHBOARD_KPI',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DASHBOARD_KPI_DESCRIPTION',
+          requires: [
+            'outbreak_view'
           ]
         }
       ]

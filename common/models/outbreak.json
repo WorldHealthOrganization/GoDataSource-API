@@ -1261,6 +1261,120 @@
       "permission": "ALLOW",
       "property": "exportCaseInvestigationTemplate"
     },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_grouped_by_location_level",
+      "permission": "ALLOW",
+      "property": "countCasesPerLocationLevel"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_stratified_by_classification_over_time",
+      "permission": "ALLOW",
+      "property": "countCasesStratifiedByClassificationOverTime"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_stratified_by_outcome_over_time",
+      "permission": "ALLOW",
+      "property": "countCasesStratifiedByOutcomeOverTime"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_stratified_by_classification_over_reporting_time",
+      "permission": "ALLOW",
+      "property": "countCasesStratifiedByClassificationOverReportingTime"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_view_follow_up_report",
+      "permission": "ALLOW",
+      "property": "getContactFollowUpReport"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list_cases_by_period_and_contact_status",
+      "permission": "ALLOW",
+      "property": "countCasesPerPeriodPerContactStatus"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list_cases_with_less_than_x_contacts",
+      "permission": "ALLOW",
+      "property": "countCasesWithLessThanXContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list_cases_new_in_previous_x_days_detected_among_contacts",
+      "permission": "ALLOW",
+      "property": "countNewCasesInThePreviousXDaysDetectedAmongKnownContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list_cases_new_in_known_cot",
+      "permission": "ALLOW",
+      "property": "countNewCasesInKnownTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_count_case_contacts",
+      "permission": "ALLOW",
+      "property": "countCasesContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_count_from_follow_up",
+      "permission": "ALLOW",
+      "property": "filteredCountContactsOnFollowUpList"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_count_lost_to_follow_up",
+      "permission": "ALLOW",
+      "property": "countContactsLostToFollowup"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_count_not_seen_in_x_days",
+      "permission": "ALLOW",
+      "property": "countContactsNotSeenInXDays"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_count_seen",
+      "permission": "ALLOW",
+      "property": "countContactsSeen"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_count_successful_follow_ups",
+      "permission": "ALLOW",
+      "property": "countContactsWithSuccessfulFollowups"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cot_list_new_from_contacts_became_cases",
+      "permission": "ALLOW",
+      "property": "buildNewChainsFromRegisteredContactsWhoBecameCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cot_list_new_from_contacts_became_cases",
+      "permission": "ALLOW",
+      "property": "countNewChainsFromRegisteredContactsWhoBecameCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_export_classification_per_location_report",
+      "permission": "ALLOW",
+      "property": "downloadCaseClassificationPerLocationLevelReport"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_export_follow_up_success_rate_report",
+      "permission": "ALLOW",
+      "property": "downloadContactTracingPerLocationLevelReport"
+    },
 
 
 
@@ -1287,33 +1401,9 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactsSeen"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactsLostToFollowup"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countNewCasesInKnownTransmissionChains"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "countNewCasesOutsideKnownTransmissionChains"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCasesWithLessThanXContacts"
     },
     {
       "principalType": "ROLE",
@@ -1323,93 +1413,15 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "buildNewChainsFromRegisteredContactsWhoBecameCases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countNewChainsFromRegisteredContactsWhoBecameCases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countCasesContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countCasesContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCasesContacts"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "countFollowUpContacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countNewCasesInThePreviousXDaysDetectedAmongKnownContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countNewCasesInThePreviousXDaysDetectedAmongKnownContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactsNotSeenInXDays"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countContactsNotSeenInXDays"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactsWithSuccessfulFollowups"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_team",
-      "permission": "ALLOW",
-      "property": "countContactsWithSuccessfulFollowups"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countContactsWithSuccessfulFollowups"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "read_report",
       "permission": "ALLOW",
       "property": "countCasesPerPeriod"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countCasesPerPeriodPerContactStatus"
     },
     {
       "principalType": "ROLE",
@@ -1431,57 +1443,9 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCasesStratifiedByClassificationOverTime"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCasesStratifiedByOutcomeOverTime"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCasesStratifiedByClassificationOverReportingTime"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "downloadCaseClassificationPerLocationLevelReport"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCasesPerLocationLevel"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "downloadContactTracingPerLocationLevelReport"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "read_contact",
       "permission": "ALLOW",
       "property": "countContactsPerLocationLevel"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "filteredCountContactsOnFollowUpList"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "getContactFollowUpReport"
     }
   ],
   "methods": {
