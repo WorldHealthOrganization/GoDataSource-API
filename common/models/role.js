@@ -508,6 +508,12 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_BACKUP',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_BACKUP_DESCRIPTION',
           requires: []
+        },
+        {
+          id: 'backup_view_cloud_location',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_BACKUP_CLOUD_LOCATION',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_BACKUP_CLOUD_LOCATION_DESCRIPTION',
+          requires: []
         }
       ]
     },

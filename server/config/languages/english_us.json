@@ -161,6 +161,8 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BACKUP_AUTOMATIC_SETTINGS_DESCRIPTION": "This permission allows settings automatic backup settings",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_BACKUP": "Backup - restore",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_BACKUP_DESCRIPTION": "This permission allows restoring a backup",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_BACKUP_CLOUD_LOCATION": "Backup - view cloud locations",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_BACKUP_CLOUD_LOCATION_DESCRIPTION": "This permission allows you to see cloud backup locations. Menu - Account - Cloud backup page.",
 
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_SYNC": "Sync",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_SYNC_DESCRIPTION": "Sync logs permissions",
