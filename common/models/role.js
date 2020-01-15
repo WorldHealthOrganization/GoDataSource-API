@@ -1668,6 +1668,55 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view'
           ]
+        },
+        //
+        {
+          id: 'contact_list_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_list'
+          ]
+        },
+        {
+          id: 'contact_view_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_view'
+          ]
+        },
+        {
+          id: 'contact_create_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_create'
+          ]
+        },
+        {
+          id: 'contact_modify_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_modify'
+          ]
+        },
+        {
+          id: 'contact_delete_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_delete'
+          ]
+        },
+        {
+          id: 'contact_restore_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_restore'
+          ]
         }
       ]
     },
@@ -2116,6 +2165,54 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view'
           ]
+        },
+        {
+          id: 'case_list_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_list'
+          ]
+        },
+        {
+          id: 'case_view_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CASE_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CASE_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_view'
+          ]
+        },
+        {
+          id: 'case_create_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CASE_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CASE_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_create'
+          ]
+        },
+        {
+          id: 'case_modify_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CASE_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CASE_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_modify'
+          ]
+        },
+        {
+          id: 'case_delete_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CASE_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CASE_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_delete'
+          ]
+        },
+        {
+          id: 'case_restore_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CASE_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CASE_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_restore'
+          ]
         }
       ]
     },
@@ -2384,6 +2481,7 @@ module.exports = function (Role) {
             'case_view'
           ]
         },
+
         {
           id: 'lab_result_modify',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_LAB_RESULT',
