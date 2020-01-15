@@ -48,39 +48,39 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_sys_config",
+      "principalId": "backup_list",
       "permission": "ALLOW",
       "property": "find"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_sys_config",
+      "principalId": "backup_list",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "backup_view",
       "permission": "ALLOW",
       "property": "findById"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_sys_config",
+      "principalId": "backup_create",
       "permission": "ALLOW",
       "property": "createManualBackup"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_sys_config",
+      "principalId": "backup_restore",
       "permission": "ALLOW",
       "property": "restoreBackup"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_sys_config",
+      "principalId": "backup_delete",
       "permission": "ALLOW",
       "property": "removeBackup"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_sys_config",
-      "permission": "ALLOW",
-      "property": "count"
     }
   ],
   "methods": {

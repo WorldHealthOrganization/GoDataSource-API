@@ -124,6 +124,17 @@ module.exports = function (User) {
   };
 
   /**
+   * Attach custom data to user model
+   */
+  User.helpers.attachCustomProperties = function (userModel, callback) {
+    // available permissions
+    userModel.availablePermissions = app.models.role.availablePermissions;
+
+    // finished
+    return callback();
+  };
+
+  /**
    * Send password reset email
    */
   User.on('resetPasswordRequest', function (info) {
@@ -279,5 +290,14 @@ module.exports = function (User) {
         return Async.series(updateJobs, err => next(err));
       });
     });
+  };
+
+  /**
+   * Remove data
+   */
+  User.sanitize = function (userData) {
+    delete userData.password;
+    delete userData.settings;
+    delete userData.roleIds;
   };
 };

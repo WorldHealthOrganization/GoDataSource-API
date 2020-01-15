@@ -64,6 +64,16 @@ module.exports = function (app) {
     if (authData && authData.user && authData.user.permissionsList) {
       // check the permission against the user's permissionIds
       hasAccess = authData.user.permissionsList.indexOf(permission) !== -1;
+
+      // if we don't have specific permission, maybe we have a global one that covers this one as well ?
+      if (!hasAccess) {
+        if (
+          Role.permissionGroupMap &&
+          Role.permissionGroupMap[permission]
+        ) {
+          hasAccess = authData.user.permissionsList.indexOf(Role.permissionGroupMap[permission].groupAllId) !== -1;
+        }
+      }
     }
 
     if (!hasAccess) {
@@ -127,7 +137,6 @@ module.exports = function (app) {
    * Roles are just groups of permissions, register role resolver for each permission
    */
   Role.availablePermissionsKeys.forEach(function (permission) {
-
     Role.registerResolver(permission, function (permission, context, callback) {
       // after verifying the user has the permission, also verify ownership
       const _callback = function (error, hasPermission) {

@@ -38,37 +38,37 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_team",
+      "principalId": "team_list",
       "permission": "ALLOW",
       "property": "find"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_team",
-      "permission": "ALLOW",
-      "property": "findById"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_team",
+      "principalId": "team_list",
       "permission": "ALLOW",
       "property": "count"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_team",
+      "principalId": "team_view",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "team_create",
       "permission": "ALLOW",
       "property": "create"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_team",
+      "principalId": "team_modify",
       "permission": "ALLOW",
       "property": "patchAttributes"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_team",
+      "principalId": "team_delete",
       "permission": "ALLOW",
       "property": "deleteById"
     }

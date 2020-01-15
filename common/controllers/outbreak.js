@@ -41,6 +41,10 @@ module.exports = function (Outbreak) {
     'prototype.__get__referenceData',
     'prototype.__delete__referenceData',
     'prototype.__count__referenceData',
+    'prototype.__create__referenceData',
+    'prototype.__findById__referenceData',
+    'prototype.__updateById__referenceData',
+    'prototype.__destroyById__referenceData',
     'prototype.__create__followUps',
     'prototype.__delete__followUps',
     'prototype.__updateById__followUps',
@@ -61,7 +65,8 @@ module.exports = function (Outbreak) {
     'prototype.__get__labResults',
     'prototype.__get__cases',
     'prototype.__get__contacts',
-    'prototype.__get__events'
+    'prototype.__get__events',
+    'prototype.__count__contacts'
   ]);
 
   // attach search by relation property behavior on get contacts
@@ -980,17 +985,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Retrieve system and own reference data
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.getReferenceData = function (filter, callback) {
-    helpers.getSystemAndOwnReferenceData(this.id, filter)
-      .then((data) => callback(null, data))
-      .catch(callback);
-  };
-
-  /**
    * Restore a deleted follow up
    * @param contactId
    * @param followUpId
@@ -1224,39 +1218,6 @@ module.exports = function (Outbreak) {
         callback(null, visualId);
       })
       .catch(callback);
-  };
-
-  /**
-   * Get a resource link embedded in a QR Code Image (png) for a case
-   * @param caseId
-   * @param callback
-   */
-  Outbreak.prototype.getCaseQRResourceLink = function (caseId, callback) {
-    Outbreak.helpers.getPersonQRResourceLink(this, app.models.case.modelName, caseId, function (error, qrCode) {
-      callback(null, qrCode, 'image/png', `attachment;filename=case-${caseId}.png`);
-    });
-  };
-
-  /**
-   * Get a resource link embedded in a QR Code Image (png) for a contact
-   * @param contactId
-   * @param callback
-   */
-  Outbreak.prototype.getContactQRResourceLink = function (contactId, callback) {
-    Outbreak.helpers.getPersonQRResourceLink(this, app.models.contact.modelName, contactId, function (error, qrCode) {
-      callback(null, qrCode, 'image/png', `attachment;filename=contact-${contactId}.png`);
-    });
-  };
-
-  /**
-   * Get a resource link embedded in a QR Code Image (png) for a event
-   * @param eventId
-   * @param callback
-   */
-  Outbreak.prototype.getEventQRResourceLink = function (eventId, callback) {
-    Outbreak.helpers.getPersonQRResourceLink(this, app.models.event.modelName, eventId, function (error, qrCode) {
-      callback(null, qrCode, 'image/png', `attachment;filename=event-${eventId}.png`);
-    });
   };
 
   /**
@@ -4209,7 +4170,7 @@ module.exports = function (Outbreak) {
                   break;
                 }
               }
-              
+
               return inconsistencyInKeyDates;
             }`
           }]
@@ -4463,36 +4424,6 @@ module.exports = function (Outbreak) {
 
         // send response
         callback(null, people);
-      })
-      .catch(callback);
-  };
-
-  /**
-   * Restore a deleted reference data
-   * @param referenceDataId
-   * @param options
-   * @param callback
-   */
-  Outbreak.prototype.restoreReferenceData = function (referenceDataId, options, callback) {
-    app.models.referenceData
-      .findOne({
-        deleted: true,
-        where: {
-          id: referenceDataId,
-          outbreakId: this.id,
-          deleted: true
-        }
-      })
-      .then(function (instance) {
-        if (!instance) {
-          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
-            model: app.models.referenceData.modelName,
-            id: referenceDataId
-          });
-        }
-
-        // undo reference data delete
-        instance.undoDelete(options, callback);
       })
       .catch(callback);
   };
@@ -6013,157 +5944,6 @@ module.exports = function (Outbreak) {
           .catch(callback);
       });
     });
-  };
-
-  /**
-   * Export filtered reference data to a file
-   * @param filter
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
-   * @param options
-   * @param callback
-   */
-  Outbreak.prototype.exportFilteredReferenceData = function (filter, exportType, options, callback) {
-    const _filters = app.utils.remote.mergeFilters(
-      {
-        where: {
-          or: [
-            {
-              outbreakId: {
-                eq: null
-              }
-            },
-            {
-              outbreakId: this.id
-            }
-          ]
-        }
-      },
-      filter || {});
-    app.utils.remote.helpers.exportFilteredModelsList(
-      app,
-      app.models.referenceData,
-      {},
-      _filters.where,
-      exportType,
-      'Reference Data',
-      null,
-      [],
-      options,
-      function (results) {
-        // translate category, value and description fields
-        return new Promise(function (resolve, reject) {
-          // load context user
-          const contextUser = app.utils.remote.getUserFromOptions(options);
-          // load user language dictionary
-          app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-            // handle errors
-            if (error) {
-              return reject(error);
-            }
-            // go trough all results
-            results.forEach(function (result) {
-              // translate category, value and description
-              result.categoryId = dictionary.getTranslation(result.categoryId);
-              result.value = dictionary.getTranslation(result.value);
-              result.description = dictionary.getTranslation(result.description);
-            });
-            resolve(results);
-          });
-        });
-      },
-      callback
-    );
-  };
-
-  /**
-   * Import an importable reference data file using file ID and a map to remap parameters & reference data values
-   * @param body
-   * @param options
-   * @param callback
-   */
-  Outbreak.prototype.importImportableReferenceDataFileUsingMap = function (body, options, callback) {
-    const self = this;
-    // treat the sync as a regular operation, not really a sync
-    options._sync = false;
-    // get importable file
-    app.models.importableFile
-      .getTemporaryFileById(body.fileId, function (error, file) {
-        // handle errors
-        if (error) {
-          return callback(error);
-        }
-        try {
-          // parse file content
-          const rawReferenceDataList = JSON.parse(file);
-          // remap properties & values
-          const referenceDataList = app.utils.helpers.convertBooleanProperties(
-            app.models.referenceData,
-            app.utils.helpers.remapProperties(rawReferenceDataList, body.map, body.valuesMap));
-          // build a list of sync operations
-          const syncReferenceData = [];
-          // define a container for error results
-          const syncErrors = [];
-          // define a toString function to be used by error handler
-          syncErrors.toString = function () {
-            return JSON.stringify(this);
-          };
-          // go through all entries
-          referenceDataList.forEach(function (referenceDataItem, index) {
-            syncReferenceData.push(function (callback) {
-              // add outbreak id
-              referenceDataItem.outbreakId = self.id;
-              // sync reference data
-              return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.referenceData, referenceDataItem, options)
-                .then(function (syncResult) {
-                  callback(null, syncResult.record);
-                })
-                .catch(function (error) {
-                  // on error, store the error, but don't stop, continue with other items
-                  syncErrors.push({
-                    message: `Failed to import reference data ${index + 1}`,
-                    error: error,
-                    recordNo: index + 1,
-                    data: {
-                      file: rawReferenceDataList[index],
-                      save: referenceDataItem
-                    }
-                  });
-                  callback(null, null);
-                });
-            });
-          });
-          // start importing reference data
-          async.parallelLimit(syncReferenceData, 10, function (error, results) {
-            // handle errors (should not be any)
-            if (error) {
-              return callback(error);
-            }
-            // if import errors were found
-            if (syncErrors.length) {
-              // remove results that failed to be added
-              results = results.filter(result => result !== null);
-              // define a toString function to be used by error handler
-              results.toString = function () {
-                return JSON.stringify(this);
-              };
-              // return error with partial success
-              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-                model: app.models.referenceData.modelName,
-                failed: syncErrors,
-                success: results
-              }));
-            }
-            // send the result
-            callback(null, results);
-          });
-        } catch (error) {
-          // handle parse error
-          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
-            contentType: 'JSON',
-            details: error.message
-          }));
-        }
-      });
   };
 
   /**

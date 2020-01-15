@@ -88,39 +88,9 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_sys_config",
-      "permissions": "ALLOW",
-      "property": "findById"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_sys_config",
-      "permissions": "ALLOW",
-      "property": "create"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_sys_config",
-      "permissions": "ALLOW",
-      "property": "patchAttributes"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_sys_config",
-      "permission": "ALLOW",
-      "property": "deleteById"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "count"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
-      "property": "exportHierarchicalList"
     },
     {
       "principalType": "ROLE",
@@ -130,31 +100,61 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_sys_config",
+      "principalId": "location_view",
+      "permissions": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "location_create",
+      "permissions": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "location_modify",
+      "permissions": "ALLOW",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "location_delete",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "location_export",
+      "permission": "ALLOW",
+      "property": "exportHierarchicalList"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "location_import",
       "permission": "ALLOW",
       "property": "importHierarchicalList"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_sys_config",
+      "principalId": "location_import",
       "permission": "ALLOW",
       "property": "importImportableFileUsingMap"
     },
     {
       "principalType": "ROLE",
-      "principalId": "$authenticated",
+      "principalId": "location_usage",
       "permission": "ALLOW",
       "property": "getUsage"
     },
     {
       "principalType": "ROLE",
-      "principalId": "$authenticated",
+      "principalId": "location_usage",
       "permission": "ALLOW",
       "property": "countUsage"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_sys_config",
+      "principalId": "location_propagate_geo_to_persons",
       "permission": "ALLOW",
       "property": "propagateGeoLocationToLinkedPeople"
     }

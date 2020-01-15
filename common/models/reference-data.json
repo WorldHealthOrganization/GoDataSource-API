@@ -100,13 +100,13 @@
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
-      "property": "findById"
+      "property": "count"
     },
     {
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
-      "property": "count"
+      "property": "findById"
     },
     {
       "principalType": "ROLE",
@@ -116,49 +116,31 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
-      "property": "getUsage"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
-      "property": "countUsage"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_reference_data",
+      "principalId": "reference_data_create_category_item",
       "permission": "ALLOW",
       "property": "create"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_reference_data",
+      "principalId": "reference_data_modify_category_item",
       "permission": "ALLOW",
       "property": "patchAttributes"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_reference_data",
+      "principalId": "reference_data_delete_category_item",
       "permission": "ALLOW",
       "property": "deleteById"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_reference_data",
-      "permission": "ALLOW",
-      "property": "restore"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
+      "principalId": "reference_data_export",
       "permission": "ALLOW",
       "property": "exportFilteredReferenceData"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_reference_data",
+      "principalId": "reference_data_import",
       "permission": "ALLOW",
       "property": "importImportableReferenceDataFileUsingMap"
     }
@@ -187,91 +169,6 @@
       "http": {
         "verb": "get",
         "path": "/available-categories"
-      }
-    },
-    "prototype.getUsage": {
-      "description": "Find usage for a record.",
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
-        }
-      ],
-      "returns": {
-        "description": "Record usage locations",
-        "arg": "data",
-        "type": {
-          "location": [],
-          "template": [],
-          "outbreak": [],
-          "followUp": [],
-          "labResult": [],
-          "case": [],
-          "contact": [],
-          "address": [],
-          "relationship": [],
-          "event": []
-        },
-        "root": true,
-        "required": true
-      },
-      "http": [
-        {
-          "verb": "get",
-          "path": "/usage"
-        }
-      ]
-    },
-    "prototype.countUsage": {
-      "description": "Count usage for a record.",
-      "accepts": [
-        {
-          "arg": "where",
-          "type": "object",
-          "description": "Criteria to match model instances"
-        }
-      ],
-      "returns": {
-        "arg": "count",
-        "type": "integer",
-        "required": true
-      },
-      "http": [
-        {
-          "verb": "get",
-          "path": "/usage/count"
-        }
-      ]
-    },
-    "restore": {
-      "accepts": [
-        {
-          "arg": "id",
-          "type": "string",
-          "description": "Reference data ID"
-        },
-        {
-          "arg": "options",
-          "type": "object",
-          "http": "optionsFromRequest"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "referenceData",
-          "type": [
-            "referenceData"
-          ],
-          "description": "Reference Data",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Restores a deleted Reference Data.",
-      "http": {
-        "verb": "post",
-        "path": "/:id/restore"
       }
     },
     "exportFilteredReferenceData": {

@@ -66,8 +66,10 @@ module.exports = function (Outbreak) {
 
   // The permissions that influence an user's ability to see a person's data
   Outbreak.personReadPermissions = [
-    'read_case',
-    'read_contact'
+    'case_list',
+    'case_view',
+    'contact_list',
+    'contact_view',
   ];
 
   // The fields that will be displayed when a user receives a person's data even though he does not
@@ -812,12 +814,18 @@ module.exports = function (Outbreak) {
     let filter = _.get(context, 'args.filter', {});
     // create a map of required permissions for each type
     let requiredPermissionMap = {
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'read_case',
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'read_case',
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'read_contact'
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'case_list',
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event_list',
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'contact_list'
     };
     // if the required permission is missing
-    if (permissions.indexOf(requiredPermissionMap[type]) === -1) {
+    if (
+      permissions.indexOf(requiredPermissionMap[type]) === -1 && (
+        !app.models.role.permissionGroupMap ||
+        !app.models.role.permissionGroupMap[requiredPermissionMap[type]] ||
+        permissions.indexOf(app.models.role.permissionGroupMap[requiredPermissionMap[type]].groupAllId) === -1
+      )
+    ) {
       // use restricted field
       filter = createRestrictedFilter(filter, [...Outbreak.noPersonReadPermissionFields, 'relationships', 'persons', 'people']);
       // update filter
@@ -1392,12 +1400,18 @@ module.exports = function (Outbreak) {
    */
   Outbreak.helpers.limitPersonInformation = function (model, permissions) {
     const personReadPermissionMap = {
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'read_contact',
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'read_case',
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'read_case'
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'contact_list',
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'case_list',
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event_list'
     };
 
-    if (permissions.indexOf(personReadPermissionMap[model.type]) === -1) {
+    if (
+      permissions.indexOf(personReadPermissionMap[model.type]) === -1 && (
+        !app.models.role.permissionGroupMap ||
+        !app.models.role.permissionGroupMap[personReadPermissionMap[model.type]] ||
+        permissions.indexOf(app.models.role.permissionGroupMap[personReadPermissionMap[model.type]].groupAllId) === -1
+      )
+    ) {
       for (let key in model) {
         if (Outbreak.noPersonReadPermissionFields.indexOf(key) === -1) {
           delete model[key];

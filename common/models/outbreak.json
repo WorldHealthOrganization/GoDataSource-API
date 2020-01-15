@@ -195,897 +195,9 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "find"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "create"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "patchAttributes"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "findById"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "deleteById"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "count"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "findCases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "findCases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__create__cases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__findById__cases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__updateById__cases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__destroyById__cases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__count__cases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "findContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "findContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "__create__contacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "__findById__contacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "__updateById__contacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "__destroyById__contacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "__count__contacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__get__cases__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__create__cases__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__findById__cases__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__updateById__cases__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__destroyById__cases__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__count__cases__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "__get__contacts__followUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_followup",
-      "permission": "ALLOW",
-      "property": "__create__contacts__followUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "__findById__contacts__followUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_followup",
-      "permission": "ALLOW",
-      "property": "__updateById__contacts__followUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_followup",
-      "permission": "ALLOW",
-      "property": "__destroyById__contacts__followUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "__count__contacts__followUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_followup",
-      "permission": "ALLOW",
-      "property": "restoreContactFollowUp"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "findCaseRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "getCaseRelationshipsAvailablePeople"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCaseRelationshipsAvailablePeople"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "findContactRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "getContactRelationshipsAvailablePeople"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactRelationshipsAvailablePeople"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "findEventRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "createCaseRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "createContactRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "createEventRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "setTargetAndSourceForRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "setTargetAndSourceForRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "getCaseRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "getContactRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "getEventRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "updateCaseRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "updateContactRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "updateEventRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "deleteCaseRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "deleteContactRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "deleteEventRelationship"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCaseRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "filteredCountCaseRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "filteredCountContactRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countEventRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "filteredCountEventRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "convertContactToCase"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "convertCaseToContact"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "getLocationsHierarchicalList"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "restoreCase"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "restoreContact"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "restoreEvent"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "findEvents"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "findEvents"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__create__events"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__findById__events"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__updateById__events"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__destroyById__events"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__count__events"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "getReferenceData"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "__create__referenceData"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "__findById__referenceData"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "__updateById__referenceData"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "__destroyById__referenceData"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "generateCaseVisualId"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "generateContactVisualId"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "getCaseQRResourceLink"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "getContactQRResourceLink"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "getEventQRResourceLink"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "__get__clusters"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "__findById__clusters"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "__create__clusters"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "__updateById__clusters"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "__destroyById__clusters"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "__count__clusters"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__get__clusters__relationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "__get__clusters__relationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__count__clusters__relationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "__count__clusters__relationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "countNewContactsByExposure"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countNewContactsByExposure"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_followup",
-      "permission": "ALLOW",
-      "property": "generateFollowups"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "filteredCountCases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "filteredCountCases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "filteredCountContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "filteredCountContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "filteredCountEvents"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "filteredCountEvents"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countIndependentTransmissionChains"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "getIndependentTransmissionChains"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "findFollowUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "__findById__followUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "__count__followUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactsSeen"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactsLostToFollowup"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countNewCasesInKnownTransmissionChains"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countNewCasesOutsideKnownTransmissionChains"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCasesWithLessThanXContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countEventNewContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "longPeriodsBetweenDatesOfOnsetInTransmissionChains"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "buildNewChainsFromRegisteredContactsWhoBecameCases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countNewChainsFromRegisteredContactsWhoBecameCases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countCasesContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countCasesContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCasesContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "findSecondaryCasesWithDateOfOnsetBeforePrimaryCase"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countFollowUpContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countNewCasesInThePreviousXDaysDetectedAmongKnownContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countNewCasesInThePreviousXDaysDetectedAmongKnownContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactsNotSeenInXDays"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countContactsNotSeenInXDays"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactsWithSuccessfulFollowups"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_team",
-      "permission": "ALLOW",
-      "property": "countContactsWithSuccessfulFollowups"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countContactsWithSuccessfulFollowups"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countFollowUpsPerTeamPerDay"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_team",
-      "permission": "ALLOW",
-      "property": "countFollowUpsPerTeamPerDay"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "mergePeople"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "mergePeople"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "exportFilteredCases"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "getBarsTransmissionChains"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "exportFilteredRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "exportFilteredRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countCasesPerPeriod"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "countCasesPerPeriodPerContactStatus"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "listLatestFollowUpsForContactsIfNotPerformed"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "filteredCountLatestFollowUpsForContactsIfNotPerformed"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__get__people"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "__get__people"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__count__people"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "__count__people"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "listInconsistenciesInKeyDates"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "listInconsistenciesInKeyDates"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "restoreReferenceData"
     },
     {
       "principalType": "ROLE",
@@ -1101,567 +213,1185 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_case",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
-      "property": "importImportableLabResultsFileUsingMap"
+      "property": "find"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_outbreak",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
-      "property": "exportCaseInvestigationTemplate"
+      "property": "count"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_report",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "__findById__attachments"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "attachmentUpload"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "attachmentUpload"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "attachmentDownload"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "attachmentDownload"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "__destroyById__attachments"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "__destroyById__attachments"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "outbreak_create",
+      "permission": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "outbreak_modify",
+      "permission": "ALLOW",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "outbreak_view",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "outbreak_delete",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list",
+      "permission": "ALLOW",
+      "property": "findCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list",
+      "permission": "ALLOW",
+      "property": "__count__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_create",
+      "permission": "ALLOW",
+      "property": "__create__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_view",
+      "permission": "ALLOW",
+      "property": "__findById__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_modify",
+      "permission": "ALLOW",
+      "property": "__updateById__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__cases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_list",
+      "permission": "ALLOW",
+      "property": "findContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_list",
+      "permission": "ALLOW",
+      "property": "countContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_create",
+      "permission": "ALLOW",
+      "property": "__create__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_view",
+      "permission": "ALLOW",
+      "property": "__findById__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_modify",
+      "permission": "ALLOW",
+      "property": "__updateById__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_list",
+      "permission": "ALLOW",
+      "property": "__get__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_list",
+      "permission": "ALLOW",
+      "property": "__count__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_create",
+      "permission": "ALLOW",
+      "property": "__create__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_view",
+      "permission": "ALLOW",
+      "property": "__findById__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_modify",
+      "permission": "ALLOW",
+      "property": "__updateById__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_list",
+      "permission": "ALLOW",
+      "property": "__get__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_list",
+      "permission": "ALLOW",
+      "property": "__count__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_create",
+      "permission": "ALLOW",
+      "property": "__create__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_view",
+      "permission": "ALLOW",
+      "property": "__findById__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_modify",
+      "permission": "ALLOW",
+      "property": "__updateById__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__contacts__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_restore",
+      "permission": "ALLOW",
+      "property": "restoreContactFollowUp"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_list",
+      "permission": "ALLOW",
+      "property": "findCaseRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_list",
+      "permission": "ALLOW",
+      "property": "findContactRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_list",
+      "permission": "ALLOW",
+      "property": "findEventRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_create",
+      "permission": "ALLOW",
+      "property": "createCaseRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_create",
+      "permission": "ALLOW",
+      "property": "createContactRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_create",
+      "permission": "ALLOW",
+      "property": "createEventRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_reverse",
+      "permission": "ALLOW",
+      "property": "setTargetAndSourceForRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_view",
+      "permission": "ALLOW",
+      "property": "getCaseRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_view",
+      "permission": "ALLOW",
+      "property": "getContactRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_view",
+      "permission": "ALLOW",
+      "property": "getEventRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_modify",
+      "permission": "ALLOW",
+      "property": "updateCaseRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_modify",
+      "permission": "ALLOW",
+      "property": "updateContactRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_modify",
+      "permission": "ALLOW",
+      "property": "updateEventRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_delete",
+      "permission": "ALLOW",
+      "property": "deleteCaseRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_delete",
+      "permission": "ALLOW",
+      "property": "deleteContactRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_delete",
+      "permission": "ALLOW",
+      "property": "deleteEventRelationship"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_list",
+      "permission": "ALLOW",
+      "property": "countCaseRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_list",
+      "permission": "ALLOW",
+      "property": "filteredCountCaseRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_list",
+      "permission": "ALLOW",
+      "property": "countContactRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_list",
+      "permission": "ALLOW",
+      "property": "filteredCountContactRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_list",
+      "permission": "ALLOW",
+      "property": "countEventRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_list",
+      "permission": "ALLOW",
+      "property": "filteredCountEventRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_restore",
+      "permission": "ALLOW",
+      "property": "restoreEvent"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_list",
+      "permission": "ALLOW",
+      "property": "findEvents"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_create",
+      "permission": "ALLOW",
+      "property": "__create__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_view",
+      "permission": "ALLOW",
+      "property": "__findById__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_modify",
+      "permission": "ALLOW",
+      "property": "__updateById__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_list",
+      "permission": "ALLOW",
+      "property": "__count__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_list",
+      "permission": "ALLOW",
+      "property": "filteredCountEvents"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cot_list",
+      "permission": "ALLOW",
+      "property": "getIndependentTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cot_list",
+      "permission": "ALLOW",
+      "property": "countIndependentTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cluster_list",
+      "permission": "ALLOW",
+      "property": "__get__clusters"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cluster_view",
+      "permission": "ALLOW",
+      "property": "__findById__clusters"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cluster_create",
+      "permission": "ALLOW",
+      "property": "__create__clusters"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cluster_modify",
+      "permission": "ALLOW",
+      "property": "__updateById__clusters"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cluster_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__clusters"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cluster_list",
+      "permission": "ALLOW",
+      "property": "__count__clusters"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cluster_list_people",
+      "permission": "ALLOW",
+      "property": "__get__clusters__relationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cluster_list_people",
+      "permission": "ALLOW",
+      "property": "__count__clusters__relationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_convert_to_case",
+      "permission": "ALLOW",
+      "property": "convertContactToCase"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_restore",
+      "permission": "ALLOW",
+      "property": "restoreContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_generate_visual_id",
+      "permission": "ALLOW",
+      "property": "generateContactVisualId"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_generate_visual_id",
+      "permission": "ALLOW",
+      "property": "generateCaseVisualId"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_list",
+      "permission": "ALLOW",
+      "property": "filteredCountContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "duplicate_merge_cases",
+      "permission": "ALLOW",
+      "property": "mergePeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "duplicate_merge_contacts",
+      "permission": "ALLOW",
+      "property": "mergePeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "duplicate_merge_events",
+      "permission": "ALLOW",
+      "property": "mergePeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cot_view_bar_chart",
+      "permission": "ALLOW",
+      "property": "getBarsTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "relationship_export",
+      "permission": "ALLOW",
+      "property": "exportFilteredRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list",
+      "permission": "ALLOW",
+      "property": "__get__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_list",
+      "permission": "ALLOW",
+      "property": "__get__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_list",
+      "permission": "ALLOW",
+      "property": "__get__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list",
+      "permission": "ALLOW",
+      "property": "__count__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_list",
+      "permission": "ALLOW",
+      "property": "__count__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_list",
+      "permission": "ALLOW",
+      "property": "__count__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "outbreak_see_inconsistencies",
+      "permission": "ALLOW",
+      "property": "listInconsistenciesInKeyDates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_export_dossier",
       "permission": "ALLOW",
       "property": "contactDossier"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_report",
-      "permission": "ALLOW",
-      "property": "caseDossier"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "contactDossier"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "caseDossier"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "importImportableCasesFileUsingMap"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "contact_import",
       "permission": "ALLOW",
       "property": "importImportableContactsFileUsingMap"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactsPerLocation"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "contact_export",
       "permission": "ALLOW",
       "property": "exportFilteredContacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "exportFilteredContactFollowUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "exportFilteredReferenceData"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
-      "permission": "ALLOW",
-      "property": "importImportableReferenceDataFileUsingMap"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "cluster_list_people",
       "permission": "ALLOW",
       "property": "findPeopleInCluster"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "findPeopleInCluster"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "cluster_list_people",
       "permission": "ALLOW",
       "property": "countPeopleInCluster"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countPeopleInCluster"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "filteredCountFollowUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_followup",
-      "permission": "ALLOW",
-      "property": "exportFilteredFollowups"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "exportExistingEmptyCaseInvestigation"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "duplicate_list",
       "permission": "ALLOW",
       "property": "findPossiblePersonDuplicates"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "duplicate_list",
       "permission": "ALLOW",
       "property": "countPossiblePersonDuplicates"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "case_create_bulk_contact",
       "permission": "ALLOW",
       "property": "createCaseMultipleContacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "event_create_bulk_contact",
       "permission": "ALLOW",
       "property": "createEventMultipleContacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "findLabResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__count__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "filteredCountLabResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "findLabResultsAggregate"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "filteredCountLabResultsAggregate"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__findById__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__updateById__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__destroyById__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_outbreak",
+      "principalId": "outbreak_restore",
       "permission": "ALLOW",
       "property": "restoreOutbreak"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "findCaseRelationshipExposures"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCaseRelationshipExposures"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "findCaseRelationshipContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCaseRelationshipContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "contact_list_relationship_exposures",
       "permission": "ALLOW",
       "property": "findContactRelationshipExposures"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "contact_list_relationship_exposures",
       "permission": "ALLOW",
       "property": "countContactRelationshipExposures"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "contact_list_relationship_contacts",
       "permission": "ALLOW",
       "property": "findContactRelationshipContacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "contact_list_relationship_contacts",
       "permission": "ALLOW",
       "property": "countContactRelationshipContacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "findEventRelationshipExposures"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "relationship_create",
       "permission": "ALLOW",
       "property": "getEventRelationshipsAvailablePeople"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "relationship_create",
       "permission": "ALLOW",
       "property": "countEventRelationshipsAvailablePeople"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "event_list_relationship_exposures",
+      "permission": "ALLOW",
+      "property": "findEventRelationshipExposures"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_list_relationship_exposures",
       "permission": "ALLOW",
       "property": "countEventRelationshipExposures"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "event_list_relationship_contacts",
       "permission": "ALLOW",
       "property": "findEventRelationshipContacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "event_list_relationship_contacts",
       "permission": "ALLOW",
       "property": "countEventRelationshipContacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCasesPerClassification"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactsPerRiskLevel"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCasesStratifiedByClassificationOverTime"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCasesStratifiedByOutcomeOverTime"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCasesStratifiedByClassificationOverReportingTime"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countFollowUpsByTeam"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "__findById__attachments"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "__findById__attachments"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "attachmentUpload"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "attachmentUpload"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$client_application",
-      "permission": "ALLOW",
-      "property": "attachmentUpload"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "attachmentDownload"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "attachmentDownload"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$client_application",
-      "permission": "ALLOW",
-      "property": "attachmentDownload"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "__destroyById__attachments"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "__destroyById__attachments"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
+      "principalId": "relationship_share",
       "permission": "ALLOW",
       "property": "bulkCreateRelationships"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "bulkCreateRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
+      "principalId": "relationship_bulk_delete",
       "permission": "ALLOW",
       "property": "bulkDeleteRelationships"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_contact",
-      "permission": "ALLOW",
-      "property": "bulkDeleteRelationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
+      "principalId": "case_change_target_relationships",
       "permission": "ALLOW",
       "property": "bulkChangeTargetRelationships"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "contact_change_target_relationships",
       "permission": "ALLOW",
       "property": "bulkChangeTargetRelationships"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_case",
+      "principalId": "event_change_target_relationships",
+      "permission": "ALLOW",
+      "property": "bulkChangeTargetRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_change_source_relationships",
       "permission": "ALLOW",
       "property": "bulkChangeSourceRelationships"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "contact_change_source_relationships",
       "permission": "ALLOW",
       "property": "bulkChangeSourceRelationships"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "event_change_source_relationships",
       "permission": "ALLOW",
-      "property": "downloadCaseClassificationPerLocationLevelReport"
+      "property": "bulkChangeSourceRelationships"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "countCasesPerLocationLevel"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "downloadContactTracingPerLocationLevelReport"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "countContactsPerLocationLevel"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "getCaseMovement"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "contact_view_movement_map",
       "permission": "ALLOW",
       "property": "getContactMovement"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "caseDelayBetweenOnsetAndLabTesting"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "exportContactFollowUpListPerDay"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_case",
-      "permission": "ALLOW",
-      "property": "restoreLabResult"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "exportDailyContactFollowUpList"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "exportRangeListOfContacts"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "filteredCountContactsOnFollowUpList"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_contact",
-      "permission": "ALLOW",
-      "property": "getContactPossibleDuplicates"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "getCasePossibleDuplicates"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_case",
-      "permission": "ALLOW",
-      "property": "caseDelayBetweenOnsetAndHospitalizationIsolation"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_outbreak",
-      "permission": "ALLOW",
-      "property": "getContactFollowUpReport"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_contact",
+      "principalId": "contact_bulk_modify",
       "permission": "ALLOW",
       "property": "bulkModifyContacts"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_followup",
+      "principalId": "relationship_create",
       "permission": "ALLOW",
-      "property": "getFollowUpsGroupedByContact"
+      "property": "getContactRelationshipsAvailablePeople"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_followup",
+      "principalId": "relationship_create",
       "permission": "ALLOW",
-      "property": "countFollowUpsGroupedByContact"
+      "property": "countContactRelationshipsAvailablePeople"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_case",
+      "principalId": "relationship_create",
       "permission": "ALLOW",
-      "property": "getCaseIsolatedContacts"
+      "property": "getCaseRelationshipsAvailablePeople"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_contact",
+      "principalId": "relationship_create",
+      "permission": "ALLOW",
+      "property": "countCaseRelationshipsAvailablePeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_list",
+      "permission": "ALLOW",
+      "property": "getContactPossibleDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list",
+      "permission": "ALLOW",
+      "property": "getCasePossibleDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_export_daily_follow_up_list",
+      "permission": "ALLOW",
+      "property": "exportDailyContactFollowUpList"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_export_daily_follow_up_form",
       "permission": "ALLOW",
       "property": "exportDailyContactFollowUpForm"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_followup",
+      "principalId": "follow_up_generate",
+      "permission": "ALLOW",
+      "property": "generateFollowups"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_list",
+      "permission": "ALLOW",
+      "property": "findFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_list",
+      "permission": "ALLOW",
+      "property": "__count__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_view",
+      "permission": "ALLOW",
+      "property": "__findById__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_export",
+      "permission": "ALLOW",
+      "property": "exportFilteredFollowups"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_export",
+      "permission": "ALLOW",
+      "property": "exportFilteredContactFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_list",
+      "permission": "ALLOW",
+      "property": "filteredCountFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_bulk_delete",
       "permission": "ALLOW",
       "property": "bulkDeleteFollowUps"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_followup",
+      "principalId": "follow_up_bulk_restore",
       "permission": "ALLOW",
       "property": "bulkRestoreFollowUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_export_daily_form",
+      "permission": "ALLOW",
+      "property": "exportContactFollowUpListPerDay"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_grouped_by_team",
+      "permission": "ALLOW",
+      "property": "countFollowUpsByTeam"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_grouped_by_risk",
+      "permission": "ALLOW",
+      "property": "countContactsPerRiskLevel"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_export_range",
+      "permission": "ALLOW",
+      "property": "exportRangeListOfContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_list_range",
+      "permission": "ALLOW",
+      "property": "getFollowUpsGroupedByContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_list_range",
+      "permission": "ALLOW",
+      "property": "countFollowUpsGroupedByContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_view_movement_map",
+      "permission": "ALLOW",
+      "property": "getCaseMovement"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "gantt_chart_view_delay_onset_lab_testing",
+      "permission": "ALLOW",
+      "property": "caseDelayBetweenOnsetAndLabTesting"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "gantt_chart_view_delay_onset_hospitalization",
+      "permission": "ALLOW",
+      "property": "caseDelayBetweenOnsetAndHospitalizationIsolation"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "team_list_workload",
+      "permission": "ALLOW",
+      "property": "countFollowUpsPerTeamPerDay"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_convert_to_contact",
+      "permission": "ALLOW",
+      "property": "convertCaseToContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_restore",
+      "permission": "ALLOW",
+      "property": "restoreCase"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list",
+      "permission": "ALLOW",
+      "property": "filteredCountCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_export",
+      "permission": "ALLOW",
+      "property": "exportFilteredCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_import",
+      "permission": "ALLOW",
+      "property": "importImportableLabResultsFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_export_dossier",
+      "permission": "ALLOW",
+      "property": "caseDossier"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_import",
+      "permission": "ALLOW",
+      "property": "importImportableCasesFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_list",
+      "permission": "ALLOW",
+      "property": "findLabResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_list",
+      "permission": "ALLOW",
+      "property": "__count__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_list",
+      "permission": "ALLOW",
+      "property": "filteredCountLabResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_list",
+      "permission": "ALLOW",
+      "property": "findLabResultsAggregate"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_list",
+      "permission": "ALLOW",
+      "property": "filteredCountLabResultsAggregate"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_view",
+      "permission": "ALLOW",
+      "property": "__findById__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_modify",
+      "permission": "ALLOW",
+      "property": "__updateById__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list_relationship_exposures",
+      "permission": "ALLOW",
+      "property": "findCaseRelationshipExposures"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list_relationship_exposures",
+      "permission": "ALLOW",
+      "property": "countCaseRelationshipExposures"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list_relationship_contacts",
+      "permission": "ALLOW",
+      "property": "findCaseRelationshipContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list_relationship_contacts",
+      "permission": "ALLOW",
+      "property": "countCaseRelationshipContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_restore",
+      "permission": "ALLOW",
+      "property": "restoreLabResult"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_grouped_by_classification",
+      "permission": "ALLOW",
+      "property": "countCasesPerClassification"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list_onset_before_primary_case_report",
+      "permission": "ALLOW",
+      "property": "findSecondaryCasesWithDateOfOnsetBeforePrimaryCase"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list_long_period_between_onset_dates_report",
+      "permission": "ALLOW",
+      "property": "longPeriodsBetweenDatesOfOnsetInTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list_isolated_cases",
+      "permission": "ALLOW",
+      "property": "getCaseIsolatedContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_export_investigation_form",
+      "permission": "ALLOW",
+      "property": "exportExistingEmptyCaseInvestigation"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_export_empty_investigation_forms",
+      "permission": "ALLOW",
+      "property": "exportCaseInvestigationTemplate"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_grouped_by_location_level",
+      "permission": "ALLOW",
+      "property": "countCasesPerLocationLevel"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_stratified_by_classification_over_time",
+      "permission": "ALLOW",
+      "property": "countCasesStratifiedByClassificationOverTime"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_stratified_by_outcome_over_time",
+      "permission": "ALLOW",
+      "property": "countCasesStratifiedByOutcomeOverTime"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_stratified_by_classification_over_reporting_time",
+      "permission": "ALLOW",
+      "property": "countCasesStratifiedByClassificationOverReportingTime"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_view_follow_up_report",
+      "permission": "ALLOW",
+      "property": "getContactFollowUpReport"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list_cases_by_period_and_contact_status",
+      "permission": "ALLOW",
+      "property": "countCasesPerPeriodPerContactStatus"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list_cases_with_less_than_x_contacts",
+      "permission": "ALLOW",
+      "property": "countCasesWithLessThanXContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list_cases_new_in_previous_x_days_detected_among_contacts",
+      "permission": "ALLOW",
+      "property": "countNewCasesInThePreviousXDaysDetectedAmongKnownContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list_cases_new_in_known_cot",
+      "permission": "ALLOW",
+      "property": "countNewCasesInKnownTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_count_case_contacts",
+      "permission": "ALLOW",
+      "property": "countCasesContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_count_from_follow_up",
+      "permission": "ALLOW",
+      "property": "filteredCountContactsOnFollowUpList"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_count_lost_to_follow_up",
+      "permission": "ALLOW",
+      "property": "countContactsLostToFollowup"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_count_not_seen_in_x_days",
+      "permission": "ALLOW",
+      "property": "countContactsNotSeenInXDays"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_count_seen",
+      "permission": "ALLOW",
+      "property": "countContactsSeen"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_count_successful_follow_ups",
+      "permission": "ALLOW",
+      "property": "countContactsWithSuccessfulFollowups"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cot_list_new_from_contacts_became_cases",
+      "permission": "ALLOW",
+      "property": "buildNewChainsFromRegisteredContactsWhoBecameCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cot_list_new_from_contacts_became_cases",
+      "permission": "ALLOW",
+      "property": "countNewChainsFromRegisteredContactsWhoBecameCases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_export_classification_per_location_report",
+      "permission": "ALLOW",
+      "property": "downloadCaseClassificationPerLocationLevelReport"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_export_follow_up_success_rate_report",
+      "permission": "ALLOW",
+      "property": "downloadContactTracingPerLocationLevelReport"
     }
   ],
   "methods": {
@@ -2273,7 +2003,7 @@
       "description": "Counts people of a event",
       "http": {
         "verb": "get",
-        "path": "/event/:nk/relationships/available-people/count"
+        "path": "/events/:nk/relationships/available-people/count"
       }
     },
     "prototype.createEventRelationship": {
@@ -2635,31 +2365,6 @@
         "path": "/events/:nk/restore"
       }
     },
-    "prototype.getReferenceData": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "referenceData",
-          "type": [
-            "referenceData"
-          ],
-          "description": "System and outbreak specific reference data",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Queries system and outbreak specific reference data list.",
-      "http": {
-        "verb": "get",
-        "path": "/reference-data"
-      }
-    },
     "prototype.generateCaseVisualId": {
       "accepts": [
         {
@@ -2716,157 +2421,6 @@
       "http": {
         "verb": "post",
         "path": "/contacts/generate-visual-id"
-      }
-    },
-    "prototype.getCaseQRResourceLink": {
-      "accepts": [
-        {
-          "arg": "nk",
-          "type": "string",
-          "description": "Foreign key for cases"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "body",
-          "type": "file",
-          "root": true,
-          "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        }
-      ],
-      "description": "Get a resource link embedded in a QR Code Image (png) for a case.",
-      "http": {
-        "verb": "get",
-        "path": "/cases/:nk/qr-resource-link"
-      }
-    },
-    "prototype.getContactQRResourceLink": {
-      "accepts": [
-        {
-          "arg": "nk",
-          "type": "string",
-          "description": "Foreign key for contacts"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "body",
-          "type": "file",
-          "root": true,
-          "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        }
-      ],
-      "description": "Get a resource link embedded in a QR Code Image (png) for a contact.",
-      "http": {
-        "verb": "get",
-        "path": "/contacts/:nk/qr-resource-link"
-      }
-    },
-    "prototype.getEventQRResourceLink": {
-      "accepts": [
-        {
-          "arg": "nk",
-          "type": "string",
-          "description": "Foreign key for events"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "body",
-          "type": "file",
-          "root": true,
-          "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        }
-      ],
-      "description": "Get a resource link embedded in a QR Code Image (png) for a event.",
-      "http": {
-        "verb": "get",
-        "path": "/events/:nk/qr-resource-link"
-      }
-    },
-    "prototype.countNewContactsByExposure": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'noDaysNewContacts' number on the first level in 'where'"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "counters",
-          "type": {
-            "newContactsCount": "number",
-            "exposureType": {
-              "type": {
-                "id": {
-                  "type": "string",
-                  "description": "Exposure type ID"
-                },
-                "count": {
-                  "type": "number",
-                  "description": "Contacts number for exposure type"
-                },
-                "contactIDs": {
-                  "type": [
-                    "string"
-                  ],
-                  "description": "Contact IDs container"
-                }
-              }
-            }
-          },
-          "description": "Object containing new contacts counters for each found exposure type",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Count the new contacts and groups them by exposure type",
-      "http": {
-        "verb": "get",
-        "path": "/contacts/new-by-exposure-type/count"
       }
     },
     "prototype.filteredCountContacts": {
@@ -3561,71 +3115,6 @@
         "path": "/relationships/new-cases-in-transmission-chains/count"
       }
     },
-    "prototype.countNewCasesOutsideKnownTransmissionChains": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'noDaysInChains' number on the first level in 'where'"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "count",
-          "type": {
-            "newCases": "number",
-            "total": "number",
-            "caseIds": [
-              "string"
-            ]
-          },
-          "description": "Retrieve number of new cases outside known transmission chains",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Count the number of new cases vs total number of cases outside known transmission chains",
-      "http": {
-        "verb": "get",
-        "path": "/relationships/new-cases-outside-transmission-chains/count"
-      }
-    },
-    "prototype.countEventNewContacts": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'noDaysNewContacts' number on the first level in 'where'"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "counters",
-          "type": {
-            "newContactsCount": "number",
-            "events": [
-              {
-                "type": {
-                  "id": "string",
-                  "newContactsCount": "number",
-                  "contactIDs": [
-                    "string"
-                  ]
-                }
-              }
-            ]
-          },
-          "description": "Object containing counters for new contacts for each event",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Count the number of new contacts for each event",
-      "http": {
-        "verb": "get",
-        "path": "/relationships/events-new-contacts/count"
-      }
-    },
     "prototype.longPeriodsBetweenDatesOfOnsetInTransmissionChains": {
       "accepts": [
         {
@@ -3872,43 +3361,6 @@
         "path": "/relationships/:nk/replace-source-and-target"
       }
     },
-    "prototype.countFollowUpContacts": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Accepts 'date' on the first level of 'where' property"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "counters",
-          "type": {
-            "contactsCount": {
-              "type": "number",
-              "description": "Number of contacts on follow-up list",
-              "required": true
-            },
-            "followUpsCount": {
-              "type": "number",
-              "description": "Total number of follow-ups.",
-              "required": true
-            },
-            "contactIDs": [
-              "string"
-            ]
-          },
-          "description": "Object containing counters for contacts on follow-up list",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Count the number of contacts on follow-up list on a specific day (default day: today)",
-      "http": {
-        "verb": "get",
-        "path": "/follow-ups/contacts/count"
-      }
-    },
     "prototype.countNewCasesInThePreviousXDaysDetectedAmongKnownContacts": {
       "accepts": [
         {
@@ -4114,415 +3566,6 @@
         "path": "/merge"
       }
     },
-    "prototype.countCasesPerPeriod": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'periodType': enum [day, week, month], 'periodInterval': ['date', 'date'], 'includeTotals': boolean (if false 'total' response properties are not calculated), 'includeDeaths': boolean (if false 'death' response properties are not calculated) on the first level in 'where'"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "counters",
-          "type": {
-            "totalCasesCount": {
-              "type": "number",
-              "description": "Total number of alive cases in the Outbreak. Present only if 'includeTotals' filter is sent as true"
-            },
-            "totalDeadCasesCount": {
-              "type": "number",
-              "description": "Total number of dead cases in the Outbreak. Present only if 'includeTotals' and 'includeDeaths' filters are sent as true"
-            },
-            "totalDeadConfirmedCasesCount": {
-              "type": "number",
-              "description": "Total number of dead confirmed cases in the Outbreak. Present only if 'includeTotals' and 'includeDeaths' filters are sent as true"
-            },
-            "totalCasesClassificationCounters": {
-              "type": {
-                "{caseClassification}": {
-                  "type": {
-                    "count": "number",
-                    "caseIDs": [
-                      "string"
-                    ],
-                    "locations": {
-                      "type": [
-                        {
-                          "type": {
-                            "id": "string",
-                            "totalCasesCount": {
-                              "type": "number",
-                              "description": "Total number of alive cases with the classification in the Outbreak at the location"
-                            },
-                            "caseIDs": {
-                              "type": [
-                                "string"
-                              ],
-                              "description": "Array containing the IDs of alive cases with the classification in the Outbreak at the location"
-                            }
-                          }
-                        }
-                      ],
-                      "description": "Object containing counters for cases with the classification per location"
-                    }
-                  }
-                }
-              },
-              "description": "Total number of cases per classification in the Outbreak. Present only if 'includeTotals' filters are sent as true"
-            },
-            "totalCasesCountersPerLocation": {
-              "type": {
-                "locations": {
-                  "type": [
-                    {
-                      "type": {
-                        "id": "string",
-                        "totalCasesCount": {
-                          "type": "number",
-                          "description": "Total number of alive cases in the Outbreak at the location"
-                        },
-                        "totalDeadCasesCount": {
-                          "type": "number",
-                          "description": "Total number of dead cases in the Outbreak at the location. Present only if 'includeDeaths' filter is sent as true"
-                        },
-                        "totalDeadConfirmedCasesCount": {
-                          "type": "number",
-                          "description": "Total number of dead confirmed cases in the Outbreak at the location. Present only if 'includeDeaths' filter is sent as true"
-                        },
-                        "caseIDs": {
-                          "type": [
-                            "string"
-                          ],
-                          "description": "Array containing the alive cases IDs in the Outbreak at the location"
-                        },
-                        "deadCaseIDs": {
-                          "type": [
-                            "string"
-                          ],
-                          "description": "Array containing the dead cases IDs in the Outbreak at the location. Present only if 'includeDeaths' filter is sent as true"
-                        },
-                        "deadConfirmedCaseIDs": {
-                          "type": [
-                            "string"
-                          ],
-                          "description": "Array containing the dead confirmed cases IDs in the Outbreak at the location. Present only if 'includeDeaths' filter is sent as true"
-                        }
-                      }
-                    }
-                  ],
-                  "description": "Object containing counters for cases per location"
-                }
-              },
-              "description": "Total number of cases per classification in the Outbreak in the provided interval (if no interval is provided the current day will be used)"
-            },
-            "caseIDs": {
-              "type": [
-                "string"
-              ],
-              "description": "Array containing the alive cases IDs in the Outbreak. Present only if 'includeTotals' filters are sent as true"
-            },
-            "deadCaseIDs": {
-              "type": [
-                "string"
-              ],
-              "description": "Array containing the dead cases IDs in the Outbreak. Present only if 'includeTotals' and 'includeDeaths' filters are sent as true"
-            },
-            "deadConfirmedCaseIDs": {
-              "type": [
-                "string"
-              ],
-              "description": "Array containing the dead confirmed cases IDs in the Outbreak. Present only if 'includeTotals' and 'includeDeaths' filters are sent as true"
-            },
-            "totalCasesForIntervalCount": {
-              "type": "number",
-              "description": "Total number of alive cases in the Outbreak for the interval provided (if no interval is provided the current day will be used)"
-            },
-            "totalDeadCasesForIntervalCount": {
-              "type": "number",
-              "description": "Total number of dead cases in the Outbreak for the interval provided (if no interval is provided the current day will be used). Present only if 'includeDeaths' filter is sent as true"
-            },
-            "totalDeadConfirmedCasesForIntervalCount": {
-              "type": "number",
-              "description": "Total number of dead confirmed cases in the Outbreak for the interval provided (if no interval is provided the current day will be used). Present only if 'includeDeaths' filter is sent as true"
-            },
-            "totalCasesClassificationCountersForInterval": {
-              "type": {
-                "{caseClassification}": {
-                  "type": {
-                    "count": "number",
-                    "caseIDs": [
-                      "string"
-                    ],
-                    "locations": {
-                      "type": [
-                        {
-                          "type": {
-                            "id": "string",
-                            "totalCasesCount": {
-                              "type": "number",
-                              "description": "Total number of alive cases with the classification in the Outbreak for the interval provided at the location"
-                            },
-                            "caseIDs": {
-                              "type": [
-                                "string"
-                              ],
-                              "description": "Array containing the IDs of alive cases with the classification in the Outbreak in the provided interval at the location"
-                            }
-                          }
-                        }
-                      ],
-                      "description": "Object containing counters for cases with the classification per location"
-                    }
-                  }
-                }
-              },
-              "description": "Total number of cases per classification in the Outbreak in the provided interval (if no interval is provided the current day will be used)"
-            },
-            "totalCasesCountersForIntervalPerLocation": {
-              "type": {
-                "locations": {
-                  "type": [
-                    {
-                      "type": {
-                        "id": "string",
-                        "totalCasesCount": {
-                          "type": "number",
-                          "description": "Total number of alive cases in the Outbreak for the interval provided at the location"
-                        },
-                        "totalDeadCasesCount": {
-                          "type": "number",
-                          "description": "Total number of dead cases in the Outbreak for the interval provided at the location. Present only if 'includeDeaths' filter is sent as true"
-                        },
-                        "totalDeadConfirmedCasesCount": {
-                          "type": "number",
-                          "description": "Total number of dead confirmed cases in the Outbreak for the interval provided at the location. Present only if 'includeDeaths' filter is sent as true"
-                        },
-                        "caseIDs": {
-                          "type": [
-                            "string"
-                          ],
-                          "description": "Array containing the alive cases IDs in the Outbreak in the provided interval at the location"
-                        },
-                        "deadCaseIDs": {
-                          "type": [
-                            "string"
-                          ],
-                          "description": "Array containing the dead cases IDs in the Outbreak in the provided interval at the location. Present only if 'includeDeaths' filter is sent as true"
-                        },
-                        "deadConfirmedCaseIDs": {
-                          "type": [
-                            "string"
-                          ],
-                          "description": "Array containing the dead confirmed cases IDs in the Outbreak in the provided interval at the location. Present only if 'includeDeaths' filter is sent as true"
-                        }
-                      }
-                    }
-                  ],
-                  "description": "Object containing counters for cases per location"
-                }
-              },
-              "description": "Total number of cases per classification in the Outbreak in the provided interval (if no interval is provided the current day will be used)"
-            },
-            "caseIDsForInterval": {
-              "type": [
-                "string"
-              ],
-              "description": "Array containing the alive cases IDs in the Outbreak in the provided interval (if no interval is provided the current day will be used)"
-            },
-            "deadCaseIDsForInterval": {
-              "type": [
-                "string"
-              ],
-              "description": "Array containing the dead cases IDs in the Outbreak in the provided interval. Present only if 'includeDeaths' filter is sent as true"
-            },
-            "deadConfirmedCaseIDsForInterval": {
-              "type": [
-                "string"
-              ],
-              "description": "Array containing the dead confirmed cases IDs in the Outbreak in the provided interval. Present only if 'includeDeaths' filter is sent as true"
-            },
-            "period": {
-              "type": [
-                {
-                  "type": {
-                    "start": "date",
-                    "end": "date",
-                    "totalCasesCount": {
-                      "type": "number",
-                      "description": "Total number of alive cases in the Outbreak for the period"
-                    },
-                    "totalDeadCasesCount": {
-                      "type": "number",
-                      "description": "Total number of dead cases in the Outbreak for the period. Present only if and 'includeDeaths' filter is sent as true"
-                    },
-                    "totalDeadConfirmedCasesCount": {
-                      "type": "number",
-                      "description": "Total number of dead confirmed cases in the Outbreak for the period. Present only if 'includeDeaths' filter is sent as true"
-                    },
-                    "classificationCounters": {
-                      "type": {
-                        "{caseClassification}": {
-                          "type": {
-                            "count": "number",
-                            "caseIDs": [
-                              "string"
-                            ],
-                            "locations": {
-                              "type": [
-                                {
-                                  "type": {
-                                    "id": "string",
-                                    "totalCasesCount": {
-                                      "type": "number",
-                                      "description": "Total number of alive cases with the classification in the Outbreak for the period at the location"
-                                    },
-                                    "caseIDs": {
-                                      "type": [
-                                        "string"
-                                      ],
-                                      "description": "Array containing the IDs of alive cases with the classification in the Outbreak for the period at the location"
-                                    }
-                                  }
-                                }
-                              ],
-                              "description": "Object containing counters for cases with the classification per location"
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "countersPerLocation": {
-                      "type": {
-                        "locations": {
-                          "type": [
-                            {
-                              "type": {
-                                "id": "string",
-                                "totalCasesCount": {
-                                  "type": "number",
-                                  "description": "Total number of alive cases in the Outbreak for the period at the location"
-                                },
-                                "totalDeadCasesCount": {
-                                  "type": "number",
-                                  "description": "Total number of dead cases in the Outbreak for the period at the location. Present only if 'includeDeaths' filter is sent as true"
-                                },
-                                "totalDeadConfirmedCasesCount": {
-                                  "type": "number",
-                                  "description": "Total number of dead confirmed cases in the Outbreak for the period at the location. Present only if 'includeDeaths' filter is sent as true"
-                                },
-                                "caseIDs": {
-                                  "type": [
-                                    "string"
-                                  ],
-                                  "description": "Array containing the alive cases IDs in the Outbreak for the period at the location"
-                                },
-                                "deadCaseIDs": {
-                                  "type": [
-                                    "string"
-                                  ],
-                                  "description": "Array containing the dead cases IDs in the Outbreak for the period  at the location. Present only if 'includeDeaths' filter is sent as true"
-                                },
-                                "deadConfirmedCaseIDs": {
-                                  "type": [
-                                    "string"
-                                  ],
-                                  "description": "Array containing the dead confirmed cases IDs in the Outbreak for the period at the location. Present only if 'includeDeaths' filter is sent as true"
-                                }
-                              }
-                            }
-                          ],
-                          "description": "Object containing counters for cases per location"
-                        }
-                      },
-                      "description": "Total number of cases per classification in the Outbreak in the provided interval (if no interval is provided the current day will be used)"
-                    },
-                    "caseIDs": {
-                      "type": [
-                        "string"
-                      ],
-                      "description": "Array containing the alive cases IDs in the Outbreak for the period"
-                    },
-                    "deadCaseIDs": {
-                      "type": [
-                        "string"
-                      ],
-                      "description": "Array containing the dead cases IDs in the Outbreak for the period. Present only if 'includeDeaths' filter is sent as true"
-                    },
-                    "deadConfirmedCaseIDs": {
-                      "type": [
-                        "string"
-                      ],
-                      "description": "Array containing the dead confirmed cases IDs in the Outbreak for the period. Present only if 'includeDeaths' filter is sent as true"
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          "description": "Object containing counters for cases per period",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Count the total number of cases per period",
-      "http": {
-        "verb": "get",
-        "path": "/cases/per-period-per-classification/count"
-      }
-    },
-    "prototype.listLatestFollowUpsForContactsIfNotPerformed": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
-        },
-        {
-          "arg": "options",
-          "type": "object",
-          "http": "optionsFromRequest"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "follow-ups",
-          "type": [
-            "followUp"
-          ],
-          "description": "Array containing latest follow-ups missed by contacts. Doesn't return a missed follow-up if there is a new one for the same contact that was performed",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "List the latest follow-ups for contacts if were not performed. Doesn't return a missed follow-up if there is a new one for the same contact that was performed",
-      "http": {
-        "verb": "get",
-        "path": "/follow-ups/latest-by-contacts-if-not-performed"
-      }
-    },
-    "prototype.filteredCountLatestFollowUpsForContactsIfNotPerformed": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "count",
-          "type": "number",
-          "description": "Number of latest follow-ups for contacts if were not performed",
-          "required": true
-        }
-      ],
-      "description": "Count the latest follow-ups for contacts if were not performed. Doesn't count a missed follow-up if there is a new one for the same contact that was performed",
-      "http": {
-        "verb": "get",
-        "path": "/follow-ups/latest-by-contacts-if-not-performed/filtered-count"
-      }
-    },
     "prototype.listInconsistenciesInKeyDates": {
       "accepts": [
         {
@@ -4546,36 +3589,6 @@
       "http": {
         "verb": "get",
         "path": "/people/inconsistencies-in-key-dates"
-      }
-    },
-    "prototype.restoreReferenceData": {
-      "accepts": [
-        {
-          "arg": "nk",
-          "type": "string",
-          "description": "Foreign key for reference data"
-        },
-        {
-          "arg": "options",
-          "type": "object",
-          "http": "optionsFromRequest"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "referenceData",
-          "type": [
-            "referenceData"
-          ],
-          "description": "Reference Data",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Restores a deleted Reference Data.",
-      "http": {
-        "verb": "post",
-        "path": "/reference-data/:nk/restore"
       }
     },
     "prototype.importableFileUpload": {
@@ -4930,67 +3943,6 @@
         "path": "/contacts/import-importable-file-using-map"
       }
     },
-    "prototype.countContactsPerLocation": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'date': 'date', 'locationId': 'locationId' on the first level in 'where'"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "counters",
-          "type": {
-            "totalRegisteredContactsCount": {
-              "type": "number",
-              "description": "Total number of registered contacts for the outbreak"
-            },
-            "releasedContactsCount": {
-              "type": "number",
-              "description": "Number of released contacts for the outbreak"
-            },
-            "contactsUnderFollowUpCount": {
-              "type": "number",
-              "description": "Number of contacts for the outbreak that are still under follow-up"
-            },
-            "contactsSeenOnDateCount": {
-              "type": "number",
-              "description": "Number of contacts for the outbreak that were seen at their last follow-up"
-            },
-            "lastContactDateOfRelease": {
-              "type": "date",
-              "description": "Expected release of last contact in the outbreak (latest follow-up date for a contact)"
-            },
-            "locations": {
-              "type": [
-                {
-                  "type": {
-                    "id": "string",
-                    "totalRegisteredContactsCount": "number",
-                    "releasedContactsCount": "number",
-                    "contactsUnderFollowUpCount": "number",
-                    "contactsSeenOnDateCount": "number",
-                    "lastContactDateOfRelease": "date",
-                    "contactIDs": [
-                      "string"
-                    ]
-                  }
-                }
-              ],
-              "description": "Object containing counters for contacts per location"
-            }
-          },
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Count the total number of contacts per location; Include counters for contacts under follow-up, contacts seen on date, contacts released as well as date for expected release of last contact",
-      "http": {
-        "verb": "get",
-        "path": "/contacts/per-location/count"
-      }
-    },
     "prototype.exportFilteredContacts": {
       "accepts": [
         {
@@ -5109,94 +4061,6 @@
       "http": {
         "verb": "get",
         "path": "/contacts/follow-ups/export"
-      }
-    },
-    "prototype.exportFilteredReferenceData": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
-        },
-        {
-          "arg": "type",
-          "type": "string",
-          "enum": [
-            "json",
-            "xml",
-            "csv",
-            "xls",
-            "xlsx",
-            "ods",
-            "pdf"
-          ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
-        },
-        {
-          "arg": "options",
-          "type": "object",
-          "http": "optionsFromRequest"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "body",
-          "type": "file",
-          "root": true,
-          "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        }
-      ],
-      "description": "Export filtered list of reference data",
-      "http": {
-        "verb": "get",
-        "path": "/reference-data/export"
-      }
-    },
-    "prototype.importImportableReferenceDataFileUsingMap": {
-      "accepts": [
-        {
-          "arg": "body",
-          "type": "object",
-          "model": "importableFileWithFieldAndReferenceDataMap",
-          "http": {
-            "source": "body"
-          },
-          "root": true
-        },
-        {
-          "arg": "options",
-          "type": "object",
-          "http": "optionsFromRequest"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "referenceData",
-          "type": [
-            "referenceData"
-          ],
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Import a list of reference data from a file that was previously uploaded as an importable file",
-      "http": {
-        "verb": "post",
-        "path": "/reference-data/import-importable-file-using-map"
       }
     },
     "prototype.findPeopleInCluster": {
@@ -6662,48 +5526,6 @@
       "http": {
         "verb": "get",
         "path": "/contacts/per-location-level-tracing-report/download"
-      }
-    },
-    "prototype.countContactsPerLocationLevel": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Accepts custom parameter dateOfFollowUp."
-        }
-      ],
-      "returns": [
-        {
-          "arg": "result",
-          "type": {
-            "locations": [
-              {
-                "type": {
-                  "location": {
-                    "type": "location"
-                  },
-                  "contactIds": {
-                    "type": "string"
-                  },
-                  "contactsCount": {
-                    "type": "number"
-                  }
-                }
-              }
-            ],
-            "count": {
-              "type": "number"
-            }
-          },
-          "description": "Collection of items with location, cases and numberOfCases properties",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Return an array of locations and the contacts (that pass a filter) assigned to those locations",
-      "http": {
-        "verb": "get",
-        "path": "/contacts/per-location-level/count"
       }
     },
     "prototype.getCaseMovement": {

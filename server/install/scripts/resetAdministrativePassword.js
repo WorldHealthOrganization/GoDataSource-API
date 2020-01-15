@@ -19,13 +19,20 @@ const defaultSystemAdminRole = {
   name: 'System administrator',
   description: 'This is a built in role that manages user accounts, and configuration of the system.',
   permissionIds: [
-    'read_sys_config',
-    'write_sys_config',
-    'read_role',
-    'write_role',
-    'read_user_account',
-    'write_user_account',
-    'read_outbreak'
+    'system_settings_all',
+    'audit_log_all',
+    'language_all',
+    'help_all',
+    'reference_data_all',
+    'icon_all',
+    'user_all',
+    'user_role_all',
+    'backup_all',
+    'sync_all',
+    'upstream_server_all',
+    'client_application_all',
+    'location_all',
+    'device_all'
   ]
 };
 
@@ -63,7 +70,12 @@ function run(callback) {
         console.warn('Default system admin role is missing some default permissions, it will be updated');
         // update it to contain missing permissions
         return systemAdminRole.updateAttributes({
-          permissionIds: _.uniq(systemAdminRole.permissionIds.concat(defaultSystemAdminRole.permissionIds))
+          permissionIds: _.uniq(systemAdminRole.permissionIds
+            .concat(defaultSystemAdminRole.permissionIds)
+            .filter((permission) => {
+              return Role.allAllowedPermissions.indexOf(permission) !== -1;
+            })
+          )
         });
       }
       return systemAdminRole;

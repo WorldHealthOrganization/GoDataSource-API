@@ -20,37 +20,37 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "$client_application",
+      "principalId": "sync_export_package",
       "permissions": "ALLOW",
       "property": "getDatabaseSnapshot"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_sys_config",
-      "permissions": "ALLOW",
-      "property": "getDatabaseSnapshot"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$client_application",
-      "permissions": "ALLOW",
-      "property": "getDatabaseSnapshotForMobile"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "read_sys_config",
-      "permissions": "ALLOW",
-      "property": "getDatabaseSnapshotForMobile"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$client_application",
+      "principalId": "sync_import_package",
       "permissions": "ALLOW",
       "property": "importDatabaseSnapshot"
     },
     {
       "principalType": "ROLE",
-      "principalId": "write_sys_config",
+      "principalId": "sync_synchronize",
+      "permissions": "ALLOW",
+      "property": "sync"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "getDatabaseSnapshot"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "getDatabaseSnapshotForMobile"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
       "permissions": "ALLOW",
       "property": "importDatabaseSnapshot"
     },
@@ -59,14 +59,7 @@
       "principalId": "$client_application",
       "permissions": "ALLOW",
       "property": "getAvailableOutbreaksForClient"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_sys_config",
-      "permissions": "ALLOW",
-      "property": "sync"
-    },
-    {
+    },    {
       "principalType": "ROLE",
       "principalId": "$client_application",
       "permissions": "ALLOW",

@@ -85,15 +85,9 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_sys_config",
+      "principalId": "$everyone",
       "permission": "ALLOW",
-      "property": "getSystemSettings"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "write_sys_config",
-      "permission": "ALLOW",
-      "property": "updateSystemSettings"
+      "property": "getVersion"
     },
     {
       "principalType": "ROLE",
@@ -111,6 +105,12 @@
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
+      "property": "generateFile"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
       "property": "getServerUTCDate"
     },
     {
@@ -121,21 +121,21 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "$everyone",
-      "permission": "ALLOW",
-      "property": "getVersion"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "getBackupLocation"
     },
     {
       "principalType": "ROLE",
-      "principalId": "read_sys_config",
+      "principalId": "system_settings_view",
       "permission": "ALLOW",
-      "property": "generateFile"
+      "property": "getSystemSettings"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "system_settings_modify",
+      "permission": "ALLOW",
+      "property": "updateSystemSettings"
     }
   ],
   "methods": {
