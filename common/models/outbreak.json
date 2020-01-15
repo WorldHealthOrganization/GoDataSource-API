@@ -126,6 +126,10 @@
     "reportingGeographicalLevelId": {
       "type": "string",
       "description": "The maximum geographical level of locations from which reports data is gathered"
+    },
+    "isContactLabResultsActive": {
+      "type": "boolean",
+      "default": true
     }
   },
   "indexes": {
@@ -396,6 +400,42 @@
       "principalId": "lab_result_delete",
       "permission": "ALLOW",
       "property": "__destroyById__cases__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_list",
+      "permission": "ALLOW",
+      "property": "__get__contacts__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_list",
+      "permission": "ALLOW",
+      "property": "__count__contacts__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_create",
+      "permission": "ALLOW",
+      "property": "__create__contacts__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_view",
+      "permission": "ALLOW",
+      "property": "__findById__contacts__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_modify",
+      "permission": "ALLOW",
+      "property": "__updateById__contacts__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__contacts__labResults"
     },
     {
       "principalType": "ROLE",
@@ -1241,7 +1281,13 @@
       "principalType": "ROLE",
       "principalId": "lab_result_restore",
       "permission": "ALLOW",
-      "property": "restoreLabResult"
+      "property": "restoreCaseLabResult"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_restore",
+      "permission": "ALLOW",
+      "property": "restoreContactLabResult"
     },
     {
       "principalType": "ROLE",
@@ -5820,7 +5866,7 @@
         "path": "/contacts/daily-followup-form/export"
       }
     },
-    "prototype.restoreLabResult": {
+    "prototype.restoreCaseLabResult": {
       "accepts": [
         {
           "arg": "nk",
@@ -6452,6 +6498,72 @@
       "http": {
         "verb": "post",
         "path": "/follow-ups/bulk/restore"
+      }
+    },
+    "prototype.restoreContactLabResult": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for lab results"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "labResult",
+          "type": "labResult",
+          "description": "Lab Result",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted lab result.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/:nk/lab-results/:fk/restore"
+      }
+    },
+    "prototype.importImportableContactLabResultsFileUsingMap": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithFieldAndReferenceDataMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "labResults",
+          "type": [
+            "labResult"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a list of lab results from a file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/lab-results/import-importable-file-using-map"
       }
     }
   }
