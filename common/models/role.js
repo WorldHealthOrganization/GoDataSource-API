@@ -1669,7 +1669,6 @@ module.exports = function (Role) {
             'outbreak_view'
           ]
         },
-        //
         {
           id: 'contact_list_lab_result',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_LAB_RESULT',
@@ -2486,7 +2485,6 @@ module.exports = function (Role) {
             'outbreak_view'
           ]
         },
-
         {
           id: 'lab_result_modify',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_LAB_RESULT',
