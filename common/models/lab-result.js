@@ -69,6 +69,10 @@ module.exports = function (LabResult) {
   LabResult.preFilterForOutbreak = function (outbreak, filter) {
     // set a default filter
     filter = filter || {};
+    let contactQuery = _.get(filter, 'where.contact');
+    if (contactQuery) {
+      delete filter.where.contact;
+    }
     // get case query, if any
     let caseQuery = _.get(filter, 'where.case');
     // if found, remove it form main query
@@ -79,6 +83,9 @@ module.exports = function (LabResult) {
     let labResultsQuery = _.get(filter, 'where', {});
     // start with a resolved promise (so we can link others)
     let buildQuery = Promise.resolve();
+
+    const personIds = [];
+
     // if a case query is present
     if (caseQuery) {
       // restrict query to current outbreak
@@ -97,21 +104,44 @@ module.exports = function (LabResult) {
             .rawFind(caseQuery, {projection: {_id: 1}})
             .then(function (cases) {
               // build a list of case ids that passed the filter
-              return cases.map(caseRecord => caseRecord.id);
+              personIds.push(...cases.map(caseRecord => caseRecord.id));
             });
         });
     }
+    // if a contact query is present
+    if (contactQuery) {
+      // restrict query to current outbreak
+      contactQuery = {
+        $and: [
+          contactQuery,
+          {
+            outbreakId: outbreak.id
+          }
+        ]
+      };
+      // filter cases based on query
+      buildQuery = buildQuery
+        .then(function () {
+          return app.models.contact
+            .rawFind(contactQuery, {projection: {_id: 1}})
+            .then(function (contacts) {
+              // build a list of case ids that passed the filter
+              personIds.push(...contacts.map(contact => contact.id));
+            });
+        });
+    }
+
     return buildQuery
-      .then(function (caseIds) {
-        // if caseIds filter present
-        if (caseIds) {
+      .then(() => {
+        // if person ids filter present
+        if (personIds.length) {
           // update lab results query to filter based on caseIds
           labResultsQuery = {
             $and: [
               labResultsQuery,
               {
                 personId: {
-                  $in: caseIds
+                  $in: personIds
                 }
               }
             ]
@@ -169,7 +199,7 @@ module.exports = function (LabResult) {
               from: 'person',
               localField: 'personId',
               foreignField: '_id',
-              as: 'case'
+              as: 'person'
             },
             unwind: true,
             map: (record) => {
@@ -197,27 +227,44 @@ module.exports = function (LabResult) {
     const data = context.isNewInstance ? context.instance : context.data;
     helpers.sortMultiAnswerQuestions(data);
 
-    // retrieve outbreak data
-    let model = _.get(context, 'options.remotingContext.instance');
-    if (model) {
-      if (!(model instanceof app.models.outbreak)) {
-        model = undefined;
-      }
-    }
-
-    // convert date fields to date before saving them in database
-    helpers
-      .convertQuestionStringDatesToDates(
-        data,
-        model ?
-          model.labResultsTemplate :
-          null
-      )
+    const promiseChain = Promise.resolve();
+    promiseChain
       .then(() => {
-        // finished
-        next();
+        const instanceData = context.isNewInstance ? context.instance : context.currentInstance;
+
+        // add the custom helper property person type
+        // mainly used for filtering lab results based on the type
+        if (!instanceData.personType) {
+          return app.models.person.findById(instanceData.personId)
+            .then(person => {
+              data.personType = person.type;
+            });
+        }
+        return null;
       })
-      .catch(next);
+      .then(() => {
+        // retrieve outbreak data
+        let model = _.get(context, 'options.remotingContext.instance');
+        if (model) {
+          if (!(model instanceof app.models.outbreak)) {
+            model = undefined;
+          }
+        }
+
+        // convert date fields to date before saving them in database
+        helpers
+          .convertQuestionStringDatesToDates(
+            data,
+            model ?
+              model.labResultsTemplate :
+              null
+          )
+          .then(() => {
+            // finished
+            next();
+          })
+          .catch(next);
+      });
   });
 
   /**

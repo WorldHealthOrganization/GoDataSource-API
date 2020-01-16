@@ -31,6 +31,7 @@ module.exports = function (Outbreak) {
     'prototype.__delete__contacts',
     'prototype.__delete__contacts__followUps',
     'prototype.__delete__contacts__relationships',
+    'prototype.__delete__contacts__labResults',
     'prototype.__delete__events',
     'prototype.__create__clusters__relationships',
     'prototype.__delete__clusters__relationships',
@@ -1868,6 +1869,15 @@ module.exports = function (Outbreak) {
    * Set outbreakId for created lab results
    */
   Outbreak.beforeRemote('prototype.__create__cases__labResults', function (context, modelInstance, next) {
+    // set outbreakId
+    context.args.data.outbreakId = context.instance.id;
+    next();
+  });
+
+  /**
+   * Set outbreakId for created lab results
+   */
+  Outbreak.beforeRemote('prototype.__create__contacts__labResults', function (context, modelInstance, next) {
     // set outbreakId
     context.args.data.outbreakId = context.instance.id;
     next();
@@ -6832,7 +6842,7 @@ module.exports = function (Outbreak) {
    * @param options
    * @param callback
    */
-  Outbreak.prototype.restoreLabResult = function (caseId, labResultId, options, callback) {
+  Outbreak.prototype.restoreCaseLabResult = function (caseId, labResultId, options, callback) {
     app.models.labResult
       .findOne({
         deleted: true,
@@ -11426,6 +11436,162 @@ module.exports = function (Outbreak) {
       })
       .then(records => {
         async.series(records.map(r => doneRecord => r.undoDelete(options, doneRecord)), callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Import an importable lab results file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.importImportableContactLabResultsFileUsingMap = function (body, options, callback) {
+    const self = this;
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
+    // get importable file
+    app.models.importableFile
+      .getTemporaryFileById(body.fileId, function (error, file) {
+        // handle errors
+        if (error) {
+          return callback(error);
+        }
+        try {
+          // parse file content
+          const rawlabResultsList = JSON.parse(file);
+          // remap properties & values
+          const labResultsList = app.utils.helpers.convertBooleanProperties(
+            app.models.labResult,
+            app.utils.helpers.remapProperties(rawlabResultsList, body.map, body.valuesMap));
+          // build a list of create lab results operations
+          const createLabResults = [];
+          // define a container for error results
+          const createErrors = [];
+          // define a toString function to be used by error handler
+          createErrors.toString = function () {
+            return JSON.stringify(this);
+          };
+          // go through all entries
+          labResultsList.forEach(function (labResult, index) {
+            createLabResults.push(function (callback) {
+              // sanitize questionnaire answers
+              // convert to new format if necessary
+              if (labResult.questionnaireAnswers) {
+                labResult.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToNewFormat(labResult.questionnaireAnswers);
+              }
+
+              // first check if the case id (person id) is valid
+              app.models.contact
+                .findOne({
+                  where: {
+                    or: [
+                      {id: labResult.personId},
+                      {visualId: labResult.personId}
+                    ],
+                    outbreakId: self.id
+                  }
+                })
+                .then(function (contactInstance) {
+                  // if the person was not found, don't sync the lab result, stop with error
+                  if (!contactInstance) {
+                    throw app.utils.apiError.getError('PERSON_NOT_FOUND', {
+                      model: app.models.case.modelName,
+                      id: labResult.personId
+                    });
+                  }
+
+                  // make sure we map it to the parent case in case we retrieved the contact using visual id
+                  labResult.personId = contactInstance.id;
+
+                  // set outbreakId
+                  labResult.outbreakId = self.id;
+
+                  // sync the record
+                  return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.labResult, labResult, options)
+                    .then(function (result) {
+                      callback(null, result.record);
+                    });
+                })
+                .catch(function (error) {
+                  // on error, store the error, but don't stop, continue with other items
+                  createErrors.push({
+                    message: `Failed to import lab result ${index + 1}`,
+                    error: error,
+                    recordNo: index + 1,
+                    data: {
+                      file: rawlabResultsList[index],
+                      save: labResult
+                    }
+                  });
+                  callback(null, null);
+                });
+            });
+          });
+          // start importing lab results
+          async.parallelLimit(createLabResults, 10, function (error, results) {
+            // handle errors (should not be any)
+            if (error) {
+              return callback(error);
+            }
+            // if import errors were found
+            if (createErrors.length) {
+              // remove results that failed to be added
+              results = results.filter(result => result !== null);
+              // define a toString function to be used by error handler
+              results.toString = function () {
+                return JSON.stringify(this);
+              };
+              // return error with partial success
+              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+                model: app.models.labResult.modelName,
+                failed: createErrors,
+                success: results
+              }));
+            }
+            // send the result
+            callback(null, results);
+          });
+        } catch (error) {
+          // handle parse error
+          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
+            contentType: 'JSON',
+            details: error.message
+          }));
+        }
+      });
+  };
+
+  /**
+   * Restore a deleted lab result
+   * @param contactId
+   * @param labResultId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.restoreContactLabResult = function (contactId, labResultId, options, callback) {
+    app.models.labResult
+      .findOne({
+        deleted: true,
+        where: {
+          id: labResultId,
+          personId: contactId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError(
+            'MODEL_NOT_FOUND',
+            {
+              model: app.models.labResult.modelName,
+              id: labResultId
+            }
+          );
+        }
+
+        // undo delete
+        instance.undoDelete(options, callback);
       })
       .catch(callback);
   };

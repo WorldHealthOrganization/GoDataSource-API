@@ -68,6 +68,11 @@
       "type": "belongsTo",
       "model": "case",
       "foreignKey": "personId"
+    },
+    "contact": {
+      "type": "belongsTo",
+      "model": "contact",
+      "foreignKey": "personId"
     }
   },
   "acls": [],
