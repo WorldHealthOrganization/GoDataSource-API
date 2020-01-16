@@ -6842,7 +6842,7 @@ module.exports = function (Outbreak) {
    * @param options
    * @param callback
    */
-  Outbreak.prototype.restoreLabResult = function (caseId, labResultId, options, callback) {
+  Outbreak.prototype.restoreCaseLabResult = function (caseId, labResultId, options, callback) {
     app.models.labResult
       .findOne({
         deleted: true,
@@ -11560,5 +11560,39 @@ module.exports = function (Outbreak) {
           }));
         }
       });
+  };
+
+  /**
+   * Restore a deleted lab result
+   * @param contactId
+   * @param labResultId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.restoreContactLabResult = function (contactId, labResultId, options, callback) {
+    app.models.labResult
+      .findOne({
+        deleted: true,
+        where: {
+          id: labResultId,
+          personId: contactId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError(
+            'MODEL_NOT_FOUND',
+            {
+              model: app.models.labResult.modelName,
+              id: labResultId
+            }
+          );
+        }
+
+        // undo delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
   };
 };
