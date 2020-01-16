@@ -38,6 +38,7 @@ module.exports = function (Outbreak) {
     labResultsTemplate: 'LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE',
     caseIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK',
     contactIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_ID_MASK',
+    contactOfContactIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_OF_CONTACT_ID_MASK',
     'arcGisServers': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVERS',
     'arcGisServers[].name': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_NAME',
     'arcGisServers[].url': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_URL'
@@ -74,7 +75,10 @@ module.exports = function (Outbreak) {
     'contact_view',
     'event_all',
     'event_list',
-    'event_view'
+    'event_view',
+    'contact_of_contact_all',
+    'contact_of_contact_list',
+    'contact_of_contact_view'
   ];
 
   // The fields that will be displayed when a user receives a person's data even though he does not
@@ -259,9 +263,15 @@ module.exports = function (Outbreak) {
                 // set its type
                 data.persons[index].type = foundPerson.type;
 
-                // Set the person assignments (source/target)
-                // If the trying to link to an event or a case, set it as the source.
-                if (['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'].includes(data.persons[1].type)) {
+                // contact of contact can only be exposed to a contact
+                if (data.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT') {
+                  data.persons[0].target = true;
+                  data.persons[1].source = true;
+                } else if (data.persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT') {
+                  data.persons[0].source = true;
+                  data.persons[1].target = true;
+                  // if the trying to link to an event or a case, set it as the source
+                } else if (['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'].includes(data.persons[1].type)) {
                   data.persons[0].target = true;
                   data.persons[1].source = true;
                 } else {
@@ -638,6 +648,24 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * If a mask is provided then retrieve the next available contact of contact visual id, or if a visual id is provided check if
+   * it matches the outbreak mask and it isn't a duplicate
+   * @param outbreak
+   * @param visualId
+   * @param [personId]
+   * @return Visual ID or throws one of the following validation errors: DUPLICATE_VISUAL_ID / INVALID_VISUAL_ID_MASK
+   */
+  Outbreak.helpers.validateOrGetAvailableContactOfContactVisualId = function (outbreak, visualId, personId) {
+    // validate visualId uniqueness
+    return Outbreak.helpers
+      .validateVisualIdUniqueness(outbreak.id, visualId, personId)
+      .then(() => {
+        // generate visual id accordingly to visualId mask
+        return Outbreak.helpers.getAvailableVisualId(outbreak, 'contactOfContactIdMask', visualId, personId);
+      });
+  };
+
+  /**
    * Get the next available visual id
    * @param outbreak
    * @param maskProperty
@@ -824,7 +852,8 @@ module.exports = function (Outbreak) {
     let requiredPermissionMap = {
       'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'case_list',
       'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event_list',
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'contact_list'
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'contact_list',
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT': 'contact_of_contact_list'
     };
     // if the required permission is missing
     if (
@@ -1402,7 +1431,7 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Hide fields that the user does not have permission to see on a person model (case/contact/event)
+   * Hide fields that the user does not have permission to see on a person model (case/contact/event/contactOfContact)
    * @param model
    * @param permissions
    */
@@ -1410,7 +1439,8 @@ module.exports = function (Outbreak) {
     const personReadPermissionMap = {
       'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'contact_list',
       'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'case_list',
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event_list'
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event_list',
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT': 'contact_of_contact_list'
     };
 
     if (
@@ -1616,13 +1646,27 @@ module.exports = function (Outbreak) {
   Outbreak.helpers.resolvePersonVisualIdTemplate = function (outbreak, visualId, personType, personId) {
     // if the field is present
     if (typeof visualId === 'string' && visualId.length) {
+      // decide what type of visual id should we resolve based on the person type
+      let maskProperty = null;
+      switch (personType) {
+        case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
+          maskProperty = 'caseIdMask';
+          break;
+        case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT':
+          maskProperty = 'contactIdMask';
+          break;
+        case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT':
+          maskProperty = 'contactOfContactIdMask';
+          break;
+        default:
+          maskProperty = 'caseIdMask';
+      }
       // validate its uniqueness
       return Outbreak.helpers
         .validateVisualIdUniqueness(outbreak.id, visualId, personId)
         .then(() => {
           // get the next available visual id for the visual id template
-          return Outbreak.helpers
-            .getAvailableVisualId(outbreak, (personType === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ? 'caseIdMask' : 'contactIdMask'), visualId, personId);
+          return Outbreak.helpers.getAvailableVisualId(outbreak, maskProperty, visualId, personId);
         });
     } else {
       // nothing to resolve
