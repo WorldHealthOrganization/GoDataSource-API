@@ -32,6 +32,13 @@ module.exports = function (Contact) {
       'socialRelationshipDetail': 'LNG_RELATIONSHIP_FIELD_LABEL_RELATION_DETAIL',
       'clusterId': 'LNG_RELATIONSHIP_FIELD_LABEL_CLUSTER',
       'comment': 'LNG_RELATIONSHIP_FIELD_LABEL_COMMENT',
+      'id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+      'createdAt': 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
+      'createdBy': 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_BY',
+      'updatedAt': 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',
+      'updatedBy': 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
+      'deleted': 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
+      'deletedAt': 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT'
     };
 
     // append source export fields
