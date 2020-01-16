@@ -1611,6 +1611,12 @@
       "principalId": "contact_of_contact_list",
       "permission": "ALLOW",
       "property": "getContactOfContactPossibleDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_restore",
+      "permission": "ALLOW",
+      "property": "restoreContactOfContact"
     }
   ],
   "methods": {
@@ -7408,6 +7414,34 @@
       "http": {
         "verb": "post",
         "path": "/contacts-of-contacts/duplicates/find"
+      }
+    },
+    "prototype.restoreContactOfContact": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contact of contacts"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "contactOfContact",
+          "type": "contactOfContact",
+          "description": "Contact Of Contact",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted contact of contact.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts-of-contacts/:nk/restore"
       }
     }
   }
