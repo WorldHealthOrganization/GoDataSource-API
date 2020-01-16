@@ -1675,7 +1675,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_LAB_RESULT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_LAB_RESULT_DESCRIPTION',
           requires: [
-            'lab_result_list'
+            'lab_result_list',
+            'contact_view'
           ]
         },
         {
@@ -1683,7 +1684,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_LAB_RESULT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_LAB_RESULT_DESCRIPTION',
           requires: [
-            'lab_result_view'
+            'lab_result_view',
+            'contact_view'
           ]
         },
         {
@@ -1691,7 +1693,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_LAB_RESULT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_LAB_RESULT_DESCRIPTION',
           requires: [
-            'lab_result_create'
+            'lab_result_create',
+            'contact_view'
           ]
         },
         {
@@ -1699,7 +1702,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_LAB_RESULT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_LAB_RESULT_DESCRIPTION',
           requires: [
-            'lab_result_modify'
+            'lab_result_modify',
+            'contact_view'
           ]
         },
         {
@@ -2171,7 +2175,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_LAB_RESULT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_LAB_RESULT_DESCRIPTION',
           requires: [
-            'lab_result_list'
+            'lab_result_list',
+            'case_view'
           ]
         },
         {
@@ -2179,7 +2184,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CASE_LAB_RESULT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CASE_LAB_RESULT_DESCRIPTION',
           requires: [
-            'lab_result_view'
+            'lab_result_view',
+            'case_view'
           ]
         },
         {
@@ -2187,7 +2193,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CASE_LAB_RESULT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CASE_LAB_RESULT_DESCRIPTION',
           requires: [
-            'lab_result_create'
+            'lab_result_create',
+            'case_view'
           ]
         },
         {
@@ -2195,7 +2202,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CASE_LAB_RESULT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CASE_LAB_RESULT_DESCRIPTION',
           requires: [
-            'lab_result_modify'
+            'lab_result_modify',
+            'case_view'
           ]
         },
         {
@@ -2458,8 +2466,7 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_LAB_RESULT_DESCRIPTION',
           requires: [
             'outbreak_view',
-            'user_list_for_filters',
-            'case_view'
+            'user_list_for_filters'
           ]
         },
         {
@@ -2468,8 +2475,7 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_LAB_RESULT_DESCRIPTION',
           requires: [
             'outbreak_view',
-            'user_list_for_filters',
-            'case_view'
+            'user_list_for_filters'
           ]
         },
         {
@@ -2477,8 +2483,7 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_LAB_RESULT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_LAB_RESULT_DESCRIPTION',
           requires: [
-            'outbreak_view',
-            'case_view'
+            'outbreak_view'
           ]
         },
 
@@ -2490,7 +2495,6 @@ module.exports = function (Role) {
             'outbreak_view',
             'user_list_for_filters',
             'lab_result_view',
-            'case_view',
             'lab_result_list'
           ]
         },
