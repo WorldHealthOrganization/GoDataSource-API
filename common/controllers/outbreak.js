@@ -12219,7 +12219,7 @@ module.exports = function (Outbreak) {
    * @param options
    * @param callback
    */
-  Outbreak.prototype.restoreContact = function (contactOfContactId, options, callback) {
+  Outbreak.prototype.restoreContactOfContact = function (contactOfContactId, options, callback) {
     app.models.contactOfContact
       .findOne({
         deleted: true,
