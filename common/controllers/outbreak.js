@@ -12010,7 +12010,7 @@ module.exports = function (Outbreak) {
    * @param options
    * @param callback
    */
-  Outbreak.prototype.importImportableContactsOfContactFileUsingMap = function (body, options, callback) {
+  Outbreak.prototype.importImportableContactsOfContactsFileUsingMap = function (body, options, callback) {
     const self = this;
     // treat the sync as a regular operation, not really a sync
     options._sync = false;
