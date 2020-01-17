@@ -254,23 +254,22 @@ module.exports = function (ContactOfContact) {
       };
       // find the related contacts in database
       resultQuery = resultQuery.then(() => {
-        return app.models.contact
-          .rawFind(relatedContactFilter, { projection: { _id: 1 } })
+        return app.models.contact.rawFind(relatedContactFilter, {projection: {_id: 1}})
           .then(records => {
             // find relationships with contact of contacts
-            return app.models.relationship
-              .rawFind({
-                  outbreakId: outbreak.id,
-                  'persons.id': {
-                    $in: records.map(record => record.id)
-                  },
-                  'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+            return app.models.relationship.rawFind(
+              {
+                outbreakId: outbreak.id,
+                'persons.id': {
+                  $in: records.map(record => record.id)
                 },
-                {
-                  projection: {
-                    persons: 1
-                  }
-                })
+                'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+              },
+              {
+                projection: {
+                  persons: 1
+                }
+              })
               .then(relationships => {
                 // gather contact of contact ids from relationships
                 const ids = [];
