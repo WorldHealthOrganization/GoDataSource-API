@@ -23,9 +23,10 @@ function offerFileToDownload(fileBuffer, mimeType, fileName, remoteCallback) {
  * @param requiredFields
  * @param requiredFiles
  * @param Model
+ * @param optionalFields
  * @param callback
  */
-function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callback) {
+function parseMultipartRequest(req, requiredFields, requiredFiles, Model, optionalFields, callback) {
   // use formidable to parse multi-part data
   const form = new formidable.IncomingForm();
   form.parse(req, function (error, fields, files) {
@@ -38,7 +39,7 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, callba
 
     // first validate required fields
     requiredFields.forEach(function (field) {
-      if (!fields[field]) {
+      if (!fields[field] && optionalFields.indexOf(field) === -1) {
         missingProperties.push(field);
       }
     });

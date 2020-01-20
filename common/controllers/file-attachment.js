@@ -9,14 +9,15 @@ module.exports = function (FileAttachment) {
    * Create (upload) a new file
    * @param outbreakId
    * @param req
+   * @param attachmentId
    * @param name
    * @param file
    * @param options
    * @param callback
    */
-  FileAttachment.upload = function (outbreakId, req, name, file, options, callback) {
+  FileAttachment.upload = function (outbreakId, req, attachmentId, name, file, options, callback) {
     // loopback cannot parse multipart requests
-    app.utils.remote.helpers.parseMultipartRequest(req, ['name'], ['file'], FileAttachment, function (error, fields, files) {
+    app.utils.remote.helpers.parseMultipartRequest(req, ['attachmentId', 'name'], ['file'], FileAttachment, ['attachmentId'], function (error, fields, files) {
       if (error) {
         return callback(error);
       }
@@ -25,6 +26,7 @@ module.exports = function (FileAttachment) {
         .then(function (savePath) {
           // then save the record into database
           return FileAttachment.create({
+            id: fields.attachmentId,
             outbreakId: outbreakId,
             name: fields.name,
             originalName: files.file.name,

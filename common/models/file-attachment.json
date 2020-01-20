@@ -6,6 +6,12 @@
     "validateUpsert": true
   },
   "properties": {
+    "id": {
+      "type": "string",
+      "id": true,
+      "defaultFn": "uuidv4",
+      "unique": true
+    },
     "outbreakId": {
       "type": "string",
       "required": true

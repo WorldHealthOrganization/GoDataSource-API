@@ -6338,14 +6338,15 @@ module.exports = function (Outbreak) {
   /**
    * Create (upload) a new file
    * @param req
+   * @param attachmentId
    * @param name
    * @param file
    * @param options
    * @param callback
    */
-  Outbreak.prototype.attachmentUpload = function (req, name, file, options, callback) {
+  Outbreak.prototype.attachmentUpload = function (req, attachmentId, name, file, options, callback) {
     app.models.fileAttachment
-      .upload(this.id, req, name, file, options, callback);
+      .upload(this.id, req, attachmentId, name, file, options, callback);
   };
 
   /**

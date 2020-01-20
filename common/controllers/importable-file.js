@@ -407,7 +407,7 @@ module.exports = function (ImportableFile) {
       outbreakId = undefined;
     }
     // loopback cannot parse multipart requests
-    app.utils.remote.helpers.parseMultipartRequest(req, [], ['file'], ImportableFile, function (error, fields, files) {
+    app.utils.remote.helpers.parseMultipartRequest(req, [], ['file'], ImportableFile, [], function (error, fields, files) {
       file = files.file;
       modelName = fields.model;
       decryptPassword = null;

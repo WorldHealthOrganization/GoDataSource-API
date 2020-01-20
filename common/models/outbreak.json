@@ -5269,6 +5269,10 @@
           }
         },
         {
+          "arg": "attachmentId",
+          "type": "string"
+        },
+        {
           "arg": "name",
           "type": "string"
         },
