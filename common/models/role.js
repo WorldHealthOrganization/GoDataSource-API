@@ -1570,7 +1570,8 @@ module.exports = function (Role) {
             'outbreak_view',
             'contact_view',
             'relationship_list',
-            'follow_up_list'
+            'follow_up_list',
+            'contact_list_lab_result'
           ]
         },
         {
@@ -2030,7 +2031,7 @@ module.exports = function (Role) {
             'outbreak_view',
             'case_view',
             'relationship_list',
-            'lab_result_list'
+            'case_list_lab_result'
           ]
         },
         {
