@@ -11,6 +11,9 @@
       "readOnly": true,
       "safeForImport": true
     },
+    "personType": {
+      "type": "string"
+    },
     "dateSampleTaken": {
       "type": "date",
       "required": true

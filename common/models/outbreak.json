@@ -129,7 +129,7 @@
     },
     "isContactLabResultsActive": {
       "type": "boolean",
-      "default": true
+      "default": false
     }
   },
   "indexes": {
@@ -367,73 +367,73 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "lab_result_list",
+      "principalId": "case_list_lab_result",
       "permission": "ALLOW",
       "property": "__get__cases__labResults"
     },
     {
       "principalType": "ROLE",
-      "principalId": "lab_result_list",
+      "principalId": "case_list_lab_result",
       "permission": "ALLOW",
       "property": "__count__cases__labResults"
     },
     {
       "principalType": "ROLE",
-      "principalId": "lab_result_create",
+      "principalId": "case_create_lab_result",
       "permission": "ALLOW",
       "property": "__create__cases__labResults"
     },
     {
       "principalType": "ROLE",
-      "principalId": "lab_result_view",
+      "principalId": "case_view_lab_result",
       "permission": "ALLOW",
       "property": "__findById__cases__labResults"
     },
     {
       "principalType": "ROLE",
-      "principalId": "lab_result_modify",
+      "principalId": "case_modify_lab_result",
       "permission": "ALLOW",
       "property": "__updateById__cases__labResults"
     },
     {
       "principalType": "ROLE",
-      "principalId": "lab_result_delete",
+      "principalId": "case_delete_lab_result",
       "permission": "ALLOW",
       "property": "__destroyById__cases__labResults"
     },
     {
       "principalType": "ROLE",
-      "principalId": "lab_result_list",
+      "principalId": "contact_list_lab_result",
       "permission": "ALLOW",
       "property": "__get__contacts__labResults"
     },
     {
       "principalType": "ROLE",
-      "principalId": "lab_result_list",
+      "principalId": "contact_list_lab_result",
       "permission": "ALLOW",
       "property": "__count__contacts__labResults"
     },
     {
       "principalType": "ROLE",
-      "principalId": "lab_result_create",
+      "principalId": "contact_create_lab_result",
       "permission": "ALLOW",
       "property": "__create__contacts__labResults"
     },
     {
       "principalType": "ROLE",
-      "principalId": "lab_result_view",
+      "principalId": "contact_view_lab_result",
       "permission": "ALLOW",
       "property": "__findById__contacts__labResults"
     },
     {
       "principalType": "ROLE",
-      "principalId": "lab_result_modify",
+      "principalId": "contact_modify_lab_result",
       "permission": "ALLOW",
       "property": "__updateById__contacts__labResults"
     },
     {
       "principalType": "ROLE",
-      "principalId": "lab_result_delete",
+      "principalId": "contact_delete_lab_result",
       "permission": "ALLOW",
       "property": "__destroyById__contacts__labResults"
     },
@@ -1189,9 +1189,15 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "lab_result_import",
+      "principalId": "case_import_lab_result",
       "permission": "ALLOW",
       "property": "importImportableLabResultsFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_import_lab_result",
+      "permission": "ALLOW",
+      "property": "importImportableContactLabResultsFileUsingMap"
     },
     {
       "principalType": "ROLE",
@@ -1279,13 +1285,13 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "lab_result_restore",
+      "principalId": "case_restore_lab_result",
       "permission": "ALLOW",
       "property": "restoreCaseLabResult"
     },
     {
       "principalType": "ROLE",
-      "principalId": "lab_result_restore",
+      "principalId": "contact_restore_lab_result",
       "permission": "ALLOW",
       "property": "restoreContactLabResult"
     },

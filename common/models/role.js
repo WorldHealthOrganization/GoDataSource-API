@@ -1720,6 +1720,14 @@ module.exports = function (Role) {
           requires: [
             'lab_result_restore'
           ]
+        },
+        {
+          id: 'contact_import_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_import'
+          ]
         }
       ]
     },
@@ -2219,6 +2227,14 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CASE_LAB_RESULT_DESCRIPTION',
           requires: [
             'lab_result_restore'
+          ]
+        },
+        {
+          id: 'case_import_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CASE_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CASE_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_import'
           ]
         }
       ]

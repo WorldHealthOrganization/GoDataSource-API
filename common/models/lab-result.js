@@ -9,21 +9,21 @@ module.exports = function (LabResult) {
   LabResult.hasController = false;
 
   LabResult.fieldLabelsMap = Object.assign({}, LabResult.fieldLabelsMap, {
-    personId: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_PERSON_ID',
-    dateSampleTaken: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_TAKEN',
-    dateSampleDelivered: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_DELIVERED',
-    dateTesting: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_TESTING',
-    dateOfResult: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_OF_RESULT',
-    labName: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_LAB_NAME',
-    sampleIdentifier: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_ID',
-    sampleType: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_SAMPLE_TYPE',
-    testType: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_TEST_TYPE',
-    testedFor: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_TESTED_FOR',
-    result: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_RESULT',
-    quantitativeResult: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_QUANTITATIVE_RESULT',
-    notes: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_NOTES',
-    status: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_STATUS',
-    questionnaireAnswers: 'LNG_CASE_LAB_RESULT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
+    personId: 'LNG_LAB_RESULT_FIELD_LABEL_PERSON_ID',
+    dateSampleTaken: 'LNG_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_TAKEN',
+    dateSampleDelivered: 'LNG_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_DELIVERED',
+    dateTesting: 'LNG_LAB_RESULT_FIELD_LABEL_DATE_TESTING',
+    dateOfResult: 'LNG_LAB_RESULT_FIELD_LABEL_DATE_OF_RESULT',
+    labName: 'LNG_LAB_RESULT_FIELD_LABEL_LAB_NAME',
+    sampleIdentifier: 'LNG_LAB_RESULT_FIELD_LABEL_SAMPLE_LAB_ID',
+    sampleType: 'LNG_LAB_RESULT_FIELD_LABEL_SAMPLE_TYPE',
+    testType: 'LNG_LAB_RESULT_FIELD_LABEL_TEST_TYPE',
+    testedFor: 'LNG_LAB_RESULT_FIELD_LABEL_TESTED_FOR',
+    result: 'LNG_LAB_RESULT_FIELD_LABEL_RESULT',
+    quantitativeResult: 'LNG_LAB_RESULT_FIELD_LABEL_QUANTITATIVE_RESULT',
+    notes: 'LNG_LAB_RESULT_FIELD_LABEL_NOTES',
+    status: 'LNG_LAB_RESULT_FIELD_LABEL_STATUS',
+    questionnaireAnswers: 'LNG_LAB_RESULT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
   });
 
   LabResult.referenceDataFieldsToCategoryMap = {
@@ -234,12 +234,23 @@ module.exports = function (LabResult) {
 
         // add the custom helper property person type
         // mainly used for filtering lab results based on the type
-        if (!instanceData.personType) {
-          return app.models.person.findById(instanceData.personId)
-            .then(person => {
-              data.personType = person.type;
+        if (
+          !instanceData.personType &&
+          instanceData.personId
+        ) {
+          return app.models.person
+            .findOne({
+              deleted: true,
+              where: {
+                id: instanceData.personId
+              }
+            })
+            .then((person) => {
+              data.personType = person ? person.type : undefined;
             });
         }
+
+        // we can't or don't need to update personType
         return null;
       })
       .then(() => {
@@ -273,7 +284,7 @@ module.exports = function (LabResult) {
    * @param next
    */
   LabResult.migrate = (options, next) => {
-    // retrieve outbreaks data so we can migrate questionnaires accordingly to outbreak template definitiuon
+    // retrieve outbreaks data so we can migrate questionnaires accordingly to outbreak template definition
     app.models.outbreak
       .find({}, {
         projection: {
@@ -293,6 +304,17 @@ module.exports = function (LabResult) {
 
         // migrate dates & numbers
         helpers.migrateModelDataInBatches(LabResult, (modelData, cb) => {
+          // force lab result save
+          const saveLabResult = () => {
+            modelData
+              .updateAttributes({
+                outbreakId: modelData.outbreakId
+              }, options)
+              .then(() => cb())
+              .catch(cb);
+          };
+
+          // personType is set when saving the lab-result, so it doesn't matter how we trigger the save
           if (!_.isEmpty(modelData.questionnaireAnswers)) {
             // convert dates
             const questionnaireAnswersClone = _.cloneDeep(modelData.questionnaireAnswers);
@@ -304,8 +326,17 @@ module.exports = function (LabResult) {
               .then(() => {
                 // check if we have something to change
                 if (_.isEqual(modelData.questionnaireAnswers, questionnaireAnswersClone)) {
-                  // nothing to change
-                  cb();
+                  // do we need to save personType ?
+                  if (
+                    !modelData.personType &&
+                    modelData.personId
+                  ) {
+                    // force lab result save
+                    saveLabResult();
+                  } else {
+                    // nothing to change
+                    cb();
+                  }
                 } else {
                   // migrate
                   modelData
@@ -317,6 +348,12 @@ module.exports = function (LabResult) {
                 }
               })
               .catch(cb);
+          } else if (
+            !modelData.personType &&
+            modelData.personId
+          ) {
+            // force lab result save
+            saveLabResult();
           } else {
             // nothing to do
             cb();
