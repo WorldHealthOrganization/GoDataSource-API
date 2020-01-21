@@ -478,6 +478,8 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_LAB_RESULT_DESCRIPTION": "This permission allows deletion of lab results",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_LAB_RESULT": "Contact - restore lab result",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_LAB_RESULT_DESCRIPTION": "This permission allows restoring of deleted lab results",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CONTACT_LAB_RESULT": "Contact - import lab results",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CONTACT_LAB_RESULT_DESCRIPTION": "This permission allows importing of lab results",
 
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CASE": "Cases",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CASE_DESCRIPTION": "Case permissions",
@@ -593,6 +595,8 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CASE_LAB_RESULT_DESCRIPTION": "This permission allows deletion of lab results",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CASE_LAB_RESULT": "Case - restore lab result",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CASE_LAB_RESULT_DESCRIPTION": "This permission allows restoring of deleted lab results",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CASE_LAB_RESULT": "Case - import lab results",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CASE_LAB_RESULT_DESCRIPTION": "This permission allows importing of lab results",
 
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_RELATIONSHIP": "Relationships",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_RELATIONSHIP_DESCRIPTION": "Relationship permissions",
@@ -648,21 +652,21 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_FOLLOW_UP_BY_TEAM": "Follow-up - group by team",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_FOLLOW_UP_BY_TEAM_DESCRIPTION": "This permission allows viewing follow-up data grouped by team",
 
-      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_LAB_RESULT": "Case lab results",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_LAB_RESULT": "Lab results",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_LAB_RESULT_DESCRIPTION": "Lab result permissions",
-      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_LAB_RESULT": "Case lab result - view",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_LAB_RESULT": "Lab result - view",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_LAB_RESULT_DESCRIPTION": "This permission allows viewing full lab result information",
-      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_LAB_RESULT": "Case lab result - list",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_LAB_RESULT": "Lab result - list",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_LAB_RESULT_DESCRIPTION": "This permission allows listing lab result information",
-      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_LAB_RESULT": "Case lab result - create",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_LAB_RESULT": "Lab result - create",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_LAB_RESULT_DESCRIPTION": "This permission allows creating lab results",
-      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_LAB_RESULT": "Case lab result - modify",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_LAB_RESULT": "Lab result - modify",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_LAB_RESULT_DESCRIPTION": "This permission allows modifying lab results",
-      "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_LAB_RESULT": "Case lab result - delete",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_LAB_RESULT": "Lab result - delete",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_LAB_RESULT_DESCRIPTION": "This permission allows removing lab result information",
-      "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_LAB_RESULT": "Case lab result - restore",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_LAB_RESULT": "Lab result - restore",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_LAB_RESULT_DESCRIPTION": "This permission allows restoring lab result information",
-      "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LAB_RESULT": "Case lab result - import",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LAB_RESULT": "Lab result - import",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LAB_RESULT_DESCRIPTION": "This permission allows import of case lab result data",
 
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_GANTT_CHART": "Gantt charts",
@@ -1306,7 +1310,9 @@
       "LNG_DIALOG_CONFIRM_DELETE_RELATIONSHIPS": "Are you sure you want to delete selected relationships?",
       "LNG_DIALOG_CONFIRM_CHANGE_CASE_EPI_CLASSIFICATION": "Are you sure you want to change '{{ caseName }}' classification to '{{ classification }}'?",
       "LNG_DIALOG_CONFIRM_DELETE_VACCINE": "Are you sure you want to delete this vaccine?",
-      "LNG_DIALOG_CONFIRM_CHANGE_SOURCE": "Are you sure you want to set this entity as source for selected contacts?"
+      "LNG_DIALOG_CONFIRM_CHANGE_SOURCE": "Are you sure you want to set this entity as source for selected contacts?",
+      "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_FOLLOW_UPS": "Are you sure you want to delete selected follow-ups?",
+      "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_FOLLOW_UPS": "Are you sure you want to restore selected follow-ups?"
     },
     "uiLoginPage": {
       "LNG_PAGE_LOGIN_ACTION_LOGIN_BUTTON": "Entrar",
@@ -1463,7 +1469,9 @@
       "LNG_OUTBREAK_FIELD_LABEL_UPDATED_BY": "Updated by",
       "LNG_OUTBREAK_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
       "LNG_OUTBREAK_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
-      "LNG_OUTBREAK_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
+      "LNG_OUTBREAK_FIELD_LABEL_UPDATED_AT_DESCRIPTION": "",
+      "LNG_OUTBREAK_FIELD_LABEL_IS_CONTACT_LAB_RESULTS_ACTIVE": "Allow lab sample collection for contacts?",
+      "LNG_OUTBREAK_FIELD_LABEL_IS_CONTACT_LAB_RESULTS_ACTIVE_DESCRIPTION": ""
     },
     "uiEntityFields": {
       "LNG_ENTITY_FIELD_LABEL_ID": "UID",
@@ -1621,7 +1629,9 @@
       "LNG_CASE_FIELD_LABEL_ADDRESS_LOCATION": "Area",
       "LNG_CASE_FIELD_LABEL_VACCINES_RECEIVED_DETAILS": "Vaccines received",
       "LNG_CASE_FIELD_LABEL_DATE_OF_EXPOSURE": "Exposure Date ( {{exposureName}} )",
-      "LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS_DESCRIPTION": ""
+      "LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS_DESCRIPTION": "",
+      "LNG_CASE_FIELD_LABEL_NUMBER_OF_CONTACTS": "Number of contacts",
+      "LNG_CASE_FIELD_LABEL_NUMBER_OF_EXPOSURES": "Number of exposures"
     },
     "uiCasesListPage": {
       "LNG_PAGE_LIST_CASES_ACTION_ADD_LAB_RESULT": "Añadir resultados de laboratorio",
@@ -1656,7 +1666,9 @@
       "LNG_PAGE_LIST_CASES_GROUP_ACTION_EXPORT_SELECTED_CASES_RELATIONSHIPS": "Export case relationships",
       "LNG_PAGE_LIST_CASES_EXPORT_RELATIONSHIP_FILE_NAME": "Cases relationships",
       "LNG_PAGE_LIST_CASES_ACTION_EXPORT_CASES_RELATIONSHIPS": "Export case relationships",
-      "LNG_PAGE_LIST_CASES_NOT_A_CASE_INFO_LABEL": "* Note that: If you wish to filter to see discarded cases then you should add the 'Not a Case' column from the menu of extra field on the left hand side and ensure that this is set to 'Yes'. You can't simply filter on the Classification column for 'Not a case (discarded)' since Not a Case is set, by default, to 'No' to only show you active records."
+      "LNG_PAGE_LIST_CASES_NOT_A_CASE_INFO_LABEL": "* Note that: If you wish to filter to see discarded cases then you should add the 'Not a Case' column from the menu of extra field on the left hand side and ensure that this is set to 'Yes'. You can't simply filter on the Classification column for 'Not a case (discarded)' since Not a Case is set, by default, to 'No' to only show you active records.",
+      "LNG_PAGE_LIST_CASES_DIALOG_ENTITY_SECTION_TITLE": "Entities",
+      "LNG_PAGE_LIST_CASES_DIALOG_ENTITY_RELATIONSHIPS_TITLE": "Relationships"
     },
     "uiCreateCasePage": {
       "LNG_PAGE_CREATE_CASE_ACTION_CREATE_CASE_BUTTON": "Crear caso",
@@ -1687,64 +1699,6 @@
       "LNG_PAGE_MODIFY_CASE_TITLE": "Modificar {{name}}",
       "LNG_PAGE_VIEW_CASE_TITLE": "Ver {{name}}",
       "LNG_PAGE_MODIFY_CASE_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details"
-    },
-    "uiCaseLabResultsFields": {
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CASE_FIRST_NAME": "Primer nombre del caso",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CASE_FIRST_NAME_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CASE_LAST_NAME": "Último nombre del caso",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CASE_LAST_NAME_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_OF_RESULT": "Fecha del resultado ",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_OF_RESULT_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_DELIVERED": "Muestra entregada al laboratorio",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_DELIVERED_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_TAKEN": "Muestra obtenida",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_TAKEN_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_TESTING": "Muestra probada",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_DATE_TESTING_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_DELETED": "Excluido ",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_DELETED_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_ID": "Identificador de muestra de laboratorio",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_LAB_NAME": "Nombre del laboratorio ",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_LAB_NAME_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_NOTES": "Notas ",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_NOTES_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_PERSON_ID": "Identificador del caso ",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_QUANTITATIVE_RESULT": "Resultado cuantitativo",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_QUANTITATIVE_RESULT_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS": "Respuestas del cuestionario",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_RESULT": "Resultado",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_RESULT_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_SAMPLE_LAB_ID": "Identificador de muestra de laboratorio",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_SAMPLE_LAB_ID_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_SAMPLE_TYPE": "Tipo de muestra ",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_SAMPLE_TYPE_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_STATUS": "Estado ",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_STATUS_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_TEST_TYPE": "Tipo de prueba",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_TEST_TYPE_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_TESTED_FOR": "Tested for",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_TESTED_FOR_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CREATED_BY": "Created by",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CREATED_BY_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CREATED_AT": "Created at ( utc )",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CREATED_AT_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_UPDATED_BY": "Updated by",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_UPDATED_AT_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CASE_CLASSIFICATION": "Classification",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CASE_CLASSIFICATION_DESCRIPTION": "",
-      "LNG_CASE_LAB_RESULT_FIELD_LABEL_CASE_CLASSIFICATION_INFO": "Current classification of the case:"
-    },
-    "uiCaseLabResultsListPage": {
-      "LNG_PAGE_LIST_CASE_LAB_RESULTS_ACTION_ADD_LAB_RESULT": "Añadir ",
-      "LNG_PAGE_LIST_CASE_LAB_RESULTS_ACTION_DELETE_SUCCESS_MESSAGE": "Resultado de laboratorio excluido ",
-      "LNG_PAGE_LIST_CASE_LAB_RESULTS_ACTION_VIEW_LAB_RESULT": "View lab result",
-      "LNG_PAGE_LIST_CASE_LAB_RESULTS_ACTION_MODIFY_LAB_RESULT": "Modify lab result",
-      "LNG_PAGE_LIST_CASE_LAB_RESULTS_ACTION_DELETE_LAB_RESULT": "Delete lab result",
-      "LNG_PAGE_LIST_CASE_LAB_RESULTS_ACTION_RESTORE_LAB_RESULT": "Restore lab result",
-      "LNG_PAGE_LIST_CASE_LAB_RESULTS_IMPORT_BUTTON": "Importar dados del laboratorio",
-      "LNG_PAGE_LIST_CASE_LAB_RESULTS_TITLE": "Resultados de laboratorio "
     },
     "uiEntityRelationshipsListPage": {
       "LNG_PAGE_LIST_ENTITY_RELATIONSHIPS_ACTION_ADD_RELATIONSHIP": "Añadir ",
@@ -1875,7 +1829,9 @@
       "LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS": "Pregnancy Status",
       "LNG_CONTACT_FIELD_LABEL_DATE_OF_EXPOSURE": "Exposure Date ( {{exposureName}} )",
       "LNG_CONTACT_FIELD_LABEL_VACCINES_RECEIVED_DETAILS": "Vaccines received",
-      "LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS_DESCRIPTION": ""
+      "LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS_DESCRIPTION": "",
+      "LNG_CONTACT_FIELD_LABEL_NUMBER_OF_CONTACTS": "Number of contacts",
+      "LNG_CONTACT_FIELD_LABEL_NUMBER_OF_EXPOSURES": "Number of exposures"
     },
     "uiContactsListPage": {
       "LNG_PAGE_LIST_CONTACTS_ACTION_ADD_FOLLOW_UP": "Añadir seguimiento ",
@@ -1911,7 +1867,10 @@
       "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_MODIFY_CONTACTS": "Modify selected contacts",
       "LNG_PAGE_LIST_CONTACTS_ACTION_CHANGE_CONTACT_FINAL_FOLLOW_UP_STATUS": "Change Contact Final Follow-Up Status",
       "LNG_PAGE_LIST_CONTACTS_ACTION_CHANGE_CONTACT_FINAL_FOLLOW_UP_STATUS_DIALOG_TITLE": "Are you sure you want to change the 'Final Follow-Up Status' for {{count}} contact(s)?",
-      "LNG_PAGE_LIST_CONTACTS_ACTION_CHANGE_CONTACT_FINAL_FOLLOW_UP_STATUS_DIALOG_SUCCESS_MSG": "Final status updated for {{count}} contact(s)"
+      "LNG_PAGE_LIST_CONTACTS_ACTION_CHANGE_CONTACT_FINAL_FOLLOW_UP_STATUS_DIALOG_SUCCESS_MSG": "Final status updated for {{count}} contact(s)",
+      "LNG_PAGE_LIST_CONTACTS_DIALOG_ENTITY_SECTION_TITLE": "Entities",
+      "LNG_PAGE_LIST_CONTACTS_DIALOG_ENTITY_RELATIONSHIPS_TITLE": "Relationships",
+      "LNG_PAGE_LIST_CONTACTS_ACTION_SEE_LAB_RESULTS": "See lab results"
     },
     "uiCreateContactPage": {
       "LNG_PAGE_CREATE_CONTACT_ACTION_CREATE_CONTACT_BUTTON": "Crear contacto ",
@@ -1925,7 +1884,8 @@
       "LNG_PAGE_CREATE_CONTACT_WARNING_CASE_OR_EVENT_REQUIRED": "Solo puede añadir un contacto a través de un caso o evento",
       "LNG_PAGE_CREATE_CONTACT_WARNING_CASE_REQUIRED": "Solo puede añadir un contacto a través de un caso",
       "LNG_PAGE_CREATE_CONTACT_ACTION_COPY_ENTITY_ADDRESS_TOOLTIP": "Copy main address from the parent entity",
-      "LNG_PAGE_CREATE_CONTACT_ACTION_CREATE_ANOTHER_CONTACT_BUTTON": "Create and add another"
+      "LNG_PAGE_CREATE_CONTACT_ACTION_CREATE_ANOTHER_CONTACT_BUTTON": "Create and add another",
+      "LNG_PAGE_CREATE_CONTACT_TAB_PERSONAL_SECTION_FLAG_CONTACT_TITLE": "Flag this contact with a risk level for additional attention"
     },
     "uiModifyContactPage": {
       "LNG_PAGE_MODIFY_CONTACT_ACTION_MODIFY_CONTACT_SUCCESS_MESSAGE": "¡ Póngase en contacto!",
@@ -1942,7 +1902,8 @@
       "LNG_PAGE_MODIFY_CONTACT_TITLE": "Modificar {{name}}",
       "LNG_PAGE_VIEW_CONTACT_TITLE": "Ver {{name}}",
       "LNG_PAGE_MODIFY_CONTACT_ACTION_VIEW_EXPOSURE": "View exposure",
-      "LNG_PAGE_MODIFY_CONTACT_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details"
+      "LNG_PAGE_MODIFY_CONTACT_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details",
+      "LNG_PAGE_MODIFY_CONTACT_ACTION_SEE_LAB_RESULTS": "Lab results"
     },
     "uiRelationshipFields": {
       "LNG_RELATIONSHIP_FIELD_LABEL_CERTAINTY_LEVEL": "Nivel de certeza",
@@ -2076,7 +2037,13 @@
       "LNG_PAGE_LIST_FOLLOW_UPS_TITLE": "Seguimiento de contactos relacionados ",
       "LNG_PAGE_LIST_FOLLOW_UPS_FOR_RELATED_CONTACTS_TITLE": "Follow-ups for related contacts",
       "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_MODIFY_QUESTIONNAIRE": "Modificar el cuestionario",
-      "LNG_PAGE_LIST_FOLLOW_UPS_NO_TEAM_LABEL": "No Team"
+      "LNG_PAGE_LIST_FOLLOW_UPS_NO_TEAM_LABEL": "No Team",
+      "LNG_PAGE_LIST_FOLLOW_UPS_GROUP_ACTION_DELETE_SELECTED_FOLLOW_UPS": "Delete selected follow-ups",
+      "LNG_PAGE_LIST_FOLLOW_UPS_GROUP_ACTION_DELETE_SELECTED_FOLLOW_UPS_DESCRIPTION": "All selected records shouldn\"t be deleted",
+      "LNG_PAGE_LIST_FOLLOW_UPS_GROUP_ACTION_RESTORE_SELECTED_FOLLOW_UPS": "Restore selected follow-ups",
+      "LNG_PAGE_LIST_FOLLOW_UPS_GROUP_ACTION_RESTORE_SELECTED_FOLLOW_UPS_DESCRIPTION": "All selected records should be deleted",
+      "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_DELETE_SELECTED_FOLLOW_UPS_SUCCESS_MESSAGE": "Follow-ups deleted",
+      "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_RESTORE_SELECTED_FOLLOW_UPS_SUCCESS_MESSAGE": "Follow-ups restored"
     },
     "uiCreateFollowUpPage": {
       "LNG_PAGE_CREATE_FOLLOW_UP_ACTION_CREATE_FOLLOW_UP_BUTTON": "Crear seguimiento ",
@@ -2118,7 +2085,9 @@
       "LNG_EVENT_FIELD_LABEL_UPDATED_BY": "Updated by",
       "LNG_EVENT_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
       "LNG_EVENT_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
-      "LNG_EVENT_FIELD_LABEL_UPDATED_AT_DESCRIPTION": ""
+      "LNG_EVENT_FIELD_LABEL_UPDATED_AT_DESCRIPTION": "",
+      "LNG_EVENT_FIELD_LABEL_NUMBER_OF_CONTACTS": "Number of contacts",
+      "LNG_EVENT_FIELD_LABEL_NUMBER_OF_EXPOSURES": "Number of exposures"
     },
     "uiCreateEventPage": {
       "LNG_PAGE_CREATE_EVENT_ACTION_CREATE_EVENT_BUTTON": "Crear evento ",
@@ -2185,8 +2154,8 @@
     },
     "uiModifyReferenceDataEntryPage": {
       "LNG_PAGE_MODIFY_REFERENCE_DATA_ENTRY_ACTION_MODIFY_ENTRY_SUCCESS_MESSAGE": "Entrada de datos de referencia modificada",
-      "LNG_PAGE_MODIFY_REFERENCE_DATA_ENTRY_LABEL_NO_COLOR": "Ningún icono",
-      "LNG_PAGE_MODIFY_REFERENCE_DATA_ENTRY_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details"
+      "LNG_PAGE_MODIFY_REFERENCE_DATA_ENTRY_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details",
+      "LNG_PAGE_MODIFY_REFERENCE_DATA_ENTRY_LABEL_NO_ICON": "No icon"
     },
     "uiOutbreakTemplates": {
       "LNG_TEMPLATE_QUESTION_ANSWER_BADGE": "UNA",
@@ -2805,7 +2774,8 @@
       "LNG_FORM_VALIDATION_ERROR_GENERAL_HAS_PROPERTY": "Property exists",
       "LNG_FORM_VALIDATION_ERROR_FIELD_URL": "Invalid URL, either it contains 'localhost' or the path is not good",
       "LNG_FORM_VALIDATION_ERROR_OUTBREAK_NAME_NOT_UNIQUE": "This name is already in use",
-      "LNG_FORM_VALIDATION_ERROR_FIELD_NOT_NUMBER": "Can't be number"
+      "LNG_FORM_VALIDATION_ERROR_FIELD_NOT_NUMBER": "Can't be number",
+      "LNG_FORM_VALIDATION_ERROR_MISSING_REQUIRED_OPTIONS": "Missing options: {{options}}"
     },
     "uiDocumentFields": {
       "LNG_DOCUMENT_FIELD_LABEL_DOCUMENT_NUMBER": "Número del documento",
@@ -2851,27 +2821,6 @@
       "LNG_PAGE_VIEW_CHRONOLOGY_CASE_TITLE": "Caso cronológico",
       "LNG_PAGE_VIEW_CHRONOLOGY_CASE_LABEL_DATE_RANGE_START_DATE": "{{type}} start date",
       "LNG_PAGE_VIEW_CHRONOLOGY_CASE_LABEL_DATE_RANGE_END_DATE": "{{type}} end date"
-    },
-    "uiCreateCaseLabResultPage": {
-      "LNG_PAGE_CREATE_CASE_LAB_RESULT_ACTION_CREATE_CASE_LAB_RESULT_SUCCESS_MESSAGE": "Resultado del laboratorio creado",
-      "LNG_PAGE_CREATE_CASE_LAB_RESULT_ACTION_CREATE_LAB_RESULT_BUTTON": "Crear resultado de laboratorio ",
-      "LNG_PAGE_CREATE_CASE_LAB_RESULT_TAB_DETAILS": "Detalles",
-      "LNG_PAGE_CREATE_CASE_LAB_RESULT_TAB_QUESTIONNAIRE_TITLE": "Cuestionario",
-      "LNG_PAGE_CREATE_CASE_LAB_RESULT_TITLE": "Crear resultado de laboratorio",
-      "LNG_PAGE_CREATE_CASE_LAB_RESULT_FIELD_LABEL_CASE": "Case",
-      "LNG_PAGE_CREATE_CASE_LAB_RESULT_WARNING_CASE_DATEOFONSET_AFTER_SAMPLE_TAKEN": "Warning: Date of onset is after sample taken date"
-    },
-    "uiModifyCaseLabResultPage": {
-      "LNG_PAGE_MODIFY_CASE_LAB_RESULT_ACTION_MODIFY_CASE_LAB_RESULT_SUCCESS_MESSAGE": "Resultado del laboratorio modificado",
-      "LNG_PAGE_MODIFY_CASE_LAB_RESULT_TAB_DETAILS_TITLE": "Detalles",
-      "LNG_PAGE_MODIFY_CASE_LAB_RESULT_TAB_QUESTIONNAIRE_TITLE": "Cuestionario",
-      "LNG_PAGE_MODIFY_CASE_LAB_RESULT_TITLE": "Modificar el resultado {{sampleIdentifier}}",
-      "LNG_PAGE_VIEW_CASE_LAB_RESULT_TITLE": "Ver resultado {{sampleIdentifier}}",
-      "LNG_PAGE_VIEW_CASE_LAB_RESULT_FIELD_LABEL_CASE": "Case",
-      "LNG_PAGE_VIEW_CASE_LAB_RESULT_WARNING_CASE_DATEOFONSET_AFTER_SAMPLE_TAKEN": "Warning: Date of onset is after sample taken date",
-      "LNG_PAGE_MODIFY_CASE_LAB_RESULT_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details",
-      "LNG_PAGE_VIEW_CASE_LAB_RESULT_FIELD_LABEL_CONTACT": "Contact",
-      "LNG_PAGE_VIEW_CASE_LAB_RESULT_FIELD_LABEL_CONTACT_WITH_INFO": "* This person is now a contact and lab tests were performed at the time when '{{ caseName }}' was registered as a case"
     },
     "uiClusterFields": {
       "LNG_CLUSTER_FIELD_LABEL_DESCRIPTION": "Descripción",
@@ -3008,8 +2957,8 @@
     "uiModifyUserPage": {
       "LNG_PAGE_MODIFY_USER_ACTION_MODIFY_USER_SUCCESS_MESSAGE": "Usuario actualizado ",
       "LNG_PAGE_MODIFY_USER_TAB_DETAILS_TITLE": "Detalles",
-      "LNG_PAGE_MODIFY_USER_TITLE": "Modificar usuario ",
-      "LNG_PAGE_VIEW_USER_TITLE": "Visualizar usuario "
+      "LNG_PAGE_MODIFY_USER_TITLE": "Modificar {{name}}",
+      "LNG_PAGE_VIEW_USER_TITLE": "Visualizar {{name}}"
     },
     "uiUserRoleFields": {
       "LNG_USER_ROLE_FIELD_LABEL_DESCRIPTION": "Descripción",
@@ -3017,7 +2966,8 @@
       "LNG_USER_ROLE_FIELD_LABEL_NAME": "Nombre",
       "LNG_USER_ROLE_FIELD_LABEL_NAME_DESCRIPTION": "",
       "LNG_USER_ROLE_FIELD_LABEL_PERMISSIONS": "Opciones",
-      "LNG_USER_ROLE_FIELD_LABEL_PERMISSIONS_DESCRIPTION": ""
+      "LNG_USER_ROLE_FIELD_LABEL_PERMISSIONS_DESCRIPTION": "",
+      "LNG_USER_ROLE_FIELD_LABEL_USERS": "Users"
     },
     "uiListUserRolePage": {
       "LNG_PAGE_LIST_USER_ROLES_ACTION_DELETE_USER_ROLE_SUCCESS_MESSAGE": "Papel excluido ",
@@ -3036,7 +2986,9 @@
       "LNG_PAGE_MODIFY_USER_ROLES_ACTION_MODIFY_USER_ROLES_SUCCESS_MESSAGE": "***Funções ou papéis",
       "LNG_PAGE_MODIFY_USER_ROLES_DETAILS_TITLE": "Detalles",
       "LNG_PAGE_MODIFY_USER_ROLES_TITLE": "Modificar papel",
-      "LNG_PAGE_VIEW_USER_ROLES_TITLE": "Mostrar papel "
+      "LNG_PAGE_VIEW_USER_ROLES_TITLE": "Mostrar papel",
+      "LNG_PAGE_MODIFY_USER_ROLES_AFFECTED_USERS_TITLE": "Affected Users",
+      "LNG_PAGE_MODIFY_USER_ROLES_AFFECTED_USERS_NONE_LABEL": "None"
     },
     "uiMovementContactPage": {
       "LNG_PAGE_VIEW_MOVEMENT_CONTACT_TITLE": "Movimiento del contacto ",
@@ -3046,7 +2998,8 @@
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_TITLE": "Cronología del contacto ",
       "LNG_PAGE_VIEW_CHRONOLOGY_CHRONOLOGY_ITEM_TYPE_FOLLOW_UP": "Follow-up:",
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_FOLLOW_UP_HISTORY_END_DATE": "Follow-up status '{{ status }}' End Date",
-      "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_FOLLOW_UP_HISTORY_START_DATE": "Follow-up status '{{ status }}' Start Date"
+      "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_FOLLOW_UP_HISTORY_START_DATE": "Follow-up status '{{ status }}' Start Date",
+      "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_LAB_RESULT_DATE": "Lab result date"
     },
     "uiProgressOptions": {
       "LNG_PROGRESS_OPTION_LABEL_COMPLETED": "Concluido ",
@@ -3078,7 +3031,9 @@
       "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_EXPORT_SELECTED_EVENTS_RELATIONSHIPS": "Export events relationships",
       "LNG_PAGE_LIST_EVENTS_EXPORT_RELATIONSHIPS_TITLE": "Export events relationships",
       "LNG_PAGE_LIST_EVENTS_EXPORT_RELATIONSHIP_FILE_NAME": "Events relationships",
-      "LNG_PAGE_LIST_EVENTS_ACTION_EXPORT_EVENTS_RELATIONSHIPS": "Export event relationships"
+      "LNG_PAGE_LIST_EVENTS_ACTION_EXPORT_EVENTS_RELATIONSHIPS": "Export event relationships",
+      "LNG_PAGE_LIST_EVENTS_DIALOG_ENTITY_SECTION_TITLE": "Entities",
+      "LNG_PAGE_LIST_EVENTS_DIALOG_ENTITY_RELATIONSHIPS_TITLE": "Relationships"
     },
     "uiModifyEventPage": {
       "LNG_PAGE_MODIFY_EVENT_ACTION_MODIFY_EVENT_SUCCESS_MESSAGE": "Evento guardado ",
@@ -3211,7 +3166,9 @@
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_LESS_THAN_X_CONTACTS": "Menos de X contactos",
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_LESS_THAN_X_CONTACTS_DESCRIPTION": "",
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_NAME": "Nombre",
-      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_NAME_DESCRIPTION": ""
+      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_NAME_DESCRIPTION": "",
+      "LNG_OUTBREAK_TEMPLATE_FIELD_IS_CONTACT_LAB_RESULTS_ACTIVE": "Allow lab sample collection for contacts?",
+      "LNG_OUTBREAK_TEMPLATE_FIELD_IS_CONTACT_LAB_RESULTS_ACTIVE_DESCRIPTION": ""
     },
     "uiOutbreakTemplateListPage": {
       "LNG_PAGE_LIST_OUTBREAK_TEMPLATES_ACTION_DELETE_SUCCESS_MESSAGE": "Modelo de brote excluido ",
@@ -3576,7 +3533,8 @@
     "uiModifyTeamPage": {
       "LNG_PAGE_MODIFY_TEAM_ACTION_MODIFY_TEAM_SUCCESS_MESSAGE": "Equipo actualizado",
       "LNG_PAGE_MODIFY_TEAM_TAB_DETAILS_TITLE": "Detalles",
-      "LNG_PAGE_MODIFY_TEAM_TITLE": "Modificar el equipo "
+      "LNG_PAGE_MODIFY_TEAM_TITLE": "Modificar el equipo",
+      "LNG_PAGE_VIEW_TEAM_TITLE": "View Team"
     },
     "uiBulkAddContactsPage": {
       "LNG_PAGE_BULK_ADD_CONTACTS_ACTION_CREATE_CONTACTS_SUCCESS_MESSAGE": "¡Contactos creados!",
@@ -3586,10 +3544,6 @@
       "LNG_PAGE_BULK_ADD_CONTACTS_WARNING_CASE_OR_EVENT_REQUIRED": "¡Puede añadir un contacto solo a través de un caso o un evento!",
       "LNG_PAGE_BULK_ADD_CONTACTS_WARNING_INVALID_FIELDS": "¡Algunos campos no son válidos!",
       "LNG_PAGE_BULK_ADD_CONTACTS_WARNING_NO_DATA": "¡No hay datos a ser guardados!",
-      "LNG_PAGE_BULK_ADD_CONTACTS_TAB_PICK_LOCATIONS": "Pick locations",
-      "LNG_PAGE_BULK_ADD_CONTACTS_TAB_ADD_CONTACTS": "Add contacts",
-      "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_LOCATIONS": "Locations",
-      "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_LOCATIONS_DESCRIPTION": "Select the locations to be assigned to contacts in the next step",
       "LNG_PAGE_BULK_ADD_CONTACTS_VISUAL_ID_INFO_LABEL": "* 'Contact ID' cell must follow this pattern: {{mask}}",
       "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_API_ERROR_MSG": " - row {{row}} is invalid: {{err}}",
       "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_PARTIAL_ERROR_MSG": " - records that were created with success were removed from the spreadsheet so we don't create duplicates"
@@ -3717,7 +3671,10 @@
       "LNG_PAGE_LIST_SYSTEM_SYNC_LOGS_SYNC_SETTINGS_DIALOG_SAVE_BUTTON": "Salvar",
       "LNG_PAGE_LIST_SYSTEM_SYNC_LOGS_SYNC_SETTINGS_DIALOG_SUCCESS_MESSAGE": "Sincronizar configuraciones cambiadas",
       "LNG_PAGE_LIST_SYSTEM_SYNC_LOGS_SYNC_SETTINGS_DIALOG_TITLE": "Sincronizar configuraciones",
-      "LNG_PAGE_LIST_SYSTEM_SYNC_LOGS_TITLE": "Sincronizar los registros "
+      "LNG_PAGE_LIST_SYSTEM_SYNC_LOGS_TITLE": "Sincronizar los registros",
+      "LNG_PAGE_LIST_SYSTEM_SYNC_LOGS_IMPORT_SYNC_PACKAGE_BUTTON": "Import sync package",
+      "LNG_PAGE_LIST_SYSTEM_SYNC_LOGS_EXPORT_SYNC_PACKAGE_BUTTON": "Export sync package",
+      "LNG_PAGE_LIST_SYSTEM_SYNC_LOGS_ERROR_DETAILS_TITLE": "Error details"
     },
     "uiClientApplicationFields": {
       "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_ACTIVE": "Activo",
@@ -3902,9 +3859,10 @@
     "uiLabResultsListPage": {
       "LNG_PAGE_LIST_LAB_RESULTS_ACTION_DELETE_SUCCESS_MESSAGE": "¡Resultado de laboratorio excluido!",
       "LNG_PAGE_LIST_LAB_RESULTS_ACTION_RESTORE_LAB_RESULT_SUCCESS_MESSAGE": "Resultado de laboratorio restaurado",
-      "LNG_PAGE_LIST_LAB_RESULTS_IMPORT_BUTTON": "Importar datos de laboratorio",
       "LNG_PAGE_LIST_LAB_RESULTS_TITLE": "Resultados de laboratorio",
-      "LNG_PAGE_LIST_LAB_RESULTS_ACTION_CHANGE_CASE_EPI_CLASSIFICATION_SUCCESS_MESSAGE": "Case classification modified!"
+      "LNG_PAGE_LIST_LAB_RESULTS_ACTION_CHANGE_CASE_EPI_CLASSIFICATION_SUCCESS_MESSAGE": "Case classification modified!",
+      "LNG_PAGE_LIST_LAB_RESULTS_IMPORT_CASE_LAB_RESULTS_BUTTON": "Import Case Lab Data",
+      "LNG_PAGE_LIST_LAB_RESULTS_IMPORT_CONTACT_LAB_RESULTS_BUTTON": "Import Contact Lab Data"
     },
     "uiEntityRelationshipsListShareAssignCreatePages": {
       "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_BULK_SUCCESS_MESSAGE": "¡Las relaciones creadas!",
@@ -4451,9 +4409,9 @@
     "uiGanttChartDashlet": {
       "LNG_PAGE_DASHLET_GANTT_CHART_NO_DATA_LABEL": "No hay datos para construir el gráfico",
       "LNG_PAGE_GANTT_CHART_REPORT_LABEL": "Gráfico de Gantt",
-      "LNG_PAGE_GANTT_CHART_TITLE": "Retardo entre el inicio de síntoma y la fecha de prueba de laboratorio",
       "LNG_PAGE_GANTT_CHART_LAB_TEST_TITLE": "Delay between symptom onset and date of lab testing",
-      "LNG_PAGE_GANTT_CHART_HOSPITALIZATION_ISOLATION_TITLE": "Delay between symptom onset and date of hospitalization / isolation"
+      "LNG_PAGE_GANTT_CHART_HOSPITALIZATION_ISOLATION_TITLE": "Delay between symptom onset and date of hospitalization / isolation",
+      "LNG_PAGE_GANTT_CHART_TITLE": "Gantt Chart"
     },
     "uiSystemUpstreamServersListPage": {
       "LNG_PAGE_LIST_SYSTEM_UPSTREAM_SERVERS_ACTION_DELETE_SUCCESS_MESSAGE": "¡Servidor upstream excluido!",
@@ -4489,8 +4447,6 @@
       "LNG_PAGE_SYSTEM_BACKUPS_CREATE_BACKUP_DIALOG_SUCCESS_MESSAGE": "Copia de seguridad inicializado",
       "LNG_PAGE_SYSTEM_BACKUPS_CREATE_BACKUP_DIALOG_TITLE": "Dados de la copia de seguridad",
       "LNG_PAGE_SYSTEM_BACKUPS_EXPORT_SYNC_PACKAGE": "Descargar el paquete de sincronización",
-      "LNG_PAGE_SYSTEM_BACKUPS_EXPORT_SYNC_PACKAGE_BUTTON": "Exportar paquete de sincronización",
-      "LNG_PAGE_SYSTEM_BACKUPS_IMPORT_SYNC_PACKAGE_BUTTON": "Importar paquete de sincronización",
       "LNG_PAGE_SYSTEM_BACKUPS_TITLE": "Copia de seguridad del sistema",
       "LNG_PAGE_SYSTEM_BACKUPS_ACTION_VIEW_BACKUP_PATH": "View backups folder",
       "LNG_PAGE_SYSTEM_BACKUPS_VIEW_BACKUP_DIALOG_TITLE": "Backup info"
@@ -4634,11 +4590,7 @@
       "LNG_PAGE_BULK_MODIFY_CONTACTS_LABEL_ERRORS": "Validation errors:",
       "LNG_PAGE_BULK_MODIFY_CONTACTS_LABEL_ERROR_MSG": " - row {{row}}, column(s) '{{columns}}' are invalid",
       "LNG_PAGE_BULK_MODIFY_CONTACTS_WARNING_INVALID_FIELDS": "Some fields are invalid",
-      "LNG_PAGE_BULK_MODIFY_CONTACTS_ACTION_MODIFY_CONTACTS_SUCCESS_MESSAGE": "Contacts modified",
-      "LNG_PAGE_BULK_MODIFY_CONTACTS_TAB_PICK_LOCATIONS": "Pick locations",
-      "LNG_PAGE_BULK_MODIFY_CONTACTS_TAB_MODIFY_CONTACTS": "Modify contacts",
-      "LNG_PAGE_BULK_MODIFY_CONTACTS_LABEL_LOCATIONS": "Locations",
-      "LNG_PAGE_BULK_MODIFY_CONTACTS_LABEL_LOCATIONS_DESCRIPTION": "Select the locations to be assigned to contacts in the next step"
+      "LNG_PAGE_BULK_MODIFY_CONTACTS_ACTION_MODIFY_CONTACTS_SUCCESS_MESSAGE": "Contacts modified"
     },
     "uiNgxWig": {
       "LNG_NGX_WIG_CUSTOM_LIBRARY_BUTTONS_LABEL_UNORDERED_LIST": "UL",
@@ -4701,6 +4653,94 @@
       "LNG_PAGE_LIST_AVAILABLE_ENTITIES_FOR_SWITCH_RELATIONSHIP_NO_CONTACTS_SELECTED": "No contacts were selected",
       "LNG_PAGE_LIST_AVAILABLE_ENTITIES_FOR_SWITCH_RELATIONSHIP_SET_SOURCE_BUTTON": "Set as source",
       "LNG_PAGE_LIST_AVAILABLE_ENTITIES_FOR_SWITCH_RELATIONSHIP_ACTION_SET_SOURCE_SUCCESS_MESSAGE": "Source set successful"
+    },
+    "uiFormInputHotTableWrapper": {
+      "LNG_FORM_HOT_TABLE_WRAPPER_NO_LOCATION_SELECTED_LABEL": "<b>None</b>",
+      "LNG_FORM_HOT_TABLE_WRAPPER_LOADING_LOCATIONS_TITLE": "Loading locations",
+      "LNG_FORM_HOT_TABLE_WRAPPER_CHANGE_LOCATION_DIALOG_TITLE": "Change location"
+    },
+    "uiGeneralLabels": {
+      "LNG_DIALOG_GENERAL_DIALOG_TITLE_GROUP_CONTACTS_DIALOG_TITLE": "Contacts",
+      "LNG_DIALOG_GENERAL_DIALOG_TITLE_GROUP_EXPOSURES_DIALOG_TITLE": "Exposures",
+      "LNG_DIALOG_GENERAL_DIALOG_LINK_FULL_LIST_CONTACTS": "Full list of contacts",
+      "LNG_DIALOG_GENERAL_DIALOG_LINK_FULL_LIST_EXPOSURES": "Full list of exposures"
+    },
+    "uiEntityLabResultsListPage": {
+      "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_ACTION_ADD_LAB_RESULT": "Add",
+      "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_ACTION_DELETE_SUCCESS_MESSAGE": "Lab result deleted",
+      "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_ACTION_VIEW_LAB_RESULT": "View lab result",
+      "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_ACTION_MODIFY_LAB_RESULT": "Modify lab result",
+      "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_ACTION_DELETE_LAB_RESULT": "Delete lab result",
+      "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_ACTION_RESTORE_LAB_RESULT": "Restore lab result",
+      "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_TITLE": "Lab results"
+    },
+    "uiLabResultsFields": {
+      "LNG_LAB_RESULT_FIELD_LABEL_ENTITY_FIRST_NAME": "Person first name",
+      "LNG_LAB_RESULT_FIELD_LABEL_ENTITY_LAST_NAME": "Person last name",
+      "LNG_LAB_RESULT_FIELD_LABEL_ENTITY_TYPE": "Person type",
+      "LNG_LAB_RESULT_FIELD_LABEL_DATE_OF_RESULT": "Date of the result",
+      "LNG_LAB_RESULT_FIELD_LABEL_DATE_OF_RESULT_DESCRIPTION": "",
+      "LNG_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_DELIVERED": "Sample delivered to lab",
+      "LNG_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_DELIVERED_DESCRIPTION": "Specify the date on which the sample was delivered to the laboratory",
+      "LNG_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_TAKEN": "Sample taken",
+      "LNG_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_TAKEN_DESCRIPTION": "Specify the date on which the sample was taken from the individual",
+      "LNG_LAB_RESULT_FIELD_LABEL_DATE_TESTING": "Sample tested",
+      "LNG_LAB_RESULT_FIELD_LABEL_DATE_TESTING_DESCRIPTION": "Specify the date on which the sample was tested by the laboratory",
+      "LNG_LAB_RESULT_FIELD_LABEL_DELETED": "Deleted",
+      "LNG_LAB_RESULT_FIELD_LABEL_LAB_NAME": "Lab name",
+      "LNG_LAB_RESULT_FIELD_LABEL_LAB_NAME_DESCRIPTION": "",
+      "LNG_LAB_RESULT_FIELD_LABEL_NOTES": "Notes",
+      "LNG_LAB_RESULT_FIELD_LABEL_NOTES_DESCRIPTION": "",
+      "LNG_LAB_RESULT_FIELD_LABEL_PERSON_ID": "Person ID",
+      "LNG_LAB_RESULT_FIELD_LABEL_QUANTITATIVE_RESULT": "Quantitative result",
+      "LNG_LAB_RESULT_FIELD_LABEL_QUANTITATIVE_RESULT_DESCRIPTION": "",
+      "LNG_LAB_RESULT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS": "Questionnaire answers",
+      "LNG_LAB_RESULT_FIELD_LABEL_RESULT": "Result",
+      "LNG_LAB_RESULT_FIELD_LABEL_RESULT_DESCRIPTION": "",
+      "LNG_LAB_RESULT_FIELD_LABEL_SAMPLE_LAB_ID": "Sample lab ID",
+      "LNG_LAB_RESULT_FIELD_LABEL_SAMPLE_LAB_ID_DESCRIPTION": "If the lab has their own identifying code/number then please enter it here",
+      "LNG_LAB_RESULT_FIELD_LABEL_SAMPLE_TYPE": "Sample type",
+      "LNG_LAB_RESULT_FIELD_LABEL_SAMPLE_TYPE_DESCRIPTION": "",
+      "LNG_LAB_RESULT_FIELD_LABEL_STATUS": "Status",
+      "LNG_LAB_RESULT_FIELD_LABEL_STATUS_DESCRIPTION": "",
+      "LNG_LAB_RESULT_FIELD_LABEL_TEST_TYPE": "Test type",
+      "LNG_LAB_RESULT_FIELD_LABEL_TEST_TYPE_DESCRIPTION": "",
+      "LNG_LAB_RESULT_FIELD_LABEL_TESTED_FOR": "Tested for",
+      "LNG_LAB_RESULT_FIELD_LABEL_TESTED_FOR_DESCRIPTION": "",
+      "LNG_LAB_RESULT_FIELD_LABEL_CREATED_BY": "Created by",
+      "LNG_LAB_RESULT_FIELD_LABEL_CREATED_BY_DESCRIPTION": "",
+      "LNG_LAB_RESULT_FIELD_LABEL_CREATED_AT": "Created at ( utc )",
+      "LNG_LAB_RESULT_FIELD_LABEL_CREATED_AT_DESCRIPTION": "",
+      "LNG_LAB_RESULT_FIELD_LABEL_UPDATED_BY": "Updated by",
+      "LNG_LAB_RESULT_FIELD_LABEL_UPDATED_BY_DESCRIPTION": "",
+      "LNG_LAB_RESULT_FIELD_LABEL_UPDATED_AT": "Updated at ( utc )",
+      "LNG_LAB_RESULT_FIELD_LABEL_UPDATED_AT_DESCRIPTION": "",
+      "LNG_LAB_RESULT_FIELD_LABEL_CASE_CLASSIFICATION": "Classification",
+      "LNG_LAB_RESULT_FIELD_LABEL_CASE_CLASSIFICATION_DESCRIPTION": "",
+      "LNG_LAB_RESULT_FIELD_LABEL_CASE_CLASSIFICATION_INFO": "Current classification of the case:"
+    },
+    "uiCreateLabResultPage": {
+      "LNG_PAGE_CREATE_LAB_RESULT_ACTION_CREATE_LAB_RESULT_SUCCESS_MESSAGE": "Lab result created",
+      "LNG_PAGE_CREATE_LAB_RESULT_ACTION_CREATE_LAB_RESULT_BUTTON": "Create lab result",
+      "LNG_PAGE_CREATE_LAB_RESULT_TAB_DETAILS": "Details",
+      "LNG_PAGE_CREATE_LAB_RESULT_TAB_QUESTIONNAIRE_TITLE": "Questionnaire",
+      "LNG_PAGE_CREATE_LAB_RESULT_TITLE": "Create lab result",
+      "LNG_PAGE_CREATE_LAB_RESULT_FIELD_LABEL_ENTITY": "Person",
+      "LNG_PAGE_CREATE_LAB_RESULT_WARNING_CASE_DATEOFONSET_AFTER_SAMPLE_TAKEN": "Warning: Date of onset is after sample taken date"
+    },
+    "uiModifyLabResultPage": {
+      "LNG_PAGE_MODIFY_LAB_RESULT_ACTION_MODIFY_LAB_RESULT_SUCCESS_MESSAGE": "Lab result modified",
+      "LNG_PAGE_MODIFY_LAB_RESULT_TAB_DETAILS_TITLE": "Details",
+      "LNG_PAGE_MODIFY_LAB_RESULT_TAB_QUESTIONNAIRE_TITLE": "Questionnaire",
+      "LNG_PAGE_MODIFY_LAB_RESULT_TITLE": "Modify lab result {{sampleIdentifier}}",
+      "LNG_PAGE_VIEW_LAB_RESULT_TITLE": "View lab result {{sampleIdentifier}}",
+      "LNG_PAGE_VIEW_LAB_RESULT_FIELD_LABEL_ENTITY": "Person",
+      "LNG_PAGE_MODIFY_LAB_RESULT_WARNING_CASE_DATEOFONSET_AFTER_SAMPLE_TAKEN": "Warning: Date of onset is after sample taken date",
+      "LNG_PAGE_MODIFY_LAB_RESULT_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": "Record Details",
+      "LNG_PAGE_MODIFY_LAB_RESULT_FIELD_LABEL_CONTACT_WITH_INFO": "* This person is now a contact and lab tests were performed at the time when '{{ caseName }}' was registered as a case"
+    },
+    "uiImportContactLabData": {
+      "LNG_PAGE_IMPORT_CONTACT_LAB_DATA_TITLE": "Import contact lab data"
     }
   }
 }

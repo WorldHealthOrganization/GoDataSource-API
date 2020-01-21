@@ -5069,7 +5069,7 @@ module.exports = function (Outbreak) {
                 const caseDetailsTitle = dictionary.getTranslation('LNG_PAGE_TITLE_CASE_DETAILS');
                 const caseQuestionnaireTitle = dictionary.getTranslation('LNG_PAGE_TITLE_CASE_QUESTIONNAIRE');
                 const relationshipsTitle = dictionary.getTranslation('LNG_PAGE_ACTION_RELATIONSHIPS');
-                const labResultsTitle = dictionary.getTranslation('LNG_PAGE_LIST_CASE_LAB_RESULTS_TITLE');
+                const labResultsTitle = dictionary.getTranslation('LNG_PAGE_LIST_ENTITY_LAB_RESULTS_TITLE');
                 const labResultsQuestionnaireTitle = dictionary.getTranslation('LNG_PAGE_TITLE_LAB_RESULTS_QUESTIONNAIRE');
 
                 let pdfPromises = [];

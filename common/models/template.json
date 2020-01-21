@@ -60,6 +60,10 @@
       "type": [
         "templateQuestion"
       ]
+    },
+    "isContactLabResultsActive": {
+      "type": "boolean",
+      "default": false
     }
   },
   "validations": [],
