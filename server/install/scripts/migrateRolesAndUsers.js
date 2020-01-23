@@ -1,6 +1,8 @@
 'use strict';
 
 const MongoDBHelper = require('../../../components/mongoDBHelper');
+const _ = require('lodash');
+const moment = require('moment');
 
 // roles map from model
 const rolesMap = require('./defaultRoles');
@@ -25,12 +27,36 @@ function migrateRoles(mongoDBConnection) {
   return Promise.all(Object.keys(rolesMap)
     .map(roleName => Role
       .findOne({
-        name: roleName
+        $or: [
+          {
+            name: roleName
+          }, {
+            _id: rolesMap[roleName].id
+          }
+        ]
       })
       .then(roleInstance => {
         if (!roleInstance) {
-          // nothing to do; role is permanently deleted
-          return 'skipped. Was permanently deleted.';
+          // role doesn't exist anymore, default roles should always be inm the system
+          // create role
+          const defaultRoleData = rolesMap[roleName];
+          return Role
+            .insertOne({
+              _id: defaultRoleData.id,
+              name: defaultRoleData.newName ?
+                defaultRoleData.newName :
+                roleName,
+              description: defaultRoleData.description,
+              permissionIds: defaultRoleData.permissionIds
+            })
+            .then(() => {
+              // new instance created
+              return 'created.';
+            })
+            .catch(err => {
+              // return not created status
+              return `not created. Error: ${err.message}`;
+            });
         }
 
         // role was found; check for ID
@@ -96,6 +122,112 @@ function migrateRoles(mongoDBConnection) {
       // nothing to do here
       // when there is an error it is already logged above in the catch for a single role
       // even though there were some errors, the successfully updated roles will be returned below
+    })
+    .then(() => {
+      // if necessary update permissions to the default ones
+      const defaultRoleIds = Object.keys(rolesMap).map((roleName) => rolesMap[roleName].id);
+
+      // there is nothing to update ?
+      if (
+        !defaultRoleIds ||
+        defaultRoleIds.length < 1
+      ) {
+        // log
+        console.log('We don\'t need to check permissions for default user roles since there are none :)');
+
+        // finished
+        return null;
+      }
+
+        // log
+      console.log(`Checking ${defaultRoleIds.length} roles permissions...`);
+
+      // retrieve roles if necessary
+      return Role
+        .find({
+          _id: {
+            $in: defaultRoleIds
+          }
+        })
+        .toArray()
+        .catch((err) => {
+          console.log(`DB error while trying to retrieve roles '${defaultRoleIds.join(', ')}'. Error: ${err.message}`);
+        });
+    })
+    .then((rolesToCheckPermissions) => {
+      // skip step ?
+      if (rolesToCheckPermissions === null) {
+        return;
+      }
+
+      // log
+      console.log(`Found ${rolesToCheckPermissions.length} roles`);
+
+      // map default roles for easy access
+      const roleMap = {};
+      Object.keys(rolesMap).forEach((roleName) => {
+        const roleData = rolesMap[roleName];
+        roleMap[roleData.id] = roleData;
+      });
+
+      // perform permissions check
+      console.log('Checking roles...');
+      const updateRolePermissions = [];
+      rolesToCheckPermissions.forEach((roleData) => {
+        // determine default role based on role id
+        const mappedRole = roleMap[roleData._id];
+        if (mappedRole) {
+          // determine if we have the same permissions, if not...update to default permissions
+          if (
+            !roleData.migrateDate ||
+            !roleData.permissionIds || (
+              (
+                roleData.permissionIds.length !== mappedRole.permissionIds.length ||
+                _.find(roleData.permissionIds, permissionId => mappedRole.permissionIds.indexOf(permissionId) === -1) || (
+                  mappedRole.newName &&
+                  roleData.name !== mappedRole.newName
+                )
+              ) &&
+              moment(roleData.migrateDate).isBefore(moment(mappedRole.migrateDate))
+            )
+          ) {
+            // update role
+            console.log(`Resetting role '${roleData._id}' permissions and name`);
+            updateRolePermissions.push({
+              id: roleData._id,
+              permissionIds: mappedRole.permissionIds,
+              name: mappedRole.newName,
+              migrateDate: mappedRole.migrateDate
+            });
+          }
+        }
+      });
+
+      // there is nothing to update ?
+      if (updateRolePermissions.length < 1) {
+        console.log('There is nothing to update');
+        return;
+      }
+
+      // if necessary create promises to update user roles
+      return Promise.all(
+        updateRolePermissions.map((roleData) => Role
+          .updateOne({
+            _id: roleData.id
+          }, {
+            $set: !_.isEmpty(roleData.name) ? {
+              permissionIds: roleData.permissionIds,
+              name: roleData.name,
+              migrateDate: roleData.migrateDate
+            } : {
+              permissionIds: roleData.permissionIds,
+              migrateDate: roleData.migrateDate
+            }
+          })
+        ))
+        .catch((err) => {
+          console.log(`DB error while trying to update roles. Error: ${err.message}`);
+        });
     })
     .then(() => {
       // role migration is finished; return updated roles to migrate associated users

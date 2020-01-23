@@ -26,6 +26,9 @@
         "string"
       ],
       "required": true
+    },
+    "migrateDate": {
+      "type": "string"
     }
   },
   "indexes": {

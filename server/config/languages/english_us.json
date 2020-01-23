@@ -146,6 +146,8 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_ROLE_DESCRIPTION": "This permission allows modifying user roles",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER_ROLE": "User Role - delete",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER_ROLE_DESCRIPTION": "This permission allows removing user role information",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_USER_ROLE_CLONE": "User Role - create clone",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_USER_ROLE_CLONE_DESCRIPTION": "This permission allows cloning user role information",
 
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_BACKUP": "Backups",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_BACKUP_DESCRIPTION": "Backup permissions",
@@ -2974,7 +2976,8 @@
       "LNG_PAGE_LIST_USER_ROLES_ACTION_VIEW_ROLE": "View role",
       "LNG_PAGE_LIST_USER_ROLES_ACTION_MODIFY_ROLE": "Modify role",
       "LNG_PAGE_LIST_USER_ROLES_ACTION_DELETE_ROLE": "Delete role",
-      "LNG_PAGE_LIST_USER_ROLES_TITLE": "Roles"
+      "LNG_PAGE_LIST_USER_ROLES_TITLE": "Roles",
+      "LNG_PAGE_LIST_USER_ROLES_ACTION_CLONE_ROLE": "Clone role"
     },
     "uiCreateUserRolePage": {
       "LNG_PAGE_CREATE_USER_ROLE_ACTION_CREATE_USER_ROLE_SUCCESS_MESSAGE": "Role created",

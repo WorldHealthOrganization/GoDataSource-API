@@ -393,6 +393,15 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER_ROLE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER_ROLE_DESCRIPTION',
           requires: []
+        },
+        {
+          id: 'user_role_create_clone',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_USER_ROLE_CLONE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_USER_ROLE_CLONE_DESCRIPTION',
+          requires: [
+            'user_role_view',
+            'user_role_create'
+          ]
         }
       ]
     },
@@ -1413,8 +1422,7 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'relationship_list'
-          ],
-          hidden: true
+          ]
         },
         {
           id: 'contact_view_relationship_contacts',
@@ -1423,8 +1431,7 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'relationship_view'
-          ],
-          hidden: true
+          ]
         },
         {
           id: 'contact_create_relationship_contacts',
@@ -1433,8 +1440,7 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'relationship_create'
-          ],
-          hidden: true
+          ]
         },
         {
           id: 'contact_modify_relationship_contacts',
@@ -1443,8 +1449,7 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'relationship_modify'
-          ],
-          hidden: true
+          ]
         },
         {
           id: 'contact_delete_relationship_contacts',
@@ -1453,8 +1458,7 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'relationship_delete'
-          ],
-          hidden: true
+          ]
         },
         {
           id: 'contact_list_relationship_exposures',
