@@ -19,20 +19,15 @@ const defaultSystemAdminRole = {
   name: 'System administrator',
   description: 'This is a built in role that manages user accounts, and configuration of the system.',
   permissionIds: [
-    'system_settings_all',
     'audit_log_all',
-    'language_all',
-    'help_all',
-    'reference_data_all',
-    'icon_all',
-    'user_all',
-    'user_role_all',
     'backup_all',
-    'sync_all',
-    'upstream_server_all',
     'client_application_all',
-    'location_all',
-    'device_all'
+    'device_all',
+    'sync_all',
+    'system_settings_all',
+    'upstream_server_all',
+
+    'user_all'
   ]
 };
 

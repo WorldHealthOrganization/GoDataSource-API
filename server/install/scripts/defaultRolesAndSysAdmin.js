@@ -33,7 +33,13 @@ function initRolesCreation() {
       Role
         .findOne({
           where: {
-            name: roleName
+            $or: [
+              {
+                name: roleName
+              }, {
+                _id: rolesMap[roleName].id
+              }
+            ]
           }
         })
         .then(function (role) {
@@ -41,9 +47,10 @@ function initRolesCreation() {
             return Role
               .create(Object.assign({
                 id: rolesMap[roleName].id,
-                name: roleName,
+                name: rolesMap[roleName].newName ? rolesMap[roleName].newName : roleName,
                 description: rolesMap[roleName].description,
-                permissionIds: rolesMap[roleName].permissionIds
+                permissionIds: rolesMap[roleName].permissionIds,
+                migrateDate: rolesMap[roleName].migrateDate
               }, common.install.timestamps), options)
               .then(function (role) {
                 if (roleName === 'System administrator') {
@@ -57,8 +64,10 @@ function initRolesCreation() {
             }
             return role
               .updateAttributes({
+                name: rolesMap[roleName].newName ? rolesMap[roleName].newName : role.name,
                 description: rolesMap[roleName].description,
-                permissionIds: rolesMap[roleName].permissionIds
+                permissionIds: rolesMap[roleName].permissionIds,
+                migrateDate: rolesMap[roleName].migrateDate
               }, options)
               .then(function () {
                 return 'updated.';
