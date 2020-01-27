@@ -95,6 +95,13 @@
       "default": [],
       "importTopLevelOnly": true
     },
+    "contactInvestigationTemplate": {
+      "type": [
+        "templateQuestion"
+      ],
+      "default": [],
+      "importTopLevelOnly": true
+    },
     "contactFollowUpTemplate": {
       "type": [
         "templateQuestion"

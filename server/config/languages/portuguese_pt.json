@@ -1828,7 +1828,8 @@
       "LNG_CONTACT_FIELD_LABEL_VACCINES_RECEIVED_DETAILS": "Vaccines received",
       "LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS_DESCRIPTION": "",
       "LNG_CONTACT_FIELD_LABEL_NUMBER_OF_CONTACTS": "Number of contacts",
-      "LNG_CONTACT_FIELD_LABEL_NUMBER_OF_EXPOSURES": "Number of exposures"
+      "LNG_CONTACT_FIELD_LABEL_NUMBER_OF_EXPOSURES": "Number of exposures",
+      "LNG_CONTACT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS": "Questionnaire answers"
     },
     "uiContactsListPage": {
       "LNG_PAGE_LIST_CONTACTS_ACTION_ADD_FOLLOW_UP": "Adicionar acompanhamento",
