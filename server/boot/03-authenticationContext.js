@@ -107,6 +107,10 @@ module.exports = function (app) {
                 if (err) {
                   return next(err);
                 }
+
+                // we need to attach access token to context for handling special loopback roles ($authenticated)
+                context.req.accessToken = accessToken;
+
                 // check if access token
                 return app.models.user
                   .findById(accessToken.userId)
@@ -142,7 +146,7 @@ module.exports = function (app) {
                           })
                           .catch(done);
                       }
-                    ], (err) => next(err));
+                    ], (err) => next());
                   })
                   .catch(next);
               });
