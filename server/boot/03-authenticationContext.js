@@ -98,6 +98,55 @@ module.exports = function (app) {
               })
               .catch(next);
           }
+
+          if (/^Bearer$/i.test(scheme)) {
+            // find and check the access token
+            return app.models.accessToken.resolve(
+              app.models.accessToken.getIdForRequest(context.req),
+              (err, accessToken) => {
+                if (err) {
+                  return next(err);
+                }
+                // check if access token
+                return app.models.user
+                  .findById(accessToken.userId)
+                  .then(function (user) {
+
+                    // user not found, continue as if no token was sent
+                    if (!user) {
+                      return next();
+                    }
+
+                    context.req.authData = {
+                      user: user.toJSON(),
+                      // keeping also the user model instance as we might need to do some actions on it
+                      userInstance: user
+                    };
+
+                    async.parallel([
+                      // add roles and their permissionIds on authentication context
+                      (done) => {
+                        app.models.role
+                          .find({
+                            where: {
+                              id: {
+                                inq: user.roleIds
+                              }
+                            }
+                          })
+                          .then((roles) => {
+                            context.req.authData.user.roles = roles;
+                            // also store the list of permissions
+                            context.req.authData.user.permissionsList = roles.reduce((permissions, role) => permissions.concat(role.permissionIds), []);
+                            return done(null);
+                          })
+                          .catch(done);
+                      }
+                    ], (err) => next(err));
+                  })
+                  .catch(next);
+              });
+          }
         }
       }
 
