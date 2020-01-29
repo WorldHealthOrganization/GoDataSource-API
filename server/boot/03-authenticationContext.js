@@ -146,7 +146,7 @@ module.exports = function (app) {
                           })
                           .catch(done);
                       }
-                    ], (err) => next());
+                    ], (err) => next(err));
                   })
                   .catch(next);
               });
