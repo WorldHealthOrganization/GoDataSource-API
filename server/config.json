@@ -84,5 +84,6 @@
   "cors": {
     "enabled": true,
     "whitelist": []
-  }
+  },
+  "enableConfigRewrite": true
 }

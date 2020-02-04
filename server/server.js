@@ -45,58 +45,61 @@ app.start = function () {
   const server = app.listen(function () {
     app.emit('started');
 
-    // try and figure out IP address
-    let baseUrl = `http://${ip.address()}:${config.port}`;
+    if (config.enableConfigRewrite) {
+      // try and figure out IP address
+      let baseUrl = `http://${ip.address()}:${config.port}`;
 
-    app.logger.debug(`Trying to find server address. Testing: ${baseUrl}`);
-    // test if that IP address is actually the correct one by making a status request
-    request({
-      uri: `${baseUrl}/status`,
-      json: true,
-      // do not wait a lot of time for the server to respond
-      timeout: 3000
-    }, function (error, response, body) {
-      // if an error occurred
-      if (error) {
-        // log it
-        app.logger.error(error);
-        // fallback to standard loopback address
-        baseUrl = app.get('url').replace(/\/$/, '');
-      }
-      // no error, but unexpected response
-      if (!body || !body.started) {
-        // log unexpected response
-        app.logger.debug('Unexpected response from /status endpoint. Falling back to default address');
-        // fallback to standard loopback address
-        baseUrl = app.get('url').replace(/\/$/, '');
-      }
+      app.logger.debug(`Trying to find server address. Testing: ${baseUrl}`);
 
-      app.logger.info('Web server listening at: %s', baseUrl);
-      if (app.get('loopback-component-explorer')) {
-        const explorerPath = app.get('loopback-component-explorer').mountPath;
-        app.logger.info('Browse your REST API at %s%s', baseUrl, explorerPath);
-      }
+      // test if that IP address is actually the correct one by making a status request
+      request({
+        uri: `${baseUrl}/status`,
+        json: true,
+        // do not wait a lot of time for the server to respond
+        timeout: 3000
+      }, function (error, response, body) {
+        // if an error occurred
+        if (error) {
+          // log it
+          app.logger.error(error);
+          // fallback to standard loopback address
+          baseUrl = app.get('url').replace(/\/$/, '');
+        }
+        // no error, but unexpected response
+        if (!body || !body.started) {
+          // log unexpected response
+          app.logger.debug('Unexpected response from /status endpoint. Falling back to default address');
+          // fallback to standard loopback address
+          baseUrl = app.get('url').replace(/\/$/, '');
+        }
 
-      // make sure we update the public data
-      const urlData = url.parse(baseUrl);
-      _.set(config, 'public.protocol', urlData.protocol.replace(':', ''));
-      _.set(config, 'public.host', urlData.hostname);
-      _.set(config, 'public.port', urlData.port);
+        app.logger.info('Web server listening at: %s', baseUrl);
+        if (app.get('loopback-component-explorer')) {
+          const explorerPath = app.get('loopback-component-explorer').mountPath;
+          app.logger.info('Browse your REST API at %s%s', baseUrl, explorerPath);
+        }
 
-      // update configuration
-      const configPath = path.resolve(__dirname + '/config.json');
-      fs.writeFileSync(
-        configPath,
-        JSON.stringify(config, null, 2)
-      );
+        // make sure we update the public data
+        const urlData = url.parse(baseUrl);
+        _.set(config, 'public.protocol', urlData.protocol.replace(':', ''));
+        _.set(config, 'public.host', urlData.hostname);
+        _.set(config, 'public.port', urlData.port);
 
-      // config saved
-      app.logger.info(
-        'Config file ( %s ) public data updated to: %s',
-        configPath,
-        JSON.stringify(config.public)
-      );
-    });
+        // update configuration
+        const configPath = path.resolve(__dirname + '/config.json');
+        fs.writeFileSync(
+          configPath,
+          JSON.stringify(config, null, 2)
+        );
+
+        // config saved
+        app.logger.info(
+          'Config file ( %s ) public data updated to: %s',
+          configPath,
+          JSON.stringify(config.public)
+        );
+      });
+    }
   });
 
   // remove default socket timeout and set it 12 hours
