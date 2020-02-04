@@ -79,5 +79,6 @@
       "name": "WHO Reference",
       "url": "http://maps.who.int/arcgis/rest/services/Basemap/WHO_Reference_layer/MapServer"
     }
-  ]
+  ],
+  "signoutUsersOnRestart": true
 }
