@@ -8666,7 +8666,12 @@ module.exports = function (Outbreak) {
     // pre-filter using related data (case)
     app.models.labResult
       .preFilterForOutbreak(this, filter)
-      .then(function (filter) {
+      .then(filter => {
+        if (!this.isContactLabResultsActive) {
+          filter.where.personType = {
+            neq: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          };
+        }
         // find follow-ups using filter
         return app.models.labResult.find(filter);
       })
@@ -8685,7 +8690,12 @@ module.exports = function (Outbreak) {
     // pre-filter using related data (case)
     app.models.labResult
       .preFilterForOutbreak(this, filter)
-      .then(function (filter) {
+      .then(filter => {
+        if (!this.isContactLabResultsActive) {
+          filter.where.personType = {
+            neq: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          };
+        }
         // handle custom filter options
         filter = genericHelpers.attachCustomDeleteFilterOption(filter);
 
@@ -8704,7 +8714,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.findLabResultsAggregate = function (filter, callback) {
     app.models.labResult.retrieveAggregateLabResults(
-      this.id,
+      this,
       filter,
       false,
       callback
@@ -8717,7 +8727,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.filteredCountLabResultsAggregate = function (filter, callback) {
     app.models.labResult.retrieveAggregateLabResults(
-      this.id,
+      this,
       filter,
       true,
       callback
