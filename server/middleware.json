@@ -2,13 +2,6 @@
   "initial:before": {},
   "initial": {
     "compression": {},
-    "cors": {
-      "params": {
-        "origin": true,
-        "credentials": true,
-        "maxAge": 86400
-      }
-    },
     "helmet#xssFilter": {},
     "helmet#frameguard": {
       "params": [
