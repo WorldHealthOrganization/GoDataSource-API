@@ -3,7 +3,8 @@
   "base": "User",
   "idInjection": true,
   "options": {
-    "validateUpsert": true
+    "validateUpsert": true,
+    "ttl": 300
   },
   "scope": {
     "order": ["lastName ASC", "firstName ASC"]
