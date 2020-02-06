@@ -1145,7 +1145,8 @@ module.exports = function (Outbreak) {
           .then(resolve)
           .catch(reject);
       })
-    ]).then(relations => {
+    ])
+      .then(relations => {
         const allRelations = (relations[0] || []).concat((relations[1] || []));
         // retrieve contact ids
         const allowedContactIds = Array.from(new Set(allRelations.map((relationshipData) => {
