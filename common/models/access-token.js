@@ -1,6 +1,5 @@
 'use strict';
 
-const app = require('../../server/server');
 const assert = require('assert');
 
 module.exports = function (AccessToken) {
