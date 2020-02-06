@@ -198,7 +198,7 @@ module.exports = function (ExtendedPersistedModel) {
    * - At this point filters on user relationships don't work, in case we need to add support for this then we will need to allow inclusion on all count methods as well
    */
   app.remotes().before('**', function (context, next) {
-    const config = require('../config');
+    let config = require('../config');
 
     if (config.enableConfigRewrite) {
       // retrieve domain from client url
@@ -216,7 +216,7 @@ module.exports = function (ExtendedPersistedModel) {
           // make sure we always check the latest values
           const filename = path.resolve(`${__dirname}/../config.json`);
           delete require.cache[filename];
-          const config = require('../config');
+          config = require('../config');
 
           // protocol changed?
           const protocolChanged = urlInfo.protocol &&
