@@ -198,72 +198,76 @@ module.exports = function (ExtendedPersistedModel) {
    * - At this point filters on user relationships don't work, in case we need to add support for this then we will need to allow inclusion on all count methods as well
    */
   app.remotes().before('**', function (context, next) {
-    // retrieve domain from client url
-    const origin = context.req.get('origin');
-    if (!_.isEmpty(origin)) {
-      // retrieve url info
-      const urlInfo = url.parse(origin);
-      if (
-        urlInfo && (
-          urlInfo.hostname &&
-          urlInfo.hostname.toLowerCase() !== 'localhost' &&
-          urlInfo.hostname.toLowerCase() !== '127.0.0.1'
-        )
-      ) {
-        // make sure we always check the latest values
-        const filename = path.resolve(`${__dirname}/../config.json`);
-        delete require.cache[filename];
-        const config = require('../config');
+    let config = require('../config');
 
-        // protocol changed?
-        const protocolChanged = urlInfo.protocol &&
-          _.get(config, 'public.protocol').toLowerCase() !== urlInfo.protocol.replace(':', '').toLowerCase();
-
-        // host changed
-        const hostChanged = urlInfo.hostname &&
-          _.get(config, 'public.host').toLowerCase() !== urlInfo.hostname.toLowerCase();
-
-        // port changed ?
-        const port = urlInfo.port === null ? '80' : urlInfo.port;
-        const portChanged = port &&
-          _.get(config, 'public.port').toString().toLowerCase() !== port.toString().toLowerCase();
-
-        // check if we need to update host information
+    if (config.enableConfigRewrite) {
+      // retrieve domain from client url
+      const origin = context.req.get('origin');
+      if (!_.isEmpty(origin)) {
+        // retrieve url info
+        const urlInfo = url.parse(origin);
         if (
-          protocolChanged ||
-          hostChanged ||
-          portChanged
+          urlInfo && (
+            urlInfo.hostname &&
+            urlInfo.hostname.toLowerCase() !== 'localhost' &&
+            urlInfo.hostname.toLowerCase() !== '127.0.0.1'
+          )
         ) {
-          // change protocol ?
-          if (protocolChanged) {
-            _.set(config, 'public.protocol', urlInfo.protocol.replace(':', ''));
+          // make sure we always check the latest values
+          const filename = path.resolve(`${__dirname}/../config.json`);
+          delete require.cache[filename];
+          config = require('../config');
+
+          // protocol changed?
+          const protocolChanged = urlInfo.protocol &&
+            _.get(config, 'public.protocol').toLowerCase() !== urlInfo.protocol.replace(':', '').toLowerCase();
+
+          // host changed
+          const hostChanged = urlInfo.hostname &&
+            _.get(config, 'public.host').toLowerCase() !== urlInfo.hostname.toLowerCase();
+
+          // port changed ?
+          const port = urlInfo.port === null ? '80' : urlInfo.port;
+          const portChanged = port &&
+            _.get(config, 'public.port').toString().toLowerCase() !== port.toString().toLowerCase();
+
+          // check if we need to update host information
+          if (
+            protocolChanged ||
+            hostChanged ||
+            portChanged
+          ) {
+            // change protocol ?
+            if (protocolChanged) {
+              _.set(config, 'public.protocol', urlInfo.protocol.replace(':', ''));
+            }
+
+            // change host ?
+            if (hostChanged) {
+              _.set(config, 'public.host', urlInfo.hostname);
+            }
+
+            // change port
+            if (portChanged) {
+              _.set(config, 'public.port', port);
+            }
+
+            // save data into file
+            // update configuration
+            const configPath = path.resolve(__dirname + '/../config.json');
+            fs.writeFileSync(
+              configPath,
+              JSON.stringify(config, null, 2)
+            );
+
+            // config saved
+            app.logger.info(
+              'Config file ( %s ) public data updated to: %s taken FROM %s',
+              configPath,
+              JSON.stringify(config.public),
+              JSON.stringify(urlInfo)
+            );
           }
-
-          // change host ?
-          if (hostChanged) {
-            _.set(config, 'public.host', urlInfo.hostname);
-          }
-
-          // change port
-          if (portChanged) {
-            _.set(config, 'public.port', port);
-          }
-
-          // save data into file
-          // update configuration
-          const configPath = path.resolve(__dirname + '/../config.json');
-          fs.writeFileSync(
-            configPath,
-            JSON.stringify(config, null, 2)
-          );
-
-          // config saved
-          app.logger.info(
-            'Config file ( %s ) public data updated to: %s taken FROM %s',
-            configPath,
-            JSON.stringify(config.public),
-            JSON.stringify(urlInfo)
-          );
         }
       }
     }
