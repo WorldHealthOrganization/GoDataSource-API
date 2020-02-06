@@ -224,7 +224,7 @@ module.exports = function (SystemSettings) {
    * @param callback
    */
   SystemSettings.getVersion = function (callback) {
-    callback(null, app.utils.helpers.getBuildInformation());
+    callback(null, Object.assign({}, app.utils.helpers.getBuildInformation(), { tokenTTL: app.models.user.settings.ttl }));
   };
 
   /**
