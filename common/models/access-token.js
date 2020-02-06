@@ -45,14 +45,19 @@ module.exports = function (AccessToken) {
         elapsedSeconds < secondsToLive;
 
       if (isValid) {
+        // avoid spams, update once every 5 seconds
+        // dont wait for token save, to not throttle request performance
+        if (elapsedSeconds > 5) {
+          // keep token alive
+          this.created = now;
+          this.save();
+        }
         process.nextTick(function() {
           cb(null, isValid);
         });
       } else {
-        this.ttl = app.models.user.settings.ttl;
-        this.created = now;
-        this.save(function(err) {
-          cb(err, true);
+        this.destroy(function(err) {
+          cb(err, isValid);
         });
       }
     } catch (e) {
