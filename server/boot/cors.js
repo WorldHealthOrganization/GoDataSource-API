@@ -4,7 +4,7 @@ const cors = require('cors');
 
 module.exports = function (app) {
   const corsOptions = {
-    origin: '*',
+    origin: true,
     credentials: true
   };
   if (app.settings.cors && app.settings.cors.enabled) {
