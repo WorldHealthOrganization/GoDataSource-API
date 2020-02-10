@@ -163,13 +163,13 @@ module.exports = function (LabResult) {
 
   /**
    * Aggregate fiind lab-results
-   * @param outbreakId
+   * @param outbreak
    * @param filter
    * @param countOnly
    * @param callback
    */
   LabResult.retrieveAggregateLabResults = (
-    outbreakId,
+    outbreak,
     filter,
     countOnly,
     callback
@@ -178,13 +178,18 @@ module.exports = function (LabResult) {
     filter = filter || {};
 
     // retrieve records from this outbreak
-    const outbreakCondition = {
-      outbreakId: outbreakId
+    const predefinedConditions = {
+      outbreakId: outbreak.id
     };
+    if (!outbreak.isContactLabResultsActive) {
+      predefinedConditions.personType = {
+        neq: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+      };
+    }
     filter.where = _.isEmpty(filter.where) ?
-      outbreakCondition : {
+      predefinedConditions : {
         and: [
-          outbreakCondition,
+          predefinedConditions,
           filter.where
         ]
       };
