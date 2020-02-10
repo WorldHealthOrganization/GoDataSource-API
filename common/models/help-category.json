@@ -161,12 +161,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "help_modify_category_item",
-      "permission": "ALLOW",
-      "property": "__updateById__helpItems"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "help_delete_category_item",
       "permission": "ALLOW",
       "property": "__destroyById__helpItems"
@@ -176,9 +170,52 @@
       "principalId": "help_approve_category_item",
       "permission": "ALLOW",
       "property": "approveHelpItem"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "help_modify_category_item",
+      "permission": "ALLOW",
+      "property": "updateHelpItem"
     }
   ],
   "methods": {
+    "prototype.updateHelpItem": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for help items"
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "helpItem",
+          "description": "Model instance data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": {
+        "arg": "helpItem",
+        "type": "helpItem",
+        "description": "Help Item resulted from approval",
+        "required": true,
+        "root": true
+      },
+      "description": "Update a help item",
+      "http": {
+        "verb": "put",
+        "path": "/help-items/:fk"
+      }
+    },
     "prototype.approveHelpItem": {
       "accepts": [
         {

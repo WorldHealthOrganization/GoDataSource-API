@@ -7,7 +7,8 @@ module.exports = function (HelpCategory) {
 
   // disable bulk delete for related models
   app.utils.remote.disableRemoteMethods(HelpCategory, [
-    'prototype.__delete__helpItems'
+    'prototype.__delete__helpItems',
+    'prototype.__updateById__helpItems'
   ]);
 
   /**
@@ -184,4 +185,23 @@ module.exports = function (HelpCategory) {
     // continue
     next();
   });
+
+  HelpCategory.prototype.updateHelpItem = function (itemId, data, options, callback) {
+    app.models.helpItem
+      .findOne({
+        where: {
+          categoryId: this.id,
+          id: itemId
+        }
+      })
+      .then((helpItem) => {
+        if (!helpItem) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.helpItem.modelName, id: itemId});
+        }
+
+        return helpItem.updateAttributes(data, options);
+      })
+      .then((helpItem) => callback(null, helpItem))
+      .catch(callback);
+  };
 };
