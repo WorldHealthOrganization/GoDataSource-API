@@ -120,12 +120,19 @@ module.exports = function (Model) {
           context.instance.createdAt = new Date();
         }
 
-        context.instance.createdBy = user.id ?
-          user.id : (
-            context.instance.createdBy ?
-              context.instance.createdBy :
-              systemAuthor
-          );
+        // lets keep original author if sync snapshot provides it
+        if (context.options._sync) {
+          if (!context.instance.createdBy) {
+            context.instance.createdBy = user.id || systemAuthor;
+          }
+        } else {
+          context.instance.createdBy = user.id ?
+            user.id : (
+              context.instance.createdBy ?
+                context.instance.createdBy :
+                systemAuthor
+            );
+        }
       }
 
       // update updatedAt property if it is missing from the instance
@@ -137,12 +144,19 @@ module.exports = function (Model) {
       // increment updatedAt if needed
       incrementUpdatedAtIfNeeded(context);
 
-      context.instance.updatedBy = user.id ?
-        user.id : (
-          context.instance.updatedBy ?
-            context.instance.updatedBy :
-            systemAuthor
-        );
+      // lets keep original author if sync snapshot provides it
+      if (context.options._sync) {
+        if (!context.instance.updatedBy) {
+          context.instance.updatedBy = user.id || systemAuthor;
+        }
+      } else {
+        context.instance.updatedBy = user.id ?
+          user.id : (
+            context.instance.updatedBy ?
+              context.instance.updatedBy :
+              systemAuthor
+          );
+      }
     } else {
       // update updatedAt property if it is missing from the update payload
       // or it's not an init / sync action
