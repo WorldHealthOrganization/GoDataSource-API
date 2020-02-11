@@ -75,10 +75,7 @@ module.exports = function (Role) {
       .catch(callback);
   };
 
-  /**
-   * Retrieve user data
-   */
-  Role.afterRemote('findById', function (context, modelInstance, next) {
+  const attachUsersToRole = function (context, modelInstance, next) {
     if (
       !modelInstance ||
       !modelInstance.id
@@ -110,5 +107,11 @@ module.exports = function (Role) {
         })
         .catch(next);
     }
-  });
+  };
+
+  /**
+   * Retrieve user data
+   */
+  Role.afterRemote('findById', attachUsersToRole);
+  Role.afterRemote('prototype.patchAttributes', attachUsersToRole);
 };
