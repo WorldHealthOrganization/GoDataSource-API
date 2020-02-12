@@ -1,8 +1,8 @@
 {
   "System administrator": {
     "id": "ROLE_SYSTEM_ADMINISTRATOR",
-    "migrateDate": "2020-01-23T00:00:00.000Z",
-    "description": "This is a built in role that manages user accounts, and configuration of the system.",
+    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "description": "System admin has access to backups, audit logs, client applications ... only system functions, no data visualization.",
     "permissionIds": [
       "audit_log_all",
       "backup_all",
@@ -17,9 +17,9 @@
   },
   "GO.Data administrator": {
     "id": "ROLE_GO_DATA_ADMINISTRATOR",
-    "migrateDate": "2020-01-23T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:00:00.000Z",
     "newName": "Outbreaks and templates administrator",
-    "description": "This role has access to configuration of the Go.Data for specific outbreak.",
+    "description": "This role has access to configuration of the Go.Data for specific outbreaks and outbreak templates.",
     "permissionIds": [
       "outbreak_all",
       "outbreak_template_all",
@@ -30,8 +30,8 @@
   },
   "Epidemiologist": {
     "id": "ROLE_EPIDEMIOLOGIST",
-    "migrateDate": "2020-01-23T00:00:00.000Z",
-    "description": "This is a built in role that analyses data to understand disease evolution and inform response.",
+    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "description": "",
     "permissionIds": [
       "case_all",
       "cluster_all",
@@ -45,6 +45,8 @@
       "relationship_all",
       "team_list",
       "team_view",
+      "cot_all",
+      "dashboard_all",
 
       "lab_result_all",
       "follow_up_list",
@@ -55,9 +57,9 @@
   },
   "Data manager": {
     "id": "ROLE_DATA_MANAGER",
-    "migrateDate": "2020-01-23T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:00:00.000Z",
     "newName": "Data exporter",
-    "description": "This is a built in role that provides support and coordinates the collection of all data related to the outbreak.",
+    "description": "",
     "permissionIds": [
       "case_export",
       "case_export_classification_per_location_report",
@@ -91,8 +93,8 @@
   },
   "Contact tracing coordinator": {
     "id": "ROLE_CONTACT_TRACING_COORDINATOR",
-    "migrateDate": "2020-01-23T00:00:00.000Z",
-    "description": "This is a built in role that coordinates the work of multiple Contact Tracers.",
+    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "description": "",
     "permissionIds": [
       "case_count_case_contacts",
       "case_create_contact",
@@ -137,8 +139,8 @@
   },
   "Contact tracer": {
     "id": "ROLE_CONTACT_TRACER",
-    "migrateDate": "2020-01-23T00:00:00.000Z",
-    "description": "This is a built in role that follows up with contacts and monitors their health.",
+    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "description": "",
     "permissionIds": [
       "case_count_case_contacts",
       "case_create_contact",
@@ -183,8 +185,8 @@
   },
   "Help content manager": {
     "id": "ROLE_HELP_CONTENT_MANAGER",
-    "migrateDate": "2020-01-23T00:00:00.000Z",
-    "description": "This is a built in role that manages content.",
+    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "description": "",
     "permissionIds": [
       "help_all",
       "user_modify_own_account"
@@ -192,8 +194,8 @@
   },
   "Language manager": {
     "id": "ROLE_LANGUAGE_MANAGER",
-    "migrateDate": "2020-01-23T00:00:00.000Z",
-    "description": "This is a built in role that manages languages.",
+    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "description": "",
     "permissionIds": [
       "language_all",
       "user_modify_own_account"
@@ -201,9 +203,9 @@
   },
   "Reports and data viewer": {
     "id": "ROLE_REPORTS_AND_DATA_VIEWER",
-    "migrateDate": "2020-01-23T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:00:00.000Z",
     "newName": "Data viewer",
-    "description": "This is a built in role that manages reports.",
+    "description": "",
     "permissionIds": [
       "case_list",
       "case_list_cases_by_period_and_contact_status",
@@ -277,8 +279,8 @@
   },
   "User manager": {
     "id": "ROLE_USER_MANAGER",
-    "migrateDate": "2020-01-23T00:00:00.000Z",
-    "description": "This is a built in role that manages users.",
+    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "description": "Manages users and user roles.",
     "permissionIds": [
       "user_role_all",
       "user_all",
@@ -287,8 +289,8 @@
   },
   "Laboratory data manager": {
     "id": "ROLE_LAB_RESULTS_MANAGER",
-    "migrateDate": "2020-01-23T00:00:00.000Z",
-    "description": "This is a built in role that manages lab results for both case and contacts.",
+    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "description": "",
     "permissionIds": [
       "lab_result_all",
 
@@ -318,72 +320,30 @@
       "user_modify_own_account"
     ]
   },
-  "Default minimum user access": {
-    "id": "ROLE_DEFAULT_MINIMUM_USER_ACCESS",
-    "migrateDate": "2020-01-23T00:00:00.000Z",
-    "description": "This is a built in role that gives minimum user access.",
+  "Default minimum backup access": {
+    "id": "ROLE_DEFAULT_MINIMUM_BACKUP_ACCESS",
+    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "description": "Has minimum access to backups.",
     "permissionIds": [
       "backup_create",
       "backup_list",
       "backup_view",
       "backup_view_cloud_location",
-      "case_list",
-      "help_list_category",
-      "help_view_category",
-      "language_list",
-      "location_list",
-      "outbreak_view",
       "user_modify_own_account",
 
-      "case_grouped_by_classification",
       "system_settings_view",
       "user_list_for_filters"
     ]
   },
   "Reference data manager": {
     "id": "ROLE_REFERENCE_DATA_MANAGER",
-    "migrateDate": "2020-01-23T00:00:00.000Z",
-    "description": "This is a built in role that gives reference data manage access.",
+    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "description": "",
     "permissionIds": [
       "icon_all",
       "location_all",
       "reference_data_all",
 
-      "user_modify_own_account"
-    ]
-  },
-  "Data visualisation": {
-    "id": "ROLE_DATA_VISUALISATION",
-    "migrateDate": "2020-01-23T00:00:00.000Z",
-    "description": "This is a built in role that gives reference data cot access.",
-    "permissionIds": [
-      "cot_all",
-
-      "case_generate_visual_id",
-      "case_grouped_by_classification",
-      "case_list",
-      "case_modify",
-      "case_modify_relationship_contacts",
-      "case_view",
-      "case_view_relationship_contacts",
-      "cluster_list",
-      "contact_create",
-      "contact_generate_visual_id",
-      "contact_grouped_by_risk",
-      "contact_list",
-      "contact_modify",
-      "contact_view",
-      "event_list",
-      "event_modify",
-      "event_modify_relationship_contacts",
-      "event_view",
-      "event_view_relationship_contacts",
-      "outbreak_view",
-      "relationship_create",
-      "relationship_list",
-      "relationship_modify",
-      "relationship_view",
-      "user_list_for_filters",
       "user_modify_own_account"
     ]
   }
