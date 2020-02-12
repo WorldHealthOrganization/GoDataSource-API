@@ -12,7 +12,11 @@ const defaultAdmin = {
   email: 'admin@who.int',
   password: 'admin',
   languageId: 'english_us',
-  passwordChange: true
+  passwordChange: true,
+  roleIds: [
+    'ROLE_SYSTEM_ADMINISTRATOR',
+    'ROLE_USER_MANAGER'
+  ]
 };
 const rolesMap = require('./defaultRoles');
 
@@ -52,16 +56,10 @@ function initRolesCreation() {
                 permissionIds: rolesMap[roleName].permissionIds,
                 migrateDate: rolesMap[roleName].migrateDate
               }, common.install.timestamps), options)
-              .then(function (role) {
-                if (roleName === 'System administrator') {
-                  defaultAdmin.roleIds = [role.id];
-                }
+              .then(function () {
                 return 'created.';
               });
           } else if (rewrite) {
-            if (roleName === 'System administrator') {
-              defaultAdmin.roleIds = [role.id];
-            }
             return role
               .updateAttributes({
                 name: rolesMap[roleName].newName ? rolesMap[roleName].newName : role.name,
@@ -73,9 +71,6 @@ function initRolesCreation() {
                 return 'updated.';
               });
           } else {
-            if (roleName === 'System administrator') {
-              defaultAdmin.roleIds = [role.id];
-            }
             return 'skipped. Role already exists.';
           }
         })
