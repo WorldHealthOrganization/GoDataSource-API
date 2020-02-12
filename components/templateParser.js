@@ -231,58 +231,113 @@ function beforeHook(context, next) {
   // depending on action (create/update) we need to check/update different context properties; parse the context to prevent additional checks
   let contextParts = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
 
-  // in order to translate dynamic data, don't store values in the database, but translatable language tokens
-  // in the template only properties from subtemplates need to be translated
-  subTemplates.forEach(function (subTemplate) {
-    // check if the subtemplates are sent in the request and they have questions
-    if (contextParts.target && Array.isArray(contextParts.target[subTemplate]) && contextParts.target[subTemplate].length) {
-      // store the original information to be used for translations
-      app.utils.helpers.setOriginalValueInContextOptions(context, subTemplate, JSON.parse(JSON.stringify(contextParts.target[subTemplate])));
-
-      // update identifier for subtemplate
-      let templateIdentifier = `${identifier}_${subTemplate.toUpperCase()}`;
-
-      // loop through the subtemplate questions to replace
-      let questions = contextParts.target[subTemplate];
-
-      // question variable must be unique in a template and answer value must be unique per question
-      // initialize container with question variable/answer value counters
-      let counters = {};
-
-      // parse questions to replace text/answer label with tokens
-      parseQuestions(questions, templateIdentifier, counters);
-
-      // check counters
-      Object.keys(counters).forEach(function (questionVariable) {
-        // check questions
-        if (counters[questionVariable].count > 1) {
-          // question variable is used multiple times; add questionVariable to errors container
-          duplicateError = true;
-          duplicateErrors.questions[subTemplate] = duplicateErrors.questions[subTemplate] || [];
-          duplicateErrors.questions[subTemplate].push(questionVariable);
+  const templateId = context.options.remotingContext.req.query.templateId;
+  if (templateId) {
+    contextParts.tokenToTemplateTokenMap = {};
+    app.models.template.findById(templateId)
+      .then(template => {
+        if (!template) {
+          return next();
         }
 
-        // check question answers
-        counters[questionVariable].answers && Object.keys(counters[questionVariable].answers).forEach(function (answerValue) {
-          if (counters[questionVariable].answers[answerValue] > 1) {
-            // answer value is used multiple times in question
-            duplicateError = true;
-            duplicateErrors.answers[subTemplate] = duplicateErrors.answers[subTemplate] || {[`question '${questionVariable}'`]: []};
-            duplicateErrors.answers[subTemplate][`question '${questionVariable}'`].push(answerValue);
-          }
-        });
-      });
-    }
-  });
+        subTemplates.forEach(subTemplate => {
+          contextParts.target[subTemplate] = JSON.parse(JSON.stringify(template[subTemplate]));
 
-  // check for duplicate questions/answers error
-  if (duplicateError) {
-    next(app.utils.apiError.getError('DUPLICATE_TEMPLATE_QUESTION_VARIABLE_OR_ANSWER_VALUE', {
-      duplicateQuestionVariable: duplicateErrors.questions,
-      duplicateAnswerValue: duplicateErrors.answers
-    }));
+          const templateIdentifier = `${identifier}_${subTemplate.toUpperCase()}`;
+
+          (function parse(questions, identifier) {
+            identifier = identifier || '';
+
+            questions.forEach((question, qIndex) => {
+              const questionIdentifier = `${identifier}_QUESTION_${_.snakeCase(question.variable).toUpperCase()}`;
+
+              contextParts.tokenToTemplateTokenMap[`${questionIdentifier}_TEXT`] = questions[qIndex].text;
+
+              // set question text
+              questions[qIndex].text = `${questionIdentifier}_TEXT`;
+
+              // check for question answers as the label for each answer needs to be translated
+              if (question.answers && Array.isArray(question.answers) && question.answers.length) {
+
+                let answers = questions[qIndex].answers;
+                answers.forEach(function (answer, aIndex) {
+
+                  // set answer identifier
+                  let answerIdentifier = `${questionIdentifier}_ANSWER_${_.snakeCase(answer.value).toUpperCase()}`;
+
+                  context.tokenToTemplateTokenMap[`${answerIdentifier}_LABEL`] = answers[aIndex].label;
+
+                  // set answer label
+                  answers[aIndex].label = `${answerIdentifier}_LABEL`;
+
+                  // check for additional questions
+                  if (answer.additionalQuestions && Array.isArray(answer.additionalQuestions) && answer.additionalQuestions.length) {
+                    parse(answers[aIndex].additionalQuestions, answerIdentifier);
+                  }
+                });
+              }
+            });
+          })(contextParts.target[subTemplate], templateIdentifier);
+
+          app.utils.helpers.setOriginalValueInContextOptions(context, 'tokenToTemplateTokenMap', contextParts.tokenToTemplateTokenMap);
+        });
+
+        return next();
+      });
   } else {
-    next();
+    // in order to translate dynamic data, don't store values in the database, but translatable language tokens
+    // in the template only properties from subtemplates need to be translated
+    subTemplates.forEach(function (subTemplate) {
+      // check if the subtemplates are sent in the request and they have questions
+      if (contextParts.target && Array.isArray(contextParts.target[subTemplate]) && contextParts.target[subTemplate].length) {
+        // store the original information to be used for translations
+        app.utils.helpers.setOriginalValueInContextOptions(context, subTemplate, JSON.parse(JSON.stringify(contextParts.target[subTemplate])));
+
+        // update identifier for subtemplate
+        let templateIdentifier = `${identifier}_${subTemplate.toUpperCase()}`;
+
+        // loop through the subtemplate questions to replace
+        let questions = contextParts.target[subTemplate];
+
+        // question variable must be unique in a template and answer value must be unique per question
+        // initialize container with question variable/answer value counters
+        let counters = {};
+
+        // parse questions to replace text/answer label with tokens
+        parseQuestions(questions, templateIdentifier, counters, !!templateId, context);
+
+        // check counters
+        Object.keys(counters).forEach(function (questionVariable) {
+          // check questions
+          if (counters[questionVariable].count > 1) {
+            // question variable is used multiple times; add questionVariable to errors container
+            duplicateError = true;
+            duplicateErrors.questions[subTemplate] = duplicateErrors.questions[subTemplate] || [];
+            duplicateErrors.questions[subTemplate].push(questionVariable);
+          }
+
+          // check question answers
+          counters[questionVariable].answers && Object.keys(counters[questionVariable].answers).forEach(function (answerValue) {
+            if (counters[questionVariable].answers[answerValue] > 1) {
+              // answer value is used multiple times in question
+              duplicateError = true;
+              duplicateErrors.answers[subTemplate] = duplicateErrors.answers[subTemplate] || {[`question '${questionVariable}'`]: []};
+              duplicateErrors.answers[subTemplate][`question '${questionVariable}'`].push(answerValue);
+            }
+          });
+        });
+      }
+    });
+
+    // check for duplicate questions/answers error
+    if (duplicateError) {
+      next(app.utils.apiError.getError('DUPLICATE_TEMPLATE_QUESTION_VARIABLE_OR_ANSWER_VALUE', {
+        duplicateQuestionVariable: duplicateErrors.questions,
+        duplicateAnswerValue: duplicateErrors.answers
+      }));
+    } else {
+      next();
+    }
   }
 }
 
@@ -296,9 +351,39 @@ function afterHook(context, next) {
   if (context.options && context.options._sync) {
     return next();
   }
-
-  // after successfully creating/updating template, also create/update translations for it.
-  saveLanguageTokens(context, next);
+  const tokenToTemplateTokenMap = app.utils.helpers.getOriginalValueFromContextOptions(context, 'tokenToTemplateTokenMap');
+  if (tokenToTemplateTokenMap) {
+    app.models.languageToken.find({
+      where: {
+        token: {
+          inq: Object.values(tokenToTemplateTokenMap)
+        }
+      }
+    }).then(tokens => {
+      tokens = tokens.map(t => t.toJSON());
+      const tokenPromises = [];
+      for (let token in tokenToTemplateTokenMap) {
+        const templateAssociatedTokens = tokens.filter(item => item.token === tokenToTemplateTokenMap[token]);
+        templateAssociatedTokens.forEach(templateToken => {
+          tokenPromises.push(new Promise((resolve, reject) => {
+            app.models.languageToken
+              .create({
+                token: token,
+                languageId: templateToken.languageId,
+                translation: templateToken.translation
+              }, context.options)
+              .then(resolve)
+              .catch(reject);
+          }));
+        });
+      }
+      return Promise.all(tokenPromises);
+    }).then(() => next())
+      .catch(next);
+  } else {
+    // after successfully creating/updating template, also create/update translations for it.
+    saveLanguageTokens(context, next);
+  }
 }
 
 /**
