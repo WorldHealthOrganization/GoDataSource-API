@@ -1,7 +1,7 @@
 {
   "System administrator": {
     "id": "ROLE_SYSTEM_ADMINISTRATOR",
-    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:01:00.000Z",
     "description": "System admin has access to backups, audit logs, client applications ... only system functions, no data visualization.",
     "permissionIds": [
       "audit_log_all",
@@ -17,7 +17,7 @@
   },
   "GO.Data administrator": {
     "id": "ROLE_GO_DATA_ADMINISTRATOR",
-    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:01:00.000Z",
     "newName": "Outbreaks and templates administrator",
     "description": "This role has access to configuration of the Go.Data for specific outbreaks and outbreak templates.",
     "permissionIds": [
@@ -30,7 +30,7 @@
   },
   "Epidemiologist": {
     "id": "ROLE_EPIDEMIOLOGIST",
-    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:01:00.000Z",
     "description": "",
     "permissionIds": [
       "case_all",
@@ -57,7 +57,7 @@
   },
   "Data manager": {
     "id": "ROLE_DATA_MANAGER",
-    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:01:00.000Z",
     "newName": "Data exporter",
     "description": "",
     "permissionIds": [
@@ -93,7 +93,7 @@
   },
   "Contact tracing coordinator": {
     "id": "ROLE_CONTACT_TRACING_COORDINATOR",
-    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:01:00.000Z",
     "description": "",
     "permissionIds": [
       "case_count_case_contacts",
@@ -139,7 +139,7 @@
   },
   "Contact tracer": {
     "id": "ROLE_CONTACT_TRACER",
-    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:01:00.000Z",
     "description": "",
     "permissionIds": [
       "case_count_case_contacts",
@@ -185,7 +185,7 @@
   },
   "Help content manager": {
     "id": "ROLE_HELP_CONTENT_MANAGER",
-    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:01:00.000Z",
     "description": "",
     "permissionIds": [
       "help_all",
@@ -194,7 +194,7 @@
   },
   "Language manager": {
     "id": "ROLE_LANGUAGE_MANAGER",
-    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:01:00.000Z",
     "description": "",
     "permissionIds": [
       "language_all",
@@ -203,7 +203,7 @@
   },
   "Reports and data viewer": {
     "id": "ROLE_REPORTS_AND_DATA_VIEWER",
-    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:01:00.000Z",
     "newName": "Data viewer",
     "description": "",
     "permissionIds": [
@@ -279,7 +279,7 @@
   },
   "User manager": {
     "id": "ROLE_USER_MANAGER",
-    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:01:00.000Z",
     "description": "Manages users and user roles.",
     "permissionIds": [
       "user_role_all",
@@ -289,7 +289,7 @@
   },
   "Laboratory data manager": {
     "id": "ROLE_LAB_RESULTS_MANAGER",
-    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:01:00.000Z",
     "description": "",
     "permissionIds": [
       "lab_result_all",
@@ -322,7 +322,7 @@
   },
   "Default minimum backup access": {
     "id": "ROLE_DEFAULT_MINIMUM_BACKUP_ACCESS",
-    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:01:00.000Z",
     "description": "Has minimum access to backups.",
     "permissionIds": [
       "backup_create",
@@ -337,14 +337,15 @@
   },
   "Reference data manager": {
     "id": "ROLE_REFERENCE_DATA_MANAGER",
-    "migrateDate": "2020-02-12T00:00:00.000Z",
+    "migrateDate": "2020-02-12T00:01:00.000Z",
     "description": "",
     "permissionIds": [
       "icon_all",
       "location_all",
       "reference_data_all",
 
-      "user_modify_own_account"
+      "user_modify_own_account",
+      "user_list_for_filters"
     ]
   }
 }

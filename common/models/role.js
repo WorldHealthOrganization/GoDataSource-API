@@ -662,7 +662,9 @@ module.exports = function (Role) {
           id: 'location_list',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_LOCATION',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_LOCATION_DESCRIPTION',
-          requires: []
+          requires: [
+            'user_list_for_filters'
+          ]
         },
         {
           id: 'location_create',
