@@ -8747,6 +8747,50 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Count a case's lab-results
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountCaseLabResults = function (caseId, filter, callback) {
+    filter = filter || {};
+    filter.where = filter.where || {};
+    filter.where.personId = caseId;
+    filter.where.personType = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
+
+    app.models.labResult
+      .preFilterForOutbreak(this, filter)
+      .then(filter => {
+        // handle custom filter options
+        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
+        return app.models.labResult.count(filter.where);
+      })
+      .then(result => callback(null, result))
+      .catch(callback);
+  };
+
+  /**
+   * Count a contact's lab-results
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountContactLabResults = function (contactId, filter, callback) {
+    filter = filter || {};
+    filter.where = filter.where || {};
+    filter.where.personId = contactId;
+    filter.where.personType = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
+
+    app.models.labResult
+      .preFilterForOutbreak(this, filter)
+      .then(filter => {
+        // handle custom filter options
+        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
+        return app.models.labResult.count(filter.where);
+      })
+      .then(result => callback(null, result))
+      .catch(callback);
+  };
+
+  /**
    * Find outbreak lab results along with case information
    * @param callback
    */

@@ -1233,6 +1233,18 @@
       "principalType": "ROLE",
       "principalId": "lab_result_list",
       "permission": "ALLOW",
+      "property": "filteredCountCaseLabResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_list",
+      "permission": "ALLOW",
+      "property": "filteredCountContactLabResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_list",
+      "permission": "ALLOW",
       "property": "findLabResultsAggregate"
     },
     {
@@ -4605,6 +4617,60 @@
       "http": {
         "verb": "get",
         "path": "/lab-results/filtered-count"
+      }
+    },
+    "prototype.filteredCountCaseLabResults": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for cases"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of lab results that pass the filter",
+          "required": true
+        }
+      ],
+      "description": "Counts the lab results that pass a filter",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/lab-results/filtered-count"
+      }
+    },
+    "prototype.filteredCountContactLabResults": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of lab results that pass the filter",
+          "required": true
+        }
+      ],
+      "description": "Counts the lab results that pass a filter",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/lab-results/filtered-count"
       }
     },
     "prototype.findLabResultsAggregate": {
