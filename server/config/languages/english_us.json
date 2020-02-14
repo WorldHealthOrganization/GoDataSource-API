@@ -24,29 +24,24 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_UNCHECK_CONFIRM_POPUP_NO_LABEL": "Don't check anything",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_REQUIRED_BY_PERMISSIONS_LABEL": "Required by",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_REQUIRED_PERMISSIONS_LABEL": "Required",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_ALL": "All",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_ALL_DESCRIPTION": "All permissions under this group ( even those that will be added in the future under this group )",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_PARTIAL": "Partial {{partialLabels}}",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_PARTIAL_DESCRIPTION": "Permissions from this group ( expand group to see or change granted permissions )",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_NONE": "None",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_NONE_DESCRIPTION": "No permissions granted under this group",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_SYSTEM_VERSION": "System version",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_SYSTEM_VERSION_DESCRIPTION": "Permission required by all accounts",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_SYSTEM_SETTINGS": "System Settings",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_SYSTEM_SETTINGS_DESCRIPTION": "System Settings permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_SYSTEM_SETTINGS": "System Settings - view",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_SYSTEM_SETTINGS_DESCRIPTION": "This permission allows viewing full system settings information",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS": "System Settings - modify",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_DESCRIPTION": "This permission allows modifying system settings",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_AUDIT_LOG": "Audit Logs",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_AUDIT_LOG_DESCRIPTION": "Audit Logs permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_AUDIT_LOG": "Audit Log - list",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_AUDIT_LOG_DESCRIPTION": "This permission allows listing audit logs",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_LANGUAGE": "Languages",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_LANGUAGE_DESCRIPTION": "Language permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_LANGUAGE": "Language - view",
@@ -63,7 +58,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_LANGUAGE_TOKENS_DESCRIPTION": "This permission allows exporting language tokens",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LANGUAGE_TOKENS": "Language - import tokens",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LANGUAGE_TOKENS_DESCRIPTION": "This permission allows importing language tokens",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_HELP": "Help",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_HELP_DESCRIPTION": "Help permissions ( No permissions are required to access help information through the website. These permissions are required only if you want to manage help records )",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_HELP_CATEGORY": "Help - view category",
@@ -88,7 +82,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_HELP_CATEGORY_ITEM_DESCRIPTION": "This permission allows removing help category items",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP_CATEGORY_ITEM": "Help - approve category item",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_APPROVE_HELP_CATEGORY_ITEM_DESCRIPTION": "This permission allows approval of help category items",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_REFERENCE_DATA": "Reference Data",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_REFERENCE_DATA_DESCRIPTION": "Reference Data permissions ( No permissions are required to access reference item information through the website. These permissions are required only if you want to manage reference data records )",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_REFERENCE_DATA_CATEGORY": "Reference Data - list categories",
@@ -107,7 +100,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_REFERENCE_DATA_CATEGORY_ITEM_DESCRIPTION": "This permission allows exporting reference data",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_REFERENCE_DATA_CATEGORY_ITEM": "Reference Data - import",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_REFERENCE_DATA_CATEGORY_ITEM_DESCRIPTION": "This permission allows importing reference data",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_ICON": "Icons",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_ICON_DESCRIPTION": "Icon permissions ( No permissions are required to access icon data through the website. These permissions are required only if you want to manage icon records )",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_ICON": "Icon - list",
@@ -116,7 +108,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_ICON_DESCRIPTION": "This permission allows uploading new icons",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_ICON": "Icon - delete",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_ICON_DESCRIPTION": "This permission allows removing icons",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_USER": "Users",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_USER_DESCRIPTION": "User permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_USER": "User - view",
@@ -133,7 +124,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_OWN_ACCOUNT_DESCRIPTION": "This permission allows user to modify his own account ( data, security questions, change password )",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_FOR_FILTERS": "User - list for dropdowns",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_FOR_FILTERS_DESCRIPTION": "This permission allows listing users in dropdowns used to filter other list pages ( e.g. Created by, Modified By columns... ). Used also by some create and modify pages.",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_USER_ROLE": "User Roles",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_USER_ROLE_DESCRIPTION": "User role permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_USER_ROLE": "User Role - view",
@@ -148,7 +138,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER_ROLE_DESCRIPTION": "This permission allows removing user role information",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_USER_ROLE_CLONE": "User Role - create clone",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_USER_ROLE_CLONE_DESCRIPTION": "This permission allows cloning user role information",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_BACKUP": "Backups",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_BACKUP_DESCRIPTION": "Backup permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_BACKUP": "Backup - view",
@@ -165,7 +154,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_BACKUP_DESCRIPTION": "This permission allows restoring a backup",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_BACKUP_CLOUD_LOCATION": "Backup - view cloud locations",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_BACKUP_CLOUD_LOCATION_DESCRIPTION": "This permission allows you to see cloud backup locations. Menu - Account - Cloud backup page.",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_SYNC": "Sync",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_SYNC_DESCRIPTION": "Sync logs permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_SYNC_LOG": "Sync log - view",
@@ -184,7 +172,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_SYNC_SETTINGS_DESCRIPTION": "This permission allows changing sync settings",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_SYNC_SYNCHRONIZE": "Sync - synchronize",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_SYNC_SYNCHRONIZE_DESCRIPTION": "This permission allows sync between two GoData systems",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_UPSTREAM_SERVER": "Upstream Servers",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_UPSTREAM_SERVER_DESCRIPTION": "Upstream Servers permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_UPSTREAM_SERVER": "Upstream Server - list",
@@ -199,7 +186,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_ENABLE_UPSTREAM_SERVER_SYNC_DESCRIPTION": "This permission enables sync between two GoData servers",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DISABLE_UPSTREAM_SERVER_SYNC": "Upstream Server - disable sync",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DISABLE_UPSTREAM_SERVER_SYNC_DESCRIPTION": "This permission disables sync between two GoData servers",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CLIENT_APPLICATION": "Client Applications",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CLIENT_APPLICATION_DESCRIPTION": "Client Applications permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLIENT_APPLICATION": "Client Application - list",
@@ -214,7 +200,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_ENABLE_CLIENT_APPLICATION_DESCRIPTION": "This permission enables client application",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DISABLE_CLIENT_APPLICATION": "Client Application - disable",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DISABLE_CLIENT_APPLICATION_DESCRIPTION": "This permission disables client application",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_LOCATION": "Locations",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_LOCATION_DESCRIPTION": "Location permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_LOCATION": "Location - view",
@@ -235,7 +220,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_SEE_LOCATION_USAGE_DESCRIPTION": "This permission allows seeing location usage ( Follow-up - list required to see follow-ups, Event - list required to see events, Contact - list required to see contacts, Case - list required to see cases )",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_PROPAGATE_LOCATION_GEO_TO_PERSONS": "Location - propagate lat and lng",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_PROPAGATE_LOCATION_GEO_TO_PERSONS_DESCRIPTION": "This permission allows propagating latitude and longitude to entities that use location and have the same latitude and longitude coordinates",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_DEVICE": "Devices",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_DEVICE_DESCRIPTION": "Device permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DEVICE": "Device - view",
@@ -250,7 +234,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_DEVICE_HISTORY_DESCRIPTION": "This permission allows listing device history",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_WIPE_DEVICE": "Device - wipe",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_WIPE_DEVICE_DESCRIPTION": "This permission allows wiping an application from a device",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_OUTBREAK": "Outbreaks",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_OUTBREAK_DESCRIPTION": "Outbreak permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_OUTBREAK": "Outbreak - view",
@@ -277,7 +260,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CASE_LAB_RESULT_QUESTIONNAIRE_DESCRIPTION": "This permission allows modifying outbreak case lab result questionnaire",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_CLONE": "Outbreak - create clone",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_CLONE_DESCRIPTION": "This permission allows creating an outbreak clone",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_OUTBREAK_TEMPLATE": "Outbreak Templates",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_OUTBREAK_TEMPLATE_DESCRIPTION": "Outbreak template permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_OUTBREAK_TEMPLATE": "Outbreak Template - view",
@@ -298,7 +280,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CASE_LAB_RESULT_QUESTIONNAIRE_DESCRIPTION": "This permission allows modifying outbreak template case lab result questionnaire",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_OUTBREAK_TEMPLATE_GENERATE_OUTBREAK": "Outbreak Template - generate outbreak",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_OUTBREAK_TEMPLATE_GENERATE_OUTBREAK_DESCRIPTION": "This permission allows creating an outbreak from an outbreak template",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_TEAM": "Teams",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_TEAM_DESCRIPTION": "Team permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_TEAM": "Team - view",
@@ -313,7 +294,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_TEAM_DESCRIPTION": "This permission allows removing team information",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_TEAM_WORKLOAD": "Team - list workload",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_TEAM_WORKLOAD_DESCRIPTION": "This permission allows listing team workload information",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CLUSTER": "Clusters",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CLUSTER_DESCRIPTION": "Cluster permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CLUSTER": "Cluster - view",
@@ -328,7 +308,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CLUSTER_DESCRIPTION": "This permission allows removing cluster information",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLUSTER_PEOPLE": "Cluster - list people",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLUSTER_PEOPLE_DESCRIPTION": "This permission allows listing cluster people",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_EVENT": "Events",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_EVENT_DESCRIPTION": "Event permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT": "Event - list",
@@ -383,7 +362,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_RELATIONSHIP_CONTACTS_DESCRIPTION": "This permission allows deletion of event contact relationships",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_RELATIONSHIP_EXPOSURES": "Event - bulk delete exposure relationships",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_RELATIONSHIP_EXPOSURES_DESCRIPTION": "This permission allows deletion of event exposure relationships",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT": "Contacts",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_DESCRIPTION": "Contact permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT": "Contact - list",
@@ -482,7 +460,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_LAB_RESULT_DESCRIPTION": "This permission allows restoring of deleted lab results",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CONTACT_LAB_RESULT": "Contact - import lab results",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CONTACT_LAB_RESULT_DESCRIPTION": "This permission allows importing of lab results",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CASE": "Cases",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CASE_DESCRIPTION": "Case permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE": "Case - list",
@@ -599,7 +576,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CASE_LAB_RESULT_DESCRIPTION": "This permission allows restoring of deleted lab results",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CASE_LAB_RESULT": "Case - import lab results",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CASE_LAB_RESULT_DESCRIPTION": "This permission allows importing of lab results",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_RELATIONSHIP": "Relationships",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_RELATIONSHIP_DESCRIPTION": "Relationship permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_RELATIONSHIP": "Relationship - view",
@@ -620,7 +596,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_RELATIONSHIP_DESCRIPTION": "This permission allows sharing relationship information",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_RELATIONSHIP": "Relationship - bulk delete",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_RELATIONSHIP_DESCRIPTION": "This permission allows bulk deleting relationship information",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_FOLLOW_UP": "Follow-up",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_FOLLOW_UP_DESCRIPTION": "Follow-up permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_FOLLOW_UP": "Follow-up - view",
@@ -653,7 +628,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_FOLLOW_UP_DESCRIPTION": "This permission allows restoring follow-ups in bulk",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_FOLLOW_UP_BY_TEAM": "Follow-up - group by team",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_FOLLOW_UP_BY_TEAM_DESCRIPTION": "This permission allows viewing follow-up data grouped by team",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_LAB_RESULT": "Lab results",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_LAB_RESULT_DESCRIPTION": "Lab result permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_LAB_RESULT": "Lab result - view",
@@ -670,7 +644,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_LAB_RESULT_DESCRIPTION": "This permission allows restoring lab result information",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LAB_RESULT": "Lab result - import",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LAB_RESULT_DESCRIPTION": "This permission allows import of case lab result data",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_GANTT_CHART": "Gantt charts",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_GANTT_CHART_DESCRIPTION": "Gantt charts permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DELAY_BETWEEN_SYMPTOM_AND_LAB": "Gantt chart - view delay between symptom onset and date of lab testing",
@@ -681,7 +654,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DELAY_BETWEEN_SYMPTOM_AND_LAB_DESCRIPTION": "This permission allows exporting delay between symptom onset and lab testing dates chart",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DELAY_BETWEEN_ONSET_HOSPITALIZATION": "Gantt chart - export delay between onset and hospitalization",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DELAY_BETWEEN_ONSET_HOSPITALIZATION_DESCRIPTION": "This permission allows exporting delay between onset and hospitalization dates chart",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_COT": "Chains of transmission",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_COT_DESCRIPTION": "Chains of transmission permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_COT": "Chains of transmission - list",
@@ -720,7 +692,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_COT_TIMELINE_NETWORK_DATE_OF_REPORTING_DESCRIPTION": "This permission allows modifying nodes and edges",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_COT_NEW_FROM_CONTACTS_BECAME_CASES": "Chains of transmission - list new chains from contacts who became cases",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_COT_NEW_FROM_CONTACTS_BECAME_CASES_DESCRIPTION": "This permission allows listing new chains from contacts who became cases",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_DUPLICATE": "Duplicates",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_DUPLICATE_DESCRIPTION": "Case / Contact / Events duplicates permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_DUPLICATE": "Duplicate - list",
@@ -731,7 +702,6 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_CONTACTS_DESCRIPTION": "This permission allows merging contact duplicates",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_EVENTS": "Duplicate - merge events",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_EVENTS_DESCRIPTION": "This permission allows merging event duplicates",
-
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_DASHBOARD": "Dashboard",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_DASHBOARD_DESCRIPTION": "Dashboard permissions",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_SUMMARY_DASHLET": "Dashboard - view case summary dashlet",
@@ -923,7 +893,7 @@
     "referenceDataCategoryTypeOfLabTest": {
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST": "Type of lab result",
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_DESCRIPTION": "",
-      "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_IG_C_OR_IG_M": "IgG or IgM",
+      "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_IG_C_OR_IG_M": "Serology (IgG, IgM, etc.)",
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_IG_C_OR_IG_M_DESCRIPTION": "",
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_RT_PCR": "RT-PCR",
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_RT_PCR_DESCRIPTION": ""
@@ -931,11 +901,11 @@
     "referenceDataCategoryLabTestResult": {
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT": "Lab test result",
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_DESCRIPTION": "",
-      "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_INCONCLUSIVE": "Inconclusive",
+      "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_INCONCLUSIVE": "Inconclusive for targeted pathogen",
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_INCONCLUSIVE_DESCRIPTION": "",
-      "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_NEGATIVE": "Negative",
+      "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_NEGATIVE": "Negative for targeted pathogen",
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_NEGATIVE_DESCRIPTION": "",
-      "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_POSITIVE": "Positive",
+      "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_POSITIVE": "Positive for targeted pathogen (if serology, enter titre in Quantitative result)",
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_POSITIVE_DESCRIPTION": ""
     },
     "referenceDataCategoryLabTestResultStatus": {
@@ -977,11 +947,11 @@
     "referenceDataCategoryExposureType": {
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE": "Exposure type",
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_DESCRIPTION": "",
-      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_DIRECT_PHYSICAL_CONTACT": "Direct physical contact",
+      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_DIRECT_PHYSICAL_CONTACT": "Healthcare worker",
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_DIRECT_PHYSICAL_CONTACT_DESCRIPTION": "",
-      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SLEPT_ATE_OR_SPEND_TIME_IN_SAME_HOUSEHOLD": "Slept, ate or spent time in same household",
+      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SLEPT_ATE_OR_SPEND_TIME_IN_SAME_HOUSEHOLD": "Household",
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SLEPT_ATE_OR_SPEND_TIME_IN_SAME_HOUSEHOLD_DESCRIPTION": "",
-      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_TOUCHED_BODY_FLUIDS": "Touched body fluids",
+      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_TOUCHED_BODY_FLUIDS": "Other (please specify in notes field)",
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_TOUCHED_BODY_FLUIDS_DESCRIPTION": ""
     },
     "referenceDataCategoryExposureIntensity": {
@@ -1044,16 +1014,16 @@
     },
     "referenceDataCategoryContextOfTransmission": {
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION": "Context of transmission",
-      "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_CO_WORKERS": "Co-workers",
+      "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_CO_WORKERS": "Workplace",
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_CO_WORKERS_DESCRIPTION": "",
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_DESCRIPTION": "",
-      "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_FAMILY": "Family",
+      "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_FAMILY": "Home/household",
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_FAMILY_DESCRIPTION": "",
-      "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_FRIENDS": "Friends",
+      "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_FRIENDS": "Tour group",
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_FRIENDS_DESCRIPTION": "",
-      "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_NOSOCOMIAL_TRANSMISSION": "Nosocomial transmission",
+      "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_NOSOCOMIAL_TRANSMISSION": "Hospital/healthcare",
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_NOSOCOMIAL_TRANSMISSION_DESCRIPTION": "",
-      "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_TRAVEL_TO_OUTBREAK_AREA": "Travel to outbreak area",
+      "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_TRAVEL_TO_OUTBREAK_AREA": "Other (please specify in notes field)",
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_TRAVEL_TO_OUTBREAK_AREA_DESCRIPTION": "",
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_UNKNOWN": "Unknown",
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_UNKNOWN_DESCRIPTION": ""
@@ -1182,7 +1152,7 @@
       "LNG_PAGE_ACTION_MODIFY": "Modify",
       "LNG_PAGE_ACTION_RELATIONSHIPS": "Relationships",
       "LNG_PAGE_ACTION_RESTORE": "Restore",
-      "LNG_PAGE_ACTION_REFRESH_VISUAL_ID_DESCRIPTION" : "Regenerate visual ID",
+      "LNG_PAGE_ACTION_REFRESH_VISUAL_ID_DESCRIPTION": "Regenerate visual ID",
       "LNG_PAGE_ACTION_VIEW": "View",
       "LNG_PAGE_ACTION_SEE_EXPOSURES_FROM": "See contacts",
       "LNG_PAGE_ACTION_SEE_EXPOSURES_TO": "See exposures"
