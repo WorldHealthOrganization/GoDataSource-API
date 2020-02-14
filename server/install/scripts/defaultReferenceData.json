@@ -144,9 +144,6 @@
     "Direct Physical contact": {
       "readOnly": false
     },
-    "Touched Or Shared Linens, Clothes, Dishes": {
-      "readOnly": false
-    },
     "Slept, Ate Or Spend Time In Same Household": {
       "readOnly": false
     }
@@ -219,9 +216,6 @@
     "Family": {
       "readOnly": false
     },
-    "Neighbor": {
-      "readOnly": false
-    },
     "Nosocomial Transmission": {
       "readOnly": false
     },
@@ -229,9 +223,6 @@
       "readOnly": false
     },
     "Friends": {
-      "readOnly": false
-    },
-    "Funeral": {
       "readOnly": false
     },
     "Travel To Outbreak Area": {
