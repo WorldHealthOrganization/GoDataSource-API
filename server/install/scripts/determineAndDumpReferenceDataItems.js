@@ -62,6 +62,9 @@ function run(callback) {
           if (mapRefItemToDumpData[refDataItem.id]) {
             // update
             itemToUpdate = mapRefItemToDumpData[refDataItem.id];
+
+            // log
+            console.log(`Differences detected for reference item '${refDataItem.id}'`);
           } else {
             // approximate ref data item key
             const refDataItemKey = refDataItem.id.substr(refDataItem.categoryId.length + 1).trim();
@@ -73,6 +76,9 @@ function run(callback) {
 
             // add it to the list
             defaultReferenceData[refDataItem.categoryId][refDataItemKey] = itemToUpdate;
+
+            // log
+            console.log(`Missing reference item '${refDataItem.id}'`);
           }
 
           // update fields
