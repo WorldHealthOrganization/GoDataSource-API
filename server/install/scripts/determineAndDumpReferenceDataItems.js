@@ -33,6 +33,7 @@ function run(callback) {
     .find()
     .then((refDataItems) => {
       // checking items
+      let noDifferencesDetected = true;
       (refDataItems || []).forEach((refDataItem) => {
         // check if ref data item is missing from our default reference data item list
         // or something is different :)
@@ -57,6 +58,9 @@ function run(callback) {
 
         // not found, or different ?
         if (!sameDataInDB) {
+          // it seems we have differences
+          noDifferencesDetected = false;
+
           // add / update defaultReferenceData
           let itemToUpdate;
           if (mapRefItemToDumpData[refDataItem.id]) {
@@ -86,6 +90,11 @@ function run(callback) {
           itemToUpdate.order = refDataItem.order;
         }
       });
+
+      // no references detected ?
+      if (noDifferencesDetected) {
+        console.log('There are no differences in ref data items...');
+      }
 
       // output
       if (module.methodRelevantArgs.export) {
