@@ -40,7 +40,7 @@ function run(callback) {
       const mapTokenToSection = {};
       fs.readdirSync(`${__dirname}/../../config/languages`).forEach((language) => {
         // map tokens to translation
-        const languageData = require(`${__dirname}/../../config/languages/${language}`);;
+        const languageData = require(`${__dirname}/../../config/languages/${language}`);
         const languageID = languageData.id;
         defaultLanguageData[languageID] = languageData;
         mapTokenToSection[languageID] = {};
@@ -77,7 +77,10 @@ function run(callback) {
             const languageSection = mapTokenToSection[tokenData.languageId][mapRefItemToCategory[tokenData.token]];
             if (
               languageSection &&
-              defaultLanguageData[tokenData.languageId].sections[languageSection][tokenData.token] !== tokenData.translation
+              defaultLanguageData[tokenData.languageId].sections[languageSection][tokenData.token] !== tokenData.translation && (
+                !module.methodRelevantArgs.checkDefaultOutbreakTemplateData ||
+                !mapRefItemToOutbreakTemplate[tokenData.token]
+              )
             ) {
               defaultLanguageData[tokenData.languageId].sections[languageSection][tokenData.token] = tokenData.translation;
             }
