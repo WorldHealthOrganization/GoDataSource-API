@@ -65,7 +65,8 @@ function run(callback) {
               noDaysNewContacts: item.noDaysNewContacts,
               caseInvestigationTemplate: item.caseInvestigationTemplate,
               contactFollowUpTemplate: item.contactFollowUpTemplate,
-              labResultsTemplate: item.labResultsTemplate
+              labResultsTemplate: item.labResultsTemplate,
+              isContactLabResultsActive: item.isContactLabResultsActive
             });
 
             // translate tokens
