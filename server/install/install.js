@@ -5,15 +5,39 @@ const _ = require('lodash');
 const args = process.argv;
 const path = require('path');
 // keep a list of supported install arguments
-const supportedArguments = ['init-database', 'migrate-database', 'reset-admin-password', 'install-script', 'dump-help-data', 'dump-language-data', 'dump-outbreak-template-data', 'remove-unused-language-tokens', 'populate-with-dummy-data'];
+const supportedArguments = [
+  'init-database',
+  'migrate-database',
+  'reset-admin-password',
+  'install-script',
+  'dump-help-data',
+  'dump-language-data',
+  'dump-outbreak-template-data',
+  'remove-unused-language-tokens',
+  'populate-with-dummy-data',
+  'determine-and-dump-reference-data-items'
+];
 // keep a list of functions that will be run
 const runFunctions = [];
+
+// parse types
+const PARSE_TYPE = {
+  BOOLEAN: 'boolean',
+  STRING: 'string'
+};
 
 // retrieve argument values
 const parseArgumentValues = (argsToRetrieve) => {
   // determine arguments values
   const argValues = {};
-  (argsToRetrieve || []).forEach((argKey) => {
+  (argsToRetrieve || []).forEach((argKeyOrObject) => {
+    // determine name
+    const argKey = _.isObject(argKeyOrObject) ? argKeyOrObject.name : argKeyOrObject;
+    if (!argKey) {
+      console.log('Invalid argument...');
+      return;
+    }
+
     // construct regex for this argument
     const argRegex = new RegExp(`^${argKey}=(.+)`, 'i');
 
@@ -27,6 +51,19 @@ const parseArgumentValues = (argsToRetrieve) => {
           result.length >= 1
         ) {
           argValues[argKey] = result[1];
+
+          // convert response to type
+          if (
+            _.isObject(argKeyOrObject) &&
+            argKeyOrObject.type
+          ) {
+            switch (argKeyOrObject.type) {
+              case PARSE_TYPE.BOOLEAN:
+                const value = argValues[argKey].toString().toLowerCase();
+                argValues[argKey] = value === 'true' || value === '1';
+                break;
+            }
+          }
         }
       }
     });
@@ -37,6 +74,7 @@ const parseArgumentValues = (argsToRetrieve) => {
 };
 
 // define a list of supported routines
+let methodRelevantArgs;
 const routines = {
   initDatabase: function () {
     console.log('Setting Up Database Initialisation...');
@@ -176,7 +214,7 @@ const routines = {
       'minNoRelationshipsForEachRecord',
       'maxNoRelationshipsForEachRecord'
     ];
-    const methodRelevantArgs = parseArgumentValues(requiredArgs);
+    methodRelevantArgs = parseArgumentValues(requiredArgs);
 
     // all above arg are required
     let stop = false;
@@ -195,6 +233,47 @@ const routines = {
     console.log('Populating database');
     [
       require('./scripts/populateWithDummyData')
+    ].forEach(function (installScript) {
+      runFunctions.push(installScript(methodRelevantArgs));
+    });
+  },
+  determineAndDumpReferenceDataItems: function () {
+    // where to check if reference data item from database are missing ?
+    const requiredArgs = [
+      {
+        name: 'checkDefaultReferenceData',
+        type: PARSE_TYPE.BOOLEAN
+      }, {
+        name: 'checkDefaultOutbreakTemplateData',
+        type: PARSE_TYPE.BOOLEAN
+      }
+    ];
+    methodRelevantArgs = parseArgumentValues([
+      ...requiredArgs, ...[
+        {
+          name: 'export',
+          type: PARSE_TYPE.STRING
+        }
+      ]
+    ]);
+
+    // all above arg are required
+    let stop = false;
+    _.each(requiredArgs, (argKey) => {
+      if (methodRelevantArgs[argKey.name] === undefined) {
+        console.log(`The following arguments are required: ${requiredArgs.map(item => item.name).join(', ')}`);
+        stop = true;
+        return false;
+      }
+    });
+    if (stop) {
+      return;
+    }
+
+    // determine missing reference data items
+    console.log('Determine missing reference data items');
+    [
+      require('./scripts/determineAndDumpReferenceDataItems')
     ].forEach(function (installScript) {
       runFunctions.push(installScript(methodRelevantArgs));
     });

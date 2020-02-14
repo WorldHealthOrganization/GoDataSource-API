@@ -1,16 +1,24 @@
 {
   "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION": {
     "Confirmed": {
-      "readOnly": true
+      "readOnly": true,
+      "colorCode": "#f41818",
+      "order": 1
     },
     "Probable": {
-      "readOnly": true
+      "readOnly": true,
+      "colorCode": "#5b50ec",
+      "order": 2
     },
     "Suspect": {
-      "readOnly": true
+      "readOnly": true,
+      "colorCode": "#dcd225",
+      "order": 3
     },
     "Not a case (discarded)": {
-      "readOnly": true
+      "readOnly": true,
+      "colorCode": "#b1afaf",
+      "order": 4
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_GENDER": {
@@ -60,6 +68,12 @@
     },
     "Unknown": {
       "readOnly": false
+    },
+    "HEALTH_LABORATORY_WORKER": {
+      "readOnly": false
+    },
+    "WORKING_WITH_ANIMALS": {
+      "readOnly": false
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE": {
@@ -74,25 +88,77 @@
     },
     "Sputum": {
       "readOnly": false
+    },
+    "CSF": {
+      "readOnly": false
+    },
+    "ENDOTRACHEAL_ASPIRATE": {
+      "readOnly": false
+    },
+    "FAECES": {
+      "readOnly": false
+    },
+    "NASAL_SWAB": {
+      "readOnly": false
+    },
+    "NASOPHARYNGEAL_SWAB": {
+      "readOnly": false
+    },
+    "OTHER_SPECIFY_IN_NOTES_FIELD": {
+      "readOnly": false
+    },
+    "PLEURAL_FLUID": {
+      "readOnly": false
+    },
+    "SERUM": {
+      "readOnly": false
+    },
+    "URINE": {
+      "readOnly": false
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST": {
     "RT-PCR": {
-      "readOnly": false
+      "readOnly": false,
+      "order": 2
     },
     "IgC or IgM": {
-      "readOnly": false
+      "readOnly": false,
+      "order": 3
+    },
+    "OTHER_SPECIFY_IN_NOTES_FIELD": {
+      "readOnly": false,
+      "order": 6
+    },
+    "PARTIAL_GENOME_SEQUENCING": {
+      "readOnly": false,
+      "order": 4
+    },
+    "PCR": {
+      "readOnly": false,
+      "order": 1
+    },
+    "WHOLE_GENOME_SEQUENCING": {
+      "readOnly": false,
+      "order": 5
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT": {
     "Positive": {
-      "readOnly": false
+      "readOnly": false,
+      "order": 1
     },
     "Negative": {
-      "readOnly": false
+      "readOnly": false,
+      "order": 2
     },
     "Inconclusive": {
-      "readOnly": false
+      "readOnly": false,
+      "order": 3
+    },
+    "POSITIVE_FOR_OTHER_PATHOGENS_SPECIFY_IN_NOTES_FIELD": {
+      "readOnly": false,
+      "order": 4
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS": {
@@ -135,20 +201,23 @@
     },
     "Middle Easi Respiratory Syndrome Coronavirus (MERS-CoV)": {
       "readOnly": false
+    },
+    "ACUTE_RESPIRATORY_DISEASE": {
+      "readOnly": false
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE": {
     "Touched Body Fluids": {
-      "readOnly": false
+      "readOnly": false,
+      "order": 3
     },
     "Direct Physical contact": {
-      "readOnly": false
-    },
-    "Touched Or Shared Linens, Clothes, Dishes": {
-      "readOnly": false
+      "readOnly": false,
+      "order": 2
     },
     "Slept, Ate Or Spend Time In Same Household": {
-      "readOnly": false
+      "readOnly": false,
+      "order": 1
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY": {
@@ -217,28 +286,28 @@
   },
   "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION": {
     "Family": {
-      "readOnly": false
-    },
-    "Neighbor": {
-      "readOnly": false
+      "readOnly": false,
+      "order": 1
     },
     "Nosocomial Transmission": {
-      "readOnly": false
+      "readOnly": false,
+      "order": 2
     },
     "Co-workers": {
-      "readOnly": false
+      "readOnly": false,
+      "order": 3
     },
     "Friends": {
-      "readOnly": false
-    },
-    "Funeral": {
-      "readOnly": false
+      "readOnly": false,
+      "order": 4
     },
     "Travel To Outbreak Area": {
-      "readOnly": false
+      "readOnly": false,
+      "order": 5
     },
     "Unknown": {
-      "readOnly": false
+      "readOnly": false,
+      "order": 6
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_OUTCOME": {
@@ -254,7 +323,8 @@
   },
   "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE": {
     "Free Text": {
-      "readOnly": true
+      "readOnly": true,
+      "order": null
     },
     "Numeric": {
       "readOnly": true
@@ -263,10 +333,12 @@
       "readOnly": true
     },
     "Single Answer": {
-      "readOnly": true
+      "readOnly": true,
+      "order": null
     },
     "Multiple Answers": {
-      "readOnly": true
+      "readOnly": true,
+      "order": null
     },
     "File Upload": {
       "readOnly": true
@@ -278,6 +350,10 @@
   "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY": {
     "Clinical": {
       "readOnly": false
+    },
+    "A_0_DATA_COLLECTOR_INFORMATION": {
+      "readOnly": false,
+      "order": 2
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE": {
@@ -292,17 +368,29 @@
     },
     "Other": {
       "readOnly": true
+    },
+    "A_E_VISIT": {
+      "readOnly": false
+    },
+    "ICU_ADMISSION": {
+      "readOnly": false
+    },
+    "PRIMARY_HEALTH_CARE_PHC_GP_ETC_VISIT": {
+      "readOnly": false
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE": {
     "Case": {
-      "readOnly": true
+      "readOnly": true,
+      "colorCode": "#e04242"
     },
     "Contact": {
-      "readOnly": true
+      "readOnly": true,
+      "colorCode": "#6263bf"
     },
     "Event": {
-      "readOnly": true
+      "readOnly": true,
+      "colorCode": "#a638ab"
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE": {
@@ -946,34 +1034,92 @@
   },
   "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE": {
     "Not Performed": {
-      "readOnly": true
+      "readOnly": true,
+      "colorCode": "#928585",
+      "order": 5
     },
     "Not Attempted": {
-      "readOnly": true
+      "readOnly": true,
+      "colorCode": "#bb359e",
+      "order": 4
     },
     "Seen Ok": {
-      "readOnly": true
+      "readOnly": true,
+      "colorCode": "#46c59c",
+      "order": 1
     },
     "Seen Not Ok": {
-      "readOnly": true
+      "readOnly": true,
+      "colorCode": "#d64545",
+      "order": 2
     },
     "Missed": {
-      "readOnly": true
+      "readOnly": true,
+      "colorCode": "#bda825",
+      "order": 3
     }
   },
   "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE": {
     "Under Follow-up": {
-      "readOnly": true
+      "readOnly": true,
+      "order": 1
     },
     "Follow-up Completed": {
-      "readOnly": true
+      "readOnly": true,
+      "order": 2
     },
     "Lost To Follow-up": {
-      "readOnly": true
+      "readOnly": true,
+      "order": 3
+    },
+    "DIED": {
+      "readOnly": false
+    },
+    "NEVER_ILL_NOT_A_CASE": {
+      "readOnly": false,
+      "order": 4
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_VACCINE": {},
-  "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS": {},
-  "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS": {},
-  "LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME": {}
+  "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS": {
+    "NOT_VACCINATED": {
+      "readOnly": false,
+      "order": 2
+    },
+    "VACCINATED": {
+      "readOnly": false,
+      "order": 1
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS": {
+    "NONE": {
+      "readOnly": false,
+      "order": 1
+    },
+    "NOT_PREGNANT": {
+      "readOnly": false,
+      "order": 2
+    },
+    "YES_FIRST_TRIMESTER": {
+      "readOnly": false,
+      "order": 3
+    },
+    "YES_SECOND_TRIMESTER": {
+      "readOnly": false,
+      "order": 4
+    },
+    "YES_THIRD_TRIMESTER": {
+      "readOnly": false,
+      "order": 5
+    },
+    "YES_TRIMESTER_UNKNOWN": {
+      "readOnly": false,
+      "order": 6
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME": {
+    "GENERIC": {
+      "readOnly": false
+    }
+  }
 }

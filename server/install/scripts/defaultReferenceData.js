@@ -49,6 +49,36 @@ function run(callback) {
                     order: defaultReferenceData[referenceDataCategory][referenceDataItem].order
                   }, common.install.timestamps), options);
               }
+
+              // check if we need to update anything...
+              if (
+                (
+                  defaultReferenceData[referenceDataCategory][referenceDataItem].colorCode !== undefined &&
+                  defaultReferenceData[referenceDataCategory][referenceDataItem].colorCode !== foundReferenceData.colorCode
+                ) || (
+                  defaultReferenceData[referenceDataCategory][referenceDataItem].order !== undefined &&
+                  defaultReferenceData[referenceDataCategory][referenceDataItem].order !== foundReferenceData.order
+                )
+              ) {
+                // construct object to update
+                const updateProps = {};
+
+                // colorCode
+                if (defaultReferenceData[referenceDataCategory][referenceDataItem].colorCode !== undefined) {
+                  updateProps.colorCode = defaultReferenceData[referenceDataCategory][referenceDataItem].colorCode;
+                }
+
+                // order
+                if (defaultReferenceData[referenceDataCategory][referenceDataItem].order !== undefined) {
+                  updateProps.order = defaultReferenceData[referenceDataCategory][referenceDataItem].order;
+                }
+
+                // update
+                return foundReferenceData
+                  .updateAttributes(updateProps, options);
+              }
+
+              // nothing to do
               return foundReferenceData;
             })
             .then(function () {
