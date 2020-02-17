@@ -6,6 +6,19 @@ const moment = require('moment');
 
 // roles map from model
 const rolesMap = require('./defaultRoles');
+const defaultAdmin = {
+  _id: 'sys_admin',
+  firstName: 'System',
+  lastName: 'Administrator',
+  email: 'admin@who.int',
+  password: 'admin',
+  languageId: 'english_us',
+  passwordChange: true,
+  roleIds: [
+    'ROLE_SYSTEM_ADMINISTRATOR',
+    'ROLE_USER_MANAGER'
+  ]
+};
 
 // initialize migration error container
 let migrationErrors = [];
@@ -340,6 +353,72 @@ function run(callback) {
     .then(updatedRoles => {
       // update users that have the updated roles
       return migrateUsers(mongoDBConnection, updatedRoles);
+    })
+    .then(() => {
+      // initialize raw mongoDB collection
+      const User = mongoDBConnection.collection('user');
+
+      // reset sys-admin user roles
+      // make sure he has both use roles - reset sys admin
+      const sysAdminId = 'sys_admin';
+      return User
+        .findOne({
+          _id: sysAdminId
+        })
+        .then((userData) => {
+          // if not found..then we need to create it
+          if (!userData) {
+            console.log('Sys admin user not found');
+            return User
+              .insertOne(defaultAdmin)
+              .then(() => {
+                console.log('Sys admin user created');
+              })
+              .catch(err => {
+                // return not created status
+                console.log(`Error creating sys admin user: ${err.message}`);
+              });
+          }
+
+          // found, we need to update user roles
+          const newRolesIds = _.uniq([
+            ...(userData.roleIds ? userData.roleIds : []),
+            ...defaultAdmin.roleIds
+          ]);
+
+          // do we need to reset sys admin data ?
+          if (_.isEqual(newRolesIds, userData.roleIds)) {
+            console.log('No need to reset sys admin');
+            return;
+          }
+
+          // reset sys admin data
+          return User
+            .updateOne({
+              _id: sysAdminId
+            }, {
+              '$set': {
+                roleIds: newRolesIds
+              }
+            })
+            .then(() => {
+              console.log('Sys admin updated');
+            })
+            .catch(err => {
+              // add error
+              let errMessage = `Sys admin role update error: ${err.message}.`;
+              migrationErrors.push(errMessage);
+              // log error
+              console.log(errMessage);
+            });
+        })
+        .catch((err) => {
+          // add error
+          let errMessage = `Sys admin role update error: ${err.message}.`;
+          migrationErrors.push(errMessage);
+          // log error
+          console.log(errMessage);
+        });
     })
     .then(() => {
       console.log(`Migration complete ${migrationErrors.length ? `with errors: \n${migrationErrors.join('\n')}` : ''}.`);
