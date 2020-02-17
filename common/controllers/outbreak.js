@@ -9007,7 +9007,10 @@ module.exports = function (Outbreak) {
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
         // count using query
-        return app.models.case.rawFind(filter.where, {projection: {classification: 1}});
+        return app.models.case.rawFind(filter.where, {
+          projection: {classification: 1},
+          includeDeletedRecords: filter.deleted
+        });
       })
       .then(function (cases) {
         // build a result
@@ -9400,7 +9403,10 @@ module.exports = function (Outbreak) {
       .preFilterForOutbreak(this, filter)
       .then(function (filter) {
         // find follow-ups using filter
-        return app.models.contact.rawFind(filter.where, {projection: {riskLevel: 1}});
+        return app.models.contact.rawFind(filter.where, {
+          projection: {riskLevel: 1},
+          includeDeletedRecords: filter.deleted
+        });
       })
       .then(function (contacts) {
         // build a result
