@@ -6,6 +6,19 @@ const moment = require('moment');
 
 // roles map from model
 const rolesMap = require('./defaultRoles');
+const defaultAdmin = {
+  _id: 'sys_admin',
+  firstName: 'System',
+  lastName: 'Administrator',
+  email: 'admin@who.int',
+  password: 'admin',
+  languageId: 'english_us',
+  passwordChange: true,
+  roleIds: [
+    'ROLE_SYSTEM_ADMINISTRATOR',
+    'ROLE_USER_MANAGER'
+  ]
+};
 
 // initialize migration error container
 let migrationErrors = [];
@@ -353,12 +366,24 @@ function run(callback) {
           _id: sysAdminId
         })
         .then((userData) => {
+          // if not found..then we need to create it
+          if (!userData) {
+            console.log('Sys admin user not found');
+            return User
+              .insertOne(defaultAdmin)
+              .then(() => {
+                console.log('Sys admin user created');
+              })
+              .catch(err => {
+                // return not created status
+                console.log(`Error creating sys admin user: ${err.message}`);
+              });
+          }
+
+          // found, we need to update user roles
           const newRolesIds = _.uniq([
             ...(userData.roleIds ? userData.roleIds : []),
-            ...[
-              'ROLE_SYSTEM_ADMINISTRATOR',
-              'ROLE_USER_MANAGER'
-            ]
+            ...defaultAdmin.roleIds
           ]);
 
           // do we need to reset sys admin data ?
