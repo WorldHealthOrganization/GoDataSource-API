@@ -165,6 +165,12 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "resetPassWithSecurityQuestion"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_export",
+      "permission": "ALLOW",
+      "property": "export"
     }
   ],
   "methods": {
@@ -195,6 +201,73 @@
       "http": {
         "verb": "post",
         "path": "/reset-password-with-security-question"
+      }
+    },
+    "prototype.export": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, limit and where.useQuestionVariable - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers."
+        },
+        {
+          "arg": "type",
+          "type": "string",
+          "enum": [
+            "json",
+            "xml",
+            "csv",
+            "xls",
+            "xlsx",
+            "ods",
+            "pdf"
+          ],
+          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+        },
+        {
+          "arg": "encryptPassword",
+          "type": "string",
+          "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
+        },
+        {
+          "arg": "anonymizeFields",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export filtered list of cases",
+      "http": {
+        "verb": "get",
+        "path": "/export"
       }
     }
   }

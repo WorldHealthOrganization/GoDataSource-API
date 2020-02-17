@@ -275,4 +275,44 @@ module.exports = function (User) {
       next
     );
   });
+
+  /**
+   * Export filtered cases to file
+   * @param filter
+   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param encryptPassword
+   * @param anonymizeFields
+   * @param options
+   * @param callback
+   */
+  User.prototype.export = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    // defensive checks
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    new Promise((resolve, reject) => {
+      const contextUser = app.utils.remote.getUserFromOptions(options);
+      app.models.language.getLanguageDictionary(contextUser.languageId, (err, dictionary) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(dictionary);
+      });
+    }).then(dictionary => {
+        return app.utils.remote.helpers.exportFilteredModelsList(
+          app,
+          app.models.user,
+          {},
+          filter.where,
+          exportType,
+          'Users List',
+          (typeof encryptPassword !== 'string' || !encryptPassword.length) ? null : encryptPassword,
+          !Array.isArray(anonymizeFields) ? [] : anonymizeFields,
+          { dictionary },
+          results => Promise.resolve(results),
+          callback
+        );
+      })
+      .catch(callback);
+  };
 };
