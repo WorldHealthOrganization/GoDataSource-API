@@ -568,6 +568,9 @@ module.exports = function (Outbreak) {
     _.unset(context, 'args.filter.where.noRelationships');
 
     if (noRelationship) {
+      // remove count relations custom flag
+      _.unset(context, 'args.filter.where.countRelations');
+
       // Retrieve all relationships of requested type for the given outbreak
       // Then filter cases based on relations count
       app.models.relationship
