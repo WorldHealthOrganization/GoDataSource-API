@@ -74,7 +74,10 @@ function run(callback) {
           // go through each token and determine if we need to update anything
           languageTokens.forEach((tokenData) => {
             // determine section from token
-            const languageSection = mapTokenToSection[tokenData.languageId][mapRefItemToCategory[tokenData.token]];
+            let languageSection = mapTokenToSection[tokenData.languageId][tokenData.token] ||
+              mapTokenToSection[tokenData.languageId][mapRefItemToCategory[tokenData.token]];
+
+            // update translation
             if (
               languageSection &&
               defaultLanguageData[tokenData.languageId].sections[languageSection][tokenData.token] !== tokenData.translation && (
