@@ -342,6 +342,60 @@ function run(callback) {
       return migrateUsers(mongoDBConnection, updatedRoles);
     })
     .then(() => {
+      // initialize raw mongoDB collection
+      const User = mongoDBConnection.collection('user');
+
+      // reset sys-admin user roles
+      // make sure he has both use roles - reset sys admin
+      const sysAdminId = 'sys_admin';
+      return User
+        .findOne({
+          _id: sysAdminId
+        })
+        .then((userData) => {
+          const newRolesIds = _.uniq([
+            ...(userData.roleIds ? userData.roleIds : []),
+            ...[
+              'ROLE_SYSTEM_ADMINISTRATOR',
+              'ROLE_USER_MANAGER'
+            ]
+          ]);
+
+          // do we need to reset sys admin data ?
+          if (_.isEqual(newRolesIds, userData.roleIds)) {
+            console.log('No need to reset sys admin');
+            return;
+          }
+
+          // reset sys admin data
+          return User
+            .updateOne({
+              _id: sysAdminId
+            }, {
+              '$set': {
+                roleIds: newRolesIds
+              }
+            })
+            .then(() => {
+              console.log('Sys admin updated');
+            })
+            .catch(err => {
+              // add error
+              let errMessage = `Sys admin role update error: ${err.message}.`;
+              migrationErrors.push(errMessage);
+              // log error
+              console.log(errMessage);
+            });
+        })
+        .catch((err) => {
+          // add error
+          let errMessage = `Sys admin role update error: ${err.message}.`;
+          migrationErrors.push(errMessage);
+          // log error
+          console.log(errMessage);
+        });
+    })
+    .then(() => {
       console.log(`Migration complete ${migrationErrors.length ? `with errors: \n${migrationErrors.join('\n')}` : ''}.`);
       return callback();
     })
