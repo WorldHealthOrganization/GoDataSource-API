@@ -6,8 +6,12 @@ const app = require('../../server');
 const referenceData = app.models.referenceData;
 const defaultReferenceData = require('./defaultReferenceData.json');
 const defaultOutbreakTemplateData = require('./defaultOutbreakTemplateData.json');
+const languageToken = app.models.languageToken;
 
 function run(callback) {
+  // keep language data
+  const defaultLanguageData = {};
+
   // map defaultReferenceData to so we can later map them properly
   const mapRefItemToDumpData = {};
   if (module.methodRelevantArgs.checkDefaultReferenceData) {
@@ -32,7 +36,68 @@ function run(callback) {
   referenceData
     .find()
     .then((refDataItems) => {
+      // retrieve current default language translations
+      const mapTokenToSection = {};
+      fs.readdirSync(`${__dirname}/../../config/languages`).forEach((language) => {
+        // map tokens to translation
+        const languageData = require(`${__dirname}/../../config/languages/${language}`);
+        const languageID = languageData.id;
+        defaultLanguageData[languageID] = languageData;
+        mapTokenToSection[languageID] = {};
+        _.each(defaultLanguageData[languageID].sections, (sectionData, sectionName) => {
+          _.each(sectionData, (translation, token) => {
+            mapTokenToSection[languageID][token] = sectionName;
+          });
+        });
+      });
+
+      // map ref items to categories
+      const mapRefItemToCategory = {};
+      refDataItems.forEach((item) => {
+        mapRefItemToCategory[item.id] = item.categoryId;
+      });
+
+      // retrieve language tokens
+      const tokensToTranslate = refDataItems.map((item) => item.id);
+      return languageToken
+        .find({
+          where: {
+            token: {
+              in: tokensToTranslate
+            },
+            languageId: {
+              in: Object.keys(defaultLanguageData)
+            }
+          }
+        })
+        .then((languageTokens) => {
+          // go through each token and determine if we need to update anything
+          languageTokens.forEach((tokenData) => {
+            // determine section from token
+            const languageSection = mapTokenToSection[tokenData.languageId][tokenData.token] ||
+              mapTokenToSection[tokenData.languageId][mapRefItemToCategory[tokenData.token]];
+
+            // update translation
+            if (
+              languageSection &&
+              defaultLanguageData[tokenData.languageId].sections[languageSection][tokenData.token] !== tokenData.translation && (
+                !module.methodRelevantArgs.checkDefaultOutbreakTemplateData ||
+                !mapRefItemToOutbreakTemplate[tokenData.token]
+              )
+            ) {
+              defaultLanguageData[tokenData.languageId].sections[languageSection][tokenData.token] = tokenData.translation;
+            }
+          });
+
+          // finished - determining translations
+          return {
+            refDataItems: refDataItems
+          };
+        });
+    })
+    .then((data) => {
       // checking items
+      const refDataItems = data.refDataItems;
       let noDifferencesDetected = true;
       (refDataItems || []).forEach((refDataItem) => {
         // check if ref data item is missing from our default reference data item list
@@ -98,6 +163,7 @@ function run(callback) {
 
       // output
       if (module.methodRelevantArgs.export) {
+        // write ref data items
         fs.writeFile(
           module.methodRelevantArgs.export,
           JSON.stringify(defaultReferenceData, null, 2),
@@ -112,6 +178,24 @@ function run(callback) {
             callback();
           }
         );
+
+        // write default languages data
+        _.each(defaultLanguageData, (languageData, languageId) => {
+          fs.writeFile(
+            `${languageId}.json`,
+            JSON.stringify(languageData, null, 2),
+            (err) => {
+              // an error occurred ?
+              if (err) {
+                return callback(err);
+              }
+
+              // finished
+              console.log(`Dumped ${languageId} language data`);
+              callback();
+            }
+          );
+        });
       } else {
         // finished
         console.log('Finished determining reference data items');
