@@ -300,4 +300,46 @@ module.exports = function (User) {
     delete userData.settings;
     delete userData.roleIds;
   };
+
+  User.referenceDataFieldsToCategoryMap = {
+    institutionName: 'LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME'
+  };
+
+  User.referenceDataFields = Object.keys(User.referenceDataFieldsToCategoryMap);
+
+  User.foreignKeyResolverMap = {
+    'roleIds[]': {
+      modelName: 'role',
+      useProperty: 'name'
+    },
+    'outbreakIds[]': {
+      modelName: 'outbreak',
+      useProperty: 'name'
+    },
+    'activeOutbreakId': {
+      modelName: 'outbreak',
+      useProperty: 'name'
+    }
+  };
+
+  User.fieldLabelsMap = {
+    id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+    createdAt: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
+    createdBy: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_BY',
+    updatedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',
+    updatedBy: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
+    deleted: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
+    deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT',
+    email: 'LNG_USER_FIELD_LABEL_EMAIL',
+    firstName: 'LNG_USER_FIELD_LABEL_FIRST_NAME',
+    lastName: 'LNG_USER_FIELD_LABEL_LAST_NAME',
+    languageId: 'LNG_LAYOUT_LANGUAGE_LABEL',
+    password: 'LNG_COMMON_FIELD_LABEL_PASSWORD',
+    roleIds: 'LNG_USER_FIELD_LABEL_ROLES',
+    outbreakIds: 'LNG_USER_FIELD_LABEL_AVAILABLE_OUTBREAKS',
+    activeOutbreakId: 'LNG_USER_FIELD_LABEL_ACTIVE_OUTBREAK',
+    institutionName: 'LNG_USER_FIELD_LABEL_INSTITUTION_NAME',
+    telephoneNumbers: 'LNG_USER_FIELD_LABEL_TELEPHONE_NUMBERS',
+    'telephoneNumbers.LNG_USER_FIELD_LABEL_PRIMARY_TELEPHONE': 'LNG_USER_FIELD_LABEL_PRIMARY_TELEPHONE'
+  };
 };

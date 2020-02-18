@@ -343,5 +343,9 @@
   "vaccine": {
     "dataSource": null,
     "public": false
+  },
+  "telephoneNumbers": {
+    "dataSource": null,
+    "public": false
   }
 }

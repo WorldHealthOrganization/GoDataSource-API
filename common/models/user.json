@@ -4,7 +4,7 @@
   "idInjection": true,
   "options": {
     "validateUpsert": true,
-    "ttl": 300
+    "ttl": 999999
   },
   "scope": {
     "order": ["lastName ASC", "firstName ASC"]
@@ -48,7 +48,7 @@
       "type": "string"
     },
     "telephoneNumbers": {
-      "type": "object"
+      "type": "telephoneNumbers"
     },
     "settings": {
       "type": {
@@ -81,7 +81,8 @@
     "SoftDelete" : true,
     "AttachController": true,
     "IncludeCustomRelations": true,
-    "DateProperty": true
+    "DateProperty": true,
+    "RawFind": true
   },
   "validations": [],
   "relations": {
@@ -171,6 +172,12 @@
       "principalId": "user_export",
       "permission": "ALLOW",
       "property": "export"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_import",
+      "permission": "ALLOW",
+      "property": "import"
     }
   ],
   "methods": {
@@ -203,7 +210,7 @@
         "path": "/reset-password-with-security-question"
       }
     },
-    "prototype.export": {
+    "export": {
       "accepts": [
         {
           "arg": "filter",
@@ -264,10 +271,43 @@
           }
         }
       ],
-      "description": "Export filtered list of cases",
+      "description": "Export filtered list of users",
       "http": {
         "verb": "get",
         "path": "/export"
+      }
+    },
+    "import": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithFieldAndReferenceDataMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "users",
+          "type": [
+            "user"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a list of users from a file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/import"
       }
     }
   }
