@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('assert');
+const authTokenConfig = require('../../server/config').authToken;
 
 module.exports = function (AccessToken) {
   // set flag to not get controller
@@ -44,11 +45,27 @@ module.exports = function (AccessToken) {
         elapsedSeconds < secondsToLive;
 
       if (isValid) {
+        // determine if ttl is different
+        const isTokenTtlDifferent = !isEternalToken &&
+          authTokenConfig &&
+          authTokenConfig.ttl &&
+          this.ttl !== authTokenConfig.ttl;
+
         // avoid spams, update once every 5 seconds
         // dont wait for token save, to not throttle request performance
-        if (elapsedSeconds > 5) {
+        if (
+          elapsedSeconds > 5 ||
+          isTokenTtlDifferent
+        ) {
           // keep token alive
           this.created = now;
+
+          // check if we need to update auth token ttl to config setting
+          if (isTokenTtlDifferent) {
+            this.ttl = authTokenConfig.ttl;
+          }
+
+          // save token
           this.save();
         }
         process.nextTick(function() {

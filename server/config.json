@@ -85,5 +85,8 @@
     "enabled": true,
     "whitelist": []
   },
-  "enableConfigRewrite": true
+  "enableConfigRewrite": true,
+  "authToken": {
+    "ttl": 600
+  }
 }
