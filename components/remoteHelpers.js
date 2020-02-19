@@ -185,42 +185,61 @@ function exportFilteredModelsList(
 
             fieldsList.forEach(function (propertyName) {
               // new functionality, not supported by all models
-              if (!isJSONXMLExport && ignoreArrayFieldLabels && Model.arrayProps[propertyName]) {
-                // determine if we need to include parent token
-                const parentToken = fieldLabelsMap[propertyName];
-
-                // array properties map
-                const map = Model.arrayProps[propertyName];
-
-                // create headers
-                let maxElements = arrayPropsLengths[propertyName];
-                // pdf has a limited width, include only one element
-                if (exportType === 'pdf') {
-                  maxElements = 1;
-                }
-                for (let i = 1; i <= maxElements; i++) {
-                  for (let prop in map) {
+              if (!isJSONXMLExport && ignoreArrayFieldLabels) {
+                if (propertyName.indexOf('[]') > -1 &&
+                  Model.arrayProps[propertyName.replace('[]', '')]) {
+                  const tmpPropertyName = propertyName.replace('[]', '');
+                  // array with primitive values
+                  let maxElements = arrayPropsLengths[tmpPropertyName];
+                  // pdf has a limited width, include only one element
+                  if (exportType === 'pdf') {
+                    maxElements = 1;
+                  }
+                  for (let i = 1; i <= maxElements; i++) {
                     headers.push({
-                      id: `${propertyName} ${i} ${prop.replace(/\./g, ' ')}`,
-                      // use correct label translation for user language
-                      header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} [${i}]`
+                      id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
+                      header: `${dictionary.getTranslation(fieldLabelsMap[propertyName])} [${i}]`
                     });
-                    // include parent locations
-                    if (
-                      Model.locationFields &&
-                      Model.locationFields.indexOf(`${propertyName}[].${prop}`) !== -1
-                    ) {
-                      for (let j = 1; j <= highestParentsChain; j++) {
-                        headers.push({
-                          id: `${propertyName} ${i} ${prop}_parentLocations ${j}`,
-                          // use correct label translation for user language
-                          header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} [${i}] ${dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL')} [${j}]`
-                        });
+                  }
+                  return;
+                }
+                if (Model.arrayProps[propertyName]) {
+                  // determine if we need to include parent token
+                  const parentToken = fieldLabelsMap[propertyName];
+
+                  // array properties map
+                  const map = Model.arrayProps[propertyName];
+
+                  // create headers
+                  let maxElements = arrayPropsLengths[propertyName];
+                  // pdf has a limited width, include only one element
+                  if (exportType === 'pdf') {
+                    maxElements = 1;
+                  }
+                  for (let i = 1; i <= maxElements; i++) {
+                    for (let prop in map) {
+                      headers.push({
+                        id: `${propertyName} ${i} ${prop.replace(/\./g, ' ')}`,
+                        // use correct label translation for user language
+                        header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} [${i}]`
+                      });
+                      // include parent locations
+                      if (
+                        Model.locationFields &&
+                        Model.locationFields.indexOf(`${propertyName}[].${prop}`) !== -1
+                      ) {
+                        for (let j = 1; j <= highestParentsChain; j++) {
+                          headers.push({
+                            id: `${propertyName} ${i} ${prop}_parentLocations ${j}`,
+                            // use correct label translation for user language
+                            header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} [${i}] ${dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL')} [${j}]`
+                          });
+                        }
                       }
                     }
                   }
+                  return;
                 }
-                return;
               }
 
               // do not handle array properties from field labels map when we have arrayProps set on the model

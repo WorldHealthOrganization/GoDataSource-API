@@ -307,6 +307,11 @@ module.exports = function (User) {
 
   User.referenceDataFields = Object.keys(User.referenceDataFieldsToCategoryMap);
 
+  User.arrayProps = {
+    roleIds: true,
+    outbreakIds: true
+  };
+
   User.foreignKeyResolverMap = {
     'roleIds[]': {
       modelName: 'role',
@@ -335,11 +340,11 @@ module.exports = function (User) {
     lastName: 'LNG_USER_FIELD_LABEL_LAST_NAME',
     languageId: 'LNG_LAYOUT_LANGUAGE_LABEL',
     password: 'LNG_COMMON_FIELD_LABEL_PASSWORD',
-    roleIds: 'LNG_USER_FIELD_LABEL_ROLES',
-    outbreakIds: 'LNG_USER_FIELD_LABEL_AVAILABLE_OUTBREAKS',
     activeOutbreakId: 'LNG_USER_FIELD_LABEL_ACTIVE_OUTBREAK',
     institutionName: 'LNG_USER_FIELD_LABEL_INSTITUTION_NAME',
     telephoneNumbers: 'LNG_USER_FIELD_LABEL_TELEPHONE_NUMBERS',
-    'telephoneNumbers.LNG_USER_FIELD_LABEL_PRIMARY_TELEPHONE': 'LNG_USER_FIELD_LABEL_PRIMARY_TELEPHONE'
+    'telephoneNumbers.LNG_USER_FIELD_LABEL_PRIMARY_TELEPHONE': 'LNG_USER_FIELD_LABEL_PRIMARY_TELEPHONE',
+    'roleIds[]': 'LNG_USER_FIELD_LABEL_ROLES',
+    'outbreakIds[]': 'LNG_USER_FIELD_LABEL_AVAILABLE_OUTBREAKS'
   };
 };
