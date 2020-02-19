@@ -299,28 +299,27 @@ module.exports = function (User) {
         return resolve(dictionary);
       });
     }).then(dictionary => {
-        if (!Array.isArray(anonymizeFields)) {
-          anonymizeFields = [];
-        }
-        if (anonymizeFields.indexOf('password') === -1) {
-          anonymizeFields.push('password');
-        }
-        options.dictionary = dictionary;
-        return app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.user,
-          {},
-          filter.where,
-          exportType,
-          'Users List',
-          (typeof encryptPassword !== 'string' || !encryptPassword.length) ? null : encryptPassword,
-          anonymizeFields,
-          options,
-          results => Promise.resolve(results),
-          callback
-        );
-      })
-      .catch(callback);
+      if (!Array.isArray(anonymizeFields)) {
+        anonymizeFields = [];
+      }
+      if (anonymizeFields.indexOf('password') === -1) {
+        anonymizeFields.push('password');
+      }
+      options.dictionary = dictionary;
+      return app.utils.remote.helpers.exportFilteredModelsList(
+        app,
+        app.models.user,
+        {},
+        filter.where,
+        exportType,
+        'Users List',
+        (typeof encryptPassword !== 'string' || !encryptPassword.length) ? null : encryptPassword,
+        anonymizeFields,
+        options,
+        results => Promise.resolve(results),
+        callback
+      );
+    }).catch(callback);
   };
 
   User.import = function (data, options, callback) {
