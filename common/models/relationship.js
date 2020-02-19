@@ -287,7 +287,7 @@ module.exports = function (Relationship) {
    * @param callback
    */
   Relationship.countTransmissionChains = function (outbreakId, followUpPeriod, filter, callback) {
-    Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, filter, true, false, callback);
+    Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, filter, true, false, true, callback);
   };
 
   /**

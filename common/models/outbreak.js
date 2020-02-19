@@ -1162,7 +1162,7 @@ module.exports = function (Outbreak) {
                   inq: relationshipIds
                 }
               }
-            }, filter || {}), countOnly, false, callback);
+            }, filter || {}), countOnly, false, true, callback);
           });
       })
       .catch(callback);
