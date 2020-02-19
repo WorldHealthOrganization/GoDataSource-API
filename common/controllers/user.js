@@ -390,62 +390,61 @@ module.exports = function (User) {
               .catch(reject);
           })
         ]).then(() => {
-            usersList.forEach((user, index) => {
-              asyncOps.push(cb => {
-
-                user.roleIds = user.roleIds.map(roleName => {
-                  return resourceMaps.roles[roleName];
-                });
-                user.outbreakIds = user.outbreakIds.map(outbreakName => {
-                  return resourceMaps.outbreaks[outbreakName];
-                });
-                user.activeOutbreakId = resourceMaps.outbreaks[user.activeOutbreakId];
-
-                return app.utils.dbSync.syncRecord(
-                  options.remotingContext.req.logger,
-                  app.models.user,
-                  user,
-                  options)
-                  .then(result => cb(null, result.record))
-                  .catch(err => {
-                    // on error, store the error, but don't stop, continue with other items
-                    asyncOpsErrors.push({
-                      message: `Failed to import user ${index + 1}`,
-                      error: err,
-                      recordNo: index + 1,
-                      data: {
-                        file: rawUsersList[index],
-                        save: user
-                      }
-                    });
-                    return cb(null, null);
-                  });
+          usersList.forEach((user, index) => {
+            asyncOps.push(cb => {
+              user.roleIds = user.roleIds.map(roleName => {
+                return resourceMaps.roles[roleName];
               });
-            });
+              user.outbreakIds = user.outbreakIds.map(outbreakName => {
+                return resourceMaps.outbreaks[outbreakName];
+              });
+              user.activeOutbreakId = resourceMaps.outbreaks[user.activeOutbreakId];
 
-            async.parallelLimit(asyncOps, 10, (err, results) => {
-              if (err) {
-                return callback(err);
-              }
-              // if import errors were found
-              if (asyncOpsErrors.length) {
-                // remove results that failed to be added
-                results = results.filter(result => result !== null);
-                // overload toString function to be used by error handler
-                results.toString = function () {
-                  return JSON.stringify(this);
-                };
-                // return error with partial success
-                return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-                  model: app.models.user.modelName,
-                  failed: asyncOpsErrors,
-                  success: results
-                }));
-              }
-              // send the result
-              return callback(null, results);
+              return app.utils.dbSync.syncRecord(
+                options.remotingContext.req.logger,
+                app.models.user,
+                user,
+                options)
+                .then(result => cb(null, result.record))
+                .catch(err => {
+                  // on error, store the error, but don't stop, continue with other items
+                  asyncOpsErrors.push({
+                    message: `Failed to import user ${index + 1}`,
+                    error: err,
+                    recordNo: index + 1,
+                    data: {
+                      file: rawUsersList[index],
+                      save: user
+                    }
+                  });
+                  return cb(null, null);
+                });
             });
           });
+
+          async.parallelLimit(asyncOps, 10, (err, results) => {
+            if (err) {
+              return callback(err);
+            }
+            // if import errors were found
+            if (asyncOpsErrors.length) {
+              // remove results that failed to be added
+              results = results.filter(result => result !== null);
+              // overload toString function to be used by error handler
+              results.toString = function () {
+                return JSON.stringify(this);
+              };
+              // return error with partial success
+              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+                model: app.models.user.modelName,
+                failed: asyncOpsErrors,
+                success: results
+              }));
+            }
+            // send the result
+            return callback(null, results);
+          });
+        });
       } catch (error) {
         // handle parse error
         callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
