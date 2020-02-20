@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('assert');
+const authTokenConfig = require('../../server/config').authToken;
 
 module.exports = function (AccessToken) {
   // set flag to not get controller
@@ -49,6 +50,8 @@ module.exports = function (AccessToken) {
         if (elapsedSeconds > 5) {
           // keep token alive
           this.created = now;
+
+          // save token
           this.save();
         }
         process.nextTick(function() {
@@ -65,4 +68,24 @@ module.exports = function (AccessToken) {
       });
     }
   };
+
+  /**
+   * Before save hooks
+   */
+  AccessToken.observe('before save', function (context, next) {
+    // check if we need to update auth token ttl to config setting
+    const data = context.isNewInstance || !context.data ? context.instance : context.data;
+    if (
+      data &&
+      authTokenConfig &&
+      authTokenConfig.ttl &&
+      data.ttl !== -1 &&
+      data.ttl !== authTokenConfig.ttl
+    ) {
+      data.ttl = authTokenConfig.ttl;
+    }
+
+    // finished
+    next();
+  });
 };
