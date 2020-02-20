@@ -186,23 +186,6 @@ function exportFilteredModelsList(
             fieldsList.forEach(function (propertyName) {
               // new functionality, not supported by all models
               if (!isJSONXMLExport && ignoreArrayFieldLabels) {
-                if (propertyName.indexOf('[]') > -1 &&
-                  Model.arrayProps[propertyName.replace('[]', '')]) {
-                  const tmpPropertyName = propertyName.replace('[]', '');
-                  // array with primitive values
-                  let maxElements = arrayPropsLengths[tmpPropertyName];
-                  // pdf has a limited width, include only one element
-                  if (exportType === 'pdf') {
-                    maxElements = 1;
-                  }
-                  for (let i = 1; i <= maxElements; i++) {
-                    headers.push({
-                      id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
-                      header: `${dictionary.getTranslation(fieldLabelsMap[propertyName])} [${i}]`
-                    });
-                  }
-                  return;
-                }
                 if (Model.arrayProps[propertyName]) {
                   // determine if we need to include parent token
                   const parentToken = fieldLabelsMap[propertyName];
@@ -237,6 +220,23 @@ function exportFilteredModelsList(
                         }
                       }
                     }
+                  }
+                  return;
+                }
+
+                if (propertyName.endsWith('[]') && Model.arrayProps[propertyName.replace('[]', '')]) {
+                  const tmpPropertyName = propertyName.replace('[]', '');
+                  // array with primitive values
+                  let maxElements = arrayPropsLengths[tmpPropertyName];
+                  // pdf has a limited width, include only one element
+                  if (exportType === 'pdf') {
+                    maxElements = 1;
+                  }
+                  for (let i = 1; i <= maxElements; i++) {
+                    headers.push({
+                      id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
+                      header: `${dictionary.getTranslation(fieldLabelsMap[propertyName])} [${i}]`
+                    });
                   }
                   return;
                 }
