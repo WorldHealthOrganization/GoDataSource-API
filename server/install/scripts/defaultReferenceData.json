@@ -12,12 +12,12 @@
     },
     "Suspect": {
       "readOnly": true,
-      "colorCode": "#dcd225",
+      "colorCode": "#f0b341",
       "order": 3
     },
     "Not a case (discarded)": {
       "readOnly": true,
-      "colorCode": "#b1afaf",
+      "colorCode": "#a59c9c",
       "order": 4
     }
   },
@@ -209,15 +209,38 @@
   "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE": {
     "Touched Body Fluids": {
       "readOnly": false,
-      "order": 3
+      "order": 3,
+      "colorCode": "#f2c87c"
     },
     "Direct Physical contact": {
       "readOnly": false,
-      "order": 2
+      "order": 2,
+      "colorCode": "#ffa500"
     },
     "Slept, Ate Or Spend Time In Same Household": {
       "readOnly": false,
-      "order": 1
+      "order": 1,
+      "colorCode": "#9370db"
+    },
+    "ATE_DRANK_CONTAMINATED_MATERIAL": {
+      "readOnly": false,
+      "colorCode": "#dcb6f4",
+      "order": 4
+    },
+    "INTRAVENOUS_EXPOSURE": {
+      "readOnly": false,
+      "colorCode": "#e2aa7e",
+      "order": 6
+    },
+    "OTHER_PLEASE_SPECIFY_IN_COMMENT_FIELD": {
+      "readOnly": false,
+      "colorCode": "#966161",
+      "order": 7
+    },
+    "SEXUAL_EXPOSURE": {
+      "readOnly": false,
+      "colorCode": "#f89d9d",
+      "order": 5
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY": {
@@ -1098,23 +1121,23 @@
     },
     "NOT_PREGNANT": {
       "readOnly": false,
-      "order": 2
+      "order": 1
     },
     "YES_FIRST_TRIMESTER": {
       "readOnly": false,
-      "order": 3
+      "order": 2
     },
     "YES_SECOND_TRIMESTER": {
       "readOnly": false,
-      "order": 4
+      "order": 3
     },
     "YES_THIRD_TRIMESTER": {
       "readOnly": false,
-      "order": 5
+      "order": 4
     },
     "YES_TRIMESTER_UNKNOWN": {
       "readOnly": false,
-      "order": 6
+      "order": 5
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME": {
