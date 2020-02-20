@@ -4519,7 +4519,8 @@
       "LNG_APP_PAGE_INDIVIDUAL_CONTACT_FOLLOW_UPS": "Individual contact follow-ups",
       "LNG_APP_PAGE_CASES": "Cases",
       "LNG_APP_PAGE_CONTACTS": "Contacts",
-      "LNG_APP_PAGE_AVAILABLE_ENTITIES_FOR_SWITCH": "Available entities for switch"
+      "LNG_APP_PAGE_AVAILABLE_ENTITIES_FOR_SWITCH": "Available entities for switch",
+      "LNG_APP_PAGE_CONTACT_LAB_RESULTS": "Individual contact lab results"
     },
     "uiSavedImportMappingsListPage": {
       "LNG_PAGE_LIST_SAVED_IMPORT_MAPPING_TITLE": "Saved import mappings",
@@ -4530,9 +4531,10 @@
     "savedImportMappingsPages": {
       "LNG_APP_PAGE_IMPORT_CASES": "Cases",
       "LNG_APP_PAGE_IMPORT_CONTACTS": "Contacts",
-      "LNG_APP_PAGE_IMPORT_CASE_LAB_DATA": "Lab data",
       "LNG_APP_PAGE_IMPORT_REFERENCE_DATA": "Reference data",
-      "LNG_APP_PAGE_IMPORT_LOCATION_DATA": "Locations"
+      "LNG_APP_PAGE_IMPORT_LOCATION_DATA": "Locations",
+      "LNG_APP_PAGE_IMPORT_CASE_LAB_DATA": "Case Lab data",
+      "LNG_APP_PAGE_IMPORT_CONTACT_LAB_DATA": "Contact Lab data"
     },
     "uiSavedImportMappingsFields": {
       "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_NAME": "Name",
