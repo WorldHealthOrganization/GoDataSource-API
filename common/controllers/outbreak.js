@@ -11694,4 +11694,79 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Export filtered lab results to file
+   * @param filter
+   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param encryptPassword
+   * @param anonymizeFields
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportFilteredLabResults = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    const self = this;
+
+    // defensive checks
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // parse useQuestionVariable query param
+    let useQuestionVariable = false;
+    // if found, remove it form main query
+    if (filter.where.hasOwnProperty('useQuestionVariable')) {
+      useQuestionVariable = filter.where.useQuestionVariable;
+      delete filter.where.useQuestionVariable;
+    }
+
+    new Promise((resolve, reject) => {
+      const contextUser = app.utils.remote.getUserFromOptions(options);
+      app.models.language.getLanguageDictionary(contextUser.languageId, (err, dictionary) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(dictionary);
+      });
+    })
+      .then(dictionary => {
+        return app.models.labResult.preFilterForOutbreak(this, filter)
+          .then((filter) => {
+            return {
+              dictionary: dictionary,
+              filter: filter
+            };
+          });
+      })
+      .then(data => {
+        const dictionary = data.dictionary;
+        const filter = data.filter;
+
+        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+          encryptPassword = null;
+        }
+
+        if (!Array.isArray(anonymizeFields)) {
+          anonymizeFields = [];
+        }
+
+        options.questionnaire = self.labResultsTemplate;
+        options.dictionary = dictionary;
+        options.useQuestionVariable = useQuestionVariable;
+
+        app.utils.remote.helpers.exportFilteredModelsList(
+          app,
+          app.models.labResult,
+          {},
+          filter.where,
+          exportType,
+          'LabResult-List',
+          encryptPassword,
+          anonymizeFields,
+          options,
+          data => Promise.resolve(data),
+          callback
+        );
+      })
+      .catch(callback);
+  };
 };
