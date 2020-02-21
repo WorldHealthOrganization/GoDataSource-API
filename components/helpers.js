@@ -2157,7 +2157,7 @@ const attachParentLocations = function (targetModel, locationModel, records, cal
             }
           })(obj.value);
 
-          // add the actual location to the end of the parent locations chain\
+          // add the actual location to the end of the parent locations chain
           if (parentLocations.length) {
             parentLocations.push(locationsMap[obj.value].name);
           }
