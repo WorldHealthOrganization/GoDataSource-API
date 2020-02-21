@@ -149,7 +149,8 @@ module.exports = function (Case) {
         'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG',
         'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
         'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
-        'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER'
+        'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
+        'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS'
       ]
     },
     documents: {
@@ -221,6 +222,7 @@ module.exports = function (Case) {
     'addresses[].geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
     'addresses[].date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
     'addresses[].phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
+    'addresses[].emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS',
     'visualId': 'LNG_CASE_FIELD_LABEL_VISUAL_ID',
     'isDateOfReportingApproximate': 'LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
     'questionnaireAnswers': 'LNG_CASE_FIELD_LABEL_QUESTIONNAIRE_ANSWERS',
@@ -265,6 +267,7 @@ module.exports = function (Case) {
       'geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
       'date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
       'phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
+      'emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS'
     },
     documents: {
       'type': 'LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE',

@@ -4992,6 +4992,12 @@
       },
       "LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER_DESCRIPTION": {
         "translation": ""
+      },
+      "LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS": {
+        "translation": "Email address"
+      },
+      "LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS_DESCRIPTION": {
+        "translation": ""
       }
     },
     "uiFillLocationFields": {

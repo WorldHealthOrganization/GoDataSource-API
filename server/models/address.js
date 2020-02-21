@@ -16,7 +16,8 @@ module.exports = function (Address) {
     'geoLocation.lng': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG',
     'geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
     'date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
-    'phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER'
+    'phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
+    'emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS'
   };
 
   Address.referenceDataFields = [
@@ -34,7 +35,8 @@ module.exports = function (Address) {
     'geoLocation',
     'geoLocationAccurate',
     'date',
-    'phoneNumber'
+    'phoneNumber',
+    'emailAddress'
   ];
 
   // this is solely used for attaching parent locations custom fields in prints
