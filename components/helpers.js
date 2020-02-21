@@ -2140,7 +2140,7 @@ const attachParentLocations = function (targetModel, locationModel, records, cal
       // used for flat files to know the highest number of columns needed
       let highestParentsChain = 0;
 
-      // go through each of records location ides
+      // go through each of records location ids
       // and build a list of each location's parents to be added into the print
       for (let record of records) {
         const recordLocationsMap = recordsLocationsMap[record.id];
@@ -2157,6 +2157,10 @@ const attachParentLocations = function (targetModel, locationModel, records, cal
             }
           })(obj.value);
 
+          // add the actual location to the end of the parent locations chain\
+          if (parentLocations.length) {
+            parentLocations.push(locationsMap[obj.value].name);
+          }
           _.set(record, `${obj.exactPath}${parentLocationsSuffix}`, parentLocations);
 
           if (parentLocations.length > highestParentsChain) {
