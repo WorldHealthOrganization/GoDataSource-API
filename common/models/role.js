@@ -1735,6 +1735,14 @@ module.exports = function (Role) {
           requires: [
             'lab_result_import'
           ]
+        },
+        {
+          id: 'contact_export_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_export'
+          ]
         }
       ]
     },
@@ -2243,6 +2251,14 @@ module.exports = function (Role) {
           requires: [
             'lab_result_import'
           ]
+        },
+        {
+          id: 'case_export_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_export'
+          ]
         }
       ]
     },
@@ -2539,6 +2555,14 @@ module.exports = function (Role) {
           id: 'lab_result_import',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LAB_RESULT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'lab_result_export',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_LAB_RESULT_DESCRIPTION',
           requires: [
             'outbreak_view'
           ]
