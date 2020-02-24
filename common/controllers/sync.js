@@ -637,7 +637,9 @@ module.exports = function (Sync) {
       // check if the flag was sent and if is true
       if (fields.generatePersonVisualId != null && (
         fields.generatePersonVisualId === 'true' ||
-        fields.generatePersonVisualId === '1'
+        fields.generatePersonVisualId === '1' ||
+        fields.generatePersonVisualId === true ||
+        fields.generatePersonVisualId === 1
       )) {
         generatePersonVisualId = true;
       }

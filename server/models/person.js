@@ -393,7 +393,11 @@ module.exports = function (Person) {
 
           // resolve visual ID; send the mask as the visualId to not break logic
           return app.models.outbreak.helpers
-            .getAvailableVisualId(outbreak, maskProperty, outbreak[maskProperty]);
+            .getAvailableVisualId(
+              outbreak,
+              maskProperty,
+              app.models.person.sanitizeVisualId(outbreak[maskProperty])
+            );
         })
         .then(function (resolvedVisualId) {
           data.target.visualId = resolvedVisualId;
