@@ -64,6 +64,7 @@ function run(callback) {
               longPeriodsBetweenCaseOnset: item.longPeriodsBetweenCaseOnset,
               noDaysNewContacts: item.noDaysNewContacts,
               caseInvestigationTemplate: item.caseInvestigationTemplate,
+              contactInvestigationTemplate: item.contactInvestigationTemplate,
               contactFollowUpTemplate: item.contactFollowUpTemplate,
               labResultsTemplate: item.labResultsTemplate,
               isContactLabResultsActive: item.isContactLabResultsActive
@@ -114,6 +115,7 @@ function run(callback) {
 
             // questionnaire translations
             pushQuestionsTranslations(item.caseInvestigationTemplate);
+            pushQuestionsTranslations(item.contactInvestigationTemplate);
             pushQuestionsTranslations(item.contactFollowUpTemplate);
             pushQuestionsTranslations(item.labResultsTemplate);
           });

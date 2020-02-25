@@ -298,6 +298,7 @@ function run(callback) {
                       longPeriodsBetweenCaseOnset: data.longPeriodsBetweenCaseOnset,
                       noDaysNewContacts: data.noDaysNewContacts,
                       caseInvestigationTemplate: data.caseInvestigationTemplate,
+                      contactInvestigationTemplate: data.contactInvestigationTemplate,
                       contactFollowUpTemplate: data.contactFollowUpTemplate,
                       labResultsTemplate: data.labResultsTemplate,
                       deleted: false,
@@ -342,6 +343,7 @@ function run(callback) {
                       longPeriodsBetweenCaseOnset: newTemplateItem.longPeriodsBetweenCaseOnset,
                       noDaysNewContacts: newTemplateItem.noDaysNewContacts,
                       caseInvestigationTemplate: newTemplateItem.caseInvestigationTemplate,
+                      contactInvestigationTemplate: newTemplateItem.contactInvestigationTemplate,
                       contactFollowUpTemplate: newTemplateItem.contactFollowUpTemplate,
                       labResultsTemplate: newTemplateItem.labResultsTemplate
                     }, common.install.timestamps), options)

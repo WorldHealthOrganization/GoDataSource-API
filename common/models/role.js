@@ -938,7 +938,16 @@ module.exports = function (Role) {
             'outbreak_template_view',
             'outbreak_create'
           ]
-        }
+        },
+        {
+          id: 'outbreak_template_modify_contact_questionnaire',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_QUESTIONNAIRE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CCONTACT_QUESTIONNAIRE_DESCRIPTION',
+          requires: [
+            'outbreak_template_view',
+            'outbreak_template_modify'
+          ]
+        },
       ]
     },
 

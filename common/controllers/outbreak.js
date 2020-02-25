@@ -4782,6 +4782,12 @@ module.exports = function (Outbreak) {
                 contactData.addresses = addresses;
               }
 
+              // sanitize questionnaire answers
+              if (contactData.questionnaireAnswers) {
+                // convert properties that should be date to actual date objects
+                contactData.questionnaireAnswers = genericHelpers.convertQuestionnairePropsToDate(contactData.questionnaireAnswers);
+              }
+
               // sanitize visual ID
               if (contactData.visualId) {
                 contactData.visualId = app.models.person.sanitizeVisualId(contactData.visualId);
@@ -9447,10 +9453,43 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportFilteredContacts = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
-    // pre-filter using related data (case, followUps)
-    app.models.contact
-      .preFilterForOutbreak(this, filter)
-      .then(function (filter) {
+    const self = this;
+    // set a default filter
+    filter = filter || {};
+    filter.where = filter.where || {};
+    // parse useQuestionVariable query param
+    let useQuestionVariable = false;
+    // if found, remove it form main query
+    if (filter.where.hasOwnProperty('useQuestionVariable')) {
+      useQuestionVariable = filter.where.useQuestionVariable;
+      delete filter.where.useQuestionVariable;
+    }
+
+    new Promise((resolve, reject) => {
+      // load user language dictionary
+      const contextUser = app.utils.remote.getUserFromOptions(options);
+      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+        // handle errors
+        if (error) {
+          return reject(error);
+        }
+
+        // resolved
+        resolve(dictionary);
+      });
+    })
+      .then(dictionary => {
+        return app.models.contact.preFilterForOutbreak(this, filter)
+          .then((filter) => {
+            return {
+              dictionary: dictionary,
+              filter: filter
+            };
+          });
+      })
+      .then(data => {
+        const dictionary = data.dictionary;
+        const filter = data.filter;
 
         // if encrypt password is not valid, remove it
         if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
@@ -9461,6 +9500,10 @@ module.exports = function (Outbreak) {
         if (!Array.isArray(anonymizeFields)) {
           anonymizeFields = [];
         }
+
+        options.questionnaire = self.contactInvestigationTemplate;
+        options.dictionary = dictionary;
+        options.useQuestionVariable = useQuestionVariable;
 
         app.utils.remote.helpers.exportFilteredModelsList(
           app,

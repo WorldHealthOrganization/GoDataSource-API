@@ -109,6 +109,9 @@
     },
     "pregnancyStatus": {
       "type": "string"
+    },
+    "questionnaireAnswers": {
+      "type": "object"
     }
   },
   "excludeBaseProperties": [
