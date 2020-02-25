@@ -9501,7 +9501,7 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        options.questionnaire = self.caseInvestigationTemplate;
+        options.questionnaire = self.contactInvestigationTemplate;
         options.dictionary = dictionary;
         options.useQuestionVariable = useQuestionVariable;
 

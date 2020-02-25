@@ -3,7 +3,12 @@
 const app = require('./../server/server');
 const _ = require('lodash');
 const uuid = require('uuid');
-const subTemplates = ['caseInvestigationTemplate', 'contactFollowUpTemplate', 'labResultsTemplate'];
+const subTemplates = [
+  'caseInvestigationTemplate',
+  'contactInvestigationTemplate',
+  'contactFollowUpTemplate',
+  'labResultsTemplate'
+];
 
 /**
  * Parse template questions to replace text/labels with language tokens
