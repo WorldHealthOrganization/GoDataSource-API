@@ -801,6 +801,10 @@ module.exports = function (Contact) {
     // archive contact follow-up status
     archiveFollowUpStatusChanges(context);
 
+    // sort multi answer questions
+    const data = context.isNewInstance ? context.instance : context.data;
+    helpers.sortMultiAnswerQuestions(data);
+
     // retrieve outbreak data
     let model = _.get(context, 'options.remotingContext.instance');
     if (model) {
