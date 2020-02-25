@@ -131,7 +131,6 @@
     "isContactLabResultsActive": {
       "type": "boolean",
       "default": false
-      "default": true
     },
     "contactOfContactIdMask": {
       "type": "string",
