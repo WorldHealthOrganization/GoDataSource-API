@@ -3202,8 +3202,7 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_DESCRIPTION',
           requires: [
             'outbreak_view',
-            'user_list_for_filters',
-            'relationship_list'
+            'user_list_for_filters'
           ]
         },
         {
@@ -3225,7 +3224,7 @@ module.exports = function (Role) {
             'outbreak_view',
             'contact_of_contact_generate_visual_id',
 
-            // must create case / event relationship
+            // must create contact relationship
             'relationship_create'
           ]
         },
@@ -3291,6 +3290,42 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'relationship_list'
+          ]
+        },
+        {
+          id: 'contact_of_contact_view_relationship_exposures',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'relationship_view'
+          ]
+        },
+        {
+          id: 'contact_of_contact_create_relationship_exposures',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'relationship_create'
+          ]
+        },
+        {
+          id: 'contact_of_contact_modify_relationship_exposures',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'relationship_modify'
+          ]
+        },
+        {
+          id: 'contact_of_contact_delete_relationship_exposures',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'relationship_delete'
           ]
         }
       ]
