@@ -933,6 +933,7 @@ module.exports = function (Person) {
    * @param targetBody Target body properties (this is used for checking duplicates)
    */
   Person.findDuplicatesByType = function (filter, outbreakId, type, targetBody) {
+    filter = filter || {};
     const buildRuleFilterPart = function (opts) {
       let filter = {
         $and: []
@@ -1075,6 +1076,7 @@ module.exports = function (Person) {
     personId,
     filter
   ) {
+    filter = filter || {};
     // attach our conditions
     filter.where = {
       and: [
