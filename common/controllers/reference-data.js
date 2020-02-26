@@ -26,7 +26,7 @@ module.exports = function (ReferenceData) {
       app,
       app.models.referenceData,
       {},
-      filter.where,
+      filter,
       exportType,
       'Reference Data',
       null,
