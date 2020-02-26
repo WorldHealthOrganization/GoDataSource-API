@@ -1494,6 +1494,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "relationship_import",
+      "permission": "ALLOW",
+      "property": "importImportableRelationshipsFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_of_contact_list",
       "permission": "ALLOW",
       "property": "findContactsOfContacts"
@@ -6874,6 +6880,39 @@
       "http": {
         "verb": "get",
         "path": "/lab-results/export"
+      }
+    },
+    "prototype.importImportableRelationshipsFileUsingMap": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithFieldAndReferenceDataMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "relationships",
+          "type": [
+            "relationship"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a list of relationships from a file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/relationships/import-importable-file-using-map"
       }
     },
     "prototype.findContactsOfContacts": {
