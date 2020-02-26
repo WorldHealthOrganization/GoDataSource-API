@@ -347,6 +347,18 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_FOR_FILTERS',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_FOR_FILTERS_DESCRIPTION',
           requires: []
+        },
+        {
+          id: 'user_export',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_USER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_USER_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'user_import',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_USER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_USER_DESCRIPTION',
+          requires: []
         }
       ]
     },

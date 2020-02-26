@@ -45,7 +45,8 @@
     "AttachController": true,
     "IncludeCustomRelations": true,
     "DateProperty": true,
-    "RawFindAggregate": true
+    "RawFindAggregate": true,
+    "RawFind": true
   },
   "validations": [],
   "relations": {},
