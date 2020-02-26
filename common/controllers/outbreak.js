@@ -12402,7 +12402,7 @@ module.exports = function (Outbreak) {
                 .catch(err => {
                   // on error, store the error, but don't stop, continue with other items
                   createErrors.push({
-                    message: `Failed to import case ${index + 1}`,
+                    message: `Failed to import relationship ${index + 1}`,
                     error: err,
                     recordNo: index + 1,
                     data: {
