@@ -12414,7 +12414,7 @@ module.exports = function (Outbreak) {
                 });
             });
           });
-          // start importing cases
+
           async.series(createOps, (err, results) => {
             if (err) {
               return callback(err);
