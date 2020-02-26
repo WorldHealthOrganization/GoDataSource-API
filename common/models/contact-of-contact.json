@@ -1,5 +1,5 @@
 {
-  "name": "contact",
+  "name": "contactOfContact",
   "base": "person",
   "idInjection": true,
   "options": {
@@ -30,29 +30,6 @@
               }
             }
           }
-        },
-        {
-          "relation": "followUps",
-          "operations": {
-            "restore": {
-              "where": {
-                "deletedByParent": ":FK_UUID"
-              },
-              "set": {
-                "deletedByParent": null
-              }
-            },
-            "delete": {
-              "where": {
-                "deletedByParent": {
-                  "eq": null
-                }
-              },
-              "set": {
-                "deletedByParent": ":FK_UUID"
-              }
-            }
-          }
         }
       ]
     }
@@ -62,14 +39,14 @@
   ],
   "scope": {
     "where": {
-      "type": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT"
+      "type": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT"
     },
     "order": ["lastName ASC", "firstName ASC"]
   },
   "properties": {
     "type": {
       "type": "string",
-      "default": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT",
+      "default": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT",
       "required": true,
       "readOnly": true
     },
@@ -109,9 +86,6 @@
     },
     "pregnancyStatus": {
       "type": "string"
-    },
-    "questionnaireAnswers": {
-      "type": "object"
     }
   },
   "excludeBaseProperties": [
@@ -125,18 +99,7 @@
     "date"
   ],
   "validations": [],
-  "relations": {
-    "followUps": {
-      "type": "hasMany",
-      "model": "followUp",
-      "foreignKey": "personId"
-    },
-    "labResults": {
-      "type": "hasMany",
-      "model": "labResult",
-      "foreignKey": "personId"
-    }
-  },
+  "relations": {},
   "acls": [],
   "methods": {}
 }

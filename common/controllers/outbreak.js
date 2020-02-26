@@ -67,7 +67,8 @@ module.exports = function (Outbreak) {
     'prototype.__get__cases',
     'prototype.__get__contacts',
     'prototype.__get__events',
-    'prototype.__count__contacts'
+    'prototype.__count__contacts',
+    'prototype.__get__contactsOfContacts',
   ]);
 
   // attach search by relation property behavior on get contacts
@@ -160,6 +161,15 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.findContacts', function (context, modelInstance, next) {
     // filter information based on available permissions
     Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', context);
+    next();
+  });
+
+  /**
+   * Attach before remote (GET outbreaks/{id}/contacts-of-contacts) hooks
+   */
+  Outbreak.beforeRemote('prototype.findContactsOfContacts', function (context, modelInstance, next) {
+    // filter information based on available permissions
+    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT', context);
     next();
   });
 
@@ -1606,11 +1616,18 @@ module.exports = function (Outbreak) {
     // check if contact nodes should be removed from result
     // this should happen when include contacts flag is not set
     const shouldKeepContacts = opts.includeContacts;
+    const shouldKeepContactsOfContacts = opts.includeContactsOfContacts;
 
     // go through all the nodes
     Object.keys(dataSet.nodes).forEach(function (nodeId) {
       // do not keep contact nodes
       if (!shouldKeepContacts && dataSet.nodes[nodeId].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+        return;
+      }
+
+      // do not keep contact of contact nodes
+      if (!shouldKeepContactsOfContacts &&
+        dataSet.nodes[nodeId].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT') {
         return;
       }
 
@@ -1731,151 +1748,161 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.getIndependentTransmissionChains = function (filter, callback) {
     const self = this;
+
+    // if contacts of contacts is disabled on the outbreak, do not include them in CoT
+    const isContactsOfContactsActive = this.isContactsOfContactsActive;
+
     // process filters
-    this.preProcessTransmissionChainsFilter(filter)
-      .then(function (processedFilter) {
-        // use processed filters
-        filter = processedFilter.filter;
-        const personIds = processedFilter.personIds;
-        const endDate = processedFilter.endDate;
-        const activeFilter = processedFilter.active;
-        const includedPeopleFilter = processedFilter.includedPeopleFilter;
-        const sizeFilter = processedFilter.size;
-        const includeContacts = processedFilter.includeContacts;
+    this.preProcessTransmissionChainsFilter(filter).then(function (processedFilter) {
+      // use processed filters
+      filter = processedFilter.filter;
+      const personIds = processedFilter.personIds;
+      const endDate = processedFilter.endDate;
+      const activeFilter = processedFilter.active;
+      const includedPeopleFilter = processedFilter.includedPeopleFilter;
+      const sizeFilter = processedFilter.size;
+      const includeContacts = processedFilter.includeContacts;
 
-        // flag that indicates that contacts should be counted per chain
-        const countContacts = processedFilter.countContacts;
+      // flag that indicates that contacts should be counted per chain
+      const countContacts = processedFilter.countContacts;
 
-        // end date is supported only one first level of where in transmission chains
-        _.set(filter, 'where.endDate', endDate);
+      // end date is supported only one first level of where in transmission chains
+      _.set(filter, 'where.endDate', endDate);
 
-        // get transmission chains
-        app.models.relationship
-          .getTransmissionChains(self.id, self.periodOfFollowup, filter, countContacts, function (error, transmissionChains) {
-            if (error) {
-              return callback(error);
-            }
+      // get transmission chains
+      app.models.relationship
+        .getTransmissionChains(self.id, self.periodOfFollowup, filter, countContacts, function (error, transmissionChains) {
+          if (error) {
+            return callback(error);
+          }
 
-            // apply post filtering/processing
-            transmissionChains = self.postProcessTransmissionChains({
+          // apply post filtering/processing
+          transmissionChains = self.postProcessTransmissionChains(
+            {
               active: activeFilter,
               size: sizeFilter,
-              includedPeopleFilter: includedPeopleFilter
-            }, transmissionChains, {includeContacts: includeContacts});
+              includedPeopleFilter:
+              includedPeopleFilter
+            },
+            transmissionChains,
+            {
+              includeContacts: includeContacts,
+              includeContactsOfContacts: isContactsOfContactsActive
+            });
 
-            // determine if isolated nodes should be included
-            const shouldIncludeIsolatedNodes = (
-              // there is no size filter
-              (sizeFilter == null) &&
-              // no included people filter
-              !includedPeopleFilter);
+          // determine if isolated nodes should be included
+          const shouldIncludeIsolatedNodes = (
+            // there is no size filter
+            (sizeFilter == null) &&
+            // no included people filter
+            !includedPeopleFilter);
 
+          // initialize isolated nodes filter
+          let isolatedNodesFilter;
+
+          // build isolated nodes filter only if needed
+          if (shouldIncludeIsolatedNodes) {
             // initialize isolated nodes filter
-            let isolatedNodesFilter;
-
-            // build isolated nodes filter only if needed
-            if (shouldIncludeIsolatedNodes) {
-              // initialize isolated nodes filter
-              isolatedNodesFilter = {
-                where: {
-                  outbreakId: self.id,
-                  or: [
-                    {
-                      type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                      classification: {
-                        nin: app.models.case.discardedCaseClassifications
-                      }
-                    },
-                    {
-                      type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+            isolatedNodesFilter = {
+              where: {
+                outbreakId: self.id,
+                or: [
+                  {
+                    type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                    classification: {
+                      nin: app.models.case.discardedCaseClassifications
                     }
-                  ],
-                  dateOfReporting: {
-                    lte: endDate
+                  },
+                  {
+                    type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
                   }
+                ],
+                dateOfReporting: {
+                  lte: endDate
                 }
-              };
+              }
+            };
 
-              // if there was a people filter
-              if (personIds) {
-                // use it for isolated nodes as well
+            // if there was a people filter
+            if (personIds) {
+              // use it for isolated nodes as well
+              isolatedNodesFilter = app.utils.remote
+                .mergeFilters({
+                  where: {
+                    id: {
+                      inq: personIds
+                    }
+                  }
+                }, isolatedNodesFilter);
+            }
+          }
+
+          // depending on activeFilter we need to filter the transmissionChains
+          if (typeof activeFilter !== 'undefined') {
+
+            // update isolated nodes filter only if needed
+            if (shouldIncludeIsolatedNodes) {
+
+              // update isolated nodes filter depending on active filter value
+              let followUpPeriod = self.periodOfFollowup;
+              // get day of the start of the follow-up period starting from specified end date (by default, today)
+              let followUpStartDate = genericHelpers.getDate(endDate).subtract(followUpPeriod, 'days');
+
+              if (activeFilter) {
+                // get cases/events reported in the last followUpPeriod days
                 isolatedNodesFilter = app.utils.remote
                   .mergeFilters({
                     where: {
-                      id: {
-                        inq: personIds
+                      dateOfReporting: {
+                        gte: new Date(followUpStartDate)
+                      }
+                    }
+                  }, isolatedNodesFilter);
+              } else {
+                // get cases/events reported earlier than in the last followUpPeriod days
+                isolatedNodesFilter = app.utils.remote
+                  .mergeFilters({
+                    where: {
+                      dateOfReporting: {
+                        lt: new Date(followUpStartDate)
                       }
                     }
                   }, isolatedNodesFilter);
               }
             }
-
-            // depending on activeFilter we need to filter the transmissionChains
-            if (typeof activeFilter !== 'undefined') {
-
-              // update isolated nodes filter only if needed
-              if (shouldIncludeIsolatedNodes) {
-
-                // update isolated nodes filter depending on active filter value
-                let followUpPeriod = self.periodOfFollowup;
-                // get day of the start of the follow-up period starting from specified end date (by default, today)
-                let followUpStartDate = genericHelpers.getDate(endDate).subtract(followUpPeriod, 'days');
-
-                if (activeFilter) {
-                  // get cases/events reported in the last followUpPeriod days
-                  isolatedNodesFilter = app.utils.remote
-                    .mergeFilters({
-                      where: {
-                        dateOfReporting: {
-                          gte: new Date(followUpStartDate)
-                        }
-                      }
-                    }, isolatedNodesFilter);
-                } else {
-                  // get cases/events reported earlier than in the last followUpPeriod days
-                  isolatedNodesFilter = app.utils.remote
-                    .mergeFilters({
-                      where: {
-                        dateOfReporting: {
-                          lt: new Date(followUpStartDate)
-                        }
-                      }
-                    }, isolatedNodesFilter);
-                }
-              }
-            } else {
-              // if isolated nodes don't need to be included, stop here
-              if (!shouldIncludeIsolatedNodes) {
-                callback(null, transmissionChains);
-              }
+          } else {
+            // if isolated nodes don't need to be included, stop here
+            if (!shouldIncludeIsolatedNodes) {
+              callback(null, transmissionChains);
             }
+          }
 
-            // look for isolated nodes, if needed
-            if (shouldIncludeIsolatedNodes) {
-              // update isolated nodes filter
-              isolatedNodesFilter = app.utils.remote
-                .mergeFilters({
-                  where: {
-                    id: {
-                      nin: Object.keys(transmissionChains.nodes)
-                    }
+          // look for isolated nodes, if needed
+          if (shouldIncludeIsolatedNodes) {
+            // update isolated nodes filter
+            isolatedNodesFilter = app.utils.remote
+              .mergeFilters({
+                where: {
+                  id: {
+                    nin: Object.keys(transmissionChains.nodes)
                   }
-                }, isolatedNodesFilter);
+                }
+              }, isolatedNodesFilter);
 
-              // get isolated nodes as well (nodes that were never part of a relationship)
-              app.models.person
-                .rawFind(app.utils.remote.convertLoopbackFilterToMongo(isolatedNodesFilter.where))
-                .then(function (isolatedNodes) {
-                  // add all the isolated nodes to the complete list of nodes
-                  isolatedNodes.forEach(function (isolatedNode) {
-                    transmissionChains.nodes[isolatedNode.id] = isolatedNode;
-                  });
-                  callback(null, transmissionChains);
-                })
-                .catch(callback);
-            }
-          });
-      });
+            // get isolated nodes as well (nodes that were never part of a relationship)
+            app.models.person
+              .rawFind(app.utils.remote.convertLoopbackFilterToMongo(isolatedNodesFilter.where))
+              .then(function (isolatedNodes) {
+                // add all the isolated nodes to the complete list of nodes
+                isolatedNodes.forEach(function (isolatedNode) {
+                  transmissionChains.nodes[isolatedNode.id] = isolatedNode;
+                });
+                callback(null, transmissionChains);
+              })
+              .catch(callback);
+          }
+        });
+    });
   };
 
   /**
@@ -4780,6 +4807,12 @@ module.exports = function (Outbreak) {
               const addresses = app.models.person.sanitizeAddresses(contactData);
               if (addresses) {
                 contactData.addresses = addresses;
+              }
+
+              // sanitize questionnaire answers
+              if (contactData.questionnaireAnswers) {
+                // convert properties that should be date to actual date objects
+                contactData.questionnaireAnswers = genericHelpers.convertQuestionnairePropsToDate(contactData.questionnaireAnswers);
               }
 
               // sanitize visual ID
@@ -9306,6 +9339,9 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.exportDailyContactFollowUpList', function (context, modelInstance, next) {
     findAndFilteredCountContactsBackCompat(context, modelInstance, next);
   });
+  Outbreak.beforeRemote('prototype.exportFilteredContactsOfContacts', function (context, modelInstance, next) {
+    findAndFilteredCountContactsBackCompat(context, modelInstance, next);
+  });
 
   Outbreak.beforeRemote('prototype.exportFilteredRelationships', function (context, modelInstance, next) {
     // remove custom filter options
@@ -9447,10 +9483,43 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportFilteredContacts = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
-    // pre-filter using related data (case, followUps)
-    app.models.contact
-      .preFilterForOutbreak(this, filter)
-      .then(function (filter) {
+    const self = this;
+    // set a default filter
+    filter = filter || {};
+    filter.where = filter.where || {};
+    // parse useQuestionVariable query param
+    let useQuestionVariable = false;
+    // if found, remove it form main query
+    if (filter.where.hasOwnProperty('useQuestionVariable')) {
+      useQuestionVariable = filter.where.useQuestionVariable;
+      delete filter.where.useQuestionVariable;
+    }
+
+    new Promise((resolve, reject) => {
+      // load user language dictionary
+      const contextUser = app.utils.remote.getUserFromOptions(options);
+      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+        // handle errors
+        if (error) {
+          return reject(error);
+        }
+
+        // resolved
+        resolve(dictionary);
+      });
+    })
+      .then(dictionary => {
+        return app.models.contact.preFilterForOutbreak(this, filter)
+          .then((filter) => {
+            return {
+              dictionary: dictionary,
+              filter: filter
+            };
+          });
+      })
+      .then(data => {
+        const dictionary = data.dictionary;
+        const filter = data.filter;
 
         // if encrypt password is not valid, remove it
         if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
@@ -9461,6 +9530,10 @@ module.exports = function (Outbreak) {
         if (!Array.isArray(anonymizeFields)) {
           anonymizeFields = [];
         }
+
+        options.questionnaire = self.contactInvestigationTemplate;
+        options.dictionary = dictionary;
+        options.useQuestionVariable = useQuestionVariable;
 
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
@@ -11691,6 +11764,595 @@ module.exports = function (Outbreak) {
 
         // undo delete
         instance.undoDelete(options, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find outbreak contacts of contacts
+   * @param filter Supports 'where.contact'
+   * @param callback
+   */
+  Outbreak.prototype.findContactsOfContacts = function (filter, callback) {
+    const outbreakId = this.outbreakId;
+    const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
+
+    app.models.contactOfContact
+      .preFilterForOutbreak(this, filter)
+      .then(app.models.contactOfContact.find)
+      .then(records => {
+        if (countRelations) {
+          // create a map of ids and their corresponding record
+          // to easily manipulate the records below
+          const recordsMap = {};
+          for (let record of records) {
+            recordsMap[record.id] = record;
+          }
+          // determine number of contacts/exposures for each record
+          app.models.person.getPeopleContactsAndExposures(outbreakId, Object.keys(recordsMap))
+            .then(relationsCountMap => {
+              for (let recordId in relationsCountMap) {
+                const mapRecord = recordsMap[recordId];
+                mapRecord.numberOfContacts = relationsCountMap[recordId].numberOfContacts;
+                mapRecord.numberOfExposures = relationsCountMap[recordId].numberOfExposures;
+              }
+              return callback(null, records);
+            });
+        } else {
+          return callback(null, records);
+        }
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find relations for a contact of contact
+   * @param contactOfContactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findContactOfContactRelationships = function (contactOfContactId, filter, callback) {
+    helpers.findPersonRelationships(contactOfContactId, filter, callback);
+  };
+
+  /**
+   * Create relation for a contact of contact
+   * @param contactOfContactId
+   * @param data
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.createContactOfContactRelationship = function (contactOfContactId, data, options, callback) {
+    app.models.contactOfContact
+      .findById(contactOfContactId)
+      .then((record) => {
+        if (!record) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.contactOfContact.modelName,
+            id: contactOfContactId
+          }));
+        }
+        helpers.createPersonRelationship(
+          this.id,
+          contactOfContactId,
+          'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT',
+          data,
+          options,
+          callback
+        );
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Retrieve a relation for a contact of contact
+   * @param contactOfContactId
+   * @param relationshipId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.getContactOfContactRelationship = function (contactOfContactId, relationshipId, filter, callback) {
+    helpers.getPersonRelationship(
+      contactOfContactId,
+      relationshipId,
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT',
+      filter,
+      callback
+    );
+  };
+
+  /**
+   * Update a relation for a contact of contact
+   * @param contactOfContactId
+   * @param relationshipId
+   * @param data
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.updateContactOfContactRelationship = function (contactOfContactId, relationshipId, data, options, callback) {
+    helpers.updatePersonRelationship(
+      contactOfContactId,
+      relationshipId,
+      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT',
+      data,
+      options,
+      callback
+    );
+  };
+
+  /**
+   * Delete a relation for a contact of contact
+   * @param contactOfContactId
+   * @param relationshipId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.deleteContactOfContactRelationship = function (contactOfContactId, relationshipId, options, callback) {
+    helpers.deletePersonRelationship(
+      contactOfContactId,
+      relationshipId,
+      options,
+      callback
+    );
+  };
+
+  /**
+   * Count relations for a contact of contact
+   * @param contactOfContactId
+   * @param where
+   * @param callback
+   */
+  Outbreak.prototype.countContactOfContactRelationships = function (contactOfContactId, where, callback) {
+    app.models.contactOfContact
+      .findById(contactOfContactId)
+      .then((contact) => {
+        if (!contact) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.contactOfContact.modelName,
+            id: contactOfContactId
+          }));
+        }
+        helpers.countPersonRelationships(contactOfContactId, where, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Retrieve available people for a contact of contact
+   * @param contactOfContactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.getContactOfContactRelationshipsAvailablePeople = function (contactOfContactId, filter, callback) {
+    // we only make relations with contacts
+    filter = filter || {};
+    filter.where = filter.where || {};
+    filter.where = {
+      and: [
+        {
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+        },
+        filter.where
+      ]
+    };
+
+    app.models.person
+      .getAvailablePeople(
+        this.id,
+        contactOfContactId,
+        filter
+      )
+      .then((records) => {
+        callback(null, records);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count available people for a contact of contact
+   * @param contactOfContactId
+   * @param where
+   * @param callback
+   */
+  Outbreak.prototype.countContactOfContactRelationshipsAvailablePeople = function (contactOfContactId, where, callback) {
+    // we only make relations with contacts
+    where = {
+      and: [
+        {
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+        },
+        where || {}
+      ]
+    };
+
+    app.models.person
+      .getAvailablePeopleCount(
+        this.id,
+        contactOfContactId,
+        where
+      )
+      .then((counted) => {
+        callback(null, counted);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find relationship exposures for a contact of contact
+   * @param contactOfContactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findContactOfContactRelationshipExposures = function (contactOfContactId, filter, callback) {
+    app.models.relationship
+      .findPersonRelationshipExposures(this.id, contactOfContactId, filter)
+      .then(function (exposures) {
+        callback(null, exposures);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count relationship exposures for a contact of contact
+   * @param contactOfContactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countContactOfContactRelationshipExposures = function (contactOfContactId, filter, callback) {
+    app.models.relationship
+      .countPersonRelationshipExposures(this.id, contactOfContactId, filter)
+      .then(function (exposures) {
+        callback(null, exposures);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Export filtered contacts of contacts to file
+   * @param filter
+   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param encryptPassword
+   * @param anonymizeFields
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportFilteredContactsOfContacts = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    app.models.contactOfContact
+      .preFilterForOutbreak(this, filter)
+      .then(filter => {
+        // if encrypt password is not valid, remove it
+        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+          encryptPassword = null;
+        }
+
+        // make sure anonymizeFields is valid
+        if (!Array.isArray(anonymizeFields)) {
+          anonymizeFields = [];
+        }
+
+        app.utils.remote.helpers.exportFilteredModelsList(
+          app,
+          app.models.contactOfContact,
+          {},
+          filter.where,
+          exportType,
+          'Contacts Of Contacts List',
+          encryptPassword,
+          anonymizeFields,
+          options,
+          results => Promise.resolve(results),
+          callback
+        );
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Import an importable contacts of contacts file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.importImportableContactsOfContactsFileUsingMap = function (body, options, callback) {
+    const self = this;
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
+    // get importable file
+    app.models.importableFile
+      .getTemporaryFileById(body.fileId, function (error, file) {
+        // handle errors
+        if (error) {
+          return callback(error);
+        }
+        try {
+          // parse file content
+          const rawRecordsList = JSON.parse(file);
+          // remap properties & values
+          const recordsList = app.utils.helpers.remapProperties(rawRecordsList, body.map, body.valuesMap);
+          // build a list of create operations
+          const createOps = [];
+          // define a container for error results
+          const createErrors = [];
+          // define a toString function to be used by error handler
+          createErrors.toString = function () {
+            return JSON.stringify(this);
+          };
+          // go through all entries
+          recordsList.forEach(function (recordItem, index) {
+            createOps.push(function (callback) {
+              // extract relationship data
+              const relationshipData = app.utils.helpers.convertBooleanProperties(
+                app.models.relationship,
+                app.utils.helpers.extractImportableFields(app.models.relationship, recordItem.relationship));
+
+              // extract record's data
+              const recordData = app.utils.helpers.convertBooleanProperties(
+                app.models.contactOfContact,
+                app.utils.helpers.extractImportableFields(app.models.contactOfContact, recordItem));
+
+              // set outbreak ids
+              recordData.outbreakId = self.id;
+              relationshipData.outbreakId = self.id;
+
+              // filter out empty addresses
+              const addresses = app.models.person.sanitizeAddresses(recordData);
+              if (addresses) {
+                recordData.addresses = addresses;
+              }
+
+              // sanitize visual ID
+              if (recordData.visualId) {
+                recordData.visualId = app.models.person.sanitizeVisualId(recordData.visualId);
+              }
+
+              // sync the record
+              return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.contactOfContact, recordData, options)
+                .then(function (syncResult) {
+                  const syncedRecord = syncResult.record;
+                  // promisify next step
+                  return new Promise(function (resolve, reject) {
+                    // normalize people
+                    Outbreak.helpers.validateAndNormalizePeople(
+                      self.id,
+                      syncedRecord.id,
+                      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT',
+                      relationshipData,
+                      true,
+                      function (error) {
+                        if (error) {
+                          // delete record since it was created without an error while relationship failed
+                          return app.models.contactOfContact.destroyById(
+                            syncedRecord.id,
+                            () => {
+                              // return error
+                              return reject(error);
+                            }
+                          );
+                        }
+
+                        // sync relationship
+                        return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.relationship, relationshipData, options)
+                          .then(function (syncedRelationship) {
+                            // relationship successfully created, move to tne next one
+                            callback(null, Object.assign({}, syncedRecord.toJSON(), {relationships: [syncedRelationship.record.toJSON()]}));
+                          })
+                          .catch(function (error) {
+                            // failed to create relationship, remove the record if it was created during sync
+                            if (syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED) {
+                              syncedRecord.destroy(options);
+                            }
+                            reject(error);
+                          });
+                      });
+                  });
+                })
+                .catch(function (error) {
+                  // on error, store the error, but don't stop, continue with other items
+                  createErrors.push({
+                    message: `Failed to import contact of contact ${index + 1}`,
+                    error: error,
+                    recordNo: index + 1,
+                    data: {
+                      file: rawRecordsList[index],
+                      save: {
+                        record: recordData,
+                        relationship: relationshipData
+                      }
+                    }
+                  });
+                  callback(null, null);
+                });
+            });
+          });
+          // start importing
+          async.series(createOps, function (error, results) {
+            // handle errors (should not be any)
+            if (error) {
+              return callback(error);
+            }
+            // if import errors were found
+            if (createErrors.length) {
+              // remove results that failed to be added
+              results = results.filter(result => result !== null);
+              // define a toString function to be used by error handler
+              results.toString = function () {
+                return JSON.stringify(this);
+              };
+              // return error with partial success
+              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+                model: app.models.contactOfContact.modelName,
+                failed: createErrors,
+                success: results
+              }));
+            }
+            // send the result
+            callback(null, results);
+          });
+        } catch (error) {
+          // log error
+          options.remotingContext.req.logger.error(error);
+          // handle parse error
+          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
+            contentType: 'JSON',
+            details: error.message
+          }));
+        }
+      });
+  };
+
+  /**
+   * Generate (next available) contact of contact visual id
+   * @param visualIdMask
+   * @param personId
+   * @param callback
+   */
+  Outbreak.prototype.generateContactOfContactVisualId = function (visualIdMask, personId, callback) {
+    Outbreak.helpers.validateOrGetAvailableContactOfContactVisualId(this, visualIdMask, personId)
+      .then(function (visualId) {
+        callback(null, visualId);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Get all duplicates based on hardcoded rules against a model props
+   * @param filter pagination props (skip, limit)
+   * @param model
+   * @param callback
+   */
+  Outbreak.prototype.getContactOfContactPossibleDuplicates = function (filter = {}, model = {}, callback) {
+    app.models.person
+      .findDuplicatesByType(filter, this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT', model)
+      .then(duplicates => callback(null, duplicates))
+      .catch(callback);
+  };
+
+  /**
+   * Count outbreak contacts of contacts
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountContactsOfContacts = function (filter, callback) {
+    // pre-filter using related data
+    app.models.contactOfContact
+      .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // replace nested geo points filters
+        filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.contactOfContact,
+          filter.where || {},
+          true,
+          undefined,
+          true,
+          true
+        );
+
+        // count using query
+        return app.models.contactOfContact.count(filter.where);
+      })
+      .then(function (records) {
+        callback(null, records);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Restore a deleted contact of contact
+   * @param contactOfContactId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.restoreContactOfContact = function (contactOfContactId, options, callback) {
+    app.models.contactOfContact
+      .findOne({
+        deleted: true,
+        where: {
+          id: contactOfContactId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contactOfContact.modelName, id: contactOfContactId});
+        }
+
+        // undo delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Export filtered lab results to file
+   * @param filter
+   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param encryptPassword
+   * @param anonymizeFields
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportFilteredLabResults = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    const self = this;
+
+    // defensive checks
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // parse useQuestionVariable query param
+    let useQuestionVariable = false;
+    // if found, remove it form main query
+    if (filter.where.hasOwnProperty('useQuestionVariable')) {
+      useQuestionVariable = filter.where.useQuestionVariable;
+      delete filter.where.useQuestionVariable;
+    }
+
+    new Promise((resolve, reject) => {
+      const contextUser = app.utils.remote.getUserFromOptions(options);
+      app.models.language.getLanguageDictionary(contextUser.languageId, (err, dictionary) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(dictionary);
+      });
+    })
+      .then(dictionary => {
+        return app.models.labResult.preFilterForOutbreak(this, filter)
+          .then((filter) => {
+            return {
+              dictionary: dictionary,
+              filter: filter
+            };
+          });
+      })
+      .then(data => {
+        const dictionary = data.dictionary;
+        const filter = data.filter;
+
+        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+          encryptPassword = null;
+        }
+
+        if (!Array.isArray(anonymizeFields)) {
+          anonymizeFields = [];
+        }
+
+        options.questionnaire = self.labResultsTemplate;
+        options.dictionary = dictionary;
+        options.useQuestionVariable = useQuestionVariable;
+
+        app.utils.remote.helpers.exportFilteredModelsList(
+          app,
+          app.models.labResult,
+          {},
+          filter.where,
+          exportType,
+          'LabResult-List',
+          encryptPassword,
+          anonymizeFields,
+          options,
+          data => Promise.resolve(data),
+          callback
+        );
       })
       .catch(callback);
   };

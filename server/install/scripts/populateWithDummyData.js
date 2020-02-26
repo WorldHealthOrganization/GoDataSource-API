@@ -107,6 +107,7 @@ function run(callback) {
     noLessContacts: 1,
     noDaysNewContacts: 3,
     caseInvestigationTemplate: [],
+    contactInvestigationTemplate: [],
     contactFollowUpTemplate: [],
     labResultsTemplate: [],
     caseIdMask: '*',

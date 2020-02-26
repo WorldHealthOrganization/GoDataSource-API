@@ -224,7 +224,17 @@ module.exports = function (SystemSettings) {
    * @param callback
    */
   SystemSettings.getVersion = function (callback) {
-    callback(null, Object.assign({}, app.utils.helpers.getBuildInformation(), { tokenTTL: app.models.user.settings.ttl }));
+    callback(
+      null,
+      Object.assign(
+        {},
+        app.utils.helpers.getBuildInformation(), {
+          tokenTTL: config.authToken && config.authToken.ttl ?
+            config.authToken.ttl :
+            app.models.user.settings.ttl
+        }
+      )
+    );
   };
 
   /**

@@ -84,6 +84,13 @@
       },
       "description": "The template for the case investigation questionnaire"
     },
+    "contactInvestigationTemplate": {
+      "type": "array",
+      "items": {
+        "$ref": "template-question"
+      },
+      "description": "The template for the contact investigation questionnaire"
+    },
     "contactFollowUpTemplate": {
       "type": "array",
       "items": {

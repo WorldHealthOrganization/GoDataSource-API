@@ -393,7 +393,11 @@ module.exports = function (Person) {
 
           // resolve visual ID; send the mask as the visualId to not break logic
           return app.models.outbreak.helpers
-            .getAvailableVisualId(outbreak, maskProperty, outbreak[maskProperty]);
+            .getAvailableVisualId(
+              outbreak,
+              maskProperty,
+              app.models.person.sanitizeVisualId(outbreak[maskProperty])
+            );
         })
         .then(function (resolvedVisualId) {
           data.target.visualId = resolvedVisualId;
@@ -929,6 +933,7 @@ module.exports = function (Person) {
    * @param targetBody Target body properties (this is used for checking duplicates)
    */
   Person.findDuplicatesByType = function (filter, outbreakId, type, targetBody) {
+    filter = filter || {};
     const buildRuleFilterPart = function (opts) {
       let filter = {
         $and: []
@@ -1071,6 +1076,7 @@ module.exports = function (Person) {
     personId,
     filter
   ) {
+    filter = filter || {};
     // attach our conditions
     filter.where = {
       and: [

@@ -96,7 +96,7 @@ const worker = {
 
     // attach client filter if necessary
     if (!_.isEmpty(whereFilter)) {
-      filter.$and.push(whereFilter);
+      filter.$and.push(convertLoopbackFilterToMongo(whereFilter));
     }
 
     // get range of days

@@ -347,5 +347,9 @@
   "telephoneNumbers": {
     "dataSource": null,
     "public": false
+  },
+  "contactOfContact": {
+    "dataSource": "mongoDb",
+    "public": false
   }
 }

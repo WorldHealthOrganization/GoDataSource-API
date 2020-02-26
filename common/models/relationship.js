@@ -184,7 +184,11 @@ module.exports = function (Relationship) {
                 },
                 {
                   type: {
-                    inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+                    inq: [
+                      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT',
+                      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                    ]
                   }
                 }
               ]

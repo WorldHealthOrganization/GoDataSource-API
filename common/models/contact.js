@@ -109,7 +109,8 @@ module.exports = function (Contact) {
     'vaccinesReceived[].vaccine': 'LNG_CONTACT_FIELD_LABEL_VACCINE',
     'vaccinesReceived[].date': 'LNG_CONTACT_FIELD_LABEL_VACCINE_DATE',
     'vaccinesReceived[].status': 'LNG_CONTACT_FIELD_LABEL_VACCINE_STATUS',
-    'pregnancyStatus': 'LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS'
+    'pregnancyStatus': 'LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS',
+    'questionnaireAnswers': 'LNG_CONTACT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS',
   });
 
   Contact.exportFieldsOrder = [
@@ -800,7 +801,41 @@ module.exports = function (Contact) {
     // archive contact follow-up status
     archiveFollowUpStatusChanges(context);
 
+    // sort multi answer questions
+    const data = context.isNewInstance ? context.instance : context.data;
+    helpers.sortMultiAnswerQuestions(data);
+
+    // retrieve outbreak data
+    let model = _.get(context, 'options.remotingContext.instance');
+    if (model) {
+      if (!(model instanceof app.models.outbreak)) {
+        model = undefined;
+      }
+    }
+
+    // convert date fields to date before saving them in database
+    helpers
+      .convertQuestionStringDatesToDates(
+        data,
+        model ?
+          model.contactInvestigationTemplate :
+          null
+      )
+      .then(() => {
+        // finished
+        next();
+      })
+      .catch(next);
+
     // finished
     next();
   });
+
+  Contact.extendedForm = {
+    template: 'contactInvestigationTemplate',
+    containerProperty: 'questionnaireAnswers',
+    isBasicArray: (variable) => {
+      return variable.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS';
+    }
+  };
 };
