@@ -236,7 +236,7 @@ function beforeHook(context, next) {
   // depending on action (create/update) we need to check/update different context properties; parse the context to prevent additional checks
   let contextParts = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
 
-  const templateId = context.options.remotingContext.req.query.templateId;
+  const templateId = _.get(context, 'options.remotingContext.req.query.templateId');
   if (templateId) {
     contextParts.tokenToTemplateTokenMap = {};
     app.models.template.findById(templateId)
@@ -246,45 +246,47 @@ function beforeHook(context, next) {
         }
 
         subTemplates.forEach(subTemplate => {
-          contextParts.target[subTemplate] = JSON.parse(JSON.stringify(template[subTemplate]));
+          if (template[subTemplate]) {
+            contextParts.target[subTemplate] = JSON.parse(JSON.stringify(template[subTemplate]));
 
-          const templateIdentifier = `${identifier}_${subTemplate.toUpperCase()}`;
+            const templateIdentifier = `${identifier}_${subTemplate.toUpperCase()}`;
 
-          (function parse(questions, identifier) {
-            identifier = identifier || '';
+            (function parse(questions, identifier) {
+              identifier = identifier || '';
 
-            questions.forEach((question, qIndex) => {
-              const questionIdentifier = `${identifier}_QUESTION_${_.snakeCase(question.variable).toUpperCase()}`;
+              questions.forEach((question, qIndex) => {
+                const questionIdentifier = `${identifier}_QUESTION_${_.snakeCase(question.variable).toUpperCase()}`;
 
-              contextParts.tokenToTemplateTokenMap[`${questionIdentifier}_TEXT`] = questions[qIndex].text;
+                contextParts.tokenToTemplateTokenMap[`${questionIdentifier}_TEXT`] = questions[qIndex].text;
 
-              // set question text
-              questions[qIndex].text = `${questionIdentifier}_TEXT`;
+                // set question text
+                questions[qIndex].text = `${questionIdentifier}_TEXT`;
 
-              // check for question answers as the label for each answer needs to be translated
-              if (question.answers && Array.isArray(question.answers) && question.answers.length) {
+                // check for question answers as the label for each answer needs to be translated
+                if (question.answers && Array.isArray(question.answers) && question.answers.length) {
 
-                let answers = questions[qIndex].answers;
-                answers.forEach(function (answer, aIndex) {
+                  let answers = questions[qIndex].answers;
+                  answers.forEach(function (answer, aIndex) {
 
-                  // set answer identifier
-                  let answerIdentifier = `${questionIdentifier}_ANSWER_${_.snakeCase(answer.value).toUpperCase()}`;
+                    // set answer identifier
+                    let answerIdentifier = `${questionIdentifier}_ANSWER_${_.snakeCase(answer.value).toUpperCase()}`;
 
-                  context.tokenToTemplateTokenMap[`${answerIdentifier}_LABEL`] = answers[aIndex].label;
+                    context.tokenToTemplateTokenMap[`${answerIdentifier}_LABEL`] = answers[aIndex].label;
 
-                  // set answer label
-                  answers[aIndex].label = `${answerIdentifier}_LABEL`;
+                    // set answer label
+                    answers[aIndex].label = `${answerIdentifier}_LABEL`;
 
-                  // check for additional questions
-                  if (answer.additionalQuestions && Array.isArray(answer.additionalQuestions) && answer.additionalQuestions.length) {
-                    parse(answers[aIndex].additionalQuestions, answerIdentifier);
-                  }
-                });
-              }
-            });
-          })(contextParts.target[subTemplate], templateIdentifier);
+                    // check for additional questions
+                    if (answer.additionalQuestions && Array.isArray(answer.additionalQuestions) && answer.additionalQuestions.length) {
+                      parse(answers[aIndex].additionalQuestions, answerIdentifier);
+                    }
+                  });
+                }
+              });
+            })(contextParts.target[subTemplate], templateIdentifier);
 
-          app.utils.helpers.setOriginalValueInContextOptions(context, 'tokenToTemplateTokenMap', contextParts.tokenToTemplateTokenMap);
+            app.utils.helpers.setOriginalValueInContextOptions(context, 'tokenToTemplateTokenMap', contextParts.tokenToTemplateTokenMap);
+          }
         });
 
         return next();
