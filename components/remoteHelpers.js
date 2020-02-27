@@ -105,7 +105,8 @@ function exportFilteredModelsList(
   let modelPropertiesExpandOnFlatFilesKeys = [];
 
   // find results
-  Model.rawFind(query)
+  query = query || {};
+  Model.rawFind(query.where, { includeDeletedRecords: query.deleted })
     .then(function (results) {
 
       // convert geo-points (if any)
