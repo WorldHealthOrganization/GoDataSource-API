@@ -12034,7 +12034,7 @@ module.exports = function (Outbreak) {
           app,
           app.models.contactOfContact,
           {},
-          filter.where,
+          filter,
           exportType,
           'Contacts Of Contacts List',
           encryptPassword,
