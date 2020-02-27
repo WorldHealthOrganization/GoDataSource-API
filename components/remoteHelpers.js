@@ -105,6 +105,7 @@ function exportFilteredModelsList(
   let modelPropertiesExpandOnFlatFilesKeys = [];
 
   // find results
+  query = query || {};
   Model.rawFind(query.where, { includeDeletedRecords: query.deleted })
     .then(function (results) {
 
