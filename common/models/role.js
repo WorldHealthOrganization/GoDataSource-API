@@ -2352,6 +2352,14 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'relationship_import',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_RELATIONSHIP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_RELATIONSHIP_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
           id: 'relationship_share',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_RELATIONSHIP',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_RELATIONSHIP_DESCRIPTION',

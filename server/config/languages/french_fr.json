@@ -636,6 +636,8 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_REVERSE_RELATIONSHIP_DESCRIPTION": "This permission allows switching relationship persons",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_RELATIONSHIP": "Relationship - export",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_RELATIONSHIP_DESCRIPTION": "This permission allows exporting relationship information",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_RELATIONSHIP": "Relationship - import",
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_RELATIONSHIP_DESCRIPTION": "This permission allows importing relationship information",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_RELATIONSHIP": "Relationship - share",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_RELATIONSHIP_DESCRIPTION": "This permission allows sharing relationship information",
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_RELATIONSHIP": "Relationship - bulk delete",
