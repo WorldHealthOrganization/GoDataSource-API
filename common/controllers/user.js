@@ -393,12 +393,12 @@ module.exports = function (User) {
           usersList.forEach((user, index) => {
             asyncOps.push(cb => {
               user.roleIds = user.roleIds.map(roleName => {
-                return resourceMaps.roles[roleName];
+                return resourceMaps.roles[roleName] || roleName;
               });
               user.outbreakIds = user.outbreakIds.map(outbreakName => {
-                return resourceMaps.outbreaks[outbreakName];
+                return resourceMaps.outbreaks[outbreakName] || outbreakName;
               });
-              user.activeOutbreakId = resourceMaps.outbreaks[user.activeOutbreakId];
+              user.activeOutbreakId = resourceMaps.outbreaks[user.activeOutbreakId] || user.activeOutbreakId;
 
               return app.utils.dbSync.syncRecord(
                 options.remotingContext.req.logger,
