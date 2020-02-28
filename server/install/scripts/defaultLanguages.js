@@ -49,14 +49,16 @@ languageList.forEach(function (language) {
           Object.keys(language.sections[section]).forEach(function (token) {
             languageTokens.push({
               token: token,
-              translation: language.sections[section][token],
+              translation: language.sections[section][token].translation,
+              outbreakId: language.sections[section][token].outbreakId,
+              modules: language.sections[section][token].modules,
               createdAt: common.install.timestamps.createdAt,
               updatedAt: common.install.timestamps.updatedAt,
             });
           });
         });
         // move to the next language after all tokens for current language have been created
-        return createdLanguage.updateLanguageTranslations(languageTokens, options)
+        return createdLanguage.updateLanguageTranslations(languageTokens, options, false)
           .then(function (languageTokens) {
             callback(null, languageTokens);
           });

@@ -45,7 +45,7 @@ function run(callback) {
         defaultLanguageData[languageID] = languageData;
         mapTokenToSection[languageID] = {};
         _.each(defaultLanguageData[languageID].sections, (sectionData, sectionName) => {
-          _.each(sectionData, (translation, token) => {
+          _.each(sectionData, (tokenData, token) => {
             mapTokenToSection[languageID][token] = sectionName;
           });
         });
@@ -72,6 +72,7 @@ function run(callback) {
         })
         .then((languageTokens) => {
           // go through each token and determine if we need to update anything
+          const referenceDataModules = ['referenceData'];
           languageTokens.forEach((tokenData) => {
             // determine section from token
             const languageSection = mapTokenToSection[tokenData.languageId][tokenData.token] ||
@@ -79,13 +80,31 @@ function run(callback) {
 
             // update translation
             if (
-              languageSection &&
-              defaultLanguageData[tokenData.languageId].sections[languageSection][tokenData.token] !== tokenData.translation && (
+              languageSection && (
+                !defaultLanguageData[tokenData.languageId].sections[languageSection][tokenData.token] ||
+                defaultLanguageData[tokenData.languageId].sections[languageSection][tokenData.token].translation !== tokenData.translation ||
+                !_.isEqual(defaultLanguageData[tokenData.languageId].sections[languageSection][tokenData.token].modules, referenceDataModules)
+              ) && (
                 !module.methodRelevantArgs.checkDefaultOutbreakTemplateData ||
                 !mapRefItemToOutbreakTemplate[tokenData.token]
               )
             ) {
-              defaultLanguageData[tokenData.languageId].sections[languageSection][tokenData.token] = tokenData.translation;
+              // translation
+              _.set(
+                defaultLanguageData,
+                `[${tokenData.languageId}].sections[${languageSection}][${tokenData.token}].translation`,
+                tokenData.translation
+              );
+
+              // outbreakId
+              // NOT NEEDED
+
+              // modules
+              _.set(
+                defaultLanguageData,
+                `[${tokenData.languageId}].sections[${languageSection}][${tokenData.token}].modules`,
+                referenceDataModules
+              );
             }
           });
 

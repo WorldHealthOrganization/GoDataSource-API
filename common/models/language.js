@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const async = require('async');
+const _ = require('lodash');
 
 module.exports = function (Language) {
 
@@ -9,9 +10,14 @@ module.exports = function (Language) {
    * Update translations for a language
    * @param languageTokens [{token: 'string', translation: 'string'}]
    * @param options
+   * @param tryToDetermineModulesAndOutbreak
    * @return {Promise<any>} list of created/updated records
    */
-  Language.prototype.updateLanguageTranslations = function (languageTokens, options) {
+  Language.prototype.updateLanguageTranslations = function (
+    languageTokens,
+    options,
+    tryToDetermineModulesAndOutbreak
+  ) {
     // make context available
     const self = this;
     // keep a list of language tokens to be created/updated
@@ -33,22 +39,102 @@ module.exports = function (Language) {
               }
             })
             .then(function (foundToken) {
-              if (foundToken) {
-                // if found, update translation
-                return foundToken.updateAttributes({
-                  translation: languageToken.translation
-                }, options);
-              } else {
+              // create update token
+              const createUpdateToken = (outbreakId, modules) => {
+                // create / update token
+                if (foundToken) {
+                  // if found, update translation
+                  return foundToken.updateAttributes({
+                    translation: languageToken.translation,
+                    outbreakId: outbreakId,
+                    modules: modules
+                  }, options);
+                }
+
                 // if not found, create it
                 return app.models.languageToken
                   .create({
                     token: languageToken.token,
                     languageId: self.id,
                     translation: languageToken.translation,
+                    outbreakId: outbreakId,
+                    modules: modules,
                     createdAt: languageToken.createdAt,
                     updatedAt: languageToken.updatedAt
                   }, options);
+              };
+
+              // determine outbreak
+              let outbreakId = languageToken.outbreakId;
+              if (
+                !outbreakId &&
+                foundToken
+              ) {
+                outbreakId = foundToken.outbreakId;
               }
+
+              // determine modules
+              let modules = languageToken.modules;
+              if (
+                _.isEmpty(modules) &&
+                foundToken
+              ) {
+                modules = foundToken.modules;
+              }
+
+              // for import / create new language.. we should overwrite these values with the ones we find in the system ( not always english..since other might become the default language )
+              // find first token that has modules ...and optional outbreakId and overwrite these values
+              if (
+                !tryToDetermineModulesAndOutbreak ||
+                !_.isEmpty(modules)
+              ) {
+                return createUpdateToken(
+                  outbreakId,
+                  modules
+                );
+              }
+
+              // determine if there is a different language that has modules and maybe outbreakId for this token
+              return app.models.languageToken
+                .find({
+                  where: {
+                    token: languageToken.token,
+                    modules: {
+                      exists: true
+                    }
+                  }
+                })
+                .then(function (tokens) {
+                  // go through tokens and try to determine modules and outbreak id
+                  let outbreakId;
+                  let modules;
+                  if (!_.isEmpty(tokens)) {
+                    let tokenData;
+                    for (tokenData of tokens) {
+                      // determine outbreak
+                      outbreakId = outbreakId || tokenData.outbreakId;
+
+                      // determine modules
+                      if (!_.isEmpty(tokenData.modules)) {
+                        modules = modules || tokenData.modules;
+                      }
+
+                      // if we have both..we can stop
+                      if (
+                        outbreakId &&
+                        !_.isEmpty(tokenData.modules)
+                      ) {
+                        break;
+                      }
+                    }
+                  }
+
+                  // create / update token
+                  return createUpdateToken(
+                    outbreakId,
+                    modules
+                  );
+                });
             })
             .then(function (token) {
               callback(null, token);
@@ -64,6 +150,7 @@ module.exports = function (Language) {
             });
         });
       });
+
       // start creating/updating tokens
       async.parallelLimit(createLanguageTokens, 10, function (error, results) {
         // check if there was an error and handle it

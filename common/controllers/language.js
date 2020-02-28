@@ -77,7 +77,7 @@ module.exports = function (Language) {
               // save raw data
               languageTokens.push({
                 token: token,
-                translation: translation,
+                translation: translation
               });
             }
           }
@@ -93,7 +93,7 @@ module.exports = function (Language) {
           }));
         }
         // start updating translations
-        self.updateLanguageTranslations(languageTokens, options)
+        self.updateLanguageTranslations(languageTokens, options, true)
           .then(function (languageTokens) {
             callback(null, languageTokens);
           })
@@ -171,6 +171,40 @@ module.exports = function (Language) {
   };
 
   /**
+   * If not authenticated then we can't retrieve all language tokens
+   */
+  Language.beforeRemote('prototype.getLanguageTokens', function (context, modelInstance, next) {
+    // attach authenticated query ?
+    if (!_.get(context, 'req.authData.user.id')) {
+
+      // construct the unauthenticated query
+      const condition = {
+        modules: {
+          $in: ['unauthenticated']
+        }
+      };
+
+      // retrieve query
+      const whereFilter = _.get(context, 'args.filter.where');
+
+      // merge with existing filter query
+      _.set(
+        context,
+        'args.filter.where',
+        whereFilter ? {
+          $and: [
+            whereFilter,
+            condition
+          ]
+        } : condition
+      );
+    }
+
+    // finished
+    next();
+  });
+
+  /**
    * Retrieve language tokens
    * @param callback
    */
@@ -221,7 +255,6 @@ module.exports = function (Language) {
           ]
         };
       }
-
     }
 
     // construct where condition
