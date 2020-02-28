@@ -187,21 +187,6 @@ module.exports = function (HelpCategory) {
   });
 
   HelpCategory.prototype.updateHelpItem = function (itemId, data, options, callback) {
-    app.models.helpItem
-      .findOne({
-        where: {
-          categoryId: this.id,
-          id: itemId
-        }
-      })
-      .then((helpItem) => {
-        if (!helpItem) {
-          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.helpItem.modelName, id: itemId});
-        }
-
-        return helpItem.updateAttributes(data, options);
-      })
-      .then((helpItem) => callback(null, helpItem))
-      .catch(callback);
+    app.models.helpItem.updateHelpItem(itemId, data, options, callback);
   };
 };
