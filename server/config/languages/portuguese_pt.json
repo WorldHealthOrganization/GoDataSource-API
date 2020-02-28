@@ -2430,7 +2430,10 @@
         "translation": "Tipo de resposta da pergunta"
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME": {
-        "translation": "Data hora"
+        "translation": "Data hora",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME_DESCRIPTION": {
         "translation": ""
@@ -2439,37 +2442,55 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD": {
-        "translation": "Upload de arquivo"
+        "translation": "Upload de arquivo",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT": {
-        "translation": "Texto livre"
+        "translation": "Texto livre",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS": {
-        "translation": "Múltiplas respostas"
+        "translation": "Múltiplas respostas",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_NUMERIC": {
-        "translation": "Numérico"
+        "translation": "Numérico",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_NUMERIC_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER": {
-        "translation": "Resposta única"
+        "translation": "Resposta única",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP": {
-        "translation": "Markup"
+        "translation": "Markup",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP_DESCRIPTION": {
         "translation": ""
@@ -2480,7 +2501,10 @@
         "translation": "Categoria de pergunta"
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL": {
-        "translation": "Clínico"
+        "translation": "Clínico",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL_DESCRIPTION": {
         "translation": ""
@@ -2489,7 +2513,10 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_A_0_DATA_COLLECTOR_INFORMATION": {
-        "translation": "A0: Data Collector Information"
+        "translation": "A0: Data Collector Information",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryCaseClassification": {
@@ -2497,7 +2524,10 @@
         "translation": "Classificação do caso"
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_CONFIRMED": {
-        "translation": "Confirmado"
+        "translation": "Confirmado",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_CONFIRMED_DESCRIPTION": {
         "translation": ""
@@ -2506,19 +2536,28 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_NOT_A_CASE_DISCARDED": {
-        "translation": "Não é um caso (descartado)"
+        "translation": "Não é um caso (descartado)",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_NOT_A_CASE_DISCARDED_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_PROBABLE": {
-        "translation": "Probable"
+        "translation": "Probable",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_PROBABLE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT": {
-        "translation": "Suspeito"
+        "translation": "Suspeito",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT_DESCRIPTION": {
         "translation": ""
@@ -2529,13 +2568,19 @@
         "translation": "Tipo de pessoa"
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE": {
-        "translation": "Caso"
+        "translation": "Caso",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT": {
-        "translation": "Contato"
+        "translation": "Contato",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_DESCRIPTION": {
         "translation": ""
@@ -2544,7 +2589,10 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT": {
-        "translation": "Evento"
+        "translation": "Evento",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT_DESCRIPTION": {
         "translation": ""
@@ -2555,37 +2603,58 @@
         "translation": "Hospitalization / Isolation types"
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_HOSPITALIZATION": {
-        "translation": "Hospitalization"
+        "translation": "Hospitalization",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_HOSPITALIZATION_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_ISOLATION": {
-        "translation": "Isolation"
+        "translation": "Isolation",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_ISOLATION_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_OTHER": {
-        "translation": "Other"
+        "translation": "Other",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_OTHER_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_HOSPITALIZATION_FOR_OTHER_MEDICAL_CONDITIONS": {
-        "translation": "Hospitalization for other medical conditions"
+        "translation": "Hospitalization for other medical conditions",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_HOSPITALIZATION_FOR_OTHER_MEDICAL_CONDITIONS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_A_E_VISIT": {
-        "translation": "A&E Visit"
+        "translation": "A&E Visit",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_ICU_ADMISSION": {
-        "translation": "ICU Admission"
+        "translation": "ICU Admission",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_PRIMARY_HEALTH_CARE_PHC_GP_ETC_VISIT": {
-        "translation": "Primary Health Care PHC (GP, etc)  Visit"
+        "translation": "Primary Health Care PHC (GP, etc)  Visit",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryAddressType": {
@@ -2596,19 +2665,28 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_OTHER": {
-        "translation": "Outros"
+        "translation": "Outros",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_OTHER_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_PREVIOUS_USUAL_PLACE_OF_RESIDENCE": {
-        "translation": "Endereço anterior"
+        "translation": "Endereço anterior",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_PREVIOUS_USUAL_PLACE_OF_RESIDENCE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE": {
-        "translation": "Endereço Atual"
+        "translation": "Endereço Atual",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE_DESCRIPTION": {
         "translation": ""
@@ -2622,13 +2700,19 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_GENDER_FEMALE": {
-        "translation": "Fêmea"
+        "translation": "Fêmea",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_GENDER_FEMALE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_GENDER_MALE": {
-        "translation": "Masculino"
+        "translation": "Masculino",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_GENDER_MALE_DESCRIPTION": {
         "translation": ""
@@ -2639,19 +2723,28 @@
         "translation": "Ocupação"
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_BUTCHER": {
-        "translation": "Açougueiro"
+        "translation": "Açougueiro",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_BUTCHER_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_CHILD": {
-        "translation": "Criança"
+        "translation": "Criança",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_CHILD_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_CIVIL_SERVANT": {
-        "translation": "Funcionário público"
+        "translation": "Funcionário público",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_CIVIL_SERVANT_DESCRIPTION": {
         "translation": ""
@@ -2660,70 +2753,106 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_FARMER": {
-        "translation": "Agricultor"
+        "translation": "Agricultor",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_FARMER_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_HEALTH_CARE_WORKER": {
-        "translation": "Trabalhador de saúde"
+        "translation": "Trabalhador de saúde",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_HEALTH_CARE_WORKER_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_HUNTER": {
-        "translation": "Caçador"
+        "translation": "Caçador",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_HUNTER_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_OTHER": {
-        "translation": "Outros"
+        "translation": "Outros",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_OTHER_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_RELIGIOUS_LEADER": {
-        "translation": "Líder religioso"
+        "translation": "Líder religioso",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_RELIGIOUS_LEADER_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_STUDENT": {
-        "translation": "Aluna"
+        "translation": "Aluna",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_STUDENT_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_TAXI_DRIVER": {
-        "translation": "Taxista"
+        "translation": "Taxista",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_TAXI_DRIVER_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_TEACHER": {
-        "translation": "Professor"
+        "translation": "Professor",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_TEACHER_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_TRADITIONAL_HEALER": {
-        "translation": "Curandeiro tradicional"
+        "translation": "Curandeiro tradicional",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_TRADITIONAL_HEALER_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_UNKNOWN": {
-        "translation": "Desconhecido"
+        "translation": "Desconhecido",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_UNKNOWN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_HEALTH_LABORATORY_WORKER": {
-        "translation": "Health laboratory worker"
+        "translation": "Health laboratory worker",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_WORKING_WITH_ANIMALS": {
-        "translation": "Working with animals"
+        "translation": "Working with animals",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryLabName": {
@@ -2739,7 +2868,10 @@
         "translation": "Tipo de amostra"
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_BLOOD": {
-        "translation": "Sangue"
+        "translation": "Sangue",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_BLOOD_DESCRIPTION": {
         "translation": ""
@@ -2748,49 +2880,85 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_SKIN_BIOPSY": {
-        "translation": "Biópsia de pele"
+        "translation": "Biópsia de pele",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_SKIN_BIOPSY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_SPUTUM": {
-        "translation": "Escarro *****"
+        "translation": "Escarro *****",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_SPUTUM_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_THROAT_SWAB": {
-        "translation": "Cotonete de garganta ****"
+        "translation": "Cotonete de garganta ****",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_THROAT_SWAB_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_CSF": {
-        "translation": "CSF"
+        "translation": "CSF",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_ENDOTRACHEAL_ASPIRATE": {
-        "translation": "Endotracheal aspirate"
+        "translation": "Endotracheal aspirate",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_FAECES": {
-        "translation": "Faeces"
+        "translation": "Faeces",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_NASAL_SWAB": {
-        "translation": "Nasal Swab"
+        "translation": "Nasal Swab",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_NASOPHARYNGEAL_SWAB": {
-        "translation": "Nasopharyngeal swab"
+        "translation": "Nasopharyngeal swab",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_OTHER_SPECIFY_IN_NOTES_FIELD": {
-        "translation": "Other (specify in Notes field)"
+        "translation": "Other (specify in Notes field)",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_PLEURAL_FLUID": {
-        "translation": "Pleural fluid"
+        "translation": "Pleural fluid",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_SERUM": {
-        "translation": "Serum"
+        "translation": "Serum",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_URINE": {
-        "translation": "Urine"
+        "translation": "Urine",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryTypeOfLabTest": {
@@ -2801,28 +2969,46 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_IG_C_OR_IG_M": {
-        "translation": "IgG ou IgM"
+        "translation": "IgG ou IgM",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_IG_C_OR_IG_M_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_RT_PCR": {
-        "translation": "RT-PCR"
+        "translation": "RT-PCR",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_RT_PCR_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_OTHER_SPECIFY_IN_NOTES_FIELD": {
-        "translation": "Other (specify in Notes field)"
+        "translation": "Other (specify in Notes field)",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_PARTIAL_GENOME_SEQUENCING": {
-        "translation": "Partial genome sequencing"
+        "translation": "Partial genome sequencing",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_PCR": {
-        "translation": "PCR"
+        "translation": "PCR",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_WHOLE_GENOME_SEQUENCING": {
-        "translation": "Whole genome sequencing"
+        "translation": "Whole genome sequencing",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryLabTestResult": {
@@ -2833,25 +3019,37 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_INCONCLUSIVE": {
-        "translation": "Inconclusivo"
+        "translation": "Inconclusivo",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_INCONCLUSIVE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_NEGATIVE": {
-        "translation": "Negativo"
+        "translation": "Negativo",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_NEGATIVE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_POSITIVE": {
-        "translation": "Positivo"
+        "translation": "Positivo",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_POSITIVE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_POSITIVE_FOR_OTHER_PATHOGENS_SPECIFY_IN_NOTES_FIELD": {
-        "translation": "Positive for other pathogens (specify in Notes field)"
+        "translation": "Positive for other pathogens (specify in Notes field)",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryLabTestResultStatus": {
@@ -2859,7 +3057,10 @@
         "translation": "Status do resultado do teste de laboratório"
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_COMPLETED": {
-        "translation": "Concluído"
+        "translation": "Concluído",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_COMPLETED_DESCRIPTION": {
         "translation": ""
@@ -2868,7 +3069,10 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_IN_PROGRESS": {
-        "translation": "Em progresso"
+        "translation": "Em progresso",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_IN_PROGRESS_DESCRIPTION": {
         "translation": ""
@@ -2882,37 +3086,55 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_ARCHIVED_ID": {
-        "translation": "Archived ID"
+        "translation": "Archived ID",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_ARCHIVED_ID_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_EXTERNAL_ID": {
-        "translation": "Identificador do caso externo"
+        "translation": "Identificador do caso externo",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_EXTERNAL_ID_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_NATIONAL_ID_CARD": {
-        "translation": "Carteira de identidade nacional"
+        "translation": "Carteira de identidade nacional",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_NATIONAL_ID_CARD_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_OTHER": {
-        "translation": "Outros"
+        "translation": "Outros",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_OTHER_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_PASSPORT": {
-        "translation": "Passaporte"
+        "translation": "Passaporte",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_PASSPORT_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_VACCINATION_CARD": {
-        "translation": "Cartão de vacinação"
+        "translation": "Cartão de vacinação",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_VACCINATION_CARD_DESCRIPTION": {
         "translation": ""
@@ -2926,31 +3148,46 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_EBOLA_VIRUS_DISEASE": {
-        "translation": "Doença do vírus Ebola"
+        "translation": "Doença do vírus Ebola",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_EBOLA_VIRUS_DISEASE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MARBURG_VIRUS_DISEASE": {
-        "translation": "Doença do vírus Marburg"
+        "translation": "Doença do vírus Marburg",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MARBURG_VIRUS_DISEASE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MIDDLE_EASI_RESPIRATORY_SYNDROME_CORONAVIRUS_MERS_CO_V": {
-        "translation": "Coronavirus da síndrome respiratória do Oriente Médio (MERS-CoV)*****"
+        "translation": "Coronavirus da síndrome respiratória do Oriente Médio (MERS-CoV)*****",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MIDDLE_EASI_RESPIRATORY_SYNDROME_CORONAVIRUS_MERS_CO_V_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_PLAGUE_PNEUMONIC": {
-        "translation": "Praga, pneumonia"
+        "translation": "Praga, pneumonia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_PLAGUE_PNEUMONIC_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_ACUTE_RESPIRATORY_DISEASE": {
-        "translation": "Acute Respiratory Disease"
+        "translation": "Acute Respiratory Disease",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryExposureType": {
@@ -2961,34 +3198,55 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_DIRECT_PHYSICAL_CONTACT": {
-        "translation": "Contato físico direto"
+        "translation": "Contato físico direto",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_DIRECT_PHYSICAL_CONTACT_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SLEPT_ATE_OR_SPEND_TIME_IN_SAME_HOUSEHOLD": {
-        "translation": "Dormi, comi ou passei algum tempo na mesma casa"
+        "translation": "Dormi, comi ou passei algum tempo na mesma casa",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SLEPT_ATE_OR_SPEND_TIME_IN_SAME_HOUSEHOLD_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_TOUCHED_BODY_FLUIDS": {
-        "translation": "Toques de fluidos corporais"
+        "translation": "Toques de fluidos corporais",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_TOUCHED_BODY_FLUIDS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_ATE_DRANK_CONTAMINATED_MATERIAL": {
-        "translation": "Ate/drank contaminated material "
+        "translation": "Ate/drank contaminated material ",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_INTRAVENOUS_EXPOSURE": {
-        "translation": "Intravenous exposure "
+        "translation": "Intravenous exposure ",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_OTHER_PLEASE_SPECIFY_IN_COMMENT_FIELD": {
-        "translation": "Other (please specify in comment field) "
+        "translation": "Other (please specify in comment field) ",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SEXUAL_EXPOSURE": {
-        "translation": "Sexual exposure"
+        "translation": "Sexual exposure",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryExposureIntensity": {
@@ -2996,19 +3254,28 @@
         "translation": "Intensidade de exposição"
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_1_LOW": {
-        "translation": "1 - baixo"
+        "translation": "1 - baixo",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_1_LOW_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_2_MEDIUM": {
-        "translation": "2 - Médio"
+        "translation": "2 - Médio",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_2_MEDIUM_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_3_HIGH": {
-        "translation": "3 - alta"
+        "translation": "3 - alta",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_3_HIGH_DESCRIPTION": {
         "translation": ""
@@ -3022,19 +3289,28 @@
         "translation": "Frequência de exposição"
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_11_20_TIMES": {
-        "translation": "11 a 20 vezes"
+        "translation": "11 a 20 vezes",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_11_20_TIMES_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_1_5_TIMES": {
-        "translation": "1-5 vezes"
+        "translation": "1-5 vezes",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_1_5_TIMES_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_6_10_TIMES": {
-        "translation": "6-10 vezes"
+        "translation": "6-10 vezes",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_6_10_TIMES_DESCRIPTION": {
         "translation": ""
@@ -3043,13 +3319,19 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_OVER_21_TIMES": {
-        "translation": "Mais de 21 vezes"
+        "translation": "Mais de 21 vezes",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_OVER_21_TIMES_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_UNKNOWN": {
-        "translation": "Desconhecido"
+        "translation": "Desconhecido",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_UNKNOWN_DESCRIPTION": {
         "translation": ""
@@ -3063,25 +3345,37 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_LONG_DAYS": {
-        "translation": "Dias longos)"
+        "translation": "Dias longos)",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_LONG_DAYS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_MEDIUM_HOURS": {
-        "translation": "Médio (horas)"
+        "translation": "Médio (horas)",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_MEDIUM_HOURS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_SHORT_MINUTES": {
-        "translation": "Curta (minutos)"
+        "translation": "Curta (minutos)",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_SHORT_MINUTES_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_VERY_SHORT_SECONDS": {
-        "translation": "Muito curto (segundos)"
+        "translation": "Muito curto (segundos)",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_VERY_SHORT_SECONDS_DESCRIPTION": {
         "translation": ""
@@ -3092,19 +3386,28 @@
         "translation": "Nível de certeza"
       },
       "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_1_LOW": {
-        "translation": "1 - Baixo"
+        "translation": "1 - Baixo",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_1_LOW_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_2_MEDIUM": {
-        "translation": "2 - Médio"
+        "translation": "2 - Médio",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_2_MEDIUM_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_3_HIGH": {
-        "translation": "3 - Alta"
+        "translation": "3 - Alta",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_3_HIGH_DESCRIPTION": {
         "translation": ""
@@ -3118,19 +3421,28 @@
         "translation": "Nível de risco"
       },
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_1_LOW": {
-        "translation": "1 - baixo"
+        "translation": "1 - baixo",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_1_LOW_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_2_MEDIUM": {
-        "translation": "2 - Médio"
+        "translation": "2 - Médio",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_2_MEDIUM_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_3_HIGH": {
-        "translation": "3 - alta"
+        "translation": "3 - alta",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_3_HIGH_DESCRIPTION": {
         "translation": ""
@@ -3150,7 +3462,10 @@
         "translation": "Contexto da transmissão"
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_CO_WORKERS": {
-        "translation": "Colegas de trabalho"
+        "translation": "Colegas de trabalho",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_CO_WORKERS_DESCRIPTION": {
         "translation": ""
@@ -3159,31 +3474,46 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_FAMILY": {
-        "translation": "Família"
+        "translation": "Família",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_FAMILY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_FRIENDS": {
-        "translation": "Amigos"
+        "translation": "Amigos",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_FRIENDS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_NOSOCOMIAL_TRANSMISSION": {
-        "translation": "Transmissão nosocomial"
+        "translation": "Transmissão nosocomial",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_NOSOCOMIAL_TRANSMISSION_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_TRAVEL_TO_OUTBREAK_AREA": {
-        "translation": "Viajar para área de surto"
+        "translation": "Viajar para área de surto",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_TRAVEL_TO_OUTBREAK_AREA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_UNKNOWN": {
-        "translation": "Desconhecido"
+        "translation": "Desconhecido",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_UNKNOWN_DESCRIPTION": {
         "translation": ""
@@ -3194,13 +3524,19 @@
         "translation": "Resultado"
       },
       "LNG_REFERENCE_DATA_CATEGORY_OUTCOME_ALIVE": {
-        "translation": "Vivo"
+        "translation": "Vivo",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OUTCOME_ALIVE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED": {
-        "translation": "Falecido"
+        "translation": "Falecido",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED_DESCRIPTION": {
         "translation": ""
@@ -3209,7 +3545,10 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_OUTCOME_RECOVERED": {
-        "translation": "Recuperado"
+        "translation": "Recuperado",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OUTCOME_RECOVERED_DESCRIPTION": {
         "translation": ""
@@ -6642,313 +6981,469 @@
         "translation": "País"
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AFGHANISTAN": {
-        "translation": "Afeganistão"
+        "translation": "Afeganistão",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AFGHANISTAN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ALBANIA": {
-        "translation": "Albânia"
+        "translation": "Albânia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ALBANIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ALGERIA": {
-        "translation": "Argélia"
+        "translation": "Argélia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ALGERIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANDORRA": {
-        "translation": "Andorra"
+        "translation": "Andorra",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANDORRA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANGOLA": {
-        "translation": "Angola"
+        "translation": "Angola",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANGOLA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANGUILLA": {
-        "translation": "Anguila"
+        "translation": "Anguila",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANGUILLA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANTIGUA_AND_BARBUDA": {
-        "translation": "Antígua e Barbuda"
+        "translation": "Antígua e Barbuda",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANTIGUA_AND_BARBUDA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ARGENTINA": {
-        "translation": "Argentina"
+        "translation": "Argentina",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ARGENTINA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ARMENIA": {
-        "translation": "Armênia"
+        "translation": "Armênia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ARMENIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ARUBA": {
-        "translation": "Aruba"
+        "translation": "Aruba",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ARUBA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AUSTRALIA": {
-        "translation": "Austrália"
+        "translation": "Austrália",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AUSTRALIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AUSTRIA": {
-        "translation": "Áustria"
+        "translation": "Áustria",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AUSTRIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AZERBAIJAN": {
-        "translation": "Azerbaijão"
+        "translation": "Azerbaijão",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AZERBAIJAN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BAHAMAS_THE": {
-        "translation": "Bahamas (o)"
+        "translation": "Bahamas (o)",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BAHAMAS_THE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BAHRAIN": {
-        "translation": "Barém"
+        "translation": "Barém",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BAHRAIN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BANGLADESH": {
-        "translation": "Bangladesh"
+        "translation": "Bangladesh",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BANGLADESH_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BARBADOS": {
-        "translation": "Barbados"
+        "translation": "Barbados",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BARBADOS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BELARUS": {
-        "translation": "Belarus"
+        "translation": "Belarus",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BELARUS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BELGIUM": {
-        "translation": "Bélgica"
+        "translation": "Bélgica",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BELGIUM_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BELIZE": {
-        "translation": "Belize"
+        "translation": "Belize",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BELIZE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BENIN": {
-        "translation": "Benin"
+        "translation": "Benin",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BENIN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BERMUDA": {
-        "translation": "Bermudas"
+        "translation": "Bermudas",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BERMUDA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BHUTAN": {
-        "translation": "Butão"
+        "translation": "Butão",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BHUTAN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BOLIVIA_PLURINATIONAL_STATE_OF": {
-        "translation": "Bolívia (Estado Plurinacional de)"
+        "translation": "Bolívia (Estado Plurinacional de)",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BOLIVIA_PLURINATIONAL_STATE_OF_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BOSNIA_AND_HERZEGOVINA": {
-        "translation": "Bósnia e Herzegovina"
+        "translation": "Bósnia e Herzegovina",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BOSNIA_AND_HERZEGOVINA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BOTSWANA": {
-        "translation": "Botsuana"
+        "translation": "Botsuana",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BOTSWANA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BRAZIL": {
-        "translation": "Brasil"
+        "translation": "Brasil",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BRAZIL_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BRUNEI_DARUSSALAM": {
-        "translation": "Brunei Darussalam"
+        "translation": "Brunei Darussalam",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BRUNEI_DARUSSALAM_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BULGARIA": {
-        "translation": "Bulgária"
+        "translation": "Bulgária",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BULGARIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BURKINA_FASO": {
-        "translation": "Burkina Faso"
+        "translation": "Burkina Faso",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BURKINA_FASO_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BURUNDI": {
-        "translation": "Burundi"
+        "translation": "Burundi",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BURUNDI_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CABO_VERDE": {
-        "translation": "Cabo Verde"
+        "translation": "Cabo Verde",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CABO_VERDE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CAMBODIA": {
-        "translation": "Camboja"
+        "translation": "Camboja",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CAMBODIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CAMEROON": {
-        "translation": "Camarões"
+        "translation": "Camarões",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CAMEROON_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CANADA": {
-        "translation": "Canadá"
+        "translation": "Canadá",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CANADA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CENTRAL_AFRICAN_REPUBLIC": {
-        "translation": "República Centro-Africana"
+        "translation": "República Centro-Africana",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CENTRAL_AFRICAN_REPUBLIC_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CHAD": {
-        "translation": "Chade"
+        "translation": "Chade",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CHAD_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CHILE": {
-        "translation": "Chile"
+        "translation": "Chile",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CHILE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CHINA": {
-        "translation": "China"
+        "translation": "China",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CHINA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COLOMBIA": {
-        "translation": "Colômbia"
+        "translation": "Colômbia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COLOMBIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COMOROS_THE": {
-        "translation": "Comores (o)"
+        "translation": "Comores (o)",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COMOROS_THE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CONGO": {
-        "translation": "Congo"
+        "translation": "Congo",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CONGO_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COOK_ISLANDS": {
-        "translation": "Ilhas Cook"
+        "translation": "Ilhas Cook",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COOK_ISLANDS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COSTA_RICA": {
-        "translation": "Costa Rica"
+        "translation": "Costa Rica",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COSTA_RICA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COTE_D_IVOIRE": {
-        "translation": "Costa do Marfim"
+        "translation": "Costa do Marfim",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COTE_D_IVOIRE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CROATIA": {
-        "translation": "Croácia"
+        "translation": "Croácia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CROATIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CUBA": {
-        "translation": "Cuba"
+        "translation": "Cuba",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CUBA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CYPRUS": {
-        "translation": "Chipre"
+        "translation": "Chipre",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CYPRUS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CZECH_REPUBLIC": {
-        "translation": "República Checa"
+        "translation": "República Checa",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CZECH_REPUBLIC_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DEMOCRATIC_PEOPLES_REPUBLIC_OF_KOREA": {
-        "translation": "República Popular Democrática da Coreia"
+        "translation": "República Popular Democrática da Coreia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DEMOCRATIC_PEOPLES_REPUBLIC_OF_KOREA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DEMOCRATIC_REPUBLIC_OF_THE_CONGO": {
-        "translation": "República Democrática do Congo"
+        "translation": "República Democrática do Congo",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DEMOCRATIC_REPUBLIC_OF_THE_CONGO_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DENMARK": {
-        "translation": "Dinamarca"
+        "translation": "Dinamarca",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DENMARK_DESCRIPTION": {
         "translation": ""
@@ -6957,16 +7452,25 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DJIBOUTI": {
-        "translation": "Djibuti"
+        "translation": "Djibuti",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DJIBOUTI_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DOMINICA": {
-        "translation": "Dominica"
+        "translation": "Dominica",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DOMINICAN_REPUBLIC_THE": {
-        "translation": "A República Dominicana "
+        "translation": "A República Dominicana ",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DOMINICAN_REPUBLIC_THE_DESCRIPTION": {
         "translation": ""
@@ -6975,118 +7479,178 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ECUADOR": {
-        "translation": "Equador"
+        "translation": "Equador",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ECUADOR_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_EGYPT": {
-        "translation": "Egito"
+        "translation": "Egito",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_EGYPT_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_EL_SALVADOR": {
-        "translation": "El Salvador"
+        "translation": "El Salvador",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_EL_SALVADOR_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_EQUATORIAL_GUINEA": {
-        "translation": "Guiné Equatorial"
+        "translation": "Guiné Equatorial",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_EQUATORIAL_GUINEA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ERITREA": {
-        "translation": "Eritréia"
+        "translation": "Eritréia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ERITREA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ESTONIA": {
-        "translation": "Estônia"
+        "translation": "Estônia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ESTONIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ESWATINI": {
-        "translation": "Eswatini"
+        "translation": "Eswatini",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ESWATINI_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ETHIOPIA": {
-        "translation": "Etiópia"
+        "translation": "Etiópia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ETHIOPIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_FIJI": {
-        "translation": "Fiji"
+        "translation": "Fiji",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_FIJI_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_FINLAND": {
-        "translation": "Finlândia"
+        "translation": "Finlândia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_FINLAND_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_FRANCE": {
-        "translation": "França"
+        "translation": "França",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_FRANCE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GABON": {
-        "translation": "Gabão"
+        "translation": "Gabão",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GABON_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GEORGIA": {
-        "translation": "Georgia"
+        "translation": "Georgia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GEORGIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GERMANY": {
-        "translation": "Alemanha"
+        "translation": "Alemanha",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GERMANY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GHANA": {
-        "translation": "Gana"
+        "translation": "Gana",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GHANA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GREECE": {
-        "translation": "Grécia"
+        "translation": "Grécia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GREECE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GRENADA": {
-        "translation": "Granada"
+        "translation": "Granada",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GRENADA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GUATEMALA": {
-        "translation": "Guatemala"
+        "translation": "Guatemala",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GUATEMALA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GUINEA": {
-        "translation": "Guiné"
+        "translation": "Guiné",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GUINEA_BISSAU": {
-        "translation": "Guiné-Bissau"
+        "translation": "Guiné-Bissau",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GUINEA_BISSAU_DESCRIPTION": {
         "translation": ""
@@ -7095,322 +7659,484 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GUYANA": {
-        "translation": "Guiana"
+        "translation": "Guiana",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GUYANA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_HAITI": {
-        "translation": "Haiti"
+        "translation": "Haiti",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_HAITI_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_HONDURAS": {
-        "translation": "Honduras"
+        "translation": "Honduras",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_HONDURAS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_HUNGARY": {
-        "translation": "Hungria"
+        "translation": "Hungria",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_HUNGARY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ICELAND": {
-        "translation": "Islândia"
+        "translation": "Islândia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ICELAND_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_INDIA": {
-        "translation": "Índia"
+        "translation": "Índia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_INDIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_INDONESIA": {
-        "translation": "Indonésia"
+        "translation": "Indonésia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_INDONESIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_IRAN_ISLAMIC_REPUBLIC_OF": {
-        "translation": "Irã (República Islâmica do Irã)"
+        "translation": "Irã (República Islâmica do Irã)",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_IRAN_ISLAMIC_REPUBLIC_OF_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_IRAQ": {
-        "translation": "Iraque"
+        "translation": "Iraque",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_IRAQ_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_IRELAND": {
-        "translation": "Irlanda"
+        "translation": "Irlanda",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_IRELAND_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ISRAEL": {
-        "translation": "Israel"
+        "translation": "Israel",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ISRAEL_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ITALY": {
-        "translation": "Itália"
+        "translation": "Itália",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ITALY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_JAMAICA": {
-        "translation": "Jamaica"
+        "translation": "Jamaica",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_JAMAICA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_JAPAN": {
-        "translation": "Japão"
+        "translation": "Japão",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_JAPAN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_JORDAN": {
-        "translation": "Jordânia"
+        "translation": "Jordânia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_JORDAN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KAZAKHSTAN": {
-        "translation": "Cazaquistão"
+        "translation": "Cazaquistão",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KAZAKHSTAN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KENYA": {
-        "translation": "Quênia"
+        "translation": "Quênia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KENYA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KIRIBATI": {
-        "translation": "Kiribati"
+        "translation": "Kiribati",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KIRIBATI_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KUWAIT": {
-        "translation": "Kuwait"
+        "translation": "Kuwait",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KUWAIT_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KYRGYZSTAN": {
-        "translation": "Quirguistão"
+        "translation": "Quirguistão",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KYRGYZSTAN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LAO_PEOPLES_DEMOCRATIC_REPUBLIC": {
-        "translation": "República Democrática Popular do Laos"
+        "translation": "República Democrática Popular do Laos",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LAO_PEOPLES_DEMOCRATIC_REPUBLIC_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LATVIA": {
-        "translation": "Letônia"
+        "translation": "Letônia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LATVIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LEBANON": {
-        "translation": "Líbano"
+        "translation": "Líbano",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LEBANON_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LESOTHO": {
-        "translation": "Lesoto"
+        "translation": "Lesoto",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LESOTHO_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LIBERIA": {
-        "translation": "Libéria"
+        "translation": "Libéria",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LIBERIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LIBYA": {
-        "translation": "Líbia"
+        "translation": "Líbia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LIBYA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LIECHTENSTEIN": {
-        "translation": "Liechtenstein"
+        "translation": "Liechtenstein",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LIECHTENSTEIN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LITHUANIA": {
-        "translation": "Lituânia"
+        "translation": "Lituânia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LITHUANIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LUXEMBOURG": {
-        "translation": "Luxemburgo"
+        "translation": "Luxemburgo",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LUXEMBOURG_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MADAGASCAR": {
-        "translation": "Madagáscar"
+        "translation": "Madagáscar",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MADAGASCAR_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALAWI": {
-        "translation": "Malawi"
+        "translation": "Malawi",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALAWI_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALAYSIA": {
-        "translation": "Malásia"
+        "translation": "Malásia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALAYSIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALDIVES": {
-        "translation": "Maldivas"
+        "translation": "Maldivas",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALDIVES_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALI": {
-        "translation": "Mali"
+        "translation": "Mali",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALI_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALTA": {
-        "translation": "Malta"
+        "translation": "Malta",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALTA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MARSHALL_ISLANDS": {
-        "translation": "Ilhas Marshall"
+        "translation": "Ilhas Marshall",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MARSHALL_ISLANDS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MAURITANIA": {
-        "translation": "Mauritânia"
+        "translation": "Mauritânia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MAURITANIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MAURITIUS": {
-        "translation": "Maurício"
+        "translation": "Maurício",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MAURITIUS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MEXICO": {
-        "translation": "México"
+        "translation": "México",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MEXICO_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MICRONESIA_FEDERATED_STATES_OF": {
-        "translation": "Micronésia (Estados Federados da)"
+        "translation": "Micronésia (Estados Federados da)",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MICRONESIA_FEDERATED_STATES_OF_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MONACO": {
-        "translation": "Mônaco"
+        "translation": "Mônaco",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MONACO_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MONGOLIA": {
-        "translation": "Mongólia"
+        "translation": "Mongólia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MONGOLIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MONTENEGRO": {
-        "translation": "Montenegro"
+        "translation": "Montenegro",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MONTENEGRO_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MOROCCO": {
-        "translation": "Marrocos"
+        "translation": "Marrocos",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MOROCCO_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MOZAMBIQUE": {
-        "translation": "Moçambique"
+        "translation": "Moçambique",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MOZAMBIQUE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MYANMAR": {
-        "translation": "Myanmar"
+        "translation": "Myanmar",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MYANMAR_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NAMIBIA": {
-        "translation": "Namíbia"
+        "translation": "Namíbia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NAMIBIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NAURU": {
-        "translation": "Nauru"
+        "translation": "Nauru",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NAURU_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NEPAL": {
-        "translation": "Nepal"
+        "translation": "Nepal",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NEPAL_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NETHERLANDS": {
-        "translation": "Países Baixos"
+        "translation": "Países Baixos",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NETHERLANDS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NEW_ZEALAND": {
-        "translation": "Nova Zelândia"
+        "translation": "Nova Zelândia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NEW_ZEALAND_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NICARAGUA": {
-        "translation": "Nicarágua"
+        "translation": "Nicarágua",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NICARAGUA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NIGER": {
-        "translation": "Níger"
+        "translation": "Níger",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NIGERIA": {
-        "translation": "Nigéria"
+        "translation": "Nigéria",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NIGERIA_DESCRIPTION": {
         "translation": ""
@@ -7419,415 +8145,622 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NIUE": {
-        "translation": "Niue"
+        "translation": "Niue",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NIUE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NORWAY": {
-        "translation": "Noruega"
+        "translation": "Noruega",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NORWAY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_OMAN": {
-        "translation": "Omã"
+        "translation": "Omã",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_OMAN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PAKISTAN": {
-        "translation": "Paquistão"
+        "translation": "Paquistão",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PAKISTAN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PALAU": {
-        "translation": "Palau"
+        "translation": "Palau",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PALAU_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PANAMA": {
-        "translation": "Panamá"
+        "translation": "Panamá",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PANAMA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PAPUA_NEW_GUINEA": {
-        "translation": "Papua Nova Guiné"
+        "translation": "Papua Nova Guiné",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PAPUA_NEW_GUINEA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PARAGUAY": {
-        "translation": "Paraguai"
+        "translation": "Paraguai",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PARAGUAY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PERU": {
-        "translation": "Peru"
+        "translation": "Peru",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PERU_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PHILIPPINES": {
-        "translation": "Filipinas"
+        "translation": "Filipinas",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PHILIPPINES_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_POLAND": {
-        "translation": "Polônia"
+        "translation": "Polônia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_POLAND_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PORTUGAL": {
-        "translation": "Portugal"
+        "translation": "Portugal",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PORTUGAL_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_QATAR": {
-        "translation": "Catar"
+        "translation": "Catar",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_QATAR_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_REPUBLIC_OF_KOREA": {
-        "translation": "República da Coreia"
+        "translation": "República da Coreia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_REPUBLIC_OF_KOREA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_REPUBLIC_OF_MOLDOVA": {
-        "translation": "República da Moldávia"
+        "translation": "República da Moldávia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_REPUBLIC_OF_MOLDOVA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ROMANIA": {
-        "translation": "Roménia"
+        "translation": "Roménia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ROMANIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_RUSSIAN_FEDERATION": {
-        "translation": "Federação Russa"
+        "translation": "Federação Russa",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_RUSSIAN_FEDERATION_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_RWANDA": {
-        "translation": "Ruanda"
+        "translation": "Ruanda",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_RWANDA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAINT_KITTS_AND_NEVIS": {
-        "translation": "São Cristóvão e Névis"
+        "translation": "São Cristóvão e Névis",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAINT_KITTS_AND_NEVIS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAINT_LUCIA": {
-        "translation": "Santa Lúcia"
+        "translation": "Santa Lúcia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAINT_LUCIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAINT_VINCENT_AND_THE_GRENADINES": {
-        "translation": "São Vicente e Granadinas"
+        "translation": "São Vicente e Granadinas",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAINT_VINCENT_AND_THE_GRENADINES_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAMOA": {
-        "translation": "Samoa"
+        "translation": "Samoa",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAMOA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAN_MARINO": {
-        "translation": "San Marino"
+        "translation": "San Marino",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAN_MARINO_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAO_TOME_AND_PRINCIPE": {
-        "translation": "São Tomé e Príncipe"
+        "translation": "São Tomé e Príncipe",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAO_TOME_AND_PRINCIPE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAUDI_ARABIA": {
-        "translation": "Arábia Saudita"
+        "translation": "Arábia Saudita",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAUDI_ARABIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SENEGAL": {
-        "translation": "Senegal"
+        "translation": "Senegal",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SENEGAL_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SERBIA": {
-        "translation": "Sérvia"
+        "translation": "Sérvia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SERBIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SEYCHELLES": {
-        "translation": "Seychell es"
+        "translation": "Seychell es",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SEYCHELLES_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SIERRA_LEONE": {
-        "translation": "Serra Leoa"
+        "translation": "Serra Leoa",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SIERRA_LEONE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SINGAPORE": {
-        "translation": "Cingapura"
+        "translation": "Cingapura",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SINGAPORE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SLOVAKIA": {
-        "translation": "Eslováquia"
+        "translation": "Eslováquia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SLOVAKIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SLOVENIA": {
-        "translation": "Eslovênia"
+        "translation": "Eslovênia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SLOVENIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOLOMON_ISLANDS": {
-        "translation": "Ilhas Salomão"
+        "translation": "Ilhas Salomão",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOLOMON_ISLANDS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOMALIA": {
-        "translation": "Somália"
+        "translation": "Somália",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOMALIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOUTH_AFRICA": {
-        "translation": "África do Sul"
+        "translation": "África do Sul",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOUTH_AFRICA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOUTH_SUDAN": {
-        "translation": "Sudão do Sul"
+        "translation": "Sudão do Sul",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOUTH_SUDAN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SPAIN": {
-        "translation": "Espanha"
+        "translation": "Espanha",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SPAIN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SRI_LANKA": {
-        "translation": "Sri Lanka"
+        "translation": "Sri Lanka",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SRI_LANKA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SUDAN": {
-        "translation": "Sudão"
+        "translation": "Sudão",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SUDAN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SURINAME": {
-        "translation": "Suriname"
+        "translation": "Suriname",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SURINAME_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SWEDEN": {
-        "translation": "Suécia"
+        "translation": "Suécia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SWEDEN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SWITZERLAND": {
-        "translation": "Suíça"
+        "translation": "Suíça",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SWITZERLAND_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SYRIAN_ARAB_REPUBLIC": {
-        "translation": "República Árabe da Síria"
+        "translation": "República Árabe da Síria",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SYRIAN_ARAB_REPUBLIC_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TAJIKISTAN": {
-        "translation": "Tajiquistão"
+        "translation": "Tajiquistão",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TAJIKISTAN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_THAILAND": {
-        "translation": "Tailândia"
+        "translation": "Tailândia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_THAILAND_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_THE_FORMER_YUGOSLAV_REPUBLIC_OF_MACEDONIA": {
-        "translation": "Antiga República Jugoslava da Macedónia"
+        "translation": "Antiga República Jugoslava da Macedónia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_THE_FORMER_YUGOSLAV_REPUBLIC_OF_MACEDONIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_THE_ISLAMIC_REPUBLIC_OF_THE_GAMBIA": {
-        "translation": "A República Islâmica da Gâmbia"
+        "translation": "A República Islâmica da Gâmbia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_THE_ISLAMIC_REPUBLIC_OF_THE_GAMBIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TIMOR_LESTE": {
-        "translation": "Timor-Leste"
+        "translation": "Timor-Leste",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TIMOR_LESTE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TOGO": {
-        "translation": "Togo"
+        "translation": "Togo",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TOGO_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TONGA": {
-        "translation": "Tonga"
+        "translation": "Tonga",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TONGA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TRINIDAD_AND_TOBAGO": {
-        "translation": "Trinidad e Tobago"
+        "translation": "Trinidad e Tobago",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TRINIDAD_AND_TOBAGO_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TUNISIA": {
-        "translation": "Tunísia"
+        "translation": "Tunísia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TUNISIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TURKEY": {
-        "translation": "Peru"
+        "translation": "Peru",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TURKEY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TURKMENISTAN": {
-        "translation": "Turcomenistão"
+        "translation": "Turcomenistão",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TURKMENISTAN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TUVALU": {
-        "translation": "Tuvalu"
+        "translation": "Tuvalu",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TUVALU_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UGANDA": {
-        "translation": "Uganda"
+        "translation": "Uganda",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UGANDA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UKRAINE": {
-        "translation": "Ucrânia"
+        "translation": "Ucrânia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UKRAINE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_ARAB_EMIRATES": {
-        "translation": "Emirados Árabes Unidos"
+        "translation": "Emirados Árabes Unidos",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_ARAB_EMIRATES_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_KINGDOM_OF_GREAT_BRITAIN_AND_NORTHERN_IRELAND_THE": {
-        "translation": "Reino Unido da Grã-Bretanha e Irlanda do Norte (a)"
+        "translation": "Reino Unido da Grã-Bretanha e Irlanda do Norte (a)",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_KINGDOM_OF_GREAT_BRITAIN_AND_NORTHERN_IRELAND_THE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_REPUBLIC_OF_TANZANIA": {
-        "translation": "República Unida da Tanzânia"
+        "translation": "República Unida da Tanzânia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_REPUBLIC_OF_TANZANIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_STATES_OF_AMERICA": {
-        "translation": "Estados Unidos da America"
+        "translation": "Estados Unidos da America",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_STATES_OF_AMERICA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_URUGUAY": {
-        "translation": "Uruguai"
+        "translation": "Uruguai",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_URUGUAY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UZBEKISTAN": {
-        "translation": "Uzbequistão"
+        "translation": "Uzbequistão",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UZBEKISTAN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_VANUATU": {
-        "translation": "Vanuatu"
+        "translation": "Vanuatu",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_VANUATU_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_VENEZUELA_BOLIVARIAN_REPUBLIC_OF": {
-        "translation": "Venezuela (República Bolivariana da)"
+        "translation": "Venezuela (República Bolivariana da)",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_VENEZUELA_BOLIVARIAN_REPUBLIC_OF_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_VIET_NAM": {
-        "translation": "Vietnã"
+        "translation": "Vietnã",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_VIET_NAM_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_YEMEN": {
-        "translation": "Iémen"
+        "translation": "Iémen",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_YEMEN_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ZAMBIA": {
-        "translation": "Zâmbia"
+        "translation": "Zâmbia",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ZAMBIA_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ZIMBABWE": {
-        "translation": "Zimbábue"
+        "translation": "Zimbábue",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ZIMBABWE_DESCRIPTION": {
         "translation": ""
@@ -7874,13 +8807,19 @@
     },
     "locationGeographicalLevel": {
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_0": {
-        "translation": "Nível de Admin 0"
+        "translation": "Nível de Admin 0",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_0_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_1": {
-        "translation": "Nível de Admin 1"
+        "translation": "Nível de Admin 1",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_1_DESCRIPTION": {
         "translation": ""
@@ -7892,49 +8831,73 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_2": {
-        "translation": "Nível de Admin 2"
+        "translation": "Nível de Admin 2",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_2_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_3": {
-        "translation": "Nível de Admin 3"
+        "translation": "Nível de Admin 3",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_3_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_4": {
-        "translation": "Nível de Admin 4"
+        "translation": "Nível de Admin 4",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_4_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_5": {
-        "translation": "Nível de Admin  5"
+        "translation": "Nível de Admin  5",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_5_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_6": {
-        "translation": "Nível de Admin  6"
+        "translation": "Nível de Admin  6",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_6_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_7": {
-        "translation": "Nível de Admin  7"
+        "translation": "Nível de Admin  7",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_7_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_8": {
-        "translation": "Nível de Admin 8"
+        "translation": "Nível de Admin 8",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_8_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_9": {
-        "translation": "Nível de Admin  9"
+        "translation": "Nível de Admin  9",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_9_DESCRIPTION": {
         "translation": ""
@@ -10865,31 +11828,46 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED": {
-        "translation": "Ausente"
+        "translation": "Ausente",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_ATTEMPTED": {
-        "translation": "Não tentado"
+        "translation": "Não tentado",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_ATTEMPTED_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED": {
-        "translation": "Não realizado"
+        "translation": "Não realizado",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK": {
-        "translation": "Parece não OK"
+        "translation": "Parece não OK",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK": {
-        "translation": "Bem visto"
+        "translation": "Bem visto",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK_DESCRIPTION": {
         "translation": ""
@@ -10920,28 +11898,43 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED": {
-        "translation": "Acompanhamento concluído"
+        "translation": "Acompanhamento concluído",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP": {
-        "translation": "Perdido para acompanhamento ******"
+        "translation": "Perdido para acompanhamento ******",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP": {
-        "translation": "Sob acompanhamento"
+        "translation": "Sob acompanhamento",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_DIED": {
-        "translation": "Died"
+        "translation": "Died",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_NEVER_ILL_NOT_A_CASE": {
-        "translation": "Never ill/not a case"
+        "translation": "Never ill/not a case",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "deviceStatus": {
@@ -13082,28 +14075,52 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_NONE": {
-        "translation": "None"
+        "translation": "None",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_NOT_PREGNANT": {
-        "translation": "Not Pregnant"
+        "translation": "Not Pregnant",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_YES_FIRST_TRIMESTER": {
-        "translation": "Yes - First Trimester"
+        "translation": "Yes - First Trimester",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_YES_SECOND_TRIMESTER": {
-        "translation": "Yes - Second Trimester"
+        "translation": "Yes - Second Trimester",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_YES_THIRD_TRIMESTER": {
-        "translation": "Yes - Third Trimester"
+        "translation": "Yes - Third Trimester",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_YES_TRIMESTER_UNKNOWN": {
-        "translation": "Yes - Trimester Unknown"
+        "translation": "Yes - Trimester Unknown",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS_NOT_VACCINATED": {
-        "translation": "Not vaccinated"
+        "translation": "Not vaccinated",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS_VACCINATED": {
-        "translation": "Vaccinated"
+        "translation": "Vaccinated",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryInstitution": {
@@ -13114,7 +14131,10 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME_GENERIC": {
-        "translation": "Generic"
+        "translation": "Generic",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "uiAvailableEntitiesForSwitchRelationshipPage": {
