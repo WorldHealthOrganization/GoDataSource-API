@@ -32,6 +32,27 @@ module.exports = function (User) {
     return next();
   });
 
+  User.observe('before save', (ctx, next) => {
+    // do not execute on sync
+    if (ctx.options && ctx.options._sync) {
+      return next();
+    }
+    // do not allow users to reuse old password when changing it
+    if (!ctx.isNewInstance && ctx.data.password) {
+      ctx.currentInstance.hasPassword(ctx.data.password, (err, isMatch) => {
+        if (err) {
+          return next(err);
+        }
+        if (isMatch) {
+          return next(new Error('Reusing passwords is disallowed.'));
+        }
+        return next();
+      });
+    } else {
+      return next();
+    }
+  });
+
   /**
    * Do not allow deletion own user or the last user
    */
