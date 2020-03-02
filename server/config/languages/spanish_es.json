@@ -19,7 +19,10 @@
     },
     "availablePermissions": {
       "LNG_ROLE_AVAILABLE_PERMISSIONS_NOT_AUTHORIZED_MESSAGE": {
-        "translation": "You're not authorized to access this page"
+        "translation": "You're not authorized to access this page",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_LABEL_MESSAGE": {
         "translation": "{{label}}{{requirements}}"
