@@ -6,6 +6,7 @@ const config = require('../../server/config.json');
 const bcrypt = require('bcrypt');
 const async = require('async');
 const _ = require('lodash');
+const moment = require('moment');
 const uuid = require('uuid');
 
 module.exports = function (User) {
@@ -146,6 +147,65 @@ module.exports = function (User) {
 
     // captcha okay
     next();
+  });
+
+  User.beforeRemote('login', (ctx, modelInstance, next) => {
+    User
+      .findOne({
+        where: {
+          email: ctx.args.credentials.email
+        }
+      })
+      .then(user => {
+        if (!user) {
+          next();
+        } else {
+          if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
+            const isValidForReset = moment(user.lastLoginDate).isAfter(moment().add(config.login.resetTime, 'h'));
+            const isBanned = user.loginRetriesCount >= config.login.maxRetries;
+            if (isBanned && !isValidForReset) {
+              next(new Error('Action blocked.'));
+            } else {
+              next();
+            }
+          } else {
+            next();
+          }
+        }
+      });
+  });
+
+  User.afterRemoteError('login', (ctx, next) => {
+    User
+      .findOne({
+        where: {
+          email: ctx.args.credentials.email
+        }
+      })
+      .then(user => {
+        if (!user) {
+          next();
+        } else {
+          const userAttributesToUpdate = {};
+          if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
+            const isValidForReset = moment(user.lastLoginDate).isAfter(moment().add(config.login.resetTime, 'h'));
+            const isBanned = user.loginRetriesCount >= config.login.maxRetries;
+            if (isBanned && !isValidForReset) {
+              return next();
+            } else if (isValidForReset) {
+              userAttributesToUpdate.loginRetriesCount = 0;
+              userAttributesToUpdate.lastLoginDate = moment().toDate();
+            } else {
+              userAttributesToUpdate.loginRetriesCount = ++user.loginRetriesCount;
+            }
+          } else {
+            userAttributesToUpdate.loginRetriesCount = 0;
+            userAttributesToUpdate.lastLoginDate = moment().toDate();
+          }
+          user.updateAttributes(userAttributesToUpdate)
+            .then(() => next());
+        }
+      });
   });
 
   /**

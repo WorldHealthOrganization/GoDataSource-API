@@ -60,7 +60,13 @@
         }
       }
     },
-    "securityQuestions": ["securityQuestion"]
+    "securityQuestions": ["securityQuestion"],
+    "loginRetriesCount": {
+      "type": "number"
+    },
+    "lastLoginDate": {
+      "type": "date"
+    }
   },
   "indexes": {
     "firstName_index": {
