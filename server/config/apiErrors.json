@@ -66,7 +66,7 @@
   },
   "PASSWORD_RECOVERY_FAILED": {
     "defaultStatusCode": 400,
-    "messagePattern": "Information provided is incorrect. Details: <%= details %>"
+    "messagePattern": "Information provided is incorrect."
   },
   "INVALID_SECURITY_QUESTIONS": {
     "defaultStatusCode": 422,

@@ -213,7 +213,8 @@ module.exports = function (User) {
       })
       .then((user) => {
         if (!user) {
-          throw buildError('PASSWORD_RECOVERY_FAILED', {details: 'User not found'});
+          app.logger.error('User not found');
+          throw buildError('PASSWORD_RECOVERY_FAILED');
         }
 
         // verify if user has any security questions set, if not stop at once
@@ -236,6 +237,9 @@ module.exports = function (User) {
 
             // check the answers
             isValid = bcrypt.compareSync(data.questions[questionPos].answer, userQuestion.answer);
+            if (!isValid) {
+              break;
+            }
           }
 
           // generate a password reset token
@@ -246,8 +250,8 @@ module.exports = function (User) {
                 password: user.password
               },
               {
-                ttl: config.passwordReset.ttl, // 15 minutes expiration time
-                scopes: ['reset-password'],
+                ttl: config.passwordReset.ttl,
+                scopes: ['reset-password']
               })
               .then((token) => {
                 return {
@@ -255,13 +259,18 @@ module.exports = function (User) {
                   ttl: token.ttl
                 };
               })
-              .catch(() => buildError('PASSWORD_RECOVERY_FAILED', {details: 'Failed to generate reset password token'}));
+              .catch((err) => {
+                app.logger.warn('Failed to generate reset password token', err);
+                return buildError('PASSWORD_RECOVERY_FAILED');
+              });
           }
 
-          throw buildError('PASSWORD_RECOVERY_FAILED', {details: 'Invalid security questions'});
+          app.logger.warn('Invalid security questions');
+          throw buildError('PASSWORD_RECOVERY_FAILED');
         }
 
-        throw buildError('PASSWORD_RECOVERY_FAILED', {details: 'Security questions recovery is disabled'});
+        app.logger.warn('Security questions recovery is disabled');
+        throw buildError('PASSWORD_RECOVERY_FAILED');
       });
   };
 
