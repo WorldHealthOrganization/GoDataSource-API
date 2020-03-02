@@ -53,12 +53,15 @@ function run(callback) {
           // finished
           app.logger.debug(`Translation missing for ${langTokenModel.token} => ${langTokenModel.languageId}`);
 
-        // check if translation is the same
-        } else if (fileTranslation === langTokenModel.translation) {
+          // check if translation is the same
+        } else if (
+          fileTranslation === langTokenModel.translation &&
+          _.isEqual(defaultOutbreakTemplateDataJson.translations[langTokenModel.token].modules, langTokenModel.modules)
+        ) {
           // finished
           app.logger.debug(`Translation is the same for ${langTokenModel.token} => ${langTokenModel.languageId}`);
         } else {
-          (function (langToken, newTranslation) {
+          (function (langToken, newTranslation, modules) {
             createUpdateLanguageTokensJob.push((cb) => {
               // display log
               app.logger.debug(`Updating token ${langToken.token} => ${langToken.languageId} ...`);
@@ -66,7 +69,8 @@ function run(callback) {
               // update
               langToken
                 .updateAttributes({
-                  translation: newTranslation
+                  translation: newTranslation,
+                  modules: modules
                 }, options)
                 .then(() => {
                   // finished
@@ -75,7 +79,7 @@ function run(callback) {
                 })
                 .catch(cb);
             });
-          })(langTokenModel, fileTranslation);
+          })(langTokenModel, fileTranslation, defaultOutbreakTemplateDataJson.translations[langTokenModel.token].modules);
         }
       });
 
@@ -85,7 +89,7 @@ function run(callback) {
           // go through each language token
           Object.keys(defaultOutbreakTemplateDataJson.translations[token] || {})
             .forEach((languageId) => {
-              (function (newToken, newLanguageId, newTranslation) {
+              (function (newToken, newLanguageId, newTranslation, modules) {
                 // add to create list
                 createUpdateLanguageTokensJob.push((cb) => {
                   // display log
@@ -96,7 +100,8 @@ function run(callback) {
                     .create(Object.assign({
                       token: newToken,
                       languageId: newLanguageId,
-                      translation: newTranslation
+                      translation: newTranslation,
+                      modules: modules
                     }, common.install.timestamps), options)
                     .then(() => {
                       // finished
@@ -105,7 +110,7 @@ function run(callback) {
                     })
                     .catch(cb);
                 });
-              })(token, languageId, defaultOutbreakTemplateDataJson.translations[token][languageId]);
+              })(token, languageId, defaultOutbreakTemplateDataJson.translations[token][languageId], defaultOutbreakTemplateDataJson.translations[token].modules);
             });
         });
 

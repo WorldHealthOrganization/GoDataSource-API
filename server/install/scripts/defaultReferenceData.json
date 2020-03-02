@@ -372,7 +372,8 @@
   },
   "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY": {
     "Clinical": {
-      "readOnly": false
+      "readOnly": false,
+      "order": 1
     },
     "A_0_DATA_COLLECTOR_INFORMATION": {
       "readOnly": false,

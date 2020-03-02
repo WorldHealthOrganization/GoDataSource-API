@@ -3,7 +3,7 @@
 const app = require('../../server');
 const fs = require('fs');
 const languageToken = app.models.languageToken;
-
+const _ = require('lodash');
 const languageId = 'english_us';
 const languageJSON = require(`./../../config/languages/${languageId}`);
 
@@ -33,7 +33,26 @@ function run(callback) {
         Object.keys(languageJSON.sections[section]).forEach((token) => {
           // change translation ?
           if (tokensMap[token]) {
-            languageJSON.sections[section][token] = tokensMap[token].translation;
+            // translation
+            _.set(
+              languageJSON,
+              `sections[${section}][${token}].translation`,
+              tokensMap[token].translation
+            );
+
+            // outbreakId
+            _.set(
+              languageJSON,
+              `sections[${section}][${token}].outbreakId`,
+              tokensMap[token].outbreakId
+            );
+
+            // modules
+            _.set(
+              languageJSON,
+              `sections[${section}][${token}].modules`,
+              tokensMap[token].modules
+            );
           }
         });
       });

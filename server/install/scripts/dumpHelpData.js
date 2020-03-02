@@ -44,6 +44,7 @@ function run(callback) {
           };
           const categoryDataMap = {};
           const tokensToTranslate = [];
+          const helpCategoryModules = ['helpCategory'];
 
           // go through categories and export needed data
           (helpCategories || []).forEach((helpCategory) => {
@@ -58,8 +59,13 @@ function run(callback) {
 
             // translate tokens
             tokensToTranslate.push(
-              helpCategory.name,
-              helpCategory.description
+              {
+                token: helpCategory.name,
+                modules: helpCategoryModules
+              }, {
+                token: helpCategory.description,
+                modules: helpCategoryModules
+              }
             );
 
             // map category
@@ -80,6 +86,7 @@ function run(callback) {
           const exportData = data.exportData;
           const categoryDataMap = data.categoryDataMap;
           const tokensToTranslate = data.tokensToTranslate;
+          const helpItemModules = ['helpItem'];
 
           // get items
           return new Promise((resolve, reject) => {
@@ -110,8 +117,13 @@ function run(callback) {
 
                   // translate tokens
                   tokensToTranslate.push(
-                    helpItem.title,
-                    helpItem.content
+                    {
+                      token: helpItem.title,
+                      modules: helpItemModules
+                    }, {
+                      token: helpItem.content,
+                      modules: helpItemModules
+                    }
                   );
                 });
 
@@ -133,7 +145,7 @@ function run(callback) {
               .find({
                 where: {
                   token: {
-                    inq: tokensToTranslate
+                    inq: tokensToTranslate.map((tokenData) => tokenData.token)
                   },
                   languageId: {
                     in: languageIds
@@ -141,6 +153,12 @@ function run(callback) {
                 }
               })
               .then((languageTokens) => {
+                // map tokens to token Data
+                const tokensToTranslateMap = {};
+                tokensToTranslate.forEach((tokenData) => {
+                  tokensToTranslateMap[tokenData.token] = tokenData;
+                });
+
                 // add tokens to list
                 (languageTokens || []).forEach((languageToken) => {
                   // init ?
@@ -150,6 +168,12 @@ function run(callback) {
 
                   // add translation
                   exportData.translations[languageToken.token][languageToken.languageId] = languageToken.translation;
+
+                  // add outbreakId
+                  // NOT NEEDED
+
+                  // add modules
+                  exportData.translations[languageToken.token].modules = tokensToTranslateMap[languageToken.token].modules;
                 });
 
                 // finished

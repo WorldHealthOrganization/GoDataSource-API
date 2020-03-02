@@ -17,6 +17,14 @@
     "translation": {
       "type": "string",
       "default": ""
+    },
+    "outbreakId": {
+      "type": "string"
+    },
+    "modules": {
+      "type": [
+        "string"
+      ]
     }
   },
   "indexes": {
@@ -28,6 +36,12 @@
     },
     "translation_index": {
       "translation": "text"
+    },
+    "outbreakId_index": {
+      "outbreakId": 1
+    },
+    "modules_index": {
+      "modules": 1
     }
   },
   "validations": [],

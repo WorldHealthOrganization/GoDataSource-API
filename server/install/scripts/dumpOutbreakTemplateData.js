@@ -6,12 +6,23 @@ const outbreakTemplate = app.models.template;
 const referenceData = app.models.referenceData;
 const fs = require('fs');
 const _ = require('lodash');
+const defaultReferenceData = require('./defaultReferenceData.json');
 
 /**
  * Run initiation
  * @param callback
  */
 function run(callback) {
+  // map defaultReferenceData to so we can later map them properly
+  const mapRefItemToDumpData = {};
+  _.each(defaultReferenceData, (referenceDataCategoryItems, referenceDataCategory) => {
+    _.each(referenceDataCategoryItems, (refDataItem, refDataItemKey) => {
+      // build item key
+      let referenceDataItemKey = referenceData.getTranslatableIdentifierForValue(referenceDataCategory, refDataItemKey);
+      mapRefItemToDumpData[referenceDataItemKey] = refDataItem;
+    });
+  });
+
   // determine languages for which we need to export data
   fs.readdir(
     './server/config/languages',
@@ -39,6 +50,7 @@ function run(callback) {
         // retrieved items
         .then((outbreakTemplates) => {
           // retrieve language data
+          const templateModules = ['template'];
           const tokensToTranslate = [];
           const referenceDataToGet = {};
           const exportData = {
@@ -77,7 +89,10 @@ function run(callback) {
             // tokensToTranslate.push();
 
             // make sure we retrieve category information
-            if (item.disease) {
+            if (
+              item.disease &&
+              !mapRefItemToDumpData[item.disease]
+            ) {
               referenceDataToGet[item.disease] = true;
             }
 
@@ -89,21 +104,26 @@ function run(callback) {
                 // - answerType
                 // - answersDisplay
                 // - category will be handled separately
-                tokensToTranslate.push(
-                  question.text
-                );
+                tokensToTranslate.push({
+                  token: question.text,
+                  modules: templateModules
+                });
 
                 // make sure we retrieve category information
-                if (question.category) {
+                if (
+                  question.category &&
+                  !mapRefItemToDumpData[question.category]
+                ) {
                   referenceDataToGet[question.category] = true;
                 }
 
                 // answer tokens
                 (question.answers || []).forEach((answer) => {
                   // answer tokens
-                  tokensToTranslate.push(
-                    answer.label
-                  );
+                  tokensToTranslate.push({
+                    token: answer.label,
+                    modules: templateModules
+                  });
 
                   // answer questions
                   if (answer.additionalQuestions) {
@@ -130,6 +150,7 @@ function run(callback) {
 
         // retrieve reference data ( diseases & question categories )
         .then((data) => {
+          const referenceDataModules = ['referenceData'];
           const exportData = data.exportData;
           const referenceDataToGet = data.referenceDataToGet;
           const tokensToTranslate = data.tokensToTranslate;
@@ -166,8 +187,13 @@ function run(callback) {
                   // translate
                   // - category is already in the system, since these aren't editable and they can be created only by the system
                   tokensToTranslate.push(
-                    referenceDataItem.value,
-                    referenceDataItem.description
+                    {
+                      token: referenceDataItem.value,
+                      modules: referenceDataModules
+                    }, {
+                      token: referenceDataItem.description,
+                      modules: referenceDataModules
+                    }
                   );
                 });
 
@@ -189,7 +215,7 @@ function run(callback) {
               .find({
                 where: {
                   token: {
-                    inq: tokensToTranslate
+                    inq: tokensToTranslate.map((tokenData) => tokenData.token)
                   },
                   languageId: {
                     in: languageIds
@@ -197,6 +223,12 @@ function run(callback) {
                 }
               })
               .then((languageTokens) => {
+                // map tokens to token Data
+                const tokensToTranslateMap = {};
+                tokensToTranslate.forEach((tokenData) => {
+                  tokensToTranslateMap[tokenData.token] = tokenData;
+                });
+
                 // add tokens to list
                 (languageTokens || []).forEach((languageToken) => {
                   // init ?
@@ -206,6 +238,12 @@ function run(callback) {
 
                   // add translation
                   exportData.translations[languageToken.token][languageToken.languageId] = languageToken.translation;
+
+                  // add outbreakId
+                  // NOT NEEDED
+
+                  // add modules
+                  exportData.translations[languageToken.token].modules = tokensToTranslateMap[languageToken.token].modules;
                 });
 
                 // finished
