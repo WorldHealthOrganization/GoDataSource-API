@@ -3556,34 +3556,64 @@
     },
     "securityQuestions": {
       "LNG_SECURITY_QUESTION_1": {
-        "translation": "What was your childhood nickname?"
+        "translation": "What was your childhood nickname?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_10": {
-        "translation": "In what town or city did you meet your spouse/partner?"
+        "translation": "In what town or city did you meet your spouse/partner?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_2": {
-        "translation": "In what city or town did your mother and father meet?"
+        "translation": "In what city or town did your mother and father meet?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_3": {
-        "translation": "What is your favourite team?"
+        "translation": "What is your favourite team?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_4": {
-        "translation": "What was your favourite sport in high school?"
+        "translation": "What was your favourite sport in high school?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_5": {
-        "translation": "What was the house number and street name you lived in as a child?"
+        "translation": "What was the house number and street name you lived in as a child?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_6": {
-        "translation": "What primary school did you attend?"
+        "translation": "What primary school did you attend?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_7": {
-        "translation": "What is your spouse or partner's mother's maiden name?"
+        "translation": "What is your spouse or partner's mother's maiden name?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_8": {
-        "translation": "What is the middle name of your oldest child?"
+        "translation": "What is the middle name of your oldest child?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_9": {
-        "translation": "In what town or city was your first full time job?"
+        "translation": "In what town or city was your first full time job?",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "translationsFileHeaders": {
@@ -3824,7 +3854,10 @@
         "translation": "No"
       },
       "LNG_COMMON_LABEL_NONE": {
-        "translation": "None"
+        "translation": "None",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_COMMON_LABEL_NO_RECORDS_SELECTED": {
         "translation": "No records selected"
@@ -3942,7 +3975,10 @@
         "translation": "Update"
       },
       "LNG_COMMON_BUTTON_BACK_TO_LOGIN": {
-        "translation": "Back to login"
+        "translation": "Back to login",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_COMMON_BUTTON_EXPOSURES_FROM": {
         "translation": "Contacts"
@@ -4246,19 +4282,31 @@
     },
     "uiLoginPage": {
       "LNG_PAGE_LOGIN_ACTION_LOGIN_BUTTON": {
-        "translation": "Login"
+        "translation": "Login",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_LOGIN_ACTION_LOGIN_SUCCESS_MESSAGE": {
-        "translation": "Welcome, {{name}}"
+        "translation": "Welcome, {{name}}",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_LOGIN_FORGOT_PASSWORD_LABEL": {
-        "translation": "Forgot password"
+        "translation": "Forgot password",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_LOGIN_LOGIN_LABEL": {
         "translation": "Login"
       },
       "LNG_PAGE_LOGIN_WELCOME_MESSAGE": {
-        "translation": "Welcome"
+        "translation": "Welcome",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiGenericErrorsWarningsInfoMessages": {
@@ -4285,7 +4333,10 @@
         "translation": "Login failed"
       },
       "LNG_API_ERROR_CODE_UNKNOWN_ERROR": {
-        "translation": "Something went wrong.  There will be more information in the Go.Data log files and you can contact an administrator for help"
+        "translation": "Something went wrong.  There will be more information in the Go.Data log files and you can contact an administrator for help",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_ADDRESS_MULTIPLE_USUAL_PLACE_OF_RESIDENCE": {
         "translation": "Multiple addresses have been set as Current Address. Only one address should be set as Current Address."
@@ -4344,10 +4395,16 @@
         "translation": "Current password"
       },
       "LNG_COMMON_FIELD_LABEL_EMAIL_ADDRESS": {
-        "translation": "Email address"
+        "translation": "Email address",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_COMMON_FIELD_LABEL_PASSWORD": {
-        "translation": "Password"
+        "translation": "Password",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiAddressFields": {
@@ -6682,94 +6739,178 @@
     },
     "uiForgotPasswordPage": {
       "LNG_PAGE_FORGOT_PASSWORD_ACTION_SEND_EMAIL_SUCCESS_MESSAGE": {
-        "translation": "Reset password instructions were sent to {{email}}, if the email address is associated with an account."
+        "translation": "Reset password instructions were sent to {{email}}, if the email address is associated with an account.",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_FORGOT_PASSWORD_BUTTON": {
-        "translation": "Reset password"
+        "translation": "Reset password",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_FORGOT_PASSWORD_DESCRIPTION": {
-        "translation": "In order to reset your password, please input the email address associated with your account and press Reset Password button."
+        "translation": "In order to reset your password, please input the email address associated with your account and press Reset Password button.",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_FORGOT_PASSWORD_SECURITY_QUESTIONS_BUTTON": {
-        "translation": "Use security questions"
+        "translation": "Use security questions",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_FORGOT_PASSWORD_TITLE": {
-        "translation": "Reset password"
+        "translation": "Reset password",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiResetPasswordUsingSecurityQuestionsPage": {
       "LNG_PAGE_RESET_PASSWORD_SECURITY_QUESTIONS_BUTTON": {
-        "translation": "Reset password"
+        "translation": "Reset password",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_SECURITY_QUESTIONS_DESCRIPTION": {
-        "translation": "In order to reset your password, please input the email address associated with your account and the security questions and answers.  Email can only be used if Go.Data has access to an email server."
+        "translation": "In order to reset your password, please input the email address associated with your account and the security questions and answers.  Email can only be used if Go.Data has access to an email server.",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_SECURITY_QUESTIONS_FIELD_LABEL_ANSWER1": {
-        "translation": "Answer 1"
+        "translation": "Answer 1",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_SECURITY_QUESTIONS_FIELD_LABEL_ANSWER2": {
-        "translation": "Answer 2"
+        "translation": "Answer 2",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_SECURITY_QUESTIONS_FIELD_LABEL_QUESTION1": {
-        "translation": "Question 1"
+        "translation": "Question 1",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_SECURITY_QUESTIONS_FIELD_LABEL_QUESTION2": {
-        "translation": "Question 2"
+        "translation": "Question 2",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_SECURITY_QUESTIONS_TITLE": {
-        "translation": "Reset password"
+        "translation": "Reset password",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiResetPasswordPage": {
       "LNG_PAGE_RESET_PASSWORD_BUTTON": {
-        "translation": "Change password"
+        "translation": "Change password",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_FIELD_LABEL_CONFIRM_NEW_PASSWORD": {
-        "translation": "Confirm new password"
+        "translation": "Confirm new password",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_FIELD_LABEL_CONFIRM_NEW_PASSWORD_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_FIELD_LABEL_CURRENT_PASSWORD": {
-        "translation": "Current Password"
+        "translation": "Current Password",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_FIELD_LABEL_CURRENT_PASSWORD_DESCRIPTION": {
-        "translation": "Current Password"
+        "translation": "Current Password",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_FIELD_LABEL_NEW_PASSWORD": {
-        "translation": "New password"
+        "translation": "New password",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_FIELD_LABEL_NEW_PASSWORD_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_TAB_CHANGE_PASSWORD_TITLE": {
-        "translation": "Change Password"
+        "translation": "Change Password",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_TITLE": {
-        "translation": "Reset password"
+        "translation": "Reset password",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiChangePasswordPage": {
       "LNG_PAGE_CHANGE_PASSWORD_ACTION_CHANGE_PASSWORD_SUCCESS_MESSAGE": {
-        "translation": "Password changed"
+        "translation": "Password changed",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_CHANGE_PASSWORD_DESCRIPTION": {
-        "translation": "You must change your password to be different from the default one"
+        "translation": "You must change your password to be different from the default one",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_CHANGE_PASSWORD_LATER_BUTTON": {
-        "translation": "Later"
+        "translation": "Later",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_CHANGE_PASSWORD_SECURITY_QUESTIONS_BUTTON": {
-        "translation": "Set security questions"
+        "translation": "Set security questions",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_CHANGE_PASSWORD_SECURITY_QUESTIONS_NOTIFICATION": {
-        "translation": "We recommend setting the security questions which will allow you to change your password even if there are connectivity issues and a reminder email cannot be sent. However, you can set security questions later by clicking on your name in the menu of the tool."
+        "translation": "We recommend setting the security questions which will allow you to change your password even if there are connectivity issues and a reminder email cannot be sent. However, you can set security questions later by clicking on your name in the menu of the tool.",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_CHANGE_PASSWORD_SUCCESS_MESSAGE": {
-        "translation": "Password changed"
+        "translation": "Password changed",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_CHANGE_PASSWORD_TITLE": {
-        "translation": "Change Password"
+        "translation": "Change Password",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiOutbreaksListPage": {
@@ -8994,13 +9135,19 @@
         "translation": "Please upload a valid file: {{extensions}}"
       },
       "LNG_FORM_VALIDATION_ERROR_FIELD_EMAIL": {
-        "translation": "Invalid email address"
+        "translation": "Invalid email address",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_FIELD_PASSWORD": {
         "translation": "Password must contain at least 6 characters, 1 lowercase, 1 uppercase, 1 number and 1 symbol"
       },
       "LNG_FORM_VALIDATION_ERROR_FIELD_REQUIRED": {
-        "translation": "This field is required"
+        "translation": "This field is required",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_GENERAL_ASYNC": {
         "translation": "Invalid data"
