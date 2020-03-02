@@ -3556,34 +3556,64 @@
     },
     "securityQuestions": {
       "LNG_SECURITY_QUESTION_1": {
-        "translation": "Quel était ton surnom d'enfance?"
+        "translation": "Quel était ton surnom d'enfance?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_10": {
-        "translation": "Dans quelle ville avez-vous rencontré votre partenaire / partenaire?"
+        "translation": "Dans quelle ville avez-vous rencontré votre partenaire / partenaire?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_2": {
-        "translation": "Dans quelle ville ou village avez-vous rencontré?"
+        "translation": "Dans quelle ville ou village avez-vous rencontré?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_3": {
-        "translation": "Quelle est votre équipe préférée?"
+        "translation": "Quelle est votre équipe préférée?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_4": {
-        "translation": "Quel était ton sport préféré au lycée?"
+        "translation": "Quel était ton sport préféré au lycée?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_5": {
-        "translation": "Quel était le numéro de rue et le nom de rue dans lequel vous viviez quand vous étiez enfant?"
+        "translation": "Quel était le numéro de rue et le nom de rue dans lequel vous viviez quand vous étiez enfant?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_6": {
-        "translation": "Quelle école primaire avez-vous fréquentée?"
+        "translation": "Quelle école primaire avez-vous fréquentée?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_7": {
-        "translation": "Quel est le nom de jeune fille de la mère de votre conjoint ou partenaire?"
+        "translation": "Quel est le nom de jeune fille de la mère de votre conjoint ou partenaire?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_8": {
-        "translation": "Quel est le deuxième prénom de votre enfant le plus âgé?"
+        "translation": "Quel est le deuxième prénom de votre enfant le plus âgé?",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_SECURITY_QUESTION_9": {
-        "translation": "Dans quelle ville avez-vous été premier emploi à temps plein?"
+        "translation": "Dans quelle ville avez-vous été premier emploi à temps plein?",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "translationsFileHeaders": {
@@ -3824,7 +3854,10 @@
         "translation": "Non"
       },
       "LNG_COMMON_LABEL_NONE": {
-        "translation": "Aucun"
+        "translation": "Aucun",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_COMMON_LABEL_NO_RECORDS_SELECTED": {
         "translation": "Rien de sélectionné"
@@ -3942,7 +3975,10 @@
         "translation": "Mettre à jour"
       },
       "LNG_COMMON_BUTTON_BACK_TO_LOGIN": {
-        "translation": "Retour connexion"
+        "translation": "Retour connexion",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_COMMON_BUTTON_EXPOSURES_FROM": {
         "translation": "Contacts"
@@ -4246,19 +4282,31 @@
     },
     "uiLoginPage": {
       "LNG_PAGE_LOGIN_ACTION_LOGIN_BUTTON": {
-        "translation": "S'identifier"
+        "translation": "S'identifier",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_LOGIN_ACTION_LOGIN_SUCCESS_MESSAGE": {
-        "translation": "Bienvenue, {{name}}"
+        "translation": "Bienvenue, {{name}}",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_LOGIN_FORGOT_PASSWORD_LABEL": {
-        "translation": "Mot de passe oublié"
+        "translation": "Mot de passe oublié",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_LOGIN_LOGIN_LABEL": {
         "translation": "S'identifier"
       },
       "LNG_PAGE_LOGIN_WELCOME_MESSAGE": {
-        "translation": "Bienvenue"
+        "translation": "Bienvenue",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiGenericErrorsWarningsInfoMessages": {
@@ -4285,7 +4333,10 @@
         "translation": "Problème de login"
       },
       "LNG_API_ERROR_CODE_UNKNOWN_ERROR": {
-        "translation": "Quelque chose s'est mal passé. Veuillez contacter un administrateur"
+        "translation": "Quelque chose s'est mal passé. Veuillez contacter un administrateur",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_ADDRESS_MULTIPLE_USUAL_PLACE_OF_RESIDENCE": {
         "translation": "Plusieurs adresses définies comme adresse actuelle. Une seule adresse doit être définie comme adresse actuelle"
@@ -4344,10 +4395,16 @@
         "translation": "Mot de passe actuel"
       },
       "LNG_COMMON_FIELD_LABEL_EMAIL_ADDRESS": {
-        "translation": "Email"
+        "translation": "Email",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_COMMON_FIELD_LABEL_PASSWORD": {
-        "translation": "Mot de passe"
+        "translation": "Mot de passe",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiAddressFields": {
@@ -6682,94 +6739,178 @@
     },
     "uiForgotPasswordPage": {
       "LNG_PAGE_FORGOT_PASSWORD_ACTION_SEND_EMAIL_SUCCESS_MESSAGE": {
-        "translation": "Les instructions de réinitialisation du mot de passe ont été envoyées à {{email}}, est-ce que l'adresse e-mail est associée à un compte."
+        "translation": "Les instructions de réinitialisation du mot de passe ont été envoyées à {{email}}, est-ce que l'adresse e-mail est associée à un compte.",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_FORGOT_PASSWORD_BUTTON": {
-        "translation": "Réinitialiser le mot de passe"
+        "translation": "Réinitialiser le mot de passe",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_FORGOT_PASSWORD_DESCRIPTION": {
-        "translation": "Afin de réinitialiser votre mot de passe, veuillez indiquer votre adresse e-mail associée à votre compte et appuyer sur le bouton Réinitialiser le mot de passe."
+        "translation": "Afin de réinitialiser votre mot de passe, veuillez indiquer votre adresse e-mail associée à votre compte et appuyer sur le bouton Réinitialiser le mot de passe.",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_FORGOT_PASSWORD_SECURITY_QUESTIONS_BUTTON": {
-        "translation": "Utilisez des questions de sécurité"
+        "translation": "Utilisez des questions de sécurité",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_FORGOT_PASSWORD_TITLE": {
-        "translation": "Réinitialiser le mot de passe"
+        "translation": "Réinitialiser le mot de passe",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiResetPasswordUsingSecurityQuestionsPage": {
       "LNG_PAGE_RESET_PASSWORD_SECURITY_QUESTIONS_BUTTON": {
-        "translation": "Réinitialiser le mot de passe"
+        "translation": "Réinitialiser le mot de passe",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_SECURITY_QUESTIONS_DESCRIPTION": {
-        "translation": "Afin de réinitialiser votre mot de passe, veuillez l'indiquer par courriel associé à votre compte."
+        "translation": "Afin de réinitialiser votre mot de passe, veuillez l'indiquer par courriel associé à votre compte.",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_SECURITY_QUESTIONS_FIELD_LABEL_ANSWER1": {
-        "translation": "Réponse 1"
+        "translation": "Réponse 1",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_SECURITY_QUESTIONS_FIELD_LABEL_ANSWER2": {
-        "translation": "Réponse 2"
+        "translation": "Réponse 2",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_SECURITY_QUESTIONS_FIELD_LABEL_QUESTION1": {
-        "translation": "question 1"
+        "translation": "question 1",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_SECURITY_QUESTIONS_FIELD_LABEL_QUESTION2": {
-        "translation": "question 2"
+        "translation": "question 2",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_SECURITY_QUESTIONS_TITLE": {
-        "translation": "réinitialiser le mot de passe"
+        "translation": "réinitialiser le mot de passe",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiResetPasswordPage": {
       "LNG_PAGE_RESET_PASSWORD_BUTTON": {
-        "translation": "Change le mot de passe"
+        "translation": "Change le mot de passe",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_FIELD_LABEL_CONFIRM_NEW_PASSWORD": {
-        "translation": "Confirmer le nouveau mot de passe"
+        "translation": "Confirmer le nouveau mot de passe",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_FIELD_LABEL_CONFIRM_NEW_PASSWORD_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_FIELD_LABEL_CURRENT_PASSWORD": {
-        "translation": "Mot de passe actuel"
+        "translation": "Mot de passe actuel",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_FIELD_LABEL_CURRENT_PASSWORD_DESCRIPTION": {
-        "translation": "Mot de passe actuel"
+        "translation": "Mot de passe actuel",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_FIELD_LABEL_NEW_PASSWORD": {
-        "translation": "Nouveau mot de passe"
+        "translation": "Nouveau mot de passe",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_FIELD_LABEL_NEW_PASSWORD_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_TAB_CHANGE_PASSWORD_TITLE": {
-        "translation": "Changer le mot de passe"
+        "translation": "Changer le mot de passe",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_RESET_PASSWORD_TITLE": {
-        "translation": "réinitialiser le mot de passe"
+        "translation": "réinitialiser le mot de passe",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiChangePasswordPage": {
       "LNG_PAGE_CHANGE_PASSWORD_ACTION_CHANGE_PASSWORD_SUCCESS_MESSAGE": {
-        "translation": "Mot de passe changé"
+        "translation": "Mot de passe changé",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_CHANGE_PASSWORD_DESCRIPTION": {
-        "translation": "Vous devez changer votre mot de passe pour qu'il soit différent de celui par défaut"
+        "translation": "Vous devez changer votre mot de passe pour qu'il soit différent de celui par défaut",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_CHANGE_PASSWORD_LATER_BUTTON": {
-        "translation": "Plus tard"
+        "translation": "Plus tard",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_CHANGE_PASSWORD_SECURITY_QUESTIONS_BUTTON": {
-        "translation": "Définir des questions de sécurité"
+        "translation": "Définir des questions de sécurité",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_CHANGE_PASSWORD_SECURITY_QUESTIONS_NOTIFICATION": {
-        "translation": "On a besoin de définir les questions de sécurité avant de modifier votre mot de passe en cas de problème de connectivité. Cela peut être fait plus tard à partir du menu utilisateur."
+        "translation": "On a besoin de définir les questions de sécurité avant de modifier votre mot de passe en cas de problème de connectivité. Cela peut être fait plus tard à partir du menu utilisateur.",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_CHANGE_PASSWORD_SUCCESS_MESSAGE": {
-        "translation": "Mot de passe changé"
+        "translation": "Mot de passe changé",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_PAGE_CHANGE_PASSWORD_TITLE": {
-        "translation": "Changer mot de passe"
+        "translation": "Changer mot de passe",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiOutbreaksListPage": {
@@ -8994,13 +9135,19 @@
         "translation": "Veuillez télécharger un fichier valide de type: {{extensions}}"
       },
       "LNG_FORM_VALIDATION_ERROR_FIELD_EMAIL": {
-        "translation": "Email invalide"
+        "translation": "Email invalide",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_FIELD_PASSWORD": {
         "translation": "Le mot de passe doit contenir au moins 6 caractères, 1 minuscule, 1 majuscule, 1 chiffre et 1 symbole."
       },
       "LNG_FORM_VALIDATION_ERROR_FIELD_REQUIRED": {
-        "translation": "Champ obligatoire"
+        "translation": "Champ obligatoire",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_GENERAL_ASYNC": {
         "translation": "Données invalides"
