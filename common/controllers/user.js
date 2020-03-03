@@ -37,20 +37,27 @@ module.exports = function (User) {
     if (ctx.options && ctx.options._sync) {
       return next();
     }
+
+    let oldPassword = null;
+    if (ctx.data) {
+      oldPassword = ctx.data.oldPassword;
+      delete ctx.data.oldPassword;
+    }
+
     // do not allow users to reuse old password when changing it and make sure their giving us the old password as well
     if (!ctx.isNewInstance && ctx.data.password) {
       Promise.resolve()
         .then(() => {
-          // if this is a reset password don't check the old password
+          // if this is a reset/change password don't check the old password
           if (ctx.options.setPassword) {
             return;
           }
-          if (!ctx.data.oldPassword) {
+          if (!oldPassword) {
             throw new Error('Changing passwords without providing old password is disallowed.');
           }
           return new Promise((resolve, reject) => {
             // check that the old password is a match before trying to change it to a new one
-            ctx.currentInstance.hasPassword(ctx.data.oldPassword, (err, isMatch) => {
+            ctx.currentInstance.hasPassword(oldPassword, (err, isMatch) => {
               if (err) {
                 return reject(err);
               }
@@ -75,10 +82,7 @@ module.exports = function (User) {
             });
           });
         })
-        .then(() => {
-          delete ctx.data.oldPassword;
-          return next();
-        })
+        .then(() => next())
         .catch(err => next(err));
     } else {
       return next();
