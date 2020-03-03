@@ -351,5 +351,9 @@
   "contactOfContact": {
     "dataSource": "mongoDb",
     "public": false
+  },
+  "captcha": {
+    "dataSource": "memory",
+    "public": true
   }
 }

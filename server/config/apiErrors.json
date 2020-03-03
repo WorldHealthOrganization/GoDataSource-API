@@ -306,5 +306,9 @@
   "SYNC_PACKAGE_FOR_USER_WITHOUT_TEAMS": {
     "defaultStatusCode": 422,
     "messagePattern": "Sync package cannot be generated for user `<%= userEmail %>` as it is not assigned to any team"
+  },
+  "INVALID_CAPTCHA": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Invalid captcha."
   }
 }

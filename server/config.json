@@ -88,5 +88,9 @@
   "enableConfigRewrite": true,
   "authToken": {
     "ttl": 600
+  },
+  "session": {
+    "appSId": "GoData",
+    "secret": "5d854dbc-5d5b-11ea-bc55-0242ac130003"
   }
 }
