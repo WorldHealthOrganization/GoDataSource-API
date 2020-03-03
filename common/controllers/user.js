@@ -75,7 +75,10 @@ module.exports = function (User) {
             });
           });
         })
-        .then(next)
+        .then(() => {
+          delete ctx.data.oldPassword;
+          return next();
+        })
         .catch(err => next(err));
     } else {
       return next();
