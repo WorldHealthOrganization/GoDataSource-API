@@ -32,6 +32,63 @@ module.exports = function (User) {
     return next();
   });
 
+  User.observe('before save', (ctx, next) => {
+    // do not execute on sync
+    if (ctx.options && ctx.options._sync) {
+      return next();
+    }
+
+    let oldPassword = null;
+    if (ctx.data) {
+      oldPassword = ctx.data.oldPassword;
+      delete ctx.data.oldPassword;
+    }
+
+    // do not allow users to reuse old password when changing it and make sure their giving us the old password as well
+    if (!ctx.isNewInstance && ctx.data.password) {
+      Promise.resolve()
+        .then(() => {
+          // if this is a reset/change password don't check the old password
+          if (ctx.options.setPassword) {
+            return;
+          }
+          if (!oldPassword) {
+            throw app.utils.apiError.getError('MISSING_REQUIRED_OLD_PASSWORD');
+          }
+          return new Promise((resolve, reject) => {
+            // check that the old password is a match before trying to change it to a new one
+            ctx.currentInstance.hasPassword(oldPassword, (err, isMatch) => {
+              if (err) {
+                return reject(err);
+              }
+              if (!isMatch) {
+                return reject(app.utils.apiError.getError('INVALID_OLD_PASSWORD'));
+              }
+              return resolve();
+            });
+          });
+        })
+        // check that the old password is not same with the one from request
+        .then(() => {
+          return new Promise((resolve, reject) => {
+            ctx.currentInstance.hasPassword(ctx.data.password, (err, isMatch) => {
+              if (err) {
+                return reject(err);
+              }
+              if (isMatch) {
+                return reject(app.utils.apiError.getError('REUSING_PASSWORDS_ERROR'));
+              }
+              return resolve();
+            });
+          });
+        })
+        .then(() => next())
+        .catch(err => next(err));
+    } else {
+      return next();
+    }
+  });
+
   /**
    * Do not allow deletion own user or the last user
    */

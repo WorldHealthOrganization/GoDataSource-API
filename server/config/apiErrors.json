@@ -306,5 +306,17 @@
   "SYNC_PACKAGE_FOR_USER_WITHOUT_TEAMS": {
     "defaultStatusCode": 422,
     "messagePattern": "Sync package cannot be generated for user `<%= userEmail %>` as it is not assigned to any team"
+  },
+  "MISSING_REQUIRED_OLD_PASSWORD": {
+    "defaultStatusCode": 400,
+    "translation": "Old password is required when changing passwords"
+  },
+  "INVALID_OLD_PASSWORD": {
+    "defaultStatusCode": 422,
+    "translation": "Old password is invalid"
+  },
+  "REUSING_PASSWORDS_ERROR": {
+    "defaultStatusCode": 422,
+    "translation": "Reusing passwords is forbidden"
   }
 }
