@@ -23,6 +23,31 @@ module.exports = function (User) {
   // disable email verification, confirm endpoints
   app.utils.remote.disableRemoteMethods(User, ['prototype.verify', 'confirm']);
 
+  User.afterRemote('setPassword', (ctx, modelInstance, next) => {
+    User
+      .findById(ctx.args.id)
+      .then(user => {
+        if (!user) {
+          return next();
+        }
+        return user.updateAttributes({
+          loginRetriesCount: 0,
+          lastLoginDate: null
+        }).then(() => next());
+      });
+  });
+
+  User.afterRemote('login', (ctx, modelInstance, next) => {
+    // delete old access tokens for this user
+    app.models.accessToken.remove({
+      userId: ctx.result.userId,
+      id: {
+        neq: ctx.result.id
+      }
+    });
+    return next();
+  });
+
   User.observe('before save', (ctx, next) => {
     // do not execute on sync
     if (ctx.options && ctx.options._sync) {
@@ -161,19 +186,19 @@ module.exports = function (User) {
           return next();
         }
         if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
-          const isValidForReset = Moment(user.lastLoginDate).isAfter(
-            Moment().add(config.login.resetTime, config.login.resetTimeUnit)
-          );
+          const lastLoginDate = Moment(user.lastLoginDate);
+          const resetDate = Moment().add(config.login.resetTime, config.login.resetTimeUnit);
+          const isValidForReset = resetDate.diff(lastLoginDate, config.login.resetTimeUnit) > config.login.resetTime;
           const isBanned = user.loginRetriesCount >= config.login.maxRetries;
-          if (isBanned) {
-            if (!isValidForReset) {
-              return next(new Error('Action is blocked temporarily.'));
-            }
+          if (isValidForReset) {
             // reset login retries
             return user.updateAttributes({
               loginRetriesCount: 0,
               lastLoginDate: null
             }).then(() => next());
+          }
+          if (isBanned && !isValidForReset) {
+            return next(new Error('Action is blocked temporarily.'));
           }
         }
         return next();
@@ -194,22 +219,12 @@ module.exports = function (User) {
 
         const userAttributesToUpdate = {};
         if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
-          const isValidForReset = Moment(user.lastLoginDate).isAfter(
-            Moment().add(config.login.resetTime, config.login.resetTimeUnit)
-          );
-          const isBanned = user.loginRetriesCount >= config.login.maxRetries;
-          if (isBanned) {
-            // nothing to do, waiting for ban to be lifted
-            if (!isValidForReset) {
-              return next();
-            }
-            userAttributesToUpdate.loginRetriesCount = 0;
-            userAttributesToUpdate.lastLoginDate = Moment().toDate();
-          } else {
-            userAttributesToUpdate.loginRetriesCount = ++user.loginRetriesCount;
+          if (user.loginRetriesCount >= config.login.maxRetries) {
+            return next();
           }
+          userAttributesToUpdate.loginRetriesCount = ++user.loginRetriesCount;
         } else {
-          userAttributesToUpdate.loginRetriesCount = 0;
+          userAttributesToUpdate.loginRetriesCount = 1;
           userAttributesToUpdate.lastLoginDate = Moment().toDate();
         }
 
