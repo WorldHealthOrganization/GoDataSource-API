@@ -310,5 +310,17 @@
   "INVALID_CAPTCHA": {
     "defaultStatusCode": 422,
     "messagePattern": "Invalid captcha."
+  },
+  "MISSING_REQUIRED_OLD_PASSWORD": {
+    "defaultStatusCode": 400,
+    "translation": "Old password is required when changing passwords"
+  },
+  "INVALID_OLD_PASSWORD": {
+    "defaultStatusCode": 422,
+    "translation": "Old password is invalid"
+  },
+  "REUSING_PASSWORDS_ERROR": {
+    "defaultStatusCode": 422,
+    "translation": "Reusing passwords is forbidden"
   }
 }
