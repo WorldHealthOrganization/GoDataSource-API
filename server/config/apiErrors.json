@@ -307,6 +307,10 @@
     "defaultStatusCode": 422,
     "messagePattern": "Sync package cannot be generated for user `<%= userEmail %>` as it is not assigned to any team"
   },
+  "INVALID_CAPTCHA": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Invalid captcha."
+  },
   "MISSING_REQUIRED_OLD_PASSWORD": {
     "defaultStatusCode": 400,
     "translation": "Old password is required when changing passwords"

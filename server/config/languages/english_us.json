@@ -4333,7 +4333,10 @@
     },
     "uiAPIErrors": {
       "LNG_API_ERROR_CODE_LOGIN_FAILED": {
-        "translation": "Login failed"
+        "translation": "Login failed",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_UNKNOWN_ERROR": {
         "translation": "Something went wrong.  There will be more information in the Go.Data log files and you can contact an administrator for help",
@@ -4342,64 +4345,130 @@
         ]
       },
       "LNG_API_ERROR_CODE_ADDRESS_MULTIPLE_USUAL_PLACE_OF_RESIDENCE": {
-        "translation": "Multiple addresses have been set as Current Address. Only one address should be set as Current Address."
+        "translation": "Multiple addresses have been set as Current Address. Only one address should be set as Current Address.",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_ADDRESS_MUST_HAVE_USUAL_PLACE_OF_RESIDENCE": {
-        "translation": "One of the addresses must be set as the Current Address"
+        "translation": "One of the addresses must be set as the Current Address",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_ADDRESS_PREVIOUS_PLACE_OF_RESIDENCE_MUST_HAVE_DATE": {
-        "translation": "The addresses set as the Previous Address must have a date set"
+        "translation": "The addresses set as the Previous Address must have a date set",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_MISSING_REQUIRED_PERMISSION": {
-        "translation": "Your role doesn't allow you to perform this operation"
+        "translation": "Your role doesn't allow you to perform this operation",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_UPSTREAM_SERVER_SYNC_IN_PROGRESS": {
-        "translation": "Only one sync action can be in progress at a time"
+        "translation": "Only one sync action can be in progress at a time",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_MODEL_IDENTIFIERS_ARE_NOT_UNIQUE_IN_CONTEXT": {
-        "translation": "Trying to import duplicate records"
+        "translation": "Trying to import duplicate records",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_INVALID_VISUAL_ID_MASK": {
-        "translation": "Invalid ID ( accepted: {{mask}} )"
+        "translation": "Invalid ID ( accepted: {{mask}} )",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_DUPLICATE_VISUAL_ID": {
-        "translation": "Duplicate ID"
+        "translation": "Duplicate ID",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_REFERENCE_DATA_ENTRY_IN_USE": {
-        "translation": "{{entryValue}} is in use and cannot be deleted"
+        "translation": "{{entryValue}} is in use and cannot be deleted",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_MODEL_IN_USE": {
-        "translation": "{{userRoleName}} role is in use and cannot be deleted"
+        "translation": "{{userRoleName}} role is in use and cannot be deleted",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_REQUEST_VALIDATION_ERROR_DUPLICATE_CLIENT_IDS": {
-        "translation": "Client IDs must be unique"
+        "translation": "Client IDs must be unique",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_REQUEST_VALIDATION_ERROR_DUPLICATE_SERVER_IDS": {
-        "translation": "Server URLs must be unique"
+        "translation": "Server URLs must be unique",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_REQUEST_VALIDATION_ERROR_INVALID_BACKUP_LOCATION": {
-        "translation": "Configured backup location is not accessible for read/write"
+        "translation": "Configured backup location is not accessible for read/write",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_DELETE_CONTACT_LAST_RELATIONSHIP": {
-        "translation": "Cannot delete a contact's last relationship with a case or event. The contact doesn't have an additional relationship with a case or event."
+        "translation": "Cannot delete a contact's last relationship with a case or event. The contact doesn't have an additional relationship with a case or event.",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_INVALID_CASE_RELATIONSHIP": {
-        "translation": "Case needs to be related to another case in order to be able to convert it to a contact"
+        "translation": "Case needs to be related to another case in order to be able to convert it to a contact",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_INVALID_PASSWORD": {
-        "translation": "Invalid current password"
+        "translation": "Invalid current password",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_DELETE_ACTIVE_OUTBREAK": {
-        "translation": "The outbreak is active for at least another user. Cannot delete an active outbreak"
+        "translation": "The outbreak is active for at least another user. Cannot delete an active outbreak",
+        "modules": [
+          "unauthenticated"
+        ]
+      },
+      "LNG_API_ERROR_CODE_INVALID_CAPTCHA": {
+        "translation": "Invalid captcha",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_MISSING_REQUIRED_OLD_PASSWORD": {
-        "translation": "Old password is required when changing passwords"
+        "translation": "Old password is required when changing passwords",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_INVALID_OLD_PASSWORD": {
-        "translation": "Old password is invalid"
+        "translation": "Old password is invalid",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_API_ERROR_CODE_REUSING_PASSWORDS_ERROR": {
-        "translation": "Reusing passwords is forbidden"
+        "translation": "Reusing passwords is forbidden",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiCommonFields": {
@@ -4414,6 +4483,12 @@
       },
       "LNG_COMMON_FIELD_LABEL_PASSWORD": {
         "translation": "Password",
+        "modules": [
+          "unauthenticated"
+        ]
+      },
+      "LNG_COMMON_FIELD_LABEL_CAPTCHA": {
+        "translation": "Captcha",
         "modules": [
           "unauthenticated"
         ]

@@ -90,6 +90,25 @@ module.exports = function (User) {
   });
 
   /**
+   * Hook before user/login method
+   */
+  User.beforeRemote('login', (ctx, modelInstance, next) => {
+    // do we need to validate captcha ?
+    const req = ctx.req;
+    if (
+      req.session &&
+      req.session.captcha &&
+      req.body &&
+      req.session.captcha !== req.body.captcha
+    ) {
+      return next(app.utils.apiError.getError('INVALID_CAPTCHA'));
+    }
+
+    // check captcha
+    next();
+  });
+
+  /**
    * Do not allow deletion own user or the last user
    */
   User.beforeRemote('deleteById', function (context, modelInstance, next) {
