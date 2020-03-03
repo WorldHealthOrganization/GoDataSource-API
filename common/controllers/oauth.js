@@ -10,8 +10,22 @@ module.exports = function (OAuth) {
     const username = data.username;
     const pw = data.password;
 
-    if (!username) { return next(new Error('Missing required parameter: username', 'invalid_request')); }
-    if (!pw) { return next(new Error('Missing required parameter: password', 'invalid_request')); }
+    if (!username) {
+      return next(app.utils.apiError.getError(
+        'REQUEST_VALIDATION_ERROR',
+        {
+          errorMessages: 'Missing required parameter: username'
+        })
+      );
+    }
+    if (!pw) {
+      return next(app.utils.apiError.getError(
+        'REQUEST_VALIDATION_ERROR',
+        {
+          errorMessages: 'Missing required parameter: pasword'
+        })
+      );
+    }
 
     const userModel = App.models.user;
     const loginSettings = App.settings.login;
@@ -24,7 +38,7 @@ module.exports = function (OAuth) {
       })
       .then(user => {
         if (!user) {
-          throw new Error('Failed to generate token.');
+          throw app.utils.apiError.getError('LOGIN_FAILED');
         }
         currentUser = user;
         if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
@@ -40,7 +54,7 @@ module.exports = function (OAuth) {
             });
           }
           if (isBanned && !isValidForReset) {
-            throw new Error('Action is blocked temporarily.');
+            throw app.utils.apiError.getError('ACTION_TEMPORARILY_BLOCKED');
           }
         }
       })
