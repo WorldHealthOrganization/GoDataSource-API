@@ -9096,46 +9096,88 @@
     },
     "uiFormInputValidationErrors": {
       "LNG_FORM_VALIDATION_EMAIL_UNIQUE": {
-        "translation": "E-mail já existe"
+        "translation": "E-mail já existe",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_ALL_OR_NONE_REQUIRED": {
-        "translation": "Insira {{field}} também"
+        "translation": "Insira {{field}} também",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_ALL_OR_NONE_REQUIRED_IF_FIELD_IS_SET": {
-        "translation": "Obrigatório se {{field}} estiver definido"
+        "translation": "Obrigatório se {{field}} estiver definido",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_AT_LEAST_ONE_REQUIRED": {
-        "translation": "Pelo menos um campo deve ser preenchido "
+        "translation": "Pelo menos um campo deve ser preenchido",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_DATE_COMPARE": {
-        "translation": "Data precisa ser {{comparador} } {{field}}"
+        "translation": "Data precisa ser {{comparador} } {{field}}",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_DATE_COMPARE_AFTER": {
-        "translation": "Depois"
+        "translation": "Depois",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_DATE_COMPARE_BEFORE": {
-        "translation": "Antes"
+        "translation": "Antes",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_DATE_COMPARE_SAME": {
-        "translation": "mesmo que "
+        "translation": "mesmo que",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_DATE_COMPARE_SAME_OR_AFTER": {
-        "translation": "mesmo ou após"
+        "translation": "mesmo ou após",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_DATE_COMPARE_SAME_OR_BEFORE": {
-        "translation": "mesma ou antes de"
+        "translation": "mesma ou antes de",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_DEFAULT": {
-        "translation": "Validação falhou: {{validation}}"
+        "translation": "Validação falhou: {{validation}}",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_DUPLICATE_VALUE": {
-        "translation": "Duplicar valor"
+        "translation": "Duplicar valor",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_EQUAL_PASSWORD_VALUE": {
-        "translation": "Valor deve corresponder à senha."
+        "translation": "Valor deve corresponder à senha.",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_EXTENSION": {
-        "translation": "Faça o upload de um arquivo válido: {{extensions}}}"
+        "translation": "Faça o upload de um arquivo válido: {{extensions}}}",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_FIELD_EMAIL": {
         "translation": "Endereço de e-mail inválido",
@@ -9144,7 +9186,10 @@
         ]
       },
       "LNG_FORM_VALIDATION_ERROR_FIELD_PASSWORD": {
-        "translation": "A senha deve conter pelo menos 6 caracteres, 1 minúscula, 1 maiúscula, 1 número e 1 símbolo"
+        "translation": "A senha deve conter pelo menos 6 caracteres, 1 minúscula, 1 maiúscula, 1 número e 1 símbolo",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_FIELD_REQUIRED": {
         "translation": "Este campo é obrigatório",
@@ -9153,49 +9198,94 @@
         ]
       },
       "LNG_FORM_VALIDATION_ERROR_GENERAL_ASYNC": {
-        "translation": "Data inválida"
+        "translation": "Data inválida",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_INVALID_DATE": {
-        "translation": "Data inválida"
+        "translation": "Data inválida",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_MAX_LENGTH": {
-        "translation": "Deve conter no máximo {{length}} caracteres{{length}}"
+        "translation": "Deve conter no máximo {{length}} caracteres{{length}}",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_MAX_NUMBER": {
-        "translation": "Deve ser menor ou igual a {{max}}"
+        "translation": "Deve ser menor ou igual a {{max}}",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_MIN_LENGTH": {
-        "translation": "Deve conter no mínimo {{length}} caracteres"
+        "translation": "Deve conter no mínimo {{length}} caracteres",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_MIN_NUMBER": {
-        "translation": "Deve ser maior ou igual a {{min}}"
+        "translation": "Deve ser maior ou igual a {{min}}",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_NOT_EQUAL_QUESTION_VALUE": {
-        "translation": "As perguntas precisam ser diferentes "
+        "translation": "As perguntas precisam ser diferentes",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_PATTERN": {
-        "translation": "O valor não corresponde ao padrão exigido"
+        "translation": "O valor não corresponde ao padrão exigido",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_TERMS_CONDITIONS": {
-        "translation": "Termos e condições devem ser aceitos"
+        "translation": "Termos e condições devem ser aceitos",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_PAGE_UNIQUE": {
-        "translation": "Nome da página já existe"
+        "translation": "Nome da página já existe",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_GENERAL_HAS_PROPERTY": {
-        "translation": "Property exists"
+        "translation": "Property exists",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_FIELD_URL": {
-        "translation": "Invalid URL, either it contains 'localhost' or the path is not good"
+        "translation": "Invalid URL, either it contains 'localhost' or the path is not good",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_OUTBREAK_NAME_NOT_UNIQUE": {
-        "translation": "This name is already in use"
+        "translation": "This name is already in use",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_FIELD_NOT_NUMBER": {
-        "translation": "Can't be number"
+        "translation": "Can't be number",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_FORM_VALIDATION_ERROR_MISSING_REQUIRED_OPTIONS": {
-        "translation": "Missing options: {{options}}"
+        "translation": "Missing options: {{options}}",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiDocumentFields": {
