@@ -53,7 +53,7 @@ module.exports = function (User) {
             return;
           }
           if (!oldPassword) {
-            throw new Error('Changing passwords without providing old password is disallowed.');
+            throw app.utils.apiError.getError('MISSING_REQUIRED_OLD_PASSWORD');
           }
           return new Promise((resolve, reject) => {
             // check that the old password is a match before trying to change it to a new one
@@ -62,7 +62,7 @@ module.exports = function (User) {
                 return reject(err);
               }
               if (!isMatch) {
-                return reject(new Error('Current password is invalid.'));
+                return reject(app.utils.apiError.getError('INVALID_OLD_PASSWORD'));
               }
               return resolve();
             });
@@ -76,7 +76,7 @@ module.exports = function (User) {
                 return reject(err);
               }
               if (isMatch) {
-                return reject(new Error('Reusing passwords is disallowed.'));
+                return reject(app.utils.apiError.getError('REUSING_PASSWORDS_ERROR'));
               }
               return resolve();
             });
