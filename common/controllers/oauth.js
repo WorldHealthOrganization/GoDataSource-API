@@ -1,16 +1,20 @@
+'use strict';
+
+// deps
+const App = require('../../server/server');
 const Moment = require('moment');
 
-module.exports = function grantToken(server) {
-  server.post('/api/oauth/token', (req, res, next) => {
-    req.body = req.body || {};
-    const username = req.body.username;
-    const pw = req.body.password;
+module.exports = function (OAuth) {
+  OAuth.createToken = function (data, opts, next) {
+    data = data || {};
+    const username = data.username;
+    const pw = data.password;
 
     if (!username) { return next(new Error('Missing required parameter: username', 'invalid_request')); }
     if (!pw) { return next(new Error('Missing required parameter: password', 'invalid_request')); }
 
-    const userModel = server.models.user;
-    const loginSettings = server.settings.login;
+    const userModel = App.models.user;
+    const loginSettings = App.settings.login;
     let currentUser = null;
     userModel
       .findOne({
@@ -41,7 +45,7 @@ module.exports = function grantToken(server) {
         }
       })
       .then(() => {
-        server.models.user.login({
+        userModel.login({
           email: username,
           password: pw
         }, (err, token) => {
@@ -61,7 +65,7 @@ module.exports = function grantToken(server) {
               .catch(() => next(err));
           }
 
-          return res.send({
+          return next(null, {
             token_type: 'bearer',
             expires_in: token.ttl,
             access_token: token.id
@@ -69,5 +73,5 @@ module.exports = function grantToken(server) {
         });
       })
       .catch(err => next(err));
-  });
+  }
 };

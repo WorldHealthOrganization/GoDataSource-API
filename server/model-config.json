@@ -355,5 +355,17 @@
   "captcha": {
     "dataSource": "memory",
     "public": true
+  },
+  "oauth": {
+    "dataSource": "memory",
+    "public": true
+  },
+  "oauthTokenRequest": {
+    "dataSource": "memory",
+    "public": true
+  },
+  "oauthTokenResponse": {
+    "dataSource": "memory",
+    "public": true
   }
 }
