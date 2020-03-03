@@ -20,9 +20,9 @@
     "cors": false
   },
   "public": {
-    "host": "localhost",
+    "host": "192.168.0.204",
     "protocol": "http",
-    "port": 3000
+    "port": "3000"
   },
   "passwordReset": {
     "ttl": 900,
@@ -82,7 +82,7 @@
   ],
   "signoutUsersOnRestart": false,
   "cors": {
-    "enabled": true,
+    "enabled": false,
     "whitelist": []
   },
   "enableConfigRewrite": true,
@@ -95,6 +95,7 @@
   },
   "login": {
     "maxRetries": 10,
-    "resetTime": 1
+    "resetTime": 1,
+    "resetTimeUnit": "minutes"
   }
 }

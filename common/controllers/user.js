@@ -6,7 +6,7 @@ const config = require('../../server/config.json');
 const bcrypt = require('bcrypt');
 const async = require('async');
 const _ = require('lodash');
-const moment = require('moment');
+const Moment = require('moment');
 const uuid = require('uuid');
 
 module.exports = function (User) {
@@ -158,20 +158,25 @@ module.exports = function (User) {
       })
       .then(user => {
         if (!user) {
-          next();
-        } else {
-          if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
-            const isValidForReset = moment(user.lastLoginDate).isAfter(moment().add(config.login.resetTime, 'h'));
-            const isBanned = user.loginRetriesCount >= config.login.maxRetries;
-            if (isBanned && !isValidForReset) {
-              next(new Error('Action blocked.'));
-            } else {
-              next();
+          return next();
+        }
+        if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
+          const isValidForReset = Moment(user.lastLoginDate).isAfter(
+            Moment().add(config.login.resetTime, config.login.resetTimeUnit)
+          );
+          const isBanned = user.loginRetriesCount >= config.login.maxRetries;
+          if (isBanned) {
+            if (!isValidForReset) {
+              return next(new Error('Action is blocked temporarily.'));
             }
-          } else {
-            next();
+            // reset login retries
+            return user.updateAttributes({
+              loginRetriesCount: 0,
+              lastLoginDate: null
+            }).then(() => next());
           }
         }
+        return next();
       });
   });
 
@@ -184,27 +189,31 @@ module.exports = function (User) {
       })
       .then(user => {
         if (!user) {
-          next();
-        } else {
-          const userAttributesToUpdate = {};
-          if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
-            const isValidForReset = moment(user.lastLoginDate).isAfter(moment().add(config.login.resetTime, 'h'));
-            const isBanned = user.loginRetriesCount >= config.login.maxRetries;
-            if (isBanned && !isValidForReset) {
-              return next();
-            } else if (isValidForReset) {
-              userAttributesToUpdate.loginRetriesCount = 0;
-              userAttributesToUpdate.lastLoginDate = moment().toDate();
-            } else {
-              userAttributesToUpdate.loginRetriesCount = ++user.loginRetriesCount;
-            }
-          } else {
-            userAttributesToUpdate.loginRetriesCount = 0;
-            userAttributesToUpdate.lastLoginDate = moment().toDate();
-          }
-          user.updateAttributes(userAttributesToUpdate)
-            .then(() => next());
+          return next();
         }
+
+        const userAttributesToUpdate = {};
+        if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
+          const isValidForReset = Moment(user.lastLoginDate).isAfter(
+            Moment().add(config.login.resetTime, config.login.resetTimeUnit)
+          );
+          const isBanned = user.loginRetriesCount >= config.login.maxRetries;
+          if (isBanned) {
+            // nothing to do, waiting for ban to be lifted
+            if (!isValidForReset) {
+              return next();
+            }
+            userAttributesToUpdate.loginRetriesCount = 0;
+            userAttributesToUpdate.lastLoginDate = Moment().toDate();
+          } else {
+            userAttributesToUpdate.loginRetriesCount = ++user.loginRetriesCount;
+          }
+        } else {
+          userAttributesToUpdate.loginRetriesCount = 0;
+          userAttributesToUpdate.lastLoginDate = Moment().toDate();
+        }
+
+        return user.updateAttributes(userAttributesToUpdate).then(() => next());
       });
   });
 
