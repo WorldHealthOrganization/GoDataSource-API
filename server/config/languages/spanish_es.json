@@ -4469,6 +4469,9 @@
         "modules": [
           "unauthenticated"
         ]
+      },
+      "LNG_API_ERROR_CODE_ACTIVE_OUTBREAK_NOT_ALLOWED": {
+        "translation": "Active outbreak not allowed"
       }
     },
     "uiCommonFields": {
