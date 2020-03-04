@@ -6,6 +6,7 @@ const config = require('../../server/config.json');
 const bcrypt = require('bcrypt');
 const async = require('async');
 const _ = require('lodash');
+const uuid = require('uuid');
 
 module.exports = function (User) {
 
@@ -97,14 +98,64 @@ module.exports = function (User) {
     const req = ctx.req;
     if (
       req.session &&
-      req.session.captcha &&
+      req.session.loginCaptcha &&
       req.body &&
-      req.session.captcha !== req.body.captcha
+      req.session.loginCaptcha !== req.body.captcha
     ) {
+      // invalidate captcha - just one time we can use it, otherwise it becomes invalid
+      req.session.loginCaptcha = uuid();
+
+      // return invalid captcha
       return next(app.utils.apiError.getError('INVALID_CAPTCHA'));
     }
 
-    // check captcha
+    // captcha okay
+    next();
+  });
+
+  /**
+   * Hook before user/reset method
+   */
+  User.beforeRemote('resetPassword', (ctx, modelInstance, next) => {
+    // do we need to validate captcha ?
+    const req = ctx.req;
+    if (
+      req.session &&
+      req.session.forgotPasswordCaptcha &&
+      req.body &&
+      req.session.forgotPasswordCaptcha !== req.body.captcha
+    ) {
+      // invalidate captcha - just one time we can use it, otherwise it becomes invalid
+      req.session.forgotPasswordCaptcha = uuid();
+
+      // return invalid captcha
+      return next(app.utils.apiError.getError('INVALID_CAPTCHA'));
+    }
+
+    // captcha okay
+    next();
+  });
+
+  /**
+   * Hook before user/reset-password-with-security-question method
+   */
+  User.beforeRemote('resetPassWithSecurityQuestion', (ctx, modelInstance, next) => {
+    // do we need to validate captcha ?
+    const req = ctx.req;
+    if (
+      req.session &&
+      req.session.resetPasswordQuestionsCaptcha &&
+      req.body &&
+      req.session.resetPasswordQuestionsCaptcha !== req.body.captcha
+    ) {
+      // invalidate captcha - just one time we can use it, otherwise it becomes invalid
+      req.session.resetPasswordQuestionsCaptcha = uuid();
+
+      // return invalid captcha
+      return next(app.utils.apiError.getError('INVALID_CAPTCHA'));
+    }
+
+    // captcha okay
     next();
   });
 

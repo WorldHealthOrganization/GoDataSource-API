@@ -7,14 +7,25 @@ module.exports = function (Captcha) {
   /**
    * Generate SVG
    */
-  Captcha.generateSVG = function (opts, next) {
+  Captcha.generateSVG = function (forComponent, opts, next) {
     try {
       // generate captcha
-      const captcha = svgCaptcha.create();
+      const captcha =
+        svgCaptcha.create();
 
       // keep captcha into session variable
       if (opts.remotingContext.req.session) {
-        opts.remotingContext.req.session.captcha = captcha.text;
+        switch (forComponent) {
+          case 'login':
+            opts.remotingContext.req.session.loginCaptcha = captcha.text;
+            break;
+          case 'forgot-password':
+            opts.remotingContext.req.session.forgotPasswordCaptcha = captcha.text;
+            break;
+          case 'reset-password-questions':
+            opts.remotingContext.req.session.resetPasswordQuestionsCaptcha = captcha.text;
+            break;
+        }
       }
 
       // send response
