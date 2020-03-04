@@ -11,7 +11,7 @@ module.exports = function (OAuth) {
     const pw = data.password;
 
     if (!username) {
-      return next(app.utils.apiError.getError(
+      return next(App.utils.apiError.getError(
         'REQUEST_VALIDATION_ERROR',
         {
           errorMessages: 'Missing required parameter: username'
@@ -19,7 +19,7 @@ module.exports = function (OAuth) {
       );
     }
     if (!pw) {
-      return next(app.utils.apiError.getError(
+      return next(App.utils.apiError.getError(
         'REQUEST_VALIDATION_ERROR',
         {
           errorMessages: 'Missing required parameter: pasword'
@@ -38,7 +38,7 @@ module.exports = function (OAuth) {
       })
       .then(user => {
         if (!user) {
-          throw app.utils.apiError.getError('LOGIN_FAILED');
+          throw App.utils.apiError.getError('LOGIN_FAILED');
         }
         currentUser = user;
         if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
@@ -54,7 +54,7 @@ module.exports = function (OAuth) {
             });
           }
           if (isBanned && !isValidForReset) {
-            throw app.utils.apiError.getError('ACTION_TEMPORARILY_BLOCKED');
+            throw App.utils.apiError.getError('ACTION_TEMPORARILY_BLOCKED');
           }
         }
       })
@@ -87,5 +87,5 @@ module.exports = function (OAuth) {
         });
       })
       .catch(err => next(err));
-  }
+  };
 };
