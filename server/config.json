@@ -95,7 +95,7 @@
   },
   "login": {
     "maxRetries": 10,
-    "resetTime": 1,
+    "resetTime": 30,
     "resetTimeUnit": "minutes"
   }
 }
