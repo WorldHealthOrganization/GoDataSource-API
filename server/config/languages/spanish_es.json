@@ -3652,13 +3652,19 @@
     },
     "uiGenericLayout": {
       "LNG_LAYOUT_ACTION_CHANGE_LANGUAGE_SUCCESS_MESSAGE": {
-        "translation": "Idioma cambiado"
+        "translation": "Idioma cambiado",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_LAYOUT_ACTIVE_OUTBREAK_LABEL": {
         "translation": "[Activo] {{name}}"
       },
       "LNG_LAYOUT_LANGUAGE_LABEL": {
-        "translation": "Idioma"
+        "translation": "Idioma",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_LAYOUT_LIST_DEFAULT_FILTER_PLACEHOLDER": {
         "translation": "Filtrar por"
