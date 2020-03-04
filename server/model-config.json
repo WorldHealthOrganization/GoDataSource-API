@@ -363,9 +363,5 @@
   "oauthTokenRequest": {
     "dataSource": "memory",
     "public": true
-  },
-  "oauthTokenResponse": {
-    "dataSource": "memory",
-    "public": true
   }
 }

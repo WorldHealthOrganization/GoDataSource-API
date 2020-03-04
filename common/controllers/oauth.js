@@ -66,7 +66,7 @@ module.exports = function (OAuth) {
           if (err) {
             const userAttributesToUpdate = {};
             if (currentUser.loginRetriesCount >= 0 && currentUser.lastLoginDate) {
-              if (currentUser.loginRetriesCount < config.login.maxRetries) {
+              if (currentUser.loginRetriesCount < loginSettings.maxRetries) {
                 userAttributesToUpdate.loginRetriesCount = ++currentUser.loginRetriesCount;
               }
             } else {
