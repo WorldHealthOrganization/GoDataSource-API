@@ -24,6 +24,12 @@
     "generateSVG": {
       "accepts": [
         {
+          "arg": "forComponent",
+          "type": "string",
+          "description": "For which request should we generate captcha ( e.g. login, forgot-password, reset-password-questions )?",
+          "required": true
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
