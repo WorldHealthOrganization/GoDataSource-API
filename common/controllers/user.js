@@ -198,7 +198,7 @@ module.exports = function (User) {
             }).then(() => next());
           }
           if (isBanned && !isValidForReset) {
-            return next(new Error('Action is blocked temporarily.'));
+            return next(app.utils.apiError.getError('ACTION_TEMPORARILY_BLOCKED'));
           }
         }
         return next();

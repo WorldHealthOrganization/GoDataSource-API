@@ -330,5 +330,9 @@
   "ACTION_TEMPORARILY_BLOCKED": {
     "defaultStatusCode": 422,
     "messagePattern": "This action has been blocked temporarily"
+  },
+  "LOGIN_FAILED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Login failed"
   }
 }
