@@ -206,30 +206,34 @@ module.exports = function (User) {
   });
 
   User.afterRemoteError('login', (ctx, next) => {
-    User
-      .findOne({
-        where: {
-          email: ctx.args.credentials.email
-        }
-      })
-      .then(user => {
-        if (!user) {
-          return next();
-        }
-
-        const userAttributesToUpdate = {};
-        if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
-          if (user.loginRetriesCount >= config.login.maxRetries) {
+    if (ctx.args.credentials.email) {
+      User
+        .findOne({
+          where: {
+            email: ctx.args.credentials.email
+          }
+        })
+        .then(user => {
+          if (!user) {
             return next();
           }
-          userAttributesToUpdate.loginRetriesCount = ++user.loginRetriesCount;
-        } else {
-          userAttributesToUpdate.loginRetriesCount = 1;
-          userAttributesToUpdate.lastLoginDate = Moment().toDate();
-        }
 
-        return user.updateAttributes(userAttributesToUpdate).then(() => next());
-      });
+          const userAttributesToUpdate = {};
+          if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
+            if (user.loginRetriesCount >= config.login.maxRetries) {
+              return next();
+            }
+            userAttributesToUpdate.loginRetriesCount = ++user.loginRetriesCount;
+          } else {
+            userAttributesToUpdate.loginRetriesCount = 1;
+            userAttributesToUpdate.lastLoginDate = Moment().toDate();
+          }
+
+          return user.updateAttributes(userAttributesToUpdate).then(() => next());
+        });
+    } else {
+      return next();
+    }
   });
 
   /**
