@@ -106,7 +106,7 @@ module.exports = function (User) {
     return questions.map((item) => {
       return {
         question: item.question,
-        answer: bcrypt.hashSync(item.answer, 10)
+        answer: bcrypt.hashSync(item.answer.toLowerCase(), 10)
       };
     });
   };

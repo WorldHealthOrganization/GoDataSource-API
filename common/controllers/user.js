@@ -363,7 +363,7 @@ module.exports = function (User) {
             }
 
             // check the answers
-            isValid = bcrypt.compareSync(data.questions[questionPos].answer, userQuestion.answer);
+            isValid = bcrypt.compareSync(data.questions[questionPos].answer.toLowerCase(), userQuestion.answer);
             if (!isValid) {
               break;
             }
