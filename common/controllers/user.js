@@ -363,7 +363,9 @@ module.exports = function (User) {
             }
 
             // check the answers
-            isValid = bcrypt.compareSync(data.questions[questionPos].answer.toLowerCase(), userQuestion.answer);
+            // backwards compatible (case sensitive check)
+            isValid = bcrypt.compareSync(data.questions[questionPos].answer.toLowerCase(), userQuestion.answer) ||
+              bcrypt.compareSync(data.questions[questionPos].answer, userQuestion.answer);
             if (!isValid) {
               break;
             }
