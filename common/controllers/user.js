@@ -22,17 +22,6 @@ module.exports = function (User) {
   // disable email verification, confirm endpoints
   app.utils.remote.disableRemoteMethods(User, ['prototype.verify', 'confirm']);
 
-  User.afterRemote('login', (ctx, modelInstance, next) => {
-    // delete old access tokens for this user
-    app.models.accessToken.remove({
-      userId: ctx.result.userId,
-      id: {
-        neq: ctx.result.id
-      }
-    });
-    return next();
-  });
-
   User.observe('before save', (ctx, next) => {
     // do not execute on sync
     if (ctx.options && ctx.options._sync) {

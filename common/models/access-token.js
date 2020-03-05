@@ -7,6 +7,19 @@ module.exports = function (AccessToken) {
   // set flag to not get controller
   AccessToken.hasController = false;
 
+  AccessToken.observe('after save', (ctx, next) => {
+    // delete old access tokens for this user
+    if (ctx.isNewInstance) {
+      AccessToken.remove({
+        userId: ctx.instance.userId,
+        id: {
+          neq: ctx.instance.id
+        }
+      });
+    }
+    return next();
+  });
+
   // its a copy of the original function signature
   // but instead of destroying expired tokens
   // it refreshes its expiration time using the configured ttl in the user model
