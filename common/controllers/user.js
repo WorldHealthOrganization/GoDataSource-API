@@ -229,13 +229,13 @@ module.exports = function (User) {
           reqBody.outbreakIds.length &&
           !reqBody.outbreakIds.includes(reqBody.activeOutbreakId)
         ) {
-          reqBody.outbreakIds.push(reqBody.activeOutbreakId);
+          return next(app.utils.apiError.getError('ACTIVE_OUTBREAK_NOT_ALLOWED'));
           // Or of the existing data has outbreakIds that don't contain the new activeOutbreakId
         } else if (Array.isArray(context.instance.outbreakIds) &&
           context.instance.outbreakIds.length &&
           !context.instance.outbreakIds.includes(reqBody.activeOutbreakId)
         ) {
-          reqBody.outbreakIds = context.instance.outbreakIds.concat([reqBody.activeOutbreakId]);
+          return next(app.utils.apiError.getError('ACTIVE_OUTBREAK_NOT_ALLOWED'));
         }
       }
 
@@ -273,13 +273,13 @@ module.exports = function (User) {
         reqBody.securityQuestions = helpers.encryptSecurityQuestions(reqBody.securityQuestions);
       }
 
-      // If the activeOutbreakId is not part of the available outbreakIds, add it to the array (only if the array is not empty)
+      // if the activeOutbreakId is not part of the available outbreakIds stop with error
       if (reqBody.activeOutbreakId) {
         if (Array.isArray(reqBody.outbreakIds) &&
           reqBody.outbreakIds.length &&
           !reqBody.outbreakIds.includes(reqBody.activeOutbreakId)
         ) {
-          reqBody.outbreakIds.push(reqBody.activeOutbreakId);
+          return next(app.utils.apiError.getError('ACTIVE_OUTBREAK_NOT_ALLOWED'));
         }
       }
 
