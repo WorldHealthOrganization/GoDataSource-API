@@ -4478,6 +4478,12 @@
       },
       "LNG_API_ERROR_CODE_ACTIVE_OUTBREAK_NOT_ALLOWED": {
         "translation": "Active outbreak not allowed"
+      },
+      "LNG_API_ERROR_CODE_ACTION_TEMPORARILY_BLOCKED": {
+        "translation": "This action has been blocked temporarily",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiCommonFields": {

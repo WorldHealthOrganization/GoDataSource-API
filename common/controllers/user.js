@@ -6,6 +6,7 @@ const config = require('../../server/config.json');
 const bcrypt = require('bcrypt');
 const async = require('async');
 const _ = require('lodash');
+const Moment = require('moment');
 const uuid = require('uuid');
 
 module.exports = function (User) {
@@ -21,6 +22,38 @@ module.exports = function (User) {
   app.utils.remote.disableStandardRelationRemoteMethods(User, 'activeOutbreak');
   // disable email verification, confirm endpoints
   app.utils.remote.disableRemoteMethods(User, ['prototype.verify', 'confirm']);
+
+  User.afterRemote('login', (ctx, instance, next) => {
+    User
+      .findOne({
+        where: {
+          id: instance.userId
+        }
+      })
+      .then(user => {
+        if (!user) {
+          return next();
+        }
+        return user.updateAttributes({
+          loginRetriesCount: 0,
+          lastLoginDate: null
+        }).then(() => next());
+      });
+  });
+
+  User.afterRemote('setPassword', (ctx, modelInstance, next) => {
+    User
+      .findById(ctx.args.id)
+      .then(user => {
+        if (!user) {
+          return next();
+        }
+        return user.updateAttributes({
+          loginRetriesCount: 0,
+          lastLoginDate: null
+        }).then(() => next());
+      });
+  });
 
   User.observe('before save', (ctx, next) => {
     // do not execute on sync
@@ -146,6 +179,70 @@ module.exports = function (User) {
 
     // captcha okay
     next();
+  });
+
+  User.beforeRemote('login', (ctx, modelInstance, next) => {
+    User
+      .findOne({
+        where: {
+          email: ctx.args.credentials.email
+        }
+      })
+      .then(user => {
+        if (!user) {
+          return next();
+        }
+        if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
+          const lastLoginDate = Moment(user.lastLoginDate);
+          const resetDate = Moment().add(config.login.resetTime, config.login.resetTimeUnit);
+          const isValidForReset = resetDate.diff(lastLoginDate, config.login.resetTimeUnit) > config.login.resetTime;
+          const isBanned = user.loginRetriesCount >= config.login.maxRetries;
+          if (isValidForReset) {
+            // reset login retries
+            return user.updateAttributes({
+              loginRetriesCount: 0,
+              lastLoginDate: null
+            }).then(() => next());
+          }
+          if (isBanned && !isValidForReset) {
+            return next(app.utils.apiError.getError('ACTION_TEMPORARILY_BLOCKED'));
+          }
+        }
+        return next();
+      });
+  });
+
+  User.afterRemoteError('login', (ctx, next) => {
+    if (ctx.args.credentials.email) {
+      User
+        .findOne({
+          where: {
+            email: ctx.args.credentials.email
+          }
+        })
+        .then(user => {
+          if (!user) {
+            return next();
+          }
+
+          const now = Moment().toDate();
+          const userAttributesToUpdate = {};
+          if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
+            if (user.loginRetriesCount >= config.login.maxRetries) {
+              return next();
+            }
+            userAttributesToUpdate.loginRetriesCount = ++user.loginRetriesCount;
+            userAttributesToUpdate.lastLoginDate = now;
+          } else {
+            userAttributesToUpdate.loginRetriesCount = 1;
+            userAttributesToUpdate.lastLoginDate = now;
+          }
+
+          return user.updateAttributes(userAttributesToUpdate).then(() => next());
+        });
+    } else {
+      return next();
+    }
   });
 
   /**

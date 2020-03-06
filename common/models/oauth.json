@@ -1,0 +1,67 @@
+{
+  "name": "oauth",
+  "base": "Model",
+  "plural": "oauth",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "AttachController": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "createToken"
+    }
+  ],
+  "methods": {
+    "createToken": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "oauthTokenRequest",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "response",
+          "description": "OAuth Token information",
+          "type": {
+            "token_type": {
+              "type": "string"
+            },
+            "expires_in": {
+              "type": "number"
+            },
+            "access_token": {
+              "type": "string"
+            }
+          },
+          "required": true
+        }
+      ],
+      "description": "Generate an OAuth access token",
+      "http": {
+        "verb": "post",
+        "path": "/token"
+      }
+    }
+  }
+}

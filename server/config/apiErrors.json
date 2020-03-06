@@ -326,5 +326,13 @@
   "ACTIVE_OUTBREAK_NOT_ALLOWED": {
     "defaultStatusCode": 422,
     "messagePattern": "Active outbreak not allowed"
+  },
+  "ACTION_TEMPORARILY_BLOCKED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "This action has been blocked temporarily"
+  },
+  "LOGIN_FAILED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Login failed"
   }
 }
