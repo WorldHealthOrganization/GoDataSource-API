@@ -23,6 +23,24 @@ module.exports = function (User) {
   // disable email verification, confirm endpoints
   app.utils.remote.disableRemoteMethods(User, ['prototype.verify', 'confirm']);
 
+  User.afterRemote('login', (ctx, instance, next) => {
+    User
+      .findOne({
+        where: {
+          id: instance.userId
+        }
+      })
+      .then(user => {
+        if (!user) {
+          return next();
+        }
+        return user.updateAttributes({
+          loginRetriesCount: 0,
+          lastLoginDate: null
+        }).then(() => next());
+      });
+  });
+
   User.afterRemote('setPassword', (ctx, modelInstance, next) => {
     User
       .findById(ctx.args.id)
@@ -207,15 +225,17 @@ module.exports = function (User) {
             return next();
           }
 
+          const now = Moment().toDate();
           const userAttributesToUpdate = {};
           if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
             if (user.loginRetriesCount >= config.login.maxRetries) {
               return next();
             }
             userAttributesToUpdate.loginRetriesCount = ++user.loginRetriesCount;
+            userAttributesToUpdate.lastLoginDate = now;
           } else {
             userAttributesToUpdate.loginRetriesCount = 1;
-            userAttributesToUpdate.lastLoginDate = Moment().toDate();
+            userAttributesToUpdate.lastLoginDate = now;
           }
 
           return user.updateAttributes(userAttributesToUpdate).then(() => next());

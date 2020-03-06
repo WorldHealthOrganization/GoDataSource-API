@@ -64,14 +64,16 @@ module.exports = function (OAuth) {
           password: pw
         }, (err, token) => {
           if (err) {
+            const now = Moment().toDate();
             const userAttributesToUpdate = {};
             if (currentUser.loginRetriesCount >= 0 && currentUser.lastLoginDate) {
               if (currentUser.loginRetriesCount < loginSettings.maxRetries) {
                 userAttributesToUpdate.loginRetriesCount = ++currentUser.loginRetriesCount;
+                userAttributesToUpdate.lastLoginDate = now;
               }
             } else {
               userAttributesToUpdate.loginRetriesCount = 1;
-              userAttributesToUpdate.lastLoginDate = Moment().toDate();
+              userAttributesToUpdate.lastLoginDate = now;
             }
 
             return currentUser.updateAttributes(userAttributesToUpdate)
@@ -79,11 +81,14 @@ module.exports = function (OAuth) {
               .catch(() => next(err));
           }
 
-          return next(null, {
-            token_type: 'bearer',
-            expires_in: token.ttl,
-            access_token: token.id
-          });
+          currentUser.updateAttributes({
+            loginRetriesCount: 0,
+            lastLoginDate: null
+          }).then(() => next(null, {
+              token_type: 'bearer',
+              expires_in: token.ttl,
+              access_token: token.id
+          }));
         });
       })
       .catch(err => next(err));
