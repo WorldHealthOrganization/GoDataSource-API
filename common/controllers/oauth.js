@@ -85,9 +85,9 @@ module.exports = function (OAuth) {
             loginRetriesCount: 0,
             lastLoginDate: null
           }).then(() => next(null, {
-              token_type: 'bearer',
-              expires_in: token.ttl,
-              access_token: token.id
+            token_type: 'bearer',
+            expires_in: token.ttl,
+            access_token: token.id
           }));
         });
       })
