@@ -194,8 +194,8 @@ module.exports = function (User) {
         }
         if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
           const lastLoginDate = Moment(user.lastLoginDate);
-          const resetDate = Moment().add(config.login.resetTime, config.login.resetTimeUnit);
-          const isValidForReset = resetDate.diff(lastLoginDate, config.login.resetTimeUnit) > config.login.resetTime;
+          const now = Moment();
+          const isValidForReset = lastLoginDate.add(config.login.resetTime, config.login.resetTimeUnit).isBefore(now);
           const isBanned = user.loginRetriesCount >= config.login.maxRetries;
           if (isValidForReset) {
             // reset login retries
