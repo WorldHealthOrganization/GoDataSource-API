@@ -5,8 +5,11 @@ const moment = require('moment');
 const async = require('async');
 const fs = require('fs');
 const path = require('path');
-const syncActionsSettings = require('../../server/config.json').sync;
+const configSettings = require('../../server/config.json');
+const syncActionsSettings = configSettings.sync;
 const SyncClient = require('../../components/syncClient');
+const tmp = require('tmp');
+const logger = require('./../../components/logger');
 
 // function used to check if a routine should be executed or not
 // if executed return an execution time, needed for further execution
@@ -334,6 +337,142 @@ module.exports = function (app) {
         });
 
       return done();
+    },
+
+    // remove old snapshot files
+    (done) => {
+      // job for deleting old files that aren't needed anymore
+      try {
+        // determine after how much time we should remove snapshot files
+        if (fs.existsSync(tmp.tmpdir)) {
+          // used to determine when can we delete snapshot files
+          const snapshotMatchRegex = /^snapshot_\d{4}-\d{2}-\d{2}\_\d{2}-\d{2}-\d{2}.zip$/i;
+          const removeSyncSnapshotsAfterHours = configSettings.removeSyncSnapshotsAfter || 24;
+          const deleteSnapshotBeforeDateTime = moment().subtract(removeSyncSnapshotsAfterHours, 'hours');
+
+          // used to determine when can we delete snapshot files
+          // fix for back-words compatibility, to remove old directories, that weren't deleted on time when zip was created
+          const snapshotTmpDirMatchRegex = /^tmp-[a-zA-Z0-9\_]{10,20}$/i;
+
+          // used to determine when can we delete uploaded files with formidable.IncomingForm
+          const uploadedMatchRegex = /^upload_[a-zA-Z0-9\_]+$/i;
+          const removeTmpUploadedFilesAfter = configSettings.removeTmpUploadedFilesAfter || 24;
+          const deleteTmpUploadBeforeDateTime = moment().subtract(removeTmpUploadedFilesAfter, 'hours');
+
+          // used to determine when can we delete uploaded files used to import data
+          const uploadedImportMatchRegex = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+          const removeTmpUploadedImportFilesAfter = configSettings.removeTmpUploadedImportFilesAfter || 24;
+          const deleteTmpUploadImportBeforeDateTime = moment().subtract(removeTmpUploadedImportFilesAfter, 'hours');
+
+          // used to remove directory
+          const removeDirectory = (dirToRemovePath) => {
+            // remove directory and its content
+            const removeDirectoryRecursive = (dirPath) => {
+              if (fs.existsSync(dirPath)) {
+                // fs.rmdirSync with "recursive: true" flag doesn't do the job properly...
+                fs.readdirSync(dirPath).forEach(function(fileOrDirToRemovePath) {
+                  const currentPath =  `${dirPath}${path.sep}${fileOrDirToRemovePath}`;
+                  if(fs.lstatSync(currentPath).isDirectory()) {
+                    // remove directory content
+                    removeDirectoryRecursive(currentPath);
+                  } else {
+                    // delete file
+                    fs.unlinkSync(currentPath);
+                  }
+                });
+
+                // remove main directory
+                fs.rmdirSync(dirPath);
+              }
+            };
+
+            // delete directory
+            // no matter if it was a success or not
+            try {
+              removeDirectoryRecursive(dirToRemovePath);
+            } catch (remErr) {
+              // we don't have rights to delete directory or something has gone wrong...
+              // log data and continue as God intended to be..without any worries...
+              logger.error(`Failed removing tmp uploaded directories: ${remErr}`);
+            }
+          };
+
+          // used to check and delete files
+          const deleteFileOrDirIfMatches = (
+            fileOrDir,
+            regexMatch,
+            beforeDate
+          ) => {
+            // does this file match out search criteria ( snapshot or something else ? )
+            const currentPath = `${tmp.tmpdir}${path.sep}${fileOrDir}`;
+            if (
+              regexMatch.test(fileOrDir) &&
+              fs.existsSync(currentPath)
+            ) {
+              // check and delete old files
+              const fileStats = fs.statSync(currentPath);
+              if (
+                fileStats.birthtime &&
+                moment(fileStats.birthtime).isBefore(beforeDate)
+              ) {
+                try {
+                  // delete file / directory
+                  if (fs.lstatSync(currentPath).isDirectory()) {
+                    // delete directory
+                    removeDirectory(currentPath);
+                  } else {
+                    // delete file
+                    fs.unlinkSync(currentPath);
+                  }
+                } catch (remFileErr) {
+                  // we don't have rights to delete file or something has gone wrong...
+                  // log data and continue as God intended to be..without any worries...
+                  logger.error(`Failed removing tmp file / directory: ${remFileErr}`);
+                }
+              }
+            }
+          };
+
+          // fs.rmdirSync with "recursive: true" flag doesn't do the job properly...
+          fs.readdirSync(tmp.tmpdir).forEach(function(fileOrDir) {
+            // snapshot zip files
+            deleteFileOrDirIfMatches(
+              fileOrDir,
+              snapshotMatchRegex,
+              deleteSnapshotBeforeDateTime
+            );
+
+            // snapshot zip tmp dir
+            // fix for back-words compatibility, to remove old directories, that weren't deleted on time when zip was created
+            deleteFileOrDirIfMatches(
+              fileOrDir,
+              snapshotTmpDirMatchRegex,
+              deleteSnapshotBeforeDateTime
+            );
+
+            // uploaded files & directories
+            deleteFileOrDirIfMatches(
+              fileOrDir,
+              uploadedMatchRegex,
+              deleteTmpUploadBeforeDateTime
+            );
+
+            // uploaded import files
+            deleteFileOrDirIfMatches(
+              fileOrDir,
+              uploadedImportMatchRegex,
+              deleteTmpUploadImportBeforeDateTime
+            );
+          });
+        }
+      } catch (remErr) {
+        // we don't have rights to delete files or something has gone wrong...
+        // log data and continue as God intended to be..without any worries...
+        logger.error(`Failed removing tmp snapshot files: ${remErr}`);
+      }
+
+      // finished
+      done();
     }
   ];
 
