@@ -43,8 +43,8 @@ module.exports = function (OAuth) {
         currentUser = user;
         if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
           const lastLoginDate = Moment(user.lastLoginDate);
-          const resetDate = Moment().add(loginSettings.resetTime, loginSettings.resetTimeUnit);
-          const isValidForReset = resetDate.diff(lastLoginDate, loginSettings.resetTimeUnit) > loginSettings.resetTime;
+          const now = Moment();
+          const isValidForReset = lastLoginDate.add(loginSettings.resetTime, loginSettings.resetTimeUnit).isBefore(now);
           const isBanned = user.loginRetriesCount >= loginSettings.maxRetries;
           if (isValidForReset) {
             // reset login retries
