@@ -97,5 +97,8 @@
     "maxRetries": 10,
     "resetTime": 30,
     "resetTimeUnit": "minutes"
-  }
+  },
+  "removeSyncSnapshotsAfter": 24,
+  "removeTmpUploadedFilesAfter": 24,
+  "removeTmpUploadedImportFilesAfter": 24
 }

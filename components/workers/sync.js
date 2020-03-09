@@ -627,7 +627,45 @@ const worker = {
                     };
                   }),
                   (err) => {
+                    // used to remove directory after archive si done or in case it fails
+                    const cleanArchiveData = (dirToRemovePath) => {
+                      // remove directory and its content
+                      const cleanArchiveDataRecursive = (dirPath) => {
+                        if (fs.existsSync(dirPath)) {
+                          // fs.rmdirSync with "recursive: true" flag doesn't do the job properly...
+                          fs.readdirSync(dirPath).forEach(function(fileOrDirToRemovePath) {
+                            const currentPath =  `${dirPath}${path.sep}${fileOrDirToRemovePath}`;
+                            if (fs.lstatSync(currentPath).isDirectory()) {
+                              // remove directory content
+                              cleanArchiveDataRecursive(currentPath);
+                            } else {
+                              // delete file
+                              fs.unlinkSync(currentPath);
+                            }
+                          });
+
+                          // remove main directory
+                          fs.rmdirSync(dirPath);
+                        }
+                      };
+
+                      // delete archived directory
+                      // no matter if it was a success or not
+                      try {
+                        cleanArchiveDataRecursive(dirToRemovePath);
+                      } catch (remErr) {
+                        // we don't have rights to delete directory or something has gone wrong...
+                        // log data and continue as God intended to be..without any worries...
+                        logger.error(`Failed removing tmp directories: ${remErr}`);
+                      }
+                    };
+
+                    // an error occurred
                     if (err) {
+                      // remove data
+                      cleanArchiveData(tmpDirName);
+
+                      // throw error
                       return reject(err);
                     }
 
@@ -641,9 +679,22 @@ const worker = {
                     // archive file name
                     let archiveName = `${tmpDirName}/../snapshot_${Moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
 
+                    // archive directory
                     createZipArchive(archivesDirName, archiveName, logger)
-                      .then(resolve)
-                      .catch(reject);
+                      .then((data) => {
+                        // remove data
+                        cleanArchiveData(tmpDirName);
+
+                        // finished
+                        resolve(data);
+                      })
+                      .catch((err) => {
+                        // remove data
+                        cleanArchiveData(tmpDirName);
+
+                        // finished
+                        reject(err);
+                      });
                   }
                 );
             })
