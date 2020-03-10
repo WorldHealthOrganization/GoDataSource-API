@@ -303,4 +303,23 @@ module.exports = function (HelpItem) {
         .catch(reject);
     });
   };
+
+  HelpItem.updateHelpItem = function (itemId, data, options, callback) {
+    HelpItem
+      .findOne({
+        where: {
+          categoryId: this.id,
+          id: itemId
+        }
+      })
+      .then((helpItem) => {
+        if (!helpItem) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: HelpItem.modelName, id: itemId});
+        }
+
+        return helpItem.updateAttributes(data, options);
+      })
+      .then((helpItem) => callback(null, helpItem))
+      .catch(callback);
+  };
 };

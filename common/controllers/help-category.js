@@ -7,7 +7,8 @@ module.exports = function (HelpCategory) {
 
   // disable bulk delete for related models
   app.utils.remote.disableRemoteMethods(HelpCategory, [
-    'prototype.__delete__helpItems'
+    'prototype.__delete__helpItems',
+    'prototype.__updateById__helpItems'
   ]);
 
   /**
@@ -184,4 +185,8 @@ module.exports = function (HelpCategory) {
     // continue
     next();
   });
+
+  HelpCategory.prototype.updateHelpItem = function (itemId, data, options, callback) {
+    app.models.helpItem.updateHelpItem(itemId, data, options, callback);
+  };
 };
