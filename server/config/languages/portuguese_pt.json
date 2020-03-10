@@ -2439,7 +2439,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DESCRIPTION": {
         "translation": ""
@@ -2451,7 +2454,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT": {
         "translation": "Texto livre",
@@ -2460,7 +2466,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS": {
         "translation": "Múltiplas respostas",
@@ -2469,7 +2478,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_NUMERIC": {
         "translation": "Numérico",
@@ -2478,7 +2490,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_NUMERIC_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER": {
         "translation": "Resposta única",
@@ -2487,7 +2502,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP": {
         "translation": "Markup",
@@ -2496,7 +2514,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryQuestionCategory": {
@@ -2510,13 +2531,22 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_A_0_DATA_COLLECTOR_INFORMATION": {
         "translation": "A0: Data Collector Information",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_A_0_DATA_COLLECTOR_INFORMATION_DESCRIPTION": {
+        "translation": "",
         "modules": [
           "referenceData"
         ]
@@ -2533,7 +2563,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_CONFIRMED_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_DESCRIPTION": {
         "translation": ""
@@ -2545,7 +2578,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_NOT_A_CASE_DISCARDED_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_PROBABLE": {
         "translation": "Probable",
@@ -2554,7 +2590,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_PROBABLE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT": {
         "translation": "Suspeito",
@@ -2563,7 +2602,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryPersonType": {
@@ -2577,7 +2619,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT": {
         "translation": "Contato",
@@ -2586,7 +2631,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_DESCRIPTION": {
         "translation": ""
@@ -2598,7 +2646,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryPersonDateType": {
@@ -2612,7 +2663,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_HOSPITALIZATION_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_ISOLATION": {
         "translation": "Isolation",
@@ -2621,7 +2675,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_ISOLATION_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_OTHER": {
         "translation": "Other",
@@ -2630,7 +2687,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_OTHER_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_HOSPITALIZATION_FOR_OTHER_MEDICAL_CONDITIONS": {
         "translation": "Hospitalization for other medical conditions",
@@ -2639,7 +2699,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_HOSPITALIZATION_FOR_OTHER_MEDICAL_CONDITIONS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_A_E_VISIT": {
         "translation": "A&E Visit",
@@ -2655,6 +2718,24 @@
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_PRIMARY_HEALTH_CARE_PHC_GP_ETC_VISIT": {
         "translation": "Primary Health Care PHC (GP, etc)  Visit",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_A_E_VISIT_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_ICU_ADMISSION_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_PRIMARY_HEALTH_CARE_PHC_GP_ETC_VISIT_DESCRIPTION": {
+        "translation": "",
         "modules": [
           "referenceData"
         ]
@@ -2674,7 +2755,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_OTHER_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_PREVIOUS_USUAL_PLACE_OF_RESIDENCE": {
         "translation": "Endereço anterior",
@@ -2683,7 +2767,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_PREVIOUS_USUAL_PLACE_OF_RESIDENCE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE": {
         "translation": "Endereço Atual",
@@ -2692,7 +2779,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryGender": {
@@ -2709,7 +2799,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_GENDER_FEMALE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_GENDER_MALE": {
         "translation": "Masculino",
@@ -2718,7 +2811,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_GENDER_MALE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryOccupation": {
@@ -2732,7 +2828,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_BUTCHER_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_CHILD": {
         "translation": "Criança",
@@ -2741,7 +2840,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_CHILD_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_CIVIL_SERVANT": {
         "translation": "Funcionário público",
@@ -2750,7 +2852,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_CIVIL_SERVANT_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_DESCRIPTION": {
         "translation": ""
@@ -2762,7 +2867,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_FARMER_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_HEALTH_CARE_WORKER": {
         "translation": "Trabalhador de saúde",
@@ -2771,7 +2879,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_HEALTH_CARE_WORKER_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_HUNTER": {
         "translation": "Caçador",
@@ -2780,7 +2891,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_HUNTER_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_OTHER": {
         "translation": "Outros",
@@ -2789,7 +2903,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_OTHER_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_RELIGIOUS_LEADER": {
         "translation": "Líder religioso",
@@ -2798,7 +2915,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_RELIGIOUS_LEADER_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_STUDENT": {
         "translation": "Aluna",
@@ -2807,7 +2927,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_STUDENT_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_TAXI_DRIVER": {
         "translation": "Taxista",
@@ -2816,7 +2939,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_TAXI_DRIVER_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_TEACHER": {
         "translation": "Professor",
@@ -2825,7 +2951,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_TEACHER_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_TRADITIONAL_HEALER": {
         "translation": "Curandeiro tradicional",
@@ -2834,7 +2963,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_TRADITIONAL_HEALER_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_UNKNOWN": {
         "translation": "Desconhecido",
@@ -2843,7 +2975,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_UNKNOWN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_HEALTH_LABORATORY_WORKER": {
         "translation": "Health laboratory worker",
@@ -2853,6 +2988,18 @@
       },
       "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_WORKING_WITH_ANIMALS": {
         "translation": "Working with animals",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_HEALTH_LABORATORY_WORKER_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_WORKING_WITH_ANIMALS_DESCRIPTION": {
+        "translation": "",
         "modules": [
           "referenceData"
         ]
@@ -2877,7 +3024,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_BLOOD_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_DESCRIPTION": {
         "translation": ""
@@ -2889,7 +3039,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_SKIN_BIOPSY_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_SPUTUM": {
         "translation": "Escarro *****",
@@ -2898,7 +3051,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_SPUTUM_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_THROAT_SWAB": {
         "translation": "Cotonete de garganta ****",
@@ -2907,7 +3063,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_THROAT_SWAB_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_CSF": {
         "translation": "CSF",
@@ -2962,6 +3121,60 @@
         "modules": [
           "referenceData"
         ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_CSF_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_ENDOTRACHEAL_ASPIRATE_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_FAECES_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_NASAL_SWAB_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_NASOPHARYNGEAL_SWAB_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_OTHER_SPECIFY_IN_NOTES_FIELD_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_PLEURAL_FLUID_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_SERUM_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_URINE_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryTypeOfLabTest": {
@@ -2978,7 +3191,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_IG_C_OR_IG_M_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_RT_PCR": {
         "translation": "RT-PCR",
@@ -2987,7 +3203,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_RT_PCR_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_OTHER_SPECIFY_IN_NOTES_FIELD": {
         "translation": "Other (specify in Notes field)",
@@ -3012,6 +3231,30 @@
         "modules": [
           "referenceData"
         ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_OTHER_SPECIFY_IN_NOTES_FIELD_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_PARTIAL_GENOME_SEQUENCING_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_PCR_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_WHOLE_GENOME_SEQUENCING_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryLabTestResult": {
@@ -3028,7 +3271,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_INCONCLUSIVE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_NEGATIVE": {
         "translation": "Negativo",
@@ -3037,7 +3283,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_NEGATIVE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_POSITIVE": {
         "translation": "Positivo",
@@ -3046,10 +3295,19 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_POSITIVE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_POSITIVE_FOR_OTHER_PATHOGENS_SPECIFY_IN_NOTES_FIELD": {
         "translation": "Positive for other pathogens (specify in Notes field)",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_POSITIVE_FOR_OTHER_PATHOGENS_SPECIFY_IN_NOTES_FIELD_DESCRIPTION": {
+        "translation": "",
         "modules": [
           "referenceData"
         ]
@@ -3066,7 +3324,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_COMPLETED_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_DESCRIPTION": {
         "translation": ""
@@ -3078,7 +3339,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_IN_PROGRESS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryDocumentType": {
@@ -3095,7 +3359,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_ARCHIVED_ID_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_EXTERNAL_ID": {
         "translation": "Identificador do caso externo",
@@ -3104,7 +3371,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_EXTERNAL_ID_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_NATIONAL_ID_CARD": {
         "translation": "Carteira de identidade nacional",
@@ -3113,7 +3383,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_NATIONAL_ID_CARD_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_OTHER": {
         "translation": "Outros",
@@ -3122,7 +3395,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_OTHER_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_PASSPORT": {
         "translation": "Passaporte",
@@ -3131,7 +3407,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_PASSPORT_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_VACCINATION_CARD": {
         "translation": "Cartão de vacinação",
@@ -3140,7 +3419,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE_VACCINATION_CARD_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryDisease": {
@@ -3157,7 +3439,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_EBOLA_VIRUS_DISEASE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MARBURG_VIRUS_DISEASE": {
         "translation": "Doença do vírus Marburg",
@@ -3166,7 +3451,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MARBURG_VIRUS_DISEASE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MIDDLE_EASI_RESPIRATORY_SYNDROME_CORONAVIRUS_MERS_CO_V": {
         "translation": "Coronavirus da síndrome respiratória do Oriente Médio (MERS-CoV)*****",
@@ -3175,7 +3463,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MIDDLE_EASI_RESPIRATORY_SYNDROME_CORONAVIRUS_MERS_CO_V_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_PLAGUE_PNEUMONIC": {
         "translation": "Praga, pneumonia",
@@ -3184,10 +3475,19 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_PLAGUE_PNEUMONIC_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_DISEASE_ACUTE_RESPIRATORY_DISEASE": {
         "translation": "Acute Respiratory Disease",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_DISEASE_ACUTE_RESPIRATORY_DISEASE_DESCRIPTION": {
+        "translation": "",
         "modules": [
           "referenceData"
         ]
@@ -3207,7 +3507,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_DIRECT_PHYSICAL_CONTACT_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SLEPT_ATE_OR_SPEND_TIME_IN_SAME_HOUSEHOLD": {
         "translation": "Dormi, comi ou passei algum tempo na mesma casa",
@@ -3216,7 +3519,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SLEPT_ATE_OR_SPEND_TIME_IN_SAME_HOUSEHOLD_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_TOUCHED_BODY_FLUIDS": {
         "translation": "Toques de fluidos corporais",
@@ -3225,7 +3531,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_TOUCHED_BODY_FLUIDS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_ATE_DRANK_CONTAMINATED_MATERIAL": {
         "translation": "Ate/drank contaminated material ",
@@ -3250,6 +3559,30 @@
         "modules": [
           "referenceData"
         ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_ATE_DRANK_CONTAMINATED_MATERIAL_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_INTRAVENOUS_EXPOSURE_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_OTHER_PLEASE_SPECIFY_IN_COMMENT_FIELD_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SEXUAL_EXPOSURE_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryExposureIntensity": {
@@ -3263,7 +3596,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_1_LOW_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_2_MEDIUM": {
         "translation": "2 - Médio",
@@ -3272,7 +3608,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_2_MEDIUM_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_3_HIGH": {
         "translation": "3 - alta",
@@ -3281,7 +3620,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_3_HIGH_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_DESCRIPTION": {
         "translation": ""
@@ -3298,7 +3640,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_11_20_TIMES_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_1_5_TIMES": {
         "translation": "1-5 vezes",
@@ -3307,7 +3652,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_1_5_TIMES_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_6_10_TIMES": {
         "translation": "6-10 vezes",
@@ -3316,7 +3664,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_6_10_TIMES_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_DESCRIPTION": {
         "translation": ""
@@ -3328,7 +3679,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_OVER_21_TIMES_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_UNKNOWN": {
         "translation": "Desconhecido",
@@ -3337,7 +3691,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_UNKNOWN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryExposureDuration": {
@@ -3354,7 +3711,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_LONG_DAYS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_MEDIUM_HOURS": {
         "translation": "Médio (horas)",
@@ -3363,7 +3723,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_MEDIUM_HOURS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_SHORT_MINUTES": {
         "translation": "Curta (minutos)",
@@ -3372,7 +3735,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_SHORT_MINUTES_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_VERY_SHORT_SECONDS": {
         "translation": "Muito curto (segundos)",
@@ -3381,7 +3747,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_VERY_SHORT_SECONDS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryCertaintyLevel": {
@@ -3395,7 +3764,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_1_LOW_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_2_MEDIUM": {
         "translation": "2 - Médio",
@@ -3404,7 +3776,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_2_MEDIUM_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_3_HIGH": {
         "translation": "3 - Alta",
@@ -3413,7 +3788,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_3_HIGH_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_DESCRIPTION": {
         "translation": ""
@@ -3430,7 +3808,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_1_LOW_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_2_MEDIUM": {
         "translation": "2 - Médio",
@@ -3439,7 +3820,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_2_MEDIUM_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_3_HIGH": {
         "translation": "3 - alta",
@@ -3448,7 +3832,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_3_HIGH_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_DESCRIPTION": {
         "translation": ""
@@ -3471,7 +3858,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_CO_WORKERS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_DESCRIPTION": {
         "translation": ""
@@ -3483,7 +3873,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_FAMILY_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_FRIENDS": {
         "translation": "Amigos",
@@ -3492,7 +3885,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_FRIENDS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_NOSOCOMIAL_TRANSMISSION": {
         "translation": "Transmissão nosocomial",
@@ -3501,7 +3897,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_NOSOCOMIAL_TRANSMISSION_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_TRAVEL_TO_OUTBREAK_AREA": {
         "translation": "Viajar para área de surto",
@@ -3510,7 +3909,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_TRAVEL_TO_OUTBREAK_AREA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_UNKNOWN": {
         "translation": "Desconhecido",
@@ -3519,7 +3921,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_UNKNOWN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryOutcome": {
@@ -3533,7 +3938,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OUTCOME_ALIVE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED": {
         "translation": "Falecido",
@@ -3542,7 +3950,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DESCRIPTION": {
         "translation": ""
@@ -3554,7 +3965,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_OUTCOME_RECOVERED_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "securityQuestions": {
@@ -7230,7 +7644,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AFGHANISTAN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ALBANIA": {
         "translation": "Albânia",
@@ -7239,7 +7656,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ALBANIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ALGERIA": {
         "translation": "Argélia",
@@ -7248,7 +7668,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ALGERIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANDORRA": {
         "translation": "Andorra",
@@ -7257,7 +7680,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANDORRA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANGOLA": {
         "translation": "Angola",
@@ -7266,7 +7692,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANGOLA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANGUILLA": {
         "translation": "Anguila",
@@ -7275,7 +7704,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANGUILLA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANTIGUA_AND_BARBUDA": {
         "translation": "Antígua e Barbuda",
@@ -7284,7 +7716,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ANTIGUA_AND_BARBUDA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ARGENTINA": {
         "translation": "Argentina",
@@ -7293,7 +7728,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ARGENTINA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ARMENIA": {
         "translation": "Armênia",
@@ -7302,7 +7740,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ARMENIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ARUBA": {
         "translation": "Aruba",
@@ -7311,7 +7752,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ARUBA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AUSTRALIA": {
         "translation": "Austrália",
@@ -7320,7 +7764,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AUSTRALIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AUSTRIA": {
         "translation": "Áustria",
@@ -7329,7 +7776,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AUSTRIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AZERBAIJAN": {
         "translation": "Azerbaijão",
@@ -7338,7 +7788,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_AZERBAIJAN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BAHAMAS_THE": {
         "translation": "Bahamas (o)",
@@ -7347,7 +7800,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BAHAMAS_THE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BAHRAIN": {
         "translation": "Barém",
@@ -7356,7 +7812,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BAHRAIN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BANGLADESH": {
         "translation": "Bangladesh",
@@ -7365,7 +7824,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BANGLADESH_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BARBADOS": {
         "translation": "Barbados",
@@ -7374,7 +7836,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BARBADOS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BELARUS": {
         "translation": "Belarus",
@@ -7383,7 +7848,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BELARUS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BELGIUM": {
         "translation": "Bélgica",
@@ -7392,7 +7860,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BELGIUM_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BELIZE": {
         "translation": "Belize",
@@ -7401,7 +7872,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BELIZE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BENIN": {
         "translation": "Benin",
@@ -7410,7 +7884,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BENIN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BERMUDA": {
         "translation": "Bermudas",
@@ -7419,7 +7896,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BERMUDA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BHUTAN": {
         "translation": "Butão",
@@ -7428,7 +7908,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BHUTAN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BOLIVIA_PLURINATIONAL_STATE_OF": {
         "translation": "Bolívia (Estado Plurinacional de)",
@@ -7437,7 +7920,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BOLIVIA_PLURINATIONAL_STATE_OF_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BOSNIA_AND_HERZEGOVINA": {
         "translation": "Bósnia e Herzegovina",
@@ -7446,7 +7932,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BOSNIA_AND_HERZEGOVINA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BOTSWANA": {
         "translation": "Botsuana",
@@ -7455,7 +7944,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BOTSWANA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BRAZIL": {
         "translation": "Brasil",
@@ -7464,7 +7956,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BRAZIL_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BRUNEI_DARUSSALAM": {
         "translation": "Brunei Darussalam",
@@ -7473,7 +7968,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BRUNEI_DARUSSALAM_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BULGARIA": {
         "translation": "Bulgária",
@@ -7482,7 +7980,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BULGARIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BURKINA_FASO": {
         "translation": "Burkina Faso",
@@ -7491,7 +7992,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BURKINA_FASO_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BURUNDI": {
         "translation": "Burundi",
@@ -7500,7 +8004,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_BURUNDI_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CABO_VERDE": {
         "translation": "Cabo Verde",
@@ -7509,7 +8016,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CABO_VERDE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CAMBODIA": {
         "translation": "Camboja",
@@ -7518,7 +8028,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CAMBODIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CAMEROON": {
         "translation": "Camarões",
@@ -7527,7 +8040,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CAMEROON_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CANADA": {
         "translation": "Canadá",
@@ -7536,7 +8052,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CANADA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CENTRAL_AFRICAN_REPUBLIC": {
         "translation": "República Centro-Africana",
@@ -7545,7 +8064,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CENTRAL_AFRICAN_REPUBLIC_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CHAD": {
         "translation": "Chade",
@@ -7554,7 +8076,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CHAD_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CHILE": {
         "translation": "Chile",
@@ -7563,7 +8088,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CHILE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CHINA": {
         "translation": "China",
@@ -7572,7 +8100,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CHINA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COLOMBIA": {
         "translation": "Colômbia",
@@ -7581,7 +8112,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COLOMBIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COMOROS_THE": {
         "translation": "Comores (o)",
@@ -7590,7 +8124,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COMOROS_THE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CONGO": {
         "translation": "Congo",
@@ -7599,7 +8136,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CONGO_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COOK_ISLANDS": {
         "translation": "Ilhas Cook",
@@ -7608,7 +8148,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COOK_ISLANDS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COSTA_RICA": {
         "translation": "Costa Rica",
@@ -7617,7 +8160,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COSTA_RICA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COTE_D_IVOIRE": {
         "translation": "Costa do Marfim",
@@ -7626,7 +8172,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_COTE_D_IVOIRE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CROATIA": {
         "translation": "Croácia",
@@ -7635,7 +8184,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CROATIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CUBA": {
         "translation": "Cuba",
@@ -7644,7 +8196,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CUBA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CYPRUS": {
         "translation": "Chipre",
@@ -7653,7 +8208,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CYPRUS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CZECH_REPUBLIC": {
         "translation": "República Checa",
@@ -7662,7 +8220,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_CZECH_REPUBLIC_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DEMOCRATIC_PEOPLES_REPUBLIC_OF_KOREA": {
         "translation": "República Popular Democrática da Coreia",
@@ -7671,7 +8232,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DEMOCRATIC_PEOPLES_REPUBLIC_OF_KOREA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DEMOCRATIC_REPUBLIC_OF_THE_CONGO": {
         "translation": "República Democrática do Congo",
@@ -7680,7 +8244,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DEMOCRATIC_REPUBLIC_OF_THE_CONGO_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DENMARK": {
         "translation": "Dinamarca",
@@ -7689,7 +8256,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DENMARK_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DESCRIPTION": {
         "translation": ""
@@ -7701,7 +8271,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DJIBOUTI_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DOMINICA": {
         "translation": "Dominica",
@@ -7716,10 +8289,16 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DOMINICAN_REPUBLIC_THE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_DOMINICA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ECUADOR": {
         "translation": "Equador",
@@ -7728,7 +8307,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ECUADOR_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_EGYPT": {
         "translation": "Egito",
@@ -7737,7 +8319,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_EGYPT_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_EL_SALVADOR": {
         "translation": "El Salvador",
@@ -7746,7 +8331,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_EL_SALVADOR_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_EQUATORIAL_GUINEA": {
         "translation": "Guiné Equatorial",
@@ -7755,7 +8343,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_EQUATORIAL_GUINEA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ERITREA": {
         "translation": "Eritréia",
@@ -7764,7 +8355,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ERITREA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ESTONIA": {
         "translation": "Estônia",
@@ -7773,7 +8367,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ESTONIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ESWATINI": {
         "translation": "Eswatini",
@@ -7782,7 +8379,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ESWATINI_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ETHIOPIA": {
         "translation": "Etiópia",
@@ -7791,7 +8391,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ETHIOPIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_FIJI": {
         "translation": "Fiji",
@@ -7800,7 +8403,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_FIJI_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_FINLAND": {
         "translation": "Finlândia",
@@ -7809,7 +8415,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_FINLAND_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_FRANCE": {
         "translation": "França",
@@ -7818,7 +8427,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_FRANCE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GABON": {
         "translation": "Gabão",
@@ -7827,7 +8439,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GABON_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GEORGIA": {
         "translation": "Georgia",
@@ -7836,7 +8451,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GEORGIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GERMANY": {
         "translation": "Alemanha",
@@ -7845,7 +8463,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GERMANY_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GHANA": {
         "translation": "Gana",
@@ -7854,7 +8475,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GHANA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GREECE": {
         "translation": "Grécia",
@@ -7863,7 +8487,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GREECE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GRENADA": {
         "translation": "Granada",
@@ -7872,7 +8499,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GRENADA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GUATEMALA": {
         "translation": "Guatemala",
@@ -7881,7 +8511,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GUATEMALA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GUINEA": {
         "translation": "Guiné",
@@ -7896,10 +8529,16 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GUINEA_BISSAU_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GUINEA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GUYANA": {
         "translation": "Guiana",
@@ -7908,7 +8547,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_GUYANA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_HAITI": {
         "translation": "Haiti",
@@ -7917,7 +8559,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_HAITI_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_HONDURAS": {
         "translation": "Honduras",
@@ -7926,7 +8571,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_HONDURAS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_HUNGARY": {
         "translation": "Hungria",
@@ -7935,7 +8583,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_HUNGARY_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ICELAND": {
         "translation": "Islândia",
@@ -7944,7 +8595,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ICELAND_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_INDIA": {
         "translation": "Índia",
@@ -7953,7 +8607,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_INDIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_INDONESIA": {
         "translation": "Indonésia",
@@ -7962,7 +8619,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_INDONESIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_IRAN_ISLAMIC_REPUBLIC_OF": {
         "translation": "Irã (República Islâmica do Irã)",
@@ -7971,7 +8631,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_IRAN_ISLAMIC_REPUBLIC_OF_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_IRAQ": {
         "translation": "Iraque",
@@ -7980,7 +8643,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_IRAQ_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_IRELAND": {
         "translation": "Irlanda",
@@ -7989,7 +8655,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_IRELAND_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ISRAEL": {
         "translation": "Israel",
@@ -7998,7 +8667,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ISRAEL_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ITALY": {
         "translation": "Itália",
@@ -8007,7 +8679,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ITALY_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_JAMAICA": {
         "translation": "Jamaica",
@@ -8016,7 +8691,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_JAMAICA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_JAPAN": {
         "translation": "Japão",
@@ -8025,7 +8703,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_JAPAN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_JORDAN": {
         "translation": "Jordânia",
@@ -8034,7 +8715,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_JORDAN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KAZAKHSTAN": {
         "translation": "Cazaquistão",
@@ -8043,7 +8727,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KAZAKHSTAN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KENYA": {
         "translation": "Quênia",
@@ -8052,7 +8739,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KENYA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KIRIBATI": {
         "translation": "Kiribati",
@@ -8061,7 +8751,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KIRIBATI_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KUWAIT": {
         "translation": "Kuwait",
@@ -8070,7 +8763,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KUWAIT_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KYRGYZSTAN": {
         "translation": "Quirguistão",
@@ -8079,7 +8775,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_KYRGYZSTAN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LAO_PEOPLES_DEMOCRATIC_REPUBLIC": {
         "translation": "República Democrática Popular do Laos",
@@ -8088,7 +8787,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LAO_PEOPLES_DEMOCRATIC_REPUBLIC_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LATVIA": {
         "translation": "Letônia",
@@ -8097,7 +8799,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LATVIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LEBANON": {
         "translation": "Líbano",
@@ -8106,7 +8811,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LEBANON_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LESOTHO": {
         "translation": "Lesoto",
@@ -8115,7 +8823,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LESOTHO_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LIBERIA": {
         "translation": "Libéria",
@@ -8124,7 +8835,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LIBERIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LIBYA": {
         "translation": "Líbia",
@@ -8133,7 +8847,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LIBYA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LIECHTENSTEIN": {
         "translation": "Liechtenstein",
@@ -8142,7 +8859,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LIECHTENSTEIN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LITHUANIA": {
         "translation": "Lituânia",
@@ -8151,7 +8871,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LITHUANIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LUXEMBOURG": {
         "translation": "Luxemburgo",
@@ -8160,7 +8883,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_LUXEMBOURG_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MADAGASCAR": {
         "translation": "Madagáscar",
@@ -8169,7 +8895,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MADAGASCAR_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALAWI": {
         "translation": "Malawi",
@@ -8178,7 +8907,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALAWI_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALAYSIA": {
         "translation": "Malásia",
@@ -8187,7 +8919,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALAYSIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALDIVES": {
         "translation": "Maldivas",
@@ -8196,7 +8931,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALDIVES_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALI": {
         "translation": "Mali",
@@ -8205,7 +8943,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALI_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALTA": {
         "translation": "Malta",
@@ -8214,7 +8955,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MALTA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MARSHALL_ISLANDS": {
         "translation": "Ilhas Marshall",
@@ -8223,7 +8967,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MARSHALL_ISLANDS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MAURITANIA": {
         "translation": "Mauritânia",
@@ -8232,7 +8979,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MAURITANIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MAURITIUS": {
         "translation": "Maurício",
@@ -8241,7 +8991,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MAURITIUS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MEXICO": {
         "translation": "México",
@@ -8250,7 +9003,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MEXICO_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MICRONESIA_FEDERATED_STATES_OF": {
         "translation": "Micronésia (Estados Federados da)",
@@ -8259,7 +9015,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MICRONESIA_FEDERATED_STATES_OF_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MONACO": {
         "translation": "Mônaco",
@@ -8268,7 +9027,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MONACO_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MONGOLIA": {
         "translation": "Mongólia",
@@ -8277,7 +9039,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MONGOLIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MONTENEGRO": {
         "translation": "Montenegro",
@@ -8286,7 +9051,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MONTENEGRO_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MOROCCO": {
         "translation": "Marrocos",
@@ -8295,7 +9063,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MOROCCO_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MOZAMBIQUE": {
         "translation": "Moçambique",
@@ -8304,7 +9075,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MOZAMBIQUE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MYANMAR": {
         "translation": "Myanmar",
@@ -8313,7 +9087,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_MYANMAR_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NAMIBIA": {
         "translation": "Namíbia",
@@ -8322,7 +9099,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NAMIBIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NAURU": {
         "translation": "Nauru",
@@ -8331,7 +9111,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NAURU_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NEPAL": {
         "translation": "Nepal",
@@ -8340,7 +9123,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NEPAL_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NETHERLANDS": {
         "translation": "Países Baixos",
@@ -8349,7 +9135,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NETHERLANDS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NEW_ZEALAND": {
         "translation": "Nova Zelândia",
@@ -8358,7 +9147,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NEW_ZEALAND_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NICARAGUA": {
         "translation": "Nicarágua",
@@ -8367,7 +9159,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NICARAGUA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NIGER": {
         "translation": "Níger",
@@ -8382,10 +9177,16 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NIGERIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NIGER_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NIUE": {
         "translation": "Niue",
@@ -8394,7 +9195,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NIUE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NORWAY": {
         "translation": "Noruega",
@@ -8403,7 +9207,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_NORWAY_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_OMAN": {
         "translation": "Omã",
@@ -8412,7 +9219,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_OMAN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PAKISTAN": {
         "translation": "Paquistão",
@@ -8421,7 +9231,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PAKISTAN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PALAU": {
         "translation": "Palau",
@@ -8430,7 +9243,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PALAU_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PANAMA": {
         "translation": "Panamá",
@@ -8439,7 +9255,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PANAMA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PAPUA_NEW_GUINEA": {
         "translation": "Papua Nova Guiné",
@@ -8448,7 +9267,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PAPUA_NEW_GUINEA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PARAGUAY": {
         "translation": "Paraguai",
@@ -8457,7 +9279,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PARAGUAY_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PERU": {
         "translation": "Peru",
@@ -8466,7 +9291,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PERU_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PHILIPPINES": {
         "translation": "Filipinas",
@@ -8475,7 +9303,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PHILIPPINES_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_POLAND": {
         "translation": "Polônia",
@@ -8484,7 +9315,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_POLAND_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PORTUGAL": {
         "translation": "Portugal",
@@ -8493,7 +9327,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_PORTUGAL_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_QATAR": {
         "translation": "Catar",
@@ -8502,7 +9339,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_QATAR_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_REPUBLIC_OF_KOREA": {
         "translation": "República da Coreia",
@@ -8511,7 +9351,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_REPUBLIC_OF_KOREA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_REPUBLIC_OF_MOLDOVA": {
         "translation": "República da Moldávia",
@@ -8520,7 +9363,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_REPUBLIC_OF_MOLDOVA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ROMANIA": {
         "translation": "Roménia",
@@ -8529,7 +9375,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ROMANIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_RUSSIAN_FEDERATION": {
         "translation": "Federação Russa",
@@ -8538,7 +9387,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_RUSSIAN_FEDERATION_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_RWANDA": {
         "translation": "Ruanda",
@@ -8547,7 +9399,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_RWANDA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAINT_KITTS_AND_NEVIS": {
         "translation": "São Cristóvão e Névis",
@@ -8556,7 +9411,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAINT_KITTS_AND_NEVIS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAINT_LUCIA": {
         "translation": "Santa Lúcia",
@@ -8565,7 +9423,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAINT_LUCIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAINT_VINCENT_AND_THE_GRENADINES": {
         "translation": "São Vicente e Granadinas",
@@ -8574,7 +9435,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAINT_VINCENT_AND_THE_GRENADINES_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAMOA": {
         "translation": "Samoa",
@@ -8583,7 +9447,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAMOA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAN_MARINO": {
         "translation": "San Marino",
@@ -8592,7 +9459,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAN_MARINO_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAO_TOME_AND_PRINCIPE": {
         "translation": "São Tomé e Príncipe",
@@ -8601,7 +9471,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAO_TOME_AND_PRINCIPE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAUDI_ARABIA": {
         "translation": "Arábia Saudita",
@@ -8610,7 +9483,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SAUDI_ARABIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SENEGAL": {
         "translation": "Senegal",
@@ -8619,7 +9495,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SENEGAL_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SERBIA": {
         "translation": "Sérvia",
@@ -8628,7 +9507,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SERBIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SEYCHELLES": {
         "translation": "Seychell es",
@@ -8637,7 +9519,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SEYCHELLES_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SIERRA_LEONE": {
         "translation": "Serra Leoa",
@@ -8646,7 +9531,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SIERRA_LEONE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SINGAPORE": {
         "translation": "Cingapura",
@@ -8655,7 +9543,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SINGAPORE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SLOVAKIA": {
         "translation": "Eslováquia",
@@ -8664,7 +9555,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SLOVAKIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SLOVENIA": {
         "translation": "Eslovênia",
@@ -8673,7 +9567,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SLOVENIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOLOMON_ISLANDS": {
         "translation": "Ilhas Salomão",
@@ -8682,7 +9579,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOLOMON_ISLANDS_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOMALIA": {
         "translation": "Somália",
@@ -8691,7 +9591,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOMALIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOUTH_AFRICA": {
         "translation": "África do Sul",
@@ -8700,7 +9603,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOUTH_AFRICA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOUTH_SUDAN": {
         "translation": "Sudão do Sul",
@@ -8709,7 +9615,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SOUTH_SUDAN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SPAIN": {
         "translation": "Espanha",
@@ -8718,7 +9627,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SPAIN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SRI_LANKA": {
         "translation": "Sri Lanka",
@@ -8727,7 +9639,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SRI_LANKA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SUDAN": {
         "translation": "Sudão",
@@ -8736,7 +9651,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SUDAN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SURINAME": {
         "translation": "Suriname",
@@ -8745,7 +9663,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SURINAME_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SWEDEN": {
         "translation": "Suécia",
@@ -8754,7 +9675,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SWEDEN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SWITZERLAND": {
         "translation": "Suíça",
@@ -8763,7 +9687,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SWITZERLAND_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SYRIAN_ARAB_REPUBLIC": {
         "translation": "República Árabe da Síria",
@@ -8772,7 +9699,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_SYRIAN_ARAB_REPUBLIC_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TAJIKISTAN": {
         "translation": "Tajiquistão",
@@ -8781,7 +9711,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TAJIKISTAN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_THAILAND": {
         "translation": "Tailândia",
@@ -8790,7 +9723,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_THAILAND_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_THE_FORMER_YUGOSLAV_REPUBLIC_OF_MACEDONIA": {
         "translation": "Antiga República Jugoslava da Macedónia",
@@ -8799,7 +9735,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_THE_FORMER_YUGOSLAV_REPUBLIC_OF_MACEDONIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_THE_ISLAMIC_REPUBLIC_OF_THE_GAMBIA": {
         "translation": "A República Islâmica da Gâmbia",
@@ -8808,7 +9747,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_THE_ISLAMIC_REPUBLIC_OF_THE_GAMBIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TIMOR_LESTE": {
         "translation": "Timor-Leste",
@@ -8817,7 +9759,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TIMOR_LESTE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TOGO": {
         "translation": "Togo",
@@ -8826,7 +9771,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TOGO_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TONGA": {
         "translation": "Tonga",
@@ -8835,7 +9783,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TONGA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TRINIDAD_AND_TOBAGO": {
         "translation": "Trinidad e Tobago",
@@ -8844,7 +9795,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TRINIDAD_AND_TOBAGO_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TUNISIA": {
         "translation": "Tunísia",
@@ -8853,7 +9807,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TUNISIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TURKEY": {
         "translation": "Peru",
@@ -8862,7 +9819,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TURKEY_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TURKMENISTAN": {
         "translation": "Turcomenistão",
@@ -8871,7 +9831,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TURKMENISTAN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TUVALU": {
         "translation": "Tuvalu",
@@ -8880,7 +9843,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_TUVALU_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UGANDA": {
         "translation": "Uganda",
@@ -8889,7 +9855,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UGANDA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UKRAINE": {
         "translation": "Ucrânia",
@@ -8898,7 +9867,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UKRAINE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_ARAB_EMIRATES": {
         "translation": "Emirados Árabes Unidos",
@@ -8907,7 +9879,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_ARAB_EMIRATES_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_KINGDOM_OF_GREAT_BRITAIN_AND_NORTHERN_IRELAND_THE": {
         "translation": "Reino Unido da Grã-Bretanha e Irlanda do Norte (a)",
@@ -8916,7 +9891,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_KINGDOM_OF_GREAT_BRITAIN_AND_NORTHERN_IRELAND_THE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_REPUBLIC_OF_TANZANIA": {
         "translation": "República Unida da Tanzânia",
@@ -8925,7 +9903,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_REPUBLIC_OF_TANZANIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_STATES_OF_AMERICA": {
         "translation": "Estados Unidos da America",
@@ -8934,7 +9915,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UNITED_STATES_OF_AMERICA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_URUGUAY": {
         "translation": "Uruguai",
@@ -8943,7 +9927,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_URUGUAY_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UZBEKISTAN": {
         "translation": "Uzbequistão",
@@ -8952,7 +9939,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_UZBEKISTAN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_VANUATU": {
         "translation": "Vanuatu",
@@ -8961,7 +9951,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_VANUATU_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_VENEZUELA_BOLIVARIAN_REPUBLIC_OF": {
         "translation": "Venezuela (República Bolivariana da)",
@@ -8970,7 +9963,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_VENEZUELA_BOLIVARIAN_REPUBLIC_OF_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_VIET_NAM": {
         "translation": "Vietnã",
@@ -8979,7 +9975,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_VIET_NAM_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_YEMEN": {
         "translation": "Iémen",
@@ -8988,7 +9987,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_YEMEN_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ZAMBIA": {
         "translation": "Zâmbia",
@@ -8997,7 +9999,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ZAMBIA_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ZIMBABWE": {
         "translation": "Zimbábue",
@@ -9006,7 +10011,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_COUNTRY_ZIMBABWE_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "passwordReset": {
@@ -9056,7 +10064,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_0_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_1": {
         "translation": "Nível de Admin 1",
@@ -9065,7 +10076,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_1_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_10": {
         "translation": "Nível de Admin 10"
@@ -9080,7 +10094,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_2_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_3": {
         "translation": "Nível de Admin 3",
@@ -9089,7 +10106,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_3_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_4": {
         "translation": "Nível de Admin 4",
@@ -9098,7 +10118,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_4_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_5": {
         "translation": "Nível de Admin  5",
@@ -9107,7 +10130,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_5_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_6": {
         "translation": "Nível de Admin  6",
@@ -9116,7 +10142,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_6_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_7": {
         "translation": "Nível de Admin  7",
@@ -9125,7 +10154,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_7_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_8": {
         "translation": "Nível de Admin 8",
@@ -9134,7 +10166,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_8_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_9": {
         "translation": "Nível de Admin  9",
@@ -9143,7 +10178,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_9_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "locationFields": {
@@ -12173,7 +13211,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_MISSED_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_ATTEMPTED": {
         "translation": "Não tentado",
@@ -12182,7 +13223,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_ATTEMPTED_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED": {
         "translation": "Não realizado",
@@ -12191,7 +13235,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK": {
         "translation": "Parece não OK",
@@ -12200,7 +13247,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK": {
         "translation": "Bem visto",
@@ -12209,7 +13259,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "contactDailyFollowUpStatusAcronymType": {
@@ -12243,7 +13296,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP": {
         "translation": "Perdido para acompanhamento ******",
@@ -12252,7 +13308,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP": {
         "translation": "Sob acompanhamento",
@@ -12261,7 +13320,10 @@
         ]
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP_DESCRIPTION": {
-        "translation": ""
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_DIED": {
         "translation": "Died",
@@ -12271,6 +13333,18 @@
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_NEVER_ILL_NOT_A_CASE": {
         "translation": "Never ill/not a case",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_DIED_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_NEVER_ILL_NOT_A_CASE_DESCRIPTION": {
+        "translation": "",
         "modules": [
           "referenceData"
         ]
@@ -14460,6 +15534,54 @@
         "modules": [
           "referenceData"
         ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_NONE_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_NOT_PREGNANT_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_YES_FIRST_TRIMESTER_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_YES_SECOND_TRIMESTER_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_YES_THIRD_TRIMESTER_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_YES_TRIMESTER_UNKNOWN_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS_NOT_VACCINATED_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS_VACCINATED_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryInstitution": {
@@ -14471,6 +15593,12 @@
       },
       "LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME_GENERIC": {
         "translation": "Generic",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME_GENERIC_DESCRIPTION": {
+        "translation": "",
         "modules": [
           "referenceData"
         ]
