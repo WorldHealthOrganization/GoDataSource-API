@@ -677,7 +677,7 @@ const worker = {
                     }
 
                     // archive file name
-                    let archiveName = `${tmpDirName}/../snapshot_${Moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+                    let archiveName = `${tmp.tmpdir}/snapshot_${Moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
 
                     // archive directory
                     createZipArchive(archivesDirName, archiveName, logger)
