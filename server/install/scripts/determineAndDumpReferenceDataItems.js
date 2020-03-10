@@ -29,6 +29,7 @@ function run(callback) {
   if (module.methodRelevantArgs.checkDefaultOutbreakTemplateData) {
     (defaultOutbreakTemplateData.referenceData || []).forEach((item) => {
       mapRefItemToOutbreakTemplate[item.id] = item;
+      mapRefItemToOutbreakTemplate[item.description] = item;
     });
   }
 
@@ -52,18 +53,28 @@ function run(callback) {
       });
 
       // map ref items to categories
+      const tokensToTranslate = {};
       const mapRefItemToCategory = {};
       refDataItems.forEach((item) => {
+        // map
         mapRefItemToCategory[item.id] = item.categoryId;
+        if (item.description) {
+          mapRefItemToCategory[item.description] = item.categoryId;
+        }
+
+        // translate
+        tokensToTranslate[item.id] = true;
+        if (item.description) {
+          tokensToTranslate[item.description] = true;
+        }
       });
 
       // retrieve language tokens
-      const tokensToTranslate = refDataItems.map((item) => item.id);
       return languageToken
         .find({
           where: {
             token: {
-              in: tokensToTranslate
+              in: Object.keys(mapRefItemToCategory)
             },
             languageId: {
               in: Object.keys(defaultLanguageData)
@@ -74,6 +85,9 @@ function run(callback) {
           // go through each token and determine if we need to update anything
           const referenceDataModules = ['referenceData'];
           languageTokens.forEach((tokenData) => {
+            // determine missing language tokens from database and fill them with empty values
+            delete tokensToTranslate[tokenData.token];
+
             // determine section from token
             const languageSection = mapTokenToSection[tokenData.languageId][tokenData.token] ||
               mapTokenToSection[tokenData.languageId][mapRefItemToCategory[tokenData.token]];
@@ -107,6 +121,43 @@ function run(callback) {
               );
             }
           });
+
+          // tokens missing from database that we need to translate to empty values
+          if (!_.isEmpty(tokensToTranslate)) {
+            _.each(tokensToTranslate, (data, token) => {
+              // go through each language
+              _.each(defaultLanguageData, (languageData) => {
+                // determine section from token
+                const languageSection = mapTokenToSection[languageData.id][token] ||
+                  mapTokenToSection[languageData.id][mapRefItemToCategory[token]];
+
+                // set data
+                if (
+                  languageSection && (
+                    !module.methodRelevantArgs.checkDefaultOutbreakTemplateData ||
+                    !mapRefItemToOutbreakTemplate[token]
+                  )
+                ) {
+                  // translation
+                  _.set(
+                    defaultLanguageData,
+                    `[${languageData.id}].sections[${languageSection}][${token}].translation`,
+                    ''
+                  );
+
+                  // outbreakId
+                  // NOT NEEDED
+
+                  // modules
+                  _.set(
+                    defaultLanguageData,
+                    `[${languageData.id}].sections[${languageSection}][${token}].modules`,
+                    referenceDataModules
+                  );
+                }
+              });
+            });
+          }
 
           // finished - determining translations
           return {
