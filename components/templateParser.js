@@ -271,7 +271,7 @@ function beforeHook(context, next) {
                     // set answer identifier
                     let answerIdentifier = `${questionIdentifier}_ANSWER_${_.snakeCase(answer.value).toUpperCase()}`;
 
-                    context.tokenToTemplateTokenMap[`${answerIdentifier}_LABEL`] = answers[aIndex].label;
+                    contextParts.tokenToTemplateTokenMap[`${answerIdentifier}_LABEL`] = answers[aIndex].label;
 
                     // set answer label
                     answers[aIndex].label = `${answerIdentifier}_LABEL`;
