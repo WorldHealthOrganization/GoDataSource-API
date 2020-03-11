@@ -1370,7 +1370,7 @@ module.exports = function (Outbreak) {
     const outbreakId = this.id;
 
     // check if contacts should be counted as transmission chains
-    const noContactChains = _.get(filter, 'where.noContactChains', true);
+    const noContactChains = _.get(filter, 'where.noContactChains', false);
     // if present remove it from the main filter
     if (noContactChains) {
       delete filter.where.noContactChains;
