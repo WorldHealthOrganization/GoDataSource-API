@@ -1361,13 +1361,19 @@ module.exports = function (Outbreak) {
    * @return {Promise<{filter: *, personIds: any, endDate: *, activeFilter: *, includedPeopleFilter: *} | never>}
    */
   Outbreak.prototype.preProcessTransmissionChainsFilter = function (filter) {
-    // set default filter
-    if (!filter) {
-      filter = {};
-    }
+    // defensive checks
+    filter = filter || {};
+    filter.where = filter.where || {};
 
     // get outbreak id
     const outbreakId = this.id;
+
+    // check if contacts should be counted as transmission chains
+    const noContactChains = _.get(filter, 'where.noContactChains', true);
+    // if present remove it from the main filter
+    if (typeof noContactChains !== 'undefined' || noContactChains !== null) {
+      delete filter.where.noContactChains;
+    }
 
     // check if contacts should be included
     const includeContacts = _.get(filter, 'where.includeContacts', false);
@@ -1502,7 +1508,8 @@ module.exports = function (Outbreak) {
           includedPeopleFilter: includedPeopleFilter,
           size: sizeFilter,
           countContacts: countContacts,
-          includeContacts: includeContacts
+          includeContacts: includeContacts,
+          noContactChains: noContactChains
         };
       });
   };
@@ -1762,6 +1769,7 @@ module.exports = function (Outbreak) {
       const includedPeopleFilter = processedFilter.includedPeopleFilter;
       const sizeFilter = processedFilter.size;
       const includeContacts = processedFilter.includeContacts;
+      const noContactChains = processedFilter.noContactChains;
 
       // flag that indicates that contacts should be counted per chain
       const countContacts = processedFilter.countContacts;
@@ -1771,7 +1779,7 @@ module.exports = function (Outbreak) {
 
       // get transmission chains
       app.models.relationship
-        .getTransmissionChains(self.id, self.periodOfFollowup, filter, countContacts, function (error, transmissionChains) {
+        .getTransmissionChains(self.id, self.periodOfFollowup, filter, countContacts, noContactChains, function (error, transmissionChains) {
           if (error) {
             return callback(error);
           }

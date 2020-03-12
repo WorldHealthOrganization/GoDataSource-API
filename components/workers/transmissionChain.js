@@ -179,13 +179,16 @@ const worker = {
           continue;
         }
 
-        // transmission chains are build only by case/event-case/event relationships
-        if (relationshipPerson1.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' || relationshipPerson2.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-          if (options.countContacts) {
-            addPeoplePairToCaseEventToContactMap(relationshipPerson1, relationshipPerson2);
+        // check if chains should be restricted
+        if (options.noContactChains) {
+          // transmission chains are build only by case/event-case/event relationships
+          if (relationshipPerson1.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' || relationshipPerson2.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+            if (options.countContacts) {
+              addPeoplePairToCaseEventToContactMap(relationshipPerson1, relationshipPerson2);
+            }
+            relationsIndex++;
+            continue;
           }
-          relationsIndex++;
-          continue;
         }
 
         // define some shortcuts
