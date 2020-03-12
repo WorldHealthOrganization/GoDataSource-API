@@ -38,7 +38,8 @@ module.exports = function (Contact) {
       'updatedAt': 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',
       'updatedBy': 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
       'deleted': 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
-      'deletedAt': 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT'
+      'deletedAt': 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT',
+      'createdOn': 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON'
     };
 
     // append source export fields
