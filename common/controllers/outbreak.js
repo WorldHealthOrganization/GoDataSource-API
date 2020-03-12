@@ -1361,10 +1361,9 @@ module.exports = function (Outbreak) {
    * @return {Promise<{filter: *, personIds: any, endDate: *, activeFilter: *, includedPeopleFilter: *} | never>}
    */
   Outbreak.prototype.preProcessTransmissionChainsFilter = function (filter) {
-    // set default filter
-    if (!filter) {
-      filter = {};
-    }
+    // defensive checks
+    filter = filter || {};
+    filter.where = filter.where || {};
 
     // get outbreak id
     const outbreakId = this.id;
