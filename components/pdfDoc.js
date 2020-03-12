@@ -80,7 +80,7 @@ function createPdfDoc(options) {
   document.on('pageAdded', function () {
     this.lineWidth(options.lineWidth);
     this.fontSize(options.fontSize);
-    this.font(`${__dirname}/../resources/fonts/NotoSansCJKjp-Regular.min.ttf`);
+    this.font(`${__dirname}/../resources/fonts/Inter-Regular.woff`);
     // include standard logo for non-border-less printing
     if (!options.borderLess) {
       this.image(`${__dirname}/../resources/images/logo-black.png`, document.options.margin, 15, {height: 25});
