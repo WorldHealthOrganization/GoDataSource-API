@@ -38,7 +38,7 @@ module.exports = function (Model) {
       if (context.isNewInstance) {
         if (context.options._sync) {
           if (!context.instance.createdOn) {
-            context.instance.createdOn = platformId === Platform.API ? Platform.SYNC : platformId;
+            context.instance.createdOn = Platform.SYNC;
           }
         } else {
           context.instance.createdOn = platformId;
