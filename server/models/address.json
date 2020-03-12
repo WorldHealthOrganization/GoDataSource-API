@@ -50,6 +50,9 @@
     },
     "phoneNumber": {
       "type": "string"
+    },
+    "emailAddress": {
+      "type": "string"
     }
   },
   "validations": [],

@@ -75,6 +75,7 @@ module.exports = function (FollowUp) {
     'address.geoLocation.lng': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LNG',
     'address.geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
     'address.date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
+    'address.emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS',
     'fillLocation': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_LOCATION',
     'fillLocation.geoLocation': 'LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION',
     'fillLocation.geoLocation.lat': 'LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT',
