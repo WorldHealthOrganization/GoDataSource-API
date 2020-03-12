@@ -25,9 +25,12 @@ module.exports = function (Model) {
       platformId = context.options.platform;
     }
     if (context.options.remotingContext && context.options.remotingContext.req) {
-      const platformHeader = context.options.remotingContext.req.headers['platform'];
+      let platformHeader = context.options.remotingContext.req.headers['platform'];
       if (platformHeader) {
-        platformId = platformHeader.toUpperCase();
+        platformHeader = platformHeader.toUpperCase();
+        if (Platform[platformHeader]) {
+          platformId = Platform[platformHeader];
+        }
       }
     }
 
