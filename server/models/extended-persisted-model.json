@@ -10,6 +10,7 @@
     "UniqueValidator": true,
     "PatternValidator": true,
     "AuthorTimeStamp": true,
+    "PlatformStamp": true,
     "AuditLogger": true,
     "SoftDelete": true,
     "ReadOnlyProperty": true,

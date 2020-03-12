@@ -16,6 +16,7 @@ const templateParser = require('./../../components/templateParser');
 const PromisePool = require('es6-promise-pool');
 const fork = require('child_process').fork;
 const WorkerRunner = require('./../../components/workerRunner');
+const Platform = require('../../components/platform');
 
 module.exports = function (Outbreak) {
 
@@ -4535,6 +4536,9 @@ module.exports = function (Outbreak) {
     const self = this;
     // treat the sync as a regular operation, not really a sync
     options._sync = false;
+    // inject platform identifier
+    options.platform = Platform.IMPORT;
+
     // get importable file
     app.models.importableFile
       .getTemporaryFileById(body.fileId, function (error, file) {
@@ -4657,6 +4661,8 @@ module.exports = function (Outbreak) {
     const self = this;
     // treat the sync as a regular operation, not really a sync
     options._sync = false;
+    // inject platform identifier
+    options.platform = Platform.IMPORT;
     // get importable file
     app.models.importableFile
       .getTemporaryFileById(body.fileId, function (error, file) {
@@ -4766,6 +4772,8 @@ module.exports = function (Outbreak) {
     const self = this;
     // treat the sync as a regular operation, not really a sync
     options._sync = false;
+    // inject platform identifier
+    options.platform = Platform.IMPORT;
     // get importable file
     app.models.importableFile
       .getTemporaryFileById(body.fileId, function (error, file) {
@@ -6457,6 +6465,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.bulkCreateRelationships = function (sources, targets, relationshipData, options, callback) {
+    // inject platform identifier
+    options.platform = Platform.BULK;
+
     // bulk create relationships
     app.models.relationship.bulkCreate(this.id, sources, targets, relationshipData, options)
       .then(function (result) {
@@ -11622,6 +11633,8 @@ module.exports = function (Outbreak) {
     const self = this;
     // treat the sync as a regular operation, not really a sync
     options._sync = false;
+    // inject platform identifier
+    options.platform = Platform.IMPORT;
     // get importable file
     app.models.importableFile
       .getTemporaryFileById(body.fileId, function (error, file) {
@@ -12057,6 +12070,8 @@ module.exports = function (Outbreak) {
     const self = this;
     // treat the sync as a regular operation, not really a sync
     options._sync = false;
+    // inject platform identifier
+    options.platform = Platform.IMPORT;
     // get importable file
     app.models.importableFile
       .getTemporaryFileById(body.fileId, function (error, file) {
@@ -12366,7 +12381,8 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.importImportableRelationshipsFileUsingMap = function (body, options, callback) {
     const self = this;
     options._sync = false;
-
+    // inject platform identifier
+    options.platform = Platform.IMPORT;
     app.models.importableFile
       .getTemporaryFileById(body.fileId, (err, file) => {
         if (err) {
