@@ -1647,6 +1647,12 @@
       "principalId": "contact_of_contact_export_dossier",
       "permission": "ALLOW",
       "property": "contactOfContactDossier"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_view_movement_map",
+      "permission": "ALLOW",
+      "property": "getContactOfContactMovement"
     }
   ],
   "methods": {
@@ -7700,6 +7706,31 @@
         "verb": "post",
         "ignoreActiveOutbreak": true,
         "path": "/contacts-of-contacts/dossier"
+      }
+    },
+    "prototype.getContactOfContactMovement": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for contacts of contacts"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "movement",
+          "type": [
+            "address"
+          ],
+          "description": "List of addresses with GeoLocations ordered from the oldest one to the most recent",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get list of addresses with GeoLocations ordered from the oldest one to the most recent",
+      "http": {
+        "verb": "get",
+        "path": "/contacts-of-contacts/:fk/movement"
       }
     }
   }

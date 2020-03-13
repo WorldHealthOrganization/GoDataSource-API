@@ -3365,6 +3365,33 @@ module.exports = function (Role) {
             'outbreak_view'
           ]
         },
+        {
+          id: 'contact_of_contact_view_movement_map',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_MOVEMENT_MAP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_MOVEMENT_MAP_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'contact_of_contact_view'
+          ]
+        },
+        {
+          id: 'contact_of_contact_export_movement_map',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_MOVEMENT_MAP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_MOVEMENT_MAP_DESCRIPTION',
+          requires: [
+            'contact_of_contact_view_movement_map'
+          ]
+        },
+        {
+          id: 'contact_of_contact_view_chronology_chart',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_CHRONOLOGY_CHART',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_CHRONOLOGY_CHART_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'contact_of_contact_view',
+            'relationship_list'
+          ]
+        }
       ]
     },
   ];

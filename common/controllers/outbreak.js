@@ -1382,6 +1382,13 @@ module.exports = function (Outbreak) {
       delete filter.where.includeContacts;
     }
 
+    // check if contacts of contacts should be included
+    const includeContactsOfContacts = _.get(filter, 'where.includeContactsOfContacts', false);
+    // if present remove it from the main filter
+    if (includeContactsOfContacts) {
+      delete filter.where.includeContactsOfContacts;
+    }
+
     // check if contacts should be counted
     const countContacts = _.get(filter, 'where.countContacts', false);
     if (countContacts) {
@@ -1509,7 +1516,8 @@ module.exports = function (Outbreak) {
           size: sizeFilter,
           countContacts: countContacts,
           includeContacts: includeContacts,
-          noContactChains: noContactChains
+          noContactChains: noContactChains,
+          includeContactsOfContacts: includeContactsOfContacts
         };
       });
   };
@@ -1770,6 +1778,7 @@ module.exports = function (Outbreak) {
       const sizeFilter = processedFilter.size;
       const includeContacts = processedFilter.includeContacts;
       const noContactChains = processedFilter.noContactChains;
+      const includeContactsOfContacts = processedFilter.includeContactsOfContacts;
 
       // flag that indicates that contacts should be counted per chain
       const countContacts = processedFilter.countContacts;
@@ -1795,7 +1804,7 @@ module.exports = function (Outbreak) {
             transmissionChains,
             {
               includeContacts: includeContacts,
-              includeContactsOfContacts: isContactsOfContactsActive
+              includeContactsOfContacts: isContactsOfContactsActive && includeContactsOfContacts && includeContacts
             });
 
           // determine if isolated nodes should be included
@@ -12880,5 +12889,32 @@ module.exports = function (Outbreak) {
           });
         });
     });
+  };
+
+  /**
+   * Get movement for a contact of contact
+   * Movement: list of addresses that contain geoLocation information, sorted from the oldest to newest based on date.
+   * Empty date is treated as the most recent
+   * @param contactOfContactId
+   * @param callback
+   */
+  Outbreak.prototype.getContactOfContactMovement = function (contactOfContactId, callback) {
+    app.models.contactOfContact
+      .findOne({
+        where: {
+          id: contactOfContactId,
+          outbreakId: this.id
+        }
+      })
+      .then(record => {
+        if (!record) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.contactOfContact.modelName,
+            id: contactOfContactId
+          });
+        }
+        return record.getMovement().then(movement => callback(null, movement));
+      })
+      .catch(callback);
   };
 };
