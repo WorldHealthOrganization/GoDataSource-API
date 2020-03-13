@@ -2079,14 +2079,15 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Modify multiple contacts
+   * Modify multiple contacts or contacts of contacts
    * @param existingContacts
+   * @param isContactOfContact
    * @return {Promise<any>}
    */
-  Outbreak.modifyMultipleContacts = function (existingContacts) {
+  Outbreak.modifyMultipleContacts = function (existingContacts, isContactOfContact) {
     // reference shortcuts
     const getError = app.utils.apiError.getError;
-    const contactModel = app.models.contact;
+    const contactModel = isContactOfContact ? app.models.contactOfContact : app.models.contact;
 
     // promisify the result
     return new Promise((resolve, reject) => {

@@ -1014,6 +1014,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "contact_of_contact_change_source_relationships",
+      "permission": "ALLOW",
+      "property": "bulkChangeSourceRelationships"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_view_movement_map",
       "permission": "ALLOW",
       "property": "getContactMovement"
@@ -1653,6 +1659,12 @@
       "principalId": "contact_of_contact_view_movement_map",
       "permission": "ALLOW",
       "property": "getContactOfContactMovement"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_grouped_by_risk",
+      "permission": "ALLOW",
+      "property": "countContactsOfContactsPerRiskLevel"
     }
   ],
   "methods": {

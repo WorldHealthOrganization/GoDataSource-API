@@ -239,6 +239,10 @@
     "defaultStatusCode": 422,
     "messagePattern": "A contact can't be the source in a relationship ( it can only be a target )"
   },
+  "CONTACT_OF_CONTACT_CANT_BE_SOURCE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "A contact of contact can't be the source in a relationship ( it can only be a target )"
+  },
   "CIRCULAR_RELATIONSHIP": {
     "defaultStatusCode": 422,
     "messagePattern": "You can't have a relationship between the same records"

@@ -12940,7 +12940,7 @@ module.exports = function (Outbreak) {
         };
         contacts.forEach(contactRecord => {
           // risk level is optional
-          if (contactRecord.riskLevel === null) {
+          if (contactRecord.riskLevel == null) {
             contactRecord.riskLevel = 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED';
           }
           // init contact riskLevel group if needed
@@ -12957,6 +12957,30 @@ module.exports = function (Outbreak) {
         // send back the result
         callback(null, result);
       })
+      .catch(callback);
+  };
+
+  /**
+   * Bulk modify contacts of contacts
+   * @param records
+   * @param callback
+   */
+  Outbreak.prototype.bulkModifyContactsOfContacts = function (records, callback) {
+    Outbreak.modifyMultipleContacts(records, true)
+      .then((results) => callback(null, results))
+      .catch(callback);
+  };
+
+  /**
+   * Create multiple contacts of contacts for a contact
+   * @param contactId
+   * @param data
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.createContactMultipleContactsOfContacts = function (contactId, data, options, callback) {
+    Outbreak.createPersonMultipleContacts(this, app.models.contact.modelName, contactId, data, options)
+      .then(results => callback(null, results))
       .catch(callback);
   };
 };

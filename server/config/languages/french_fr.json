@@ -1863,6 +1863,24 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_CHRONOLOGY_CHART_DESCRIPTION": {
         "translation": "This permission allows viewing contact of contact chronology chart"
       },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_OF_CONTACT_BY_RISK": {
+        "translation": "Contact Of Contact - group by risk"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_OF_CONTACT_BY_RISK_DESCRIPTION": {
+        "translation": "This permission allows grouping contacts of contacts by risk"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_SOURCE_CONTACT_OF_CONTACT_RELATIONSHIP": {
+        "translation": "Contact Of Contact - change source"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_SOURCE_CONTACT_OF_CONTACT_RELATIONSHIP_DESCRIPTION": {
+        "translation": "This permission allows changing relationship source person"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_TARGET_CONTACT_OF_CONTACT_RELATIONSHIP": {
+        "translation": "Contact Of Contact - change target"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_TARGET_CONTACT_OF_CONTACT_RELATIONSHIP_DESCRIPTION": {
+        "translation": "This permission allows changing relationship target person"
+      },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_RELATIONSHIP": {
         "translation": "Relationships"
       },

@@ -3240,7 +3240,8 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_DESCRIPTION',
           requires: [
             'outbreak_view',
-            'user_list_for_filters'
+            'user_list_for_filters',
+            'contact_of_contact_grouped_by_risk'
           ]
         },
         {
@@ -3391,7 +3392,32 @@ module.exports = function (Role) {
             'contact_of_contact_view',
             'relationship_list'
           ]
-        }
+        },
+        {
+          id: 'contact_of_contact_grouped_by_risk',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_OF_CONTACT_BY_RISK',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_OF_CONTACT_BY_RISK_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'contact_of_contact_change_source_relationships',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_SOURCE_CONTACT_OF_CONTACT_RELATIONSHIP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_SOURCE_CONTACT_OF_CONTACT_RELATIONSHIP_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'contact_of_contact_change_target_relationships',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_TARGET_CONTACT_OF_CONTACT_RELATIONSHIP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_TARGET_CONTACT_OF_CONTACT_RELATIONSHIP_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ],
+          hidden: true
+        },
       ]
     },
   ];
