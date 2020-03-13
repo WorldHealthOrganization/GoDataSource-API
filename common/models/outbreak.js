@@ -2190,4 +2190,139 @@ module.exports = function (Outbreak) {
         });
     });
   };
+
+  /**
+   * Create multiple contacts of contacts for a contact
+   * @param outbreak
+   * @param contactId
+   * @param data
+   * @param options
+   * @return {Promise<any>}
+   */
+  Outbreak.createContactMultipleContactsOfContacts = function (outbreak, contactId, data, options) {
+    // promisify the result
+    return new Promise(function (resolve, reject) {
+      // check if pairs of contacts of contacts + relationship were sent
+      if (!data.length) {
+        return reject(app.utils.apiError.getError('CONTACT_OF_CONTACT_AND_RELATIONSHIP_REQUIRED'));
+      }
+
+      // initialize array of actions that will be executed in async mode
+      let actions = [];
+
+      // initialize array of failed/successful entries
+      let failedEntries = [];
+      let successfulEntries = [];
+
+      // loop through the pairs and create contact of contact + relationship;
+      // relationship needs to be created after the contact is created
+      data.forEach(function (entry, index) {
+        actions.push(function (asyncCallback) {
+          // check for contact of contact + relationship presence
+          if (!entry.contactOfContact || !entry.relationship) {
+            // don't try to create the contact or relationship
+            // will not error the entire request if an entry fails; will return error for each failed entry
+            // add entry in the failed list
+            failedEntries.push({
+              recordNo: index,
+              error: app.utils.apiError.getError('CONTACT_OF_CONTACT_AND_RELATIONSHIP_REQUIRED')
+            });
+            return asyncCallback();
+          }
+
+          // initialize pair result
+          let result = {};
+
+          // add outbreakId to contact of contact and relationship
+          entry.contactOfContact.outbreakId = outbreak.id;
+
+          // create contact through loopback model functionality
+          app.models.contactOfContact
+            .create(entry.contactOfContact, options)
+            .then(function (contact) {
+              // add contact to result
+              result.contactOfContact = contact;
+
+              // add contact information into relationship data
+              entry.relationship.persons = [{
+                id: contact.id,
+                type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT',
+                source: true
+              }];
+
+              // create relationship; using the action and not the loopback model functionality as there are actions to be done before the actual create
+              return new Promise(function (resolve, reject) {
+                outbreak.createContactOfContactRelationship.call(
+                  outbreak,
+                  contactId,
+                  entry.relationship,
+                  options,
+                  function (err, relationship) {
+                    if (err) {
+                      reject(err);
+                    } else {
+                      resolve(relationship);
+                    }
+                });
+              });
+            })
+            .then(function (relationship) {
+              // add relationship to the result
+              result.relationship = relationship;
+
+              // add pair to the success list
+              successfulEntries.push(Object.assign({
+                recordNo: index,
+              }, result));
+
+              asyncCallback();
+            })
+            .catch(function (err) {
+              // pair add failed; add entry to the failed list
+              failedEntries.push({
+                recordNo: index,
+                error: err
+              });
+
+              // will not error the entire request if an entry fails; will return error for each failed entry
+              // check for what model the error was returned;
+              // if contact exists in result then the error is for relationship and we need to rollback contact of contact
+              // else the error is for contact and nothing else needs to be done
+              if (result.contactOfContact) {
+                // rollback contact of contact
+                result.contactOfContact
+                  .destroy(options)
+                  .then(function () {
+                    app.logger.debug('Contact of contact successfully rolled back');
+                  })
+                  .catch(function (rollbackError) {
+                    app.logger.debug(`Failed to rollback contact. Error: ${rollbackError}`);
+                  });
+              } else {
+                // nothing to do
+              }
+
+              asyncCallback();
+            });
+        });
+      });
+
+      // execute actions in sync because we need to generate a different visualID for each record
+      async.series(actions, function (error) {
+        if (error) {
+          return reject(error);
+        }
+
+        if (!failedEntries.length) {
+          // all entries added successfully
+          resolve(successfulEntries);
+        } else {
+          reject(app.utils.apiError.getError('MULTIPLE_CONTACTS_OF_CONTACT_CREATION_PARTIAL_SUCCESS', {
+            failed: failedEntries,
+            success: successfulEntries
+          }));
+        }
+      });
+    });
+  };
 };

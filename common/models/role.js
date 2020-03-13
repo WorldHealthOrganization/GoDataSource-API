@@ -1764,7 +1764,17 @@ module.exports = function (Role) {
           requires: [
             'lab_result_export'
           ]
-        }
+        },
+        {
+          id: 'contact_create_bulk_contact_of_contact',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_OF_CONTACT_FROM_CONTACT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_OF_CONTACT_FROM_CONTACT_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'contact_of_contact_bulk_create',
+            'contact_view'
+          ]
+        },
       ]
     },
 
@@ -3306,6 +3316,16 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'contact_of_contact_bulk_modify',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_CONTACT_OF_CONTACT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_CONTACT_OF_CONTACT_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'contact_of_contact_list',
+            'contact_of_contact_generate_visual_id'
+          ]
+        },
+        {
           id: 'contact_of_contact_generate_visual_id',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_CONTACT_OF_CONTACT_VISUAL_ID',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_CONTACT_OF_CONTACT_VISUAL_ID_DESCRIPTION',
@@ -3418,6 +3438,16 @@ module.exports = function (Role) {
           ],
           hidden: true
         },
+        {
+          id: 'contact_of_contact_bulk_create',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_CREATE_CONTACT_OF_CONTACT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_CREATE_CONTACT_OF_CONTACT_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'contact_of_contact_list',
+            'contact_of_contact_generate_visual_id'
+          ]
+        }
       ]
     },
   ];

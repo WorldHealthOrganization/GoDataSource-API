@@ -12979,7 +12979,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.createContactMultipleContactsOfContacts = function (contactId, data, options, callback) {
-    Outbreak.createPersonMultipleContacts(this, app.models.contact.modelName, contactId, data, options)
+    Outbreak.createContactMultipleContactsOfContacts(this, app.models.contact.modelName, contactId, data, options)
       .then(results => callback(null, results))
       .catch(callback);
   };

@@ -363,5 +363,9 @@
   "oauthTokenRequest": {
     "dataSource": "memory",
     "public": true
+  },
+  "contactOfContactAndRelationship": {
+    "dataSource": null,
+    "public": false
   }
 }

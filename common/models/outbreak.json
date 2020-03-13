@@ -1665,6 +1665,18 @@
       "principalId": "contact_of_contact_grouped_by_risk",
       "permission": "ALLOW",
       "property": "countContactsOfContactsPerRiskLevel"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_bulk_modify",
+      "permission": "ALLOW",
+      "property": "bulkModifyContactsOfContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_create_bulk_contact_of_contact",
+      "permission": "ALLOW",
+      "property": "createContactMultipleContactsOfContacts"
     }
   ],
   "methods": {
@@ -7780,6 +7792,80 @@
       "http": {
         "verb": "get",
         "path": "/contacts-of-contacts/per-risk-level/count"
+      }
+    },
+    "prototype.bulkModifyContactsOfContacts": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": [
+            "contactOfContact"
+          ],
+          "description": "Array containing contacts of contacts",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "createResponse",
+          "type": [
+            "contact"
+          ],
+          "description": "Array of updated contacts of contacts",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Update multiple contacts of contacts",
+      "http": {
+        "verb": "put",
+        "path": "/contacts-of-contacts/bulk"
+      }
+    },
+    "prototype.createContactMultipleContactsOfContacts": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "data",
+          "type": [
+            "contactOfContactAndRelationship"
+          ],
+          "description": "Array containing pairs for contact of contact + relationship",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "createResponse",
+          "type": [
+            "contactOfContactAndRelationship"
+          ],
+          "description": "Array of responses for the create actions",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Creates multiple contacts of contacts for a contact.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/:nk/contacts-of-contacts"
       }
     }
   }
