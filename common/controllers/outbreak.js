@@ -12322,20 +12322,7 @@ module.exports = function (Outbreak) {
         }
         return resolve(dictionary);
       });
-    })
-      .then(dictionary => {
-        return app.models.labResult.preFilterForOutbreak(this, filter)
-          .then((filter) => {
-            return {
-              dictionary: dictionary,
-              filter: filter
-            };
-          });
-      })
-      .then(data => {
-        const dictionary = data.dictionary;
-        const filter = data.filter;
-
+    }).then(dictionary => {
         if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
           encryptPassword = null;
         }
@@ -12344,22 +12331,34 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        options.questionnaire = self.labResultsTemplate;
-        options.dictionary = dictionary;
-        options.useQuestionVariable = useQuestionVariable;
-
-        app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.labResult,
-          {},
+        app.models.labResult.retrieveAggregateLabResults(
+          this,
           filter,
-          exportType,
-          'LabResult-List',
-          encryptPassword,
-          anonymizeFields,
-          options,
-          data => Promise.resolve(data),
-          callback
+          false,
+          (err, results) => {
+            if (err) {
+              return callback(err);
+            }
+
+            options.questionnaire = self.labResultsTemplate;
+            options.dictionary = dictionary;
+            options.useQuestionVariable = useQuestionVariable;
+            options.records = results;
+
+            app.utils.remote.helpers.exportFilteredModelsList(
+              app,
+              app.models.labResult,
+              {},
+              filter,
+              exportType,
+              'LabResult-List',
+              encryptPassword,
+              anonymizeFields,
+              options,
+              data => Promise.resolve(data),
+              callback
+            );
+          }
         );
       })
       .catch(callback);
