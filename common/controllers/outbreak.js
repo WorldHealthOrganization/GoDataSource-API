@@ -12322,7 +12322,8 @@ module.exports = function (Outbreak) {
         }
         return resolve(dictionary);
       });
-    }).then(dictionary => {
+    })
+      .then(dictionary => {
         if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
           encryptPassword = null;
         }
