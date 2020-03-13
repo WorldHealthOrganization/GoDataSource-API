@@ -90,6 +90,8 @@ function exportFilteredModelsList(
   beforeExport,
   callback
 ) {
+  query = query || {};
+
   // no-op fallback function for beforeExport hook
   // used for defensive checks, when it is not passed
   let noOp = (results) => Promise.resolve(results);
@@ -104,11 +106,15 @@ function exportFilteredModelsList(
 
   let modelPropertiesExpandOnFlatFilesKeys = [];
 
-  // find results
-  query = query || {};
-  Model.rawFind(query.where, { includeDeletedRecords: query.deleted })
+  Promise.resolve()
+    .then(() => {
+      if (options.records) {
+        return options.records;
+      } else {
+        return Model.rawFind(query.where, { includeDeletedRecords: query.deleted });
+      }
+    })
     .then(function (results) {
-
       // convert geo-points (if any)
       results.forEach(function (result) {
         helpers.covertAddressesGeoPointToLoopbackFormat(result);

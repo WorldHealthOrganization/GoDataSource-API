@@ -12324,18 +12324,6 @@ module.exports = function (Outbreak) {
       });
     })
       .then(dictionary => {
-        return app.models.labResult.preFilterForOutbreak(this, filter)
-          .then((filter) => {
-            return {
-              dictionary: dictionary,
-              filter: filter
-            };
-          });
-      })
-      .then(data => {
-        const dictionary = data.dictionary;
-        const filter = data.filter;
-
         if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
           encryptPassword = null;
         }
@@ -12344,22 +12332,34 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        options.questionnaire = self.labResultsTemplate;
-        options.dictionary = dictionary;
-        options.useQuestionVariable = useQuestionVariable;
-
-        app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.labResult,
-          {},
+        app.models.labResult.retrieveAggregateLabResults(
+          this,
           filter,
-          exportType,
-          'LabResult-List',
-          encryptPassword,
-          anonymizeFields,
-          options,
-          data => Promise.resolve(data),
-          callback
+          false,
+          (err, results) => {
+            if (err) {
+              return callback(err);
+            }
+
+            options.questionnaire = self.labResultsTemplate;
+            options.dictionary = dictionary;
+            options.useQuestionVariable = useQuestionVariable;
+            options.records = results;
+
+            app.utils.remote.helpers.exportFilteredModelsList(
+              app,
+              app.models.labResult,
+              {},
+              filter,
+              exportType,
+              'LabResult-List',
+              encryptPassword,
+              anonymizeFields,
+              options,
+              data => Promise.resolve(data),
+              callback
+            );
+          }
         );
       })
       .catch(callback);
@@ -12452,5 +12452,179 @@ module.exports = function (Outbreak) {
           }));
         }
       });
+  };
+
+  /**
+   * Export filtered case lab results to file
+   * @param caseId
+   * @param filter
+   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param encryptPassword
+   * @param anonymizeFields
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportFilteredCaseLabResults = function (caseId, filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    const self = this;
+
+    // defensive checks
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // only case lab results
+    filter.where = {
+      and: [
+        filter.where,
+        {
+          personId: caseId,
+          personType: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+        }
+      ]
+    };
+
+    // parse useQuestionVariable query param
+    let useQuestionVariable = false;
+    // if found, remove it form main query
+    if (filter.where.hasOwnProperty('useQuestionVariable')) {
+      useQuestionVariable = filter.where.useQuestionVariable;
+      delete filter.where.useQuestionVariable;
+    }
+
+    new Promise((resolve, reject) => {
+      const contextUser = app.utils.remote.getUserFromOptions(options);
+      app.models.language.getLanguageDictionary(contextUser.languageId, (err, dictionary) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(dictionary);
+      });
+    })
+      .then(dictionary => {
+        return app.models.labResult.preFilterForOutbreak(this, filter)
+          .then((filter) => {
+            return {
+              dictionary: dictionary,
+              filter: filter
+            };
+          });
+      })
+      .then(data => {
+        const dictionary = data.dictionary;
+        const filter = data.filter;
+
+        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+          encryptPassword = null;
+        }
+
+        if (!Array.isArray(anonymizeFields)) {
+          anonymizeFields = [];
+        }
+
+        options.questionnaire = self.labResultsTemplate;
+        options.dictionary = dictionary;
+        options.useQuestionVariable = useQuestionVariable;
+
+        app.utils.remote.helpers.exportFilteredModelsList(
+          app,
+          app.models.labResult,
+          {},
+          filter,
+          exportType,
+          'LabResult-List',
+          encryptPassword,
+          anonymizeFields,
+          options,
+          data => Promise.resolve(data),
+          callback
+        );
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Export filtered case lab results to file
+   * @param contactId
+   * @param filter
+   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param encryptPassword
+   * @param anonymizeFields
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportFilteredContactLabResults = function (contactId, filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+    const self = this;
+
+    // defensive checks
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // only contact lab results
+    filter.where = {
+      and: [
+        filter.where,
+        {
+          personId: contactId,
+          personType: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+        }
+      ]
+    };
+
+    // parse useQuestionVariable query param
+    let useQuestionVariable = false;
+    // if found, remove it form main query
+    if (filter.where.hasOwnProperty('useQuestionVariable')) {
+      useQuestionVariable = filter.where.useQuestionVariable;
+      delete filter.where.useQuestionVariable;
+    }
+
+    new Promise((resolve, reject) => {
+      const contextUser = app.utils.remote.getUserFromOptions(options);
+      app.models.language.getLanguageDictionary(contextUser.languageId, (err, dictionary) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(dictionary);
+      });
+    })
+      .then(dictionary => {
+        return app.models.labResult.preFilterForOutbreak(this, filter)
+          .then((filter) => {
+            return {
+              dictionary: dictionary,
+              filter: filter
+            };
+          });
+      })
+      .then(data => {
+        const dictionary = data.dictionary;
+        const filter = data.filter;
+
+        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+          encryptPassword = null;
+        }
+
+        if (!Array.isArray(anonymizeFields)) {
+          anonymizeFields = [];
+        }
+
+        options.questionnaire = self.labResultsTemplate;
+        options.dictionary = dictionary;
+        options.useQuestionVariable = useQuestionVariable;
+
+        app.utils.remote.helpers.exportFilteredModelsList(
+          app,
+          app.models.labResult,
+          {},
+          filter,
+          exportType,
+          'LabResult-List',
+          encryptPassword,
+          anonymizeFields,
+          options,
+          data => Promise.resolve(data),
+          callback
+        );
+      })
+      .catch(callback);
   };
 };
