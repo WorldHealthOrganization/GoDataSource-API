@@ -1641,6 +1641,12 @@
       "principalId": "contact_of_contact_restore",
       "permission": "ALLOW",
       "property": "restoreContactOfContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_export_dossier",
+      "permission": "ALLOW",
+      "property": "contactOfContactDossier"
     }
   ],
   "methods": {
@@ -7643,6 +7649,57 @@
       "http": {
         "verb": "get",
         "path": "/contacts/:nk/lab-results/export"
+      }
+    },
+    "prototype.contactOfContactDossier": {
+      "accepts": [
+        {
+          "arg": "ids",
+          "type": [
+            "string"
+          ],
+          "description": "Array of contacts for which the dossiers will be generated"
+        },
+        {
+          "arg": "data",
+          "type": [
+            "string"
+          ],
+          "description": "Array of fields to be anonymized"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export dossier for one or more contacts",
+      "http": {
+        "verb": "post",
+        "ignoreActiveOutbreak": true,
+        "path": "/contacts-of-contacts/dossier"
       }
     }
   }

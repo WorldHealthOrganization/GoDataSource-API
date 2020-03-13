@@ -3356,7 +3356,15 @@ module.exports = function (Role) {
             'outbreak_view',
             'relationship_delete'
           ]
-        }
+        },
+        {
+          id: 'contact_of_contact_export_dossier',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_DOSSIER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_DOSSIER_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
       ]
     },
   ];

@@ -1839,6 +1839,12 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION": {
         "translation": "This permission allows deleting contact of contact exposures"
       },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_DOSSIER": {
+        "translation": "Contact Of Contact - export dossier"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_DOSSIER_DESCRIPTION": {
+        "translation": "This permission allows export of contact of contact dossier document"
+      },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_RELATIONSHIP": {
         "translation": "Relationships"
       },
@@ -7637,6 +7643,9 @@
       },
       "LNG_CONTACT_ADDRESSES_SECTION": {
         "translation": "Adresses"
+      },
+      "LNG_PAGE_TITLE_CONTACT_OF_CONTACT_DETAILS": {
+        "translation": "Contact of Contact details"
       }
     },
     "countries": {
