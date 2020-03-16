@@ -2202,7 +2202,7 @@ module.exports = function (Outbreak) {
   Outbreak.createContactMultipleContactsOfContacts = function (outbreak, contactId, data, options, callback) {
     // check if pairs of contacts of contacts + relationship were sent
     if (!data.length) {
-      return reject(app.utils.apiError.getError('CONTACT_OF_CONTACT_AND_RELATIONSHIP_REQUIRED'));
+      return callback(app.utils.apiError.getError('CONTACT_OF_CONTACT_AND_RELATIONSHIP_REQUIRED'));
     }
 
     // initialize array of actions that will be executed in async mode
@@ -2308,7 +2308,7 @@ module.exports = function (Outbreak) {
     // execute actions in sync because we need to generate a different visualID for each record
     async.series(actions, function (error) {
       if (error) {
-        return reject(error);
+        return callback(error);
       }
 
       if (!failedEntries.length) {
