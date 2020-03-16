@@ -15,7 +15,8 @@ const supportedArguments = [
   'dump-outbreak-template-data',
   'remove-unused-language-tokens',
   'populate-with-dummy-data',
-  'determine-and-dump-reference-data-items'
+  'determine-and-dump-reference-data-items',
+  'populate-missing-language-tokens'
 ];
 // keep a list of functions that will be run
 const runFunctions = [];
@@ -102,7 +103,8 @@ const routines = {
       require('./scripts/defaultHelpData'),
       require('./scripts/defaultOutbreakTemplateData'),
       require('./scripts/migrateModelData'),
-      require('./scripts/migrateRolesAndUsers')
+      require('./scripts/migrateRolesAndUsers'),
+      require('./scripts/populateMissingLanguageTokens')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });
@@ -276,6 +278,15 @@ const routines = {
       require('./scripts/determineAndDumpReferenceDataItems')
     ].forEach(function (installScript) {
       runFunctions.push(installScript(methodRelevantArgs));
+    });
+  },
+  populateMissingLanguageTokens: function () {
+    // determine missing reference data items
+    console.log('Determine and populate missing language tokens');
+    [
+      require('./scripts/populateMissingLanguageTokens')
+    ].forEach(function (installScript) {
+      runFunctions.push(installScript);
     });
   }
 };
