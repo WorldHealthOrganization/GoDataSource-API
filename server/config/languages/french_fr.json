@@ -849,6 +849,12 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_QUESTIONNAIRE_DESCRIPTION": {
         "translation": "This permission allows modifying outbreak template contact questionnaire"
       },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_TEMPLATE_CLONE": {
+        "translation": "Outbreak Template - create clone"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_TEMPLATE_CLONE_DESCRIPTION": {
+        "translation": "This permission allows creating an outbreak template clone"
+      },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_TEAM": {
         "translation": "Teams"
       },
