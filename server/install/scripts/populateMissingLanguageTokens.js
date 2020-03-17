@@ -187,11 +187,13 @@ function determineMissingLanguageTokens(
       data.languagesIds.forEach((languageToCheckId) => {
         data.records.forEach((mainLanguageTokenData) => {
           // create ?
-          if (!tokensToCheckMap[languageToCheckId][mainLanguageTokenData.token]) {
+          if (tokensToCheckMap[languageToCheckId][mainLanguageTokenData.token] === undefined) {
             // create token
             jobs.push((function (localMainLanguageTokenData, localLanguageToCheckId) { return (callback) => {
               // generate id
-              const tokenID = generateTokenID(localMainLanguageTokenData.token, localLanguageToCheckId);
+              const tokenID = localMainLanguageTokenData._id.startsWith('LNG_') ?
+                generateTokenID(localMainLanguageTokenData.token, localLanguageToCheckId) :
+                uuid();
 
               // prepare object to save
               const newTokenData = Object.assign({
@@ -220,11 +222,11 @@ function determineMissingLanguageTokens(
             // check if anything is different
             if (
               (
-                mainLanguageTokenData.outbreakId !== tokensToCheckMap[languageToCheckId][mainLanguageTokenData.token].outbreakId ||
-                !_.isEqual(mainLanguageTokenData.modules, tokensToCheckMap[languageToCheckId][mainLanguageTokenData.token].modules)
-              ) && (
                 mainLanguageTokenData.outbreakId ||
                 mainLanguageTokenData.modules
+              ) && (
+                mainLanguageTokenData.outbreakId !== tokensToCheckMap[languageToCheckId][mainLanguageTokenData.token].outbreakId ||
+                !_.isEqual(mainLanguageTokenData.modules, tokensToCheckMap[languageToCheckId][mainLanguageTokenData.token].modules)
               )
             ) {
               // update token
@@ -253,16 +255,22 @@ function determineMissingLanguageTokens(
       });
 
       // wait for all operations to be done
-      async.parallelLimit(jobs, 10, function (error) {
-        // an error occurred
-        if (error) {
-          return finishedCallback(error);
-        }
+      if (jobs.length > 0) {
+        async.parallelLimit(jobs, 10, function (error) {
+          // an error occurred
+          if (error) {
+            return finishedCallback(error);
+          }
 
-        // finished - go to next page
-        console.log(`Determined missing tokens ( page: ${pageNo} )`);
+          // finished - go to next page
+          console.log(`Determined missing tokens ( page: ${pageNo} )`);
+          finishedCallback();
+        });
+      } else {
+        // next page
+        console.log('Nothing to change');
         finishedCallback();
-      });
+      }
     })
     .catch(finishedCallback);
 }
