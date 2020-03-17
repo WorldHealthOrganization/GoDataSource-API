@@ -88,7 +88,8 @@
     "AttachController": true,
     "IncludeCustomRelations": true,
     "DateProperty": true,
-    "RawFind": true
+    "RawFind": true,
+    "PlatformStamp": true
   },
   "validations": [],
   "relations": {

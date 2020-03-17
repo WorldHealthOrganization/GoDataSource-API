@@ -9,7 +9,7 @@ const AdmZip = require('adm-zip');
 const tmp = require('tmp');
 const async = require('async');
 const fs = require('fs');
-
+const Platform = require('./../../components/platform');
 // used to manipulate dates
 const moment = require('moment');
 
@@ -1951,6 +1951,9 @@ module.exports = function (Outbreak) {
    * @return {Promise<any>}
    */
   Outbreak.createPersonMultipleContacts = function (outbreak, modelName, modelId, data, options) {
+    // inject platform identifier
+    options.platform = Platform.BULK;
+
     // promisify the result
     return new Promise(function (resolve, reject) {
       // check if pairs of contacts + relationship were sent

@@ -329,6 +329,7 @@ module.exports = function (User) {
 
   User.fieldLabelsMap = {
     id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+    createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',
     createdAt: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
     createdBy: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_BY',
     updatedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',

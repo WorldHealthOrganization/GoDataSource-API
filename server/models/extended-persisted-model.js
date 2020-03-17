@@ -20,7 +20,8 @@ module.exports = function (ExtendedPersistedModel) {
     updatedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',
     updatedBy: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
     deleted: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
-    deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT'
+    deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT',
+    createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON'
   };
 
   // some models can be referenced by other models and they have restrictions on actions like delete
