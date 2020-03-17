@@ -960,6 +960,15 @@ module.exports = function (Role) {
             'outbreak_template_modify'
           ]
         },
+        {
+          id: 'outbreak_template_create_clone',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_TEMPLATE_CLONE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_TEMPLATE_CLONE_DESCRIPTION',
+          requires: [
+            'outbreak_template_view',
+            'outbreak_template_create'
+          ]
+        }
       ]
     },
 
