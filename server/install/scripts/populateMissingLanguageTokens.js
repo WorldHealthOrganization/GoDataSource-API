@@ -219,8 +219,13 @@ function determineMissingLanguageTokens(
             // update
             // check if anything is different
             if (
-              mainLanguageTokenData.outbreakId !== tokensToCheckMap[languageToCheckId][mainLanguageTokenData.token].outbreakId ||
-              !_.isEqual(mainLanguageTokenData.modules, tokensToCheckMap[languageToCheckId][mainLanguageTokenData.token].modules)
+              (
+                mainLanguageTokenData.outbreakId !== tokensToCheckMap[languageToCheckId][mainLanguageTokenData.token].outbreakId ||
+                !_.isEqual(mainLanguageTokenData.modules, tokensToCheckMap[languageToCheckId][mainLanguageTokenData.token].modules)
+              ) && (
+                mainLanguageTokenData.outbreakId ||
+                mainLanguageTokenData.modules
+              )
             ) {
               // update token
               jobs.push((function (_id, localMainLanguageTokenData) { return (callback) => {
