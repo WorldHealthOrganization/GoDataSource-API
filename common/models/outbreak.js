@@ -2237,9 +2237,9 @@ module.exports = function (Outbreak) {
         // create contact through loopback model functionality
         app.models.contactOfContact
           .create(entry.contactOfContact, options)
-          .then(function (contact) {
+          .then(function (contactOfContact) {
             // add contact to result
-            result.contactOfContact = contact;
+            result.contactOfContact = contactOfContact;
 
             // add contact information into relationship data
             entry.relationship.persons = [{
@@ -2252,7 +2252,7 @@ module.exports = function (Outbreak) {
             return new Promise(function (resolve, reject) {
               outbreak.createContactOfContactRelationship.call(
                 outbreak,
-                contact.id,
+                contactOfContact.id,
                 entry.relationship,
                 options,
                 function (err, relationship) {

@@ -1383,9 +1383,9 @@ module.exports = function (Outbreak) {
     }
 
     // check if contacts of contacts should be included
-    const includeContactsOfContacts = _.get(filter, 'where.includeContactsOfContacts', false);
+    const includeContactsOfContacts = _.get(filter, 'where.includeContactsOfContacts');
     // if present remove it from the main filter
-    if (includeContactsOfContacts) {
+    if (typeof includeContactsOfContacts !== 'undefined') {
       delete filter.where.includeContactsOfContacts;
     }
 
