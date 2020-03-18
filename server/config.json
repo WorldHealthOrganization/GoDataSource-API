@@ -20,9 +20,9 @@
     "cors": false
   },
   "public": {
-    "host": "localhost",
+    "host": "192.168.0.103",
     "protocol": "http",
-    "port": 3000
+    "port": "3000"
   },
   "passwordReset": {
     "ttl": 900,
@@ -82,7 +82,7 @@
   ],
   "signoutUsersOnRestart": false,
   "cors": {
-    "enabled": true,
+    "enabled": false,
     "whitelist": []
   },
   "enableConfigRewrite": true,
@@ -100,5 +100,6 @@
   },
   "removeSyncSnapshotsAfter": 24,
   "removeTmpUploadedFilesAfter": 24,
-  "removeTmpUploadedImportFilesAfter": 24
+  "removeTmpUploadedImportFilesAfter": 24,
+  "skipOldPasswordForUserModify": true
 }
