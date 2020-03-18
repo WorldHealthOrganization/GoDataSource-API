@@ -20,9 +20,9 @@
     "cors": false
   },
   "public": {
-    "host": "192.168.0.103",
+    "host": "localhost",
     "protocol": "http",
-    "port": "3000"
+    "port": 3000
   },
   "passwordReset": {
     "ttl": 900,
@@ -101,5 +101,5 @@
   "removeSyncSnapshotsAfter": 24,
   "removeTmpUploadedFilesAfter": 24,
   "removeTmpUploadedImportFilesAfter": 24,
-  "skipOldPasswordForUserModify": true
+  "skipOldPasswordForUserModify": false
 }
