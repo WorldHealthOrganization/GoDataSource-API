@@ -15619,6 +15619,26 @@
         ]
       }
     },
+    "referenceDataCategoryCentre": {
+      "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME": {
+        "translation": "Centre Name"
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME_DESCRIPTION": {
+        "translation": ""
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME_GENERIC": {
+        "translation": "Generic",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME_GENERIC_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      }
+    },
     "uiAvailableEntitiesForSwitchRelationshipPage": {
       "LNG_PAGE_LIST_AVAILABLE_ENTITIES_FOR_SWITCH_RELATIONSHIP_TITLE": {
         "translation": "Available people for switch"
