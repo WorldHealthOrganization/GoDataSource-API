@@ -1036,65 +1036,71 @@ module.exports = function (Case) {
                     // that need to be transformed as reference data entries
                     // then update those records with the corresponding reference data ids
                     const uniqueCentreNames = {};
+
+                    const referenceDataEntries = [];
+                    const languageTokensEntries = [];
+                    const caseEntries = [];
+
                     records.forEach(record => {
                       record.dateRanges.forEach(dateRange => {
                         const trimmedCentreName = dateRange.centerName.trim();
                         const insensitiveCentreName = trimmedCentreName.toUpperCase();
                         if (!uniqueCentreNames[insensitiveCentreName]) {
                           uniqueCentreNames[insensitiveCentreName] = {
-                            value: trimmedCentreName
+                            value: trimmedCentreName,
+                            id: models.referenceData.getTranslatableIdentifierForValue(
+                              centreNameReferenceDataCategory,
+                              trimmedCentreName
+                            )
                           };
+
+                          const dataId = uniqueCentreNames[trimmedCentreName].id;
+
+                          referenceDataEntries.push(Object.assign({}, {
+                            _id: dataId,
+                            categoryId: 'LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME',
+                            value: dataId,
+                            description: dataId + '_DESCRIPTION',
+                            readOnly: false,
+                            active: true,
+                            deleted: false
+                          }, authorInfo));
+
+                          languageIds.forEach(langId => {
+                            languageTokensEntries.push(Object.assign({}, {
+                              _id: models.languageToken.generateID(dataId, langId),
+                              token: dataId,
+                              languageId: langId,
+                              translation: trimmedCentreName
+                            }, authorInfo));
+                          });
                         }
+
+                        dateRange.centerName = uniqueCentreNames[insensitiveCentreName].id;
+                      });
+
+                      caseEntries.push({
+                        _id: record.id,
+                        dateRanges: record.dateRanges
                       });
                     });
 
-                    const referenceDataEntries = [];
-                    const languageTokensEntries = [];
-                    for (let centreName in uniqueCentreNames) {
-                      const dataId = models.referenceData.getTranslatableIdentifierForValue(
-                        centreNameReferenceDataCategory,
-                        uniqueCentreNames[centreName].value
-                      );
-
-                      uniqueCentreNames[centreName].id = dataId;
-
-                      referenceDataEntries.push(Object.assign({}, {
-                        _id: dataId,
-                        categoryId: 'LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME',
-                        value: dataId,
-                        description: dataId + '_DESCRIPTION',
-                        readOnly: false,
-                        active: true,
-                        deleted: false
-                      }, authorInfo));
-
-                      languageIds.forEach(langId => {
-                        languageTokensEntries.push(Object.assign({}, {
-                          _id: models.languageToken.generateID(dataId, langId),
-                          token: dataId,
-                          languageId: langId,
-                          translation: uniqueCentreNames[centreName].value
-                        }, authorInfo));
-                      });
-                    }
+                    records = null;
 
                     // insert reference data entries/translations into database
                     return Promise.all([
                       referenceDataCollection.insertMany(referenceDataEntries),
                       languageTokenCollection.insertMany(languageTokensEntries)
                     ]).then(() => {
-                      async.parallelLimit(records.map(record => {
+                      async.parallelLimit(caseEntries.map(entry => {
                         return (cb) => {
                           personCollection.updateOne(
                             {
-                              _id: record.id
+                              _id: entry._id
                             },
                             {
                               $set: {
-                                dateRanges: record.dateRanges.map(dateRange => {
-                                  dateRange.centerName = uniqueCentreNames[dateRange.centerName.trim().toUpperCase()].id;
-                                  return dateRange;
-                                })
+                                dateRanges: entry.dateRanges
                               }
                             },
                             (err) => {
