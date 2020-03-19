@@ -290,7 +290,6 @@ module.exports = function (Case) {
     'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
     'addresses[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE',
     'dateRanges[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE',
-    'dateRanges[].centerName': 'LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME',
     'vaccinesReceived[].vaccine': 'LNG_REFERENCE_DATA_CATEGORY_VACCINE',
     'vaccinesReceived[].status': 'LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS',
     pregnancyStatus: 'LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS'
@@ -776,7 +775,7 @@ module.exports = function (Case) {
           // hospitalization/isolation dates are types of date ranges, look for them in dateRanges list
           if (Array.isArray(caseRecord.dateRanges) && caseRecord.dateRanges.length) {
             hospitalizationIsolationDate = caseRecord.dateRanges
-            // we need the earliest one, make sure the list is sorted accordingly
+              // we need the earliest one, make sure the list is sorted accordingly
               .sort(function (a, b) {
                 return a.startDate - b.startDate;
               })
@@ -932,197 +931,58 @@ module.exports = function (Case) {
    * @param next
    */
   Case.migrate = (options, next) => {
-    const models = app.models;
-    const MongoDBHelper = require('../../../components/mongoDBHelper');
+    // retrieve outbreaks data so we can migrate questionnaires accordingly to outbreak template definitiuon
+    app.models.outbreak
+      .find({}, {
+        projection: {
+          _id: 1,
+          caseInvestigationTemplate: 1
+        }
+      })
+      .then((outbreakData) => {
+        // map outbreak data
+        const outbreakTemplates = _.transform(
+          outbreakData,
+          (a, m) => {
+            a[m.id] = m.caseInvestigationTemplate;
+          },
+          {}
+        );
 
-    Promsie.all([
-      // retrieve outbreaks data so we can migrate questionnaires accordingly to outbreak template definitiuon
-      models.outbreak
-        .find({}, {
-          projection: {
-            _id: 1,
-            caseInvestigationTemplate: 1
+        // migrate dates & numbers
+        helpers.migrateModelDataInBatches(Case, (modelData, cb) => {
+          if (!_.isEmpty(modelData.questionnaireAnswers)) {
+            // convert dates
+            const questionnaireAnswersClone = _.cloneDeep(modelData.questionnaireAnswers);
+            helpers
+              .convertQuestionStringDatesToDates(
+                modelData,
+                outbreakTemplates[modelData.outbreakId]
+              )
+              .then(() => {
+                // check if we have something to change
+                if (_.isEqual(modelData.questionnaireAnswers, questionnaireAnswersClone)) {
+                  // nothing to change
+                  cb();
+                } else {
+                  // migrate
+                  modelData
+                    .updateAttributes({
+                      questionnaireAnswers: modelData.questionnaireAnswers
+                    }, options)
+                    .then(() => cb())
+                    .catch(cb);
+                }
+              })
+              .catch(cb);
+          } else {
+            // nothing to do
+            cb();
           }
         })
-        .then((outbreakData) => {
-          // map outbreak data
-          const outbreakTemplates = _.transform(
-            outbreakData,
-            (a, m) => {
-              a[m.id] = m.caseInvestigationTemplate;
-            },
-            {}
-          );
-
-          // migrate dates & numbers
-          helpers.migrateModelDataInBatches(Case, (modelData, cb) => {
-            if (!_.isEmpty(modelData.questionnaireAnswers)) {
-              // convert dates
-              const questionnaireAnswersClone = _.cloneDeep(modelData.questionnaireAnswers);
-              helpers
-                .convertQuestionStringDatesToDates(
-                  modelData,
-                  outbreakTemplates[modelData.outbreakId]
-                )
-                .then(() => {
-                  // check if we have something to change
-                  if (_.isEqual(modelData.questionnaireAnswers, questionnaireAnswersClone)) {
-                    // nothing to change
-                    cb();
-                  } else {
-                    // migrate
-                    modelData
-                      .updateAttributes({
-                        questionnaireAnswers: modelData.questionnaireAnswers
-                      }, options)
-                      .then(() => cb())
-                      .catch(cb);
-                  }
-                })
-                .catch(cb);
-            } else {
-              // nothing to do
-              cb();
-            }
-          })
-        }),
-      Promise.resolve()
-        .then(() => {
-          const centreNameReferenceDataCategory = 'LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME';
-          const now = new Date();
-          const authorInfo = {
-            createdBy: 'system',
-            updatedBy: 'system',
-            createdAt: now,
-            updatedAt: now
-          };
-
-          // create Mongo DB connection
-          MongoDBHelper
-            .getMongoDBConnection({
-              ignoreUndefined: datasources.mongoDb.ignoreUndefined
-            })
-            .then((mongoDBConnection) => {
-              const referenceDataCollection = mongoDBConnection.collection('referenceData');
-              const languageTokenCollection = mongoDBConnection.collection('languageToken');
-              const personCollection = mongoDBConnection.collection('person');
-
-              // create reference data entries for date range centres that aren't yet
-              models.case
-                .rawFind({
-                  and: [
-                    {
-                      'dateRanges.centreName': {
-                        $exists: true
-                      }
-                    },
-                    {
-                      'dateRanges.centreName': {
-                        $ne: null
-                      }
-                    },
-                    {
-                      'dateRanges.centreName': {
-                        $not: /LNG_REFERENCE_DATA/
-                      }
-                    }
-                  ]
-                })
-                .then(records => {
-                  models.language.find().then(languages => {
-                    const languageIds = languages.map(lang => lang.id);
-
-                    // go through all the records and build a map of unique centre names
-                    // that need to be transformed as reference data entries
-                    // then update those records with the corresponding reference data ids
-                    const uniqueCentreNames = {};
-
-                    const referenceDataEntries = [];
-                    const languageTokensEntries = [];
-                    const caseEntries = [];
-
-                    records.forEach(record => {
-                      record.dateRanges.forEach(dateRange => {
-                        const trimmedCentreName = dateRange.centerName.trim();
-                        const insensitiveCentreName = trimmedCentreName.toUpperCase();
-                        if (!uniqueCentreNames[insensitiveCentreName]) {
-                          uniqueCentreNames[insensitiveCentreName] = {
-                            value: trimmedCentreName,
-                            id: models.referenceData.getTranslatableIdentifierForValue(
-                              centreNameReferenceDataCategory,
-                              trimmedCentreName
-                            )
-                          };
-
-                          const dataId = uniqueCentreNames[trimmedCentreName].id;
-
-                          referenceDataEntries.push(Object.assign({}, {
-                            _id: dataId,
-                            categoryId: 'LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME',
-                            value: dataId,
-                            description: dataId + '_DESCRIPTION',
-                            readOnly: false,
-                            active: true,
-                            deleted: false
-                          }, authorInfo));
-
-                          languageIds.forEach(langId => {
-                            languageTokensEntries.push(Object.assign({}, {
-                              _id: models.languageToken.generateID(dataId, langId),
-                              token: dataId,
-                              languageId: langId,
-                              translation: trimmedCentreName
-                            }, authorInfo));
-                          });
-                        }
-
-                        dateRange.centerName = uniqueCentreNames[insensitiveCentreName].id;
-                      });
-
-                      caseEntries.push({
-                        _id: record.id,
-                        dateRanges: record.dateRanges
-                      });
-                    });
-
-                    records = null;
-
-                    // insert reference data entries/translations into database
-                    return Promise.all([
-                      referenceDataCollection.insertMany(referenceDataEntries),
-                      languageTokenCollection.insertMany(languageTokensEntries)
-                    ]).then(() => {
-                      async.parallelLimit(caseEntries.map(entry => {
-                        return (cb) => {
-                          personCollection.updateOne(
-                            {
-                              _id: entry._id
-                            },
-                            {
-                              $set: {
-                                dateRanges: entry.dateRanges
-                              }
-                            },
-                            (err) => {
-                              if (err) {
-                                return cb(err);
-                              }
-                              return cb();
-                            });
-                        };
-                      }), 50, (err) => {
-                        if (err) {
-                          return next(err);
-                        }
-                        return next();
-                      });
-                    });
-                  });
-                });
-            })
-        })
-    ])
-      .then(next)
+          .then(() => next())
+          .catch(next);
+      })
       .catch(next);
   };
 };

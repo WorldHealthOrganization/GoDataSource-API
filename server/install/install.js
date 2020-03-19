@@ -104,7 +104,8 @@ const routines = {
       require('./scripts/defaultOutbreakTemplateData'),
       require('./scripts/migrateModelData'),
       require('./scripts/migrateRolesAndUsers'),
-      require('./scripts/populateMissingLanguageTokens')
+      require('./scripts/populateMissingLanguageTokens'),
+      require('./scripts/migrateCaseCentreName')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });
