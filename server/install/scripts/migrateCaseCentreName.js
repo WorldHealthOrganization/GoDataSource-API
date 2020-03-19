@@ -5,6 +5,7 @@ const MongoDBHelper = require('../../../components/mongoDBHelper');
 const Async = require('async');
 const DataSources = require('../../datasources');
 const _ = require('lodash');
+const Uuid = require('uuid');
 
 // taken from language token model
 // doing this to not start the whole app
@@ -12,7 +13,7 @@ const generateLanguageTokenID = function (token, languageId) {
   // id can have at most 1024 chars
   if (token.length > 900) {
     // make token smaller (and make sure its unique)
-    token = `${token.substring(0, 100)}_${_.snakeCase(uuid.v4().toUpperCase())}`;
+    token = `${token.substring(0, 100)}_${_.snakeCase(Uuid.v4().toUpperCase())}`;
   }
   return `${token}_${_.snakeCase(languageId).toUpperCase()}`;
 };
