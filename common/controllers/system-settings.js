@@ -231,7 +231,8 @@ module.exports = function (SystemSettings) {
         app.utils.helpers.getBuildInformation(), {
           tokenTTL: config.authToken && config.authToken.ttl ?
             config.authToken.ttl :
-            app.models.user.settings.ttl
+            app.models.user.settings.ttl,
+          skipOldPasswordForUserModify: config.skipOldPasswordForUserModify
         }
       )
     );
