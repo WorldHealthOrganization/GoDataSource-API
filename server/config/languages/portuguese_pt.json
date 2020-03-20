@@ -15619,6 +15619,14 @@
         ]
       }
     },
+    "referenceDataCategoryCentre": {
+      "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME": {
+        "translation": "Centre Name"
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME_DESCRIPTION": {
+        "translation": ""
+      }
+    },
     "uiAvailableEntitiesForSwitchRelationshipPage": {
       "LNG_PAGE_LIST_AVAILABLE_ENTITIES_FOR_SWITCH_RELATIONSHIP_TITLE": {
         "translation": "Available people for switch"
