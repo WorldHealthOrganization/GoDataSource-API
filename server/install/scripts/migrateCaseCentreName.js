@@ -51,28 +51,15 @@ const executeNextBatch = function (cb) {
   mongoDBConnection
     .collection('person')
     .find({
-      $and: [
-        {
-          'dateRanges.centerName': {
-            $exists: true
-          }
-        },
-        {
-          'dateRanges.centerName': {
-            $ne: null
-          }
-        },
-        {
-          'dateRanges.centerName': {
-            $not: /LNG_REFERENCE_DATA/
-          }
-        },
-        {
-          deleted: {
-            $ne: true
+      dateRanges: {
+        $elemMatch: {
+          centerName: {
+            $exists: true,
+            $ne: null,
+            $not: /^LNG_REFERENCE_DATA/
           }
         }
-      ]
+      }
     }, { projection: { _id: 1, dateRanges: 1 } })
     .limit(batchSize)
     .toArray()
@@ -87,8 +74,18 @@ const executeNextBatch = function (cb) {
 
       records.forEach(record => {
         record.dateRanges.forEach(dateRange => {
+          // determine center name
+          // jump over if there is nothing to change ir if this item was already changed
           const trimmedCentreName = dateRange.centerName.trim();
-          const insensitiveCentreName = trimmedCentreName.toUpperCase();
+          if (
+            !trimmedCentreName ||
+            trimmedCentreName.startsWith('LNG_REFERENCE_DATA')
+          ) {
+            return;
+          }
+
+          // determine unique id to check if center name was created already
+          const insensitiveCentreName = `${centreNameReferenceDataCategory}_${_.snakeCase(trimmedCentreName).toUpperCase()}`.toUpperCase();
           if (!centreNames[insensitiveCentreName]) {
             centreNames[insensitiveCentreName] = {
               value: trimmedCentreName,
@@ -96,10 +93,9 @@ const executeNextBatch = function (cb) {
             };
 
             const dataId = centreNames[insensitiveCentreName].id;
-
             referenceDataEntries.push(Object.assign({}, {
               _id: dataId,
-              categoryId: 'LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME',
+              categoryId: centreNameReferenceDataCategory,
               value: dataId,
               description: dataId + '_DESCRIPTION',
               readOnly: false,
@@ -107,20 +103,32 @@ const executeNextBatch = function (cb) {
               deleted: false
             }, authorInfo));
 
+            // create tokens for each language
             languageIds.forEach(langId => {
+              // create centre name token
               languageTokensEntries.push(Object.assign({}, {
                 _id: generateLanguageTokenID(dataId, langId),
                 token: dataId,
                 languageId: langId,
                 translation: trimmedCentreName
               }, authorInfo));
+
+              // create centre name description token
+              languageTokensEntries.push(Object.assign({}, {
+                _id: generateLanguageTokenID(`${dataId}_DESCRIPTION`, langId),
+                token: `${dataId}_DESCRIPTION`,
+                languageId: langId,
+                translation: ''
+              }, authorInfo));
             });
           }
 
+          // update center names
           dateRange.centerName = centreNames[insensitiveCentreName].id;
         });
       });
 
+      // run jobs
       let promiseOps = [];
       if (referenceDataEntries.length) {
         promiseOps.push(referenceDataCollection.insertMany(referenceDataEntries));
@@ -128,6 +136,7 @@ const executeNextBatch = function (cb) {
       if (languageTokensEntries.length) {
         promiseOps.push(languageTokenCollection.insertMany(languageTokensEntries));
       }
+
       // insert reference data entries/translations into database
       return Promise.all(promiseOps).then(() => {
         referenceDataEntries = [];
@@ -182,9 +191,29 @@ const run = function (cb) {
         .toArray()
         .then(languages => {
           languageIds = languages.map(lang => lang._id);
+        })
+        .then(() => {
+          return referenceDataCollection
+            .find({
+              categoryId: centreNameReferenceDataCategory
+            }, { projection: { _id: 1, value: 1 } })
+            .toArray();
+        })
+        .then((existingCenterNames) => {
+          // populate existing center names
+          (existingCenterNames || []).forEach((center) => {
+            centreNames[center.value.toUpperCase()] = {
+              value: center.value,
+              id: center._id
+            };
+          });
 
           // start processing records
-          executeNextBatch(cb);
+          executeNextBatch(() => {
+            // finished
+            console.log('Finished migrating center names');
+            cb();
+          });
         });
     })
     .catch(cb);

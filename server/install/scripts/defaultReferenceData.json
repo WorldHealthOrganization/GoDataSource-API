@@ -1146,9 +1146,5 @@
       "readOnly": false
     }
   },
-  "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME": {
-    "GENERIC": {
-      "readOnly": false
-    }
-  }
+  "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME": {}
 }

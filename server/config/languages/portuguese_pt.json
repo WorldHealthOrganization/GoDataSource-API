@@ -15625,18 +15625,6 @@
       },
       "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME_DESCRIPTION": {
         "translation": ""
-      },
-      "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME_GENERIC": {
-        "translation": "Generic",
-        "modules": [
-          "referenceData"
-        ]
-      },
-      "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME_GENERIC_DESCRIPTION": {
-        "translation": "",
-        "modules": [
-          "referenceData"
-        ]
       }
     },
     "uiAvailableEntitiesForSwitchRelationshipPage": {

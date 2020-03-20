@@ -16,7 +16,8 @@ const supportedArguments = [
   'remove-unused-language-tokens',
   'populate-with-dummy-data',
   'determine-and-dump-reference-data-items',
-  'populate-missing-language-tokens'
+  'populate-missing-language-tokens',
+  'migrate-case-centre-name'
 ];
 // keep a list of functions that will be run
 const runFunctions = [];
@@ -286,6 +287,15 @@ const routines = {
     console.log('Determine and populate missing language tokens');
     [
       require('./scripts/populateMissingLanguageTokens')
+    ].forEach(function (installScript) {
+      runFunctions.push(installScript);
+    });
+  },
+  migrateCaseCentreName: function () {
+    // determine missing case center names
+    console.log('Determine and create reference center names from text center names');
+    [
+      require('./scripts/migrateCaseCentreName')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });
