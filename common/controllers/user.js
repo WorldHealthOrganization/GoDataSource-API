@@ -72,7 +72,7 @@ module.exports = function (User) {
       Promise.resolve()
         .then(() => {
           // if this is a reset/change password don't check the old password
-          if (ctx.options.setPassword) {
+          if (ctx.options.setPassword || ctx.options.skipOldPasswordCheck || ctx.options.remotingContext.options.skipOldPasswordCheck) {
             return;
           }
           if (!oldPassword) {
@@ -291,6 +291,8 @@ module.exports = function (User) {
   User.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
     // cache request body ref
     let reqBody = context.args.data;
+
+    context.options.skipOldPasswordCheck = config.skipOldPasswordForUserModify;
 
     if (context.instance.id === context.req.authData.user.id) {
       delete reqBody.roleIds;

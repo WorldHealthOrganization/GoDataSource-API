@@ -82,7 +82,7 @@
   ],
   "signoutUsersOnRestart": false,
   "cors": {
-    "enabled": true,
+    "enabled": false,
     "whitelist": []
   },
   "enableConfigRewrite": true,
@@ -100,5 +100,6 @@
   },
   "removeSyncSnapshotsAfter": 24,
   "removeTmpUploadedFilesAfter": 24,
-  "removeTmpUploadedImportFilesAfter": 24
+  "removeTmpUploadedImportFilesAfter": 24,
+  "skipOldPasswordForUserModify": true
 }
