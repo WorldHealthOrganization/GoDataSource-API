@@ -1386,45 +1386,65 @@ const getSourceAndTargetFromModelHookContext = function (context) {
  * @param useVariable
  * @param multiDateLengthsMap
  * @param isNestedMultiDate
+ * @param multiDateIndex
  * @returns {[{id, header}]}
  */
-const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary, useVariable, multiDateLengthsMap, isNestedMultiDate) => {
-  // no questions
+const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary, useVariable, multiDateLengthsMap, isNestedMultiDate, multiDateIndex) => {
   if (_.isEmpty(questionnaire)) {
     return [];
   }
 
-  // go through each question
   const result = [];
   _.each(questionnaire, (question) => {
-    // exclude markups from exports
     if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP') {
+      result.push({
+        expandKey: question.variable,
+        expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
+        id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable,
+        header: useVariable ? question.variable : dictionary.getTranslation(question.text)
+      });
       return;
     }
-    // add question
     if (!_.isEmpty(question.variable)) {
       const isMultiDate = question.multiAnswer || isNestedMultiDate;
       multiDateLengthsMap[question.variable] = multiDateLengthsMap[question.variable] || 0;
 
-      // can have multiple answers ?
       if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
-        // add a column for each answer
         if (!_.isEmpty(question.answers)) {
           if (isMultiDate) {
-            for (let i = 0; i < multiDateLengthsMap[question.variable]; i++) {
-              let elIndex = i + 1;
+            const addQuestionAndAnswers = (multiDateIndex) => {
               _.each(question.answers, (answer, answerIndex) => {
+                result.push({
+                  id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} date`,
+                  header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} [MD ${multiDateIndex}]`
+                });
+
                 result.push({
                   expandKey: question.variable,
                   expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
-                  id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${elIndex} value ${(answerIndex + 1)}`,
-                  header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} ${(answerIndex + 1)} [MV ${elIndex}]`
+                  id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} value ${(answerIndex + 1)}`,
+                  header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} ${(answerIndex + 1)} [MV ${multiDateIndex}]`
                 });
+
+                if (!_.isEmpty(answer.additionalQuestions)) {
+                  result.push(...retrieveQuestionnaireVariables(
+                    answer.additionalQuestions,
+                    idHeaderPrefix,
+                    dictionary,
+                    useVariable,
+                    multiDateLengthsMap,
+                    isMultiDate,
+                    multiDateIndex
+                  ));
+                }
               });
-              result.push({
-                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${elIndex} date`,
-                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} [MD ${elIndex}]`
-              });
+            };
+            if (multiDateIndex) {
+              addQuestionAndAnswers(multiDateIndex);
+            } else {
+              for (let i = 0; i < multiDateLengthsMap[question.variable]; i++) {
+                addQuestionAndAnswers(i + 1);
+              }
             }
           } else {
             _.each(question.answers, (answer, answerIndex) => {
@@ -1434,56 +1454,89 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
                 id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} 1 value ${(answerIndex + 1)}`,
                 header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} ${(answerIndex + 1)}`
               });
+
+              if (!_.isEmpty(answer.additionalQuestions)) {
+                result.push(...retrieveQuestionnaireVariables(
+                  answer.additionalQuestions,
+                  idHeaderPrefix,
+                  dictionary,
+                  useVariable,
+                  multiDateLengthsMap,
+                  isMultiDate,
+                  multiDateIndex
+                ));
+              }
             });
           }
         }
       } else {
         if (isMultiDate) {
-          for (let i = 0; i < multiDateLengthsMap[question.variable]; i++) {
-            let answerIndex = i + 1;
+          const addQuestionAndAnswers = (multiDateIndex) => {
             result.push(
+              {
+                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} date`,
+                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} [MD ${multiDateIndex}]`
+              },
               {
                 expandKey: question.variable,
                 expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
-                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${answerIndex} value`,
-                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} [MV ${answerIndex}]`
-              },
-              {
-                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${answerIndex} date`,
-                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} [MD ${answerIndex}]`
+                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} value`,
+                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} [MV ${multiDateIndex}]`
               }
             );
+
+            // add children questions
+            if (!_.isEmpty(question.answers)) {
+              _.each(question.answers, (answer) => {
+                if (!_.isEmpty(answer.additionalQuestions)) {
+                  result.push(...retrieveQuestionnaireVariables(
+                    answer.additionalQuestions,
+                    idHeaderPrefix,
+                    dictionary,
+                    useVariable,
+                    multiDateLengthsMap,
+                    isMultiDate,
+                    multiDateIndex
+                  ));
+                }
+              });
+            }
+          };
+          if (multiDateIndex) {
+            addQuestionAndAnswers(multiDateIndex);
+          } else {
+            for (let i = 0; i < multiDateLengthsMap[question.variable]; i++) {
+              addQuestionAndAnswers(i + 1);
+            }
           }
         } else {
-          // add parent question
           result.push({
             expandKey: question.variable,
             expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
             id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable + ' 1 value',
             header: useVariable ? question.variable : dictionary.getTranslation(question.text)
           });
-        }
-      }
 
-      // add children questions
-      if (!_.isEmpty(question.answers)) {
-        _.each(question.answers, (answer) => {
-          if (!_.isEmpty(answer.additionalQuestions)) {
-            result.push(...retrieveQuestionnaireVariables(
-              answer.additionalQuestions,
-              idHeaderPrefix,
-              dictionary,
-              useVariable,
-              multiDateLengthsMap,
-              isMultiDate
-            ));
+          if (!_.isEmpty(question.answers)) {
+            _.each(question.answers, (answer) => {
+              if (!_.isEmpty(answer.additionalQuestions)) {
+                result.push(...retrieveQuestionnaireVariables(
+                  answer.additionalQuestions,
+                  idHeaderPrefix,
+                  dictionary,
+                  useVariable,
+                  multiDateLengthsMap,
+                  isMultiDate,
+                  multiDateIndex
+                ));
+              }
+            });
           }
-        });
+        }
       }
     }
   });
 
-  // finished
   return result;
 };
 
