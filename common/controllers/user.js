@@ -72,7 +72,14 @@ module.exports = function (User) {
       Promise.resolve()
         .then(() => {
           // if this is a reset/change password don't check the old password
-          if (ctx.options.setPassword || ctx.options.skipOldPasswordCheck || ctx.options.remotingContext.options.skipOldPasswordCheck) {
+          if (
+            ctx.options.setPassword ||
+            ctx.options.skipOldPasswordCheck || (
+              ctx.options.remotingContext &&
+              ctx.options.remotingContext.options &&
+              ctx.options.remotingContext.options.skipOldPasswordCheck
+            )
+          ) {
             return;
           }
           if (!oldPassword) {
