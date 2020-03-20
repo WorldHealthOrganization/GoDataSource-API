@@ -100,6 +100,7 @@ const executeNextBatch = function (cb) {
             };
 
             const dataId = centreNames[insensitiveCentreName].id;
+            console.log(`Creating ref data '${dataId}'`);
             referenceDataEntries.push(Object.assign({}, {
               _id: dataId,
               categoryId: centreNameReferenceDataCategory,
@@ -113,8 +114,10 @@ const executeNextBatch = function (cb) {
             // create tokens for each language
             languageIds.forEach(langId => {
               // create centre name token
+              const langTokenId = generateLanguageTokenID(dataId, langId);
+              console.log(`Creating lang token '${langTokenId}'`);
               languageTokensEntries.push(Object.assign({}, {
-                _id: generateLanguageTokenID(dataId, langId),
+                _id: langTokenId,
                 token: dataId,
                 languageId: langId,
                 translation: trimmedCentreName
@@ -151,6 +154,7 @@ const executeNextBatch = function (cb) {
 
         Async.parallelLimit(records.map(entry => {
           return (cb) => {
+            console.log(`Updating person '${entry._id}' dataRanges`);
             personCollection.updateOne(
               {
                 _id: entry._id
