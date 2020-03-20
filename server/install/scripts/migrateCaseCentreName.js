@@ -74,6 +74,12 @@ const executeNextBatch = function (cb) {
 
       records.forEach(record => {
         record.dateRanges.forEach(dateRange => {
+          // jump over empty center names
+          if (!dateRange.centerName) {
+            dateRange.centerName = dateRange.centerName || null;
+            return;
+          }
+
           // determine center name
           // jump over if there is nothing to change ir if this item was already changed
           const trimmedCentreName = dateRange.centerName.trim();
@@ -81,6 +87,7 @@ const executeNextBatch = function (cb) {
             !trimmedCentreName ||
             trimmedCentreName.startsWith('LNG_REFERENCE_DATA')
           ) {
+            dateRange.centerName = trimmedCentreName || null;
             return;
           }
 
