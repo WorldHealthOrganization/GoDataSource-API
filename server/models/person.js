@@ -456,8 +456,9 @@ module.exports = function (Person) {
                         deleted: false
                       },
                       authorInfo
-                    ),
-                    context.options
+                    ), {
+                      _init: true
+                    }
                   )
               );
 
