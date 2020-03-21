@@ -442,6 +442,9 @@ module.exports = function (Person) {
             const referenceDataEntriesJobs = [];
             _.each(centerNames, (centerData) => {
               // create ref item
+              // must force ref data item to its jobs without being blocked by sync
+              const options = Object.assign({}, context.options);
+              delete options._sync;
               referenceDataEntriesJobs.push(
                 app.models.referenceData
                   .create(
@@ -456,9 +459,8 @@ module.exports = function (Person) {
                         deleted: false
                       },
                       authorInfo
-                    ), {
-                      _init: true
-                    }
+                    ),
+                    options
                   )
               );
 
