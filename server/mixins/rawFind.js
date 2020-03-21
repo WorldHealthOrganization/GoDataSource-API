@@ -58,13 +58,12 @@ module.exports = function (Model) {
     if (!options.includeDeletedRecords) {
       query = {
         $and: [
+          query,
           {
-            $or: [
-              {deleted: false},
-              {deleted: {$eq: null}}
-            ]
-          },
-          query
+            deleted: {
+              $ne: true
+            }
+          }
         ]
       };
     }

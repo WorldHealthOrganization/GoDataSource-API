@@ -200,7 +200,10 @@ module.exports = function (Location) {
         startLocationsIdsToRetrieve.push(locationId);
       }
       // start location is already retrieved; retrieve parent if not already in the list
-      else if (allLocations.findIndex(location => location.id === allLocations[index].parentLocationId) === -1) {
+      else if (
+        allLocations[index].parentLocationId &&
+        allLocations.findIndex(location => location.id === allLocations[index].parentLocationId) === -1
+      ) {
         parentLocationsIds.push(allLocations[index].parentLocationId);
       }
     });
@@ -208,16 +211,23 @@ module.exports = function (Location) {
     // we need to retrieve both the start locations as well as their parents
     locationsToRetrieve = locationsToRetrieve.concat(startLocationsIdsToRetrieve, parentLocationsIds);
 
+    // retrieve locations only if there are IDs missing
+    let locationsToRetrievePromise = Promise.resolve([]);
+    if (locationsToRetrieve.length) {
+      // find not already retrieved locations
+      locationsToRetrievePromise = Location
+        .find({
+          where: {
+            id: {
+              in: locationsToRetrieve
+            }
+          },
+          order: 'name ASC'
+        });
+    }
+
     // find not already retrieved locations
-    Location
-      .find({
-        where: {
-          id: {
-            in: locationsToRetrieve
-          }
-        },
-        order: 'name ASC'
-      })
+    locationsToRetrievePromise
       .then(function (locations) {
         // if locations found
         if (locations.length) {
@@ -230,14 +240,23 @@ module.exports = function (Location) {
             let parentLocationId = location.parentLocationId;
 
             // check if the parent location already exists in allLocations; if so do not retrieve it again.
-            if (allLocations.findIndex(location => location.id === parentLocationId) === -1) {
+            if (
+              parentLocationId &&
+              allLocations.findIndex(location => location.id === parentLocationId) === -1
+            ) {
               locationsIdsToRetrieveParent.push(location.id);
             }
           });
           // consolidate them in the locations list
           allLocations = allLocations.concat(locations);
-          // go higher into the hierarchy
-          Location.getParentLocationsWithDetails(locationsIdsToRetrieveParent, allLocations, callback);
+
+          if (locationsIdsToRetrieveParent.length) {
+            // go higher into the hierarchy
+            Location.getParentLocationsWithDetails(locationsIdsToRetrieveParent, allLocations, callback);
+          } else {
+            // no need to continue searching
+            callback(null, allLocations);
+          }
         } else {
           // no more locations found, stop here
           callback(null, allLocations);
