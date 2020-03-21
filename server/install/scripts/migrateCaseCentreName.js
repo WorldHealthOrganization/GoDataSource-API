@@ -154,7 +154,7 @@ const executeNextBatch = function (cb) {
 
         Async.parallelLimit(records.map(entry => {
           return (cb) => {
-            console.log(`Updating person '${entry._id}' dataRanges`);
+            console.log(`Updating person '${entry._id}' dateRanges`);
             personCollection.updateOne(
               {
                 _id: entry._id
