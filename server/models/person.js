@@ -363,92 +363,201 @@ module.exports = function (Person) {
       }
     }
 
-    // special sync logic as no validation of visualId is required on sync
-    if (context.options && context.options._sync) {
-      // we need to generate the visualId when the generatePersonVisualId flag is sent and person visual ID is empty
-      if (!context.options.generatePersonVisualId) {
-        return next();
-      }
+    // make sure we update data in order so we don't break anything
+    Promise
+      .resolve()
+      .then(() => {
+        // if there are no dates then there is no point in continuing
+        const modelNewData = data.source.all;
+        if (
+          !modelNewData.dateRanges ||
+          !_.isArray(modelNewData.dateRanges) ||
+          modelNewData.dateRanges.length < 1
+        ) {
+          return;
+        }
 
-      // if visual ID is sent or instance already has it no need to do anything
-      if (data.target.visualId || data.source.all.visualId) {
-        return next();
-      }
-
-      // generatePersonVisualId is true and visual ID was not sent; try to generate the visual ID
-      // get outbreak
-      app.models.outbreak
-        .findById(data.source.existing.outbreakId)
-        .then(function (outbreak) {
-          // check for outbreak; should always exist
-          if (!outbreak) {
-            throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
-              model: app.models.outbreak.modelName,
-              id: data.source.existing.outbreakId
-            });
+        // we need to make sure dataRange.center names are migrated properly
+        const centerNames = {};
+        const centreNameReferenceDataCategory = 'LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME';
+        modelNewData.dateRanges.forEach((dateRange) => {
+          // do we have a center name, if not there is no point in continuing
+          // or if we have already a reference data item inside, then we don't need to update this date range
+          const trimmedCentreName = (dateRange.centerName || '').trim();
+          if (
+            !trimmedCentreName ||
+            trimmedCentreName.startsWith('LNG_REFERENCE_DATA')
+          ) {
+            return;
           }
 
-          // get mask property
-          let maskProperty = data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ? 'caseIdMask' : 'contactIdMask';
+          // determine center name id accordingly to migrateCaseCentreName.js script logic
+          const refDataItemId = `${centreNameReferenceDataCategory}_${_.snakeCase(trimmedCentreName).toUpperCase()}`;
+          if (!centerNames[refDataItemId]) {
+            centerNames[refDataItemId] = {
+              id: refDataItemId,
+              value: trimmedCentreName
+            };
+          }
 
-          // resolve visual ID; send the mask as the visualId to not break logic
-          return app.models.outbreak.helpers
-            .getAvailableVisualId(
-              outbreak,
-              maskProperty,
-              app.models.person.sanitizeVisualId(outbreak[maskProperty])
-            );
-        })
-        .then(function (resolvedVisualId) {
-          data.target.visualId = resolvedVisualId;
-
-          // set flag for sync "before save" changes
-          context.options._syncActionBeforeSaveChanges = true;
-
-          next();
-        })
-        .catch(function (err) {
-          // mask couldn't be generated; log error and continue saving the user
-          app.logger.debug(`Failed generating visualId for person '${data.target.id}'. Error: ${err}`);
-          next();
+          // add date range to items to update
+          dateRange.centerName = refDataItemId;
         });
 
-      // stop logic for sync
-      return;
-    }
+        // do we need to update date ranges, if not, there no point in continuing
+        if (_.isEmpty(centerNames)) {
+          return;
+        }
 
-    // sync action doesn't need validation and it doesn't reach here
-    // check if visual id should be validated (validation can be disabled under certain conditions)
-    const validateVisualId = !_.get(context, 'options._disableVisualIdValidation', false);
+        // we need to update center names
+        const dataToUpdate = data.target;
+        dataToUpdate.dateRanges = modelNewData.dateRanges;
 
-    // if validation is enabled
-    if (validateVisualId) {
-      // validate visual ID template
-      // get outbreak
-      app.models.outbreak
-        .findById(data.source.existing.outbreakId)
-        .then(function (outbreak) {
-          // check for outbreak; should always exist
-          if (!outbreak) {
-            throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
-              model: app.models.outbreak.modelName,
-              id: data.source.existing.outbreakId
+        // retrieve ref data items to see if we need to create anything
+        return app.models.referenceData
+          .rawFind({
+            _id: {
+              $in: Object.keys(centerNames)
+            }
+          }, {projection: { _id: 1 }})
+          .then((refItems) => {
+            // remove items that exist already
+            (refItems || []).forEach((refItem) => {
+              delete centerNames[refItem.id];
             });
+
+            // if we don't have to create reference data item, than God finished with this promise
+            if (_.isEmpty(centerNames)) {
+              return;
+            }
+
+            // prepare reference data items that we need to create
+            const now = new Date();
+            const authorInfo = {
+              createdBy: 'system',
+              updatedBy: 'system',
+              createdAt: now,
+              updatedAt: now
+            };
+            const referenceDataEntriesJobs = [];
+            _.each(centerNames, (centerData) => {
+              // create ref item
+              referenceDataEntriesJobs.push(
+                app.models.referenceData
+                  .create(
+                    Object.assign(
+                      {
+                        _id: centerData.id,
+                        categoryId: centreNameReferenceDataCategory,
+                        value: centerData.value,
+                        description: '',
+                        readOnly: false,
+                        active: true,
+                        deleted: false
+                      },
+                      authorInfo
+                    ),
+                    context.options
+                  )
+              );
+
+              // create language tokens
+              // Handled by ref data item create hooks
+            });
+
+            // create reference data items
+            return Promise.all(referenceDataEntriesJobs).then(() => undefined);
+          });
+      })
+      .then(() => {
+        // special sync logic as no validation of visualId is required on sync
+        if (context.options && context.options._sync) {
+          // we need to generate the visualId when the generatePersonVisualId flag is sent and person visual ID is empty
+          if (!context.options.generatePersonVisualId) {
+            return next();
           }
 
-          // resolve visual ID
-          return app.models.outbreak.helpers
-            .resolvePersonVisualIdTemplate(outbreak, data.target.visualId, data.source.existingRaw.type, context.isNewInstance ? null : data.source.existing.id);
-        })
-        .then(function (resolvedVisualId) {
-          data.target.visualId = resolvedVisualId;
+          // if visual ID is sent or instance already has it no need to do anything
+          if (data.target.visualId || data.source.all.visualId) {
+            return next();
+          }
+
+          // generatePersonVisualId is true and visual ID was not sent; try to generate the visual ID
+          // get outbreak
+          app.models.outbreak
+            .findById(data.source.existing.outbreakId)
+            .then(function (outbreak) {
+              // check for outbreak; should always exist
+              if (!outbreak) {
+                throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+                  model: app.models.outbreak.modelName,
+                  id: data.source.existing.outbreakId
+                });
+              }
+
+              // get mask property
+              let maskProperty = data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ? 'caseIdMask' : 'contactIdMask';
+
+              // resolve visual ID; send the mask as the visualId to not break logic
+              return app.models.outbreak.helpers
+                .getAvailableVisualId(
+                  outbreak,
+                  maskProperty,
+                  app.models.person.sanitizeVisualId(outbreak[maskProperty])
+                );
+            })
+            .then(function (resolvedVisualId) {
+              data.target.visualId = resolvedVisualId;
+
+              // set flag for sync "before save" changes
+              context.options._syncActionBeforeSaveChanges = true;
+
+              next();
+            })
+            .catch(function (err) {
+              // mask couldn't be generated; log error and continue saving the user
+              app.logger.debug(`Failed generating visualId for person '${data.target.id}'. Error: ${err}`);
+              next();
+            });
+
+          // stop logic for sync
+          return;
+        }
+
+        // sync action doesn't need validation and it doesn't reach here
+        // check if visual id should be validated (validation can be disabled under certain conditions)
+        const validateVisualId = !_.get(context, 'options._disableVisualIdValidation', false);
+
+        // if validation is enabled
+        if (validateVisualId) {
+          // validate visual ID template
+          // get outbreak
+          app.models.outbreak
+            .findById(data.source.existing.outbreakId)
+            .then(function (outbreak) {
+              // check for outbreak; should always exist
+              if (!outbreak) {
+                throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+                  model: app.models.outbreak.modelName,
+                  id: data.source.existing.outbreakId
+                });
+              }
+
+              // resolve visual ID
+              return app.models.outbreak.helpers
+                .resolvePersonVisualIdTemplate(outbreak, data.target.visualId, data.source.existingRaw.type, context.isNewInstance ? null : data.source.existing.id);
+            })
+            .then(function (resolvedVisualId) {
+              data.target.visualId = resolvedVisualId;
+              next();
+            })
+            .catch(next);
+        } else {
+          // validation disabled
           next();
-        })
-        .catch(next);
-    } else {
-      // validation disabled
-      next();
-    }
+        }
+      })
+      .catch(next);
   });
 
   /**
