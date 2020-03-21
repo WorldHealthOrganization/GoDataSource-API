@@ -414,62 +414,104 @@ module.exports = function (Person) {
         dataToUpdate.dateRanges = modelNewData.dateRanges;
 
         // retrieve ref data items to see if we need to create anything
-        return app.models.referenceData
-          .rawFind({
-            _id: {
-              $in: Object.keys(centerNames)
+        return Promise
+          .resolve()
+          .then(() => {
+            if (context.options && context.options._sync) {
+              // get the languages list and create a token entry for each language
+              return app.models.language.rawFind({}, {projection: {id: 1}});
             }
-          }, {projection: { _id: 1 }})
-          .then((refItems) => {
-            // remove items that exist already
-            (refItems || []).forEach((refItem) => {
-              delete centerNames[refItem.id];
-            });
+          })
+          .then((languages) => {
+            return app.models.referenceData
+              .rawFind({
+                _id: {
+                  $in: Object.keys(centerNames)
+                }
+              }, {projection: {_id: 1}})
+              .then((refItems) => {
+                // remove items that exist already
+                (refItems || []).forEach((refItem) => {
+                  delete centerNames[refItem.id];
+                });
 
-            // if we don't have to create reference data item, than God finished with this promise
-            if (_.isEmpty(centerNames)) {
-              return;
-            }
+                // if we don't have to create reference data item, than God finished with this promise
+                if (_.isEmpty(centerNames)) {
+                  return;
+                }
 
-            // prepare reference data items that we need to create
-            const now = new Date();
-            const authorInfo = {
-              createdBy: 'system',
-              updatedBy: 'system',
-              createdAt: now,
-              updatedAt: now
-            };
-            const referenceDataEntriesJobs = [];
-            _.each(centerNames, (centerData) => {
-              // create ref item
-              // must force ref data item to its jobs without being blocked by sync
-              const options = Object.assign({}, context.options);
-              delete options._sync;
-              referenceDataEntriesJobs.push(
-                app.models.referenceData
-                  .create(
-                    Object.assign(
-                      {
-                        _id: centerData.id,
-                        categoryId: centreNameReferenceDataCategory,
-                        value: centerData.value,
-                        description: '',
-                        readOnly: false,
-                        active: true,
-                        deleted: false
-                      },
-                      authorInfo
-                    ),
-                    options
-                  )
-              );
+                // prepare reference data items that we need to create
+                const now = new Date();
+                const authorInfo = {
+                  createdBy: 'system',
+                  updatedBy: 'system',
+                  createdAt: now,
+                  updatedAt: now
+                };
+                const jobs = [];
+                _.each(centerNames, (centerData) => {
+                  // create ref item
+                  jobs.push(
+                    app.models.referenceData.create(
+                      Object.assign(
+                        {
+                          _id: centerData.id,
+                          categoryId: centreNameReferenceDataCategory,
+                          value: context.options && context.options._sync ?
+                            centerData.id : centerData.value,
+                          description: '',
+                          readOnly: false,
+                          active: true,
+                          deleted: false
+                        },
+                        authorInfo
+                      ),
+                      context.options
+                    )
+                  );
 
-              // create language tokens
-              // Handled by ref data item create hooks
-            });
+                  // create language tokens
+                  // Handled by ref data item create hooks if not _sync
+                  if (context.options && context.options._sync) {
+                    (languages || []).forEach((language) => {
+                      // create language token
+                      jobs.push(
+                        app.models.languageToken.create(
+                          Object.assign(
+                            {
+                              _id: app.models.languageToken.generateID(centerData.id, language.id),
+                              token: centerData.id,
+                              languageId: language.id,
+                              translation: centerData.value
+                            },
+                            authorInfo
+                          ),
+                          context.options
+                        )
+                      );
 
-            // create reference data items
-            return Promise.all(referenceDataEntriesJobs).then(() => undefined);
+                      // create language token description
+                      jobs.push(
+                        app.models.languageToken.create(
+                          Object.assign(
+                            {
+                              _id: app.models.languageToken.generateID(`${centerData.id}_DESCRIPTION`, language.id),
+                              token: `${centerData.id}_DESCRIPTION`,
+                              languageId: language.id,
+                              translation: ''
+                            },
+                            authorInfo
+                          ),
+                          context.options
+                        )
+                      );
+                    });
+                  }
+                });
+
+                // create reference data items
+                return Promise.all(jobs).then(() => undefined);
+              });
           });
       })
       .then(() => {
