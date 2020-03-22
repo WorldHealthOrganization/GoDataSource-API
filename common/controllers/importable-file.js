@@ -342,7 +342,7 @@ function getLocationAvailableValuesForModel(outbreakId, modelName) {
       // promisify the result
       return new Promise(function (resolve, reject) {
         // get the list of locations
-        app.models.location.getSubLocationsWithDetails(outbreakLocations, [], function (error, allLocations) {
+        app.models.location.getSubLocationsWithDetails(outbreakLocations, [], {}, function (error, allLocations) {
           // handle eventual errors
           if (error) {
             return reject(error);

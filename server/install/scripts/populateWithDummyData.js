@@ -24,6 +24,7 @@ function run(callback) {
   const eventsNo = module.methodRelevantArgs.eventsNo;
   const locationsNo = module.methodRelevantArgs.locationsNo;
   const subLocationsPerLocationNo = module.methodRelevantArgs.subLocationsPerLocationNo;
+  const subLocationsLevelsNo = module.methodRelevantArgs.subLocationsLevelsNo;
   const minNoRelationshipsForEachRecord = module.methodRelevantArgs.minNoRelationshipsForEachRecord;
   const maxNoRelationshipsForEachRecord = module.methodRelevantArgs.maxNoRelationshipsForEachRecord;
 
@@ -179,10 +180,10 @@ function run(callback) {
     maxValue,
     precision
   ) => {
-    if(typeof(precision) === 'undefined') {
+    if (typeof (precision) === 'undefined') {
       precision = 2;
     }
-    return parseFloat(Math.min(minValue + (Math.random() * (maxValue - minValue)),maxValue).toFixed(precision));
+    return parseFloat(Math.min(minValue + (Math.random() * (maxValue - minValue)), maxValue).toFixed(precision));
   };
 
   // create outbreak
@@ -280,77 +281,110 @@ function run(callback) {
       // display log
       app.logger.debug('Creating sub-locations');
 
-      // create locations jobs so we can create them in parallel
-      const locationsJobs = [];
-      _.each(
-        data.locations,
-        (parentLocationData) => {
-          for (let index = 0; index < subLocationsPerLocationNo; index++) {
-            locationsJobs.push((cb) => {
-              // display log
-              const locationName = `${parentLocationData.name} sub ${index + 1}`;
-              app.logger.debug(`Creating location '${locationName}'`);
-
-              // generate geo location
-              const geoLocation = {
-                lat: randomFloatBetween(
-                  parentLocationData.geoLocation.lat + geoLocationRange.subLocationError.lat.min,
-                  parentLocationData.geoLocation.lat + geoLocationRange.subLocationError.lat.max,
-                  3
-                ),
-                lng: randomFloatBetween(
-                  parentLocationData.geoLocation.lng + geoLocationRange.subLocationError.lng.min,
-                  parentLocationData.geoLocation.lng + geoLocationRange.subLocationError.lng.max,
-                  3
-                )
-              };
-
-              // create sub-location
-              app.models.location
-                .create(Object.assign(
-                  defaultLocationTemplate, {
-                    name: locationName,
-                    parentLocationId: parentLocationData.id,
-                    geoLocation: geoLocation,
-                    geographicalLevelId: outbreakAdminLevel
-                  },
-                  common.install.timestamps
-                ), options)
-                .then((locationData) => {
-                  // log
-                  app.logger.debug(`Location '${locationData.name}' created => '${locationData.id}'`);
-
-                  // map location for later use
-                  if (!data.locations[locationData.parentLocationId].subLocations) {
-                    data.locations[locationData.parentLocationId].subLocations = [];
-                  }
-                  data.locations[locationData.parentLocationId].subLocations.push(locationData.toJSON());
-
-                  // finished
-                  cb();
-                })
-                .catch(cb);
-            });
-          }
+      /**
+       * Create sublocations on multiple levels
+       * Note: only 1st level sublocations will be cached for further use
+       * @param locations Parent locations
+       * @param levels Number of levels to create sublocations
+       * @param currentLevel Number of levels for which sublocations were already created
+       * @return {*}
+       */
+      const createSubLocationsForLocations = function (locations, levels = 0, currentLevel = 0) {
+        // don't create additional levels if we reached required number
+        if (levels < currentLevel) {
+          return Promise.resolve();
         }
-      );
 
-      // execute jobs
-      return new Promise((resolve, reject) => {
-        // wait for all operations to be done
-        async.parallelLimit(locationsJobs, 10, function (error) {
-          // error
-          if (error) {
-            return reject(error);
+        // creating a new level
+        currentLevel++;
+
+        // initialize new sublocations container
+        let newSubLocations = [];
+
+        // create locations jobs so we can create them in parallel
+        const locationsJobs = [];
+        _.each(
+          locations,
+          (parentLocationData) => {
+            for (let index = 0; index < subLocationsPerLocationNo; index++) {
+              locationsJobs.push((cb) => {
+                // display log
+                const locationName = `${parentLocationData.name} sub ${index + 1}`;
+                app.logger.debug(`Creating location '${locationName}'`);
+
+                // generate geo location
+                const geoLocation = {
+                  lat: randomFloatBetween(
+                    parentLocationData.geoLocation.lat + geoLocationRange.subLocationError.lat.min,
+                    parentLocationData.geoLocation.lat + geoLocationRange.subLocationError.lat.max,
+                    3
+                  ),
+                  lng: randomFloatBetween(
+                    parentLocationData.geoLocation.lng + geoLocationRange.subLocationError.lng.min,
+                    parentLocationData.geoLocation.lng + geoLocationRange.subLocationError.lng.max,
+                    3
+                  )
+                };
+
+                // create sub-location
+                app.models.location
+                  .create(Object.assign(
+                    defaultLocationTemplate, {
+                      name: locationName,
+                      parentLocationId: parentLocationData.id,
+                      geoLocation: geoLocation,
+                      geographicalLevelId: outbreakAdminLevel
+                    },
+                    common.install.timestamps
+                  ), options)
+                  .then((locationData) => {
+                    // log
+                    app.logger.debug(`Location '${locationData.name}' created => '${locationData.id}'`);
+
+                    if (currentLevel === 1) {
+                      // map location for later use
+                      if (!locations[locationData.parentLocationId].subLocations) {
+                        locations[locationData.parentLocationId].subLocations = [];
+                      }
+                      locations[locationData.parentLocationId].subLocations.push(locationData.toJSON());
+                    }
+
+                    // cache sublocation for use in next levels
+                    newSubLocations.push(locationData.toJSON());
+
+                    // finished
+                    cb();
+                  })
+                  .catch(cb);
+              });
+            }
           }
+        );
 
-          // display log
-          app.logger.debug('Finished creating sub-locations');
+        // execute jobs
+        // Note: number of inserts increases exponentially for each level; Using async series
+        return new Promise((resolve, reject) => {
+          // wait for all operations to be done
+          async
+          // .parallelLimit(locationsJobs, 10, function (error) {
+            .series(locationsJobs, function (error) {
+              // error
+              if (error) {
+                return reject(error);
+              }
 
-          // finished
-          resolve(data);
+              // display log
+              app.logger.debug(`Finished creating sub-locations for level ${currentLevel}`);
+
+              return createSubLocationsForLocations(newSubLocations, levels, currentLevel)
+                .then(() => resolve(data))
+                .catch(reject);
+            });
         });
-      });
+      };
+
+      // Note: only 1st level sublocations will be cached in data for further use
+      return createSubLocationsForLocations(data.locations, subLocationsLevelsNo);
     })
 
     // populate cases
@@ -368,7 +402,7 @@ function run(callback) {
           const firstName = `CaseFirst${index + 1}`;
 
           // determine last name - we might have the same name...same family
-          const lastName = `CaseLast${randomFloatBetween(Math.max(index - lastNameError, 0), index + lastNameError,0)}`;
+          const lastName = `CaseLast${randomFloatBetween(Math.max(index - lastNameError, 0), index + lastNameError, 0)}`;
 
           // generate dob
           let dob, age;
@@ -557,7 +591,7 @@ function run(callback) {
           const firstName = `ContactFirst${index + 1}`;
 
           // determine last name - we might have the same name...same family
-          const lastName = `ContactLast${randomFloatBetween(Math.max(index - lastNameError, 0), index + lastNameError,0)}`;
+          const lastName = `ContactLast${randomFloatBetween(Math.max(index - lastNameError, 0), index + lastNameError, 0)}`;
 
           // generate dob
           let dob, age;
@@ -848,7 +882,7 @@ function run(callback) {
               existingRelationships[otherPerson.id] &&
               existingRelationships[otherPerson.id][personData.id]
             )
-          ) {
+            ) {
             // case / event / contact ?
             const idsPool = personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
               caseAndEventsIds :
@@ -857,7 +891,7 @@ function run(callback) {
             // determine id
             const otherId = idsPool[randomFloatBetween(0, idsPool.length - 1, 0)];
             otherPerson = data.cases[otherId] ?
-              data.cases[otherId]: (
+              data.cases[otherId] : (
                 data.contacts[otherId] ?
                   data.contacts[otherId] :
                   data.events[otherId]

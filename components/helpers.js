@@ -2169,6 +2169,7 @@ const attachParentLocations = function (targetModel, locationModel, records, cal
   return locationModel.getParentLocationsWithDetails(
     allLocations,
     [],
+    {},
     (err, locations) => {
       if (err) {
         return callback(err);

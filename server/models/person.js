@@ -822,7 +822,7 @@ module.exports = function (Person) {
         outbreakLocations = outbreak.locationIds;
       }
       // Avoid making secondary request to DB by using a collection of locations instead of an array of locationIds
-      app.models.location.getSubLocationsWithDetails(outbreakLocations, [], function (error, allLocations) {
+      app.models.location.getSubLocationsWithDetails(outbreakLocations, [], {}, function (error, allLocations) {
         if (error) {
           reject(error);
         }

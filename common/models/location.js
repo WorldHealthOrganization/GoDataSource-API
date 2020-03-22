@@ -65,12 +65,12 @@ module.exports = function (Location) {
     });
     // find children location
     Location
-      .find({
-        where: {
-          parentLocationId: {
-            in: parentLocations
-          }
+      .rawFind({
+        parentLocationId: {
+          inq: parentLocations
         }
+      }, {
+        projection: {_id: 1}
       })
       .then(function (locations) {
         // if children locations found
@@ -101,18 +101,23 @@ module.exports = function (Location) {
    * Get sub-locations for a list of locations. Result is an array of location models
    * @param parentLocationsIds Array of location Ids for which to get the sublocations
    * @param allLocations Array on which to add the result; Must be an array of location models
+   * @param loopbackFilter Loopback filter; used for projection
    * @param callback
    */
-  Location.getSubLocationsWithDetails = function (parentLocationsIds, allLocations, callback) {
-    allLocations = allLocations || [];
+  Location.getSubLocationsWithDetails = function (parentLocationsIds, allLocations, loopbackFilter, callback) {
     // get the location IDs from the allLocations array
-    let allLocationsIds = allLocations.map(location => location.id);
+    let allLocationsIds = [];
+    let allLocationsMap = {};
+    allLocations.forEach(location => {
+      allLocationsIds.push(location.id);
+      allLocationsMap[location.id] = location;
+    });
 
     // get IDs of the parentLocations that are not in the allLocations array
     let notRetrievedParentLocationsIds;
     if (Array.isArray(parentLocationsIds)) {
       // get IDs of the parentLocations that are not in the allLocations array
-      notRetrievedParentLocationsIds = parentLocationsIds.filter(locationId => allLocationsIds.indexOf(locationId) === -1);
+      notRetrievedParentLocationsIds = parentLocationsIds.filter(locationId => !allLocationsMap[locationId]);
     }
 
     // do not search for the locations already searched for
@@ -145,11 +150,16 @@ module.exports = function (Location) {
       });
     }
 
+    // construct filter using loopback format
+    let filter = {
+      where: query,
+      order: ['name ASC']
+    };
+    loopbackFilter.fields && (filter.fields = loopbackFilter.fields);
+
     // find not already retrieved parent locations as well as sublocations
     Location
-      .rawFind(query, {
-        order: {name: 1}
-      })
+      .rawFindWithLoopbackFilter(filter)
       .then(function (locations) {
         // if children locations found
         if (locations.length) {
@@ -159,7 +169,7 @@ module.exports = function (Location) {
             // check if the retrieved location is not a searched parent location
             if (notRetrievedParentLocationsIds && notRetrievedParentLocationsIds.indexOf(location.id) === -1) {
               // sublocation; avoid loops
-              if (allLocationsIds.indexOf(location.id) === -1) {
+              if (!allLocationsMap[location.id]) {
                 foundLocationsIds.push(location.id);
               } else {
                 app.logger.warn(`Detected loop in location hierarchy: location with id "${location.id}" is set as a child location for a location that is lower the hierarchy. Scanned locations ids: ${allLocationsIds.join(', ')}`);
@@ -169,7 +179,7 @@ module.exports = function (Location) {
           // consolidate them in the locations list
           allLocations = allLocations.concat(locations);
           // scan their children
-          Location.getSubLocationsWithDetails(foundLocationsIds, allLocations, callback);
+          Location.getSubLocationsWithDetails(foundLocationsIds, allLocations, loopbackFilter, callback);
         } else {
           // no more locations found, stop here
           callback(null, allLocations);
@@ -183,9 +193,10 @@ module.exports = function (Location) {
    * Result also includes the models with IDs in locationsIds
    * @param locationsIds Array of location Ids for which to get the parent locations recursively
    * @param allLocations Array on which to add the result; Must be an array of location models
+   * @param loopbackFilter Loopback filter; used for projection
    * @param callback
    */
-  Location.getParentLocationsWithDetails = function (locationsIds, allLocations, callback) {
+  Location.getParentLocationsWithDetails = function (locationsIds, allLocations, loopbackFilter, callback) {
     // initialize array of IDs for locations that need to be retrieved
     let locationsToRetrieve = [];
 
@@ -193,31 +204,49 @@ module.exports = function (Location) {
     // also retrieve the parent locations for the locationsIds that are found in allLocations array
     let startLocationsIdsToRetrieve = [];
     let parentLocationsIds = [];
+
+    // create map for allLocations to avoid multiple searches in the array
+    let allLocationsMap = {};
+    allLocations.forEach(location => {
+      allLocationsMap[location.id] = location;
+    });
+
     locationsIds.forEach(function (locationId) {
-      let index = allLocations.findIndex(location => location.id === locationId);
-      if (index === -1) {
+      if (!allLocationsMap[locationId]) {
         // start location was not found in allLocations array; retrieve it
         startLocationsIdsToRetrieve.push(locationId);
       }
       // start location is already retrieved; retrieve parent if not already in the list
-      else if (allLocations.findIndex(location => location.id === allLocations[index].parentLocationId) === -1) {
-        parentLocationsIds.push(allLocations[index].parentLocationId);
+      else if (
+        allLocationsMap[locationId].parentLocationId &&
+        !allLocationsMap[allLocationsMap[locationId].parentLocationId]
+      ) {
+        parentLocationsIds.push(allLocationsMap[locationId].parentLocationId);
       }
     });
 
     // we need to retrieve both the start locations as well as their parents
     locationsToRetrieve = locationsToRetrieve.concat(startLocationsIdsToRetrieve, parentLocationsIds);
 
-    // find not already retrieved locations
-    Location
-      .find({
+    // retrieve locations only if there are IDs missing
+    let locationsToRetrievePromise = Promise.resolve([]);
+    if (locationsToRetrieve.length) {
+      // find not already retrieved locations
+      let query = {
         where: {
           id: {
-            in: locationsToRetrieve
+            inq: locationsToRetrieve
           }
         },
-        order: 'name ASC'
-      })
+        order: ['name ASC']
+      };
+      loopbackFilter.fields && (query.fields = loopbackFilter.fields);
+      locationsToRetrievePromise = Location
+        .rawFindWithLoopbackFilter(query);
+    }
+
+    // find not already retrieved locations
+    locationsToRetrievePromise
       .then(function (locations) {
         // if locations found
         if (locations.length) {
@@ -230,14 +259,23 @@ module.exports = function (Location) {
             let parentLocationId = location.parentLocationId;
 
             // check if the parent location already exists in allLocations; if so do not retrieve it again.
-            if (allLocations.findIndex(location => location.id === parentLocationId) === -1) {
+            if (
+              parentLocationId &&
+              !allLocationsMap[parentLocationId]
+            ) {
               locationsIdsToRetrieveParent.push(location.id);
             }
           });
           // consolidate them in the locations list
           allLocations = allLocations.concat(locations);
-          // go higher into the hierarchy
-          Location.getParentLocationsWithDetails(locationsIdsToRetrieveParent, allLocations, callback);
+
+          if (locationsIdsToRetrieveParent.length) {
+            // go higher into the hierarchy
+            Location.getParentLocationsWithDetails(locationsIdsToRetrieveParent, allLocations, loopbackFilter, callback);
+          } else {
+            // no need to continue searching
+            callback(null, allLocations);
+          }
         } else {
           // no more locations found, stop here
           callback(null, allLocations);
@@ -729,7 +767,7 @@ module.exports = function (Location) {
       }
 
       // avoid making secondary request to DB by using a collection of locations instead of an array of locationIds
-      return models.location.getSubLocationsWithDetails(outbreakLocations, [], function (error, allLocations) {
+      return models.location.getSubLocationsWithDetails(outbreakLocations, [], {}, function (error, allLocations) {
         let allLocationIds = allLocations.map((location) => location.id);
 
         // reportingGeographicalLevelId should be required in the model schema as well but it is not yet implemented

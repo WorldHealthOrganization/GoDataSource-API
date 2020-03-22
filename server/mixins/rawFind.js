@@ -27,6 +27,7 @@ module.exports = function (Model) {
    * @param {number} [options.skip]
    * @param {number} [options.limit]
    * @param {object} [options.order]
+   * @param {object} [options.sort]
    * @param {object} [options.projection]
    * @param {object} [options.includeDeletedRecords]
    * @return {Promise<any>}
@@ -58,27 +59,26 @@ module.exports = function (Model) {
     if (!options.includeDeletedRecords) {
       query = {
         $and: [
+          query,
           {
-            $or: [
-              {deleted: false},
-              {deleted: {$eq: null}}
-            ]
-          },
-          query
+            deleted: {
+              $ne: true
+            }
+          }
         ]
       };
     }
 
     // log usage
-    app.logger.debug(`[QueryId: ${queryId}] Performing MongoDB request on collection '${collectionName}': find ${JSON.stringify(query)}`);
+    app.logger.debug(`[QueryId: ${queryId}] Performing MongoDB request on collection '${collectionName}': find ${JSON.stringify(query)}, ${options.projection ? JSON.stringify({projection: options.projection}) : ''}`);
 
     // perform find using mongo connector
     let queryDb = app.dataSources.mongoDb.connector.collection(collectionName)
       .find(query, {projection: options.projection});
 
     // sort, if needed
-    if (options.order) {
-      queryDb = queryDb.sort(options.order);
+    if (options.order || options.sort) {
+      queryDb = queryDb.sort(options.order || options.sort);
     }
 
     // apply skip
@@ -103,5 +103,44 @@ module.exports = function (Model) {
         });
         return records;
       });
+  };
+
+  /**
+   * Parse loopback filter and find using connector
+   * @param filter Loopback filter (including where, order, limit, skip, fields)
+   * Note: where property should include actual query to be sent to MongoDB.
+   * Shouldn't include other custom flags like "includeChildren"
+   * @param {object} [options]
+   * @param {object} [options.includeDeletedRecords]
+   * @return {Promise<any>}
+   */
+  Model.rawFindWithLoopbackFilter = function (filter = {}, options = {}) {
+    // actual query
+    let query = filter.where || {};
+
+    // skip
+    filter.skip && (options.skip = filter.skip);
+
+    // limit
+    filter.limit && (options.limit = filter.limit);
+
+    // projection
+    if (filter.fields) {
+      options.projection = {};
+      filter.fields.forEach(field => options.projection[field] = 1);
+    }
+
+    // sort
+    if (filter.order) {
+      options.sort = {};
+      filter.order.forEach(entry => {
+        let entryParts = entry.split(' ');
+        let field = entryParts[0];
+        // if field order was sent as DESC we will sort DESC else we will sort ASC
+        options.sort[field] = entryParts[1] && ['desc', 'DESC'].indexOf(entryParts[1]) !== -1 ? -1 : 1;
+      });
+    }
+
+    return Model.rawFind(query, options);
   };
 };

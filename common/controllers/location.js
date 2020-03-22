@@ -35,7 +35,7 @@ module.exports = function (Location) {
    * @param filter Besides the default filter properties this request also accepts 'includeChildren' boolean on the first level in 'where'; this flag is taken into consideration only if other filters are applied
    * @param callback
    */
-  Location.getHierarchicalList = function (filter, callback) {
+  Location.getHierarchicalList = function (filter = {}, callback) {
     // initialize includeChildren filter
     let includeChildren;
     // check if the includeChildren filter was sent; accepting it only on the first level
@@ -48,8 +48,14 @@ module.exports = function (Location) {
       includeChildren = true;
     }
 
+    // check for sent fields
+    if (filter.fields) {
+      // ensure that properties required in logic are requested from db
+      filter.fields = new Array(...new Set(filter.fields.concat(['id', 'parentLocationId'])));
+    }
+
     Location
-      .find(app.utils.remote
+      .rawFindWithLoopbackFilter(app.utils.remote
         .mergeFilters({
           order: ['name ASC', 'parentLocationId ASC', 'id ASC']
         }, filter || {}))
@@ -61,7 +67,7 @@ module.exports = function (Location) {
           let locationsIDs = locations.map(location => location.id);
 
           // get parent locations
-          Location.getParentLocationsWithDetails(locationsIDs, locations, function (error, locationsWithParents) {
+          Location.getParentLocationsWithDetails(locationsIDs, locations, filter, function (error, locationsWithParents) {
             if (error) {
               throw error;
             }
@@ -69,7 +75,7 @@ module.exports = function (Location) {
             // check for includeChildren flag
             if (includeChildren) {
               // get sub locations
-              Location.getSubLocationsWithDetails(locationsIDs, locationsWithParents, function (error, foundLocations) {
+              Location.getSubLocationsWithDetails(locationsIDs, locationsWithParents, filter, function (error, foundLocations) {
                 if (error) {
                   throw error;
                 }

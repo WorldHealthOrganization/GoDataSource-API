@@ -215,6 +215,7 @@ const routines = {
       'eventsNo',
       'locationsNo',
       'subLocationsPerLocationNo',
+      'subLocationsLevelsNo',
       'minNoRelationshipsForEachRecord',
       'maxNoRelationshipsForEachRecord'
     ];

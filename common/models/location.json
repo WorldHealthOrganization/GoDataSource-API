@@ -64,6 +64,9 @@
     },
     "identifiers_code_index": {
       "identifiers.code": 1
+    },
+    "parentLocationId_index": {
+      "parentLocationId": 1
     }
   },
   "validations": [],
