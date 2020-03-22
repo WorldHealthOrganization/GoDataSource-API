@@ -167,11 +167,15 @@ function run(callback) {
           }
 
           // update user roles & reset password
-          return systemAdmin.updateAttributes({
-            roleIds: _.uniq(systemAdmin.roleIds.concat(adminRoles.map(data => data.role.id))),
-            password: defaultAdmin.password,
-            passwordChange: true
-          });
+          return Promise.all([
+            systemAdmin.updateAttributes({
+              roleIds: _.uniq(systemAdmin.roleIds.concat(adminRoles.map(data => data.role.id)))
+            }),
+            systemAdmin.updateAttributes({
+              password: defaultAdmin.password,
+              passwordChange: true
+            }, { skipOldPasswordCheck: true })
+          ]);
         });
     })
     .then(function () {

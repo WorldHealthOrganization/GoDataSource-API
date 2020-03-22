@@ -4828,7 +4828,7 @@
         ]
       },
       "LNG_API_ERROR_CODE_MODEL_IN_USE": {
-        "translation": "{{userRoleName}} role is in use and cannot be deleted",
+        "translation": "Item is in use and cannot be deleted",
         "modules": [
           "unauthenticated"
         ]
@@ -15617,6 +15617,14 @@
         "modules": [
           "referenceData"
         ]
+      }
+    },
+    "referenceDataCategoryCentre": {
+      "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME": {
+        "translation": "Centre Name"
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME_DESCRIPTION": {
+        "translation": ""
       }
     },
     "uiAvailableEntitiesForSwitchRelationshipPage": {
