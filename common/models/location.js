@@ -65,12 +65,12 @@ module.exports = function (Location) {
     });
     // find children location
     Location
-      .find({
-        where: {
-          parentLocationId: {
-            in: parentLocations
-          }
+      .rawFind({
+        parentLocationId: {
+          inq: parentLocations
         }
+      }, {
+        projection: {_id: 1}
       })
       .then(function (locations) {
         // if children locations found
@@ -105,17 +105,6 @@ module.exports = function (Location) {
    * @param callback
    */
   Location.getSubLocationsWithDetails = function (parentLocationsIds, allLocations, loopbackFilter, callback) {
-    // normalize input parameters
-    if (!parentLocationsIds) {
-      parentLocationsIds = [];
-    }
-    if (!allLocations) {
-      allLocations = [];
-    }
-    if (!loopbackFilter) {
-      loopbackFilter = {};
-    }
-
     // get the location IDs from the allLocations array
     let allLocationsIds = [];
     let allLocationsMap = {};
@@ -125,8 +114,8 @@ module.exports = function (Location) {
     });
 
     // get IDs of the parentLocations that are not in the allLocations array
-    let notRetrievedParentLocationsIds = [];
-    if (Array.isArray(parentLocationsIds) && parentLocationsIds.length) {
+    let notRetrievedParentLocationsIds;
+    if (Array.isArray(parentLocationsIds)) {
       // get IDs of the parentLocations that are not in the allLocations array
       notRetrievedParentLocationsIds = parentLocationsIds.filter(locationId => !allLocationsMap[locationId]);
     }
@@ -138,30 +127,27 @@ module.exports = function (Location) {
       }
     };
 
-    // include in the search parent locations, if any
     // include in the search locations that were not already found (if any)
-    if (parentLocationsIds.length && notRetrievedParentLocationsIds.length) {
-      // include both
-      query.or = [{
+    if (notRetrievedParentLocationsIds) {
+      if (!query.or) {
+        query.or = [];
+      }
+      query.or.push({
         id: {
           inq: notRetrievedParentLocationsIds
         }
-      }, {
+      });
+    }
+    // include in the search parent locations, if any
+    if (parentLocationsIds) {
+      if (!query.or) {
+        query.or = [];
+      }
+      query.or.push({
         parentLocationId: {
           inq: parentLocationsIds
         }
-      }];
-    } else if (parentLocationsIds.length) {
-      // include only parent locations search
-      query.parentLocationId = {
-        inq: parentLocationsIds
-      };
-    } else if (notRetrievedParentLocationsIds.length) {
-      // include only not already found locations
-      // overwriting previously set id nin filter; no need for nin filter since we are adding inq filter
-      query.id = {
-        inq: notRetrievedParentLocationsIds
-      };
+      });
     }
 
     // construct filter using loopback format
@@ -181,7 +167,7 @@ module.exports = function (Location) {
           let foundLocationsIds = [];
           locations.forEach(function (location) {
             // check if the retrieved location is not a searched parent location
-            if (!notRetrievedParentLocationsIds.length || notRetrievedParentLocationsIds.indexOf(location.id) === -1) {
+            if (notRetrievedParentLocationsIds && notRetrievedParentLocationsIds.indexOf(location.id) === -1) {
               // sublocation; avoid loops
               if (!allLocationsMap[location.id]) {
                 foundLocationsIds.push(location.id);
