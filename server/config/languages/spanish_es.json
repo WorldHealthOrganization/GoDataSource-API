@@ -12461,7 +12461,7 @@
         "translation": "Errores de validación:"
       },
       "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_ERROR_MSG": {
-        "translation": "- línea {{fila}}, columna (s) '{{columnas}}' no es válida"
+        "translation": "- línea {{row}}, columna (s) '{{columns}}' no es válida"
       },
       "LNG_PAGE_BULK_ADD_CONTACTS_TITLE": {
         "translation": "Añadir contactos en masa"
