@@ -414,32 +414,33 @@ module.exports = function (Person) {
         dataToUpdate.dateRanges = modelNewData.dateRanges;
 
         // retrieve ref data items to see if we need to create anything
-        return Promise
-          .resolve()
-          .then(() => {
-            if (context.options && context.options._sync) {
-              // get the languages list and create a token entry for each language
-              return app.models.language.rawFind({}, {projection: {id: 1}});
+        return app.models.referenceData
+          .rawFind({
+            _id: {
+              $in: Object.keys(centerNames)
             }
-          })
-          .then((languages) => {
-            return app.models.referenceData
-              .rawFind({
-                _id: {
-                  $in: Object.keys(centerNames)
-                }
-              }, {projection: {_id: 1}})
-              .then((refItems) => {
-                // remove items that exist already
-                (refItems || []).forEach((refItem) => {
-                  delete centerNames[refItem.id];
-                });
+          }, {projection: {_id: 1}})
+          .then((refItems) => {
+            // remove items that exist already
+            (refItems || []).forEach((refItem) => {
+              delete centerNames[refItem.id];
+            });
 
-                // if we don't have to create reference data item, than God finished with this promise
-                if (_.isEmpty(centerNames)) {
-                  return;
-                }
+            // if we don't have to create reference data item, than God finished with this promise
+            if (_.isEmpty(centerNames)) {
+              return;
+            }
 
+            // if we're in sync mode then we need to retrieve languages too
+            return Promise
+              .resolve()
+              .then(() => {
+                if (context.options && context.options._sync) {
+                  // get the languages list and create a token entry for each language
+                  return app.models.language.rawFind({}, {projection: {id: 1}});
+                }
+              })
+              .then((languages) => {
                 // prepare reference data items that we need to create
                 const now = new Date();
                 const authorInfo = {
@@ -455,7 +456,7 @@ module.exports = function (Person) {
                     app.models.referenceData.create(
                       Object.assign(
                         {
-                          _id: centerData.id,
+                          id: centerData.id,
                           categoryId: centreNameReferenceDataCategory,
                           value: context.options && context.options._sync ?
                             centerData.id : centerData.value,
@@ -479,7 +480,7 @@ module.exports = function (Person) {
                         app.models.languageToken.create(
                           Object.assign(
                             {
-                              _id: app.models.languageToken.generateID(centerData.id, language.id),
+                              id: app.models.languageToken.generateID(centerData.id, language.id),
                               token: centerData.id,
                               languageId: language.id,
                               translation: centerData.value
@@ -495,7 +496,7 @@ module.exports = function (Person) {
                         app.models.languageToken.create(
                           Object.assign(
                             {
-                              _id: app.models.languageToken.generateID(`${centerData.id}_DESCRIPTION`, language.id),
+                              id: app.models.languageToken.generateID(`${centerData.id}_DESCRIPTION`, language.id),
                               token: `${centerData.id}_DESCRIPTION`,
                               languageId: language.id,
                               translation: ''
