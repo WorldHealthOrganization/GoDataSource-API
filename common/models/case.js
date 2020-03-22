@@ -225,7 +225,6 @@ module.exports = function (Case) {
     'addresses[].emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS',
     'visualId': 'LNG_CASE_FIELD_LABEL_VISUAL_ID',
     'isDateOfReportingApproximate': 'LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
-    'questionnaireAnswers': 'LNG_CASE_FIELD_LABEL_QUESTIONNAIRE_ANSWERS',
     'safeBurial': 'LNG_CASE_FIELD_LABEL_SAFE_BURIAL',
     'dateOfBurial': 'LNG_CASE_FIELD_LABEL_DATE_OF_BURIAL',
     'burialLocationId': 'LNG_CASE_FIELD_LABEL_BURIAL_LOCATION_ID',
@@ -234,7 +233,10 @@ module.exports = function (Case) {
     'vaccinesReceived[].vaccine': 'LNG_CASE_FIELD_LABEL_VACCINE',
     'vaccinesReceived[].date': 'LNG_CASE_FIELD_LABEL_VACCINE_DATE',
     'vaccinesReceived[].status': 'LNG_CASE_FIELD_LABEL_VACCINE_STATUS',
-    'pregnancyStatus': 'LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS'
+    'pregnancyStatus': 'LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS',
+
+    // must be last item from the list
+    'questionnaireAnswers': 'LNG_CASE_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
   });
 
   Case.exportFieldsOrder = [
