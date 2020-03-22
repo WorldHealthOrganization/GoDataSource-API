@@ -23,6 +23,8 @@ module.exports = function (LabResult) {
     quantitativeResult: 'LNG_LAB_RESULT_FIELD_LABEL_QUANTITATIVE_RESULT',
     notes: 'LNG_LAB_RESULT_FIELD_LABEL_NOTES',
     status: 'LNG_LAB_RESULT_FIELD_LABEL_STATUS',
+
+    // must be last item from the list
     questionnaireAnswers: 'LNG_LAB_RESULT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
   });
 
