@@ -2177,7 +2177,6 @@ const attachParentLocations = function (targetModel, locationModel, records, cal
 
       const locationsMap = {};
       for (let location of locations) {
-        location = location.toJSON();
         locationsMap[location.id] = {
           name: location.name,
           parentLocationId: location.parentLocationId,
