@@ -20,7 +20,7 @@ const shouldExecute = function (startTime, interval, timeUnit) {
     m: 'minutes',
     d: 'days'
   };
-  return moment.duration(moment().diff(startTime))[unitsMap[timeUnit]]() >= interval;
+  return moment().isAfter(moment(startTime).add(interval, unitsMap[timeUnit]));
 };
 
 // initialize ID to be set as createdBy for automatic sync
