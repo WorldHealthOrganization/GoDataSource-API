@@ -15,6 +15,7 @@ const fs = require('fs');
 const packageJson = require('../package');
 const workerRunner = require('./workerRunner');
 const crypto = require('crypto');
+const EpiWeek = require('epi-week');
 
 const arrayFields = {
   'addresses': 'address',
@@ -77,12 +78,36 @@ const getAsciiString = function (string) {
 };
 
 /**
+ * Calculate end of week for different type of weeks
+ * @param date
+ * @param weekType ISO, Sunday Starting, CDC (EPI WEEK)
+ */
+const calculateEndOfWeek = function (date, weekType) {
+  weekType = weekType || 'iso';
+  let result = null;
+  switch (weekType) {
+    case 'iso':
+      result = date.clone().endOf('isoWeek');
+      break;
+    case 'sunday':
+      result = date.clone().endOf('week');
+      break;
+    case 'epi':
+      const epiWeek = EpiWeek(date.clone().toDate());
+      result = date.clone().week(epiWeek.week).endOf('week');
+      break;
+  }
+  return result;
+};
+
+/**
  * Split a date interval into chunks of specified length
  * @param start Interval start date
  * @param end Interval end date
  * @param chunkType String Length of each resulted chunk; Can be a (day, week, month)
+ * @param weekType Type of week (epi, iso, sunday)
  */
-const getDateChunks = function (start, end, chunkType) {
+const getDateChunks = function (start, end, chunkType, weekType) {
   start = getDate(start);
   end = getDateEndOfDay(end);
   let result = [];
@@ -98,7 +123,7 @@ const getDateChunks = function (start, end, chunkType) {
         if (!date.isSame(start)) {
           date.add(1, 'day');
         }
-        let lastDate = date.clone().endOf(chunkType === 'week' ? 'isoWeek' : chunkType);
+        let lastDate = chunkType === 'week' ? calculateEndOfWeek(date, weekType) : date.clone().endOf(chunkType);
         if (lastDate.isSameOrAfter(end)) {
           lastDate = end;
         }
@@ -117,9 +142,10 @@ const getDateChunks = function (start, end, chunkType) {
  * Split a date interval into chunks of specified length
  * @param interval Array containing the margin dates of the interval
  * @param chunk String Length of each resulted chunk; Can be a daily/weekly/monthly
+ * @param weekType Type of week (epi, iso, sunday)
  * @returns {{}} Map of chunks
  */
-const getChunksForInterval = function (interval, chunk) {
+const getChunksForInterval = function (interval, chunk, weekType) {
   // initialize map of chunk values
   let chunkMap = {
     day: 'day',
@@ -134,7 +160,7 @@ const getChunksForInterval = function (interval, chunk) {
   interval[1] = getDateEndOfDay(interval[1]);
 
   // get chunks
-  let chunks = getDateChunks(interval[0], interval[1], chunk);
+  let chunks = getDateChunks(interval[0], interval[1], chunk, weekType);
 
   // initialize result
   let result = {};

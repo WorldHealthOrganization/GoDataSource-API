@@ -490,7 +490,7 @@ module.exports = function (Case) {
    */
   Case.countStratifiedByCategoryOverTime = function (outbreak, referenceDataCategoryId, timePropertyName, exportedPropertyName, counterFn, filter) {
     // initialize periodType filter; default is day; accepting day/week/month
-    let periodType, endDate;
+    let periodType, weekType, endDate;
     let periodTypes = {
       day: 'day',
       week: 'week',
@@ -517,6 +517,12 @@ module.exports = function (Case) {
       delete filter.where.endDate;
     }
 
+    // check if we received weekType filter
+    weekType = _.get(filter, 'where.weekType');
+    if (typeof weekType !== 'undefined') {
+      delete filter.where.weekType;
+    }
+
     // always work with end of day
     if (endDate) {
       // get end of day for specified date
@@ -539,7 +545,7 @@ module.exports = function (Case) {
     ];
 
     // build period map
-    const periodMap = app.utils.helpers.getChunksForInterval(periodInterval, periodType);
+    const periodMap = app.utils.helpers.getChunksForInterval(periodInterval, periodType, weekType);
 
     // get available case categories
     const categoryList = {};
