@@ -480,6 +480,10 @@ module.exports = function (Location) {
       }
       // clone location (in order to modify it without altering the source)
       let locationToStore = Object.assign({}, location);
+
+      // process geopoint
+      convertNestedGeoPointsToLatLng(locationToStore);
+
       // check if identifiers should be removed
       if (removeIdentifiers) {
         delete locationToStore.id;
@@ -533,9 +537,6 @@ module.exports = function (Location) {
             // remove it from where it previously was in the list (will be moved under parent location)
             _.set(hierarchicalLocationsList, locationIndex[location.id], null);
           }
-
-          // process geopoint
-          convertNestedGeoPointsToLatLng(currentLocation.location);
 
           // add it under parent location
           length = parentLocation.children.push(currentLocation);
