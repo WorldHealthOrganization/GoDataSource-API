@@ -1893,6 +1893,12 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_CREATE_CONTACT_OF_CONTACT_DESCRIPTION": {
         "translation": "This permission allows creating multiple contacts of contacts at the same time ( bulk )"
       },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_RELATIONSHIP": {
+        "translation": "Contact of Contact - export relationships"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_RELATIONSHIP_DESCRIPTION": {
+        "translation": "This permission allows exporting of contact of contact relationships"
+      },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_RELATIONSHIP": {
         "translation": "Relationships"
       },

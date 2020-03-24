@@ -3447,6 +3447,15 @@ module.exports = function (Role) {
             'contact_of_contact_list',
             'contact_of_contact_generate_visual_id'
           ]
+        },
+        {
+          id: 'contact_of_contact_export_relationships',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_RELATIONSHIP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_RELATIONSHIP_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'relationship_export'
+          ]
         }
       ]
     },
