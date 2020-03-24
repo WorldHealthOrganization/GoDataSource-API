@@ -319,7 +319,7 @@ function exportFilteredModelsList(
                     } else {
                       for (let i = 1; i <= highestParentsChain; i++) {
                         headers.push({
-                          id: `${propertyName}_parentLocations ${i}`,
+                          id: `${propertyName.replace(/\./g, ' ')}_parentLocations ${i}`,
                           header: `${headerTranslation} ${dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL')} [${i}]`
                         });
                       }
