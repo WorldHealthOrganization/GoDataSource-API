@@ -100,6 +100,13 @@ module.exports = function (User) {
         })
         // check that the old password is not same with the one from request
         .then(() => {
+          if (ctx.options.skipSamePasswordCheck || (
+            ctx.options.remotingContext &&
+            ctx.options.remotingContext.options &&
+            ctx.options.remotingContext.options.skipSamePasswordCheck
+          )) {
+            return;
+          }
           return new Promise((resolve, reject) => {
             ctx.currentInstance.hasPassword(ctx.data.password, (err, isMatch) => {
               if (err) {

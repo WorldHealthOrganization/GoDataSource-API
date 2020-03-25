@@ -174,7 +174,7 @@ function run(callback) {
             systemAdmin.updateAttributes({
               password: defaultAdmin.password,
               passwordChange: true
-            }, { skipOldPasswordCheck: true })
+            }, { skipOldPasswordCheck: true, skipSamePasswordCheck: true })
           ]);
         });
     })
