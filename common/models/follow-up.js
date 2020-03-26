@@ -6,6 +6,8 @@ const _ = require('lodash');
 const helpers = require('../../components/helpers');
 const FollowupGeneration = require('../../components/followupGeneration');
 const RoundRobin = require('rr');
+const Timer = require('../../components/Timer');
+const Uuid = require('uuid');
 
 module.exports = function (FollowUp) {
   // set flag to not get controller
@@ -410,56 +412,122 @@ module.exports = function (FollowUp) {
    * @param filter
    */
   FollowUp.countByTeam = function (outbreakId, filter) {
-    // find follow-ups for current outbreak
-    return FollowUp.rawFind(
-      app.utils.remote.mergeFilters({
-        where: {
-          outbreakId: outbreakId
-        }
-      }, filter || {}).where,
+    // set query id and start timer (for logging purposes)
+    const queryId = Uuid.v4();
+    const timer = new Timer();
+    timer.start();
+
+    // convert filter to mongodb filter structure
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // sanitize the filter
+    let parsedFilter = app.utils.remote.convertLoopbackFilterToMongo(
       {
-        includeDeletedRecords: filter.deleted
-      }
-    ).then(function (followUps) {
-      // define result
-      const result = {
-        team: {},
-        count: followUps.length
-      };
-      // go through all followUps
-      followUps.forEach(function (followUp) {
-        // use empty string for not associated team
-        if (!followUp.teamId) {
-          followUp.teamId = '';
-        }
-        // init team container if not already inited
-        if (!result.team[followUp.teamId]) {
-          result.team[followUp.teamId] = {
-            followUpIds: [],
-            count: 0
-          };
-        }
-        // add follow-up ID per team
-        result.team[followUp.teamId].followUpIds.push(followUp.id);
-        // increment the number of follow-ups per team
-        result.team[followUp.teamId].count++;
+        $and: [
+          // make sure we're only counting follow ups from the current outbreak
+          {
+            outbreakId: outbreakId
+          },
+          {
+            $or: [
+              {
+                deleted: false
+              },
+              {
+                deleted: {
+                  $eq: null
+                }
+              }
+            ]
+          },
+          // conditions coming from request
+          filter.where
+        ]
       });
-      // find the teams for for the follow-ups
-      return app.models.team
-        .rawFind({
-          id: {
-            inq: Object.keys(result.team)
+
+    // add soft deleted condition if not specified otherwise
+    if (!filter.deleted) {
+      parsedFilter = {
+        $and: [
+          parsedFilter,
+          {
+            $or: [
+              {
+                deleted: false
+              },
+              {
+                deleted: {
+                  $eq: null
+                }
+              }
+            ]
           }
-        })
-        .then(function (teams) {
-          // add team information to each section
-          teams.forEach(function (team) {
-            result.team[team.id].team = team;
-          });
-          // return built result
-          return result;
-        });
+        ]
+      };
+    }
+
+    // pipeline for database aggregate query
+    const aggregatePipeline = [];
+
+    // restrict the follow-ups list
+    aggregatePipeline.push({
+      $match: parsedFilter
     });
+
+    // group follow-ups by team (those without team will go into 'null' section)
+    // then sum them
+    aggregatePipeline.push({
+      $group: {
+        _id: '$teamId',
+        count: {
+          $sum: 1
+        }
+      }
+    });
+
+    // retrieve each team information
+    // do not unwind the data, it consumes too much memory
+    // better transform it afterwards, as we don't have many team in the system anyways
+    aggregatePipeline.push({
+      $lookup: {
+        from: 'team',
+        localField: 'teamId',
+        foreignField: '_id',
+        as: 'team'
+      }
+    });
+
+    // log usage
+    app.logger.info(`[QueryId: ${queryId}] Performing MongoDB aggregate request on collection '${FollowUp.modelName}': aggregate ${JSON.stringify(aggregatePipeline)}`);
+
+    // retrieve data
+    return app.dataSources.mongoDb.connector
+      .collection(FollowUp.modelName)
+      .aggregate(aggregatePipeline)
+      .toArray()
+      .then(data => {
+        // log time need to execute query
+        app.logger.info(`[QueryId: ${queryId}] MongoDB request completed after ${timer.getElapsedMilliseconds()} msec`);
+
+        // defensive checks
+        data = data || [];
+
+        // format team property
+        // as $lookup result is always an array, we need it an object
+        // also system uses 'id' property, so replace internal _id prop with it
+        for (let item of data) {
+          if (Array.isArray(item) && item.length) {
+            item.team = item.team[0];
+          } else {
+            item.team = '';
+          }
+
+          item.id = item._id || '';
+          delete item._id;
+        }
+        return data;
+      });
   };
 
   /**
@@ -918,19 +986,23 @@ module.exports = function (FollowUp) {
     filter,
     countOnly
   ) => {
+    let relations = [];
+    if (!countOnly) {
+      relations.push({
+        lookup: {
+          from: 'person',
+          localField: 'personId',
+          foreignField: '_id',
+          as: 'contact'
+        },
+        unwind: true
+      });
+    }
     return app.models.followUp
       .rawFindAggregate(
         filter, {
           countOnly: countOnly,
-          relations: [{
-            lookup: {
-              from: 'person',
-              localField: 'personId',
-              foreignField: '_id',
-              as: 'contact'
-            },
-            unwind: true
-          }]
+          relations: relations
         }
       ).then((followUps) => {
         // nothing to do if we just want to count follow-ups

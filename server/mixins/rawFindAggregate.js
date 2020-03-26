@@ -152,6 +152,11 @@ module.exports = function (Model) {
       });
     }
 
+    // construct aggregate filters
+    aggregatePipeline.push({
+      $match: whereFilter
+    });
+
     // include relations
     if (options.relations) {
       _.each(options.relations, (relation) => {
@@ -173,11 +178,6 @@ module.exports = function (Model) {
         }
       });
     }
-
-    // construct aggregate filters
-    aggregatePipeline.push({
-      $match: whereFilter
-    });
 
     // no need to retrieve data, sort & skip records if we just need to count
     if (options.countOnly) {
@@ -249,8 +249,8 @@ module.exports = function (Model) {
       }
     }
 
-    // // log usage
-    app.logger.debug(`[QueryId: ${queryId}] Performing MongoDB aggregate request on collection '${collectionName}': aggregate ${JSON.stringify(aggregatePipeline)}`);
+    // log usage
+    app.logger.info(`[QueryId: ${queryId}] Performing MongoDB aggregate request on collection '${collectionName}': aggregate ${JSON.stringify(aggregatePipeline)}`);
 
     // retrieve data
     return app.dataSources.mongoDb.connector
@@ -259,7 +259,7 @@ module.exports = function (Model) {
       .toArray()
       .then((records) => {
         // log time need to execute query
-        app.logger.debug(`[QueryId: ${queryId}] MongoDB request completed after ${timer.getElapsedMilliseconds()} msec`);
+        app.logger.info(`[QueryId: ${queryId}] MongoDB request completed after ${timer.getElapsedMilliseconds()} msec`);
 
         // make sure we have an array
         records = records || [];
