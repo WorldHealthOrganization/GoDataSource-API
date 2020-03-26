@@ -513,7 +513,15 @@ module.exports = function (FollowUp) {
         // defensive checks
         data = data || [];
 
-        // format team property
+        const result = {
+          team: {},
+          count: 0 // this is total count of follow-ups from all the teams
+        };
+
+        // convert response into object
+        // doing this before old implementation were returning in this format
+        // and to avoid front end from changing their implementation as well
+        // also format team property
         // as $lookup result is always an array, we need it an object
         // also system uses 'id' property, so replace internal _id prop with it
         for (let item of data) {
@@ -525,8 +533,14 @@ module.exports = function (FollowUp) {
 
           item.id = item._id || '';
           delete item._id;
+
+          result[item.id] = {
+            team: item.team,
+            count: item.count
+          };
+          result.count += item.count;
         }
-        return data;
+        return result;
       });
   };
 
