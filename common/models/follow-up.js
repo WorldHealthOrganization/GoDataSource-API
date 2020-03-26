@@ -534,7 +534,7 @@ module.exports = function (FollowUp) {
           item.id = item._id || '';
           delete item._id;
 
-          result[item.id] = {
+          result.team[item.id] = {
             team: item.team,
             count: item.count
           };
