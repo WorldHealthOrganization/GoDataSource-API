@@ -239,6 +239,10 @@
     "defaultStatusCode": 422,
     "messagePattern": "A contact can't be the source in a relationship ( it can only be a target )"
   },
+  "CONTACT_OF_CONTACT_CANT_BE_SOURCE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "A contact of contact can't be the source in a relationship ( it can only be a target )"
+  },
   "CIRCULAR_RELATIONSHIP": {
     "defaultStatusCode": 422,
     "messagePattern": "You can't have a relationship between the same records"
@@ -334,5 +338,13 @@
   "LOGIN_FAILED": {
     "defaultStatusCode": 422,
     "messagePattern": "Login failed"
+  },
+  "CONTACT_OF_CONTACT_AND_RELATIONSHIP_REQUIRED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Both contact of contact and relationship are required when creating a contact of contact"
+  },
+  "MULTIPLE_CONTACTS_OF_CONTACT_CREATION_PARTIAL_SUCCESS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Multiple contact of contact creation partial Success. Some contact instances failed to be created."
   }
 }

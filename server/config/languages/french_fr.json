@@ -1401,6 +1401,12 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_LAB_RESULT_DESCRIPTION": {
         "translation": "This permission allows exporting of lab results"
       },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_OF_CONTACT_FROM_CONTACT": {
+        "translation": "Contact - bulk create contacts of contacts"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_OF_CONTACT_FROM_CONTACT_DESCRIPTION": {
+        "translation": "This permission allows bulk creating contacts of contacts from contact"
+      },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CASE": {
         "translation": "Cases"
       },
@@ -1845,6 +1851,60 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION": {
         "translation": "This permission allows deleting contact of contact exposures"
       },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_DOSSIER": {
+        "translation": "Contact Of Contact - export dossier"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_DOSSIER_DESCRIPTION": {
+        "translation": "This permission allows export of contact of contact dossier document"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_MOVEMENT_MAP": {
+        "translation": "Contact Of Contact - view movement map"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_MOVEMENT_MAP_DESCRIPTION": {
+        "translation": "This permission allows viewing contact of contact movement map"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_MOVEMENT_MAP": {
+        "translation": "Contact Of Contact - export movement map"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_MOVEMENT_MAP_DESCRIPTION": {
+        "translation": "This permission allows exporting contact of contact movement map"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_CHRONOLOGY_CHART": {
+        "translation": "Contact Of Contact - view chronology chart"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_CHRONOLOGY_CHART_DESCRIPTION": {
+        "translation": "This permission allows viewing contact of contact chronology chart"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_OF_CONTACT_BY_RISK": {
+        "translation": "Contact Of Contact - group by risk"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_OF_CONTACT_BY_RISK_DESCRIPTION": {
+        "translation": "This permission allows grouping contacts of contacts by risk"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_SOURCE_CONTACT_OF_CONTACT_RELATIONSHIP": {
+        "translation": "Contact Of Contact - change source"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_SOURCE_CONTACT_OF_CONTACT_RELATIONSHIP_DESCRIPTION": {
+        "translation": "This permission allows changing relationship source person"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_TARGET_CONTACT_OF_CONTACT_RELATIONSHIP": {
+        "translation": "Contact Of Contact - change target"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_TARGET_CONTACT_OF_CONTACT_RELATIONSHIP_DESCRIPTION": {
+        "translation": "This permission allows changing relationship target person"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_CREATE_CONTACT_OF_CONTACT": {
+        "translation": "Contact Of Contact - bulk create"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_CREATE_CONTACT_OF_CONTACT_DESCRIPTION": {
+        "translation": "This permission allows creating multiple contacts of contacts at the same time ( bulk )"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_RELATIONSHIP": {
+        "translation": "Contact of Contact - export relationships"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_RELATIONSHIP_DESCRIPTION": {
+        "translation": "This permission allows exporting of contact of contact relationships"
+      },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_RELATIONSHIP": {
         "translation": "Relationships"
       },
@@ -2059,7 +2119,7 @@
         "translation": "Lab result - export"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_LAB_RESULT_DESCRIPTION": {
-        "translation": "This permission allows export of case lab result data"
+        "translation": "This permission allows export of lab result data"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_GANTT_CHART": {
         "translation": "Gantt charts"
@@ -7646,6 +7706,9 @@
       },
       "LNG_CONTACT_ADDRESSES_SECTION": {
         "translation": "Adresses"
+      },
+      "LNG_PAGE_TITLE_CONTACT_OF_CONTACT_DETAILS": {
+        "translation": "Contact of Contact details"
       }
     },
     "countries": {

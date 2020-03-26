@@ -1014,6 +1014,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "contact_of_contact_change_source_relationships",
+      "permission": "ALLOW",
+      "property": "bulkChangeSourceRelationships"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_view_movement_map",
       "permission": "ALLOW",
       "property": "getContactMovement"
@@ -1641,6 +1647,36 @@
       "principalId": "contact_of_contact_restore",
       "permission": "ALLOW",
       "property": "restoreContactOfContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_export_dossier",
+      "permission": "ALLOW",
+      "property": "contactOfContactDossier"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_view_movement_map",
+      "permission": "ALLOW",
+      "property": "getContactOfContactMovement"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_grouped_by_risk",
+      "permission": "ALLOW",
+      "property": "countContactsOfContactsPerRiskLevel"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_bulk_modify",
+      "permission": "ALLOW",
+      "property": "bulkModifyContactsOfContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_create_bulk_contact_of_contact",
+      "permission": "ALLOW",
+      "property": "createContactMultipleContactsOfContacts"
     }
   ],
   "methods": {
@@ -7643,6 +7679,193 @@
       "http": {
         "verb": "get",
         "path": "/contacts/:nk/lab-results/export"
+      }
+    },
+    "prototype.contactOfContactDossier": {
+      "accepts": [
+        {
+          "arg": "ids",
+          "type": [
+            "string"
+          ],
+          "description": "Array of contacts for which the dossiers will be generated"
+        },
+        {
+          "arg": "data",
+          "type": [
+            "string"
+          ],
+          "description": "Array of fields to be anonymized"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export dossier for one or more contacts",
+      "http": {
+        "verb": "post",
+        "ignoreActiveOutbreak": true,
+        "path": "/contacts-of-contacts/dossier"
+      }
+    },
+    "prototype.getContactOfContactMovement": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for contacts of contacts"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "movement",
+          "type": [
+            "address"
+          ],
+          "description": "List of addresses with GeoLocations ordered from the oldest one to the most recent",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get list of addresses with GeoLocations ordered from the oldest one to the most recent",
+      "http": {
+        "verb": "get",
+        "path": "/contacts-of-contacts/:fk/movement"
+      }
+    },
+    "prototype.countContactsOfContactsPerRiskLevel": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: it supports same filters as GET /outbreak/:id/contacts"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": {
+            "riskLevel": {
+              "type": {
+                "<riskLevel>": {
+                  "type": {
+                    "count": "number",
+                    "contactIDs": [
+                      "string"
+                    ]
+                  }
+                }
+              }
+            },
+            "count": "number"
+          },
+          "description": "Number of contacts of contacts grouped by risk level",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Counts the number of contacts grouped by risk level",
+      "http": {
+        "verb": "get",
+        "path": "/contacts-of-contacts/per-risk-level/count"
+      }
+    },
+    "prototype.bulkModifyContactsOfContacts": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": [
+            "contactOfContact"
+          ],
+          "description": "Array containing contacts of contacts",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "createResponse",
+          "type": [
+            "contact"
+          ],
+          "description": "Array of updated contacts of contacts",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Update multiple contacts of contacts",
+      "http": {
+        "verb": "put",
+        "path": "/contacts-of-contacts/bulk"
+      }
+    },
+    "prototype.createContactMultipleContactsOfContacts": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "data",
+          "type": [
+            "contactOfContactAndRelationship"
+          ],
+          "description": "Array containing pairs for contact of contact + relationship",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "createResponse",
+          "type": [
+            "contactOfContactAndRelationship"
+          ],
+          "description": "Array of responses for the create actions",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Creates multiple contacts of contacts for a contact.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/:nk/contacts-of-contacts"
       }
     }
   }

@@ -1179,7 +1179,7 @@ module.exports = function (Relationship) {
       }));
     }
 
-    // retrieve source / target - case / contact / event
+    // retrieve source / target - case / contact / contact-of-contact / event
     // it must be a valid one, otherwise we need to throw an error
     return app.models.person
       .findById(sourceTargetId)
@@ -1192,12 +1192,9 @@ module.exports = function (Relationship) {
           });
         }
 
-        // contact can't become source
-        if (
-          changeSource &&
-          sourceTargetModel.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-        ) {
-          throw app.utils.apiError.getError('CONTACT_CANT_BE_SOURCE');
+        // contact of contact can't become source
+        if (changeSource && sourceTargetModel.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT') {
+          throw app.utils.apiError.getError('CONTACT_OF_CONTACT_CANT_BE_SOURCE');
         }
 
         // finished
@@ -1282,6 +1279,15 @@ module.exports = function (Relationship) {
             relationship.persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
           ) {
             throw app.utils.apiError.getError('CONTACT_CANT_BE_SOURCE');
+          }
+
+          // make sure that at least one of the persons records isn't a contact of contact
+          // either sourceTargetId, or the unaltered one
+          if (
+            relationship.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' &&
+            relationship.persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+          ) {
+            throw app.utils.apiError.getError('CONTACT_OF_CONTACT_CANT_BE_SOURCE');
           }
 
           // make sure that we don't have circular relationships, both person records pointing to the same id
