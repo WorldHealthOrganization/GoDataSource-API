@@ -429,18 +429,6 @@ module.exports = function (FollowUp) {
           {
             outbreakId: outbreakId
           },
-          {
-            $or: [
-              {
-                deleted: false
-              },
-              {
-                deleted: {
-                  $eq: null
-                }
-              }
-            ]
-          },
           // conditions coming from request
           filter.where
         ]
