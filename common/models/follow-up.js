@@ -440,16 +440,9 @@ module.exports = function (FollowUp) {
         $and: [
           parsedFilter,
           {
-            $or: [
-              {
-                deleted: false
-              },
-              {
-                deleted: {
-                  $eq: null
-                }
-              }
-            ]
+            deleted: {
+              $ne: true
+            }
           }
         ]
       };

@@ -8737,6 +8737,13 @@ module.exports = function (Outbreak) {
       // use that old version
       _.set(filter, 'where.case', query.case);
     }
+
+    // be backwards compatible
+    const personQuery = _.get(filter, 'where.person');
+    if (!personQuery && query.person) {
+      _.set(filter, 'where.person', query.person);
+    }
+
     next();
   }
 
@@ -8744,6 +8751,13 @@ module.exports = function (Outbreak) {
     findAndFilteredCountLabResultsBackCompat(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.filteredCountLabResults', function (context, modelInstance, next) {
+    findAndFilteredCountLabResultsBackCompat(context, modelInstance, next);
+  });
+
+  Outbreak.beforeRemote('prototype.findLabResultsAggregate', function (context, modelInstance, next) {
+    findAndFilteredCountLabResultsBackCompat(context, modelInstance, next);
+  });
+  Outbreak.beforeRemote('prototype.filteredCountLabResultsAggregate', function (context, modelInstance, next) {
     findAndFilteredCountLabResultsBackCompat(context, modelInstance, next);
   });
 
@@ -8844,28 +8858,38 @@ module.exports = function (Outbreak) {
 
   /**
    * Find outbreak lab results along with case information
+   * @param filter
    * @param callback
    */
   Outbreak.prototype.findLabResultsAggregate = function (filter, callback) {
-    app.models.labResult.retrieveAggregateLabResults(
-      this,
-      filter,
-      false,
-      callback
-    );
+    app.models.labResult
+      .preFilterForOutbreak(this, filter)
+      .then(filter => {
+        app.models.labResult.retrieveAggregateLabResults(
+          this,
+          filter,
+          false,
+          callback
+        );
+      });
   };
 
   /**
    * Count outbreak lab-results
+   * @param filter
    * @param callback
    */
   Outbreak.prototype.filteredCountLabResultsAggregate = function (filter, callback) {
-    app.models.labResult.retrieveAggregateLabResults(
-      this,
-      filter,
-      true,
-      callback
-    );
+    app.models.labResult
+      .preFilterForOutbreak(this, filter)
+      .then(filter => {
+        app.models.labResult.retrieveAggregateLabResults(
+          this,
+          filter,
+          true,
+          callback
+        );
+      });
   };
 
   /**
