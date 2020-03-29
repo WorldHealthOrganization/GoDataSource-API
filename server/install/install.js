@@ -217,7 +217,8 @@ const routines = {
       'subLocationsPerLocationNo',
       'subLocationsLevelsNo',
       'minNoRelationshipsForEachRecord',
-      'maxNoRelationshipsForEachRecord'
+      'maxNoRelationshipsForEachRecord',
+      'batchSize'
     ];
     methodRelevantArgs = parseArgumentValues(requiredArgs);
 
