@@ -142,7 +142,7 @@ module.exports = function (LabResult) {
       // restrict query to current outbreak
       personQuery = {
         $and: [
-          contactQuery,
+          personQuery,
           {
             outbreakId: outbreak.id
           }
@@ -156,12 +156,12 @@ module.exports = function (LabResult) {
             .then(people => {
               personIds.push(...people.map(person => person.id));
             });
-         });
+        });
     }
     return buildQuery
       .then(() => {
         // if person ids filter present
-        if (personIds.length) {
+        if (personQuery || contactQuery || caseQuery) {
           // update lab results query to filter based on caseIds
           labResultsQuery = {
             $and: [
