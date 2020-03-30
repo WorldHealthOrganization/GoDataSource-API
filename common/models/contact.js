@@ -832,9 +832,6 @@ module.exports = function (Contact) {
         next();
       })
       .catch(next);
-
-    // finished
-    next();
   });
 
   Contact.extendedForm = {
