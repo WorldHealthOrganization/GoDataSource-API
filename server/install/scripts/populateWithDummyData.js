@@ -206,9 +206,6 @@ function run(callback) {
     return parseFloat(Math.min(minValue + (Math.random() * (maxValue - minValue)), maxValue).toFixed(precision));
   };
 
-  // initialize outbreakIsNew flag
-  let outbreakIsNew = false;
-
   // create or update existing outbreak
   // an existing outbreak should be used when additional data needs to be added to it
   app.logger.debug(`Creating/finding outbreak ${outbreakName}`);
@@ -226,8 +223,6 @@ function run(callback) {
     ), options)
     .then((result) => {
       let outbreakData = result[0];
-      // cache outbreakIsNew
-      outbreakIsNew = result[1];
 
       // outbreak created
       app.logger.debug(`Outbreak '${outbreakData.name}' ${result[1] ? 'created' : 'found'} => '${outbreakData.id}'`);
