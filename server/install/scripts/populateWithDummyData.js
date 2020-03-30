@@ -13,6 +13,25 @@ let options = {
 };
 
 /**
+ * Convert a mongo point to a json point since loopback doesn't do it
+ * @param location
+ */
+function convertNestedGeoPointsToLatLng(location) {
+  if (
+    location.geoLocation &&
+    location.geoLocation.coordinates &&
+    location.geoLocation.coordinates[0] != null &&
+    location.geoLocation.coordinates[1] != null
+  ) {
+    // convert it
+    location.geoLocation = {
+      lat: location.geoLocation.coordinates[1],
+      lng: location.geoLocation.coordinates[0]
+    };
+  }
+}
+
+/**
  * Run initiation
  * @param callback
  */
@@ -219,37 +238,58 @@ function run(callback) {
       };
     })
 
-    // count number of current parent locations
     .then((data) => {
-      // check where the numbering needs to start
-      data.currentParentLocationsNumber = 0;
-      let getCurrentParentLocationsNumber = Promise.resolve(data);
-      if (!outbreakIsNew) {
-        getCurrentParentLocationsNumber = app.models.location
-          .count({
-            name: {
-              regexp: `/^${outbreakName} location \\d+$/`
-            }
-          })
-          .then(count => {
-            data.currentParentLocationsNumber = count;
-            return data;
-          });
+      if (
+        locationsNo == 0 &&
+        casesNo == 0 &&
+        contactsNo == 0 &&
+        eventsNo == 0
+      ) {
+        // no locations need to be added/retrieved
+        app.logger.debug('Skipping locations as they are not needed');
+        return Promise.resolve(data);
       }
 
-      // populate locations
-      return getCurrentParentLocationsNumber
+      // retrieve current parent locations
+      return app.models.location
+        .rawFindWithLoopbackFilter({
+          where: {
+            name: {
+              regexp: `/^${outbreakName} location \\d+$/`
+            },
+            parentLocationId: null
+          }
+        })
+        .then(parentLocations => {
+          // add useful variables in data
+          data.locations = {};
+          data.parentLocationIds = [];
+          parentLocations.forEach(location => {
+            convertNestedGeoPointsToLatLng(location);
+            data.locations[location.id] = location;
+            data.parentLocationIds.push(location.id);
+          });
+          data.parentLocationsNo = parentLocations.length;
+
+          return data;
+        })
         .then(data => {
+          // check if other locations need to be added
+          if (locationsNo == 0) {
+            app.logger.debug('No need to add new locations. Skip');
+            return Promise.resolve(data);
+          }
+
           // display log
           app.logger.debug('Creating locations');
 
           // create locations jobs so we can create them in parallel
-          data.locations = {};
+          data.newLocationsIds = [];
           const locationsJobs = [];
           for (let index = 0; index < locationsNo; index++) {
             locationsJobs.push((cb) => {
               // display log
-              const locationName = `${outbreakName} location ${data.currentParentLocationsNumber + index + 1}`;
+              const locationName = `${outbreakName} location ${data.parentLocationsNo + index + 1}`;
               app.logger.debug(`Creating location '${locationName}'`);
 
               // generate geo location
@@ -283,7 +323,7 @@ function run(callback) {
 
                   // map location for later use
                   data.locations[locationData.id] = locationData.toJSON();
-
+                  data.newLocationsIds.push(locationData.id);
                   // finished
                   cb();
                 })
@@ -303,6 +343,10 @@ function run(callback) {
               // display log
               app.logger.debug('Finished creating locations');
 
+              // add useful variables in data
+              data.parentLocationIds = Object.keys(data.locations);
+              data.parentLocationsNo = data.parentLocationIds.length;
+
               // finished
               resolve(data);
             });
@@ -311,134 +355,187 @@ function run(callback) {
     })
     // populate sub-locations
     .then((data) => {
-      // display log
-      app.logger.debug('Creating sub-locations');
-
-      /**
-       * Given a location data create sublocations payload and add them to queue if needed
-       * @param location
-       */
-      function createSubLocationsPayload(location, queue) {
-        if (location.level >= subLocationsLevelsNo) {
-          // no additional sublocations need to be created
-          return;
-        }
-
-        const subLocationLevel = location.level + 1;
-
-        // create sublocations
-        for (let index = 0; index < subLocationsPerLocationNo; index++) {
-          const parentLocationData = location.data;
-          const locationName = `${parentLocationData.name} sub ${index + 1}`;
-
-          // generate geo location
-          const geoLocation = {
-            lat: randomFloatBetween(
-              parentLocationData.geoLocation.lat + geoLocationRange.subLocationError.lat.min,
-              parentLocationData.geoLocation.lat + geoLocationRange.subLocationError.lat.max,
-              3
-            ),
-            lng: randomFloatBetween(
-              parentLocationData.geoLocation.lng + geoLocationRange.subLocationError.lng.min,
-              parentLocationData.geoLocation.lng + geoLocationRange.subLocationError.lng.max,
-              3
-            )
-          };
-
-          const payload = {
-            level: subLocationLevel,
-            data: Object.assign({},
-              defaultLocationTemplate, {
-                name: locationName,
-                parentLocationId: parentLocationData.id,
-                geoLocation: geoLocation,
-                geographicalLevelId: outbreakAdminLevel
-              },
-              common.install.timestamps
-            )
-          };
-
-          // add sublocation in queue
-          queue.push(payload);
-        }
+      if (!data.locations) {
+        // no parent locations were create/retrieved then no sublocations need to be created/retrieved
+        app.logger.debug('Skipping subLocations as they are not needed');
+        return Promise.resolve(data);
       }
 
-      return new Promise((resolve, reject) => {
-        let subLocationQueue = async.queue(function (payload, callback) {
-          let location = payload.data;
-
-          app.logger.debug(`Creating location '${location.name}'`);
-
-          // create sub-location
-          app.models.location
-            .create(location, options)
-            .then((locationData) => {
-              // log
-              app.logger.debug(`Location '${locationData.name}' created => '${locationData.id}'`);
-
-              // map only 1st level sublocations for later use
-              if (payload.level === 1) {
-                if (!data.locations[locationData.parentLocationId].subLocations) {
-                  data.locations[locationData.parentLocationId].subLocations = [];
-                }
-                data.locations[locationData.parentLocationId].subLocations.push(locationData.toJSON());
-              }
-
-              createSubLocationsPayload({
-                level: payload.level,
-                data: locationData
-              }, subLocationQueue);
-
-              // finished
-              callback();
-            })
-            .catch(callback);
-        }, batchSize);
-
-        subLocationQueue.drain = function () {
-          // display log
-          app.logger.debug('Finished creating sub-locations');
-          resolve(data);
-        };
-
-        subLocationQueue.error = reject;
-
-        _.each(
-          data.locations,
-          (parentLocationData) => {
-            createSubLocationsPayload({
-              level: 0,
-              data: parentLocationData
-            }, subLocationQueue);
+      // retrieve current 1st level sublocations
+      return app.models.location
+        .rawFindWithLoopbackFilter({
+          where: {
+            parentLocationId: {
+              inq: Object.keys(data.locations)
+            }
+          }
+        })
+        .then(subLocations => {
+          subLocations.forEach(location => {
+            convertNestedGeoPointsToLatLng(location);
+            if (!data.locations[location.parentLocationId].subLocations) {
+              data.locations[location.parentLocationId].subLocations = [];
+            }
+            data.locations[location.parentLocationId].subLocations.push(location);
           });
-      });
+          return data;
+        })
+        .then(data => {
+          // check if we need to add additional sublocations
+          if (subLocationsPerLocationNo == 0) {
+            app.logger.debug('No new subLocations need to be added. Skip');
+            return Promise.resolve(data);
+          }
+
+          // display log
+          app.logger.debug('Creating sub-locations');
+
+          /**
+           * Given a location data create sublocations payload and add them to queue if needed
+           * @param location
+           */
+          function createSubLocationsPayload(location, queue) {
+            if (location.level >= subLocationsLevelsNo) {
+              // no additional sublocations need to be created
+              return;
+            }
+
+            const subLocationLevel = location.level + 1;
+
+            // create sublocations
+            for (let index = 0; index < subLocationsPerLocationNo; index++) {
+              const parentLocationData = location.data;
+              const locationName = `${parentLocationData.name} sub ${index + 1}`;
+
+              // generate geo location
+              const geoLocation = {
+                lat: randomFloatBetween(
+                  parentLocationData.geoLocation.lat + geoLocationRange.subLocationError.lat.min,
+                  parentLocationData.geoLocation.lat + geoLocationRange.subLocationError.lat.max,
+                  3
+                ),
+                lng: randomFloatBetween(
+                  parentLocationData.geoLocation.lng + geoLocationRange.subLocationError.lng.min,
+                  parentLocationData.geoLocation.lng + geoLocationRange.subLocationError.lng.max,
+                  3
+                )
+              };
+
+              const payload = {
+                level: subLocationLevel,
+                data: Object.assign({},
+                  defaultLocationTemplate, {
+                    name: locationName,
+                    parentLocationId: parentLocationData.id,
+                    geoLocation: geoLocation,
+                    geographicalLevelId: outbreakAdminLevel
+                  },
+                  common.install.timestamps
+                )
+              };
+
+              // add sublocation in queue
+              queue.push(payload);
+            }
+          }
+
+          return new Promise((resolve, reject) => {
+            let subLocationQueue = async.queue(function (payload, callback) {
+              let location = payload.data;
+
+              app.logger.debug(`Creating location '${location.name}'`);
+
+              // create sub-location
+              app.models.location
+                .create(location, options)
+                .then((locationData) => {
+                  // log
+                  app.logger.debug(`Location '${locationData.name}' created => '${locationData.id}'`);
+
+                  // map only 1st level sublocations for later use
+                  if (payload.level === 1) {
+                    if (!data.locations[locationData.parentLocationId].subLocations) {
+                      data.locations[locationData.parentLocationId].subLocations = [];
+                    }
+                    data.locations[locationData.parentLocationId].subLocations.push(locationData.toJSON());
+                  }
+
+                  createSubLocationsPayload({
+                    level: payload.level,
+                    data: locationData
+                  }, subLocationQueue);
+
+                  // finished
+                  callback();
+                })
+                .catch(callback);
+            }, batchSize);
+
+            subLocationQueue.drain = function () {
+              // display log
+              app.logger.debug('Finished creating sub-locations');
+              resolve(data);
+            };
+
+            subLocationQueue.error = reject;
+
+            // create sublocations only for the newly created locations
+            _.each(
+              data.newLocationsIds,
+              (parentLocationId) => {
+                createSubLocationsPayload({
+                  level: 0,
+                  data: data.locations[parentLocationId]
+                }, subLocationQueue);
+              });
+          });
+        });
     })
 
     // populate cases
     .then((data) => {
-      // check where the numbering needs to start
-      data.currentCasesNumber = 0;
-      let getCurrentCasesNumber = Promise.resolve(data);
-      if (!outbreakIsNew) {
-        getCurrentCasesNumber = app.models.case
-          .count({
-            outbreakId: data.outbreakData.id
-          })
-          .then(count => {
-            data.currentCasesNumber = count;
-            return data;
-          });
+      if (
+        casesNo == 0 &&
+        minNoRelationshipsForEachRecord == 0 &&
+        maxNoRelationshipsForEachRecord == 0
+      ) {
+        // no cases need to be created/retrieved
+        app.logger.debug('Skipping cases as they are not needed');
+        return Promise.resolve(data);
       }
 
-      return getCurrentCasesNumber
+      // retrieve current cases
+      return app.models.case
+        .rawFindWithLoopbackFilter({
+          where: {
+            outbreakId: data.outbreakData.id
+          },
+          fields: ['id', 'type']
+        })
+        .then(cases => {
+          data.cases = {};
+          cases.forEach(caseData => {
+            // map case for later use
+            data.cases[caseData.id] = {
+              id: caseData.id,
+              type: caseData.type
+            };
+          });
+          data.currentCasesNumber = cases.length;
+          return data;
+        })
         .then(data => {
+          if (casesNo == 0) {
+            // no new cases need to be created
+            app.logger.debug('No new cases need to be created. Skip');
+            return Promise.resolve(data);
+          }
+
           // display log
           app.logger.debug('Creating cases');
 
           // create cases jobs so we can create them in parallel
-          data.cases = {};
           const casesJobs = [];
-          const parentLocationIds = Object.keys(data.locations);
           for (let index = 0; index < casesNo; index++) {
             casesJobs.push((cb) => {
               // determine first name ( unique )
@@ -473,18 +570,19 @@ function run(callback) {
               const addresses = [];
               if (Math.random() >= 0.1) {
                 // determine location
-                const parentLocationId = parentLocationIds[index % locationsNo];
+                const parentLocationId = data.parentLocationIds[index % data.parentLocationsNo];
 
                 // use main location or child location ?
                 let location;
                 if (
-                  subLocationsPerLocationNo < 1 ||
+                  !data.locations[parentLocationId].subLocations ||
+                  !data.locations[parentLocationId].subLocations.length ||
                   Math.random() < 0.5
                 ) {
                   location = data.locations[parentLocationId];
                 } else {
                   // use child location if we have one
-                  const childLocationIndex = randomFloatBetween(0, subLocationsPerLocationNo - 1, 0);
+                  const childLocationIndex = randomFloatBetween(0, data.locations[parentLocationId].subLocations.length - 1, 0);
                   location = data.locations[parentLocationId].subLocations[childLocationIndex];
                 }
 
@@ -622,29 +720,48 @@ function run(callback) {
 
     // populate contacts
     .then((data) => {
-      // check where the numbering needs to start
-      data.currentContactsNumber = 0;
-      let getCurrentContactsNumber = Promise.resolve(data);
-      if (!outbreakIsNew) {
-        getCurrentContactsNumber = app.models.contact
-          .count({
-            outbreakId: data.outbreakData.id
-          })
-          .then(count => {
-            data.currentContactsNumber = count;
-            return data;
-          });
+      if (
+        contactsNo == 0 &&
+        minNoRelationshipsForEachRecord == 0 &&
+        maxNoRelationshipsForEachRecord == 0
+      ) {
+        // no contacts need to be created/retrieved
+        app.logger.debug('Skipping contacts as they are not needed');
+        return Promise.resolve(data);
       }
 
-      return getCurrentContactsNumber
+      // retrieve current contacts
+      return app.models.contact
+        .rawFindWithLoopbackFilter({
+          where: {
+            outbreakId: data.outbreakData.id
+          },
+          fields: ['id', 'type']
+        })
+        .then(contacts => {
+          data.contacts = {};
+          contacts.forEach(contactData => {
+            // map contact for later use
+            data.contacts[contactData.id] = {
+              id: contactData.id,
+              type: contactData.type
+            };
+          });
+          data.currentContactsNumber = contacts.length;
+          return data;
+        })
         .then(data => {
+          if (contactsNo == 0) {
+            // no new contacts need to be created
+            app.logger.debug('No new contacts need to be created. Skip');
+            return Promise.resolve(data);
+          }
+
           // display log
           app.logger.debug('Creating contacts');
 
           // create contacts jobs so we can create them in parallel
-          data.contacts = {};
           const contactsJobs = [];
-          const parentLocationIds = Object.keys(data.locations);
           for (let index = 0; index < contactsNo; index++) {
             contactsJobs.push((cb) => {
               // determine first name ( unique )
@@ -679,18 +796,19 @@ function run(callback) {
               const addresses = [];
               if (Math.random() >= 0.1) {
                 // determine location
-                const parentLocationId = parentLocationIds[index % locationsNo];
+                const parentLocationId = data.parentLocationIds[index % data.parentLocationsNo];
 
                 // use main location or child location ?
                 let location;
                 if (
-                  subLocationsPerLocationNo < 1 ||
+                  !data.locations[parentLocationId].subLocations ||
+                  !data.locations[parentLocationId].subLocations.length ||
                   Math.random() < 0.5
                 ) {
                   location = data.locations[parentLocationId];
                 } else {
                   // use child location if we have one
-                  const childLocationIndex = randomFloatBetween(0, subLocationsPerLocationNo - 1, 0);
+                  const childLocationIndex = randomFloatBetween(0, data.locations[parentLocationId].subLocations.length - 1, 0);
                   location = data.locations[parentLocationId].subLocations[childLocationIndex];
                 }
 
@@ -789,29 +907,48 @@ function run(callback) {
 
     // populate events
     .then((data) => {
-      // check where the numbering needs to start
-      data.currentEventsNumber = 0;
-      let getCurrentEventsNumber = Promise.resolve(data);
-      if (!outbreakIsNew) {
-        getCurrentEventsNumber = app.models.event
-          .count({
-            outbreakId: data.outbreakData.id
-          })
-          .then(count => {
-            data.currentEventsNumber = count;
-            return data;
-          });
+      if (
+        eventsNo == 0 &&
+        minNoRelationshipsForEachRecord == 0 &&
+        maxNoRelationshipsForEachRecord == 0
+      ) {
+        // no events need to be created/retrieved
+        app.logger.debug('Skipping events as they are not needed');
+        return Promise.resolve(data);
       }
 
-      return getCurrentEventsNumber
+      // retrieve current events
+      return app.models.event
+        .rawFindWithLoopbackFilter({
+          where: {
+            outbreakId: data.outbreakData.id
+          },
+          fields: ['id', 'type']
+        })
+        .then(events => {
+          data.events = {};
+          events.forEach(eventData => {
+            // map event for later use
+            data.events[eventData.id] = {
+              id: eventData.id,
+              type: eventData.type
+            };
+          });
+          data.currentEventsNumber = events.length;
+          return data;
+        })
         .then(data => {
+          if (eventsNo == 0) {
+            // no new events need to be created
+            app.logger.debug('No new events need to be added. Skip');
+            return Promise.resolve(data);
+          }
+
           // display log
           app.logger.debug('Creating events');
 
           // create events jobs so we can create them in parallel
-          data.events = {};
           const eventsJobs = [];
-          const parentLocationIds = Object.keys(data.locations);
           for (let index = 0; index < eventsNo; index++) {
             eventsJobs.push((cb) => {
               // determine event name
@@ -822,18 +959,19 @@ function run(callback) {
               let address;
               if (Math.random() >= 0.1) {
                 // determine location
-                const parentLocationId = parentLocationIds[index % locationsNo];
+                const parentLocationId = data.parentLocationIds[index % data.parentLocationsNo];
 
                 // use main location or child location ?
                 let location;
                 if (
-                  subLocationsPerLocationNo < 1 ||
+                  !data.locations[parentLocationId].subLocations ||
+                  !data.locations[parentLocationId].subLocations.length ||
                   Math.random() < 0.5
                 ) {
                   location = data.locations[parentLocationId];
                 } else {
                   // use child location if we have one
-                  const childLocationIndex = randomFloatBetween(0, subLocationsPerLocationNo - 1, 0);
+                  const childLocationIndex = randomFloatBetween(0, data.locations[parentLocationId].subLocations.length - 1, 0);
                   location = data.locations[parentLocationId].subLocations[childLocationIndex];
                 }
 
@@ -922,6 +1060,15 @@ function run(callback) {
 
     // create relationships
     .then((data) => {
+      if (
+        minNoRelationshipsForEachRecord == 0 &&
+        maxNoRelationshipsForEachRecord == 0
+      ) {
+        // no relations need to be created/retrieved
+        app.logger.debug('No relations need to be added. Skip');
+        return Promise.resolve(data);
+      }
+
       // display log
       app.logger.debug('Creating relationships');
 
@@ -1117,6 +1264,8 @@ function run(callback) {
 
       // events
       _.each(data.contacts, createRelationshipJobs);
+
+      app.logger.debug(`Relationships to create: ${relationshipsJobs.length}`);
 
       // execute jobs
       return new Promise((resolve, reject) => {
