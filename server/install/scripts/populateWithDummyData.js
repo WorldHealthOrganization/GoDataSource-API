@@ -307,7 +307,7 @@ function run(callback) {
               resolve(data);
             });
           });
-        })
+        });
     })
     // populate sub-locations
     .then((data) => {
@@ -361,7 +361,7 @@ function run(callback) {
           // add sublocation in queue
           queue.push(payload);
         }
-      };
+      }
 
       return new Promise((resolve, reject) => {
         let subLocationQueue = async.queue(function (payload, callback) {
@@ -397,7 +397,7 @@ function run(callback) {
 
         subLocationQueue.drain = function () {
           // display log
-          app.logger.debug(`Finished creating sub-locations`);
+          app.logger.debug('Finished creating sub-locations');
           resolve(data);
         };
 
