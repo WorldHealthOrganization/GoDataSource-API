@@ -3453,6 +3453,7 @@ module.exports = function (Role) {
       .rawFindAggregate(
         filter, {
           countOnly: countOnly,
+          matchAfterLookup: includeUsers,
           relations: includeUsers ? [{
             lookup: {
               from: 'user',
