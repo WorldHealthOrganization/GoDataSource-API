@@ -1,0 +1,12 @@
+{
+  "outbreakName": "o8",
+  "casesNo": 0,
+  "contactsNo": 0,
+  "eventsNo": 0,
+  "locationsNo": 0,
+  "subLocationsPerLocationNo": 0,
+  "subLocationsLevelsNo": 0,
+  "minNoRelationshipsForEachRecord": 3,
+  "maxNoRelationshipsForEachRecord": 5,
+  "batchSize": 10
+}

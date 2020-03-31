@@ -1,7 +1,6 @@
 'use strict';
 
 const app = require('../../server');
-const common = require('./_common');
 const async = require('async');
 const moment = require('moment');
 const _ = require('lodash');
@@ -10,6 +9,18 @@ const _ = require('lodash');
 let options = {
   _init: true,
   _sync: true
+};
+
+// generate random numbers between min & max
+const randomFloatBetween = (
+  minValue,
+  maxValue,
+  precision
+) => {
+  if (typeof (precision) === 'undefined') {
+    precision = 2;
+  }
+  return parseFloat(Math.min(minValue + (Math.random() * (maxValue - minValue)), maxValue).toFixed(precision));
 };
 
 /**
@@ -32,21 +43,47 @@ function convertNestedGeoPointsToLatLng(location) {
 }
 
 /**
+ * Parse value to integer if possible or return 0
+ * @param value
+ * @return {number}
+ */
+const parseIntArgValue = function (value) {
+  let intValue = parseInt(value);
+  return isNaN(intValue) ? 0 : intValue;
+};
+
+/**
+ * Returns object containing generated createdAt/updatedAt
+ * Outbreak date is set to 6 months ago; generate createdAt/updatedAt randomly in the last 6 months
+ * @return {{createdAt: string, updatedAt: string}}
+ */
+const getTimestamps = function () {
+  // get a random number between 0 and 180 to be used as number of days in the past
+  let noDaysCreated = Math.ceil(Math.random() * 180);
+  let noDaysUpdated = Math.ceil(Math.random() * noDaysCreated);
+
+  return {
+    createdAt: moment().utc().subtract(noDaysCreated, 'days').startOf('day'),
+    updatedAt: moment().utc().subtract(noDaysUpdated, 'days').startOf('day')
+  };
+};
+
+/**
  * Run initiation
  * @param callback
  */
 function run(callback) {
   // retrieve config data
   const outbreakName = module.methodRelevantArgs.outbreakName;
-  const casesNo = module.methodRelevantArgs.casesNo;
-  const contactsNo = module.methodRelevantArgs.contactsNo;
-  const eventsNo = module.methodRelevantArgs.eventsNo;
-  const locationsNo = module.methodRelevantArgs.locationsNo;
-  const subLocationsPerLocationNo = module.methodRelevantArgs.subLocationsPerLocationNo;
-  const subLocationsLevelsNo = module.methodRelevantArgs.subLocationsLevelsNo;
-  const minNoRelationshipsForEachRecord = module.methodRelevantArgs.minNoRelationshipsForEachRecord;
-  const maxNoRelationshipsForEachRecord = module.methodRelevantArgs.maxNoRelationshipsForEachRecord;
-  const batchSize = module.methodRelevantArgs.batchSize;
+  const casesNo = parseIntArgValue(module.methodRelevantArgs.casesNo);
+  const contactsNo = parseIntArgValue(module.methodRelevantArgs.contactsNo);
+  const eventsNo = parseIntArgValue(module.methodRelevantArgs.eventsNo);
+  const locationsNo = parseIntArgValue(module.methodRelevantArgs.locationsNo);
+  const subLocationsPerLocationNo = parseIntArgValue(module.methodRelevantArgs.subLocationsPerLocationNo);
+  const subLocationsLevelsNo = parseIntArgValue(module.methodRelevantArgs.subLocationsLevelsNo);
+  const minNoRelationshipsForEachRecord = parseIntArgValue(module.methodRelevantArgs.minNoRelationshipsForEachRecord);
+  const maxNoRelationshipsForEachRecord = parseIntArgValue(module.methodRelevantArgs.maxNoRelationshipsForEachRecord);
+  const batchSize = parseIntArgValue(module.methodRelevantArgs.batchSize) || 10;
 
   // default geo location range
   const geoLocationRange = {
@@ -194,17 +231,15 @@ function run(callback) {
     socialRelationshipDetail: undefined
   };
 
-  // generate random numbers between min & max
-  const randomFloatBetween = (
-    minValue,
-    maxValue,
-    precision
-  ) => {
-    if (typeof (precision) === 'undefined') {
-      precision = 2;
-    }
-    return parseFloat(Math.min(minValue + (Math.random() * (maxValue - minValue)), maxValue).toFixed(precision));
-  };
+  // initialize containers for generated data
+  // keeping data separate in order to allow Javascript to clear memory when a variable is no longer used
+  let outbreakDataContainer;
+  let locationsDataContainer;
+  let parentLocationsIdsContainer;
+  let parentLocationsNumberContainer;
+  let casesContainer;
+  let contactsContainer;
+  let eventsContainer;
 
   // create or update existing outbreak
   // an existing outbreak should be used when additional data needs to be added to it
@@ -219,7 +254,7 @@ function run(callback) {
       defaultOutbreakTemplate, {
         name: outbreakName
       },
-      common.install.timestamps
+      getTimestamps()
     ), options)
     .then((result) => {
       let outbreakData = result[0];
@@ -227,13 +262,12 @@ function run(callback) {
       // outbreak created
       app.logger.debug(`Outbreak '${outbreakData.name}' ${result[1] ? 'created' : 'found'} => '${outbreakData.id}'`);
 
-      // start creating locations
-      return {
-        outbreakData: outbreakData.toJSON()
-      };
+      // cache outbreak data
+      outbreakDataContainer = outbreakData.toJSON();
     })
 
-    .then((data) => {
+    // start creating locations
+    .then(() => {
       if (
         locationsNo == 0 &&
         casesNo == 0 &&
@@ -242,7 +276,7 @@ function run(callback) {
       ) {
         // no locations need to be added/retrieved
         app.logger.debug('Skipping locations as they are not needed');
-        return Promise.resolve(data);
+        return Promise.resolve();
       }
 
       // retrieve current parent locations
@@ -256,35 +290,33 @@ function run(callback) {
           }
         })
         .then(parentLocations => {
-          // add useful variables in data
-          data.locations = {};
-          data.parentLocationIds = [];
+          // cache useful variables
+          locationsDataContainer = {};
+          parentLocationsIdsContainer = [];
           parentLocations.forEach(location => {
             convertNestedGeoPointsToLatLng(location);
-            data.locations[location.id] = location;
-            data.parentLocationIds.push(location.id);
+            locationsDataContainer[location.id] = location;
+            parentLocationsIdsContainer.push(location.id);
           });
-          data.parentLocationsNo = parentLocations.length;
-
-          return data;
+          parentLocationsNumberContainer = parentLocations.length;
         })
-        .then(data => {
+        .then(() => {
           // check if other locations need to be added
           if (locationsNo == 0) {
             app.logger.debug('No need to add new locations. Skip');
-            return Promise.resolve(data);
+            return Promise.resolve();
           }
 
           // display log
           app.logger.debug('Creating locations');
 
           // create locations jobs so we can create them in parallel
-          data.newLocationsIds = [];
+          let newLocationsIds = [];
           const locationsJobs = [];
           for (let index = 0; index < locationsNo; index++) {
             locationsJobs.push((cb) => {
               // display log
-              const locationName = `${outbreakName} location ${data.parentLocationsNo + index + 1}`;
+              const locationName = `${outbreakName} location ${parentLocationsNumberContainer + index + 1}`;
               app.logger.debug(`Creating location '${locationName}'`);
 
               // generate geo location
@@ -310,15 +342,15 @@ function run(callback) {
                     geoLocation: geoLocation,
                     geographicalLevelId: outbreakAdminLevel
                   },
-                  common.install.timestamps
+                  getTimestamps()
                 ), options)
                 .then((locationData) => {
                   // log
                   app.logger.debug(`Location '${locationData.name}' created => '${locationData.id}'`);
 
                   // map location for later use
-                  data.locations[locationData.id] = locationData.toJSON();
-                  data.newLocationsIds.push(locationData.id);
+                  locationsDataContainer[locationData.id] = locationData.toJSON();
+                  newLocationsIds.push(locationData.id);
                   // finished
                   cb();
                 })
@@ -339,21 +371,21 @@ function run(callback) {
               app.logger.debug('Finished creating locations');
 
               // add useful variables in data
-              data.parentLocationIds = Object.keys(data.locations);
-              data.parentLocationsNo = data.parentLocationIds.length;
+              parentLocationsIdsContainer = Object.keys(locationsDataContainer);
+              parentLocationsNumberContainer = parentLocationsIdsContainer.length;
 
               // finished
-              resolve(data);
+              resolve(newLocationsIds);
             });
           });
         });
     })
     // populate sub-locations
-    .then((data) => {
-      if (!data.locations) {
+    .then((newLocationsIds) => {
+      if (!locationsDataContainer) {
         // no parent locations were create/retrieved then no sublocations need to be created/retrieved
         app.logger.debug('Skipping subLocations as they are not needed');
-        return Promise.resolve(data);
+        return Promise.resolve();
       }
 
       // retrieve current 1st level sublocations
@@ -361,25 +393,24 @@ function run(callback) {
         .rawFindWithLoopbackFilter({
           where: {
             parentLocationId: {
-              inq: Object.keys(data.locations)
+              inq: Object.keys(locationsDataContainer)
             }
           }
         })
         .then(subLocations => {
           subLocations.forEach(location => {
             convertNestedGeoPointsToLatLng(location);
-            if (!data.locations[location.parentLocationId].subLocations) {
-              data.locations[location.parentLocationId].subLocations = [];
+            if (!locationsDataContainer[location.parentLocationId].subLocations) {
+              locationsDataContainer[location.parentLocationId].subLocations = [];
             }
-            data.locations[location.parentLocationId].subLocations.push(location);
+            locationsDataContainer[location.parentLocationId].subLocations.push(location);
           });
-          return data;
         })
-        .then(data => {
+        .then(() => {
           // check if we need to add additional sublocations
           if (subLocationsPerLocationNo == 0) {
             app.logger.debug('No new subLocations need to be added. Skip');
-            return Promise.resolve(data);
+            return Promise.resolve();
           }
 
           // display log
@@ -425,7 +456,7 @@ function run(callback) {
                     geoLocation: geoLocation,
                     geographicalLevelId: outbreakAdminLevel
                   },
-                  common.install.timestamps
+                  getTimestamps()
                 )
               };
 
@@ -449,10 +480,10 @@ function run(callback) {
 
                   // map only 1st level sublocations for later use
                   if (payload.level === 1) {
-                    if (!data.locations[locationData.parentLocationId].subLocations) {
-                      data.locations[locationData.parentLocationId].subLocations = [];
+                    if (!locationsDataContainer[locationData.parentLocationId].subLocations) {
+                      locationsDataContainer[locationData.parentLocationId].subLocations = [];
                     }
-                    data.locations[locationData.parentLocationId].subLocations.push(locationData.toJSON());
+                    locationsDataContainer[locationData.parentLocationId].subLocations.push(locationData.toJSON());
                   }
 
                   createSubLocationsPayload({
@@ -469,18 +500,18 @@ function run(callback) {
             subLocationQueue.drain = function () {
               // display log
               app.logger.debug('Finished creating sub-locations');
-              resolve(data);
+              resolve();
             };
 
             subLocationQueue.error = reject;
 
             // create sublocations only for the newly created locations
             _.each(
-              data.newLocationsIds,
+              newLocationsIds,
               (parentLocationId) => {
                 createSubLocationsPayload({
                   level: 0,
-                  data: data.locations[parentLocationId]
+                  data: locationsDataContainer[parentLocationId]
                 }, subLocationQueue);
               });
           });
@@ -488,44 +519,19 @@ function run(callback) {
     })
 
     // populate cases
-    .then((data) => {
-      if (
-        casesNo == 0 &&
-        minNoRelationshipsForEachRecord == 0 &&
-        maxNoRelationshipsForEachRecord == 0
-      ) {
-        // no cases need to be created/retrieved
-        app.logger.debug('Skipping cases as they are not needed');
-        return Promise.resolve(data);
+    .then(() => {
+      if (casesNo == 0) {
+        // no new cases need to be created
+        app.logger.debug('No new cases need to be created. Skip');
+        return Promise.resolve();
       }
 
-      // retrieve current cases
+      // count current cases
       return app.models.case
-        .rawFindWithLoopbackFilter({
-          where: {
-            outbreakId: data.outbreakData.id
-          },
-          fields: ['id', 'type']
+        .count({
+          outbreakId: outbreakDataContainer.id
         })
-        .then(cases => {
-          data.cases = {};
-          cases.forEach(caseData => {
-            // map case for later use
-            data.cases[caseData.id] = {
-              id: caseData.id,
-              type: caseData.type
-            };
-          });
-          data.currentCasesNumber = cases.length;
-          return data;
-        })
-        .then(data => {
-          if (casesNo == 0) {
-            // no new cases need to be created
-            app.logger.debug('No new cases need to be created. Skip');
-            return Promise.resolve(data);
-          }
-
+        .then(currentCasesNumber => {
           // display log
           app.logger.debug('Creating cases');
 
@@ -534,7 +540,7 @@ function run(callback) {
           for (let index = 0; index < casesNo; index++) {
             casesJobs.push((cb) => {
               // determine first name ( unique )
-              const firstName = `CaseFirst${data.currentCasesNumber + index + 1}`;
+              const firstName = `CaseFirst${currentCasesNumber + index + 1}`;
 
               // determine last name - we might have the same name...same family
               const lastName = `CaseLast${randomFloatBetween(Math.max(index - lastNameError, 0), index + lastNameError, 0)}`;
@@ -565,20 +571,20 @@ function run(callback) {
               const addresses = [];
               if (Math.random() >= 0.1) {
                 // determine location
-                const parentLocationId = data.parentLocationIds[index % data.parentLocationsNo];
+                const parentLocationId = parentLocationsIdsContainer[index % parentLocationsNumberContainer];
 
                 // use main location or child location ?
                 let location;
                 if (
-                  !data.locations[parentLocationId].subLocations ||
-                  !data.locations[parentLocationId].subLocations.length ||
+                  !locationsDataContainer[parentLocationId].subLocations ||
+                  !locationsDataContainer[parentLocationId].subLocations.length ||
                   Math.random() < 0.5
                 ) {
-                  location = data.locations[parentLocationId];
+                  location = locationsDataContainer[parentLocationId];
                 } else {
                   // use child location if we have one
-                  const childLocationIndex = randomFloatBetween(0, data.locations[parentLocationId].subLocations.length - 1, 0);
-                  location = data.locations[parentLocationId].subLocations[childLocationIndex];
+                  const childLocationIndex = randomFloatBetween(0, locationsDataContainer[parentLocationId].subLocations.length - 1, 0);
+                  location = locationsDataContainer[parentLocationId].subLocations[childLocationIndex];
                 }
 
                 // generate geo location
@@ -659,7 +665,7 @@ function run(callback) {
               app.models.case
                 .create(Object.assign(
                   defaultCaseTemplate, {
-                    outbreakId: data.outbreakData.id,
+                    outbreakId: outbreakDataContainer.id,
                     firstName: firstName,
                     lastName: lastName,
                     dob: dob ? dob.toISOString() : dob,
@@ -675,17 +681,11 @@ function run(callback) {
                     dateOfBurial: dateOfBurial ? dateOfBurial.toISOString() : dateOfBurial,
                     riskLevel: riskLevel
                   },
-                  common.install.timestamps
+                  getTimestamps()
                 ), options)
                 .then((caseData) => {
                   // log
                   app.logger.debug(`Case '${caseData.lastName} ${caseData.firstName}' created => '${caseData.id}'`);
-
-                  // map case for later use
-                  data.cases[caseData.id] = {
-                    id: caseData.id,
-                    type: caseData.type
-                  };
 
                   // finished
                   cb();
@@ -707,51 +707,26 @@ function run(callback) {
               app.logger.debug('Finished creating cases');
 
               // finished
-              resolve(data);
+              resolve();
             });
           });
         });
     })
 
     // populate contacts
-    .then((data) => {
-      if (
-        contactsNo == 0 &&
-        minNoRelationshipsForEachRecord == 0 &&
-        maxNoRelationshipsForEachRecord == 0
-      ) {
-        // no contacts need to be created/retrieved
-        app.logger.debug('Skipping contacts as they are not needed');
-        return Promise.resolve(data);
+    .then(() => {
+      if (contactsNo == 0) {
+        // no new contacts need to be created
+        app.logger.debug('No new contacts need to be created. Skip');
+        return Promise.resolve();
       }
 
-      // retrieve current contacts
+      // count current contacts
       return app.models.contact
-        .rawFindWithLoopbackFilter({
-          where: {
-            outbreakId: data.outbreakData.id
-          },
-          fields: ['id', 'type']
+        .count({
+          outbreakId: outbreakDataContainer.id
         })
-        .then(contacts => {
-          data.contacts = {};
-          contacts.forEach(contactData => {
-            // map contact for later use
-            data.contacts[contactData.id] = {
-              id: contactData.id,
-              type: contactData.type
-            };
-          });
-          data.currentContactsNumber = contacts.length;
-          return data;
-        })
-        .then(data => {
-          if (contactsNo == 0) {
-            // no new contacts need to be created
-            app.logger.debug('No new contacts need to be created. Skip');
-            return Promise.resolve(data);
-          }
-
+        .then(currentContactsNumber => {
           // display log
           app.logger.debug('Creating contacts');
 
@@ -760,7 +735,7 @@ function run(callback) {
           for (let index = 0; index < contactsNo; index++) {
             contactsJobs.push((cb) => {
               // determine first name ( unique )
-              const firstName = `ContactFirst${data.currentContactsNumber + index + 1}`;
+              const firstName = `ContactFirst${currentContactsNumber + index + 1}`;
 
               // determine last name - we might have the same name...same family
               const lastName = `ContactLast${randomFloatBetween(Math.max(index - lastNameError, 0), index + lastNameError, 0)}`;
@@ -791,20 +766,20 @@ function run(callback) {
               const addresses = [];
               if (Math.random() >= 0.1) {
                 // determine location
-                const parentLocationId = data.parentLocationIds[index % data.parentLocationsNo];
+                const parentLocationId = parentLocationsIdsContainer[index % parentLocationsNumberContainer];
 
                 // use main location or child location ?
                 let location;
                 if (
-                  !data.locations[parentLocationId].subLocations ||
-                  !data.locations[parentLocationId].subLocations.length ||
+                  !locationsDataContainer[parentLocationId].subLocations ||
+                  !locationsDataContainer[parentLocationId].subLocations.length ||
                   Math.random() < 0.5
                 ) {
-                  location = data.locations[parentLocationId];
+                  location = locationsDataContainer[parentLocationId];
                 } else {
                   // use child location if we have one
-                  const childLocationIndex = randomFloatBetween(0, data.locations[parentLocationId].subLocations.length - 1, 0);
-                  location = data.locations[parentLocationId].subLocations[childLocationIndex];
+                  const childLocationIndex = randomFloatBetween(0, locationsDataContainer[parentLocationId].subLocations.length - 1, 0);
+                  location = locationsDataContainer[parentLocationId].subLocations[childLocationIndex];
                 }
 
                 // generate geo location
@@ -852,7 +827,7 @@ function run(callback) {
               app.models.contact
                 .create(Object.assign(
                   defaultContactTemplate, {
-                    outbreakId: data.outbreakData.id,
+                    outbreakId: outbreakDataContainer.id,
                     firstName: firstName,
                     lastName: lastName,
                     dob: dob ? dob.toISOString() : dob,
@@ -862,17 +837,11 @@ function run(callback) {
                     dateOfReporting: dateOfReporting ? dateOfReporting.toISOString() : dateOfReporting,
                     riskLevel: riskLevel
                   },
-                  common.install.timestamps
+                  getTimestamps()
                 ), options)
                 .then((contactData) => {
                   // log
                   app.logger.debug(`Contact '${contactData.lastName} ${contactData.firstName}' created => '${contactData.id}'`);
-
-                  // map contact for later use
-                  data.contacts[contactData.id] = {
-                    id: contactData.id,
-                    type: contactData.type
-                  };
 
                   // finished
                   cb();
@@ -894,51 +863,26 @@ function run(callback) {
               app.logger.debug('Finished creating contacts');
 
               // finished
-              resolve(data);
+              resolve();
             });
           });
         });
     })
 
     // populate events
-    .then((data) => {
-      if (
-        eventsNo == 0 &&
-        minNoRelationshipsForEachRecord == 0 &&
-        maxNoRelationshipsForEachRecord == 0
-      ) {
-        // no events need to be created/retrieved
-        app.logger.debug('Skipping events as they are not needed');
-        return Promise.resolve(data);
+    .then(() => {
+      if (eventsNo == 0) {
+        // no new events need to be created
+        app.logger.debug('No new events need to be added. Skip');
+        return Promise.resolve();
       }
 
       // retrieve current events
       return app.models.event
-        .rawFindWithLoopbackFilter({
-          where: {
-            outbreakId: data.outbreakData.id
-          },
-          fields: ['id', 'type']
+        .count({
+          outbreakId: outbreakDataContainer.id
         })
-        .then(events => {
-          data.events = {};
-          events.forEach(eventData => {
-            // map event for later use
-            data.events[eventData.id] = {
-              id: eventData.id,
-              type: eventData.type
-            };
-          });
-          data.currentEventsNumber = events.length;
-          return data;
-        })
-        .then(data => {
-          if (eventsNo == 0) {
-            // no new events need to be created
-            app.logger.debug('No new events need to be added. Skip');
-            return Promise.resolve(data);
-          }
-
+        .then(currentEventsNumber => {
           // display log
           app.logger.debug('Creating events');
 
@@ -947,27 +891,27 @@ function run(callback) {
           for (let index = 0; index < eventsNo; index++) {
             eventsJobs.push((cb) => {
               // determine event name
-              const name = `Event${data.currentEventsNumber + index + 1}`;
+              const name = `Event${currentEventsNumber + index + 1}`;
 
               // determine current address - some have an address while others don't
               // 90% have an address
               let address;
               if (Math.random() >= 0.1) {
                 // determine location
-                const parentLocationId = data.parentLocationIds[index % data.parentLocationsNo];
+                const parentLocationId = parentLocationsIdsContainer[index % parentLocationsNumberContainer];
 
                 // use main location or child location ?
                 let location;
                 if (
-                  !data.locations[parentLocationId].subLocations ||
-                  !data.locations[parentLocationId].subLocations.length ||
+                  !locationsDataContainer[parentLocationId].subLocations ||
+                  !locationsDataContainer[parentLocationId].subLocations.length ||
                   Math.random() < 0.5
                 ) {
-                  location = data.locations[parentLocationId];
+                  location = locationsDataContainer[parentLocationId];
                 } else {
                   // use child location if we have one
-                  const childLocationIndex = randomFloatBetween(0, data.locations[parentLocationId].subLocations.length - 1, 0);
-                  location = data.locations[parentLocationId].subLocations[childLocationIndex];
+                  const childLocationIndex = randomFloatBetween(0, locationsDataContainer[parentLocationId].subLocations.length - 1, 0);
+                  location = locationsDataContainer[parentLocationId].subLocations[childLocationIndex];
                 }
 
                 // generate geo location
@@ -1009,23 +953,17 @@ function run(callback) {
               app.models.event
                 .create(Object.assign(
                   defaultEventTemplate, {
-                    outbreakId: data.outbreakData.id,
+                    outbreakId: outbreakDataContainer.id,
                     name: name,
                     address: address,
                     dateOfReporting: dateOfReporting ? dateOfReporting.toISOString() : dateOfReporting,
                     date: date ? date.toISOString() : date
                   },
-                  common.install.timestamps
+                  getTimestamps()
                 ), options)
                 .then((eventData) => {
                   // log
                   app.logger.debug(`Event '${eventData.name}' created => '${eventData.id}'`);
-
-                  // map event for later use
-                  data.events[eventData.id] = {
-                    id: eventData.id,
-                    type: eventData.type
-                  };
 
                   // finished
                   cb();
@@ -1047,235 +985,428 @@ function run(callback) {
               app.logger.debug('Finished creating events');
 
               // finished
-              resolve(data);
+              resolve();
             });
           });
         });
     })
 
     // create relationships
-    .then((data) => {
+    .then(() => {
       if (
         minNoRelationshipsForEachRecord == 0 &&
         maxNoRelationshipsForEachRecord == 0
       ) {
         // no relations need to be created/retrieved
         app.logger.debug('No relations need to be added. Skip');
-        return Promise.resolve(data);
+        return Promise.resolve();
       }
 
       // display log
       app.logger.debug('Creating relationships');
 
-      // create relationships
-      const relationshipsJobs = [];
-      const existingRelationships = {};
-      const caseIds = Object.keys(data.cases);
-      const contactIds = Object.keys(data.contacts);
-      const eventIds = Object.keys(data.events);
-      const caseAndEventsIds = [
-        ...caseIds,
-        ...eventIds
-      ];
-      const personIds = [
-        ...caseAndEventsIds,
-        ...contactIds
-      ];
-      const createRelationshipJobs = (personData) => {
-        // how many relationships do we need to create
-        let relationshipsNo = randomFloatBetween(minNoRelationshipsForEachRecord, maxNoRelationshipsForEachRecord);
+      // get number of cases, contacts, events and split relationship creation in multiple batches to avoid loading entire DB in memory
+      let resources = ['case', 'contact', 'event'];
+      let countJobs = {};
+      resources.forEach(res => {
+        countJobs[res] = (cb) => {
+          return app.models[res]
+            .count({
+              outbreakId: outbreakDataContainer.id
+            })
+            .then(count => {
+              cb(null, count);
+            })
+            .catch(cb);
+        };
+      });
 
-        // each contact must have at least one relationship
-        relationshipsNo = personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
-          Math.max(relationshipsNo, 1) :
-          relationshipsNo;
-
-        // create relationships
-        for (let index = 0; index < relationshipsNo; index++) {
-          // determine the other person
-          // - exclude teh same person
-          // - exclude duplicate relationships
-          let otherPerson;
-          while (
-            otherPerson === undefined ||
-            otherPerson.id === personData.id || (
-              existingRelationships[otherPerson.id] &&
-              existingRelationships[otherPerson.id][personData.id]
-            )
-            ) {
-            // case / event / contact ?
-            const idsPool = personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
-              caseAndEventsIds :
-              personIds;
-
-            // determine id
-            const otherId = idsPool[randomFloatBetween(0, idsPool.length - 1, 0)];
-            otherPerson = data.cases[otherId] ?
-              data.cases[otherId] : (
-                data.contacts[otherId] ?
-                  data.contacts[otherId] :
-                  data.events[otherId]
-              );
+      return new Promise((resolveCounters, rejectCounters) => {
+        async.parallel(countJobs, (err, countersMap) => {
+          if (err) {
+            return rejectCounters(err);
           }
 
-          // determine persons
-          const persons = [];
+          // initialize resources in DB array
+          let resourcesInDb = [];
 
-          // contact always needs to be target
-          if (personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-            persons.push({
-              id: personData.id,
-              type: personData.type,
-              target: true
-            }, {
-              id: otherPerson.id,
-              type: otherPerson.type,
-              source: true
-            });
-          } else if (otherPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-            persons.push({
-              id: otherPerson.id,
-              type: otherPerson.type,
-              target: true
-            }, {
-              id: personData.id,
-              type: personData.type,
-              source: true
-            });
-          } else {
-            // relation between cases & events
-            // determine who is source
-            if (Math.random() < 0.5) {
-              persons.push({
-                id: personData.id,
-                type: personData.type,
-                target: true
-              }, {
-                id: otherPerson.id,
-                type: otherPerson.type,
-                source: true
-              });
-            } else {
-              persons.push({
-                id: otherPerson.id,
-                type: otherPerson.type,
-                target: true
-              }, {
-                id: personData.id,
-                type: personData.type,
-                source: true
-              });
+          // get maximum number of resources
+          let maxResNo = 0;
+          let resWithMaxNo;
+          resources.forEach(res => {
+            // remove resource types which don't exist in DB
+            if (countersMap[res] === 0) {
+              delete countersMap[res];
+              return;
             }
-          }
 
-          // add relationship to list of existing relationships
-          if (!existingRelationships[persons[1].id]) {
-            existingRelationships[persons[1].id] = {};
-          }
-          existingRelationships[persons[1].id][persons[0].id] = true;
+            // use resource in future calculations
+            resourcesInDb.push(res);
 
-          // and teh reverse
-          if (!existingRelationships[persons[0].id]) {
-            existingRelationships[persons[0].id] = {};
-          }
-          existingRelationships[persons[0].id][persons[1].id] = true;
-
-          // determine dates
-          const contactDate = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
-
-          // determine certainty
-          const certaintyLevelId = [
-            'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_1_LOW',
-            'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_2_MEDIUM',
-            'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_3_HIGH'
-          ][randomFloatBetween(0, 2, 0)];
-
-          // only some have exposure type
-          let exposureTypeId;
-          if (Math.random() >= 0.5) {
-            exposureTypeId = [
-              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_DIRECT_PHYSICAL_CONTACT',
-              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SLEPT_ATE_OR_SPEND_TIME_IN_SAME_HOUSEHOLD',
-              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_TOUCHED_BODY_FLUIDS'
-            ][randomFloatBetween(0, 3, 0)];
-          }
-
-          // only some have exposure frequency
-          let exposureFrequencyId;
-          if (Math.random() >= 0.5) {
-            exposureFrequencyId = [
-              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_11_20_TIMES',
-              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_1_5_TIMES',
-              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_6_10_TIMES',
-              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_OVER_21_TIMES',
-              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_UNKNOWN'
-            ][randomFloatBetween(0, 4, 0)];
-          }
-
-          // only some have exposure duration
-          let exposureDurationId;
-          if (Math.random() >= 0.5) {
-            exposureDurationId = [
-              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_LONG_DAYS',
-              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_MEDIUM_HOURS',
-              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_SHORT_MINUTES',
-              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_VERY_SHORT_SECONDS'
-            ][randomFloatBetween(0, 3, 0)];
-          }
-
-          // create relationship
-          relationshipsJobs.push((cb) => {
-            // create relationship
-            app.models.relationship
-              .create(Object.assign(
-                defaultRelationshipTemplate, {
-                  outbreakId: data.outbreakData.id,
-                  persons: persons,
-                  contactDate: contactDate ? contactDate.toISOString() : contactDate,
-                  certaintyLevelId: certaintyLevelId,
-                  exposureTypeId: exposureTypeId,
-                  exposureFrequencyId: exposureFrequencyId,
-                  exposureDurationId: exposureDurationId
-                },
-                common.install.timestamps
-              ), options)
-              .then((relationshipData) => {
-                // log
-                app.logger.debug(`Relationship created => '${relationshipData.id}'`);
-
-                // finished
-                cb();
-              })
-              .catch(cb);
+            if (maxResNo < countersMap[res]) {
+              maxResNo = countersMap[res];
+              resWithMaxNo = res;
+            }
           });
-        }
-      };
 
-      // contacts
-      _.each(data.contacts, createRelationshipJobs);
-
-      // cases
-      _.each(data.cases, createRelationshipJobs);
-
-      // events
-      _.each(data.contacts, createRelationshipJobs);
-
-      app.logger.debug(`Relationships to create: ${relationshipsJobs.length}`);
-
-      // execute jobs
-      return new Promise((resolve, reject) => {
-        // wait for all operations to be done
-        async.parallelLimit(relationshipsJobs, batchSize, function (error) {
-          // error
-          if (error) {
-            return reject(error);
+          if (!resourcesInDb.length) {
+            return Promise.reject('No resources exist in DB for which to create relations')
           }
 
-          // display log
-          app.logger.debug('Finished creating relationships');
+          // get a maximum of 1000 resources per type at a time
+          let resourcesPerBatch = 7;
+          // no need to check if additional items remain after the batches as we will get all remaining data in last batch
+          let batches = Math.floor(maxResNo / resourcesPerBatch);
 
-          // finished
-          resolve(data);
+          // get limits for all resources pe batch
+          let limits = {};
+          resourcesInDb.forEach(res => {
+            if (resWithMaxNo === res) {
+              limits[res] = resourcesPerBatch;
+            } else {
+              limits[res] = Math.floor(countersMap[res] / batches);
+              // don't allow 0
+              (limits[res] === 0) && limits[res]++;
+            }
+          });
+
+          // cache existing relationships
+          const existingRelationships = {};
+
+          // create batches jobs
+          let batchesJobs = [];
+          for (let jobNo = 1; jobNo <= batches; jobNo++) {
+            batchesJobs.push(batchJobCB => {
+              // retrieve data
+              let retrieveDataJobs = {};
+              // cache last batch data as for some resource there might not be enough items to get in all batches
+              let retrievedLastBatchData = {};
+              resourcesInDb.forEach(res => {
+                retrieveDataJobs[res] = (retrieveDataCB) => {
+
+                  //TODO
+                  if (jobNo * limits[res] > countersMap[res]) {
+                    // no additional data to retrieve; use last batch data
+                    return Promise.resolve(retrievedLastBatchData[res]);
+                  }
+
+                  return app.models[res]
+                    .rawFindWithLoopbackFilter({
+                      where: {
+                        outbreakId: outbreakDataContainer.id
+                      },
+                      fields: ['id', 'type'],
+                      skip: (jobNo - 1) * limits[res],
+                      // no limit on last batch
+                      limit: jobNo !== batches ? limits[res] : null,
+                      order: ['updatedAt ASC']
+                    })
+                    .then(resources => {
+                      // cache batch data
+                      retrievedLastBatchData[res] && (delete retrievedLastBatchData[res]);
+                      retrievedLastBatchData[res] = resources;
+
+                      return retrieveDataCB(null, resources);
+                    })
+                    .catch(retrieveDataCB);
+                };
+              });
+
+              app.logger.debug(`Starting relations job ${jobNo}`);
+
+              return new Promise((resolveRetrieveJobs, rejectRetrieveJobs) => {
+                async.series(retrieveDataJobs, (err, resources) => {
+                  if (err) {
+                    return rejectRetrieveJobs(err);
+                  }
+
+                  // map received data
+                  let resourcesContainer = {};
+                  let resourcesIdsContainer = {};
+                  resourcesInDb.forEach(res => {
+                    resourcesContainer[res] = {};
+                    resourcesIdsContainer[res] = [];
+                    resources[res].forEach(item => {
+                      resourcesContainer[res][item.id] = item;
+                      resourcesIdsContainer[res].push(item.id);
+                    })
+                  });
+
+                  // contacts
+                  contactsContainer = resourcesContainer.contact || {};
+
+                  // cases
+                  casesContainer = resourcesContainer.case || {};
+
+                  // events
+                  eventsContainer = resourcesContainer.event || {};
+
+                  const caseIds = resourcesIdsContainer.case || [];
+                  const contactIds = resourcesIdsContainer.contact || [];
+                  const eventIds = resourcesIdsContainer.event || [];
+                  const caseAndEventsIds = [
+                    ...caseIds,
+                    ...eventIds
+                  ];
+                  const personIds = [
+                    ...caseAndEventsIds,
+                    ...contactIds
+                  ];
+
+                  // create relationships
+                  const relationshipsJobs = [];
+
+                  const createRelationshipJobs = (personData) => {
+                    // how many relationships do we need to create
+                    let relationshipsNo = randomFloatBetween(minNoRelationshipsForEachRecord, maxNoRelationshipsForEachRecord);
+
+                    // each contact must have at least one relationship
+                    relationshipsNo = personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
+                      (
+                        // handle case where required relationships number is bigger than actual pool
+                        relationshipsNo < caseAndEventsIds.length ?
+                          Math.max(relationshipsNo, 1) :
+                          caseAndEventsIds.length
+                      ) : (
+                        // handle case where required relationships number is bigger than actual pool
+                        relationshipsNo < personIds.length ?
+                          relationshipsNo :
+                          personIds.length
+                      );
+
+                    // create relationships
+                    for (let index = 0; index < relationshipsNo; index++) {
+                      // check if person already has existing relationships
+                      let personExistingRelationships = existingRelationships[personData.id] || {};
+                      let personExistingRelationshipsNo = Object.keys(personExistingRelationships).length;
+
+                      // check if additional relationships can be created
+                      if (
+                        (
+                          personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
+                          personExistingRelationshipsNo >= caseAndEventsIds.length
+                        ) || (
+                          (
+                            personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ||
+                            personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                          ) &&
+                          personExistingRelationshipsNo >= personIds.length - 1
+                        )
+                      ) {
+                        // there are no persons with which the person doesn't have relationships
+                        return;
+                      }
+
+                      // determine the other person
+                      // - exclude teh same person
+                      // - exclude duplicate relationships
+                      let otherPerson;
+                      while (
+                        otherPerson === undefined ||
+                        otherPerson.id === personData.id || (
+                          existingRelationships[otherPerson.id] &&
+                          existingRelationships[otherPerson.id][personData.id]
+                        )
+                        ) {
+                        // case / event / contact ?
+                        const idsPool = personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
+                          caseAndEventsIds :
+                          personIds;
+
+                        // determine id
+                        let index = randomFloatBetween(0, idsPool.length, 0);
+                        // handle low probability of actually getting the max value from randomFloatBetween
+                        (index === idsPool.length) && index--;
+                        const otherId = idsPool[index];
+                        otherPerson = casesContainer[otherId] ?
+                          casesContainer[otherId] : (
+                            contactsContainer[otherId] ?
+                              contactsContainer[otherId] :
+                              eventsContainer[otherId]
+                          );
+                      }
+
+                      // determine persons
+                      const persons = [];
+
+                      // contact always needs to be target
+                      if (personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                        persons.push({
+                          id: personData.id,
+                          type: personData.type,
+                          target: true
+                        }, {
+                          id: otherPerson.id,
+                          type: otherPerson.type,
+                          source: true
+                        });
+                      } else if (otherPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                        persons.push({
+                          id: otherPerson.id,
+                          type: otherPerson.type,
+                          target: true
+                        }, {
+                          id: personData.id,
+                          type: personData.type,
+                          source: true
+                        });
+                      } else {
+                        // relation between cases & events
+                        // determine who is source
+                        if (Math.random() < 0.5) {
+                          persons.push({
+                            id: personData.id,
+                            type: personData.type,
+                            target: true
+                          }, {
+                            id: otherPerson.id,
+                            type: otherPerson.type,
+                            source: true
+                          });
+                        } else {
+                          persons.push({
+                            id: otherPerson.id,
+                            type: otherPerson.type,
+                            target: true
+                          }, {
+                            id: personData.id,
+                            type: personData.type,
+                            source: true
+                          });
+                        }
+                      }
+
+                      // add relationship to list of existing relationships
+                      if (!existingRelationships[persons[1].id]) {
+                        existingRelationships[persons[1].id] = {};
+                      }
+                      existingRelationships[persons[1].id][persons[0].id] = true;
+
+                      // and the reverse
+                      if (!existingRelationships[persons[0].id]) {
+                        existingRelationships[persons[0].id] = {};
+                      }
+                      existingRelationships[persons[0].id][persons[1].id] = true;
+
+                      // determine dates
+                      const contactDate = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
+
+                      // determine certainty
+                      const certaintyLevelId = [
+                        'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_1_LOW',
+                        'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_2_MEDIUM',
+                        'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_3_HIGH'
+                      ][randomFloatBetween(0, 2, 0)];
+
+                      // only some have exposure type
+                      let exposureTypeId;
+                      if (Math.random() >= 0.5) {
+                        exposureTypeId = [
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_DIRECT_PHYSICAL_CONTACT',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SLEPT_ATE_OR_SPEND_TIME_IN_SAME_HOUSEHOLD',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_TOUCHED_BODY_FLUIDS'
+                        ][randomFloatBetween(0, 3, 0)];
+                      }
+
+                      // only some have exposure frequency
+                      let exposureFrequencyId;
+                      if (Math.random() >= 0.5) {
+                        exposureFrequencyId = [
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_11_20_TIMES',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_1_5_TIMES',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_6_10_TIMES',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_OVER_21_TIMES',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_UNKNOWN'
+                        ][randomFloatBetween(0, 4, 0)];
+                      }
+
+                      // only some have exposure duration
+                      let exposureDurationId;
+                      if (Math.random() >= 0.5) {
+                        exposureDurationId = [
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_LONG_DAYS',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_MEDIUM_HOURS',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_SHORT_MINUTES',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_VERY_SHORT_SECONDS'
+                        ][randomFloatBetween(0, 3, 0)];
+                      }
+
+                      // create relationship
+                      relationshipsJobs.push((cb) => {
+                        // create relationship
+                        app.models.relationship
+                          .create(Object.assign(
+                            defaultRelationshipTemplate, {
+                              outbreakId: outbreakDataContainer.id,
+                              persons: persons,
+                              contactDate: contactDate ? contactDate.toISOString() : contactDate,
+                              certaintyLevelId: certaintyLevelId,
+                              exposureTypeId: exposureTypeId,
+                              exposureFrequencyId: exposureFrequencyId,
+                              exposureDurationId: exposureDurationId
+                            },
+                            getTimestamps()
+                          ), options)
+                          .then((relationshipData) => {
+                            // log
+                            app.logger.debug(`Relationship created => '${relationshipData.id}'`);
+
+                            // finished
+                            cb();
+                          })
+                          .catch(cb);
+                      });
+                    }
+                  };
+
+                  // contacts
+                  contactIds.length && _.each(contactsContainer, createRelationshipJobs);
+
+                  // cases
+                  caseIds.length && _.each(casesContainer, createRelationshipJobs);
+
+                  // events
+                  eventIds.length && _.each(eventsContainer, createRelationshipJobs);
+
+                  app.logger.debug(`Relationships to create: ${relationshipsJobs.length}`);
+
+                  // execute jobs
+                  return new Promise((resolveRelationships, rejectRelationships) => {
+                    async.parallelLimit(relationshipsJobs, batchSize, (err) => {
+                      if (err) {
+                        return rejectRelationships(err);
+                      }
+                      // display log
+                      app.logger.debug(`Finished creating relationships batch ${jobNo}`);
+                      resolveRelationships();
+                    })
+                  })
+                    .then(() => {
+                      resolveRetrieveJobs();
+                    })
+                    .catch(rejectRetrieveJobs);
+                });
+              })
+                .then(() => {
+                  batchJobCB();
+                })
+                .catch(batchJobCB);
+            });
+          }
+
+          return new Promise((resolveBatches, rejectBatches) => {
+            async.series(batchesJobs, (err) => {
+              if (err) {
+                return rejectBatches(err);
+              }
+
+              return resolveBatches();
+            });
+          })
+            .then(() => {
+              resolveCounters();
+            })
+            .catch(rejectCounters);
         });
       });
     })

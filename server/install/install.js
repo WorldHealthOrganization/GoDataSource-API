@@ -4,6 +4,8 @@ const async = require('async');
 const _ = require('lodash');
 const args = process.argv;
 const path = require('path');
+const fs = require('fs-extra');
+
 // keep a list of supported install arguments
 const supportedArguments = [
   'init-database',
@@ -208,7 +210,9 @@ const routines = {
   },
   populateWithDummyData: function () {
     // need outbreak name & data amount
-    const requiredArgs = [
+    // can receive an options file or a list of options
+    const allowedArgs = [
+      'options',
       'outbreakName',
       'casesNo',
       'contactsNo',
@@ -220,13 +224,22 @@ const routines = {
       'maxNoRelationshipsForEachRecord',
       'batchSize'
     ];
-    methodRelevantArgs = parseArgumentValues(requiredArgs);
+
+    const requiredOptions = [
+      'outbreakName'
+    ];
+
+    let methodRelevantArgs = parseArgumentValues(allowedArgs);
+    if (methodRelevantArgs.options) {
+      // options arg was sent; try to use options from the given JSON
+      methodRelevantArgs = fs.readJsonSync(methodRelevantArgs.options, {throws: false}) || [];
+    }
 
     // all above arg are required
     let stop = false;
-    _.each(requiredArgs, (argKey) => {
-      if (!methodRelevantArgs[argKey]) {
-        console.log(`The following arguments are required: ${requiredArgs.join(', ')}`);
+    _.each(requiredOptions, (argKey) => {
+      if (methodRelevantArgs[argKey] === undefined) {
+        console.log(`The following arguments are required either in given options JSON file or separate input parameters: ${requiredOptions.join(', ')}`);
         stop = true;
         return false;
       }
