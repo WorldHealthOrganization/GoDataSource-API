@@ -31,6 +31,9 @@
     "token_index": {
       "token": "hashed"
     },
+    "token_asc_index": {
+      "token": 1
+    },
     "languageId_index": {
       "languageId": 1
     },
