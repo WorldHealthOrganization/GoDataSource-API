@@ -33,6 +33,7 @@ module.exports = function (Model) {
    * @param {boolean} [options.ignoreDefaultScope]
    * @param {boolean} [options.countOnly]
    * @param {array} [options.relations]
+   * @param {boolean} [options.matchAfterLookup]
    * @return {Promise<any>}
    */
   Model.rawFindAggregate = function (filter = {}, options = {}) {
@@ -152,6 +153,13 @@ module.exports = function (Model) {
       });
     }
 
+    if (!options.matchAfterLookup) {
+      // construct aggregate filters
+      aggregatePipeline.push({
+        $match: whereFilter
+      });
+    }
+
     // include relations
     if (options.relations) {
       _.each(options.relations, (relation) => {
@@ -174,10 +182,12 @@ module.exports = function (Model) {
       });
     }
 
-    // construct aggregate filters
-    aggregatePipeline.push({
-      $match: whereFilter
-    });
+    if (options.matchAfterLookup) {
+      // construct aggregate filters
+      aggregatePipeline.push({
+        $match: whereFilter
+      });
+    }
 
     // no need to retrieve data, sort & skip records if we just need to count
     if (options.countOnly) {
@@ -249,7 +259,7 @@ module.exports = function (Model) {
       }
     }
 
-    // // log usage
+    // log usage
     app.logger.debug(`[QueryId: ${queryId}] Performing MongoDB aggregate request on collection '${collectionName}': aggregate ${JSON.stringify(aggregatePipeline)}`);
 
     // retrieve data

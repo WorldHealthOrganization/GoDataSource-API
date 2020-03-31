@@ -81,6 +81,11 @@ module.exports = function (LabResult) {
     if (caseQuery) {
       delete filter.where.case;
     }
+    // this query is used mainly for pre filtering lab results before reaching aggregate
+    let personQuery = _.get(filter, 'where.person');
+    if (personQuery) {
+      delete filter.where.person;
+    }
     // get main lab results query
     let labResultsQuery = _.get(filter, 'where', {});
     // start with a resolved promise (so we can link others)
@@ -132,11 +137,31 @@ module.exports = function (LabResult) {
             });
         });
     }
-
+    // if a person query is present
+    if (personQuery) {
+      // restrict query to current outbreak
+      personQuery = {
+        $and: [
+          personQuery,
+          {
+            outbreakId: outbreak.id
+          }
+        ]
+      };
+      // filter people based on query
+      buildQuery = buildQuery
+        .then(() => {
+          return app.models.person
+            .rawFind(personQuery, {projection: {_id: 1}})
+            .then(people => {
+              personIds.push(...people.map(person => person.id));
+            });
+        });
+    }
     return buildQuery
       .then(() => {
         // if person ids filter present
-        if (personIds.length) {
+        if (personQuery || contactQuery || caseQuery) {
           // update lab results query to filter based on caseIds
           labResultsQuery = {
             $and: [
@@ -158,7 +183,6 @@ module.exports = function (LabResult) {
             }
           ]
         };
-        // return updated filter
         return Object.assign(filter, app.utils.remote.convertLoopbackFilterToMongo({where: labResultsQuery}));
       });
   };
