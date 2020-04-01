@@ -1050,7 +1050,7 @@ function run(callback) {
           });
 
           if (!resourcesInDb.length) {
-            return Promise.reject('No resources exist in DB for which to create relations')
+            return Promise.reject('No resources exist in DB for which to create relations');
           }
 
           // get a maximum of 1000 resources per type at a time
@@ -1133,7 +1133,7 @@ function run(callback) {
                     resources[res].forEach(item => {
                       resourcesContainer[res][item.id] = item;
                       resourcesIdsContainer[res].push(item.id);
-                    })
+                    });
                   });
 
                   // contacts
@@ -1383,7 +1383,7 @@ function run(callback) {
                       // display log
                       app.logger.debug(`Finished creating relationships batch ${jobNo}`);
                       resolveRelationships();
-                    })
+                    });
                   })
                     .then(() => {
                       resolveRetrieveJobs();
