@@ -63,8 +63,8 @@ const getTimestamps = function () {
   let noDaysUpdated = Math.ceil(Math.random() * noDaysCreated);
 
   return {
-    createdAt: moment().utc().subtract(noDaysCreated, 'days').startOf('day'),
-    updatedAt: moment().utc().subtract(noDaysUpdated, 'days').startOf('day')
+    createdAt: moment().utc().subtract(noDaysCreated, 'days'),
+    updatedAt: moment().utc().subtract(noDaysUpdated, 'days')
   };
 };
 
@@ -1054,7 +1054,7 @@ function run(callback) {
           }
 
           // get a maximum of 1000 resources per type at a time
-          let resourcesPerBatch = 7;
+          let resourcesPerBatch = 1000;
           // no need to check if additional items remain after the batches as we will get all remaining data in last batch
           let batches = Math.floor(maxResNo / resourcesPerBatch);
 
@@ -1075,32 +1075,36 @@ function run(callback) {
 
           // create batches jobs
           let batchesJobs = [];
+
+          // cache last batch data as for some resource there might not be enough items to get in all batches
+          let retrievedLastBatchData = {};
+
           for (let jobNo = 1; jobNo <= batches; jobNo++) {
             batchesJobs.push(batchJobCB => {
               // retrieve data
               let retrieveDataJobs = {};
-              // cache last batch data as for some resource there might not be enough items to get in all batches
-              let retrievedLastBatchData = {};
               resourcesInDb.forEach(res => {
                 retrieveDataJobs[res] = (retrieveDataCB) => {
+                  let retrieveDataPromise;
 
-                  //TODO
                   if (jobNo * limits[res] > countersMap[res]) {
                     // no additional data to retrieve; use last batch data
-                    return Promise.resolve(retrievedLastBatchData[res]);
+                    retrieveDataPromise = Promise.resolve(retrievedLastBatchData[res]);
+                  } else {
+                    retrieveDataPromise = app.models[res]
+                      .rawFindWithLoopbackFilter({
+                        where: {
+                          outbreakId: outbreakDataContainer.id
+                        },
+                        fields: ['id', 'type'],
+                        skip: (jobNo - 1) * limits[res],
+                        // no limit on last batch
+                        limit: jobNo !== batches ? limits[res] : null,
+                        order: ['createdAt ASC']
+                      });
                   }
 
-                  return app.models[res]
-                    .rawFindWithLoopbackFilter({
-                      where: {
-                        outbreakId: outbreakDataContainer.id
-                      },
-                      fields: ['id', 'type'],
-                      skip: (jobNo - 1) * limits[res],
-                      // no limit on last batch
-                      limit: jobNo !== batches ? limits[res] : null,
-                      order: ['updatedAt ASC']
-                    })
+                  return retrieveDataPromise
                     .then(resources => {
                       // cache batch data
                       retrievedLastBatchData[res] && (delete retrievedLastBatchData[res]);
