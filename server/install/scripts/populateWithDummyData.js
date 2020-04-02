@@ -84,7 +84,7 @@ function run(callback) {
   const minNoRelationshipsForEachRecord = parseIntArgValue(module.methodRelevantArgs.minNoRelationshipsForEachRecord);
   const maxNoRelationshipsForEachRecord = parseIntArgValue(module.methodRelevantArgs.maxNoRelationshipsForEachRecord);
   const relationshipsForAlreadyAssociatedPerson = module.methodRelevantArgs.relationshipsForAlreadyAssociatedPerson &&
-  ['true', true].indexOf(module.methodRelevantArgs.relationshipsForAlreadyAssociatedPerson) !== -1 ? true : false
+  ['true', true].indexOf(module.methodRelevantArgs.relationshipsForAlreadyAssociatedPerson) !== -1 ? true : false;
   const batchSize = parseIntArgValue(module.methodRelevantArgs.batchSize) || 10;
 
   // default geo location range
