@@ -1,9 +1,10 @@
 {
   "mongoDb": {
-    "host": "127.0.0.1",
+    "host": "localhost",
+    "hostWHOCD": "whoapicd.clarisoft.com",
     "port": 27017,
     "url": "",
-    "database": "go-data",
+    "database": "go-data-new",
     "password": "",
     "name": "mongoDb",
     "user": "root",

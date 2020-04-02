@@ -83,6 +83,8 @@ function run(callback) {
   const subLocationsLevelsNo = parseIntArgValue(module.methodRelevantArgs.subLocationsLevelsNo);
   const minNoRelationshipsForEachRecord = parseIntArgValue(module.methodRelevantArgs.minNoRelationshipsForEachRecord);
   const maxNoRelationshipsForEachRecord = parseIntArgValue(module.methodRelevantArgs.maxNoRelationshipsForEachRecord);
+  const relationshipsForAlreadyAssociatedPerson = module.methodRelevantArgs.relationshipsForAlreadyAssociatedPerson &&
+  ['true', true].indexOf(module.methodRelevantArgs.relationshipsForAlreadyAssociatedPerson) !== -1 ? true : false
   const batchSize = parseIntArgValue(module.methodRelevantArgs.batchSize) || 10;
 
   // default geo location range
@@ -1005,414 +1007,443 @@ function run(callback) {
       // display log
       app.logger.debug('Creating relationships');
 
-      // get number of cases, contacts, events and split relationship creation in multiple batches to avoid loading entire DB in memory
-      let resources = ['case', 'contact', 'event'];
-      let countJobs = {};
-      resources.forEach(res => {
-        countJobs[res] = (cb) => {
-          return app.models[res]
-            .count({
+      // depending on relationshipsForAlreadyAssociatedPerson we will only create relationships for not already associated person or for all
+      // check if we need to retrieve persons that already have relationships in order to not create additional relationships for them
+      let retrievePersonsIdsWithRelationships = Promise.resolve([]);
+      if (!relationshipsForAlreadyAssociatedPerson) {
+        retrievePersonsIdsWithRelationships = app.models.relationship
+          .rawFindWithLoopbackFilter({
+            where: {
               outbreakId: outbreakDataContainer.id
-            })
-            .then(count => {
-              cb(null, count);
-            })
-            .catch(cb);
-        };
-      });
+            },
+            fields: ['persons']
+          })
+          .then(relationships => {
+            // get persons IDs
+            let personsIds = [];
+            relationships.forEach(rel => {
+              personsIds.push(rel.persons[0].id);
+              personsIds.push(rel.persons[1].id);
+            });
 
-      return new Promise((resolveCounters, rejectCounters) => {
-        async.parallel(countJobs, (err, countersMap) => {
-          if (err) {
-            return rejectCounters(err);
-          }
+            // keep only one entry of an ID
+            return [...new Set(personsIds)];
+          });
+      }
 
-          // initialize resources in DB array
-          let resourcesInDb = [];
+      return retrievePersonsIdsWithRelationships
+        .then(personsWithRelationshipsIds => {
+          // initialize filter for counting and filtering persons
+          const personsFilter = {
+            outbreakId: outbreakDataContainer.id
+          };
+          personsWithRelationshipsIds.length && (personsFilter.id = {nin: personsWithRelationshipsIds});
 
-          // get maximum number of resources
-          let maxResNo = 0;
-          let resWithMaxNo;
+          // get number of cases, contacts, events and split relationship creation in multiple batches to avoid loading entire DB in memory
+          let resources = ['case', 'contact', 'event'];
+          let countJobs = {};
           resources.forEach(res => {
-            // remove resource types which don't exist in DB
-            if (countersMap[res] === 0) {
-              delete countersMap[res];
-              return;
-            }
-
-            // use resource in future calculations
-            resourcesInDb.push(res);
-
-            if (maxResNo < countersMap[res]) {
-              maxResNo = countersMap[res];
-              resWithMaxNo = res;
-            }
+            countJobs[res] = (cb) => {
+              return app.models[res]
+                .count(personsFilter)
+                .then(count => {
+                  cb(null, count);
+                })
+                .catch(cb);
+            };
           });
 
-          if (!resourcesInDb.length) {
-            return Promise.reject('No resources exist in DB for which to create relations');
-          }
+          return new Promise((resolveCounters, rejectCounters) => {
+            async.parallel(countJobs, (err, countersMap) => {
+              if (err) {
+                return rejectCounters(err);
+              }
 
-          // get a maximum of 1000 resources per type at a time
-          let resourcesPerBatch = 1000;
-          // no need to check if additional items remain after the batches as we will get all remaining data in last batch
-          let batches = Math.floor(maxResNo / resourcesPerBatch);
+              // initialize resources in DB array
+              let resourcesInDb = [];
 
-          // get limits for all resources pe batch
-          let limits = {};
-          resourcesInDb.forEach(res => {
-            if (resWithMaxNo === res) {
-              limits[res] = resourcesPerBatch;
-            } else {
-              limits[res] = Math.floor(countersMap[res] / batches);
-              // don't allow 0
-              (limits[res] === 0) && limits[res]++;
-            }
-          });
+              // get maximum number of resources
+              let maxResNo = 0;
+              let resWithMaxNo;
+              resources.forEach(res => {
+                // remove resource types which don't exist in DB
+                if (countersMap[res] === 0) {
+                  delete countersMap[res];
+                  return;
+                }
 
-          // cache existing relationships
-          const existingRelationships = {};
+                // use resource in future calculations
+                resourcesInDb.push(res);
 
-          // create batches jobs
-          let batchesJobs = [];
-
-          // cache last batch data as for some resource there might not be enough items to get in all batches
-          let retrievedLastBatchData = {};
-
-          for (let jobNo = 1; jobNo <= batches; jobNo++) {
-            batchesJobs.push(batchJobCB => {
-              // retrieve data
-              let retrieveDataJobs = {};
-              resourcesInDb.forEach(res => {
-                retrieveDataJobs[res] = (retrieveDataCB) => {
-                  let retrieveDataPromise;
-
-                  if (jobNo * limits[res] > countersMap[res]) {
-                    // no additional data to retrieve; use last batch data
-                    retrieveDataPromise = Promise.resolve(retrievedLastBatchData[res]);
-                  } else {
-                    retrieveDataPromise = app.models[res]
-                      .rawFindWithLoopbackFilter({
-                        where: {
-                          outbreakId: outbreakDataContainer.id
-                        },
-                        fields: ['id', 'type'],
-                        skip: (jobNo - 1) * limits[res],
-                        // no limit on last batch
-                        limit: jobNo !== batches ? limits[res] : null,
-                        order: ['createdAt ASC']
-                      });
-                  }
-
-                  return retrieveDataPromise
-                    .then(resources => {
-                      // cache batch data
-                      retrievedLastBatchData[res] && (delete retrievedLastBatchData[res]);
-                      retrievedLastBatchData[res] = resources;
-
-                      return retrieveDataCB(null, resources);
-                    })
-                    .catch(retrieveDataCB);
-                };
+                if (maxResNo < countersMap[res]) {
+                  maxResNo = countersMap[res];
+                  resWithMaxNo = res;
+                }
               });
 
-              app.logger.debug(`Starting relations job ${jobNo}`);
+              if (!resourcesInDb.length) {
+                return rejectCounters('No resources exist in DB for which to create relations');
+              }
 
-              return new Promise((resolveRetrieveJobs, rejectRetrieveJobs) => {
-                async.series(retrieveDataJobs, (err, resources) => {
-                  if (err) {
-                    return rejectRetrieveJobs(err);
-                  }
+              // get a maximum of 1000 resources per type at a time
+              let resourcesPerBatch = 1000;
+              // no need to check if additional items remain after the batches as we will get all remaining data in last batch
+              let batches = Math.floor(maxResNo / resourcesPerBatch);
 
-                  // map received data
-                  let resourcesContainer = {};
-                  let resourcesIdsContainer = {};
+              // get limits for all resources pe batch
+              let limits = {};
+              resourcesInDb.forEach(res => {
+                if (resWithMaxNo === res) {
+                  limits[res] = resourcesPerBatch;
+                } else {
+                  limits[res] = Math.floor(countersMap[res] / batches);
+                  // don't allow 0
+                  (limits[res] === 0) && limits[res]++;
+                }
+              });
+
+              // cache existing relationships
+              const existingRelationships = {};
+
+              // create batches jobs
+              let batchesJobs = [];
+
+              // cache last batch data as for some resource there might not be enough items to get in all batches
+              let retrievedLastBatchData = {};
+
+              for (let jobNo = 1; jobNo <= batches; jobNo++) {
+                batchesJobs.push(batchJobCB => {
+                  // retrieve data
+                  let retrieveDataJobs = {};
                   resourcesInDb.forEach(res => {
-                    resourcesContainer[res] = {};
-                    resourcesIdsContainer[res] = [];
-                    resources[res].forEach(item => {
-                      resourcesContainer[res][item.id] = item;
-                      resourcesIdsContainer[res].push(item.id);
-                    });
+                    retrieveDataJobs[res] = (retrieveDataCB) => {
+                      let retrieveDataPromise;
+
+                      if (jobNo * limits[res] > countersMap[res]) {
+                        // no additional data to retrieve; use last batch data
+                        retrieveDataPromise = Promise.resolve(retrievedLastBatchData[res]);
+                      } else {
+                        retrieveDataPromise = app.models[res]
+                          .rawFindWithLoopbackFilter({
+                            where: personsFilter,
+                            fields: ['id', 'type'],
+                            skip: (jobNo - 1) * limits[res],
+                            // no limit on last batch
+                            limit: jobNo !== batches ? limits[res] : null,
+                            order: ['createdAt ASC']
+                          });
+                      }
+
+                      return retrieveDataPromise
+                        .then(resources => {
+                          // cache batch data
+                          retrievedLastBatchData[res] && (delete retrievedLastBatchData[res]);
+                          retrievedLastBatchData[res] = resources;
+
+                          return retrieveDataCB(null, resources);
+                        })
+                        .catch(retrieveDataCB);
+                    };
                   });
 
-                  // contacts
-                  contactsContainer = resourcesContainer.contact || {};
+                  app.logger.debug(`Starting relations job ${jobNo}`);
 
-                  // cases
-                  casesContainer = resourcesContainer.case || {};
+                  return new Promise((resolveRetrieveJobs, rejectRetrieveJobs) => {
+                    async.series(retrieveDataJobs, (err, resources) => {
+                      if (err) {
+                        return rejectRetrieveJobs(err);
+                      }
 
-                  // events
-                  eventsContainer = resourcesContainer.event || {};
+                      // map received data
+                      let resourcesContainer = {};
+                      let resourcesIdsContainer = {};
+                      resourcesInDb.forEach(res => {
+                        resourcesContainer[res] = {};
+                        resourcesIdsContainer[res] = [];
+                        resources[res].forEach(item => {
+                          resourcesContainer[res][item.id] = item;
+                          resourcesIdsContainer[res].push(item.id);
+                        });
+                      });
 
-                  const caseIds = resourcesIdsContainer.case || [];
-                  const contactIds = resourcesIdsContainer.contact || [];
-                  const eventIds = resourcesIdsContainer.event || [];
-                  const caseAndEventsIds = [
-                    ...caseIds,
-                    ...eventIds
-                  ];
-                  const personIds = [
-                    ...caseAndEventsIds,
-                    ...contactIds
-                  ];
+                      // contacts
+                      contactsContainer = resourcesContainer.contact || {};
 
-                  // create relationships
-                  const relationshipsJobs = [];
+                      // cases
+                      casesContainer = resourcesContainer.case || {};
 
-                  const createRelationshipJobs = (personData) => {
-                    // how many relationships do we need to create
-                    let relationshipsNo = randomFloatBetween(minNoRelationshipsForEachRecord, maxNoRelationshipsForEachRecord);
+                      // events
+                      eventsContainer = resourcesContainer.event || {};
 
-                    // each contact must have at least one relationship
-                    relationshipsNo = personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
-                      (
-                        // handle case where required relationships number is bigger than actual pool
-                        relationshipsNo < caseAndEventsIds.length ?
-                          Math.max(relationshipsNo, 1) :
-                          caseAndEventsIds.length
-                      ) : (
-                        // handle case where required relationships number is bigger than actual pool
-                        relationshipsNo < personIds.length ?
-                          relationshipsNo :
-                          personIds.length
-                      );
+                      const caseIds = resourcesIdsContainer.case || [];
+                      const contactIds = resourcesIdsContainer.contact || [];
+                      const eventIds = resourcesIdsContainer.event || [];
+                      const caseAndEventsIds = [
+                        ...caseIds,
+                        ...eventIds
+                      ];
+                      const personIds = [
+                        ...caseAndEventsIds,
+                        ...contactIds
+                      ];
 
-                    // create relationships
-                    for (let index = 0; index < relationshipsNo; index++) {
-                      // check if person already has existing relationships
-                      let personExistingRelationships = existingRelationships[personData.id] || {};
-                      let personExistingRelationshipsNo = Object.keys(personExistingRelationships).length;
+                      // create relationships
+                      const relationshipsJobs = [];
 
-                      // check if additional relationships can be created
-                      if (
-                        (
-                          personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
-                          personExistingRelationshipsNo >= caseAndEventsIds.length
-                        ) || (
+                      const createRelationshipJobs = (personData) => {
+                        // how many relationships do we need to create
+                        let relationshipsNo = randomFloatBetween(minNoRelationshipsForEachRecord, maxNoRelationshipsForEachRecord);
+
+                        // each contact must have at least one relationship
+                        relationshipsNo = personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
                           (
-                            personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ||
-                            personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
-                          ) &&
-                          personExistingRelationshipsNo >= personIds.length - 1
-                        )
-                      ) {
-                        // there are no persons with which the person doesn't have relationships
-                        return;
-                      }
-
-                      // determine the other person
-                      // - exclude teh same person
-                      // - exclude duplicate relationships
-                      let otherPerson;
-                      while (
-                        otherPerson === undefined ||
-                        otherPerson.id === personData.id || (
-                          existingRelationships[otherPerson.id] &&
-                          existingRelationships[otherPerson.id][personData.id]
-                        )
-                        ) {
-                        // case / event / contact ?
-                        const idsPool = personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
-                          caseAndEventsIds :
-                          personIds;
-
-                        // determine id
-                        let index = randomFloatBetween(0, idsPool.length, 0);
-                        // handle low probability of actually getting the max value from randomFloatBetween
-                        (index === idsPool.length) && index--;
-                        const otherId = idsPool[index];
-                        otherPerson = casesContainer[otherId] ?
-                          casesContainer[otherId] : (
-                            contactsContainer[otherId] ?
-                              contactsContainer[otherId] :
-                              eventsContainer[otherId]
+                            // handle case where required relationships number is bigger than actual pool
+                            relationshipsNo < caseAndEventsIds.length ?
+                              Math.max(relationshipsNo, 1) :
+                              caseAndEventsIds.length
+                          ) : (
+                            // handle case where required relationships number is bigger than actual pool
+                            relationshipsNo < personIds.length ?
+                              relationshipsNo :
+                              personIds.length
                           );
-                      }
 
-                      // determine persons
-                      const persons = [];
+                        // create relationships
+                        for (let index = 0; index < relationshipsNo; index++) {
+                          // check if person already has existing relationships
+                          let personExistingRelationships = existingRelationships[personData.id] || {};
+                          let personExistingRelationshipsNo = Object.keys(personExistingRelationships).length;
 
-                      // contact always needs to be target
-                      if (personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-                        persons.push({
-                          id: personData.id,
-                          type: personData.type,
-                          target: true
-                        }, {
-                          id: otherPerson.id,
-                          type: otherPerson.type,
-                          source: true
-                        });
-                      } else if (otherPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-                        persons.push({
-                          id: otherPerson.id,
-                          type: otherPerson.type,
-                          target: true
-                        }, {
-                          id: personData.id,
-                          type: personData.type,
-                          source: true
-                        });
-                      } else {
-                        // relation between cases & events
-                        // determine who is source
-                        if (Math.random() < 0.5) {
-                          persons.push({
-                            id: personData.id,
-                            type: personData.type,
-                            target: true
-                          }, {
-                            id: otherPerson.id,
-                            type: otherPerson.type,
-                            source: true
-                          });
-                        } else {
-                          persons.push({
-                            id: otherPerson.id,
-                            type: otherPerson.type,
-                            target: true
-                          }, {
-                            id: personData.id,
-                            type: personData.type,
-                            source: true
+                          // check if additional relationships can be created
+                          if (
+                            (
+                              personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
+                              personExistingRelationshipsNo >= caseAndEventsIds.length
+                            ) || (
+                              (
+                                personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ||
+                                personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                              ) &&
+                              personExistingRelationshipsNo >= personIds.length - 1
+                            )
+                          ) {
+                            // there are no persons with which the person doesn't have relationships
+                            return;
+                          }
+
+                          // determine the other person
+                          // - exclude teh same person
+                          // - exclude duplicate relationships
+                          let otherPerson;
+                          while (
+                            otherPerson === undefined ||
+                            otherPerson.id === personData.id || (
+                              existingRelationships[otherPerson.id] &&
+                              existingRelationships[otherPerson.id][personData.id]
+                            )
+                            ) {
+                            // case / event / contact ?
+                            const idsPool = personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
+                              caseAndEventsIds :
+                              personIds;
+
+                            // determine id
+                            let index = randomFloatBetween(0, idsPool.length, 0);
+                            // handle low probability of actually getting the max value from randomFloatBetween
+                            (index === idsPool.length) && index--;
+                            const otherId = idsPool[index];
+                            otherPerson = casesContainer[otherId] ?
+                              casesContainer[otherId] : (
+                                contactsContainer[otherId] ?
+                                  contactsContainer[otherId] :
+                                  eventsContainer[otherId]
+                              );
+                          }
+
+                          // determine persons
+                          const persons = [];
+
+                          // contact always needs to be target
+                          if (personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                            persons.push({
+                              id: personData.id,
+                              type: personData.type,
+                              target: true
+                            }, {
+                              id: otherPerson.id,
+                              type: otherPerson.type,
+                              source: true
+                            });
+                          } else if (otherPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                            persons.push({
+                              id: otherPerson.id,
+                              type: otherPerson.type,
+                              target: true
+                            }, {
+                              id: personData.id,
+                              type: personData.type,
+                              source: true
+                            });
+                          } else {
+                            // relation between cases & events
+                            // determine who is source
+                            if (Math.random() < 0.5) {
+                              persons.push({
+                                id: personData.id,
+                                type: personData.type,
+                                target: true
+                              }, {
+                                id: otherPerson.id,
+                                type: otherPerson.type,
+                                source: true
+                              });
+                            } else {
+                              persons.push({
+                                id: otherPerson.id,
+                                type: otherPerson.type,
+                                target: true
+                              }, {
+                                id: personData.id,
+                                type: personData.type,
+                                source: true
+                              });
+                            }
+                          }
+
+                          // add relationship to list of existing relationships
+                          if (!existingRelationships[persons[1].id]) {
+                            existingRelationships[persons[1].id] = {};
+                          }
+                          existingRelationships[persons[1].id][persons[0].id] = true;
+
+                          // and the reverse
+                          if (!existingRelationships[persons[0].id]) {
+                            existingRelationships[persons[0].id] = {};
+                          }
+                          existingRelationships[persons[0].id][persons[1].id] = true;
+
+                          // determine dates
+                          const contactDate = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
+
+                          // determine certainty
+                          const certaintyLevelId = [
+                            'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_1_LOW',
+                            'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_2_MEDIUM',
+                            'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_3_HIGH'
+                          ][randomFloatBetween(0, 2, 0)];
+
+                          // only some have exposure type
+                          let exposureTypeId;
+                          if (Math.random() >= 0.5) {
+                            exposureTypeId = [
+                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_DIRECT_PHYSICAL_CONTACT',
+                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SLEPT_ATE_OR_SPEND_TIME_IN_SAME_HOUSEHOLD',
+                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_TOUCHED_BODY_FLUIDS'
+                            ][randomFloatBetween(0, 3, 0)];
+                          }
+
+                          // only some have exposure frequency
+                          let exposureFrequencyId;
+                          if (Math.random() >= 0.5) {
+                            exposureFrequencyId = [
+                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_11_20_TIMES',
+                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_1_5_TIMES',
+                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_6_10_TIMES',
+                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_OVER_21_TIMES',
+                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_UNKNOWN'
+                            ][randomFloatBetween(0, 4, 0)];
+                          }
+
+                          // only some have exposure duration
+                          let exposureDurationId;
+                          if (Math.random() >= 0.5) {
+                            exposureDurationId = [
+                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_LONG_DAYS',
+                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_MEDIUM_HOURS',
+                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_SHORT_MINUTES',
+                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_VERY_SHORT_SECONDS'
+                            ][randomFloatBetween(0, 3, 0)];
+                          }
+
+                          // create relationship
+                          relationshipsJobs.push((cb) => {
+                            // create relationship
+                            app.models.relationship
+                              .create(Object.assign(
+                                defaultRelationshipTemplate, {
+                                  outbreakId: outbreakDataContainer.id,
+                                  persons: persons,
+                                  contactDate: contactDate ? contactDate.toISOString() : contactDate,
+                                  certaintyLevelId: certaintyLevelId,
+                                  exposureTypeId: exposureTypeId,
+                                  exposureFrequencyId: exposureFrequencyId,
+                                  exposureDurationId: exposureDurationId
+                                },
+                                getTimestamps()
+                              ), options)
+                              .then((relationshipData) => {
+                                // log
+                                app.logger.debug(`Relationship created => '${relationshipData.id}'`);
+
+                                // finished
+                                cb();
+                              })
+                              .catch(cb);
                           });
                         }
-                      }
+                      };
 
-                      // add relationship to list of existing relationships
-                      if (!existingRelationships[persons[1].id]) {
-                        existingRelationships[persons[1].id] = {};
-                      }
-                      existingRelationships[persons[1].id][persons[0].id] = true;
+                      // contacts
+                      contactIds.length && _.each(contactsContainer, createRelationshipJobs);
 
-                      // and the reverse
-                      if (!existingRelationships[persons[0].id]) {
-                        existingRelationships[persons[0].id] = {};
-                      }
-                      existingRelationships[persons[0].id][persons[1].id] = true;
+                      // cases
+                      caseIds.length && _.each(casesContainer, createRelationshipJobs);
 
-                      // determine dates
-                      const contactDate = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
+                      // events
+                      eventIds.length && _.each(eventsContainer, createRelationshipJobs);
 
-                      // determine certainty
-                      const certaintyLevelId = [
-                        'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_1_LOW',
-                        'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_2_MEDIUM',
-                        'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_3_HIGH'
-                      ][randomFloatBetween(0, 2, 0)];
+                      app.logger.debug(`Relationships to create: ${relationshipsJobs.length}`);
 
-                      // only some have exposure type
-                      let exposureTypeId;
-                      if (Math.random() >= 0.5) {
-                        exposureTypeId = [
-                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_DIRECT_PHYSICAL_CONTACT',
-                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SLEPT_ATE_OR_SPEND_TIME_IN_SAME_HOUSEHOLD',
-                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_TOUCHED_BODY_FLUIDS'
-                        ][randomFloatBetween(0, 3, 0)];
-                      }
-
-                      // only some have exposure frequency
-                      let exposureFrequencyId;
-                      if (Math.random() >= 0.5) {
-                        exposureFrequencyId = [
-                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_11_20_TIMES',
-                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_1_5_TIMES',
-                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_6_10_TIMES',
-                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_OVER_21_TIMES',
-                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_UNKNOWN'
-                        ][randomFloatBetween(0, 4, 0)];
-                      }
-
-                      // only some have exposure duration
-                      let exposureDurationId;
-                      if (Math.random() >= 0.5) {
-                        exposureDurationId = [
-                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_LONG_DAYS',
-                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_MEDIUM_HOURS',
-                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_SHORT_MINUTES',
-                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_VERY_SHORT_SECONDS'
-                        ][randomFloatBetween(0, 3, 0)];
-                      }
-
-                      // create relationship
-                      relationshipsJobs.push((cb) => {
-                        // create relationship
-                        app.models.relationship
-                          .create(Object.assign(
-                            defaultRelationshipTemplate, {
-                              outbreakId: outbreakDataContainer.id,
-                              persons: persons,
-                              contactDate: contactDate ? contactDate.toISOString() : contactDate,
-                              certaintyLevelId: certaintyLevelId,
-                              exposureTypeId: exposureTypeId,
-                              exposureFrequencyId: exposureFrequencyId,
-                              exposureDurationId: exposureDurationId
-                            },
-                            getTimestamps()
-                          ), options)
-                          .then((relationshipData) => {
-                            // log
-                            app.logger.debug(`Relationship created => '${relationshipData.id}'`);
-
-                            // finished
-                            cb();
-                          })
-                          .catch(cb);
-                      });
-                    }
-                  };
-
-                  // contacts
-                  contactIds.length && _.each(contactsContainer, createRelationshipJobs);
-
-                  // cases
-                  caseIds.length && _.each(casesContainer, createRelationshipJobs);
-
-                  // events
-                  eventIds.length && _.each(eventsContainer, createRelationshipJobs);
-
-                  app.logger.debug(`Relationships to create: ${relationshipsJobs.length}`);
-
-                  // execute jobs
-                  return new Promise((resolveRelationships, rejectRelationships) => {
-                    async.parallelLimit(relationshipsJobs, batchSize, (err) => {
-                      if (err) {
-                        return rejectRelationships(err);
-                      }
-                      // display log
-                      app.logger.debug(`Finished creating relationships batch ${jobNo}`);
-                      resolveRelationships();
+                      // execute jobs
+                      return new Promise((resolveRelationships, rejectRelationships) => {
+                        async.parallelLimit(relationshipsJobs, batchSize, (err) => {
+                          if (err) {
+                            return rejectRelationships(err);
+                          }
+                          // display log
+                          app.logger.debug(`Finished creating relationships batch ${jobNo}`);
+                          resolveRelationships();
+                        });
+                      })
+                        .then(() => {
+                          resolveRetrieveJobs();
+                        })
+                        .catch(rejectRetrieveJobs);
                     });
                   })
                     .then(() => {
-                      resolveRetrieveJobs();
+                      batchJobCB();
                     })
-                    .catch(rejectRetrieveJobs);
+                    .catch(batchJobCB);
+                });
+              }
+
+              return new Promise((resolveBatches, rejectBatches) => {
+                async.series(batchesJobs, (err) => {
+                  if (err) {
+                    return rejectBatches(err);
+                  }
+
+                  return resolveBatches();
                 });
               })
                 .then(() => {
-                  batchJobCB();
+                  resolveCounters();
                 })
-                .catch(batchJobCB);
+                .catch(rejectCounters);
             });
-          }
-
-          return new Promise((resolveBatches, rejectBatches) => {
-            async.series(batchesJobs, (err) => {
-              if (err) {
-                return rejectBatches(err);
-              }
-
-              return resolveBatches();
-            });
-          })
-            .then(() => {
-              resolveCounters();
-            })
-            .catch(rejectCounters);
+          });
         });
-      });
     })
 
     // finished

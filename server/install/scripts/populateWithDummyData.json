@@ -8,5 +8,6 @@
   "subLocationsLevelsNo": 2,
   "minNoRelationshipsForEachRecord": 3,
   "maxNoRelationshipsForEachRecord": 5,
+  "relationshipsForAlreadyAssociatedPerson": true,
   "batchSize": 10
 }
