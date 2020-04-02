@@ -222,6 +222,7 @@ const routines = {
       'subLocationsLevelsNo',
       'minNoRelationshipsForEachRecord',
       'maxNoRelationshipsForEachRecord',
+      'relationshipsForAlreadyAssociatedPerson',
       'batchSize'
     ];
 
