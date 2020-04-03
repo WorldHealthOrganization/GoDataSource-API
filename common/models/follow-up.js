@@ -470,10 +470,11 @@ module.exports = function (FollowUp) {
     // retrieve each team information
     // do not unwind the data, it consumes too much memory
     // better transform it afterwards, as we don't have many team in the system anyways
+    // localField: '_id' =>  must be _id because we group by team, and the results keeps the id of the team in _id and not in the teamId how it was per follow-up record
     aggregatePipeline.push({
       $lookup: {
         from: 'team',
-        localField: 'teamId',
+        localField: '_id',
         foreignField: '_id',
         as: 'team'
       }
@@ -506,7 +507,10 @@ module.exports = function (FollowUp) {
         // as $lookup result is always an array, we need it an object
         // also system uses 'id' property, so replace internal _id prop with it
         for (let item of data) {
-          if (Array.isArray(item) && item.length) {
+          if (
+            Array.isArray(item.team) &&
+            item.team.length
+          ) {
             item.team = item.team[0];
           } else {
             item.team = '';
