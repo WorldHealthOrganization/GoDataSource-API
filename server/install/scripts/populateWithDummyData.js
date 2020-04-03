@@ -1007,6 +1007,14 @@ function run(callback) {
       // display log
       app.logger.debug('Creating relationships');
 
+      // initialize map of resources for which to create relationships to type
+      let resourcesMap = {
+        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'case',
+        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'contact',
+        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event'
+      };
+      let resources = Object.values(resourcesMap);
+
       // depending on relationshipsForAlreadyAssociatedPerson we will only create relationships for not already associated person or for all
       // check if we need to retrieve persons that already have relationships in order to not create additional relationships for them
       let retrievePersonsIdsWithRelationships = Promise.resolve([]);
@@ -1020,32 +1028,44 @@ function run(callback) {
           })
           .then(relationships => {
             // get persons IDs
-            let personsIds = [];
-            relationships.forEach(rel => {
-              personsIds.push(rel.persons[0].id);
-              personsIds.push(rel.persons[1].id);
+            let personsIds = {};
+            resources.forEach(res => {
+              personsIds[res] = [];
             });
 
-            // keep only one entry of an ID
-            return [...new Set(personsIds)];
+            relationships.forEach(rel => {
+              personsIds[resourcesMap[rel.persons[0].type]].push(rel.persons[0].id);
+              personsIds[resourcesMap[rel.persons[1].type]].push(rel.persons[1].id);
+            });
+
+            resources.forEach(res => {
+              // keep only one entry of an ID
+              personsIds[res] = [...new Set(personsIds[res])];
+            });
+
+            return personsIds;
           });
       }
 
       return retrievePersonsIdsWithRelationships
         .then(personsWithRelationshipsIds => {
           // initialize filter for counting and filtering persons
-          const personsFilter = {
-            outbreakId: outbreakDataContainer.id
-          };
-          personsWithRelationshipsIds.length && (personsFilter.id = {nin: personsWithRelationshipsIds});
+          let personsFilter = {};
+
+          resources.forEach(res => {
+            personsFilter[res] = {
+              outbreakId: outbreakDataContainer.id
+            };
+
+            personsWithRelationshipsIds[res].length && (personsFilter[res].id = {nin: personsWithRelationshipsIds[res]});
+          });
 
           // get number of cases, contacts, events and split relationship creation in multiple batches to avoid loading entire DB in memory
-          let resources = ['case', 'contact', 'event'];
           let countJobs = {};
           resources.forEach(res => {
             countJobs[res] = (cb) => {
               return app.models[res]
-                .count(personsFilter)
+                .count(personsFilter[res])
                 .then(count => {
                   cb(null, count);
                 })
@@ -1089,6 +1109,8 @@ function run(callback) {
               let resourcesPerBatch = 1000;
               // no need to check if additional items remain after the batches as we will get all remaining data in last batch
               let batches = Math.floor(maxResNo / resourcesPerBatch);
+              // don't allow 0
+              batches === 0 && (batches++);
 
               // get limits for all resources pe batch
               let limits = {};
@@ -1119,13 +1141,17 @@ function run(callback) {
                     retrieveDataJobs[res] = (retrieveDataCB) => {
                       let retrieveDataPromise;
 
-                      if (jobNo * limits[res] > countersMap[res]) {
+                      if (
+                        // need to execute at least once
+                        jobNo > 1 &&
+                        (jobNo * limits[res]) > countersMap[res]
+                      ) {
                         // no additional data to retrieve; use last batch data
                         retrieveDataPromise = Promise.resolve(retrievedLastBatchData[res]);
                       } else {
                         retrieveDataPromise = app.models[res]
                           .rawFindWithLoopbackFilter({
-                            where: personsFilter,
+                            where: personsFilter[res],
                             fields: ['id', 'type'],
                             skip: (jobNo - 1) * limits[res],
                             // no limit on last batch
