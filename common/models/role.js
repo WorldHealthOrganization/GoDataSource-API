@@ -1784,6 +1784,15 @@ module.exports = function (Role) {
             'contact_view'
           ]
         },
+        {
+          id: 'contact_of_contact_share_relationships',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_CONTACT_OF_CONTACT_RELATIONSHIP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_CONTACT_OF_CONTACT_RELATIONSHIP_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'relationship_share'
+          ]
+        }
       ]
     },
 

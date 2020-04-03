@@ -7684,7 +7684,7 @@
     "prototype.contactOfContactDossier": {
       "accepts": [
         {
-          "arg": "ids",
+          "arg": "contactsOfContacts",
           "type": [
             "string"
           ],
