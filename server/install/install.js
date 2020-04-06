@@ -331,7 +331,7 @@ if (!runFunctions.length) {
 } else {
   async.series(runFunctions, function (error) {
     if (error) {
-      console.error(JSON.stringify(error));
+      console.error(error.toString ? error.toString() : JSON.stringify(error));
       process.exit(1);
     }
     console.log('Install finished successfully');

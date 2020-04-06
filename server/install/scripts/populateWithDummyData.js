@@ -4,11 +4,20 @@ const app = require('../../server');
 const async = require('async');
 const moment = require('moment');
 const _ = require('lodash');
+const randomize = require('randomatic');
 
 // initialize action options; set _init, _sync flags to prevent execution of some after save scripts
 let options = {
   _init: true,
   _sync: true
+};
+
+const charsetType = ['default', 'french', 'chinese'];
+
+const charsetMap = {
+  default: 'abcdefghijklmnopqrstuvwxyz',
+  french: `${this.default}çàèîûôöïüù`,
+  chinese: '常用國字標準字體表形表'
 };
 
 // generate random numbers between min & max
@@ -21,6 +30,19 @@ const randomFloatBetween = (
     precision = 2;
   }
   return parseFloat(Math.min(minValue + (Math.random() * (maxValue - minValue)), maxValue).toFixed(precision));
+};
+
+/**
+ * Generate random string for given charset
+ * @param charset If not present the charset will be chose randomly
+ * @return {String}
+ */
+const randomString = (charset) => {
+  if (!charset) {
+    charset = charsetType[randomFloatBetween(0, 2, 0)];
+  }
+
+  return randomize('?', randomFloatBetween(5, 10, 0), {chars: charsetMap[charset]});
 };
 
 /**
@@ -145,7 +167,6 @@ function run(callback) {
     max: 20000
   };
   const defaultPhoneNo = 10;
-  const lastNameError = 3;
 
   // default outbreak template
   const outbreakStartDate = moment().utc().add(-6, 'months').startOf('day');
@@ -285,9 +306,6 @@ function run(callback) {
       return app.models.location
         .rawFindWithLoopbackFilter({
           where: {
-            name: {
-              regexp: `/^${outbreakName} location \\d+$/`
-            },
             parentLocationId: null
           }
         })
@@ -317,8 +335,9 @@ function run(callback) {
           const locationsJobs = [];
           for (let index = 0; index < locationsNo; index++) {
             locationsJobs.push((cb) => {
-              // display log
-              const locationName = `${outbreakName} location ${parentLocationsNumberContainer + index + 1}`;
+              // get charset to be used for location name
+              const locationCharset = charsetType[randomFloatBetween(0, 2, 0)];
+              const locationName = randomString(locationCharset);
               app.logger.debug(`Creating location '${locationName}'`);
 
               // generate geo location
@@ -352,6 +371,8 @@ function run(callback) {
 
                   // map location for later use
                   locationsDataContainer[locationData.id] = locationData.toJSON();
+                  // cache charset to be used on sublocations
+                  locationsDataContainer[locationData.id].locationCharset = locationCharset;
                   newLocationsIds.push(locationData.id);
                   // finished
                   cb();
@@ -433,7 +454,8 @@ function run(callback) {
             // create sublocations
             for (let index = 0; index < subLocationsPerLocationNo; index++) {
               const parentLocationData = location.data;
-              const locationName = `${parentLocationData.name} sub ${index + 1}`;
+              // generate sublocation name; use same charset as parent location
+              const locationName = randomString(location.locationCharset);
 
               // generate geo location
               const geoLocation = {
@@ -451,6 +473,7 @@ function run(callback) {
 
               const payload = {
                 level: subLocationLevel,
+                locationCharset: location.locationCharset,
                 data: Object.assign({},
                   defaultLocationTemplate, {
                     name: locationName,
@@ -490,6 +513,7 @@ function run(callback) {
 
                   createSubLocationsPayload({
                     level: payload.level,
+                    locationCharset: payload.locationCharset,
                     data: locationData
                   }, subLocationQueue);
 
@@ -513,6 +537,7 @@ function run(callback) {
               (parentLocationId) => {
                 createSubLocationsPayload({
                   level: 0,
+                  locationCharset: locationsDataContainer[parentLocationId].locationCharset,
                   data: locationsDataContainer[parentLocationId]
                 }, subLocationQueue);
               });
@@ -528,191 +553,185 @@ function run(callback) {
         return Promise.resolve();
       }
 
-      // count current cases
-      return app.models.case
-        .count({
-          outbreakId: outbreakDataContainer.id
-        })
-        .then(currentCasesNumber => {
-          // display log
-          app.logger.debug('Creating cases');
+      // display log
+      app.logger.debug('Creating cases');
 
-          // create cases jobs so we can create them in parallel
-          const casesJobs = [];
-          for (let index = 0; index < casesNo; index++) {
-            casesJobs.push((cb) => {
-              // determine first name ( unique )
-              const firstName = `CaseFirst${currentCasesNumber + index + 1}`;
+      // create cases jobs so we can create them in parallel
+      const casesJobs = [];
+      for (let index = 0; index < casesNo; index++) {
+        casesJobs.push((cb) => {
+          const namesCharset = charsetType[randomFloatBetween(0, 2, 0)];
+          // determine first name
+          const firstName = randomString(namesCharset);
 
-              // determine last name - we might have the same name...same family
-              const lastName = `CaseLast${randomFloatBetween(Math.max(index - lastNameError, 0), index + lastNameError, 0)}`;
+          // determine last name - we might have the same name...same family
+          const lastName = randomString(namesCharset);
 
-              // generate dob
-              let dob, age;
-              if (Math.random() >= 0.3) {
-                dob = moment().utc()
-                  .startOf('day')
-                  .add(-randomFloatBetween(ageRange.min, ageRange.max, 0), 'years')
-                  .add(randomFloatBetween(0, 10, 0), 'months')
-                  .add(randomFloatBetween(0, 28, 0), 'days');
+          // generate dob
+          let dob, age;
+          if (Math.random() >= 0.3) {
+            dob = moment().utc()
+              .startOf('day')
+              .add(-randomFloatBetween(ageRange.min, ageRange.max, 0), 'years')
+              .add(randomFloatBetween(0, 10, 0), 'months')
+              .add(randomFloatBetween(0, 28, 0), 'days');
 
-                // determine age
-                age = {
-                  years: moment().utc().startOf('day').diff(dob, 'years'),
-                  months: 0
-                };
-              }
+            // determine age
+            age = {
+              years: moment().utc().startOf('day').diff(dob, 'years'),
+              months: 0
+            };
+          }
 
-              // determine gender
-              const gender = Math.random() < 0.5 ?
-                'LNG_REFERENCE_DATA_CATEGORY_GENDER_FEMALE' :
-                'LNG_REFERENCE_DATA_CATEGORY_GENDER_MALE';
+          // determine gender
+          const gender = Math.random() < 0.5 ?
+            'LNG_REFERENCE_DATA_CATEGORY_GENDER_FEMALE' :
+            'LNG_REFERENCE_DATA_CATEGORY_GENDER_MALE';
 
-              // determine current address - some have an address while others don't
-              // 90% have an address
-              const addresses = [];
-              if (Math.random() >= 0.1) {
-                // determine location
-                const parentLocationId = parentLocationsIdsContainer[index % parentLocationsNumberContainer];
+          // determine current address - some have an address while others don't
+          // 90% have an address
+          const addresses = [];
+          if (Math.random() >= 0.1) {
+            // determine location
+            const parentLocationId = parentLocationsIdsContainer[index % parentLocationsNumberContainer];
 
-                // use main location or child location ?
-                let location;
-                if (
-                  !locationsDataContainer[parentLocationId].subLocations ||
-                  !locationsDataContainer[parentLocationId].subLocations.length ||
-                  Math.random() < 0.5
-                ) {
-                  location = locationsDataContainer[parentLocationId];
-                } else {
-                  // use child location if we have one
-                  const childLocationIndex = randomFloatBetween(0, locationsDataContainer[parentLocationId].subLocations.length - 1, 0);
-                  location = locationsDataContainer[parentLocationId].subLocations[childLocationIndex];
-                }
+            // use main location or child location ?
+            let location;
+            if (
+              !locationsDataContainer[parentLocationId].subLocations ||
+              !locationsDataContainer[parentLocationId].subLocations.length ||
+              Math.random() < 0.5
+            ) {
+              location = locationsDataContainer[parentLocationId];
+            } else {
+              // use child location if we have one
+              const childLocationIndex = randomFloatBetween(0, locationsDataContainer[parentLocationId].subLocations.length - 1, 0);
+              location = locationsDataContainer[parentLocationId].subLocations[childLocationIndex];
+            }
 
-                // generate geo location
-                const geoLocation = {
-                  lat: randomFloatBetween(
-                    location.geoLocation.lat + geoLocationRange.caseLocationError.lat.min,
-                    location.geoLocation.lat + geoLocationRange.caseLocationError.lat.max,
-                    3
-                  ),
-                  lng: randomFloatBetween(
-                    location.geoLocation.lng + geoLocationRange.caseLocationError.lng.min,
-                    location.geoLocation.lng + geoLocationRange.caseLocationError.lng.max,
-                    3
-                  )
-                };
+            // generate geo location
+            const geoLocation = {
+              lat: randomFloatBetween(
+                location.geoLocation.lat + geoLocationRange.caseLocationError.lat.min,
+                location.geoLocation.lat + geoLocationRange.caseLocationError.lat.max,
+                3
+              ),
+              lng: randomFloatBetween(
+                location.geoLocation.lng + geoLocationRange.caseLocationError.lng.min,
+                location.geoLocation.lng + geoLocationRange.caseLocationError.lng.max,
+                3
+              )
+            };
 
-                // create address
-                addresses.push({
-                  typeId: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
-                  city: `City ${randomFloatBetween(1, defaultCitiesNo, 0)}`,
-                  addressLine1: `Street ${randomFloatBetween(1, defaultAddressLineNo, 0)}`,
-                  postalCode: randomFloatBetween(defaultPostalCodeRange.min, defaultPostalCodeRange.max, 0).toString(),
-                  locationId: location.id,
-                  geoLocation: geoLocation,
-                  geoLocationAccurate: false,
-                  date: todayString,
-                  phoneNumber: `Phone ${randomFloatBetween(1, defaultPhoneNo, 0)}`,
-                });
-              }
-
-              // determine dates
-              const dateOfOnset = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
-              const dateOfReporting = dateOfOnset.clone().add(1, 'days');
-              const dateOfOutcome = dateOfReporting.clone().add(1, 'days');
-
-              // determine outcome
-              let outcomeId = 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED';
-              if (Math.random() >= 0.1) {
-                outcomeId = [
-                  'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_ALIVE',
-                  'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_RECOVERED'
-                ][randomFloatBetween(0, 1, 0)];
-              }
-
-              // determine classification
-              let classification = 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_NOT_A_CASE_DISCARDED';
-              if (
-                outcomeId === 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED' ||
-                Math.random() >= 0.1
-              ) {
-                classification = [
-                  'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_CONFIRMED',
-                  'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_PROBABLE',
-                  'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT'
-                ][randomFloatBetween(0, 2, 0)];
-              }
-
-              // determine date of burial
-              let dateOfBurial;
-              if (
-                outcomeId === 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED' &&
-                Math.random() >= 0.3
-              ) {
-                dateOfBurial = dateOfOutcome.clone().add(7, 'days');
-              }
-
-              // determine risk level
-              const riskLevel = [
-                'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_1_LOW',
-                'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_2_MEDIUM',
-                'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_3_HIGH'
-              ][randomFloatBetween(0, 2, 0)];
-
-              // display log
-              app.logger.debug(`Creating case '${lastName} ${firstName}'`);
-
-              // create case
-              app.models.case
-                .create(Object.assign(
-                  defaultCaseTemplate, {
-                    outbreakId: outbreakDataContainer.id,
-                    firstName: firstName,
-                    lastName: lastName,
-                    dob: dob ? dob.toISOString() : dob,
-                    age: age,
-                    gender: gender,
-                    addresses: addresses,
-                    dateOfLastContact: todayString,
-                    dateOfOnset: dateOfOnset ? dateOfOnset.toISOString() : dateOfOnset,
-                    dateOfReporting: dateOfReporting ? dateOfReporting.toISOString() : dateOfReporting,
-                    dateOfOutcome: dateOfOutcome ? dateOfOutcome.toISOString() : dateOfOutcome,
-                    outcomeId: outcomeId,
-                    classification: classification,
-                    dateOfBurial: dateOfBurial ? dateOfBurial.toISOString() : dateOfBurial,
-                    riskLevel: riskLevel
-                  },
-                  getTimestamps()
-                ), options)
-                .then((caseData) => {
-                  // log
-                  app.logger.debug(`Case '${caseData.lastName} ${caseData.firstName}' created => '${caseData.id}'`);
-
-                  // finished
-                  cb();
-                })
-                .catch(cb);
+            // create address
+            addresses.push({
+              typeId: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
+              city: `City ${randomFloatBetween(1, defaultCitiesNo, 0)}`,
+              addressLine1: `Street ${randomFloatBetween(1, defaultAddressLineNo, 0)}`,
+              postalCode: randomFloatBetween(defaultPostalCodeRange.min, defaultPostalCodeRange.max, 0).toString(),
+              locationId: location.id,
+              geoLocation: geoLocation,
+              geoLocationAccurate: false,
+              date: todayString,
+              phoneNumber: `Phone ${randomFloatBetween(1, defaultPhoneNo, 0)}`,
             });
           }
 
-          // execute jobs
-          return new Promise((resolve, reject) => {
-            // wait for all operations to be done
-            async.parallelLimit(casesJobs, batchSize, function (error) {
-              // error
-              if (error) {
-                return reject(error);
-              }
+          // determine dates
+          const dateOfOnset = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
+          const dateOfReporting = dateOfOnset.clone().add(1, 'days');
+          const dateOfOutcome = dateOfReporting.clone().add(1, 'days');
 
-              // display log
-              app.logger.debug('Finished creating cases');
+          // determine outcome
+          let outcomeId = 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED';
+          if (Math.random() >= 0.1) {
+            outcomeId = [
+              'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_ALIVE',
+              'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_RECOVERED'
+            ][randomFloatBetween(0, 1, 0)];
+          }
+
+          // determine classification
+          let classification = 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_NOT_A_CASE_DISCARDED';
+          if (
+            outcomeId === 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED' ||
+            Math.random() >= 0.1
+          ) {
+            classification = [
+              'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_CONFIRMED',
+              'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_PROBABLE',
+              'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT'
+            ][randomFloatBetween(0, 2, 0)];
+          }
+
+          // determine date of burial
+          let dateOfBurial;
+          if (
+            outcomeId === 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME_DECEASED' &&
+            Math.random() >= 0.3
+          ) {
+            dateOfBurial = dateOfOutcome.clone().add(7, 'days');
+          }
+
+          // determine risk level
+          const riskLevel = [
+            'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_1_LOW',
+            'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_2_MEDIUM',
+            'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_3_HIGH'
+          ][randomFloatBetween(0, 2, 0)];
+
+          // display log
+          app.logger.debug(`Creating case '${lastName} ${firstName}'`);
+
+          // create case
+          app.models.case
+            .create(Object.assign(
+              defaultCaseTemplate, {
+                outbreakId: outbreakDataContainer.id,
+                firstName: firstName,
+                lastName: lastName,
+                dob: dob ? dob.toISOString() : dob,
+                age: age,
+                gender: gender,
+                addresses: addresses,
+                dateOfLastContact: todayString,
+                dateOfOnset: dateOfOnset ? dateOfOnset.toISOString() : dateOfOnset,
+                dateOfReporting: dateOfReporting ? dateOfReporting.toISOString() : dateOfReporting,
+                dateOfOutcome: dateOfOutcome ? dateOfOutcome.toISOString() : dateOfOutcome,
+                outcomeId: outcomeId,
+                classification: classification,
+                dateOfBurial: dateOfBurial ? dateOfBurial.toISOString() : dateOfBurial,
+                riskLevel: riskLevel
+              },
+              getTimestamps()
+            ), options)
+            .then((caseData) => {
+              // log
+              app.logger.debug(`Case '${caseData.lastName} ${caseData.firstName}' created => '${caseData.id}'`);
 
               // finished
-              resolve();
-            });
-          });
+              cb();
+            })
+            .catch(cb);
         });
+      }
+
+      // execute jobs
+      return new Promise((resolve, reject) => {
+        // wait for all operations to be done
+        async.parallelLimit(casesJobs, batchSize, function (error) {
+          // error
+          if (error) {
+            return reject(error);
+          }
+
+          // display log
+          app.logger.debug('Finished creating cases');
+
+          // finished
+          resolve();
+        });
+      });
     })
 
     // populate contacts
@@ -723,152 +742,146 @@ function run(callback) {
         return Promise.resolve();
       }
 
-      // count current contacts
-      return app.models.contact
-        .count({
-          outbreakId: outbreakDataContainer.id
-        })
-        .then(currentContactsNumber => {
-          // display log
-          app.logger.debug('Creating contacts');
+      // display log
+      app.logger.debug('Creating contacts');
 
-          // create contacts jobs so we can create them in parallel
-          const contactsJobs = [];
-          for (let index = 0; index < contactsNo; index++) {
-            contactsJobs.push((cb) => {
-              // determine first name ( unique )
-              const firstName = `ContactFirst${currentContactsNumber + index + 1}`;
+      // create contacts jobs so we can create them in parallel
+      const contactsJobs = [];
+      for (let index = 0; index < contactsNo; index++) {
+        contactsJobs.push((cb) => {
+          const namesCharset = charsetType[randomFloatBetween(0, 2, 0)];
+          // determine first name
+          const firstName = randomString(namesCharset);
 
-              // determine last name - we might have the same name...same family
-              const lastName = `ContactLast${randomFloatBetween(Math.max(index - lastNameError, 0), index + lastNameError, 0)}`;
+          // determine last name - we might have the same name...same family
+          const lastName = randomString(namesCharset);
 
-              // generate dob
-              let dob, age;
-              if (Math.random() >= 0.3) {
-                dob = moment().utc()
-                  .startOf('day')
-                  .add(-randomFloatBetween(ageRange.min, ageRange.max, 0), 'years')
-                  .add(randomFloatBetween(0, 10, 0), 'months')
-                  .add(randomFloatBetween(0, 28, 0), 'days');
+          // generate dob
+          let dob, age;
+          if (Math.random() >= 0.3) {
+            dob = moment().utc()
+              .startOf('day')
+              .add(-randomFloatBetween(ageRange.min, ageRange.max, 0), 'years')
+              .add(randomFloatBetween(0, 10, 0), 'months')
+              .add(randomFloatBetween(0, 28, 0), 'days');
 
-                // determine age
-                age = {
-                  years: moment().utc().startOf('day').diff(dob, 'years'),
-                  months: 0
-                };
-              }
+            // determine age
+            age = {
+              years: moment().utc().startOf('day').diff(dob, 'years'),
+              months: 0
+            };
+          }
 
-              // determine gender
-              const gender = Math.random() < 0.5 ?
-                'LNG_REFERENCE_DATA_CATEGORY_GENDER_FEMALE' :
-                'LNG_REFERENCE_DATA_CATEGORY_GENDER_MALE';
+          // determine gender
+          const gender = Math.random() < 0.5 ?
+            'LNG_REFERENCE_DATA_CATEGORY_GENDER_FEMALE' :
+            'LNG_REFERENCE_DATA_CATEGORY_GENDER_MALE';
 
-              // determine current address - some have an address while others don't
-              // 90% have an address
-              const addresses = [];
-              if (Math.random() >= 0.1) {
-                // determine location
-                const parentLocationId = parentLocationsIdsContainer[index % parentLocationsNumberContainer];
+          // determine current address - some have an address while others don't
+          // 90% have an address
+          const addresses = [];
+          if (Math.random() >= 0.1) {
+            // determine location
+            const parentLocationId = parentLocationsIdsContainer[index % parentLocationsNumberContainer];
 
-                // use main location or child location ?
-                let location;
-                if (
-                  !locationsDataContainer[parentLocationId].subLocations ||
-                  !locationsDataContainer[parentLocationId].subLocations.length ||
-                  Math.random() < 0.5
-                ) {
-                  location = locationsDataContainer[parentLocationId];
-                } else {
-                  // use child location if we have one
-                  const childLocationIndex = randomFloatBetween(0, locationsDataContainer[parentLocationId].subLocations.length - 1, 0);
-                  location = locationsDataContainer[parentLocationId].subLocations[childLocationIndex];
-                }
+            // use main location or child location ?
+            let location;
+            if (
+              !locationsDataContainer[parentLocationId].subLocations ||
+              !locationsDataContainer[parentLocationId].subLocations.length ||
+              Math.random() < 0.5
+            ) {
+              location = locationsDataContainer[parentLocationId];
+            } else {
+              // use child location if we have one
+              const childLocationIndex = randomFloatBetween(0, locationsDataContainer[parentLocationId].subLocations.length - 1, 0);
+              location = locationsDataContainer[parentLocationId].subLocations[childLocationIndex];
+            }
 
-                // generate geo location
-                const geoLocation = {
-                  lat: randomFloatBetween(
-                    location.geoLocation.lat + geoLocationRange.contactLocationError.lat.min,
-                    location.geoLocation.lat + geoLocationRange.contactLocationError.lat.max,
-                    3
-                  ),
-                  lng: randomFloatBetween(
-                    location.geoLocation.lng + geoLocationRange.contactLocationError.lng.min,
-                    location.geoLocation.lng + geoLocationRange.contactLocationError.lng.max,
-                    3
-                  )
-                };
+            // generate geo location
+            const geoLocation = {
+              lat: randomFloatBetween(
+                location.geoLocation.lat + geoLocationRange.contactLocationError.lat.min,
+                location.geoLocation.lat + geoLocationRange.contactLocationError.lat.max,
+                3
+              ),
+              lng: randomFloatBetween(
+                location.geoLocation.lng + geoLocationRange.contactLocationError.lng.min,
+                location.geoLocation.lng + geoLocationRange.contactLocationError.lng.max,
+                3
+              )
+            };
 
-                // create address
-                addresses.push({
-                  typeId: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
-                  city: `City ${randomFloatBetween(1, defaultCitiesNo, 0)}`,
-                  addressLine1: `Street ${randomFloatBetween(1, defaultAddressLineNo, 0)}`,
-                  postalCode: randomFloatBetween(defaultPostalCodeRange.min, defaultPostalCodeRange.max, 0).toString(),
-                  locationId: location.id,
-                  geoLocation: geoLocation,
-                  geoLocationAccurate: false,
-                  date: todayString,
-                  phoneNumber: `Phone ${randomFloatBetween(1, defaultPhoneNo, 0)}`,
-                });
-              }
-
-              // determine dates
-              const dateOfReporting = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
-
-              // determine risk level
-              const riskLevel = [
-                'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_1_LOW',
-                'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_2_MEDIUM',
-                'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_3_HIGH'
-              ][randomFloatBetween(0, 2, 0)];
-
-              // display log
-              app.logger.debug(`Creating contact '${lastName} ${firstName}'`);
-
-              // create contact
-              app.models.contact
-                .create(Object.assign(
-                  defaultContactTemplate, {
-                    outbreakId: outbreakDataContainer.id,
-                    firstName: firstName,
-                    lastName: lastName,
-                    dob: dob ? dob.toISOString() : dob,
-                    age: age,
-                    gender: gender,
-                    addresses: addresses,
-                    dateOfReporting: dateOfReporting ? dateOfReporting.toISOString() : dateOfReporting,
-                    riskLevel: riskLevel
-                  },
-                  getTimestamps()
-                ), options)
-                .then((contactData) => {
-                  // log
-                  app.logger.debug(`Contact '${contactData.lastName} ${contactData.firstName}' created => '${contactData.id}'`);
-
-                  // finished
-                  cb();
-                })
-                .catch(cb);
+            // create address
+            addresses.push({
+              typeId: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
+              city: `City ${randomFloatBetween(1, defaultCitiesNo, 0)}`,
+              addressLine1: `Street ${randomFloatBetween(1, defaultAddressLineNo, 0)}`,
+              postalCode: randomFloatBetween(defaultPostalCodeRange.min, defaultPostalCodeRange.max, 0).toString(),
+              locationId: location.id,
+              geoLocation: geoLocation,
+              geoLocationAccurate: false,
+              date: todayString,
+              phoneNumber: `Phone ${randomFloatBetween(1, defaultPhoneNo, 0)}`,
             });
           }
 
-          // execute jobs
-          return new Promise((resolve, reject) => {
-            // wait for all operations to be done
-            async.parallelLimit(contactsJobs, batchSize, function (error) {
-              // error
-              if (error) {
-                return reject(error);
-              }
+          // determine dates
+          const dateOfReporting = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
 
-              // display log
-              app.logger.debug('Finished creating contacts');
+          // determine risk level
+          const riskLevel = [
+            'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_1_LOW',
+            'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_2_MEDIUM',
+            'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_3_HIGH'
+          ][randomFloatBetween(0, 2, 0)];
+
+          // display log
+          app.logger.debug(`Creating contact '${lastName} ${firstName}'`);
+
+          // create contact
+          app.models.contact
+            .create(Object.assign(
+              defaultContactTemplate, {
+                outbreakId: outbreakDataContainer.id,
+                firstName: firstName,
+                lastName: lastName,
+                dob: dob ? dob.toISOString() : dob,
+                age: age,
+                gender: gender,
+                addresses: addresses,
+                dateOfReporting: dateOfReporting ? dateOfReporting.toISOString() : dateOfReporting,
+                riskLevel: riskLevel
+              },
+              getTimestamps()
+            ), options)
+            .then((contactData) => {
+              // log
+              app.logger.debug(`Contact '${contactData.lastName} ${contactData.firstName}' created => '${contactData.id}'`);
 
               // finished
-              resolve();
-            });
-          });
+              cb();
+            })
+            .catch(cb);
         });
+      }
+
+      // execute jobs
+      return new Promise((resolve, reject) => {
+        // wait for all operations to be done
+        async.parallelLimit(contactsJobs, batchSize, function (error) {
+          // error
+          if (error) {
+            return reject(error);
+          }
+
+          // display log
+          app.logger.debug('Finished creating contacts');
+
+          // finished
+          resolve();
+        });
+      });
     })
 
     // populate events
@@ -879,118 +892,111 @@ function run(callback) {
         return Promise.resolve();
       }
 
-      // retrieve current events
-      return app.models.event
-        .count({
-          outbreakId: outbreakDataContainer.id
-        })
-        .then(currentEventsNumber => {
-          // display log
-          app.logger.debug('Creating events');
+      // display log
+      app.logger.debug('Creating events');
 
-          // create events jobs so we can create them in parallel
-          const eventsJobs = [];
-          for (let index = 0; index < eventsNo; index++) {
-            eventsJobs.push((cb) => {
-              // determine event name
-              const name = `Event${currentEventsNumber + index + 1}`;
+      // create events jobs so we can create them in parallel
+      const eventsJobs = [];
+      for (let index = 0; index < eventsNo; index++) {
+        eventsJobs.push((cb) => {
+          // determine event name
+          const name = randomString(charsetType[randomFloatBetween(0, 2, 0)]);
 
-              // determine current address - some have an address while others don't
-              // 90% have an address
-              let address;
-              if (Math.random() >= 0.1) {
-                // determine location
-                const parentLocationId = parentLocationsIdsContainer[index % parentLocationsNumberContainer];
+          // determine current address - some have an address while others don't
+          // 90% have an address
+          let address;
+          if (Math.random() >= 0.1) {
+            // determine location
+            const parentLocationId = parentLocationsIdsContainer[index % parentLocationsNumberContainer];
 
-                // use main location or child location ?
-                let location;
-                if (
-                  !locationsDataContainer[parentLocationId].subLocations ||
-                  !locationsDataContainer[parentLocationId].subLocations.length ||
-                  Math.random() < 0.5
-                ) {
-                  location = locationsDataContainer[parentLocationId];
-                } else {
-                  // use child location if we have one
-                  const childLocationIndex = randomFloatBetween(0, locationsDataContainer[parentLocationId].subLocations.length - 1, 0);
-                  location = locationsDataContainer[parentLocationId].subLocations[childLocationIndex];
-                }
+            // use main location or child location ?
+            let location;
+            if (
+              !locationsDataContainer[parentLocationId].subLocations ||
+              !locationsDataContainer[parentLocationId].subLocations.length ||
+              Math.random() < 0.5
+            ) {
+              location = locationsDataContainer[parentLocationId];
+            } else {
+              // use child location if we have one
+              const childLocationIndex = randomFloatBetween(0, locationsDataContainer[parentLocationId].subLocations.length - 1, 0);
+              location = locationsDataContainer[parentLocationId].subLocations[childLocationIndex];
+            }
 
-                // generate geo location
-                const geoLocation = {
-                  lat: randomFloatBetween(
-                    location.geoLocation.lat + geoLocationRange.contactLocationError.lat.min,
-                    location.geoLocation.lat + geoLocationRange.contactLocationError.lat.max,
-                    3
-                  ),
-                  lng: randomFloatBetween(
-                    location.geoLocation.lng + geoLocationRange.contactLocationError.lng.min,
-                    location.geoLocation.lng + geoLocationRange.contactLocationError.lng.max,
-                    3
-                  )
-                };
+            // generate geo location
+            const geoLocation = {
+              lat: randomFloatBetween(
+                location.geoLocation.lat + geoLocationRange.contactLocationError.lat.min,
+                location.geoLocation.lat + geoLocationRange.contactLocationError.lat.max,
+                3
+              ),
+              lng: randomFloatBetween(
+                location.geoLocation.lng + geoLocationRange.contactLocationError.lng.min,
+                location.geoLocation.lng + geoLocationRange.contactLocationError.lng.max,
+                3
+              )
+            };
 
-                // create address
-                address = {
-                  typeId: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
-                  city: `City ${randomFloatBetween(1, defaultCitiesNo, 0)}`,
-                  addressLine1: `Street ${randomFloatBetween(1, defaultAddressLineNo, 0)}`,
-                  postalCode: randomFloatBetween(defaultPostalCodeRange.min, defaultPostalCodeRange.max, 0).toString(),
-                  locationId: location.id,
-                  geoLocation: geoLocation,
-                  geoLocationAccurate: false,
-                  date: todayString,
-                  phoneNumber: `Phone ${randomFloatBetween(1, defaultPhoneNo, 0)}`,
-                };
-              }
-
-              // determine dates
-              const date = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
-              const dateOfReporting = date.clone().add(5, 'days');
-
-              // display log
-              app.logger.debug(`Creating event '${name}'`);
-
-              // create event
-              app.models.event
-                .create(Object.assign(
-                  defaultEventTemplate, {
-                    outbreakId: outbreakDataContainer.id,
-                    name: name,
-                    address: address,
-                    dateOfReporting: dateOfReporting ? dateOfReporting.toISOString() : dateOfReporting,
-                    date: date ? date.toISOString() : date
-                  },
-                  getTimestamps()
-                ), options)
-                .then((eventData) => {
-                  // log
-                  app.logger.debug(`Event '${eventData.name}' created => '${eventData.id}'`);
-
-                  // finished
-                  cb();
-                })
-                .catch(cb);
-            });
+            // create address
+            address = {
+              typeId: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
+              city: `City ${randomFloatBetween(1, defaultCitiesNo, 0)}`,
+              addressLine1: `Street ${randomFloatBetween(1, defaultAddressLineNo, 0)}`,
+              postalCode: randomFloatBetween(defaultPostalCodeRange.min, defaultPostalCodeRange.max, 0).toString(),
+              locationId: location.id,
+              geoLocation: geoLocation,
+              geoLocationAccurate: false,
+              date: todayString,
+              phoneNumber: `Phone ${randomFloatBetween(1, defaultPhoneNo, 0)}`,
+            };
           }
 
-          // execute jobs
-          return new Promise((resolve, reject) => {
-            // wait for all operations to be done
-            async.parallelLimit(eventsJobs, batchSize, function (error) {
-              // error
-              if (error) {
-                return reject(error);
-              }
+          // determine dates
+          const date = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
+          const dateOfReporting = date.clone().add(5, 'days');
 
-              // display log
-              app.logger.debug('Finished creating events');
+          // display log
+          app.logger.debug(`Creating event '${name}'`);
+
+          // create event
+          app.models.event
+            .create(Object.assign(
+              defaultEventTemplate, {
+                outbreakId: outbreakDataContainer.id,
+                name: name,
+                address: address,
+                dateOfReporting: dateOfReporting ? dateOfReporting.toISOString() : dateOfReporting,
+                date: date ? date.toISOString() : date
+              },
+              getTimestamps()
+            ), options)
+            .then((eventData) => {
+              // log
+              app.logger.debug(`Event '${eventData.name}' created => '${eventData.id}'`);
 
               // finished
-              resolve();
-            });
-          });
+              cb();
+            })
+            .catch(cb);
         });
+      }
+
+      // execute jobs
+      return new Promise((resolve, reject) => {
+        // wait for all operations to be done
+        async.parallelLimit(eventsJobs, batchSize, function (error) {
+          // error
+          if (error) {
+            return reject(error);
+          }
+
+          // display log
+          app.logger.debug('Finished creating events');
+
+          // finished
+          resolve();
+        });
+      });
     })
 
     // create relationships
@@ -1015,461 +1021,444 @@ function run(callback) {
       };
       let resources = Object.values(resourcesMap);
 
-      // depending on relationshipsForAlreadyAssociatedPerson we will only create relationships for not already associated person or for all
-      // check if we need to retrieve persons that already have relationships in order to not create additional relationships for them
-      let retrievePersonsIdsWithRelationships = Promise.resolve([]);
-      if (!relationshipsForAlreadyAssociatedPerson) {
-        retrievePersonsIdsWithRelationships = app.models.relationship
-          .rawFindWithLoopbackFilter({
-            where: {
-              outbreakId: outbreakDataContainer.id
-            },
-            fields: ['persons']
-          })
-          .then(relationships => {
-            // get persons IDs
-            let personsIds = {};
-            resources.forEach(res => {
-              personsIds[res] = [];
-            });
+      // initialize filter for counting and filtering persons
+      let personsFilter = {};
 
-            relationships.forEach(rel => {
-              personsIds[resourcesMap[rel.persons[0].type]].push(rel.persons[0].id);
-              personsIds[resourcesMap[rel.persons[1].type]].push(rel.persons[1].id);
-            });
+      resources.forEach(res => {
+        personsFilter[res] = {
+          outbreakId: outbreakDataContainer.id
+        };
 
-            resources.forEach(res => {
-              // keep only one entry of an ID
-              personsIds[res] = [...new Set(personsIds[res])];
-            });
+        // depending on relationshipsForAlreadyAssociatedPerson we will only create relationships for not already associated person or for all
+        if (!relationshipsForAlreadyAssociatedPerson) {
+          personsFilter[res].hasRelationships = {
+            ne: true
+          };
+        }
+      });
 
-            return personsIds;
-          });
-      }
+      // get number of cases, contacts, events and split relationship creation in multiple batches to avoid loading entire DB in memory
+      let countJobs = {};
+      resources.forEach(res => {
+        countJobs[res] = (cb) => {
+          return app.models[res]
+            .count(personsFilter[res])
+            .then(count => {
+              cb(null, count);
+            })
+            .catch(cb);
+        };
+      });
 
-      return retrievePersonsIdsWithRelationships
-        .then(personsWithRelationshipsIds => {
-          // initialize filter for counting and filtering persons
-          let personsFilter = {};
+      return new Promise((resolveCounters, rejectCounters) => {
+        async.parallel(countJobs, (err, countersMap) => {
+          if (err) {
+            return rejectCounters(err);
+          }
 
+          // initialize resources in DB array
+          let resourcesInDb = [];
+
+          // get maximum number of resources
+          let maxResNo = 0;
+          let resWithMaxNo;
           resources.forEach(res => {
-            personsFilter[res] = {
-              outbreakId: outbreakDataContainer.id
-            };
+            // remove resource types which don't exist in DB
+            if (countersMap[res] === 0) {
+              delete countersMap[res];
+              return;
+            }
 
-            personsWithRelationshipsIds[res].length && (personsFilter[res].id = {nin: personsWithRelationshipsIds[res]});
+            // use resource in future calculations
+            resourcesInDb.push(res);
+
+            if (maxResNo < countersMap[res]) {
+              maxResNo = countersMap[res];
+              resWithMaxNo = res;
+            }
           });
 
-          // get number of cases, contacts, events and split relationship creation in multiple batches to avoid loading entire DB in memory
-          let countJobs = {};
-          resources.forEach(res => {
-            countJobs[res] = (cb) => {
-              return app.models[res]
-                .count(personsFilter[res])
-                .then(count => {
-                  cb(null, count);
-                })
-                .catch(cb);
-            };
-          });
+          if (!resourcesInDb.length) {
+            return rejectCounters('No resources exist in DB for which to create relations');
+          }
 
-          return new Promise((resolveCounters, rejectCounters) => {
-            async.parallel(countJobs, (err, countersMap) => {
-              if (err) {
-                return rejectCounters(err);
-              }
+          // get a maximum of 1000 resources per type at a time
+          let resourcesPerBatch = 1000;
+          // no need to check if additional items remain after the batches as we will get all remaining data in last batch
+          let batches = Math.floor(maxResNo / resourcesPerBatch);
+          // don't allow 0
+          batches === 0 && (batches++);
 
-              // initialize resources in DB array
-              let resourcesInDb = [];
-
-              // get maximum number of resources
-              let maxResNo = 0;
-              let resWithMaxNo;
-              resources.forEach(res => {
-                // remove resource types which don't exist in DB
-                if (countersMap[res] === 0) {
-                  delete countersMap[res];
-                  return;
-                }
-
-                // use resource in future calculations
-                resourcesInDb.push(res);
-
-                if (maxResNo < countersMap[res]) {
-                  maxResNo = countersMap[res];
-                  resWithMaxNo = res;
-                }
-              });
-
-              if (!resourcesInDb.length) {
-                return rejectCounters('No resources exist in DB for which to create relations');
-              }
-
-              // get a maximum of 1000 resources per type at a time
-              let resourcesPerBatch = 1000;
-              // no need to check if additional items remain after the batches as we will get all remaining data in last batch
-              let batches = Math.floor(maxResNo / resourcesPerBatch);
+          // get limits for all resources pe batch
+          let limits = {};
+          resourcesInDb.forEach(res => {
+            if (resWithMaxNo === res) {
+              limits[res] = resourcesPerBatch;
+            } else {
+              limits[res] = Math.floor(countersMap[res] / batches);
               // don't allow 0
-              batches === 0 && (batches++);
+              (limits[res] === 0) && limits[res]++;
+            }
+          });
 
-              // get limits for all resources pe batch
-              let limits = {};
+          // cache existing relationships
+          const existingRelationships = {};
+
+          // create batches jobs
+          let batchesJobs = [];
+
+          // cache last batch data as for some resource there might not be enough items to get in all batches
+          let retrievedLastBatchData = {};
+
+          for (let jobNo = 1; jobNo <= batches; jobNo++) {
+            batchesJobs.push(batchJobCB => {
+              // retrieve data
+              let retrieveDataJobs = {};
               resourcesInDb.forEach(res => {
-                if (resWithMaxNo === res) {
-                  limits[res] = resourcesPerBatch;
-                } else {
-                  limits[res] = Math.floor(countersMap[res] / batches);
-                  // don't allow 0
-                  (limits[res] === 0) && limits[res]++;
-                }
+                retrieveDataJobs[res] = (retrieveDataCB) => {
+                  let retrieveDataPromise;
+
+                  if (
+                    // need to execute at least once
+                    jobNo > 1 &&
+                    (jobNo * limits[res]) > countersMap[res]
+                  ) {
+                    // no additional data to retrieve; use last batch data
+                    retrieveDataPromise = Promise.resolve(retrievedLastBatchData[res]);
+                  } else {
+                    retrieveDataPromise = app.models[res]
+                      .rawFindWithLoopbackFilter({
+                        where: personsFilter[res],
+                        fields: ['id', 'type'],
+                        skip: (jobNo - 1) * limits[res],
+                        // no limit on last batch
+                        limit: jobNo !== batches ? limits[res] : null,
+                        order: ['createdAt ASC']
+                      });
+                  }
+
+                  return retrieveDataPromise
+                    .then(resources => {
+                      // cache batch data
+                      retrievedLastBatchData[res] && (delete retrievedLastBatchData[res]);
+                      retrievedLastBatchData[res] = resources;
+
+                      return retrieveDataCB(null, resources);
+                    })
+                    .catch(retrieveDataCB);
+                };
               });
 
-              // cache existing relationships
-              const existingRelationships = {};
+              app.logger.debug(`Starting relations job ${jobNo}`);
 
-              // create batches jobs
-              let batchesJobs = [];
+              return new Promise((resolveRetrieveJobs, rejectRetrieveJobs) => {
+                async.series(retrieveDataJobs, (err, resources) => {
+                  if (err) {
+                    return rejectRetrieveJobs(err);
+                  }
 
-              // cache last batch data as for some resource there might not be enough items to get in all batches
-              let retrievedLastBatchData = {};
-
-              for (let jobNo = 1; jobNo <= batches; jobNo++) {
-                batchesJobs.push(batchJobCB => {
-                  // retrieve data
-                  let retrieveDataJobs = {};
+                  // map received data
+                  let resourcesContainer = {};
+                  let resourcesIdsContainer = {};
                   resourcesInDb.forEach(res => {
-                    retrieveDataJobs[res] = (retrieveDataCB) => {
-                      let retrieveDataPromise;
-
-                      if (
-                        // need to execute at least once
-                        jobNo > 1 &&
-                        (jobNo * limits[res]) > countersMap[res]
-                      ) {
-                        // no additional data to retrieve; use last batch data
-                        retrieveDataPromise = Promise.resolve(retrievedLastBatchData[res]);
-                      } else {
-                        retrieveDataPromise = app.models[res]
-                          .rawFindWithLoopbackFilter({
-                            where: personsFilter[res],
-                            fields: ['id', 'type'],
-                            skip: (jobNo - 1) * limits[res],
-                            // no limit on last batch
-                            limit: jobNo !== batches ? limits[res] : null,
-                            order: ['createdAt ASC']
-                          });
-                      }
-
-                      return retrieveDataPromise
-                        .then(resources => {
-                          // cache batch data
-                          retrievedLastBatchData[res] && (delete retrievedLastBatchData[res]);
-                          retrievedLastBatchData[res] = resources;
-
-                          return retrieveDataCB(null, resources);
-                        })
-                        .catch(retrieveDataCB);
-                    };
+                    resourcesContainer[res] = {};
+                    resourcesIdsContainer[res] = [];
+                    resources[res].forEach(item => {
+                      resourcesContainer[res][item.id] = item;
+                      resourcesIdsContainer[res].push(item.id);
+                    });
                   });
 
-                  app.logger.debug(`Starting relations job ${jobNo}`);
+                  // contacts
+                  contactsContainer = resourcesContainer.contact || {};
 
-                  return new Promise((resolveRetrieveJobs, rejectRetrieveJobs) => {
-                    async.series(retrieveDataJobs, (err, resources) => {
-                      if (err) {
-                        return rejectRetrieveJobs(err);
+                  // cases
+                  casesContainer = resourcesContainer.case || {};
+
+                  // events
+                  eventsContainer = resourcesContainer.event || {};
+
+                  const caseIds = resourcesIdsContainer.case || [];
+                  const contactIds = resourcesIdsContainer.contact || [];
+                  const eventIds = resourcesIdsContainer.event || [];
+                  const caseAndEventsIds = [
+                    ...caseIds,
+                    ...eventIds
+                  ];
+                  const personIds = [
+                    ...caseAndEventsIds,
+                    ...contactIds
+                  ];
+
+                  // create relationships
+                  const relationshipsJobs = [];
+
+                  const createRelationshipJobs = (personData) => {
+                    // how many relationships do we need to create
+                    let relationshipsNo = randomFloatBetween(minNoRelationshipsForEachRecord, maxNoRelationshipsForEachRecord);
+
+                    // each contact must have at least one relationship
+                    relationshipsNo = personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
+                      (
+                        // handle case where required relationships number is bigger than actual pool
+                        relationshipsNo < caseAndEventsIds.length ?
+                          Math.max(relationshipsNo, 1) :
+                          caseAndEventsIds.length
+                      ) : (
+                        // handle case where required relationships number is bigger than actual pool
+                        relationshipsNo < personIds.length ?
+                          relationshipsNo :
+                          personIds.length
+                      );
+
+                    // create relationships
+                    for (let index = 0; index < relationshipsNo; index++) {
+                      // check if person already has existing relationships
+                      let personExistingRelationships = existingRelationships[personData.id] || {};
+                      let personExistingRelationshipsNo = Object.keys(personExistingRelationships).length;
+
+                      // check if additional relationships can be created
+                      if (
+                        (
+                          personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
+                          personExistingRelationshipsNo >= caseAndEventsIds.length
+                        ) || (
+                          (
+                            personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ||
+                            personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                          ) &&
+                          personExistingRelationshipsNo >= personIds.length - 1
+                        )
+                      ) {
+                        // there are no persons with which the person doesn't have relationships
+                        return;
                       }
 
-                      // map received data
-                      let resourcesContainer = {};
-                      let resourcesIdsContainer = {};
-                      resourcesInDb.forEach(res => {
-                        resourcesContainer[res] = {};
-                        resourcesIdsContainer[res] = [];
-                        resources[res].forEach(item => {
-                          resourcesContainer[res][item.id] = item;
-                          resourcesIdsContainer[res].push(item.id);
-                        });
-                      });
+                      // determine the other person
+                      // - exclude teh same person
+                      // - exclude duplicate relationships
+                      let otherPerson;
+                      while (
+                        otherPerson === undefined ||
+                        otherPerson.id === personData.id || (
+                          existingRelationships[otherPerson.id] &&
+                          existingRelationships[otherPerson.id][personData.id]
+                        )
+                        ) {
+                        // case / event / contact ?
+                        const idsPool = personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
+                          caseAndEventsIds :
+                          personIds;
 
-                      // contacts
-                      contactsContainer = resourcesContainer.contact || {};
-
-                      // cases
-                      casesContainer = resourcesContainer.case || {};
-
-                      // events
-                      eventsContainer = resourcesContainer.event || {};
-
-                      const caseIds = resourcesIdsContainer.case || [];
-                      const contactIds = resourcesIdsContainer.contact || [];
-                      const eventIds = resourcesIdsContainer.event || [];
-                      const caseAndEventsIds = [
-                        ...caseIds,
-                        ...eventIds
-                      ];
-                      const personIds = [
-                        ...caseAndEventsIds,
-                        ...contactIds
-                      ];
-
-                      // create relationships
-                      const relationshipsJobs = [];
-
-                      const createRelationshipJobs = (personData) => {
-                        // how many relationships do we need to create
-                        let relationshipsNo = randomFloatBetween(minNoRelationshipsForEachRecord, maxNoRelationshipsForEachRecord);
-
-                        // each contact must have at least one relationship
-                        relationshipsNo = personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
-                          (
-                            // handle case where required relationships number is bigger than actual pool
-                            relationshipsNo < caseAndEventsIds.length ?
-                              Math.max(relationshipsNo, 1) :
-                              caseAndEventsIds.length
-                          ) : (
-                            // handle case where required relationships number is bigger than actual pool
-                            relationshipsNo < personIds.length ?
-                              relationshipsNo :
-                              personIds.length
+                        // determine id
+                        let index = randomFloatBetween(0, idsPool.length, 0);
+                        // handle low probability of actually getting the max value from randomFloatBetween
+                        (index === idsPool.length) && index--;
+                        const otherId = idsPool[index];
+                        otherPerson = casesContainer[otherId] ?
+                          casesContainer[otherId] : (
+                            contactsContainer[otherId] ?
+                              contactsContainer[otherId] :
+                              eventsContainer[otherId]
                           );
+                      }
 
-                        // create relationships
-                        for (let index = 0; index < relationshipsNo; index++) {
-                          // check if person already has existing relationships
-                          let personExistingRelationships = existingRelationships[personData.id] || {};
-                          let personExistingRelationshipsNo = Object.keys(personExistingRelationships).length;
+                      // determine persons
+                      const persons = [];
 
-                          // check if additional relationships can be created
-                          if (
-                            (
-                              personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
-                              personExistingRelationshipsNo >= caseAndEventsIds.length
-                            ) || (
-                              (
-                                personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ||
-                                personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
-                              ) &&
-                              personExistingRelationshipsNo >= personIds.length - 1
-                            )
-                          ) {
-                            // there are no persons with which the person doesn't have relationships
-                            return;
-                          }
-
-                          // determine the other person
-                          // - exclude teh same person
-                          // - exclude duplicate relationships
-                          let otherPerson;
-                          while (
-                            otherPerson === undefined ||
-                            otherPerson.id === personData.id || (
-                              existingRelationships[otherPerson.id] &&
-                              existingRelationships[otherPerson.id][personData.id]
-                            )
-                            ) {
-                            // case / event / contact ?
-                            const idsPool = personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
-                              caseAndEventsIds :
-                              personIds;
-
-                            // determine id
-                            let index = randomFloatBetween(0, idsPool.length, 0);
-                            // handle low probability of actually getting the max value from randomFloatBetween
-                            (index === idsPool.length) && index--;
-                            const otherId = idsPool[index];
-                            otherPerson = casesContainer[otherId] ?
-                              casesContainer[otherId] : (
-                                contactsContainer[otherId] ?
-                                  contactsContainer[otherId] :
-                                  eventsContainer[otherId]
-                              );
-                          }
-
-                          // determine persons
-                          const persons = [];
-
-                          // contact always needs to be target
-                          if (personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-                            persons.push({
-                              id: personData.id,
-                              type: personData.type,
-                              target: true
-                            }, {
-                              id: otherPerson.id,
-                              type: otherPerson.type,
-                              source: true
-                            });
-                          } else if (otherPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-                            persons.push({
-                              id: otherPerson.id,
-                              type: otherPerson.type,
-                              target: true
-                            }, {
-                              id: personData.id,
-                              type: personData.type,
-                              source: true
-                            });
-                          } else {
-                            // relation between cases & events
-                            // determine who is source
-                            if (Math.random() < 0.5) {
-                              persons.push({
-                                id: personData.id,
-                                type: personData.type,
-                                target: true
-                              }, {
-                                id: otherPerson.id,
-                                type: otherPerson.type,
-                                source: true
-                              });
-                            } else {
-                              persons.push({
-                                id: otherPerson.id,
-                                type: otherPerson.type,
-                                target: true
-                              }, {
-                                id: personData.id,
-                                type: personData.type,
-                                source: true
-                              });
-                            }
-                          }
-
-                          // add relationship to list of existing relationships
-                          if (!existingRelationships[persons[1].id]) {
-                            existingRelationships[persons[1].id] = {};
-                          }
-                          existingRelationships[persons[1].id][persons[0].id] = true;
-
-                          // and the reverse
-                          if (!existingRelationships[persons[0].id]) {
-                            existingRelationships[persons[0].id] = {};
-                          }
-                          existingRelationships[persons[0].id][persons[1].id] = true;
-
-                          // determine dates
-                          const contactDate = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
-
-                          // determine certainty
-                          const certaintyLevelId = [
-                            'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_1_LOW',
-                            'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_2_MEDIUM',
-                            'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_3_HIGH'
-                          ][randomFloatBetween(0, 2, 0)];
-
-                          // only some have exposure type
-                          let exposureTypeId;
-                          if (Math.random() >= 0.5) {
-                            exposureTypeId = [
-                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_DIRECT_PHYSICAL_CONTACT',
-                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SLEPT_ATE_OR_SPEND_TIME_IN_SAME_HOUSEHOLD',
-                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_TOUCHED_BODY_FLUIDS'
-                            ][randomFloatBetween(0, 3, 0)];
-                          }
-
-                          // only some have exposure frequency
-                          let exposureFrequencyId;
-                          if (Math.random() >= 0.5) {
-                            exposureFrequencyId = [
-                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_11_20_TIMES',
-                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_1_5_TIMES',
-                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_6_10_TIMES',
-                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_OVER_21_TIMES',
-                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_UNKNOWN'
-                            ][randomFloatBetween(0, 4, 0)];
-                          }
-
-                          // only some have exposure duration
-                          let exposureDurationId;
-                          if (Math.random() >= 0.5) {
-                            exposureDurationId = [
-                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_LONG_DAYS',
-                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_MEDIUM_HOURS',
-                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_SHORT_MINUTES',
-                              'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_VERY_SHORT_SECONDS'
-                            ][randomFloatBetween(0, 3, 0)];
-                          }
-
-                          // create relationship
-                          relationshipsJobs.push((cb) => {
-                            // create relationship
-                            app.models.relationship
-                              .create(Object.assign(
-                                defaultRelationshipTemplate, {
-                                  outbreakId: outbreakDataContainer.id,
-                                  persons: persons,
-                                  contactDate: contactDate ? contactDate.toISOString() : contactDate,
-                                  certaintyLevelId: certaintyLevelId,
-                                  exposureTypeId: exposureTypeId,
-                                  exposureFrequencyId: exposureFrequencyId,
-                                  exposureDurationId: exposureDurationId
-                                },
-                                getTimestamps()
-                              ), options)
-                              .then((relationshipData) => {
-                                // log
-                                app.logger.debug(`Relationship created => '${relationshipData.id}'`);
-
-                                // finished
-                                cb();
-                              })
-                              .catch(cb);
+                      // contact always needs to be target
+                      if (personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                        persons.push({
+                          id: personData.id,
+                          type: personData.type,
+                          target: true
+                        }, {
+                          id: otherPerson.id,
+                          type: otherPerson.type,
+                          source: true
+                        });
+                      } else if (otherPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                        persons.push({
+                          id: otherPerson.id,
+                          type: otherPerson.type,
+                          target: true
+                        }, {
+                          id: personData.id,
+                          type: personData.type,
+                          source: true
+                        });
+                      } else {
+                        // relation between cases & events
+                        // determine who is source
+                        if (Math.random() < 0.5) {
+                          persons.push({
+                            id: personData.id,
+                            type: personData.type,
+                            target: true
+                          }, {
+                            id: otherPerson.id,
+                            type: otherPerson.type,
+                            source: true
+                          });
+                        } else {
+                          persons.push({
+                            id: otherPerson.id,
+                            type: otherPerson.type,
+                            target: true
+                          }, {
+                            id: personData.id,
+                            type: personData.type,
+                            source: true
                           });
                         }
-                      };
+                      }
 
-                      // contacts
-                      contactIds.length && _.each(contactsContainer, createRelationshipJobs);
+                      // add relationship to list of existing relationships
+                      if (!existingRelationships[persons[1].id]) {
+                        existingRelationships[persons[1].id] = {};
+                      }
+                      existingRelationships[persons[1].id][persons[0].id] = true;
 
-                      // cases
-                      caseIds.length && _.each(casesContainer, createRelationshipJobs);
+                      // and the reverse
+                      if (!existingRelationships[persons[0].id]) {
+                        existingRelationships[persons[0].id] = {};
+                      }
+                      existingRelationships[persons[0].id][persons[1].id] = true;
 
-                      // events
-                      eventIds.length && _.each(eventsContainer, createRelationshipJobs);
+                      // determine dates
+                      const contactDate = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
 
-                      app.logger.debug(`Relationships to create: ${relationshipsJobs.length}`);
+                      // determine certainty
+                      const certaintyLevelId = [
+                        'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_1_LOW',
+                        'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_2_MEDIUM',
+                        'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL_3_HIGH'
+                      ][randomFloatBetween(0, 2, 0)];
 
-                      // execute jobs
-                      return new Promise((resolveRelationships, rejectRelationships) => {
-                        async.parallelLimit(relationshipsJobs, batchSize, (err) => {
-                          if (err) {
-                            return rejectRelationships(err);
-                          }
-                          // display log
-                          app.logger.debug(`Finished creating relationships batch ${jobNo}`);
-                          resolveRelationships();
-                        });
-                      })
-                        .then(() => {
-                          resolveRetrieveJobs();
-                        })
-                        .catch(rejectRetrieveJobs);
+                      // only some have exposure type
+                      let exposureTypeId;
+                      if (Math.random() >= 0.5) {
+                        exposureTypeId = [
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_DIRECT_PHYSICAL_CONTACT',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SLEPT_ATE_OR_SPEND_TIME_IN_SAME_HOUSEHOLD',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_TOUCHED_BODY_FLUIDS'
+                        ][randomFloatBetween(0, 3, 0)];
+                      }
+
+                      // only some have exposure frequency
+                      let exposureFrequencyId;
+                      if (Math.random() >= 0.5) {
+                        exposureFrequencyId = [
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_11_20_TIMES',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_1_5_TIMES',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_6_10_TIMES',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_OVER_21_TIMES',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY_UNKNOWN'
+                        ][randomFloatBetween(0, 4, 0)];
+                      }
+
+                      // only some have exposure duration
+                      let exposureDurationId;
+                      if (Math.random() >= 0.5) {
+                        exposureDurationId = [
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_LONG_DAYS',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_MEDIUM_HOURS',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_SHORT_MINUTES',
+                          'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION_VERY_SHORT_SECONDS'
+                        ][randomFloatBetween(0, 3, 0)];
+                      }
+
+                      // create relationship
+                      relationshipsJobs.push((cb) => {
+                        // create relationship
+                        app.models.relationship
+                          .create(Object.assign(
+                            defaultRelationshipTemplate, {
+                              outbreakId: outbreakDataContainer.id,
+                              persons: persons,
+                              contactDate: contactDate ? contactDate.toISOString() : contactDate,
+                              certaintyLevelId: certaintyLevelId,
+                              exposureTypeId: exposureTypeId,
+                              exposureFrequencyId: exposureFrequencyId,
+                              exposureDurationId: exposureDurationId
+                            },
+                            getTimestamps()
+                          ), options)
+                          .then((relationshipData) => {
+                            // log
+                            app.logger.debug(`Relationship created => '${relationshipData.id}'`);
+
+                            // update relationship participants with hasRelationship flag
+                            return app.dataSources.mongoDb.connector.collection('person')
+                              .updateMany({
+                                _id: {
+                                  $in: relationshipData.persons.map(person => person.id)
+                                }
+                              }, {
+                                '$set': {
+                                  hasRelationships: true
+                                }
+                              });
+                          })
+                          .then(() => {
+                            // finished
+                            cb();
+                          })
+                          .catch(cb);
+                      });
+                    }
+                  };
+
+                  // contacts
+                  contactIds.length && _.each(contactsContainer, createRelationshipJobs);
+
+                  // cases
+                  caseIds.length && _.each(casesContainer, createRelationshipJobs);
+
+                  // events
+                  eventIds.length && _.each(eventsContainer, createRelationshipJobs);
+
+                  app.logger.debug(`Relationships to create: ${relationshipsJobs.length}`);
+
+                  // execute jobs
+                  return new Promise((resolveRelationships, rejectRelationships) => {
+                    async.parallelLimit(relationshipsJobs, batchSize, (err) => {
+                      if (err) {
+                        return rejectRelationships(err);
+                      }
+                      // display log
+                      app.logger.debug(`Finished creating relationships batch ${jobNo}`);
+                      resolveRelationships();
                     });
                   })
                     .then(() => {
-                      batchJobCB();
+                      resolveRetrieveJobs();
                     })
-                    .catch(batchJobCB);
-                });
-              }
-
-              return new Promise((resolveBatches, rejectBatches) => {
-                async.series(batchesJobs, (err) => {
-                  if (err) {
-                    return rejectBatches(err);
-                  }
-
-                  return resolveBatches();
+                    .catch(rejectRetrieveJobs);
                 });
               })
                 .then(() => {
-                  resolveCounters();
+                  batchJobCB();
                 })
-                .catch(rejectCounters);
+                .catch(batchJobCB);
             });
-          });
+          }
+
+          return new Promise((resolveBatches, rejectBatches) => {
+            async.series(batchesJobs, (err) => {
+              if (err) {
+                return rejectBatches(err);
+              }
+
+              return resolveBatches();
+            });
+          })
+            .then(() => {
+              resolveCounters();
+            })
+            .catch(rejectCounters);
         });
+      });
     })
 
     // finished
