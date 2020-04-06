@@ -1,5 +1,27 @@
 {
   "outbreakName": "outbreakNameExample",
+  "outbreakSettings": {
+    "caseInvestigationTemplate": {
+      "questionsNo": 70,
+      "answersNo": 5,
+      "levelsNo": 5
+    },
+    "contactInvestigationTemplate": {
+      "questionsNo": 70,
+      "answersNo": 5,
+      "levelsNo": 5
+    },
+    "contactFollowUpTemplate": {
+      "questionsNo": 70,
+      "answersNo": 5,
+      "levelsNo": 5
+    },
+    "labResultsTemplate": {
+      "questionsNo": 70,
+      "answersNo": 5,
+      "levelsNo": 5
+    }
+  },
   "casesNo": 1000,
   "contactsNo": 10000,
   "eventsNo": 1000,
