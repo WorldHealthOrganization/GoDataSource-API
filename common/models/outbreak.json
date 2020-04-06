@@ -5327,10 +5327,7 @@
               "type": {
                 "<caseClassification>": {
                   "type": {
-                    "count": "number",
-                    "caseIDs": [
-                      "string"
-                    ]
+                    "count": "number"
                   }
                 }
               }
@@ -5364,10 +5361,7 @@
               "type": {
                 "<riskLevel>": {
                   "type": {
-                    "count": "number",
-                    "contactIDs": [
-                      "string"
-                    ]
+                    "count": "number"
                   }
                 }
               }
@@ -7773,10 +7767,7 @@
               "type": {
                 "<riskLevel>": {
                   "type": {
-                    "count": "number",
-                    "contactIDs": [
-                      "string"
-                    ]
+                    "count": "number"
                   }
                 }
               }

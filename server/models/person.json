@@ -212,6 +212,12 @@
     },
     "dateOfOnset_index": {
       "dateOfOnset": 1
+    },
+    "classification_index": {
+      "classification": 1
+    },
+    "riskLevel_index": {
+      "riskLevel": 1
     }
   },
   "validations": [],
