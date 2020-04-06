@@ -9108,13 +9108,12 @@ module.exports = function (Outbreak) {
           // init case classification group if needed
           if (!result.classification[caseRecord.classification]) {
             result.classification[caseRecord.classification] = {
-              count: 0,
-              caseIDs: []
+              count: 0
             };
           }
+
           // classify records by their classification
           result.classification[caseRecord.classification].count++;
-          result.classification[caseRecord.classification].caseIDs.push(caseRecord.id);
         });
         // send back the result
         callback(null, result);
@@ -9511,13 +9510,11 @@ module.exports = function (Outbreak) {
           // init contact riskLevel group if needed
           if (!result.riskLevel[contactRecord.riskLevel]) {
             result.riskLevel[contactRecord.riskLevel] = {
-              count: 0,
-              contactIDs: []
+              count: 0
             };
           }
           // classify records by their risk level
           result.riskLevel[contactRecord.riskLevel].count++;
-          result.riskLevel[contactRecord.riskLevel].contactIDs.push(contactRecord.id);
         });
         // send back the result
         callback(null, result);
@@ -12986,13 +12983,11 @@ module.exports = function (Outbreak) {
           // init contact riskLevel group if needed
           if (!result.riskLevel[contactRecord.riskLevel]) {
             result.riskLevel[contactRecord.riskLevel] = {
-              count: 0,
-              contactIDs: []
+              count: 0
             };
           }
           // classify records by their risk level
           result.riskLevel[contactRecord.riskLevel].count++;
-          result.riskLevel[contactRecord.riskLevel].contactIDs.push(contactRecord.id);
         });
         // send back the result
         callback(null, result);
