@@ -1407,6 +1407,12 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_OF_CONTACT_FROM_CONTACT_DESCRIPTION": {
         "translation": "This permission allows bulk creating contacts of contacts from contact"
       },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_CONTACT_OF_CONTACT_RELATIONSHIP": {
+        "translation": "Contact Of Contact - share relationships"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_CONTACT_OF_CONTACT_RELATIONSHIP_DESCRIPTION": {
+        "translation": "This permission allows sharing of contact of contact relationships"
+      },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CASE": {
         "translation": "Cases"
       },

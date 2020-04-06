@@ -12676,12 +12676,12 @@ module.exports = function (Outbreak) {
 
   /**
    * Build and return a pdf containing a contact of contact's information and relationships (dossier)
-   * @param ids
+   * @param contactsOfContacts
    * @param anonymousFields
    * @param options
    * @param callback
    */
-  Outbreak.prototype.contactOfContactDossier = function (ids, anonymousFields, options, callback) {
+  Outbreak.prototype.contactOfContactDossier = function (contactsOfContacts, anonymousFields, options, callback) {
     const models = app.models;
 
 
@@ -12692,7 +12692,7 @@ module.exports = function (Outbreak) {
     models.contactOfContact.find({
       where: {
         id: {
-          inq: ids
+          inq: contactsOfContacts
         }
       },
       include: [
