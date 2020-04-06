@@ -382,6 +382,11 @@ module.exports = function (Contact) {
             }
           });
 
+        // if dates are the same, but there is no previous status set, we may need to set the default status
+        // this case might occur during import
+        if (!shouldUpdate && !previousStatusValue) {
+          shouldUpdate = true;
+        }
         // if updates are required
         if (shouldUpdate) {
           // set a flag for this operation so we prevent infinite loops
