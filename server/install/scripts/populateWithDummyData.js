@@ -12,13 +12,40 @@ let options = {
   _sync: true
 };
 
+// variables for names generation
 const charsetType = ['default', 'french', 'chinese'];
-
 const charsetMap = {
   default: 'abcdefghijklmnopqrstuvwxyz',
   french: `${this.default}çàèîûôöïüù`,
   chinese: '常用國字標準字體表形表'
 };
+
+// variables for outbreak templates
+const questionsTypesToAnswers = {
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT': false,
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_NUMERIC': false,
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME': false,
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER': true,
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWER': true,
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD': false,
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP': false
+};
+const questionsTypes = Object.keys(questionsTypesToAnswers);
+const questionsTypesNo = questionsTypes.length;
+const questionCategories = [
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL',
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_A_0_INTERVIEW_RESPONDENT_INFORMATION',
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_A_0_OUCOME_S_TATUS',
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_A_0_PATIENT_SYMPTOMS',
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL_COURSE_COMPLICATIONS',
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CONTACT_DETAILS',
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CONTACT_WITH_CONFIRMED_PATIENT',
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_DROMEDARY_CAMEL_CONTACT',
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE',
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EXPOSURE_RISK',
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_FORM_COMPLETION'
+];
+const questionCategoriesNo = questionCategories.length;
 
 // generate random numbers between min & max
 const randomFloatBetween = (
@@ -91,12 +118,90 @@ const getTimestamps = function () {
 };
 
 /**
+ * Generate template for given parameters
+ * @param options
+ * @return {{}[]}
+ */
+const generateTemplateQuestions = function (options) {
+  if (!options.questionsNoPerLevel || !options.answersNoPerLevel) {
+    return [];
+  }
+
+  const questionsNoPerLevel = options.questionsNoPerLevel;
+  const answersNoPerLevel = options.answersNoPerLevel;
+  const levelsNo = questionsNoPerLevel.length;
+
+  /**
+   * Generate questions for level
+   * @param parentAnswerLabel
+   * @param level
+   * @return {Array}
+   */
+  const addSubQuestionsForLevel = function (parentAnswerLabel = '', level) {
+    if (level > levelsNo) {
+      return [];
+    }
+
+    // increase level that will be used for subquestions
+    let nextLevel = level + 1;
+
+    // initialize level questions container
+    let result = [];
+
+    // add required number of questions
+    for (let questionNo = 1; questionNo <= questionsNoPerLevel[level - 1]; questionNo++) {
+      let questionType = questionsTypes[randomFloatBetween(0, questionsTypesNo - 1, 0)];
+      let questionText = `${parentAnswerLabel.length ? `${parentAnswerLabel} - ` : ''}Q${questionNo}`;
+
+      let question = {
+        multiAnswer: !!randomFloatBetween(0, 1, 0),
+        inactive: randomFloatBetween(1, 10, 0) > 9 ? true : false,
+        text: questionText,
+        variable: questionText,
+        category: questionCategories[randomFloatBetween(0, questionCategoriesNo - 1, 0)],
+        required: !!randomFloatBetween(0, 1, 0),
+        order: questionNo,
+        answerType: questionType,
+        answersDisplay: !!randomFloatBetween(0, 1, 0) ?
+          'LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL' :
+          'LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_HORIZONTAL'
+      };
+
+      // check if we need to add answers
+      if (questionsTypesToAnswers[questionType]) {
+        question.answers = [];
+
+        for (let answerNo = 1; answerNo <= answersNoPerLevel[level - 1]; answerNo++) {
+          let answerLabel = `${question.text} - A${answerNo}`;
+
+          let answer = {
+            label: answerLabel,
+            value: answerLabel,
+            alert: !!randomFloatBetween(0, 1, 0),
+            additionalQuestions: !!randomFloatBetween(0, 1, 0) ? addSubQuestionsForLevel(answerLabel, nextLevel) : []
+          };
+
+          question.answers.push(answer);
+        }
+      }
+
+      result.push(question);
+    }
+
+    return result;
+  };
+
+  return addSubQuestionsForLevel('', 1);
+};
+
+/**
  * Run initiation
  * @param callback
  */
 function run(callback) {
   // retrieve config data
   const outbreakName = module.methodRelevantArgs.outbreakName;
+  const outbreakSettings = module.methodRelevantArgs.outbreakSettings || {};
   const casesNo = parseIntArgValue(module.methodRelevantArgs.casesNo);
   const contactsNo = parseIntArgValue(module.methodRelevantArgs.contactsNo);
   const eventsNo = parseIntArgValue(module.methodRelevantArgs.eventsNo);
@@ -196,6 +301,25 @@ function run(callback) {
     reportingGeographicalLevelId: outbreakAdminLevel
   };
 
+  // initialize outbreak update boolean
+  let outbreakRequiresUpdate = false;
+  let newTemplates = {};
+  // check given outbreak settings
+  [
+    'caseInvestigationTemplate',
+    'contactInvestigationTemplate',
+    'contactFollowUpTemplate',
+    'labResultsTemplate'
+  ].forEach(templateType => {
+    if (outbreakSettings[templateType]) {
+      let template = generateTemplateQuestions(outbreakSettings[templateType]);
+      if (template.length) {
+        outbreakRequiresUpdate = true;
+        defaultOutbreakTemplate[templateType] = newTemplates[templateType] = template;
+      }
+    }
+  });
+
   // default location template
   const defaultLocationTemplate = {
     synonyms: [],
@@ -268,7 +392,6 @@ function run(callback) {
   // an existing outbreak should be used when additional data needs to be added to it
   app.logger.debug(`Creating/finding outbreak ${outbreakName}`);
   app.models.outbreak
-  // .create(Object.assign(
     .findOrCreate({
       where: {
         name: outbreakName
@@ -285,12 +408,25 @@ function run(callback) {
       // outbreak created
       app.logger.debug(`Outbreak '${outbreakData.name}' ${result[1] ? 'created' : 'found'} => '${outbreakData.id}'`);
 
-      // cache outbreak data
-      outbreakDataContainer = outbreakData.toJSON();
+      // check if outbreak was found and if we need to update it
+      // currently we just need to update the templates
+      if (!result[1] && outbreakRequiresUpdate) {
+        return outbreakData
+          .updateAttributes(newTemplates, options)
+          .then(outbreakData => {
+            app.logger.debug(`Outbreak '${outbreakData.name}' updated => '${outbreakData.id}'`);
+            return outbreakData;
+          });
+      }
+
+      return outbreakData;
     })
 
     // start creating locations
-    .then(() => {
+    .then((outbreakData) => {
+      // cache outbreak data
+      outbreakDataContainer = outbreakData.toJSON();
+
       if (
         locationsNo == 0 &&
         casesNo == 0 &&

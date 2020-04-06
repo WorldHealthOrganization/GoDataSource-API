@@ -2,24 +2,52 @@
   "outbreakName": "outbreakNameExample",
   "outbreakSettings": {
     "caseInvestigationTemplate": {
-      "questionsNo": 70,
-      "answersNo": 5,
-      "levelsNo": 5
+      "questionsNoPerLevel": [
+        100,
+        2,
+        2
+      ],
+      "answersNoPerLevel": [
+        5,
+        2,
+        2
+      ]
     },
     "contactInvestigationTemplate": {
-      "questionsNo": 70,
-      "answersNo": 5,
-      "levelsNo": 5
+      "questionsNoPerLevel": [
+        2,
+        100,
+        2
+      ],
+      "answersNoPerLevel": [
+        2,
+        5,
+        2
+      ]
     },
     "contactFollowUpTemplate": {
-      "questionsNo": 70,
-      "answersNo": 5,
-      "levelsNo": 5
+      "questionsNoPerLevel": [
+        100,
+        2,
+        2
+      ],
+      "answersNoPerLevel": [
+        5,
+        2,
+        2
+      ]
     },
     "labResultsTemplate": {
-      "questionsNo": 70,
-      "answersNo": 5,
-      "levelsNo": 5
+      "questionsNoPerLevel": [
+        100,
+        2,
+        2
+      ],
+      "answersNoPerLevel": [
+        5,
+        2,
+        2
+      ]
     }
   },
   "casesNo": 1000,
