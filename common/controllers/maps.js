@@ -28,7 +28,7 @@ module.exports = function (Maps) {
     }
 
     // build an address string
-    const _address = ['addressLine1', 'addressLine2', 'city', 'country', 'postalCode']
+    const _address = ['addressLine1', 'city', 'country', 'postalCode']
       .filter((prop) => address[prop])
       .map((prop) => address[prop])
       .join();

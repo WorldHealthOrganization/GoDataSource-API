@@ -16,7 +16,6 @@ module.exports = function (Event) {
     'address.country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
     'address.city': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY',
     'address.addressLine1': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1',
-    'address.addressLine2': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_2',
     'address.postalCode': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE',
     'address.locationId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID',
     'address.geoLocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
