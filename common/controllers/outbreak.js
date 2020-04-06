@@ -7200,7 +7200,7 @@ module.exports = function (Outbreak) {
                       let contactAddress = app.models.person.getCurrentAddress(contact);
                       if (contactAddress) {
                         row.city = display(contactAddress.city);
-                        row.address = `${display(contactAddress.addressLine1)}`;
+                        row.address = display(contactAddress.addressLine1);
                       }
 
                       // defensive check
@@ -7608,7 +7608,7 @@ module.exports = function (Outbreak) {
                     let contactAddress = models.person.getCurrentAddress(contact);
                     if (contactAddress) {
                       row.city = display(contactAddress.city);
-                      row.address = `${display(contactAddress.addressLine1)}`;
+                      row.address = display(contactAddress.addressLine1);
                     }
 
                     // only the latest follow up will be shown
