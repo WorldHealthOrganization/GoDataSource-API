@@ -1,0 +1,49 @@
+{
+  "name": "migrationLog",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "executionMap": {
+      "description": "Map for migration successful execution. Saved after each migration action",
+      "type": "any"
+    },
+    "status": {
+      "description": "Flag specifying the migration status",
+      "type": "string",
+      "enum": [
+        "Started",
+        "Success",
+        "Failed"
+      ],
+      "required": true
+    },
+    "error": {
+      "description": "Error encountered during migration. Present only if status is Failed",
+      "type": "any"
+    },
+    "startDate": {
+      "description": "Date when the migration was started",
+      "type": "date",
+      "required": true
+    },
+    "endDate": {
+      "description": "Date when the migration was finished",
+      "type": "date"
+    }
+  },
+  "indexes": {
+    "status_index": {
+      "status": 1
+    },
+    "endDate_index": {
+      "endDate": 1
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
