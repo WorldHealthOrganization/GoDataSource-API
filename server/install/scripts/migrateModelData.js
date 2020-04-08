@@ -17,7 +17,7 @@ const migrationLogStatusMap = {
 // initialize map of versions that contain migration scripts in migrations folder
 // migration scripts will be executed in the order by version/script/action
 const migrationVersions = [{
-  version: '<2.35.0',
+  version: 'older',
   scripts: [{
     fileName: 'case.js',
     actions: [{
