@@ -159,6 +159,10 @@
     },
     "pregnancyStatus": {
       "type": "string"
+    },
+    "hasRelationships": {
+      "type": "boolean",
+      "description": "Note: currently used only on dummy data generation. Flag that specifies if a case/contact/event has at least a relationship."
     }
   },
   "indexes": {

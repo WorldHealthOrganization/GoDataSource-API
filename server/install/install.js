@@ -4,6 +4,8 @@ const async = require('async');
 const _ = require('lodash');
 const args = process.argv;
 const path = require('path');
+const fs = require('fs-extra');
+
 // keep a list of supported install arguments
 const supportedArguments = [
   'init-database',
@@ -205,7 +207,9 @@ const routines = {
   },
   populateWithDummyData: function () {
     // need outbreak name & data amount
-    const requiredArgs = [
+    // can receive an options file or a list of options
+    const allowedArgs = [
+      'options',
       'outbreakName',
       'casesNo',
       'contactsNo',
@@ -214,15 +218,34 @@ const routines = {
       'subLocationsPerLocationNo',
       'subLocationsLevelsNo',
       'minNoRelationshipsForEachRecord',
-      'maxNoRelationshipsForEachRecord'
+      'maxNoRelationshipsForEachRecord',
+      'relationshipsForAlreadyAssociatedPerson',
+      'batchSize'
     ];
-    methodRelevantArgs = parseArgumentValues(requiredArgs);
+
+    const requiredOptions = [
+      'outbreakName'
+    ];
+
+    let methodRelevantArgs = parseArgumentValues(allowedArgs);
+    if (methodRelevantArgs.options) {
+      // options arg was sent; try to use options from the given JSON
+      methodRelevantArgs = fs.readJsonSync(methodRelevantArgs.options, {throws: false}) || [];
+    }
 
     // all above arg are required
     let stop = false;
-    _.each(requiredArgs, (argKey) => {
-      if (!methodRelevantArgs[argKey]) {
-        console.log(`The following arguments are required: ${requiredArgs.join(', ')}`);
+    _.each(requiredOptions, (argKey) => {
+      if (
+        // required arg should be present
+        methodRelevantArgs[argKey] === undefined ||
+        (
+          // required arg should not be empty string
+          typeof methodRelevantArgs[argKey] === 'string' &&
+          !methodRelevantArgs[argKey].length
+        )
+      ) {
+        console.log(`The following arguments are required either in given options JSON file or separate input parameters and should not be empty: ${requiredOptions.join(', ')}`);
         stop = true;
         return false;
       }
@@ -313,7 +336,9 @@ if (!runFunctions.length) {
 } else {
   async.series(runFunctions, function (error) {
     if (error) {
-      console.error(JSON.stringify(error));
+      console.error(error.toString && error.toString() !== '[object Object]' ?
+        error.toString() :
+        JSON.stringify(error));
       process.exit(1);
     }
     console.log('Install finished successfully');
