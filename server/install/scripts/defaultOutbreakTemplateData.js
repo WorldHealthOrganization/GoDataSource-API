@@ -306,6 +306,7 @@ function run(callback) {
                       contactInvestigationTemplate: data.contactInvestigationTemplate,
                       contactFollowUpTemplate: data.contactFollowUpTemplate,
                       labResultsTemplate: data.labResultsTemplate,
+                      isContactLabResultsActive: !!data.isContactLabResultsActive,
                       deleted: false,
                       deletedAt: null
                     }, options)
@@ -350,7 +351,8 @@ function run(callback) {
                       caseInvestigationTemplate: newTemplateItem.caseInvestigationTemplate,
                       contactInvestigationTemplate: newTemplateItem.contactInvestigationTemplate,
                       contactFollowUpTemplate: newTemplateItem.contactFollowUpTemplate,
-                      labResultsTemplate: newTemplateItem.labResultsTemplate
+                      labResultsTemplate: newTemplateItem.labResultsTemplate,
+                      isContactLabResultsActive: !!newTemplateItem.isContactLabResultsActive
                     }, common.install.timestamps), options)
                     .then(() => {
                       // finished
