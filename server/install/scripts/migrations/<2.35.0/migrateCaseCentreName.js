@@ -1,9 +1,9 @@
 'use strict';
 
 // deps
-const MongoDBHelper = require('../../../components/mongoDBHelper');
+const MongoDBHelper = require('../../../../../components/mongoDBHelper');
 const Async = require('async');
-const DataSources = require('../../datasources');
+const DataSources = require('../../../../datasources');
 const _ = require('lodash');
 const Uuid = require('uuid');
 
@@ -60,7 +60,7 @@ const executeNextBatch = function (cb) {
           }
         }
       }
-    }, { projection: { _id: 1, dateRanges: 1 } })
+    }, {projection: {_id: 1, dateRanges: 1}})
     .limit(batchSize)
     .toArray()
     .then(records => {
@@ -198,7 +198,7 @@ const run = function (cb) {
       // get system's languages
       dbConn
         .collection('language')
-        .find({ deleted: { $ne: true } }, { projection: { _id: 1 } })
+        .find({deleted: {$ne: true}}, {projection: {_id: 1}})
         .toArray()
         .then(languages => {
           languageIds = languages.map(lang => lang._id);
@@ -207,7 +207,7 @@ const run = function (cb) {
           return referenceDataCollection
             .find({
               categoryId: centreNameReferenceDataCategory
-            }, { projection: { _id: 1, value: 1 } })
+            }, {projection: {_id: 1, value: 1}})
             .toArray();
         })
         .then((existingCenterNames) => {
@@ -230,4 +230,6 @@ const run = function (cb) {
     .catch(cb);
 };
 
-module.exports = run;
+module.exports = {
+  run
+};

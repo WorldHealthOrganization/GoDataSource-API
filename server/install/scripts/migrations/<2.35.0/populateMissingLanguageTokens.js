@@ -1,11 +1,11 @@
 'use strict';
 
-const MongoDBHelper = require('../../../components/mongoDBHelper');
+const MongoDBHelper = require('../../../../../components/mongoDBHelper');
 const _ = require('lodash');
 const uuid = require('uuid');
 const async = require('async');
-const datasources = require('../../datasources');
-const common = require('./_common');
+const datasources = require('../../../../datasources');
+const common = require('../../_common');
 
 // main language used to fill out missing tokens for all other languages
 const mainLanguageId = 'english_us';
@@ -189,34 +189,36 @@ function determineMissingLanguageTokens(
           // create ?
           if (tokensToCheckMap[languageToCheckId][mainLanguageTokenData.token] === undefined) {
             // create token
-            jobs.push((function (localMainLanguageTokenData, localLanguageToCheckId) { return (callback) => {
-              // generate id
-              const tokenID = localMainLanguageTokenData._id.startsWith('LNG_') ?
-                generateTokenID(localMainLanguageTokenData.token, localLanguageToCheckId) :
-                uuid();
+            jobs.push((function (localMainLanguageTokenData, localLanguageToCheckId) {
+              return (callback) => {
+                // generate id
+                const tokenID = localMainLanguageTokenData._id.startsWith('LNG_') ?
+                  generateTokenID(localMainLanguageTokenData.token, localLanguageToCheckId) :
+                  uuid();
 
-              // prepare object to save
-              const newTokenData = Object.assign({
-                _id: tokenID,
-                languageId: localLanguageToCheckId,
-                token: localMainLanguageTokenData.token,
-                outbreakId: localMainLanguageTokenData.outbreakId,
-                modules: localMainLanguageTokenData.modules,
-                translation: localMainLanguageTokenData.translation
-              }, common.install.timestamps);
+                // prepare object to save
+                const newTokenData = Object.assign({
+                  _id: tokenID,
+                  languageId: localLanguageToCheckId,
+                  token: localMainLanguageTokenData.token,
+                  outbreakId: localMainLanguageTokenData.outbreakId,
+                  modules: localMainLanguageTokenData.modules,
+                  translation: localMainLanguageTokenData.translation
+                }, common.install.timestamps);
 
-              // create
-              languageToken
-                .insertOne(newTokenData)
-                .then(() => {
-                  // log
-                  console.log(`Token '${newTokenData._id}' created`);
+                // create
+                languageToken
+                  .insertOne(newTokenData)
+                  .then(() => {
+                    // log
+                    console.log(`Token '${newTokenData._id}' created`);
 
-                  // finished
-                  callback();
-                })
-                .catch(callback);
-            }; })(mainLanguageTokenData, languageToCheckId));
+                    // finished
+                    callback();
+                  })
+                  .catch(callback);
+              };
+            })(mainLanguageTokenData, languageToCheckId));
           } else {
             // update
             // check if anything is different
@@ -230,25 +232,27 @@ function determineMissingLanguageTokens(
               )
             ) {
               // update token
-              jobs.push((function (_id, localMainLanguageTokenData) { return (callback) => {
-                languageToken
-                  .updateOne({
-                    _id: _id
-                  }, {
-                    '$set': {
-                      outbreakId: localMainLanguageTokenData.outbreakId,
-                      modules: localMainLanguageTokenData.modules
-                    }
-                  })
-                  .then(() => {
-                    // log
-                    console.log(`Token '${_id}' updated`);
+              jobs.push((function (_id, localMainLanguageTokenData) {
+                return (callback) => {
+                  languageToken
+                    .updateOne({
+                      _id: _id
+                    }, {
+                      '$set': {
+                        outbreakId: localMainLanguageTokenData.outbreakId,
+                        modules: localMainLanguageTokenData.modules
+                      }
+                    })
+                    .then(() => {
+                      // log
+                      console.log(`Token '${_id}' updated`);
 
-                    // finished
-                    callback();
-                  })
-                  .catch(callback);
-              }; })(tokensToCheckMap[languageToCheckId][mainLanguageTokenData.token]._id, mainLanguageTokenData));
+                      // finished
+                      callback();
+                    })
+                    .catch(callback);
+                };
+              })(tokensToCheckMap[languageToCheckId][mainLanguageTokenData.token]._id, mainLanguageTokenData));
             }
           }
         });
@@ -306,4 +310,6 @@ function run(callback) {
     .catch(callback);
 }
 
-module.exports = run;
+module.exports = {
+  run
+};

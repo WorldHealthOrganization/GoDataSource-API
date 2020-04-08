@@ -38,8 +38,8 @@
     "status_index": {
       "status": 1
     },
-    "endDate_index": {
-      "endDate": 1
+    "startDate_index": {
+      "startDate": 1
     }
   },
   "validations": [],

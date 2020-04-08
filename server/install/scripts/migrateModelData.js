@@ -2,11 +2,9 @@
 
 const MongoDBHelper = require('../../../components/mongoDBHelper');
 const DataSources = require('../../datasources');
-const Fs = require('fs-extra');
 const Path = require('path');
 const Async = require('async');
 const Uuid = require('uuid');
-const _ = require('lodash');
 
 const migrationVersionsFoldersPath = Path.resolve(__dirname, './migrations');
 
@@ -21,33 +19,51 @@ const migrationLogStatusMap = {
 const migrationVersions = [{
   version: '<2.35.0',
   scripts: [{
-    fileName: 'lab-result.js',
+    fileName: 'case.js',
     actions: [{
-      name: 'labResultMigrate',
-      buildNo: 1
-    }, {
-      name: 'labResultMigrate2',
+      name: 'migrateCases',
       buildNo: 1
     }]
   }, {
-    fileName: 'lab-result22.js',
+    fileName: 'followUp.js',
     actions: [{
-      name: 'labResultMigrate',
-      buildNo: 1
-    }, {
-      name: 'labResultMigrate2',
+      name: 'migrateFollowUps',
       buildNo: 1
     }]
-  }]
-}, {
-  version: '2.35.0',
-  scripts: [{
-    fileName: 'lab-result.js',
+  }, {
+    fileName: 'labResult.js',
     actions: [{
-      name: 'labResultMigrate',
+      name: 'migrateLabResults',
       buildNo: 1
-    }, {
-      name: 'labResultMigrate2',
+    }]
+  }, {
+    fileName: 'systemSettings.js',
+    actions: [{
+      name: 'migrateSystemSettings',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'user.js',
+    actions: [{
+      name: 'migrateUsers',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'migrateRolesAndUsers.js',
+    actions: [{
+      name: 'run',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'populateMissingLanguageTokens.js',
+    actions: [{
+      name: 'run',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'migrateCaseCentreName.js',
+    actions: [{
+      name: 'run',
       buildNo: 1
     }]
   }]
@@ -57,32 +73,44 @@ const migrationVersions = [{
  * Walk through the migrationVersions and get actions that need to be executed based on the last execution map
  * Will throw error if it was unable to read migration scripts from version folder or required actions are not defined in scripts
  * @param lastExecutionMap
- * @return {Array}
+ * @return {Object} Contains list of action entries for the ones that need to be executed and map for already executed actions
  */
-const getActionsForExecutionMap = function (lastExecutionMap = {}) {
-  let actionsForExecution = [];
+const getActionsForExecutionMap = function (lastExecutionMap = []) {
+  let result = {
+    actionsForExecution: [],
+    mapForAlreadyExecutedActions: []
+  };
 
   // loop through the versions
   migrationVersions.forEach(versionEntry => {
     // loop through the version scripts
     versionEntry.scripts.forEach(scriptEntry => {
-      let script = require(Path.resolve(migrationVersionsFoldersPath, versionEntry.version, scriptEntry.fileName) + '/dsddd');
+      let script = require(Path.resolve(migrationVersionsFoldersPath, versionEntry.version, scriptEntry.fileName));
 
       // loop through the script actions
       scriptEntry.actions.forEach(actionEntry => {
         let actionPath = `${versionEntry.version}/${scriptEntry.fileName}/${actionEntry.name}`;
-        let actionLastExecutedBuildNo = lastExecutionMap[actionPath];
+
+        // check for action presence in last execution map
+        let actionLastExecutedEntry = lastExecutionMap.find(actionEntry => actionEntry.name === actionPath);
+        let actionLastExecutedBuildNo = actionLastExecutedEntry ? actionLastExecutedEntry.buildNo : null;
 
         if (actionLastExecutedBuildNo !== actionEntry.buildNo) {
           // validate that action actually exists in script
           if (typeof script[actionEntry.name] !== 'function') {
-            console.log(`Action ${actionPath} is not defined`);
+            throw `Action '${actionPath}' is not defined`;
           }
 
           // need to execute action
-          actionsForExecution.push({
+          result.actionsForExecution.push({
             name: actionPath,
             action: script[actionEntry.name],
+            buildNo: actionEntry.buildNo
+          });
+        } else {
+          // action was already executed
+          result.mapForAlreadyExecutedActions.push({
+            name: actionPath,
             buildNo: actionEntry.buildNo
           });
         }
@@ -90,7 +118,7 @@ const getActionsForExecutionMap = function (lastExecutionMap = {}) {
     });
   });
 
-  return actionsForExecution;
+  return result;
 };
 
 // script's entry point
@@ -104,7 +132,7 @@ const run = function (cb) {
     return cb();
   }
 
-  let mongoDBConnection, migrationLogCollection, migrationLogInstanceId, actionsToBeExecuted, executionMap = {};
+  let migrationLogCollection, migrationLogInstanceId, actionsToBeExecuted, executionMap;
 
   // create Mongo DB connection
   return MongoDBHelper
@@ -112,7 +140,6 @@ const run = function (cb) {
       ignoreUndefined: DataSources.mongoDb.ignoreUndefined
     })
     .then(dbConn => {
-      mongoDBConnection = dbConn;
       migrationLogCollection = dbConn.collection('migrationLog');
 
       // check migration log to see if there is already a migration in progress
@@ -137,7 +164,7 @@ const run = function (cb) {
         .find({}, {
           limit: 1,
           sort: {
-            endDate: -1
+            startDate: -1
           },
           projection: {
             executionMap: 1
@@ -147,7 +174,9 @@ const run = function (cb) {
     })
     .then(lastMigration => {
       try {
-        actionsToBeExecuted = getActionsForExecutionMap(lastMigration.length && lastMigration[0].executionMap ? lastMigration[0].executionMap : {});
+        let result = getActionsForExecutionMap(lastMigration.length && lastMigration[0].executionMap ? lastMigration[0].executionMap : []);
+        actionsToBeExecuted = result.actionsForExecution;
+        executionMap = result.mapForAlreadyExecutedActions;
       } catch (e) {
         console.error('Failed reading migration actions', e);
         return Promise.reject(e);
@@ -187,7 +216,10 @@ const run = function (cb) {
             }
 
             // action executed successfully; update execution map and migration log
-            executionMap[actionEntry.name] = actionEntry.buildNo;
+            executionMap.push({
+              name: actionEntry.name,
+              buildNo: actionEntry.buildNo
+            });
             return migrationLogCollection
               .updateOne({
                 _id: migrationLogInstanceId
@@ -273,7 +305,8 @@ const run = function (cb) {
           '$set': {
             status: migrationLogStatusMap.failed,
             executionMap: executionMap,
-            endDate: new Date()
+            endDate: new Date(),
+            error: err.toString ? err.toString() : JSON.stringify(err)
           }
         })
         .then(updateResult => {
@@ -292,10 +325,6 @@ const run = function (cb) {
         });
     });
 };
-
-run((err) => {
-  console.log('errr', err);
-});
 
 // execute model migration scripts
 module.exports = run;
