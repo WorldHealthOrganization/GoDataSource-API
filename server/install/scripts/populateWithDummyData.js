@@ -1,5 +1,7 @@
 'use strict';
 
+/*eslint no-extra-boolean-cast: "off"*/
+
 const app = require('../../server');
 const async = require('async');
 const moment = require('moment');
@@ -19,6 +21,7 @@ const charsetMap = {
   french: `${this.default}çàèîûôöïüù`,
   chinese: '常用國字標準字體表形表'
 };
+const charsetsNo = charsetType.length;
 
 // variables for outbreak templates
 const questionsTypesToAnswers = {
@@ -47,6 +50,9 @@ const questionCategories = [
 ];
 const questionCategoriesNo = questionCategories.length;
 
+// outbreak constants
+const outbreakStartDatePastMonths = 6;
+
 // generate random numbers between min & max
 const randomFloatBetween = (
   minValue,
@@ -66,7 +72,7 @@ const randomFloatBetween = (
  */
 const randomString = (charset) => {
   if (!charset) {
-    charset = charsetType[randomFloatBetween(0, 2, 0)];
+    charset = charsetType[randomFloatBetween(0, charsetsNo - 1, 0)];
   }
 
   return randomize('?', randomFloatBetween(5, 10, 0), {chars: charsetMap[charset]});
@@ -103,12 +109,15 @@ const parseIntArgValue = function (value) {
 
 /**
  * Returns object containing generated createdAt/updatedAt
- * Outbreak date is set to 6 months ago; generate createdAt/updatedAt randomly in the last 6 months
+ * Note: Outbreak date is set to outbreakStartDatePastMonths months ago; generate createdAt/updatedAt randomly in the last outbreakStartDatePastMonths months
  * @return {{createdAt: string, updatedAt: string}}
  */
 const getTimestamps = function () {
-  // get a random number between 0 and 180 to be used as number of days in the past
-  let noDaysCreated = Math.ceil(Math.random() * 180);
+  // get days past since outbreak start (round month days to 30)
+  const daysPastSinceOutbreakStart = outbreakStartDatePastMonths * 30;
+
+  // get a random number between 0 and daysPastSinceOutbreakStart to be used as number of days in the past
+  let noDaysCreated = Math.ceil(Math.random() * daysPastSinceOutbreakStart);
   let noDaysUpdated = Math.ceil(Math.random() * noDaysCreated);
 
   return {
@@ -154,12 +163,13 @@ const generateTemplateQuestions = function (options) {
       let questionText = `${parentAnswerLabel.length ? `${parentAnswerLabel} - ` : ''}Q${questionNo}`;
 
       let question = {
-        multiAnswer: !!randomFloatBetween(0, 1, 0),
+        // multiAnswer can be true only on 1st level
+        multiAnswer: level === 1 ? (randomFloatBetween(0, 10, 0) <= 2) : false,
         inactive: randomFloatBetween(1, 10, 0) > 9 ? true : false,
         text: questionText,
         variable: questionText,
         category: questionCategories[randomFloatBetween(0, questionCategoriesNo - 1, 0)],
-        required: !!randomFloatBetween(0, 1, 0),
+        required: randomFloatBetween(0, 10, 0) <= 3,
         order: questionNo,
         answerType: questionType,
         answersDisplay: !!randomFloatBetween(0, 1, 0) ?
@@ -201,6 +211,16 @@ const generateTemplateQuestions = function (options) {
 function run(callback) {
   // retrieve config data
   const outbreakName = module.methodRelevantArgs.outbreakName;
+  /**
+   * type = caseInvestigationTemplate / contactInvestigationTemplate / contactFollowUpTemplate / labResultsTemplate
+   * {
+   *   [type]: {
+   *     questionsNoPerLevel: [ number of questions for each needed level ], // eg: [100, 2, 2]
+   *     answersNoPerLevel: [ number answers for single/multi asnwer questions for each needed level ] // eg: [5, 2, 3]
+   *   }
+   * }
+   *
+   */
   const outbreakSettings = module.methodRelevantArgs.outbreakSettings || {};
   const casesNo = parseIntArgValue(module.methodRelevantArgs.casesNo);
   const contactsNo = parseIntArgValue(module.methodRelevantArgs.contactsNo);
@@ -274,7 +294,7 @@ function run(callback) {
   const defaultPhoneNo = 10;
 
   // default outbreak template
-  const outbreakStartDate = moment().utc().add(-6, 'months').startOf('day');
+  const outbreakStartDate = moment().utc().add(-outbreakStartDatePastMonths, 'months').startOf('day');
   const outbreakAdminLevel = 'LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_0';
   const defaultOutbreakTemplate = {
     description: 'Created by populate script',
@@ -428,10 +448,10 @@ function run(callback) {
       outbreakDataContainer = outbreakData.toJSON();
 
       if (
-        locationsNo == 0 &&
-        casesNo == 0 &&
-        contactsNo == 0 &&
-        eventsNo == 0
+        locationsNo === 0 &&
+        casesNo === 0 &&
+        contactsNo === 0 &&
+        eventsNo === 0
       ) {
         // no locations need to be added/retrieved
         app.logger.debug('Skipping locations as they are not needed');
@@ -458,7 +478,7 @@ function run(callback) {
         })
         .then(() => {
           // check if other locations need to be added
-          if (locationsNo == 0) {
+          if (locationsNo === 0) {
             app.logger.debug('No need to add new locations. Skip');
             return Promise.resolve();
           }
@@ -472,7 +492,7 @@ function run(callback) {
           for (let index = 0; index < locationsNo; index++) {
             locationsJobs.push((cb) => {
               // get charset to be used for location name
-              const locationCharset = charsetType[randomFloatBetween(0, 2, 0)];
+              const locationCharset = charsetType[randomFloatBetween(0, charsetsNo - 1, 0)];
               const locationName = randomString(locationCharset);
               app.logger.debug(`Creating location '${locationName}'`);
 
@@ -567,7 +587,7 @@ function run(callback) {
         })
         .then(() => {
           // check if we need to add additional sublocations
-          if (subLocationsPerLocationNo == 0) {
+          if (subLocationsPerLocationNo === 0) {
             app.logger.debug('No new subLocations need to be added. Skip');
             return Promise.resolve();
           }
@@ -683,7 +703,7 @@ function run(callback) {
 
     // populate cases
     .then(() => {
-      if (casesNo == 0) {
+      if (casesNo === 0) {
         // no new cases need to be created
         app.logger.debug('No new cases need to be created. Skip');
         return Promise.resolve();
@@ -696,7 +716,7 @@ function run(callback) {
       const casesJobs = [];
       for (let index = 0; index < casesNo; index++) {
         casesJobs.push((cb) => {
-          const namesCharset = charsetType[randomFloatBetween(0, 2, 0)];
+          const namesCharset = charsetType[randomFloatBetween(0, charsetsNo - 1, 0)];
           // determine first name
           const firstName = randomString(namesCharset);
 
@@ -872,7 +892,7 @@ function run(callback) {
 
     // populate contacts
     .then(() => {
-      if (contactsNo == 0) {
+      if (contactsNo === 0) {
         // no new contacts need to be created
         app.logger.debug('No new contacts need to be created. Skip');
         return Promise.resolve();
@@ -885,7 +905,7 @@ function run(callback) {
       const contactsJobs = [];
       for (let index = 0; index < contactsNo; index++) {
         contactsJobs.push((cb) => {
-          const namesCharset = charsetType[randomFloatBetween(0, 2, 0)];
+          const namesCharset = charsetType[randomFloatBetween(0, charsetsNo - 1, 0)];
           // determine first name
           const firstName = randomString(namesCharset);
 
@@ -1022,7 +1042,7 @@ function run(callback) {
 
     // populate events
     .then(() => {
-      if (eventsNo == 0) {
+      if (eventsNo === 0) {
         // no new events need to be created
         app.logger.debug('No new events need to be added. Skip');
         return Promise.resolve();
@@ -1036,7 +1056,7 @@ function run(callback) {
       for (let index = 0; index < eventsNo; index++) {
         eventsJobs.push((cb) => {
           // determine event name
-          const name = randomString(charsetType[randomFloatBetween(0, 2, 0)]);
+          const name = randomString(charsetType[randomFloatBetween(0, charsetsNo - 1, 0)]);
 
           // determine current address - some have an address while others don't
           // 90% have an address
@@ -1138,8 +1158,8 @@ function run(callback) {
     // create relationships
     .then(() => {
       if (
-        minNoRelationshipsForEachRecord == 0 &&
-        maxNoRelationshipsForEachRecord == 0
+        minNoRelationshipsForEachRecord === 0 &&
+        maxNoRelationshipsForEachRecord === 0
       ) {
         // no relations need to be created/retrieved
         app.logger.debug('No relations need to be added. Skip');

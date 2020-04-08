@@ -239,8 +239,16 @@ const routines = {
     // all above arg are required
     let stop = false;
     _.each(requiredOptions, (argKey) => {
-      if (methodRelevantArgs[argKey] === undefined) {
-        console.log(`The following arguments are required either in given options JSON file or separate input parameters: ${requiredOptions.join(', ')}`);
+      if (
+        // required arg should be present
+        methodRelevantArgs[argKey] === undefined ||
+        (
+          // required arg should not be empty string
+          typeof methodRelevantArgs[argKey] === 'string' &&
+          !methodRelevantArgs[argKey].length
+        )
+      ) {
+        console.log(`The following arguments are required either in given options JSON file or separate input parameters and should not be empty: ${requiredOptions.join(', ')}`);
         stop = true;
         return false;
       }
@@ -331,7 +339,9 @@ if (!runFunctions.length) {
 } else {
   async.series(runFunctions, function (error) {
     if (error) {
-      console.error(error.toString ? error.toString() : JSON.stringify(error));
+      console.error(error.toString && error.toString() !== '[object Object]' ?
+        error.toString() :
+        JSON.stringify(error));
       process.exit(1);
     }
     console.log('Install finished successfully');
