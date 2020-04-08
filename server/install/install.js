@@ -307,7 +307,7 @@ const routines = {
     // determine missing reference data items
     console.log('Determine and populate missing language tokens');
     [
-      require('./scripts/migrations/<2.35.0/populateMissingLanguageTokens').run
+      require('./scripts/migrations/older/populateMissingLanguageTokens').run
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });
@@ -316,7 +316,7 @@ const routines = {
     // determine missing case center names
     console.log('Determine and create reference center names from text center names');
     [
-      require('./scripts/migrations/<2.35.0/migrateCaseCentreName').run
+      require('./scripts/migrations/older/migrateCaseCentreName').run
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });
