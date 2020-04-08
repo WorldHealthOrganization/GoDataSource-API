@@ -103,10 +103,7 @@ const routines = {
       require('./scripts/defaultReferenceData'),
       require('./scripts/defaultHelpData'),
       require('./scripts/defaultOutbreakTemplateData'),
-      require('./scripts/migrateModelData'),
-      require('./scripts/migrateRolesAndUsers'),
-      require('./scripts/populateMissingLanguageTokens'),
-      require('./scripts/migrateCaseCentreName')
+      require('./scripts/migrateModelData')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });
@@ -287,7 +284,7 @@ const routines = {
     // determine missing reference data items
     console.log('Determine and populate missing language tokens');
     [
-      require('./scripts/populateMissingLanguageTokens')
+      require('./scripts/migrations/<2.35.0/populateMissingLanguageTokens').run
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });
@@ -296,7 +293,7 @@ const routines = {
     // determine missing case center names
     console.log('Determine and create reference center names from text center names');
     [
-      require('./scripts/migrateCaseCentreName')
+      require('./scripts/migrations/<2.35.0/migrateCaseCentreName').run
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });

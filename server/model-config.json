@@ -367,5 +367,9 @@
   "contactOfContactAndRelationship": {
     "dataSource": null,
     "public": false
+  },
+  "migrationLog": {
+    "dataSource": "mongoDb",
+    "public": false
   }
 }

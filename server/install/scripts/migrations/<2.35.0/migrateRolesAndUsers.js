@@ -1,11 +1,11 @@
 'use strict';
 
-const MongoDBHelper = require('../../../components/mongoDBHelper');
+const MongoDBHelper = require('../../../../../components/mongoDBHelper');
 const _ = require('lodash');
 const moment = require('moment');
 
 // roles map from model
-const rolesMap = require('./defaultRoles');
+const rolesMap = require('../../defaultRoles');
 const defaultAdmin = {
   _id: 'sys_admin',
   firstName: 'System',
@@ -152,7 +152,7 @@ function migrateRoles(mongoDBConnection) {
         return null;
       }
 
-        // log
+      // log
       console.log(`Checking ${defaultRoleIds.length} roles permissions...`);
 
       // retrieve roles if necessary
@@ -427,4 +427,6 @@ function run(callback) {
     .catch(callback);
 }
 
-module.exports = run;
+module.exports = {
+  run
+};
