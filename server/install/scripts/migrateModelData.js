@@ -67,6 +67,15 @@ const migrationVersions = [{
       buildNo: 1
     }]
   }]
+}, {
+  version: '2.35.0',
+  scripts: [{
+    fileName: 'person.js',
+    actions: [{
+      name: 'setHasRelationshipsFlag',
+      buildNo: 1
+    }]
+  }]
 }];
 
 /**
