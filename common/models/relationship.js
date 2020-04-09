@@ -621,8 +621,41 @@ module.exports = function (Relationship) {
               throw app.logger.error(`Failed to trigger person record updates. Person (id: ${person.id}) not found.`);
             }
             personRecord.systemTriggeredUpdate = true;
-            // trigger record update
-            return personRecord.updateAttributes({}, context.options);
+
+            // initialize person relationships related payload; will be updated depending on action taken on relationships
+            let personRelationships = personRecord.relationshipsIds || [];
+            let relationshipsPayload = {};
+
+            if (relationship.deleted) {
+              // when a relationship is deleted we need to check if the person has additional relationships
+              personRelationships.splice(personRelationships.indexOf(relationship.id), 1);
+              if (personRelationships.length) {
+                // person will still have relationships
+                relationshipsPayload = {
+                  hasRelationships: true,
+                  relationshipsIds: personRelationships
+                };
+              } else {
+                // no relationships remain
+                relationshipsPayload = {
+                  hasRelationships: false,
+                  relationshipsIds: []
+                };
+              }
+            } else {
+              // relationship just created or updated
+              relationshipsPayload = {
+                hasRelationships: true
+              };
+              if (personRelationships.indexOf(relationship.id) === -1) {
+                // relationship was not found in current person relationships; add it
+                // if it was already in the array there is no need to update the array
+                personRelationships.push(relationship.id);
+                relationshipsPayload.relationshipsIds = personRelationships;
+              }
+            }
+
+            return personRecord.updateAttributes(relationshipsPayload, context.options);
           })
       );
     });

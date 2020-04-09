@@ -37,9 +37,6 @@
     }
   },
   "indexes": {
-    "createdAt_index": {
-      "createdAt": 1
-    },
     "action_index": {
       "action": 1
     },

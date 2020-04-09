@@ -164,6 +164,12 @@
       "description": "Flag that specifies if a case/contact/event has at least a relationship.",
       "type": "boolean",
       "default": false
+    },
+    "relationshipsIds": {
+      "description": "Array containing IDs for the relationships where the person is a participant",
+      "type": [
+        "string"
+      ]
     }
   },
   "indexes": {
