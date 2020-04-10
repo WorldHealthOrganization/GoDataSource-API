@@ -79,6 +79,9 @@ module.exports = function (Outbreak) {
     'prototype.findEventRelationships'
   ]);
 
+  // load controller extensions (other files that contain outbreak related actions)
+  require('./outbreakRelationship')(Outbreak);
+  
   /**
    * Allow changing follow-up status (only status property)
    */
@@ -2025,7 +2028,7 @@ module.exports = function (Outbreak) {
         .then((caseData) => {
           // no case data, so there is no need to retrieve relationships
           if (_.isEmpty(caseData)) {
-            return  [];
+            return [];
           }
 
           // retrieve list of cases for which we need to retrieve contacts relationships
@@ -2786,7 +2789,7 @@ module.exports = function (Outbreak) {
         .then((caseData) => {
           // no case data, so there is no need to retrieve relationships
           if (_.isEmpty(caseData)) {
-            return  [];
+            return [];
           }
 
           // retrieve list of cases for which we need to retrieve contacts relationships
@@ -2981,7 +2984,7 @@ module.exports = function (Outbreak) {
         .then((caseData) => {
           // no case data, so there is no need to retrieve relationships
           if (_.isEmpty(caseData)) {
-            return  [];
+            return [];
           }
 
           // retrieve list of cases for which we need to retrieve contacts relationships
@@ -9825,7 +9828,7 @@ module.exports = function (Outbreak) {
         .then((caseData) => {
           // no case data, so there is no need to retrieve relationships
           if (_.isEmpty(caseData)) {
-            return  [];
+            return [];
           }
 
           // retrieve list of cases for which we need to retrieve contacts relationships
@@ -11402,188 +11405,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Delete all relationships matching specific conditions
-   * @param where Mongo Query
-   * @param callback
-   */
-  Outbreak.prototype.bulkDeleteRelationships = function (where, callback) {
-    // where is required so we don't remove all relationships from an outbreak unless we want to do that :)
-    if (_.isEmpty(where)) {
-      return callback(app.utils.apiError.getError('VALIDATION_ERROR', {
-        model: app.models.relationship.modelName,
-        details: 'Where should be a non-empty query'
-      }));
-    }
-
-    // Retrieve contact id from a relationship ( return undefined if relationships is associated with a contact )
-    const getContactId = (persons) => {
-      let contactId;
-      if (persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-        contactId = persons[0].id;
-      } else if (persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-        contactId = persons[1].id;
-      }
-      return contactId;
-    };
-
-    // retrieve relationships
-    app.models.relationship
-      .rawFind(app.utils.remote.convertLoopbackFilterToMongo({
-        $and: [
-          {
-            deleted: {
-              $ne: true
-            },
-            outbreakId: this.id
-          },
-          where
-        ]
-      }), {
-        projection: {
-          _id: 1,
-          persons: 1
-        }
-      })
-      .then((relationships) => {
-        // nothing to delete ?
-        if (_.isEmpty(relationships)) {
-          return null;
-        }
-
-        // map relationships to easily identify what will be removed
-        // & determine contacts associated with these relationships
-        const mappedData = relationships.reduce((accumulator, relationship) => {
-          // validate persons
-          if (
-            !relationship.persons ||
-            relationship.persons.length !== 2
-          ) {
-            return accumulator;
-          }
-
-          // if this relationship is between a contact & something else, then we need to cache contact id for later use
-          const contactId = getContactId(relationship.persons);
-          if (contactId) {
-            // initialize contact map to be used later to determine relationships deleted per contact
-            // this way we can determine if one of contacts will become isolated ( no exposure )
-            if (!accumulator.contacts[contactId]) {
-              accumulator.contacts[contactId] = {
-                deleteRelationships: [],
-                relatedRelationships: []
-              };
-            }
-
-            // map deleted relationship
-            accumulator.contacts[contactId].deleteRelationships.push(relationship.id);
-          }
-
-          // map relationships
-          accumulator.relationships[relationship.id] = relationship;
-          return accumulator;
-        }, {
-          relationships: {},
-          contacts: {}
-        });
-
-        // there are no contact relationships that we want to remove, so there is no point in validating ( retrieving the contact relationships )
-        if (_.isEmpty(mappedData.contacts)) {
-          return {
-            mappedData: mappedData,
-            contactRelationships: []
-          };
-        }
-
-        // retrieve all relationships for contacts associated with our contact relationships
-        // outbreak condition not need since we filter by pk
-        return app.models.relationship
-          .rawFind({
-            deleted: {
-              $ne: true
-            },
-            'persons.id': {
-              $in: Object.keys(mappedData.contacts)
-            }
-          }, {
-            projection: {
-              _id: 1,
-              persons: 1
-            }
-          })
-          .then((contactRelationships) => ({
-            mappedData: mappedData,
-            contactRelationships: contactRelationships
-          }));
-      })
-      .then((data) => {
-        // nothing to delete ?
-        if (_.isEmpty(data)) {
-          return null;
-        }
-
-        // there are no contact relationships that we want to remove, so there is no point in validating ( retrieving the contact relationships )
-        const mappedData = data.mappedData;
-        if (_.isEmpty(mappedData.contacts)) {
-          return mappedData.relationships;
-        }
-
-        // map contact relationships to easily determine if we have at least one isolated contact
-        data.contactRelationships.forEach((relationship) => {
-          // determine contact id
-          // no need to validate existence since all these relationships are associated with contacts
-          const contactId = getContactId(relationship.persons);
-          mappedData.contacts[contactId].relatedRelationships.push(relationship.id);
-        });
-
-        // determine if at least one of the relationships we're trying to remove contains a contact that will remain without an exposure
-        // in this case we need to stop the delete bulk process & throw a detailed error ( contact ids that will remain without exposures... )
-        const isolatedContacts = [];
-        _.each(mappedData.contacts, (contactData, contactId) => {
-          // check if this will become an isolated contact if we remove data
-          // this condition always will be either equal ( isolated case ), or greater, but never less...but it doesn't matter :)
-          if (contactData.relatedRelationships.length <= contactData.deleteRelationships.length) {
-            // we found an isolated contact
-            isolatedContacts.push(contactId);
-          }
-        });
-
-        // can't delete relationships because at least one case will become isolated after that
-        if (!_.isEmpty(isolatedContacts)) {
-          throw app.utils.apiError.getError('DELETE_CONTACT_LAST_RELATIONSHIP', {
-            contactIDs: isolatedContacts.join(', '),
-            contactIDsArray: isolatedContacts
-          });
-        }
-
-        // proceed with removing relationships
-        return mappedData.relationships;
-      })
-      .then((relationshipsToDelete) => {
-        // nothing to delete ?
-        if (_.isEmpty(relationshipsToDelete)) {
-          // no records deleted
-          return callback(null, 0);
-        }
-
-        // delete relationships
-        return app.models.relationship
-          .rawBulkDelete({
-            _id: {
-              $in: Object.keys(relationshipsToDelete)
-            }
-          })
-          .then((removedCount) => {
-            callback(
-              null,
-              removedCount && removedCount.modifiedCount ?
-                removedCount.modifiedCount :
-                0
-            );
-          });
-      })
-      .catch(callback);
-  };
-
-  /**
    * Change target for all relationships matching specific conditions
    * @param targetId Case / Contact / Event
    * @param where Mongo Query
@@ -12326,7 +12147,10 @@ module.exports = function (Outbreak) {
       })
       .then(function (instance) {
         if (!instance) {
-          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contactOfContact.modelName, id: contactOfContactId});
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.contactOfContact.modelName,
+            id: contactOfContactId
+          });
         }
 
         // undo delete
@@ -12685,7 +12509,7 @@ module.exports = function (Outbreak) {
     const models = app.models;
 
 
-    let tmpDir = tmp.dirSync({ unsafeCleanup: true });
+    let tmpDir = tmp.dirSync({unsafeCleanup: true});
     let tmpDirName = tmpDir.name;
 
     // get all requested contact of contacts, including their relationships and followUps
@@ -12966,7 +12790,7 @@ module.exports = function (Outbreak) {
       .then(filter => app.models.contactOfContact.rawFind(
         filter.where,
         {
-          projection: { riskLevel: 1 },
+          projection: {riskLevel: 1},
           includeDeletedRecords: filter.deleted
         })
       )

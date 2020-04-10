@@ -115,7 +115,7 @@ const getDateChunks = function (start, end, chunkType, weekType) {
   switch (chunkType) {
     case 'day':
       let range = moment.range(start, end);
-      result = Array.from(range.by('day')).map(day => ({ start: getDate(day), end: getDateEndOfDay(day) }));
+      result = Array.from(range.by('day')).map(day => ({start: getDate(day), end: getDateEndOfDay(day)}));
       break;
     case 'week':
     case 'month':
@@ -2062,7 +2062,7 @@ const getQuestionnaireMaxAnswersMap = function (questionnaire, records, translat
   // get a map of all the multi date answer questions and their nested questions
   let multiDateQuestionsMap = {};
 
-  (function parseQuestion (questions) {
+  (function parseQuestion(questions) {
     (questions || []).forEach(question => {
       multiDateQuestionsMap[question.variable] = [];
       (question.answers || []).forEach(answer => parseQuestion(answer.additionalQuestions));
@@ -2190,7 +2190,7 @@ const attachParentLocations = function (targetModel, locationModel, records, cal
   }
 
   if (!allLocations.length) {
-    return callback(null, { records });
+    return callback(null, {records});
   }
 
   return locationModel.getParentLocationsWithDetails(
@@ -2243,7 +2243,7 @@ const attachParentLocations = function (targetModel, locationModel, records, cal
           }
         }
       }
-      return callback(null, { records, highestParentsChain });
+      return callback(null, {records, highestParentsChain});
     }
   );
 };
@@ -2314,6 +2314,69 @@ const getCaptchaConfig = () => {
   return captchaConfig;
 };
 
+/**
+ * Handle actions in batches
+ * @param getActionsCount Function returning a promise which resolves with the total number of actions
+ * @param getBatchData Function returning a promise which resolves with a data array for the given batch and given batch size
+ * @param itemAction Action for each item in a batch; Function returning a promise for the given item data
+ * @param batchSize Size of a batch
+ * @param parallelActionsNo Number of actions to be executed in parallel in a batch
+ * @param logger
+ * @return {*|PromiseLike<T | never | never>|Promise<T | never | never>}
+ */
+const handleActionsInBatches = function (getActionsCount, getBatchData, itemAction, batchSize, parallelActionsNo, logger) {
+  return getActionsCount()
+    .then(actionsCount => {
+      /**
+       * Handle batchNo of actions
+       * @param batchNo
+       * @return {PromiseLike<T | never>}
+       */
+      const handleBatch = (batchNo = 1) => {
+        logger.debug(`Processing batch ${batchNo}`);
+
+        return getBatchData(batchNo, batchSize)
+          .then(dataArray => {
+            let batchJobs = dataArray.forEach(data => {
+              return (cb) => {
+                return itemAction(data)
+                  .then(() => {
+                    return cb();
+                  })
+                  .catch(cb);
+              };
+            });
+
+            return new Promise((resolve, reject) => {
+              async.parallelLimit(batchJobs, parallelActionsNo, (err) => {
+                if (err) {
+                  return reject(err);
+                }
+
+                return resolve();
+              });
+            });
+          })
+          .then(() => {
+            logger.debug(`Finished processing batch ${batchNo}`);
+            // check if we need to handle another batch
+            if (batchNo * batchSize > actionsCount) {
+              logger.debug('All data has been processed');
+              // finished processing
+              return Promise.resolve();
+            } else {
+              // actions handled are less than the total number; continue with next batch
+              return handleBatch(++batchNo);
+            }
+          });
+      };
+
+      // start batches processing
+      logger.debug('Processing actions in batches');
+      return handleBatch();
+    });
+};
+
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -2367,5 +2430,6 @@ module.exports = {
   removeFilterOptions: removeFilterOptions,
   attachCustomDeleteFilterOption: attachCustomDeleteFilterOption,
   getMaximumLengthForArrays: getMaximumLengthForArrays,
-  getCaptchaConfig: getCaptchaConfig
+  getCaptchaConfig: getCaptchaConfig,
+  handleActionsInBatches: handleActionsInBatches
 };

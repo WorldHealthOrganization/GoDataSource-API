@@ -5673,6 +5673,11 @@
           "type": "object",
           "description": "Criteria to match filter thorough relationships",
           "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": {
