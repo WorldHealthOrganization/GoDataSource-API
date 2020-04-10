@@ -74,12 +74,13 @@ module.exports = function (Outbreak) {
                 deleteRelationships: [],
                 relatedRelationships: []
               };
+
+              // cache person ID
+              accumulator[idsContainer].push(person.id);
             }
 
             // map deleted relationship
             accumulator[mapContainer][person.id].deleteRelationships.push(relationship.id);
-            // cache person ID
-            accumulator[idsContainer].push(person.id);
           });
 
           // map relationships
@@ -153,12 +154,13 @@ module.exports = function (Outbreak) {
         return data;
       })
       .then((data) => {
-        let relationshipsToDelete = data.relationships;
         // nothing to delete ?
-        if (_.isEmpty(relationshipsToDelete)) {
+        if (!data || _.isEmpty(data.relationships)) {
           // no records deleted
           return callback(null, 0);
         }
+
+        let relationshipsToDelete = data.relationships;
 
         // initialize removed relationships count
         let removedCount;
@@ -182,10 +184,10 @@ module.exports = function (Outbreak) {
             // we have contacts
             // create functions to be used in handleActionsInBatches
             const getActionsCount = function () {
-              return Promise.resolve(data.contactIds.length);
+              return Promise.resolve(data.contactsIds.length);
             };
             const getBatchData = function (batchNo, batchSize) {
-              let contactsBatch = data.contactsIds.slice((batchNo - 1) * batchSize, batchSize);
+              let contactsBatch = data.contactsIds.slice((batchNo - 1) * batchSize, batchNo * batchSize);
               return Promise.resolve(contactsBatch.map(contactId => {
                 return {
                   id: contactId,
@@ -195,11 +197,16 @@ module.exports = function (Outbreak) {
               }));
             };
             const itemAction = function (item) {
+              // get remaining relationships
+              let remainingRelationships = item.relatedRelationships.filter(relId => !item.deleteRelationships.includes(relId));
+
               return app.models.person
                 .rawUpdateOne({
                   _id: item.id
                 }, {
-                  relationshipsIds: item.relatedRelationships.filter(relId => !item.deleteRelationships.includes(relId))
+                  // no need to update hasRelationships flag as for contacts will not change
+                  // hasRelationships: !!remainingRelationships.length,
+                  relationshipsIds: remainingRelationships
                 }, options, {
                   returnUpdatedResource: false
                 });
@@ -231,11 +238,15 @@ module.exports = function (Outbreak) {
                 });
             };
             const itemAction = function (item) {
+              // get remaining relationships
+              let remainingRelationships = item.relationshipsIds.filter(relId => !data.otherPersons[item.id].deleteRelationships.includes(relId));
+
               return app.models.person
                 .rawUpdateOne({
                   _id: item.id
                 }, {
-                  relationshipsIds: item.relationshipsIds.filter(relId => !data.otherPersons[item.id].deleteRelationships.includes(relId))
+                  hasRelationships: !!remainingRelationships.length,
+                  relationshipsIds: remainingRelationships
                 }, options, {
                   returnUpdatedResource: false
                 });

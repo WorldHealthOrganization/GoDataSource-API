@@ -2327,6 +2327,12 @@ const getCaptchaConfig = () => {
 const handleActionsInBatches = function (getActionsCount, getBatchData, itemAction, batchSize, parallelActionsNo, logger) {
   return getActionsCount()
     .then(actionsCount => {
+      if (actionsCount === 0) {
+        // nothing to do
+        logger.debug('No data found for which to execute actions');
+        return Promise.resolve();
+      }
+
       /**
        * Handle batchNo of actions
        * @param batchNo
@@ -2337,7 +2343,7 @@ const handleActionsInBatches = function (getActionsCount, getBatchData, itemActi
 
         return getBatchData(batchNo, batchSize)
           .then(dataArray => {
-            let batchJobs = dataArray.forEach(data => {
+            let batchJobs = dataArray.map(data => {
               return (cb) => {
                 return itemAction(data)
                   .then(() => {

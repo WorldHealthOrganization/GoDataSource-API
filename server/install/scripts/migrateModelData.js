@@ -72,7 +72,7 @@ const migrationVersions = [{
   scripts: [{
     fileName: 'person.js',
     actions: [{
-      name: 'setHasRelationshipsFlag',
+      name: 'setRelationshipsInformationOnPerson',
       buildNo: 1
     }]
   }]
