@@ -206,7 +206,8 @@ const run = function (cb) {
         .insert({
           _id: migrationLogInstanceId,
           status: migrationLogStatusMap.started,
-          startDate: new Date()
+          startDate: new Date(),
+          executionMap: executionMap
         });
     })
     .then(() => {
