@@ -232,7 +232,8 @@ module.exports = function (SystemSettings) {
           tokenTTL: config.authToken && config.authToken.ttl ?
             config.authToken.ttl :
             app.models.user.settings.ttl,
-          skipOldPasswordForUserModify: config.skipOldPasswordForUserModify
+          skipOldPasswordForUserModify: config.skipOldPasswordForUserModify,
+          captcha: app.utils.helpers.getCaptchaConfig()
         }
       )
     );

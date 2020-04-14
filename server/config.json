@@ -29,6 +29,11 @@
     "path": "/auth/reset-password",
     "from": "no-reply@who.int"
   },
+  "captcha": {
+    "login": false,
+    "forgotPassword": false,
+    "resetPasswordQuestions": false
+  },
   "logging": {
     "level": "info",
     "maxSize": 10000000,

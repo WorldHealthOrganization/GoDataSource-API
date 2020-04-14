@@ -315,6 +315,10 @@
     "defaultStatusCode": 422,
     "messagePattern": "Invalid captcha."
   },
+  "DISABLED_CAPTCHA": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Disabled captcha."
+  },
   "MISSING_REQUIRED_OLD_PASSWORD": {
     "defaultStatusCode": 400,
     "translation": "Old password is required when changing passwords"
