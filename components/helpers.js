@@ -16,6 +16,7 @@ const packageJson = require('../package');
 const workerRunner = require('./workerRunner');
 const crypto = require('crypto');
 const EpiWeek = require('epi-week');
+const config = require('../server/config');
 
 const arrayFields = {
   'addresses': 'address',
@@ -2292,6 +2293,27 @@ const getMaximumLengthForArrays = function (items, props) {
   return propsLengths;
 };
 
+/**
+ * Retrieve enabled captcha items
+ * @returns {{login: boolean, forgotPassword: boolean, resetPasswordQuestions: boolean}|{}}
+ */
+const getCaptchaConfig = () => {
+  // fill missing captcha properties
+  const captchaConfig = config.captcha || {};
+  if (captchaConfig.login === undefined) {
+    captchaConfig.login = true;
+  }
+  if (captchaConfig.forgotPassword === undefined) {
+    captchaConfig.forgotPassword = true;
+  }
+  if (captchaConfig.resetPasswordQuestions === undefined) {
+    captchaConfig.resetPasswordQuestions = true;
+  }
+
+  // finished
+  return captchaConfig;
+};
+
 module.exports = {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -2344,5 +2366,6 @@ module.exports = {
   attachParentLocations: attachParentLocations,
   removeFilterOptions: removeFilterOptions,
   attachCustomDeleteFilterOption: attachCustomDeleteFilterOption,
-  getMaximumLengthForArrays: getMaximumLengthForArrays
+  getMaximumLengthForArrays: getMaximumLengthForArrays,
+  getCaptchaConfig: getCaptchaConfig
 };

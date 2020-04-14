@@ -130,9 +130,13 @@ module.exports = function (User) {
    * Hook before user/login method
    */
   User.beforeRemote('login', (ctx, modelInstance, next) => {
+    // fill missing captcha properties
+    const captchaConfig = app.utils.helpers.getCaptchaConfig();
+
     // do we need to validate captcha ?
     const req = ctx.req;
     if (
+      captchaConfig.login &&
       req.session &&
       req.session.loginCaptcha &&
       req.body &&
@@ -153,9 +157,13 @@ module.exports = function (User) {
    * Hook before user/reset method
    */
   User.beforeRemote('resetPassword', (ctx, modelInstance, next) => {
+    // fill missing captcha properties
+    const captchaConfig = app.utils.helpers.getCaptchaConfig();
+
     // do we need to validate captcha ?
     const req = ctx.req;
     if (
+      captchaConfig.forgotPassword &&
       req.session &&
       req.session.forgotPasswordCaptcha &&
       req.body &&
@@ -176,9 +184,13 @@ module.exports = function (User) {
    * Hook before user/reset-password-with-security-question method
    */
   User.beforeRemote('resetPassWithSecurityQuestion', (ctx, modelInstance, next) => {
+    // fill missing captcha properties
+    const captchaConfig = app.utils.helpers.getCaptchaConfig();
+
     // do we need to validate captcha ?
     const req = ctx.req;
     if (
+      captchaConfig.resetPasswordQuestions &&
       req.session &&
       req.session.resetPasswordQuestionsCaptcha &&
       req.body &&
