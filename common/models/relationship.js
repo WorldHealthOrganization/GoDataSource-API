@@ -679,7 +679,7 @@ module.exports = function (Relationship) {
               .then(function (personRecord) {
                 // if the record is not found, stop with err
                 if (!personRecord) {
-                  throw app.logger.error(`Failed to trigger person record updates. Person (id: ${person.id}) not found.`);
+                  throw app.logger.error(`Failed to trigger person record updates. Person (id: ${oldPerson.id}) not found.`);
                 }
                 personRecord.systemTriggeredUpdate = true;
 

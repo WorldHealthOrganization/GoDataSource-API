@@ -275,7 +275,7 @@ const routines = {
     console.log('Setting relationships information on person model');
     runFunctions.push((cb) => {
       require('./scripts/migrations/2.35.0/person').setRelationshipsInformationOnPerson(methodRelevantArgs, cb);
-    })
+    });
   },
   determineAndDumpReferenceDataItems: function () {
     // where to check if reference data item from database are missing ?
