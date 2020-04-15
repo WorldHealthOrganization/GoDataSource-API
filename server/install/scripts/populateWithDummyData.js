@@ -1553,6 +1553,9 @@ function run(callback) {
                               }, {
                                 '$set': {
                                   hasRelationships: true
+                                },
+                                'addToSet': {
+                                  relationshipsIds: relationshipData.id
                                 }
                               });
                           })

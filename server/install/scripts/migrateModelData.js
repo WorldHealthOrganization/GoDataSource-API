@@ -67,6 +67,15 @@ const migrationVersions = [{
       buildNo: 1
     }]
   }]
+}, {
+  version: '2.35.0',
+  scripts: [{
+    fileName: 'person.js',
+    actions: [{
+      name: 'setRelationshipsInformationOnPerson',
+      buildNo: 1
+    }]
+  }]
 }];
 
 /**
@@ -85,8 +94,6 @@ const getActionsForExecutionMap = function (lastExecutionMap = []) {
   migrationVersions.forEach(versionEntry => {
     // loop through the version scripts
     versionEntry.scripts.forEach(scriptEntry => {
-      let script = require(Path.resolve(migrationVersionsFoldersPath, versionEntry.version, scriptEntry.fileName));
-
       // loop through the script actions
       scriptEntry.actions.forEach(actionEntry => {
         let actionPath = `${versionEntry.version}/${scriptEntry.fileName}/${actionEntry.name}`;
@@ -96,6 +103,8 @@ const getActionsForExecutionMap = function (lastExecutionMap = []) {
         let actionLastExecutedBuildNo = actionLastExecutedEntry ? actionLastExecutedEntry.buildNo : null;
 
         if (actionLastExecutedBuildNo !== actionEntry.buildNo) {
+          // load script only if action needs to be executed
+          let script = require(Path.resolve(migrationVersionsFoldersPath, versionEntry.version, scriptEntry.fileName));
           // validate that action actually exists in script
           if (typeof script[actionEntry.name] !== 'function') {
             throw `Action '${actionPath}' is not defined`;
@@ -197,7 +206,8 @@ const run = function (cb) {
         .insert({
           _id: migrationLogInstanceId,
           status: migrationLogStatusMap.started,
-          startDate: new Date()
+          startDate: new Date(),
+          executionMap: executionMap
         });
     })
     .then(() => {

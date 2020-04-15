@@ -563,6 +563,9 @@ module.exports = function (Relationship) {
   Relationship.observe('before save', function (context, next) {
     // get instance data
     const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
+    // cache data for future use (after save)
+    context.options.contextData = data;
+
     // relation is active, by default
     data.target.active = true;
     // get case IDs from from the relationship
@@ -621,11 +624,91 @@ module.exports = function (Relationship) {
               throw app.logger.error(`Failed to trigger person record updates. Person (id: ${person.id}) not found.`);
             }
             personRecord.systemTriggeredUpdate = true;
-            // trigger record update
-            return personRecord.updateAttributes({}, context.options);
+
+            // initialize person relationships related payload; will be updated depending on action taken on relationships
+            let personRelationships = personRecord.relationshipsIds || [];
+            let relationshipsPayload = {};
+
+            if (relationship.deleted) {
+              // when a relationship is deleted we need to check if the person has additional relationships
+              personRelationships.splice(personRelationships.indexOf(relationship.id), 1);
+              if (personRelationships.length) {
+                // person will still have relationships
+                relationshipsPayload = {
+                  hasRelationships: true,
+                  relationshipsIds: personRelationships
+                };
+              } else {
+                // no relationships remain
+                relationshipsPayload = {
+                  hasRelationships: false,
+                  relationshipsIds: []
+                };
+              }
+            } else {
+              // relationship just created or updated
+              relationshipsPayload = {
+                hasRelationships: true
+              };
+              if (personRelationships.indexOf(relationship.id) === -1) {
+                // relationship was not found in current person relationships; add it
+                // if it was already in the array there is no need to update the array
+                personRelationships.push(relationship.id);
+                relationshipsPayload.relationshipsIds = personRelationships;
+              }
+            }
+
+            return personRecord.updateAttributes(relationshipsPayload, context.options);
           })
       );
     });
+
+    // when the relationship is modified the source and target can be changed
+    // in this case we need to remove the relationship from the old participant
+    // Note: the relationships information is already updated above for the new participants
+    if (!context.isNewInstance && !relationship.deleted) {
+      let oldParticipants = _.get(context, 'options.contextData.source.existing.persons', []);
+      // loop through the old participants and check if they are still in the relationship
+      oldParticipants.forEach(oldPerson => {
+        if (!relationship.persons.find(newPerson => newPerson.id === oldPerson.id)) {
+          // we need to update the old person
+          updatePersonRecords.push(
+            // load the record
+            app.models.person
+              .findById(oldPerson.id)
+              .then(function (personRecord) {
+                // if the record is not found, stop with err
+                if (!personRecord) {
+                  throw app.logger.error(`Failed to trigger person record updates. Person (id: ${oldPerson.id}) not found.`);
+                }
+                personRecord.systemTriggeredUpdate = true;
+
+                // initialize person relationships related payload; will be updated depending on action taken on relationships
+                let personRelationships = personRecord.relationshipsIds || [];
+                let relationshipsPayload = {};
+
+                // check if the person has additional relationships
+                personRelationships.splice(personRelationships.indexOf(relationship.id), 1);
+                if (personRelationships.length) {
+                  // person will still have relationships
+                  relationshipsPayload = {
+                    hasRelationships: true,
+                    relationshipsIds: personRelationships
+                  };
+                } else {
+                  // no relationships remain
+                  relationshipsPayload = {
+                    hasRelationships: false,
+                    relationshipsIds: []
+                  };
+                }
+
+                return personRecord.updateAttributes(relationshipsPayload, context.options);
+              })
+          );
+        }
+      });
+    }
 
     // after finishing updating dates of last contact
     Promise.all(updatePersonRecords)

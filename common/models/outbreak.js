@@ -199,7 +199,7 @@ module.exports = function (Outbreak) {
               app.models.person.find({
                 where: {
                   or: [
-                    { _id: person.id },
+                    {_id: person.id},
                     {
                       outbreakId: outbreakId,
                       visualId: person.id
@@ -582,34 +582,16 @@ module.exports = function (Outbreak) {
       // remove count relations custom flag
       _.unset(context, 'args.filter.where.countRelations');
 
-      // Retrieve all relationships of requested type for the given outbreak
-      // Then filter cases based on relations count
-      app.models.relationship
-        .rawFind({
-          outbreakId: context.instance.id,
-          'persons.type': type
-        }, {
-          projection: {persons: 1}
-        })
-        // build list of people that have relationships in the given outbreak
-        .then((relations) => [].concat(...relations.map((relation) => relation.persons.map(((person) => person.id)))))
-        .then((peopleWithRelation) => {
-          // attach additional filtering for cases that have no relationships
-          context.args.filter = app.utils.remote
-            .mergeFilters({
-              where: {
-                id: {
-                  nin: peopleWithRelation
-                }
-              }
-            }, context.args.filter);
-
-          return next();
-        })
-        .catch(next);
-    } else {
-      return next();
+      // attach additional filtering for cases that have no relationships
+      context.args.filter = app.utils.remote
+        .mergeFilters({
+          where: {
+            hasRelationships: false
+          }
+        }, context.args.filter);
     }
+
+    return next();
   };
 
   /**
@@ -923,7 +905,7 @@ module.exports = function (Outbreak) {
         .then((caseData) => {
           // no case data, so there is no need to retrieve relationships
           if (_.isEmpty(caseData)) {
-            return  [];
+            return [];
           }
 
           // retrieve list of cases for which we need to retrieve contacts relationships

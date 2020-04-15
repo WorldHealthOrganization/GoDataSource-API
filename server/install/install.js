@@ -17,6 +17,7 @@ const supportedArguments = [
   'dump-outbreak-template-data',
   'remove-unused-language-tokens',
   'populate-with-dummy-data',
+  'set-relationships-information-on-person',
   'determine-and-dump-reference-data-items',
   'populate-missing-language-tokens',
   'migrate-case-centre-name'
@@ -260,6 +261,20 @@ const routines = {
       require('./scripts/populateWithDummyData')
     ].forEach(function (installScript) {
       runFunctions.push(installScript(methodRelevantArgs));
+    });
+  },
+  setRelationshipsInformationOnPerson: function () {
+    // accept outbreak name
+    const allowedArgs = [
+      'outbreakName'
+    ];
+
+    let methodRelevantArgs = parseArgumentValues(allowedArgs);
+
+    // populate database
+    console.log('Setting relationships information on person model');
+    runFunctions.push((cb) => {
+      require('./scripts/migrations/2.35.0/person').setRelationshipsInformationOnPerson(methodRelevantArgs, cb);
     });
   },
   determineAndDumpReferenceDataItems: function () {

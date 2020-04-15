@@ -161,8 +161,15 @@
       "type": "string"
     },
     "hasRelationships": {
+      "description": "Flag that specifies if a case/contact/event has at least a relationship.",
       "type": "boolean",
-      "description": "Note: currently used only on dummy data generation. Flag that specifies if a case/contact/event has at least a relationship."
+      "default": false
+    },
+    "relationshipsIds": {
+      "description": "Array containing IDs for the relationships where the person is a participant",
+      "type": [
+        "string"
+      ]
     }
   },
   "indexes": {
@@ -222,6 +229,9 @@
     },
     "riskLevel_index": {
       "riskLevel": 1
+    },
+    "hasRelationships_index": {
+      "hasRelationships": 1
     }
   },
   "validations": [],

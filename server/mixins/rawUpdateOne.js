@@ -66,15 +66,27 @@ module.exports = function (Model) {
     // log usage
     app.logger.debug(`[QueryId: ${queryId}] Performing MongoDB request on collection '${collectionName}': updateOne query: ${JSON.stringify(filter)} update: ${JSON.stringify(update)}`);
 
-    // perform update using mongo connector
-    let updateDb = app.dataSources.mongoDb.connector.collection(collectionName)
-      .findOneAndUpdate(filter, {$set: update}, options);
+    // get flag for returned updated resource; default: true
+    let returnUpdatedResource = true;
+    if (options.returnUpdatedResource === false) {
+      returnUpdatedResource = false;
+      delete options.returnUpdatedResource;
+    }
 
+    // perform update using mongo connector
+    let mongoActionToExecute = returnUpdatedResource ? 'findOneAndUpdate' : 'updateOne';
+    let updateDb = app.dataSources.mongoDb.connector.collection(collectionName)[mongoActionToExecute](filter, {$set: update}, options);
 
     // handle result
     return updateDb
       .then(function (result) {
         app.logger.debug(`[QueryId: ${queryId}] MongoDB request completed after ${timer.getElapsedMilliseconds()} msec`);
+
+        if (!returnUpdatedResource) {
+          // no need to parse result
+          return Promise.resolve();
+        }
+
         const record = result.value;
         // add id property (not the native _id property)
         record.id = record._id;

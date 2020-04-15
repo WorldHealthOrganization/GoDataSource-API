@@ -39,6 +39,9 @@
   "indexes": {
     "deleted_index": {
       "deleted": 1
+    },
+    "createdAt_index": {
+      "createdAt": 1
     }
   },
   "validations": [],
