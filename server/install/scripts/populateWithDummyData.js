@@ -1554,7 +1554,7 @@ function run(callback) {
                                 '$set': {
                                   hasRelationships: true
                                 },
-                                'addToSet': {
+                                '$addToSet': {
                                   relationshipsIds: relationshipData.id
                                 }
                               });

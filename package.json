@@ -54,6 +54,7 @@
     "parse": "2.1.0",
     "pdfkit": "0.8.3",
     "qr-image": "3.2.0",
+    "randomatic": "^3.1.1",
     "request": "2.88.0",
     "rr": "0.1.0",
     "serve-favicon": "2.5.0",
@@ -74,8 +75,7 @@
     "gulp-run-command": "0.0.9",
     "gulp-uglify-es": "1.0.4",
     "nsp": "2.8.1",
-    "pump": "3.0.0",
-    "randomatic": "^3.1.1"
+    "pump": "3.0.0"
   },
   "optionalDependencies": {
     "sharp": "^0.22.0"
