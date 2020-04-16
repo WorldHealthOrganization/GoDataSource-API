@@ -12897,7 +12897,7 @@ module.exports = function (Outbreak) {
             return followUp[0]
               .updateAttributes(data, options)
               .then(updatedFollowUp => callback(null, updatedFollowUp));
-          })
+          });
       })
       .catch(callback);
   };
@@ -12954,7 +12954,7 @@ module.exports = function (Outbreak) {
             return followUp[0]
               .destroy(options)
               .then(() => callback());
-          })
+          });
       })
       .catch(callback);
   };
