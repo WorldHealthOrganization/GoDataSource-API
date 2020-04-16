@@ -70,6 +70,8 @@ module.exports = function (Outbreak) {
     'prototype.__get__events',
     'prototype.__count__contacts',
     'prototype.__get__contactsOfContacts',
+    'prototype.__updateById__contacts__followUps',
+    'prototype.__destroyById__contacts__followUps'
   ]);
 
   // attach search by relation property behavior on get contacts
@@ -81,7 +83,7 @@ module.exports = function (Outbreak) {
 
   // load controller extensions (other files that contain outbreak related actions)
   require('./outbreakRelationship')(Outbreak);
-  
+
   /**
    * Allow changing follow-up status (only status property)
    */
@@ -12840,4 +12842,121 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.createContactMultipleContactsOfContacts = function (contactId, data, options, callback) {
     Outbreak.createContactMultipleContactsOfContacts(this, contactId, data, options, callback);
   };
+
+  /**
+   * Update a contact's follow-ups or a case that was contact
+   * @param personId
+   * @param followUpId
+   * @param data
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.modifyContactFollowUp = function (personId, followUpId, data, options, callback) {
+    const outbreakId = this.id;
+    data = data || {};
+
+    // make sure person is either a contact or was a contact
+    app.models.person.find({
+      where: {
+        outbreakId: outbreakId,
+        id: personId,
+        or: [
+          {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          },
+          {
+            wasContact: true
+          }
+        ]
+      }
+    })
+      .then(contact => {
+        if (!contact.length) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.contact.modelName,
+            id: personId
+          });
+        }
+
+        // find the desired follow-up and modify it
+        app.models.followUp.find({
+          where: {
+            outbreakId: outbreakId,
+            id: followUpId,
+            personId: personId
+          }
+        })
+          .then(followUp => {
+            if (!followUp.length) {
+              throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+                model: app.models.followUp.modelName,
+                id: followUpId
+              });
+            }
+
+            return followUp[0]
+              .updateAttributes(data, options)
+              .then(updatedFollowUp => callback(null, updatedFollowUp));
+          })
+      })
+      .catch(callback);
+  };
+
+  /**
+   *
+   * @param personId
+   * @param followUpId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.deleteContactFollowUp = function (personId, followUpId, options, callback) {
+    const outbreakId = this.id;
+
+    // make sure person is either a contact or was a contact
+    app.models.person.find({
+      where: {
+        outbreakId: outbreakId,
+        id: personId,
+        or: [
+          {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          },
+          {
+            wasContact: true
+          }
+        ]
+      }
+    })
+      .then(contact => {
+        if (!contact.length) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.contact.modelName,
+            id: personId
+          });
+        }
+
+        // find the desired follow-up and modify it
+        app.models.followUp.find({
+          where: {
+            outbreakId: outbreakId,
+            id: followUpId,
+            personId: personId
+          }
+        })
+          .then(followUp => {
+            if (!followUp.length) {
+              throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+                model: app.models.followUp.modelName,
+                id: followUpId
+              });
+            }
+
+            return followUp[0]
+              .destroy(options)
+              .then(() => callback());
+          })
+      })
+      .catch(callback);
+  };
+
 };
