@@ -81,7 +81,7 @@ module.exports = function (Outbreak) {
 
   // load controller extensions (other files that contain outbreak related actions)
   require('./outbreakRelationship')(Outbreak);
-  
+
   /**
    * Allow changing follow-up status (only status property)
    */
@@ -1089,102 +1089,13 @@ module.exports = function (Outbreak) {
     // and those that have last follow up inconclusive
     let outbreakId = this.id;
 
-    // retrieve events with relationships to contacts
-    // retrieve cases that were discarded so we can exclude contacts that are related only to discarded contacts
-    Promise.all([
-      new Promise((resolve, reject) => {
-        app.models.case
-          // retrieve discarded cases
-          .rawFind({
-            outbreakId: outbreakId,
-            classification: {
-              $in: app.models.case.discardedCaseClassifications
-            }
-          }, {projection: {_id: 1}})
-          // retrieve contacts for which we can generate follow-ups
-          .then(caseIds => {
-            // retrieve list of discarded case ids
-            caseIds = (caseIds || []).map((caseData) => caseData.id);
-
-            // filter relationships
-            return app.models.relationship
-              .rawFind({
-                outbreakId: outbreakId,
-                $or: [{
-                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                  'persons.0.id': {
-                    $nin: caseIds
-                  },
-                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-                }, {
-                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
-                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                  'persons.1.id': {
-                    $nin: caseIds
-                  }
-                }]
-              }, {projection: {persons: 1}});
-          })
-          .then(resolve)
-          .catch(reject);
-      }),
-      new Promise((resolve, reject) => {
-        app.models.event
-          .rawFind({
-            outbreakId: outbreakId,
-          }, {projection: {_id: 1}})
-          // retrieve contacts for which we can generate follow-ups
-          .then(eventIds => {
-            eventIds = (eventIds || []).map((eventData) => eventData.id);
-
-            // filter relationships
-            return app.models.relationship
-              .rawFind({
-                outbreakId: outbreakId,
-                $or: [{
-                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT',
-                  'persons.0.id': {
-                    $in: eventIds
-                  },
-                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-                }, {
-                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
-                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT',
-                  'persons.1.id': {
-                    $in: eventIds
-                  }
-                }]
-              }, {projection: {persons: 1}});
-          })
-          .then(resolve)
-          .catch(reject);
-      })
-    ])
-      .then(relations => {
-        const allRelations = (relations[0] || []).concat((relations[1] || []));
-        // retrieve contact ids
-        const allowedContactIds = Array.from(new Set(allRelations.map((relationshipData) => {
-          return relationshipData.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
-            relationshipData.persons[0].id :
-            relationshipData.persons[1].id;
-        })));
-
-        // there is no point in generating any follow-ups if no allowed contact were found
-        if (allowedContactIds.length < 1) {
-          return [
-            [],
-            []
-          ];
-        }
-
-        // retrieve contacts for which we can generate follow-ups
-        return FollowupGeneration.getContactsEligibleForFollowup(
-          followupStartDate.toDate(),
-          followupEndDate.toDate(),
-          outbreakId,
-          allowedContactIds
-        );
-      })
+    // retrieve contacts for which we can generate follow-ups
+    FollowupGeneration
+      .getContactsEligibleForFollowup(
+        followupStartDate.toDate(),
+        followupEndDate.toDate(),
+        outbreakId
+      )
       .then((contacts) => {
         if (!contacts.length) {
           return 0;
@@ -2426,7 +2337,7 @@ module.exports = function (Outbreak) {
     // get known transmission chains
     app.models.relationship
       .filterKnownTransmissionChains(this.id, app.utils.remote
-      // were only interested in cases
+        // were only interested in cases
         .mergeFilters({
           where: {
             'persons.0.type': {
@@ -2598,7 +2509,7 @@ module.exports = function (Outbreak) {
     // get known transmission chains
     app.models.relationship
       .filterKnownTransmissionChains(this.id, app.utils.remote
-      // were only interested in cases
+        // were only interested in cases
         .mergeFilters({
           where: {
             'persons.0.type': {
@@ -4036,7 +3947,7 @@ module.exports = function (Outbreak) {
 
         // make changes into database
         Promise
-        // delete all the merge candidates
+          // delete all the merge candidates
           .all(modelsIds.map((id) => targetModel.destroyById(id, options)))
           // create a new model containing the result properties
           .then(() => targetModel.create(data.model, options))

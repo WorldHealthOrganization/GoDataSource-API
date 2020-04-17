@@ -165,10 +165,10 @@
       "type": "boolean",
       "default": false
     },
-    "relationshipsIds": {
-      "description": "Array containing IDs for the relationships where the person is a participant",
+    "relationshipsRepresentation": {
+      "description": "Array containing entries for the relationships where the person is a participant",
       "type": [
-        "string"
+        "personRelationshipRepresentation"
       ]
     }
   },

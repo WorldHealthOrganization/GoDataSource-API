@@ -1544,20 +1544,34 @@ function run(callback) {
                             // log
                             app.logger.debug(`Relationship created => '${relationshipData.id}'`);
 
-                            // update relationship participants with hasRelationship flag
-                            return app.dataSources.mongoDb.connector.collection('person')
-                              .updateMany({
-                                _id: {
-                                  $in: relationshipData.persons.map(person => person.id)
-                                }
-                              }, {
-                                '$set': {
-                                  hasRelationships: true
-                                },
-                                '$addToSet': {
-                                  relationshipsIds: relationshipData.id
-                                }
-                              });
+                            // create update participant jobs
+                            let updateParticipantsJobs = relationshipData.persons.forEach((person, index) => {
+                              // get other participant
+                              let otherParticipant = relationshipData.persons[index === 0 ? 1 : 0];
+
+                              // update relationship participants with hasRelationship flag
+                              return app.dataSources.mongoDb.connector.collection('person')
+                                .updateOne({
+                                  _id: person.id
+                                }, {
+                                  '$set': {
+                                    hasRelationships: true
+                                  },
+                                  '$addToSet': {
+                                    relationshipsRepresentation: {
+                                      id: relationshipData._id,
+                                      active: relationshipData.active,
+                                      otherParticipantType: otherParticipant.type,
+                                      otherParticipantId: otherParticipant.id,
+                                      target: person.target,
+                                      source: person.source
+                                    }
+                                  }
+                                });
+                            });
+
+                            // update relationship participants
+                            return Promise.all(updateParticipantsJobs);
                           })
                           .then(() => {
                             // finished

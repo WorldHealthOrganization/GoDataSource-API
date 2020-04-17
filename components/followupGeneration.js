@@ -22,28 +22,21 @@ const _createFollowUpEntry = function (props, contact) {
 };
 
 // get contacts that have follow up period between the passed start/end dates
-module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId, allowedContactIds) {
+module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId) {
   return App.models.contact
     .rawFind({
       $and: [
         {
-          outbreakId: outbreakId
-        },
-        {
-          id: {
-            $in: allowedContactIds
-          }
-        },
-        {
+          outbreakId: outbreakId,
+          // should have relationships
+          hasRelationships: true,
+          // at least one of the relationships needs to be active
+          'relationshipsRepresentation.active': true,
           followUp: {
             $ne: null
-          }
-        },
-        // only contacts that are under follow up
-        {
-          'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
-        },
-        {
+          },
+          // only contacts that are under follow up
+          'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP',
           $or: [
             {
               // follow up period is inside contact's follow up period

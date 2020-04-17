@@ -83,7 +83,10 @@ const setRelationshipsInformationOnPerson = (options, callback) => {
               .updateMany(relationshipsFilter, {
                 '$unset': {
                   hasRelationships: 1,
-                  relationshipsIds: 1
+                  // unset the relationshipsIds array added in v1 of the script
+                  relationshipsIds: 1,
+                  // unset the container that will be constructed again
+                  relationshipsRepresentation: 1
                 }
               })
               .then(() => {
@@ -106,24 +109,35 @@ const setRelationshipsInformationOnPerson = (options, callback) => {
               createdAt: 1
             },
             projection: {
-              persons: 1
+              persons: 1,
+              active: 1
             }
           })
           .toArray()
           .then(relationships => {
             // loop through the found relationships and fill the persons with relationships maps
             relationships.forEach(relationship => {
-              relationship.persons.forEach(person => {
+              relationship.persons.forEach((person, index) => {
                 if (!personsWithRelationshipsMap[person.id]) {
                   // initialize map entry
                   personsWithRelationshipsMap[person.id] = {
                     id: person.id,
-                    relationshipsIds: []
+                    relationshipsRepresentation: []
                   };
                 }
 
+                // get other participant
+                let otherParticipant = relationship.persons[index === 0 ? 1 : 0];
+
                 // add new entry in map
-                personsWithRelationshipsMap[person.id].relationshipsIds.push(relationship._id);
+                personsWithRelationshipsMap[person.id].relationshipsRepresentation.push({
+                  id: relationship._id,
+                  active: relationship.active,
+                  otherParticipantType: otherParticipant.type,
+                  otherParticipantId: otherParticipant.id,
+                  target: person.target,
+                  source: person.source
+                });
               });
             });
 
@@ -141,8 +155,8 @@ const setRelationshipsInformationOnPerson = (options, callback) => {
               hasRelationships: true
             },
             '$addToSet': {
-              relationshipsIds: {
-                '$each': data.relationshipsIds
+              relationshipsRepresentation: {
+                '$each': data.relationshipsRepresentation
               }
             }
           });
