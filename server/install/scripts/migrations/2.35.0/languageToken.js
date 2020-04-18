@@ -1,7 +1,7 @@
 'use strict';
 
-const MongoDBHelper = require('../../../components/mongoDBHelper');
-const Helpers = require('../../../components/helpers');
+const MongoDBHelper = require('../../../../../components/mongoDBHelper');
+const Helpers = require('../../../../../components/helpers');
 
 // Number of find requests at the same time
 // Don't set this value to high so we don't exceed Mongo 16MB limit
