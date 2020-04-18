@@ -119,6 +119,7 @@ const executeNextBatch = function (cb) {
               languageTokensEntries.push(Object.assign({}, {
                 _id: langTokenId,
                 token: dataId,
+                tokenSortKey: dataId.substr(0, 128),
                 languageId: langId,
                 translation: trimmedCentreName
               }, authorInfo));
@@ -127,6 +128,7 @@ const executeNextBatch = function (cb) {
               languageTokensEntries.push(Object.assign({}, {
                 _id: generateLanguageTokenID(`${dataId}_DESCRIPTION`, langId),
                 token: `${dataId}_DESCRIPTION`,
+                tokenSortKey: `${dataId}_DESCRIPTION`.substr(0, 128),
                 languageId: langId,
                 translation: ''
               }, authorInfo));

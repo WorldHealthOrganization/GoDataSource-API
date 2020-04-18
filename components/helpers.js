@@ -2318,13 +2318,22 @@ const getCaptchaConfig = () => {
  * Handle actions in batches
  * @param getActionsCount Function returning a promise which resolves with the total number of actions
  * @param getBatchData Function returning a promise which resolves with a data array for the given batch and given batch size
+ * @param batchItemsAction Action for entire batch items; Function returning a promise for the given item data
  * @param itemAction Action for each item in a batch; Function returning a promise for the given item data
  * @param batchSize Size of a batch
  * @param parallelActionsNo Number of actions to be executed in parallel in a batch
  * @param logger
  * @return {*|PromiseLike<T | never | never>|Promise<T | never | never>}
  */
-const handleActionsInBatches = function (getActionsCount, getBatchData, itemAction, batchSize, parallelActionsNo, logger) {
+const handleActionsInBatches = function (
+  getActionsCount,
+  getBatchData,
+  batchItemsAction,
+  itemAction,
+  batchSize,
+  parallelActionsNo,
+  logger
+) {
   return getActionsCount()
     .then(actionsCount => {
       if (actionsCount === 0) {
@@ -2343,6 +2352,24 @@ const handleActionsInBatches = function (getActionsCount, getBatchData, itemActi
 
         return getBatchData(batchNo, batchSize)
           .then(dataArray => {
+            // do we need to execute action for all batch data ?
+            if (!batchItemsAction) {
+              return dataArray;
+            }
+
+            // execute batch group promise
+            return batchItemsAction(dataArray)
+              .then(() => {
+                return dataArray;
+              });
+          })
+          .then(dataArray => {
+            /// we don't need to perform an actions on each items ?
+            if (!itemAction) {
+              return;
+            }
+
+            // construct array of jobs that we need to perform in parallel
             let batchJobs = dataArray.map(data => {
               return (cb) => {
                 return itemAction(data)
@@ -2353,6 +2380,7 @@ const handleActionsInBatches = function (getActionsCount, getBatchData, itemActi
               };
             });
 
+            // execute jobs in parallel
             return new Promise((resolve, reject) => {
               async.parallelLimit(batchJobs, parallelActionsNo, (err) => {
                 if (err) {

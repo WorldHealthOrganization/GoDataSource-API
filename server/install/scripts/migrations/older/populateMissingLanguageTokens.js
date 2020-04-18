@@ -201,6 +201,7 @@ function determineMissingLanguageTokens(
                   _id: tokenID,
                   languageId: localLanguageToCheckId,
                   token: localMainLanguageTokenData.token,
+                  tokenSortKey: localMainLanguageTokenData.token.substr(0, 128),
                   outbreakId: localMainLanguageTokenData.outbreakId,
                   modules: localMainLanguageTokenData.modules,
                   translation: localMainLanguageTokenData.translation

@@ -211,7 +211,15 @@ module.exports = function (Outbreak) {
                   returnUpdatedResource: false
                 });
             };
-            return helpers.handleActionsInBatches(getActionsCount, getBatchData, itemAction, 1000, 10, options.remotingContext.req.logger);
+            return helpers.handleActionsInBatches(
+              getActionsCount,
+              getBatchData,
+              null,
+              itemAction,
+              1000,
+              10,
+              options.remotingContext.req.logger
+            );
           })
           .then(() => {
             // update other persons; we will always have some persons in list
@@ -252,7 +260,15 @@ module.exports = function (Outbreak) {
                 });
             };
 
-            return helpers.handleActionsInBatches(getActionsCount, getBatchData, itemAction, 1000, 10, options.remotingContext.req.logger);
+            return helpers.handleActionsInBatches(
+              getActionsCount,
+              getBatchData,
+              null,
+              itemAction,
+              1000,
+              10,
+              options.remotingContext.req.logger
+            );
           })
           .then(() => {
             // done

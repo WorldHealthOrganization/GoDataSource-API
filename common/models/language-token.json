@@ -10,6 +10,9 @@
       "type": "string",
       "required": true
     },
+    "tokenSortKey": {
+      "type": "string"
+    },
     "languageId": {
       "type": "string",
       "required": true
@@ -27,12 +30,15 @@
       ]
     }
   },
+  "removeIndexes": [
+    "token_asc_index"
+  ],
   "indexes": {
     "token_index": {
       "token": "hashed"
     },
-    "token_asc_index": {
-      "token": 1
+    "tokenSortKey_index": {
+      "tokenSortKey": 1
     },
     "languageId_index": {
       "languageId": 1

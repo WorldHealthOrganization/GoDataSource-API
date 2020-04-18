@@ -148,7 +148,15 @@ const setRelationshipsInformationOnPerson = (options, callback) => {
           });
       };
 
-      return Helpers.handleActionsInBatches(getActionsCount, getBatchData, itemAction, relationshipsFindBatchSize, personsUpdateBatchSize, console);
+      return Helpers.handleActionsInBatches(
+        getActionsCount,
+        getBatchData,
+        null,
+        itemAction,
+        relationshipsFindBatchSize,
+        personsUpdateBatchSize,
+        console
+      );
     })
     .then(() => {
       callback();

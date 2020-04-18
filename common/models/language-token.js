@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const uuid = require('uuid');
+const app = require('../../server/server');
 
 module.exports = function (LanguageToken) {
   // set flag to not get controller
@@ -26,6 +27,16 @@ module.exports = function (LanguageToken) {
    * On create, generate and add an ID to the language token instance
    */
   LanguageToken.observe('before save', function (context, next) {
+    // update token sort key translation
+    // used to sort by since token can be > 1024 bytes and it isn't possible at this moment to create an asc sort index on token key
+    const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
+    if (data.source.all.token) {
+      const tokenSortKey = data.source.all.token.substr(0, 128);
+      if (tokenSortKey !== data.source.all.tokenSortKey) {
+        data.target.tokenSortKey = tokenSortKey;
+      }
+    }
+
     // do not execute hook on sync
     if (context.options && context.options._sync) {
       return next();
