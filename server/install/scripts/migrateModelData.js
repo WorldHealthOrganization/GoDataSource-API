@@ -76,7 +76,7 @@ const migrationVersions = [{
       buildNo: 1
     }]
   }, {
-    fileName: 'migrateLanguageTokens.js',
+    fileName: 'languageToken.js',
     actions: [{
       name: 'addMissingTokenSortKeys',
       buildNo: 1
