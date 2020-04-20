@@ -631,12 +631,16 @@ module.exports = function (Relationship) {
 
             if (relationship.deleted) {
               // when a relationship is deleted we need to check if the person has additional relationships
-              personRelationships.splice(personRelationships.findIndex(rel => rel.id === relationship.id), 1);
-              if (personRelationships.length) {
+              if (personRelationships.length - 1) {
                 // person will still have relationships
                 relationshipsPayload = {
                   hasRelationships: true,
-                  relationshipsRepresentation: personRelationships
+                  // remove relationship from relationshipsRepresentation
+                  '$pull': {
+                    relationshipsRepresentation: {
+                      id: relationship.id
+                    }
+                  }
                 };
               } else {
                 // no relationships remain
@@ -666,12 +670,15 @@ module.exports = function (Relationship) {
               let relationshipIndex = personRelationships.findIndex(rel => rel.id === relationship.id);
               if (relationshipIndex === -1) {
                 // relationship was not found in current person relationships; add it
-                personRelationships.push(relationshipRepresentationPayload);
+                relationshipsPayload['$addToSet'] = {
+                  relationshipsRepresentation: relationshipRepresentationPayload
+                };
               } else {
-                // relationship already existed; replace its entry from the relationships representation with the new one
-                personRelationships.splice(relationshipIndex, 1, relationshipRepresentationPayload);
+                // relationship already exists; replace its entry from the relationships representation with the new one
+                relationshipsPayload['$set'] = {
+                  [`relationshipsRepresentation.${relationshipIndex}`]: relationshipRepresentationPayload
+                };
               }
-              relationshipsPayload.relationshipsRepresentation = personRelationships;
             }
 
             return personRecord.updateAttributes(relationshipsPayload, context.options);
@@ -704,12 +711,16 @@ module.exports = function (Relationship) {
                 let relationshipsPayload = {};
 
                 // check if the person has additional relationships
-                personRelationships.splice(personRelationships.findIndex(rel => rel.id === relationship.id), 1);
-                if (personRelationships.length) {
+                if (personRelationships.length - 1) {
                   // person will still have relationships
                   relationshipsPayload = {
                     hasRelationships: true,
-                    relationshipsRepresentation: personRelationships
+                    // remove relationship from relationshipsRepresentation
+                    '$pull': {
+                      relationshipsRepresentation: {
+                        id: relationship.id
+                      }
+                    }
                   };
                 } else {
                   // no relationships remain
@@ -754,9 +765,7 @@ module.exports = function (Relationship) {
           callback();
         }
       })
-      .catch(err => {
-        callback(err);
-      });
+      .catch(callback);
   });
 
   /**

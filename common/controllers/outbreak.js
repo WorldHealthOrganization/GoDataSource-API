@@ -81,6 +81,7 @@ module.exports = function (Outbreak) {
 
   // load controller extensions (other files that contain outbreak related actions)
   require('./outbreakRelationship')(Outbreak);
+  require('./outbreakFollowUp')(Outbreak);
 
   /**
    * Allow changing follow-up status (only status property)
@@ -1023,137 +1024,6 @@ module.exports = function (Outbreak) {
         instance.undoDelete(options, callback);
       })
       .catch(callback);
-  };
-
-  /**
-   * Generate list of follow ups
-   * @param data Props: { startDate, endDate (both follow up dates are required), targeted (boolean) }
-   * @param options
-   * @param callback
-   */
-  Outbreak.prototype.generateFollowups = function (data, options, callback) {
-    let errorMessage = '';
-
-    // outbreak follow up generate params sanity checks
-    let invalidOutbreakParams = [];
-    if (this.frequencyOfFollowUp <= 0) {
-      invalidOutbreakParams.push('frequencyOfFollowUp');
-    }
-    if (this.frequencyOfFollowUpPerDay <= 0) {
-      invalidOutbreakParams.push('frequencyOfFollowUpPerDay');
-    }
-    if (invalidOutbreakParams.length) {
-      errorMessage += `Following outbreak params: [${Object.keys(invalidOutbreakParams).join(',')}] should be greater than 0`;
-    }
-
-    // parse start/end dates from request
-    let followupStartDate = genericHelpers.getDate(data.startDate);
-    let followupEndDate = genericHelpers.getDateEndOfDay(data.endDate);
-
-    // sanity checks for dates
-    let invalidFollowUpDates = [];
-    if (!followupStartDate.isValid()) {
-      invalidFollowUpDates.push('startDate');
-    }
-    if (!followupEndDate.isValid()) {
-      invalidFollowUpDates.push('endDate');
-    }
-    if (invalidFollowUpDates.length) {
-      errorMessage += `Follow up: [${Object.keys(invalidOutbreakParams).join(',')}] are not valid dates`;
-    }
-
-    // if the error message is not empty, stop the request
-    if (errorMessage) {
-      return callback(
-        app.utils.apiError.getError(
-          'INVALID_GENERATE_FOLLOWUP_PARAMS',
-          {
-            details: errorMessage
-          }
-        )
-      );
-    }
-
-    // check if 'targeted' flag exists in the request, if not default to true
-    // this flag will be set upon all generated follow ups
-    let targeted = true;
-    if (data.hasOwnProperty('targeted')) {
-      targeted = data.targeted;
-    }
-
-    // cache outbreak's follow up options
-    let outbreakFollowUpFreq = this.frequencyOfFollowUp;
-    let outbreakFollowUpPerDay = this.frequencyOfFollowUpPerDay;
-
-    // retrieve list of contacts that are eligible for follow up generation
-    // and those that have last follow up inconclusive
-    let outbreakId = this.id;
-
-    // retrieve contacts for which we can generate follow-ups
-    FollowupGeneration
-      .getContactsEligibleForFollowup(
-        followupStartDate.toDate(),
-        followupEndDate.toDate(),
-        outbreakId
-      )
-      .then((contacts) => {
-        if (!contacts.length) {
-          return 0;
-        }
-
-        // get all teams and their locations to get eligible teams for each contact
-        return FollowupGeneration
-          .getAllTeamsWithLocationsIncluded()
-          .then((teams) => {
-            // get follow ups list for all contacts
-            return FollowupGeneration
-              .getContactFollowups(followupStartDate.toDate(), followupEndDate.toDate(), contacts.map(c => c.id))
-              .then((followUpGroups) => {
-                // create promise queues for handling database operations
-                const dbOpsQueue = FollowupGeneration.dbOperationsQueue(options);
-
-                let pool = new PromisePool(
-                  contacts.map((contact) => {
-                    contact.followUpsList = followUpGroups[contact.id] || [];
-                    return FollowupGeneration
-                      .getContactFollowupEligibleTeams(contact, teams)
-                      .then((eligibleTeams) => {
-                        contact.eligibleTeams = eligibleTeams;
-                      })
-                      .then(() => {
-                        // it returns a list of follow ups objects to insert and a list of ids to remove
-                        let generateResult = FollowupGeneration.generateFollowupsForContact(
-                          contact,
-                          contact.eligibleTeams,
-                          {
-                            startDate: followupStartDate,
-                            endDate: followupEndDate
-                          },
-                          outbreakFollowUpFreq,
-                          outbreakFollowUpPerDay,
-                          targeted
-                        );
-
-                        dbOpsQueue.enqueueForInsert(generateResult.add);
-                        dbOpsQueue.enqueueForRecreate(generateResult.update);
-                      });
-                  }),
-                  100 // concurrency limit
-                );
-
-                let poolPromise = pool.start();
-
-                return poolPromise
-                  // make sure the queue has emptied
-                  .then(() => dbOpsQueue.internalQueue.onIdle())
-                  // settle any remaining items that didn't reach the batch size
-                  .then(() => dbOpsQueue.settleRemaining())
-                  .then(() => dbOpsQueue.insertedCount());
-              });
-          });
-      })
-      .then((count) => callback(null, {count: count}))
-      .catch((err) => callback(err));
   };
 
   /**

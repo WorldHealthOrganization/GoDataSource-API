@@ -82,11 +82,11 @@ const setRelationshipsInformationOnPerson = (options, callback) => {
             return personCollection
               .updateMany(relationshipsFilter, {
                 '$unset': {
-                  hasRelationships: 1,
+                  hasRelationships: '',
                   // unset the relationshipsIds array added in v1 of the script
-                  relationshipsIds: 1,
+                  relationshipsIds: '',
                   // unset the container that will be constructed again
-                  relationshipsRepresentation: 1
+                  relationshipsRepresentation: ''
                 }
               })
               .then(() => {

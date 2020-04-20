@@ -21,8 +21,104 @@ const _createFollowUpEntry = function (props, contact) {
   return props;
 };
 
+// count contacts that have follow up period between the passed start/end dates
+module.exports.countContactsEligibleForFollowup = function (startDate, endDate, outbreakId) {
+  return App.models.contact
+    .count({
+      $and: [
+        {
+          outbreakId: outbreakId,
+          // should have relationships
+          hasRelationships: true,
+          // at least one of the relationships needs to be active
+          'relationshipsRepresentation.active': true,
+          // only contacts that are under follow up
+          'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP',
+          $or: [
+            {
+              // follow up period is inside contact's follow up period
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $lte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: endDate
+                  }
+                }
+              ]
+            },
+            {
+              // period starts before contact's start date but ends before contact's end date
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.startDate': {
+                    $lte: endDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: endDate
+                  }
+                }
+              ]
+            },
+            {
+              // period starts before contact's end date and after contact's start date
+              // but stops after contact's end date
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $lte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $lte: endDate
+                  }
+                }
+              ]
+            },
+            {
+              // contact's period is inside follow up period
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $lte: endDate
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    });
+};
+
 // get contacts that have follow up period between the passed start/end dates
-module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId) {
+module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId, skip, limit) {
   return App.models.contact
     .rawFind({
       $and: [
@@ -114,6 +210,17 @@ module.exports.getContactsEligibleForFollowup = function (startDate, endDate, ou
           ]
         }
       ]
+    }, {
+      skip: skip,
+      limit: limit,
+      sort: {
+        createdAt: 1
+      },
+      projection: {
+        outbreakId: 1,
+        addresses: 1,
+        followUp: 1
+      }
     });
 };
 
