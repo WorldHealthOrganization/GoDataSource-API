@@ -655,7 +655,7 @@ module.exports = function (Relationship) {
               // get other participant
               let otherParticipant = relationship.persons[personIndex === 0 ? 1 : 0];
               let relationshipRepresentationPayload = {
-                id: relationship._id,
+                id: relationship.id,
                 active: relationship.active,
                 otherParticipantType: otherParticipant.type,
                 otherParticipantId: otherParticipant.id,
@@ -754,7 +754,9 @@ module.exports = function (Relationship) {
           callback();
         }
       })
-      .catch(callback);
+      .catch(err => {
+        callback(err);
+      });
   });
 
   /**
