@@ -10508,6 +10508,12 @@
           "unauthenticated"
         ]
       },
+      "LNG_FORM_VALIDATION_ERROR_REF_DATA_ITEM_CODE_NOT_UNIQUE": {
+        "translation": "This code is already in use",
+        "modules": [
+          "unauthenticated"
+        ]
+      },
       "LNG_FORM_VALIDATION_ERROR_FIELD_NOT_NUMBER": {
         "translation": "Can't be number",
         "modules": [
