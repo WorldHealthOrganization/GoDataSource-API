@@ -125,31 +125,8 @@ module.exports = function (Language) {
     const self = this;
 
     // initialize filter
-    let languageTokenFilter = {
+    const languageTokenFilter = {
       languageId: this.id
-    };
-
-    // initialize parameters for handleActionsInBatches call
-    const getActionsCount = () => {
-      return Promise.resolve()
-        .then(() => {
-          // count language tokens that we need to update
-          return app.models.languageToken
-            .count(languageTokenFilter);
-        });
-    };
-
-    // get language tokens for batch
-    const getBatchData = (batchNo, batchSize) => {
-      return app.models.languageToken
-        .rawFind(
-          languageTokenFilter, {
-            order: {tokenSortKey: 1},
-            projection: {token: 1, translation: 1},
-            skip: (batchNo - 1) * batchSize,
-            limit: batchSize,
-          }
-        );
     };
 
     // define default translation file headers
@@ -158,66 +135,99 @@ module.exports = function (Language) {
       translation: 'Translation'
     };
 
-    // batch item actions
-    // #TODO - must change this logic  to work with worker and write to stream and NOT to memory how it is right now
-    // keep a list of tokens that we will export
-    const tokens = [];
-    const batchItemsAction = (languageTokens) => {
-      // try and find translation file headers in the correct language
-      languageTokens.forEach(function (languageToken) {
-        // token header
-        if (languageToken.token === 'LNG_TRANSLATION_FILE_LANGUAGE_TOKEN_HEADER') {
-          translationFileHeaders.token = languageToken.translation;
+    // translate file headers
+    return app.models.languageToken
+      .rawFind(Object.assign({
+        token: {
+          $in: [
+            'LNG_TRANSLATION_FILE_LANGUAGE_TOKEN_HEADER',
+            'LNG_TRANSLATION_FILE_TRANSLATION_HEADER'
+          ]
         }
-
-        // translation header
-        if (languageToken.token === 'LNG_TRANSLATION_FILE_TRANSLATION_HEADER') {
-          translationFileHeaders.translation = languageToken.translation;
-        }
-
-        // add to list of tokens to export
-        tokens.push(languageToken);
-      });
-
-      // finished
-      return Promise.resolve();
-    };
-
-
-    // execute jobs in batches
-    return app.utils.helpers
-      .handleActionsInBatches(
-        getActionsCount,
-        getBatchData,
-        batchItemsAction,
-        null,
-        1000,
-        10,
-        console
-      )
-      .then(() => {
-        // format tokens to able to export them to xlsx with the proper header columns
-        // #TODO - must change this logic  to work with worker and write to stream and NOT to memory how it is right now
-        const formattedToken = tokens.map((languageToken) => {
-          return {
-            [translationFileHeaders.token]: languageToken.token,
-            [translationFileHeaders.translation]: languageToken.translation
-          };
-        });
-
-        // create XLSX file
-        app.utils.spreadSheetFile.createXlsxFile(null, formattedToken, function (error, file) {
-          // handle errors
-          if (error) {
-            return callback(error);
+      }, languageTokenFilter), {
+        projection: {token: 1, translation: 1}
+      })
+      .then((headerTokens) => {
+        // determine header columns translations
+        (headerTokens || []).forEach((languageToken) => {
+          // token header
+          if (languageToken.token === 'LNG_TRANSLATION_FILE_LANGUAGE_TOKEN_HEADER') {
+            translationFileHeaders.token = languageToken.translation;
           }
 
-          // offer file for download
-          app.utils.remote.helpers
-            .offerFileToDownload(file, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', `${self.name}.xlsx`, callback);
+          // translation header
+          if (languageToken.token === 'LNG_TRANSLATION_FILE_TRANSLATION_HEADER') {
+            translationFileHeaders.translation = languageToken.translation;
+          }
         });
-      })
-      .catch(callback);
+
+        // initialize parameters for handleActionsInBatches call
+        const getActionsCount = () => {
+          return Promise.resolve()
+            .then(() => {
+              // count language tokens that we need to update
+              return app.models.languageToken
+                .count(languageTokenFilter);
+            });
+        };
+
+        // get language tokens for batch
+        const getBatchData = (batchNo, batchSize) => {
+          return app.models.languageToken
+            .rawFind(
+              languageTokenFilter, {
+                order: {tokenSortKey: 1},
+                projection: {token: 1, translation: 1},
+                skip: (batchNo - 1) * batchSize,
+                limit: batchSize,
+              }
+            );
+        };
+
+        // batch item actions
+        // #TODO - must change this logic  to work with worker and write to stream and NOT to memory how it is right now
+        // keep a list of tokens that we will export
+        const tokens = [];
+        const batchItemsAction = (languageTokens) => {
+          // try and find translation file headers in the correct language
+          languageTokens.forEach(function (languageToken) {
+            // add to list of tokens to export
+            tokens.push({
+              [translationFileHeaders.token]: languageToken.token,
+              [translationFileHeaders.translation]: languageToken.translation
+            });
+          });
+
+          // finished
+          return Promise.resolve();
+        };
+
+        // execute jobs in batches
+        return app.utils.helpers
+          .handleActionsInBatches(
+            getActionsCount,
+            getBatchData,
+            batchItemsAction,
+            null,
+            1000,
+            10,
+            console
+          )
+          .then(() => {
+            // create XLSX file
+            app.utils.spreadSheetFile.createXlsxFile(null, tokens, function (error, file) {
+              // handle errors
+              if (error) {
+                return callback(error);
+              }
+
+              // offer file for download
+              app.utils.remote.helpers
+                .offerFileToDownload(file, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', `${self.name}.xlsx`, callback);
+            });
+          })
+          .catch(callback);
+      });
   };
 
   /**

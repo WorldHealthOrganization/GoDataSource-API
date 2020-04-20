@@ -72,56 +72,47 @@ app.models().forEach(function (Model) {
         }
 
         // return promise that handles index drop
-        return (function (localModelHandler) {
-          return new Promise(function (resolve, reject) {
-            // remove indexes
-            console.log(`Removing indexes for ${localModelHandler.modelName}...`);
+        return new Promise(function (resolve, reject) {
+          // remove indexes
+          console.log(`Removing indexes for ${modelHandler.modelName}...`);
 
-            // if collection name was not defined in settings
-            collectionName = _.get(localModelHandler, 'definition.settings.mongodb.collection');
-            if (!collectionName) {
-              // get it from model name
-              collectionName = localModelHandler.modelName;
-            }
+          // generate list of promises that drop indexes if they exists
+          const promiseList = [];
+          modelHandler.settings.removeIndexes.forEach((indexName) => {
+            // check
+            promiseList.push(
+              modelHandler.dataSource.connector.db.collection(collectionName)
+                .indexExists(indexName)
+                .then((foundIndex) => {
+                  // nothing to do ?
+                  if (!foundIndex) {
+                    console.log(`Index '${indexName}' from ${modelHandler.modelName} was already removed`);
+                    return;
+                  }
 
-            // generate list of promises that drop indexes if they exists
-            const promiseList = [];
-            localModelHandler.settings.removeIndexes.forEach((indexName) => {
-              // check
-              promiseList.push(
-                localModelHandler.dataSource.connector.db.collection(collectionName)
-                  .indexExists(indexName)
-                  .then((foundIndex) => {
-                    // nothing to do ?
-                    if (!foundIndex) {
-                      console.log(`Index '${indexName}' from ${localModelHandler.modelName} was already removed`);
-                      return;
-                    }
-
-                    // remove index
-                    console.log(`Removing index '${indexName}' for ${localModelHandler.modelName}`);
-                    return localModelHandler.dataSource.connector.db.collection(collectionName)
-                      .dropIndex(indexName)
-                      .then(() => {
-                        console.log(`Finished removing index '${indexName}' for ${localModelHandler.modelName}`);
-                      });
-                  })
-              );
-            });
-
-            // execute all promises
-            return Promise
-              .all(promiseList)
-              .then(() => {
-                // finished
-                console.log(`Finished removing indexes for ${localModelHandler.modelName}...`);
-
-                // finished
-                resolve();
-              })
-              .catch(reject);
+                  // remove index
+                  console.log(`Removing index '${indexName}' for ${modelHandler.modelName}`);
+                  return modelHandler.dataSource.connector.db.collection(collectionName)
+                    .dropIndex(indexName)
+                    .then(() => {
+                      console.log(`Finished removing index '${indexName}' for ${modelHandler.modelName}`);
+                    });
+                })
+            );
           });
-        })(modelHandler);
+
+          // execute all promises
+          return Promise
+            .all(promiseList)
+            .then(() => {
+              // finished
+              console.log(`Finished removing indexes for ${modelHandler.modelName}...`);
+
+              // finished
+              resolve();
+            })
+            .catch(reject);
+        });
       };
 
       // remove index
