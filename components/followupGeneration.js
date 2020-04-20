@@ -32,9 +32,6 @@ module.exports.getContactsEligibleForFollowup = function (startDate, endDate, ou
           hasRelationships: true,
           // at least one of the relationships needs to be active
           'relationshipsRepresentation.active': true,
-          followUp: {
-            $ne: null
-          },
           // only contacts that are under follow up
           'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP',
           $or: [
