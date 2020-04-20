@@ -669,7 +669,7 @@ module.exports = function (Relationship) {
                 personRelationships.push(relationshipRepresentationPayload);
               } else {
                 // relationship already existed; replace its entry from the relationships representation with the new one
-                personRelationships.splice(relationshipIndex, 1, relationshipsPayload);
+                personRelationships.splice(relationshipIndex, 1, relationshipRepresentationPayload);
               }
               relationshipsPayload.relationshipsRepresentation = personRelationships;
             }
