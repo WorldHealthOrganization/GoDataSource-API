@@ -173,6 +173,7 @@ module.exports = function (ReferenceData) {
   ReferenceData.fieldLabelsMap = Object.assign({}, ReferenceData.fieldLabelsMap, {
     'categoryId': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CATEGORY_ID',
     'value': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_VALUE',
+    'code': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CODE',
     'description': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_DESCRIPTION',
     'iconId': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ICON',
     'order': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ORDER',

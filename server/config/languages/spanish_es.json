@@ -7195,9 +7195,15 @@
         "translation": "Valor del sistema"
       },
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_VALUE": {
-        "translation": "Etiqueta "
+        "translation": "Etiqueta"
       },
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_VALUE_DESCRIPTION": {
+        "translation": ""
+      },
+      "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CODE": {
+        "translation": "Code"
+      },
+      "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CODE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ORDER": {
