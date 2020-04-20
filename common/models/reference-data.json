@@ -65,7 +65,8 @@
     },
     "code": {
       "type": "string",
-      "unique": true
+      "unique": true,
+      "ignoreCase": true
     },
     "colorCode": {
       "type": "string"
