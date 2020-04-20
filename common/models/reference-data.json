@@ -64,7 +64,8 @@
       "type": "string"
     },
     "code": {
-      "type": "string"
+      "type": "string",
+      "unique": true
     },
     "colorCode": {
       "type": "string"
@@ -81,6 +82,11 @@
     },
     "order": {
       "type": "number"
+    }
+  },
+  "indexes": {
+    "code_index": {
+      "code": 1
     }
   },
   "validations": [],
