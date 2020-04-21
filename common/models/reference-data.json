@@ -64,7 +64,9 @@
       "type": "string"
     },
     "code": {
-      "type": "string"
+      "type": "string",
+      "unique": true,
+      "ignoreCase": true
     },
     "colorCode": {
       "type": "string"
@@ -81,6 +83,17 @@
     },
     "order": {
       "type": "number"
+    }
+  },
+  "indexes": {
+    "value_index": {
+      "value": 1
+    },
+    "categoryId_index": {
+      "categoryId": 1
+    },
+    "code_index": {
+      "code": 1
     }
   },
   "validations": [],

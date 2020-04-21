@@ -7200,6 +7200,12 @@
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_VALUE_DESCRIPTION": {
         "translation": ""
       },
+      "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CODE": {
+        "translation": "Code"
+      },
+      "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CODE_DESCRIPTION": {
+        "translation": ""
+      },
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ORDER": {
         "translation": "Ordre"
       },
@@ -10498,6 +10504,12 @@
       },
       "LNG_FORM_VALIDATION_ERROR_OUTBREAK_NAME_NOT_UNIQUE": {
         "translation": "Ce nom est déjà utilisé",
+        "modules": [
+          "unauthenticated"
+        ]
+      },
+      "LNG_FORM_VALIDATION_ERROR_REF_DATA_ITEM_CODE_NOT_UNIQUE": {
+        "translation": "This code is already in use",
         "modules": [
           "unauthenticated"
         ]
