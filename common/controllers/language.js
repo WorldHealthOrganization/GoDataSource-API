@@ -225,9 +225,9 @@ module.exports = function (Language) {
               app.utils.remote.helpers
                 .offerFileToDownload(file, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', `${self.name}.xlsx`, callback);
             });
-          })
-          .catch(callback);
-      });
+          });
+      })
+      .catch(callback);
   };
 
   /**
