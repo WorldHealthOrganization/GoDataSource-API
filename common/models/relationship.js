@@ -563,8 +563,8 @@ module.exports = function (Relationship) {
   Relationship.observe('before save', function (context, next) {
     // get instance data
     const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
-    // cache data for future use (after save)
-    context.options.contextData = data;
+    // cache current persons for future use (after save)
+    app.utils.helpers.setValueInContextOptions(context, 'oldParticipants', _.get(data, 'source.existing.persons', []));
 
     // relation is active, by default
     data.target.active = true;
@@ -630,29 +630,33 @@ module.exports = function (Relationship) {
             let relationshipsPayload = {};
 
             if (relationship.deleted) {
+              // remove relationship from relationshipsRepresentation
+              relationshipsPayload = {
+                '$pull': {
+                  relationshipsRepresentation: {
+                    id: relationship.id
+                  }
+                }
+              };
+
               // when a relationship is deleted we need to check if the person has additional relationships
               if (personRelationships.length - 1) {
                 // person will still have relationships
-                relationshipsPayload = {
-                  hasRelationships: true,
-                  // remove relationship from relationshipsRepresentation
-                  '$pull': {
-                    relationshipsRepresentation: {
-                      id: relationship.id
-                    }
-                  }
+                relationshipsPayload['$set'] = {
+                  hasRelationships: true
                 };
               } else {
                 // no relationships remain
-                relationshipsPayload = {
-                  hasRelationships: false,
-                  relationshipsRepresentation: []
+                relationshipsPayload['$set'] = {
+                  hasRelationships: false
                 };
               }
             } else {
               // relationship just created or updated
               relationshipsPayload = {
-                hasRelationships: true
+                '$set': {
+                  hasRelationships: true
+                }
               };
 
               // create payload for relationship representations
@@ -675,9 +679,7 @@ module.exports = function (Relationship) {
                 };
               } else {
                 // relationship already exists; replace its entry from the relationships representation with the new one
-                relationshipsPayload['$set'] = {
-                  [`relationshipsRepresentation.${relationshipIndex}`]: relationshipRepresentationPayload
-                };
+                relationshipsPayload['$set'][`relationshipsRepresentation.${relationshipIndex}`] = relationshipRepresentationPayload;
               }
             }
 
@@ -690,7 +692,7 @@ module.exports = function (Relationship) {
     // in this case we need to remove the relationship from the old participant
     // Note: the relationships information is already updated above for the new participants
     if (!context.isNewInstance && !relationship.deleted) {
-      let oldParticipants = _.get(context, 'options.contextData.source.existing.persons', []);
+      let oldParticipants = app.utils.helpers.getValueFromContextOptions(context, 'oldParticipants');
       // loop through the old participants and check if they are still in the relationship
       oldParticipants.forEach(oldPerson => {
         if (!relationship.persons.find(newPerson => newPerson.id === oldPerson.id)) {
@@ -708,25 +710,25 @@ module.exports = function (Relationship) {
 
                 // initialize person relationships related payload; will be updated depending on action taken on relationships
                 let personRelationships = personRecord.relationshipsRepresentation || [];
-                let relationshipsPayload = {};
+                let relationshipsPayload = {
+                  // remove relationship from relationshipsRepresentation
+                  '$pull': {
+                    relationshipsRepresentation: {
+                      id: relationship.id
+                    }
+                  }
+                };
 
                 // check if the person has additional relationships
                 if (personRelationships.length - 1) {
                   // person will still have relationships
-                  relationshipsPayload = {
-                    hasRelationships: true,
-                    // remove relationship from relationshipsRepresentation
-                    '$pull': {
-                      relationshipsRepresentation: {
-                        id: relationship.id
-                      }
-                    }
+                  relationshipsPayload['$set'] = {
+                    hasRelationships: true
                   };
                 } else {
                   // no relationships remain
-                  relationshipsPayload = {
-                    hasRelationships: false,
-                    relationshipsRepresentation: []
+                  relationshipsPayload['$set'] = {
+                    hasRelationships: false
                   };
                 }
 

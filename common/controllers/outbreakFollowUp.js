@@ -6,8 +6,9 @@
  */
 
 const app = require('../../server/server');
-const _ = require('lodash');
 const helpers = require('../../components/helpers');
+const FollowupGeneration = require('../../components/followupGeneration');
+const PromisePool = require('es6-promise-pool');
 
 module.exports = function (Outbreak) {
   /**
@@ -32,8 +33,8 @@ module.exports = function (Outbreak) {
     }
 
     // parse start/end dates from request
-    let followupStartDate = genericHelpers.getDate(data.startDate);
-    let followupEndDate = genericHelpers.getDateEndOfDay(data.endDate);
+    let followupStartDate = helpers.getDate(data.startDate);
+    let followupEndDate = helpers.getDateEndOfDay(data.endDate);
 
     // sanity checks for dates
     let invalidFollowUpDates = [];
@@ -106,7 +107,7 @@ module.exports = function (Outbreak) {
                   followupEndDate.toDate(),
                   outbreakId,
                   (batchNo - 1) * batchSize,
-                  batchSize,
+                  batchSize
                 );
             };
             const batchItemsAction = function (contacts) {
