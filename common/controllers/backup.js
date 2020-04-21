@@ -82,7 +82,7 @@ module.exports = function (Backup) {
         }
 
         // backup setting are valid; create backup
-        backupModel.createBackup(backupLocation, backupModules, userId, done);
+        backupModel.createBackup(backupLocation, backupModules, userId, params.description, done);
       })
       .catch(function (err) {
         return done(err);
