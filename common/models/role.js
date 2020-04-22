@@ -3474,6 +3474,15 @@ module.exports = function (Role) {
             'outbreak_view',
             'relationship_export'
           ]
+        },
+        {
+          id: 'contact_of_contact_bulk_delete_relationships_exposures',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'relationship_bulk_delete'
+          ]
         }
       ]
     },
