@@ -2342,13 +2342,16 @@ const handleActionsInBatches = function (
         return Promise.resolve();
       }
 
+      let totalBatchesNo = Math.ceil(actionsCount / batchSize);
+      logger.debug(`Actions to be done: ${actionsCount}. Batches: ${totalBatchesNo}`);
+
       /**
        * Handle batchNo of actions
        * @param batchNo
        * @return {PromiseLike<T | never>}
        */
       const handleBatch = (batchNo = 1) => {
-        logger.debug(`Processing batch ${batchNo}`);
+        logger.debug(`Processing batch ${batchNo} of ${totalBatchesNo}`);
 
         return getBatchData(batchNo, batchSize)
           .then(dataArray => {
@@ -2392,7 +2395,7 @@ const handleActionsInBatches = function (
             });
           })
           .then(() => {
-            logger.debug(`Finished processing batch ${batchNo}`);
+            logger.debug(`Finished processing batch ${batchNo} of ${totalBatchesNo}`);
             // check if we need to handle another batch
             if (batchNo * batchSize > actionsCount) {
               logger.debug('All data has been processed');
