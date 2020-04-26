@@ -24,24 +24,26 @@ const addMissingTokenSortKeys = (callback) => {
 
       // initialize filter
       // - update deleted items too
-      // - update items that already have sort token key since the key might be different, and it break the current batch logic :)
-      let languageTokenFilter = {};
+      // - update only items that don't have the token already set
+      let languageTokenFilter = {
+        tokenSortKey: {
+          $exists: false
+        }
+      };
 
       // initialize parameters for handleActionsInBatches call
       const getActionsCount = () => {
-        return Promise.resolve()
-          .then(() => {
-            // count language tokens that we need to update
-            return languageTokenCollection
-              .countDocuments(languageTokenFilter);
-          });
+        // count language tokens that we need to update
+        return languageTokenCollection
+          .countDocuments(languageTokenFilter);
       };
 
       // get language tokens for batch
       const getBatchData = (batchNo, batchSize) => {
         return languageTokenCollection
           .find(languageTokenFilter, {
-            skip: (batchNo - 1) * batchSize,
+            // always getting the first items as the already modified ones are filtered out
+            skip: 0,
             limit: batchSize,
             sort: {
               createdAt: 1
@@ -58,16 +60,14 @@ const addMissingTokenSortKeys = (callback) => {
       // update language token
       const itemAction = (data) => {
         const tokenSortKey = data.token ? data.token.substr(0, 128) : '';
-        return data.tokenSortKey === tokenSortKey ?
-          Promise.resolve() :
-          languageTokenCollection
-            .updateOne({
-              _id: data._id
-            }, {
-              '$set': {
-                tokenSortKey: tokenSortKey
-              }
-            });
+        return languageTokenCollection
+          .updateOne({
+            _id: data._id
+          }, {
+            '$set': {
+              tokenSortKey: tokenSortKey
+            }
+          });
       };
 
       // execute jobs in batches
