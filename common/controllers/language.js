@@ -209,7 +209,7 @@ module.exports = function (Language) {
             getBatchData,
             batchItemsAction,
             null,
-            1000,
+            10000,
             10,
             console
           )
