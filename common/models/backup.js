@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const backupHelper = require('../../components/backup');
+const fs = require('fs');
 
 module.exports = function (Backup) {
   Backup.hasController = true;
@@ -108,5 +109,25 @@ module.exports = function (Backup) {
     } else {
       return createBackup;
     }
+  };
+
+  /**
+   * Attach custom properties
+   */
+  Backup.attachCustomProperties = function (record) {
+    // determine file size
+    let sizeBytes;
+    try {
+      if (fs.existsSync(record.location)) {
+        const stats = fs.statSync(record.location);
+        sizeBytes = stats.size;
+      }
+    } catch (e) {
+      app.logger.error(`Can't determine backup size ( ${record.id} )`);
+      sizeBytes = undefined;
+    }
+
+    // set backup size
+    record.sizeBytes = sizeBytes;
   };
 };
