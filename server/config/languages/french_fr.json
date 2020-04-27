@@ -7002,6 +7002,9 @@
       },
       "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_RESTORE_SELECTED_FOLLOW_UPS_SUCCESS_MESSAGE": {
         "translation": "Follow-ups restored"
+      },
+      "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_SHOW_GROUP_BY_TEAM_PILLS": {
+        "translation": "Show follow-ups grouped by team count"
       }
     },
     "uiCreateFollowUpPage": {
@@ -12621,6 +12624,9 @@
       },
       "LNG_BACKUP_FIELD_LABEL_USER": {
         "translation": "Utilisateur"
+      },
+      "LNG_BACKUP_FIELD_LABEL_FILE_SIZE": {
+        "translation": "File size"
       }
     },
     "uiAutomaticBackupFields": {

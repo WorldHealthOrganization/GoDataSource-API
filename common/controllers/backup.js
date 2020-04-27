@@ -128,4 +128,17 @@ module.exports = function (Backup) {
       })
       .catch((err) => done(err));
   };
+
+  /**
+   * Go through all records and attach the custom properties
+   */
+  Backup.afterRemote('find', function (context, modelInstances, next) {
+    // go through all records and attach the custom properties
+    (modelInstances || []).forEach((filterMappingModel) => {
+      app.models.backup.attachCustomProperties(filterMappingModel);
+    });
+
+    // finished - continue
+    next();
+  });
 };
