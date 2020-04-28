@@ -391,11 +391,10 @@ function run(callback) {
 
   // default relationship template
   const defaultRelationshipTemplate = {
-    contactDateEstimated: false,
-    active: true,
-    clusterId: undefined,
-    socialRelationshipTypeId: undefined,
-    socialRelationshipDetail: undefined
+    contactDateEstimated: false
+    // clusterId: undefined,
+    // socialRelationshipTypeId: undefined,
+    // socialRelationshipDetail: undefined
   };
 
   // initialize containers for generated data
@@ -1285,7 +1284,7 @@ function run(callback) {
                     retrieveDataPromise = app.models[res]
                       .rawFindWithLoopbackFilter({
                         where: personsFilter[res],
-                        fields: ['id', 'type'],
+                        fields: ['id', 'type', 'classification'],
                         skip: (jobNo - 1) * limits[res],
                         // no limit on last batch
                         limit: jobNo !== batches ? limits[res] : null,
@@ -1481,6 +1480,10 @@ function run(callback) {
                       }
                       existingRelationships[persons[0].id][persons[1].id] = true;
 
+                      // determine active flag
+                      const active = (personData.classification === 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_NOT_A_CASE_DISCARDED' ||
+                        otherPerson.classification === 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_NOT_A_CASE_DISCARDED') ? false : true;
+
                       // determine dates
                       const contactDate = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
 
@@ -1532,6 +1535,7 @@ function run(callback) {
                             defaultRelationshipTemplate, {
                               outbreakId: outbreakDataContainer.id,
                               persons: persons,
+                              active: active,
                               contactDate: contactDate ? contactDate.toISOString() : contactDate,
                               certaintyLevelId: certaintyLevelId,
                               exposureTypeId: exposureTypeId,
@@ -1545,7 +1549,7 @@ function run(callback) {
                             app.logger.debug(`Relationship created => '${relationshipData.id}'`);
 
                             // create update participant jobs
-                            let updateParticipantsJobs = relationshipData.persons.forEach((person, index) => {
+                            let updateParticipantsJobs = relationshipData.persons.map((person, index) => {
                               // get other participant
                               let otherParticipant = relationshipData.persons[index === 0 ? 1 : 0];
 

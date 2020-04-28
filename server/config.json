@@ -106,5 +106,13 @@
   "removeSyncSnapshotsAfter": 24,
   "removeTmpUploadedFilesAfter": 24,
   "removeTmpUploadedImportFilesAfter": 24,
-  "skipOldPasswordForUserModify": true
+  "skipOldPasswordForUserModify": true,
+  "jobSettings": {
+    "generateFollowups": {
+      "batchSize": 10000
+    },
+    "setRelationshipInformationOnPerson": {
+      "batchSize": 10000
+    }
+  }
 }

@@ -9,6 +9,8 @@ const app = require('../../server/server');
 const helpers = require('../../components/helpers');
 const FollowupGeneration = require('../../components/followupGeneration');
 const PromisePool = require('es6-promise-pool');
+const _ = require('lodash');
+const Config = require('./../../server/config.json');
 
 module.exports = function (Outbreak) {
   /**
@@ -167,7 +169,7 @@ module.exports = function (Outbreak) {
               getBatchData,
               batchItemsAction,
               null,
-              1000,
+              _.get(Config, 'jobSettings.generateFollowups.batchSize', 1000),
               null,
               options.remotingContext.req.logger
             );
