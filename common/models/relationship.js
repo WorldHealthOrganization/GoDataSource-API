@@ -963,7 +963,11 @@ module.exports = function (Relationship) {
           });
         }
         // source person must be a case or event
-        if (!['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'].includes(sourcePerson.type)) {
+        if (![
+          'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT',
+          'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+          'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+        ].includes(sourcePerson.type)) {
           // otherwise stop with error
           throw app.utils.apiError.getError('INVALID_RELATIONSHIP_SOURCE_TYPE', {
             type: sourcePerson.type,
@@ -1004,6 +1008,18 @@ module.exports = function (Relationship) {
             ) {
               throw app.utils.apiError.getError('INVALID_RELATIONSHIP_WITH_DISCARDED_CASE', {
                 id: targetId
+              });
+            }
+            if (sourcePerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
+              targetPerson.type !== 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+            ) {
+              // otherwise stop with error
+              throw app.utils.apiError.getError('INVALID_RELATIONSHIP_SOURCE_TYPE', {
+                type: sourcePerson.type,
+                allowedTypes: [
+                  'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT',
+                  'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+                ]
               });
             }
             // everything went fine, return the two people
