@@ -23,12 +23,14 @@ module.exports = function (Backup) {
       'languageToken',
       'referenceData',
       'helpCategory',
+      'helpItem',
       'auditLog',
       'template',
       'icon',
       'device',
       'deviceHistory',
-      'importMapping'
+      'importMapping',
+      'filterMapping'
     ],
     'Data': [
       'outbreak',

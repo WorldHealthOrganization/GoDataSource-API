@@ -48,7 +48,8 @@ const collectionsMap = {
   fileAttachment: 'fileAttachment',
   device: 'device',
   deviceHistory: 'deviceHistory',
-  importMapping: 'importMapping'
+  importMapping: 'importMapping',
+  filterMapping: 'filterMapping'
 };
 
 // list of user related collections
