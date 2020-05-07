@@ -30,7 +30,8 @@ module.exports = function (Backup) {
       'device',
       'deviceHistory',
       'importMapping',
-      'filterMapping'
+      'filterMapping',
+      'migrationLog'
     ],
     'Data': [
       'outbreak',

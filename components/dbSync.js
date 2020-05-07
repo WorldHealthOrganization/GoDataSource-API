@@ -49,7 +49,8 @@ const collectionsMap = {
   device: 'device',
   deviceHistory: 'deviceHistory',
   importMapping: 'importMapping',
-  filterMapping: 'filterMapping'
+  filterMapping: 'filterMapping',
+  migrationLog: 'migrationLog'
 };
 
 // list of user related collections
