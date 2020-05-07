@@ -12868,8 +12868,7 @@ module.exports = function (Outbreak) {
     app.models.person
       .findMarkedAsNotDuplicates(
         this.id,
-        contactId,
-        {
+        contactId, {
           where: where
         },
         true
@@ -12925,8 +12924,7 @@ module.exports = function (Outbreak) {
     app.models.person
       .findMarkedAsNotDuplicates(
         this.id,
-        caseId,
-        {
+        caseId, {
           where: where
         },
         true
@@ -12982,8 +12980,7 @@ module.exports = function (Outbreak) {
     app.models.person
       .findMarkedAsNotDuplicates(
         this.id,
-        contactOfContactId,
-        {
+        contactOfContactId, {
           where: where
         },
         true
