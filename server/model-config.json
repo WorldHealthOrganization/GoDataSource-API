@@ -371,5 +371,9 @@
   "migrationLog": {
     "dataSource": "mongoDb",
     "public": false
+  },
+  "personDuplicateParams": {
+    "dataSource": null,
+    "public": false
   }
 }

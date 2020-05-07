@@ -170,6 +170,12 @@
       "type": [
         "string"
       ]
+    },
+    "notDuplicatesIds": {
+      "description": "Array containing IDs for persons that system detected as possible duplicates but they aren't duplicates",
+      "type": [
+        "string"
+      ]
     }
   },
   "indexes": {
@@ -232,6 +238,9 @@
     },
     "hasRelationships_index": {
       "hasRelationships": 1
+    },
+    "notDuplicatesIds_index": {
+      "notDuplicatesIds": 1
     }
   },
   "validations": [],
