@@ -1092,16 +1092,7 @@ module.exports = function (Person) {
   Person.findDuplicatesByType = function (filter, outbreakId, type, targetBody) {
     filter = filter || {};
     const buildRuleFilterPart = function (opts) {
-      let filter = {
-        $and: []
-      };
-      for (let prop in opts) {
-        filter.$and.push({
-          // we do exact matches for now
-          [prop]: opts[prop]
-        });
-      }
-      return filter;
+      return opts;
     };
 
     // remove end of line
@@ -1172,32 +1163,8 @@ module.exports = function (Person) {
           query.$or.push({
             documents: {
               $elemMatch: {
-                $and: [
-                  {
-                    $and: [
-                      {
-                        type: {
-                          $ne: null
-                        }
-                      },
-                      {
-                        type: doc.type
-                      }
-                    ]
-                  },
-                  {
-                    $and: [
-                      {
-                        number: {
-                          $ne: null
-                        }
-                      },
-                      {
-                        number: doc.number
-                      }
-                    ]
-                  }
-                ]
+                type: doc.type,
+                number: doc.number
               }
             }
           });
