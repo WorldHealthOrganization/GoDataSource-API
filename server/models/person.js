@@ -1095,21 +1095,16 @@ module.exports = function (Person) {
       };
       for (let prop in opts) {
         filter.$and.push({
-          $and: [
-            {
-              // we don't do non-exist values
-              [prop]: {
-                $ne: null
-              }
-            },
-            {
-              // we do exact matches for now
-              [prop]: opts[prop]
-            }
-          ]
+          // we do exact matches for now
+          [prop]: opts[prop]
         });
       }
       return filter;
+    };
+
+    // remove end of line
+    const removeEOL = (value) => {
+      return value ? value.trim().replace(/(\n|\r)/gm, '') : value;
     };
 
     // init base query
@@ -1118,6 +1113,11 @@ module.exports = function (Person) {
       type: type,
       $or: []
     };
+
+    // make sure we trim values
+    targetBody.firstName = removeEOL(targetBody.firstName);
+    targetBody.lastName = removeEOL(targetBody.lastName);
+    targetBody.middleName = removeEOL(targetBody.middleName);
 
     // duplicate rules
     if (targetBody.firstName && targetBody.lastName) {
