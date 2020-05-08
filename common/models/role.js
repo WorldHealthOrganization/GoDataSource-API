@@ -1573,6 +1573,15 @@ module.exports = function (Role) {
           hidden: true
         },
         {
+          id: 'contact_bulk_delete_relationships_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_RELATIONSHIP_CONTACTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'relationship_bulk_delete'
+          ]
+        },
+        {
           id: 'contact_bulk_delete_relationships_exposures',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_RELATIONSHIP_EXPOSURES',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION',
