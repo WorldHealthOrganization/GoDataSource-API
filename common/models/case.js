@@ -6,6 +6,7 @@ const _ = require('lodash');
 const moment = require('moment');
 const helpers = require('../../components/helpers');
 const async = require('async');
+const caseConstants = require('../../components/constants/case');
 
 module.exports = function (Case) {
   Case.getIsolatedContacts = function (caseId, callback) {
@@ -111,9 +112,7 @@ module.exports = function (Case) {
   Case.hasController = false;
 
   // list of case classifications that are discarded
-  Case.discardedCaseClassifications = [
-    'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_NOT_A_CASE_DISCARDED'
-  ];
+  Case.discardedCaseClassifications = caseConstants.discardedCaseClassifications;
 
   Case.sectionsFieldLabels = {
     personalInformation: {

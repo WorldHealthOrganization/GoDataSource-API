@@ -43,7 +43,8 @@ function encryptSync(password, options, filePath) {
             }
             resolve(filePath);
           });
-        });
+        })
+        .catch(reject);
     });
   });
 }

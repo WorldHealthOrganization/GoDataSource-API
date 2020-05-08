@@ -107,13 +107,13 @@ module.exports = function (Outbreak) {
             }
           }, {
             projection: {
-              relationshipsIds: 1
+              relationshipsRepresentation: 1
             }
           })
           .then(contacts => {
             // cache contacts relationships
             contacts.forEach(contact => {
-              mappedData.contacts[contact.id].relatedRelationships = contact.relationshipsIds;
+              mappedData.contacts[contact.id].relatedRelationships = contact.relationshipsRepresentation;
             });
 
             return mappedData;
@@ -198,7 +198,7 @@ module.exports = function (Outbreak) {
             };
             const itemAction = function (item) {
               // get remaining relationships
-              let remainingRelationships = item.relatedRelationships.filter(relId => !item.deleteRelationships.includes(relId));
+              let remainingRelationships = item.relatedRelationships.filter(rel => !item.deleteRelationships.includes(rel.id));
 
               return app.models.person
                 .rawUpdateOne({
@@ -206,7 +206,7 @@ module.exports = function (Outbreak) {
                 }, {
                   // no need to update hasRelationships flag as for contacts will not change
                   // hasRelationships: !!remainingRelationships.length,
-                  relationshipsIds: remainingRelationships
+                  relationshipsRepresentation: remainingRelationships
                 }, options, {
                   returnUpdatedResource: false
                 });
@@ -241,20 +241,20 @@ module.exports = function (Outbreak) {
                     createdAt: 1
                   },
                   projection: {
-                    relationshipsIds: 1
+                    relationshipsRepresentation: 1
                   }
                 });
             };
             const itemAction = function (item) {
               // get remaining relationships
-              let remainingRelationships = item.relationshipsIds.filter(relId => !data.otherPersons[item.id].deleteRelationships.includes(relId));
+              let remainingRelationships = item.relationshipsRepresentation.filter(rel => !data.otherPersons[item.id].deleteRelationships.includes(rel.id));
 
               return app.models.person
                 .rawUpdateOne({
                   _id: item.id
                 }, {
                   hasRelationships: !!remainingRelationships.length,
-                  relationshipsIds: remainingRelationships
+                  relationshipsRepresentation: remainingRelationships
                 }, options, {
                   returnUpdatedResource: false
                 });
