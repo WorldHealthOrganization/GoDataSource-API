@@ -6593,6 +6593,18 @@
       },
       "LNG_PAGE_CREATE_CONTACT_TAB_PERSONAL_SECTION_FLAG_CONTACT_TITLE": {
         "translation": "Пометить контакт повышенным уровнем риска как требующий дополнительного внимания"
+      },
+      "LNG_PAGE_CREATE_CONTACT_DUPLICATES_DIALOG_LABEL_NOT_A_DUPLICATE": {
+        "translation": "Not a duplicate"
+      },
+      "LNG_PAGE_CREATE_CONTACT_DUPLICATES_DIALOG_LABEL_NOT_A_DUPLICATE_DESCRIPTION": {
+        "translation": "Mark this item as not a duplicate for the current record"
+      },
+      "LNG_PAGE_CREATE_CONTACT_DUPLICATES_DIALOG_LABEL_POSSIBLE_DUPLICATE": {
+        "translation": "Might be a duplicate"
+      },
+      "LNG_PAGE_CREATE_CONTACT_DUPLICATES_DIALOG_LABEL_POSSIBLE_DUPLICATE_DESCRIPTION": {
+        "translation": "Mark this item as a possible duplicate for the current record"
       }
     },
     "uiModifyContactPage": {
