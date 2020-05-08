@@ -172,6 +172,10 @@
     "dataSource": null,
     "public": false
   },
+  "personRelationshipRepresentation": {
+    "dataSource": null,
+    "public": false
+  },
   "language": {
     "dataSource": "mongoDb",
     "public": true

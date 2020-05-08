@@ -1,0 +1,43 @@
+{
+  "name": "personRelationshipRepresentation",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "id": {
+      "id": true,
+      "description": "Relationship ID",
+      "type": "string",
+      "required": true
+    },
+    "active": {
+      "description": "Whether the relationship is active or not. A relationship becomes inactive if the case (if any) becomes discarded",
+      "type": "boolean",
+      "default": true
+    },
+    "otherParticipantType": {
+      "description": "Other participant type (case/contact/event)",
+      "type": "string",
+      "required": true
+    },
+    "otherParticipantId": {
+      "description": "Other participant ID",
+      "type": "string",
+      "required": true
+    },
+    "target": {
+      "description": "Flag specifying if the person is the target in the relationship",
+      "type": "boolean"
+    },
+    "source": {
+      "description": "Flag specifying if the person is the source in the relationship",
+      "type": "boolean"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

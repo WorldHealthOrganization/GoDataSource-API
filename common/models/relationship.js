@@ -563,8 +563,8 @@ module.exports = function (Relationship) {
   Relationship.observe('before save', function (context, next) {
     // get instance data
     const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
-    // cache data for future use (after save)
-    context.options.contextData = data;
+    // cache current persons for future use (after save)
+    app.utils.helpers.setValueInContextOptions(context, 'oldParticipants', _.get(data, 'source.existing.persons', []));
 
     // relation is active, by default
     data.target.active = true;
@@ -612,7 +612,7 @@ module.exports = function (Relationship) {
     // keep a list of update actions
     const updatePersonRecords = [];
     // go through the people that are part of the relationship
-    relationship.persons.forEach(function (person) {
+    relationship.persons.forEach(function (person, personIndex) {
       // trigger update operations on them (they might have before/after save listeners that need to be triggered on relationship updates)
       updatePersonRecords.push(
         // load the record
@@ -626,35 +626,60 @@ module.exports = function (Relationship) {
             personRecord.systemTriggeredUpdate = true;
 
             // initialize person relationships related payload; will be updated depending on action taken on relationships
-            let personRelationships = personRecord.relationshipsIds || [];
+            let personRelationships = personRecord.relationshipsRepresentation || [];
             let relationshipsPayload = {};
 
             if (relationship.deleted) {
+              // remove relationship from relationshipsRepresentation
+              relationshipsPayload = {
+                '$pull': {
+                  relationshipsRepresentation: {
+                    id: relationship.id
+                  }
+                }
+              };
+
               // when a relationship is deleted we need to check if the person has additional relationships
-              personRelationships.splice(personRelationships.indexOf(relationship.id), 1);
-              if (personRelationships.length) {
+              if (personRelationships.length - 1) {
                 // person will still have relationships
-                relationshipsPayload = {
-                  hasRelationships: true,
-                  relationshipsIds: personRelationships
+                relationshipsPayload['$set'] = {
+                  hasRelationships: true
                 };
               } else {
                 // no relationships remain
-                relationshipsPayload = {
-                  hasRelationships: false,
-                  relationshipsIds: []
+                relationshipsPayload['$set'] = {
+                  hasRelationships: false
                 };
               }
             } else {
               // relationship just created or updated
               relationshipsPayload = {
-                hasRelationships: true
+                '$set': {
+                  hasRelationships: true
+                }
               };
-              if (personRelationships.indexOf(relationship.id) === -1) {
+
+              // create payload for relationship representations
+              // get other participant
+              let otherParticipant = relationship.persons[personIndex === 0 ? 1 : 0];
+              let relationshipRepresentationPayload = {
+                id: relationship.id,
+                active: relationship.active,
+                otherParticipantType: otherParticipant.type,
+                otherParticipantId: otherParticipant.id,
+                target: person.target,
+                source: person.source
+              };
+
+              let relationshipIndex = personRelationships.findIndex(rel => rel.id === relationship.id);
+              if (relationshipIndex === -1) {
                 // relationship was not found in current person relationships; add it
-                // if it was already in the array there is no need to update the array
-                personRelationships.push(relationship.id);
-                relationshipsPayload.relationshipsIds = personRelationships;
+                relationshipsPayload['$addToSet'] = {
+                  relationshipsRepresentation: relationshipRepresentationPayload
+                };
+              } else {
+                // relationship already exists; replace its entry from the relationships representation with the new one
+                relationshipsPayload['$set'][`relationshipsRepresentation.${relationshipIndex}`] = relationshipRepresentationPayload;
               }
             }
 
@@ -667,7 +692,7 @@ module.exports = function (Relationship) {
     // in this case we need to remove the relationship from the old participant
     // Note: the relationships information is already updated above for the new participants
     if (!context.isNewInstance && !relationship.deleted) {
-      let oldParticipants = _.get(context, 'options.contextData.source.existing.persons', []);
+      let oldParticipants = app.utils.helpers.getValueFromContextOptions(context, 'oldParticipants');
       // loop through the old participants and check if they are still in the relationship
       oldParticipants.forEach(oldPerson => {
         if (!relationship.persons.find(newPerson => newPerson.id === oldPerson.id)) {
@@ -684,22 +709,26 @@ module.exports = function (Relationship) {
                 personRecord.systemTriggeredUpdate = true;
 
                 // initialize person relationships related payload; will be updated depending on action taken on relationships
-                let personRelationships = personRecord.relationshipsIds || [];
-                let relationshipsPayload = {};
+                let personRelationships = personRecord.relationshipsRepresentation || [];
+                let relationshipsPayload = {
+                  // remove relationship from relationshipsRepresentation
+                  '$pull': {
+                    relationshipsRepresentation: {
+                      id: relationship.id
+                    }
+                  }
+                };
 
                 // check if the person has additional relationships
-                personRelationships.splice(personRelationships.indexOf(relationship.id), 1);
-                if (personRelationships.length) {
+                if (personRelationships.length - 1) {
                   // person will still have relationships
-                  relationshipsPayload = {
-                    hasRelationships: true,
-                    relationshipsIds: personRelationships
+                  relationshipsPayload['$set'] = {
+                    hasRelationships: true
                   };
                 } else {
                   // no relationships remain
-                  relationshipsPayload = {
-                    hasRelationships: false,
-                    relationshipsIds: []
+                  relationshipsPayload['$set'] = {
+                    hasRelationships: false
                   };
                 }
 

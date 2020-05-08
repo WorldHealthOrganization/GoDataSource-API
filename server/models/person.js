@@ -336,8 +336,8 @@ module.exports = function (Person) {
       (
         !context.isNewInstance &&
         data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
-        && data.source.update
-        && data.source.update.classification
+        && data.source.updated
+        && data.source.updated.classification
         && data.source.existing.classification
         && data.source.existing.classification !== data.source.updated.classification
       ) &&
@@ -641,6 +641,8 @@ module.exports = function (Person) {
      */
     // if a case was updated and relationship updates need to be triggered
     if (!ctx.isNewInstance && instance.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' && ctx.options.triggerRelationshipUpdates) {
+      // reset flag
+      delete ctx.options.triggerRelationshipUpdates;
       // find all of its relationships with a contact
       app.models.relationship
         .find({
