@@ -219,7 +219,8 @@ module.exports.getContactsEligibleForFollowup = function (startDate, endDate, ou
       projection: {
         outbreakId: 1,
         addresses: 1,
-        followUp: 1
+        followUp: 1,
+        followUpTeamId: 1
       }
     });
 };

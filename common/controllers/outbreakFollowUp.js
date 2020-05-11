@@ -123,11 +123,22 @@ module.exports = function (Outbreak) {
                   let pool = new PromisePool(
                     contacts.map((contact) => {
                       contact.followUpsList = followUpGroups[contact.id] || [];
-                      return FollowupGeneration
-                        .getContactFollowupEligibleTeams(contact, teams)
-                        .then((eligibleTeams) => {
-                          contact.eligibleTeams = eligibleTeams;
-                        })
+
+                      // get eligible teams for contact
+                      let getContactEligibleTeams = Promise.resolve();
+                      if (contact.followUpTeamId) {
+                        // contact has a default assigned team; use it
+                        contact.eligibleTeams = [contact.followUpTeamId];
+                      } else {
+                        // get contact eligible teams from all system teams
+                        getContactEligibleTeams = FollowupGeneration
+                          .getContactFollowupEligibleTeams(contact, teams)
+                          .then((eligibleTeams) => {
+                            contact.eligibleTeams = eligibleTeams;
+                          });
+                      }
+
+                      return getContactEligibleTeams
                         .then(() => {
                           // it returns a list of follow ups objects to insert and a list of ids to remove
                           let generateResult = FollowupGeneration.generateFollowupsForContact(
