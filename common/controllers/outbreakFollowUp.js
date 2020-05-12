@@ -123,11 +123,22 @@ module.exports = function (Outbreak) {
                   let pool = new PromisePool(
                     contacts.map((contact) => {
                       contact.followUpsList = followUpGroups[contact.id] || [];
-                      return FollowupGeneration
-                        .getContactFollowupEligibleTeams(contact, teams)
-                        .then((eligibleTeams) => {
-                          contact.eligibleTeams = eligibleTeams;
-                        })
+
+                      // get eligible teams for contact
+                      let getContactEligibleTeams = Promise.resolve();
+                      if (contact.followUpTeamId) {
+                        // contact has a default assigned team; use it
+                        contact.eligibleTeams = [contact.followUpTeamId];
+                      } else {
+                        // get contact eligible teams from all system teams
+                        getContactEligibleTeams = FollowupGeneration
+                          .getContactFollowupEligibleTeams(contact, teams)
+                          .then((eligibleTeams) => {
+                            contact.eligibleTeams = eligibleTeams;
+                          });
+                      }
+
+                      return getContactEligibleTeams
                         .then(() => {
                           // it returns a list of follow ups objects to insert and a list of ids to remove
                           let generateResult = FollowupGeneration.generateFollowupsForContact(
@@ -177,5 +188,60 @@ module.exports = function (Outbreak) {
       })
       .then(() => callback(null, {count: followUpsCount}))
       .catch((err) => callback(err));
+  };
+
+  /**
+   * Bulk modify follow ups
+   * @param where
+   * @param data
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.bulkModifyFollowUps = function (where, data, options, callback) {
+    // since the query can return many results we will do the update in batches
+    // Note: Updating each follow-up one by one in order for the "before/after save" hooks to be executed for each entry
+    // container for count
+    let followUpsCount = 0;
+
+    // initialize parameters for handleActionsInBatches call
+    const getActionsCount = () => {
+      return app.models.followUp
+        .count(where)
+        .then(count => {
+          // cache count
+          followUpsCount = count;
+
+          return Promise.resolve(count);
+        });
+    };
+
+    const getBatchData = (batchNo, batchSize) => {
+      // get follow-ups for batch
+      return app.models.followUp
+        .find({
+          where: where,
+          skip: (batchNo - 1) * batchSize,
+          limit: batchSize,
+          order: 'createdAt ASC'
+        });
+    };
+
+    const itemAction = (followUpRecord) => {
+      return followUpRecord.updateAttributes(data, options);
+    };
+
+    helpers.handleActionsInBatches(
+      getActionsCount,
+      getBatchData,
+      null,
+      itemAction,
+      _.get(Config, 'jobSettings.bulkModifyFollowUps.batchSize', 1000),
+      10,
+      options.remotingContext.req.logger
+    )
+      .then(() => {
+        callback(null, {count: followUpsCount});
+      })
+      .catch(callback);
   };
 };

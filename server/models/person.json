@@ -145,6 +145,10 @@
         }
       }
     },
+    "followUpTeamId": {
+      "description": "Contact property; Allocated team for contact follow-ups; Defining it here as on sync we use the person model and not the contact model",
+      "type": "string"
+    },
     "date": {
       "type": "date",
       "description": "Event property; Defining it here as on sync we use the person model and not the event model"

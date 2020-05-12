@@ -6272,6 +6272,12 @@
       "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_STATUS_DESCRIPTION": {
         "translation": ""
       },
+      "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_TEAM_ID": {
+        "translation": "Follow-up assigned team"
+      },
+      "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_TEAM_ID_DESCRIPTION": {
+        "translation": ""
+      },
       "LNG_CONTACT_FIELD_LABEL_GENDER": {
         "translation": "Sexe"
       },
