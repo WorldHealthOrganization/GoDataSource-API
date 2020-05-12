@@ -50,6 +50,14 @@
       "type": "number",
       "description": "Number of follow ups to be generated per day"
     },
+    "generateFollowUpsOverwriteExisting": {
+      "description": "Flag specifying whether existing follow-ups in the specified period will be overwritten or not",
+      "type": "boolean"
+    },
+    "generateFollowUpsKeepTeamAssignment": {
+      "description": "Flag specifying whether new generated follow-ups will be assigned to the same team as the last follow-up for a contact or the team assignment will be made through round-robin (can be true only if 'overwriteExistingFollowUps' is false)",
+      "type": "boolean"
+    },
     "noDaysAmongContacts": {
       "type": "number",
       "description": "Number of days used to calculate the proportion of new cases detected among known contacts"

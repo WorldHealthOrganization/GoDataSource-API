@@ -69,6 +69,8 @@ function run(callback) {
               periodOfFollowup: item.periodOfFollowup,
               frequencyOfFollowUp: item.frequencyOfFollowUp,
               frequencyOfFollowUpPerDay: item.frequencyOfFollowUpPerDay,
+              generateFollowUpsOverwriteExisting: item.generateFollowUpsOverwriteExisting,
+              generateFollowUpsKeepTeamAssignment: item.generateFollowUpsKeepTeamAssignment,
               noDaysAmongContacts: item.noDaysAmongContacts,
               noDaysInChains: item.noDaysInChains,
               noDaysNotSeen: item.noDaysNotSeen,

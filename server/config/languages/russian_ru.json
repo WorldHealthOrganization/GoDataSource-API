@@ -5296,6 +5296,18 @@
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY_PER_DAY_DESCRIPTION": {
         "translation": "Сколько раз в день следует проводить последующие наблюдения?  Цифра 1 означает одно последующее наблюдение в день."
       },
+      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING": {
+        "translation": "Overwrite existing follow-ups"
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING_DESCRIPTION": {
+        "translation": "Flag specifying whether existing follow-ups in the specified period will be overwritten or not"
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT": {
+        "translation": "Keep team assignment"
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT_DESCRIPTION": {
+        "translation": "Flag specifying whether new generated follow-ups will be assigned to the same team as the last follow-up for a contact or the team assignment will be made through round-robin."
+      },
       "LNG_OUTBREAK_FIELD_LABEL_ID": {
         "translation": "Идентификатор"
       },
