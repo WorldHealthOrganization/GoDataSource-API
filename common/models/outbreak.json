@@ -1086,6 +1086,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "follow_up_bulk_modify",
+      "permission": "ALLOW",
+      "property": "bulkModifyFollowUps"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "follow_up_list",
       "permission": "ALLOW",
       "property": "findFollowUps"
@@ -7862,6 +7868,53 @@
       "http": {
         "verb": "post",
         "path": "/contacts/:nk/contacts-of-contacts"
+      }
+    },
+    "prototype.bulkModifyFollowUps": {
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances",
+          "http": {
+            "source": "query"
+          },
+          "required": true
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "followUp",
+          "description": "Follow-up properties",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "response",
+          "type": {
+            "count": {
+              "type": "number"
+            }
+          },
+          "description": "Number of updated follow ups",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Bulk update follow-ups",
+      "http": {
+        "verb": "put",
+        "path": "/follow-ups/bulk"
       }
     }
   }
