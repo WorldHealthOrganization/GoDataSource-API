@@ -6010,9 +6010,6 @@
       "LNG_PAGE_MODIFY_CASE_ACTION_VIEW_MOVEMENT": {
         "translation": "Ver movimiento"
       },
-      "LNG_PAGE_MODIFY_CASE_DUPLICATES_DIALOG_ACTION_MERGE_AT_LEAST_ONE_ERROR_MESSAGE": {
-        "translation": "Por favor seleccione por lo menos un registro para mezclar"
-      },
       "LNG_PAGE_MODIFY_CASE_DUPLICATES_DIALOG_CONFIRM_MSG": {
         "translation": "Este caso puede ya estar en el sistema (ver abajo posibles coincidencias). Todavía desea actualizar o mezclar posibles coincidencias?"
       },
@@ -6054,6 +6051,9 @@
       },
       "LNG_PAGE_MODIFY_CASE_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
         "translation": "Record Details"
+      },
+      "LNG_PAGE_MODIFY_CASE_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
+        "translation": "Not duplicates"
       }
     },
     "uiEntityRelationshipsListPage": {
@@ -6626,26 +6626,8 @@
       "LNG_PAGE_MODIFY_CONTACT_ACTION_VIEW_MOVEMENT": {
         "translation": "Ver movimiento"
       },
-      "LNG_PAGE_MODIFY_CONTACT_DUPLICATES_DIALOG_ACTION_MERGE_AT_LEAST_ONE_ERROR_MESSAGE": {
-        "translation": "Por favor, seleccione al menos un registro para mezclar"
-      },
       "LNG_PAGE_MODIFY_CONTACT_DUPLICATES_DIALOG_CONFIRM_MSG": {
         "translation": "Este contacto puede ya estar en el sistema (vea posibles coincidencias abajo). Todavía desea actualizar este contacto o mezclar posibles coincidencias?"
-      },
-      "LNG_PAGE_MODIFY_CONTACT_DUPLICATES_DIALOG_LABEL_MERGE_WITH": {
-        "translation": "¿Mezclar con?"
-      },
-      "LNG_PAGE_MODIFY_CONTACT_DUPLICATES_DIALOG_LABEL_NOT_A_DUPLICATE": {
-        "translation": "Not a duplicate"
-      },
-      "LNG_PAGE_MODIFY_CONTACT_DUPLICATES_DIALOG_LABEL_NOT_A_DUPLICATE_DESCRIPTION": {
-        "translation": "Mark this item as not a duplicate for the current record"
-      },
-      "LNG_PAGE_MODIFY_CONTACT_DUPLICATES_DIALOG_LABEL_POSSIBLE_DUPLICATE": {
-        "translation": "Might be a duplicate"
-      },
-      "LNG_PAGE_MODIFY_CONTACT_DUPLICATES_DIALOG_LABEL_POSSIBLE_DUPLICATE_DESCRIPTION": {
-        "translation": "Mark this item as a possible duplicate for the current record"
       },
       "LNG_PAGE_MODIFY_CONTACT_TAB_ADDRESS_TITLE": {
         "translation": "Dirección"
@@ -6673,6 +6655,9 @@
       },
       "LNG_PAGE_MODIFY_CONTACT_ACTION_SEE_LAB_RESULTS": {
         "translation": "Lab results"
+      },
+      "LNG_PAGE_MODIFY_CONTACT_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
+        "translation": "Not duplicates"
       }
     },
     "uiRelationshipFields": {
@@ -16295,6 +16280,23 @@
       },
       "LNG_PAGE_LIST_MARKED_AS_NOT_DUPLICATES_ACTION_REMOVE_FROM_LIST_ENTITY_CONFIRMATION": {
         "translation": "Are you sure you want to remove tem from list of not duplicates ( if it matches again, it will be considered as a duplicate )?"
+      }
+    },
+    "uiDuplicates": {
+      "LNG_DUPLICATES_DIALOG_ACTION": {
+        "translation": "Action"
+      },
+      "LNG_DUPLICATES_DIALOG_ACTION_DESCRIPTION": {
+        "translation": "Mark as NOT a duplicate - won't be displayed as a potential duplicate in the future for this record\nMerge duplicate - This is a duplicate of the current record, and we need to merge it"
+      },
+      "LNG_DUPLICATES_DIALOG_ACTION_NONE": {
+        "translation": "No action"
+      },
+      "LNG_DUPLICATES_DIALOG_ACTION_MARK_AS_NOT_A_DUPLICATE": {
+        "translation": "Mark as NOT a duplicate"
+      },
+      "LNG_DUPLICATES_DIALOG_ACTION_MERGE_DUPLICATE": {
+        "translation": "Merge duplicate"
       }
     }
   }
