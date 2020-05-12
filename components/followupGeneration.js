@@ -245,11 +245,15 @@ module.exports.getContactFollowups = function (startDate, endDate, contactIds) {
         }
       ]
     }, {
+      sort: {
+        createdAt: 1
+      },
       projection: {
         _id: 1,
         date: 1,
         personId: 1,
-        statusId: 1
+        statusId: 1,
+        teamId: 1
       }
     })
     .then((followUps) => _.groupBy(followUps, (f) => f.personId));
@@ -275,8 +279,40 @@ module.exports.getAllTeamsWithLocationsIncluded = function () {
     })));
 };
 
-// get a contact's teams that are eligible for assignment on generated follow ups
-module.exports.getContactFollowupEligibleTeams = function (contact, teams) {
+/**
+ * Get a contact's teams that are eligible for assignment on generated follow ups
+ * Priority is a follows:
+ * 1. use contact.followUpTeamId
+ * 2. use latest contact.followUpsList assigned team if useLastAssignedTeam is true
+ * 3. use "nearest fit" teams
+ * @param contact
+ * @param teams
+ * @param useLastAssignedTeam
+ * @returns {Promise<[]>}
+ */
+module.exports.getContactFollowupEligibleTeams = function (contact, teams, useLastAssignedTeam = true) {
+  // check for contact followUpTeamId
+  if (contact.followUpTeamId) {
+    // contact has a default assigned team; use it
+    return Promise.resolve([contact.followUpTeamId]);
+  }
+
+  // check if last follow-up assigned team needs to be used
+  if (useLastAssignedTeam &&
+    Array.isArray(contact.followUpsList) && contact.followUpsList.length
+  ) {
+    // use latest assigned team
+    // contact.followUpsList should be sorted ascending by date
+    for (let i = contact.followUpsList.length - 1; i >= 0; i--) {
+      let followUp = contact.followUpsList[i];
+      if (followUp.teamId) {
+        // found an assigned team on an existing follow-up; use it
+        return Promise.resolve(followUp.teamId);
+      }
+    }
+  }
+
+  // get nearest fit teams
   // find all the teams that are matching the contact's location ids from addresses
   let eligibleTeams = [];
   // normalize addresses

@@ -19,6 +19,16 @@
     },
     "targeted": {
       "type": "boolean"
+    },
+    "overwriteExistingFollowUps": {
+      "description": "Flag specifying whether existing follow-ups in the specified period will be overwritten or not. Applies only to not performed follow-ups",
+      "type": "boolean",
+      "default": false
+    },
+    "keepTeamAssignment": {
+      "description": "Flag specifying whether new generated follow-ups will be assigned to the same team as the last follow-up for a contact or the team assignment will be made through round-robin (can be true only if 'overwriteExistingFollowUps' is false)",
+      "type": "boolean",
+      "default": true
     }
   },
   "validations": [],

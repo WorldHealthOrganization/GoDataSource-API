@@ -5300,7 +5300,7 @@
         "translation": "Overwrite existing follow-ups"
       },
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING_DESCRIPTION": {
-        "translation": "Flag specifying whether existing follow-ups in the specified period will be overwritten or not"
+        "translation": "Flag specifying whether existing follow-ups in the specified period will be overwritten or not. Applies only to not performed follow-ups"
       },
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT": {
         "translation": "Keep team assignment"
