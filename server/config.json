@@ -111,7 +111,7 @@
     "generateFollowups": {
       "batchSize": 10000
     },
-    "bulkUpdateFollowups": {
+    "bulkModifyFollowUps": {
       "batchSize": 1000
     },
     "setRelationshipInformationOnPerson": {

@@ -235,7 +235,7 @@ module.exports = function (Outbreak) {
       getBatchData,
       null,
       itemAction,
-      _.get(Config, 'jobSettings.bulkUpdateFollowups.batchSize', 1000),
+      _.get(Config, 'jobSettings.bulkModifyFollowUps.batchSize', 1000),
       10,
       options.remotingContext.req.logger
     )
