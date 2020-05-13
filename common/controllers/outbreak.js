@@ -12619,4 +12619,172 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.createContactMultipleContactsOfContacts = function (contactId, data, options, callback) {
     Outbreak.createContactMultipleContactsOfContacts(this, contactId, data, options, callback);
   };
+
+  /**
+   * Get all records marked as not duplicates for a specific record
+   * @param contactId
+   * @param filter pagination props (skip, limit)
+   * @param callback
+   */
+  Outbreak.prototype.getContactMarkedAsNotDuplicates = function (contactId, filter = {}, callback) {
+    app.models.person
+      .findMarkedAsNotDuplicates(
+        this.id,
+        contactId,
+        filter
+      )
+      .then((markedAsNotDuplicates) => callback(null, markedAsNotDuplicates))
+      .catch(callback);
+  };
+
+  /**
+   * Count records marked as not duplicates for a specific record
+   * @param contactOfContactId
+   * @param filter pagination props (skip, limit)
+   * @param callback
+   */
+  Outbreak.prototype.getContactMarkedAsNotDuplicatesCount = function (contactId, where = {}, callback) {
+    app.models.person
+      .findMarkedAsNotDuplicates(
+        this.id,
+        contactId, {
+          where: where
+        },
+        true
+      )
+      .then((counted) => callback(null, counted))
+      .catch(callback);
+  };
+
+  /**
+   * Change contact duplicates
+   */
+  Outbreak.prototype.contactMarkPersonAsOrNotADuplicate = function (contactId, data, options, callback) {
+    data = data || {};
+    app.models.person
+      .markAsOrNotADuplicate(
+        options,
+        this.id,
+        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+        contactId,
+        data.addRecords,
+        data.removeRecords
+      )
+      .then((finalNotDuplicates) => {
+        callback(null, finalNotDuplicates);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Get all records marked as not duplicates for a specific record
+   * @param caseId
+   * @param filter pagination props (skip, limit)
+   * @param callback
+   */
+  Outbreak.prototype.getCaseMarkedAsNotDuplicates = function (caseId, filter = {}, callback) {
+    app.models.person
+      .findMarkedAsNotDuplicates(
+        this.id,
+        caseId,
+        filter
+      )
+      .then((markedAsNotDuplicates) => callback(null, markedAsNotDuplicates))
+      .catch(callback);
+  };
+
+  /**
+   * Count records marked as not duplicates for a specific record
+   * @param caseId
+   * @param filter pagination props (skip, limit)
+   * @param callback
+   */
+  Outbreak.prototype.getCaseMarkedAsNotDuplicatesCount = function (caseId, where = {}, callback) {
+    app.models.person
+      .findMarkedAsNotDuplicates(
+        this.id,
+        caseId, {
+          where: where
+        },
+        true
+      )
+      .then((counted) => callback(null, counted))
+      .catch(callback);
+  };
+
+  /**
+   * Change case duplicates
+   */
+  Outbreak.prototype.caseMarkPersonAsOrNotADuplicate = function (caseId, data, options, callback) {
+    data = data || {};
+    app.models.person
+      .markAsOrNotADuplicate(
+        options,
+        this.id,
+        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+        caseId,
+        data.addRecords,
+        data.removeRecords
+      )
+      .then((finalNotDuplicates) => {
+        callback(null, finalNotDuplicates);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Get all records marked as not duplicates for a specific record
+   * @param contactOfContactId
+   * @param filter pagination props (skip, limit)
+   * @param callback
+   */
+  Outbreak.prototype.getContactOfContactMarkedAsNotDuplicates = function (contactOfContactId, filter = {}, callback) {
+    app.models.person
+      .findMarkedAsNotDuplicates(
+        this.id,
+        contactOfContactId,
+        filter
+      )
+      .then((markedAsNotDuplicates) => callback(null, markedAsNotDuplicates))
+      .catch(callback);
+  };
+
+  /**
+   * Count records marked as not duplicates for a specific record
+   * @param contactOfContactId
+   * @param filter pagination props (skip, limit)
+   * @param callback
+   */
+  Outbreak.prototype.getContactOfContactMarkedAsNotDuplicatesCount = function (contactOfContactId, where = {}, callback) {
+    app.models.person
+      .findMarkedAsNotDuplicates(
+        this.id,
+        contactOfContactId, {
+          where: where
+        },
+        true
+      )
+      .then((counted) => callback(null, counted))
+      .catch(callback);
+  };
+
+  /**
+   * Change contact of contact duplicates
+   */
+  Outbreak.prototype.contactOfContactMarkPersonAsOrNotADuplicate = function (contactOfContactId, data, options, callback) {
+    data = data || {};
+    app.models.person
+      .markAsOrNotADuplicate(
+        options,
+        this.id,
+        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT',
+        contactOfContactId,
+        data.addRecords,
+        data.removeRecords
+      )
+      .then((finalNotDuplicates) => {
+        callback(null, finalNotDuplicates);
+      })
+      .catch(callback);
+  };
 };

@@ -693,25 +693,37 @@ module.exports = function (Person) {
       where = {
         $and: [
           {
-            $or: [
-              {
-                deleted: {
-                  $ne: true
-                }
-              },
-              {
-                deleted: {
-                  $exists: false
-                }
-              }
-            ],
+            deleted: {
+              $ne: true
+            }
           },
           where || {}
         ]
       };
+
       // use connector directly to bring big number of (raw) results
+      // #TODO:
+      // - move logic to worker
+      // - get data in batches
       app.dataSources.mongoDb.connector.collection('person')
-        .find(where)
+        .find(
+          where, {
+            projection: {
+              _id: 1,
+              type: 1,
+              visualId: 1,
+              name: 1,
+              firstName: 1,
+              lastName: 1,
+              middleName: 1,
+              documents: 1,
+              notDuplicatesIds: 1,
+              age: 1,
+              addresses: 1,
+              address: 1
+            }
+          }
+        )
         .toArray(function (error, people) {
           // handle eventual errors
           if (error) {
@@ -723,12 +735,14 @@ module.exports = function (Person) {
           } else {
             findOrCount = personDuplicate.find.bind(null, people, Object.assign({where: where}, filter));
           }
+
           // find or count duplicate groups
           findOrCount(function (error, duplicates) {
             // handle eventual errors
             if (error) {
               return reject(error);
             }
+
             // send back the result
             return resolve(duplicates);
           });
@@ -1092,33 +1106,27 @@ module.exports = function (Person) {
   Person.findDuplicatesByType = function (filter, outbreakId, type, targetBody) {
     filter = filter || {};
     const buildRuleFilterPart = function (opts) {
-      let filter = {
-        $and: []
-      };
-      for (let prop in opts) {
-        filter.$and.push({
-          $and: [
-            {
-              // we don't do non-exist values
-              [prop]: {
-                $ne: null
-              }
-            },
-            {
-              // we do exact matches for now
-              [prop]: opts[prop]
-            }
-          ]
-        });
-      }
-      return filter;
+      return opts;
     };
-    const query = {
+
+    // remove end of line
+    const removeEOL = (value) => {
+      return value ? value.trim().replace(/(\n|\r)/gm, '') : value;
+    };
+
+    // init base query
+    let query = {
       outbreakId: outbreakId,
       type: type,
       $or: []
     };
 
+    // make sure we trim values
+    targetBody.firstName = removeEOL(targetBody.firstName);
+    targetBody.lastName = removeEOL(targetBody.lastName);
+    targetBody.middleName = removeEOL(targetBody.middleName);
+
+    // duplicate rules
     if (targetBody.firstName && targetBody.lastName) {
       query.$or.push(
         buildRuleFilterPart({
@@ -1169,32 +1177,8 @@ module.exports = function (Person) {
           query.$or.push({
             documents: {
               $elemMatch: {
-                $and: [
-                  {
-                    $and: [
-                      {
-                        type: {
-                          $ne: null
-                        }
-                      },
-                      {
-                        type: doc.type
-                      }
-                    ]
-                  },
-                  {
-                    $and: [
-                      {
-                        number: {
-                          $ne: null
-                        }
-                      },
-                      {
-                        number: doc.number
-                      }
-                    ]
-                  }
-                ]
+                type: doc.type,
+                number: doc.number
               }
             }
           });
@@ -1214,7 +1198,43 @@ module.exports = function (Person) {
 
     // find duplicates only if there is something to look for
     if (query.$or) {
-      return app.models.person.rawFind(query, {skip: filter.skip, limit: filter.limit});
+      // determine if we "duplicates" to exclude
+      // - we need the latest changes, this is why we can't use targetBody.notDuplicatesIds
+      let promise = Promise.resolve();
+      if (targetBody.id) {
+        promise = promise
+          .then(() => {
+            return app.models.person.findById(targetBody.id, {
+              fields: [
+                'id',
+                'notDuplicatesIds'
+              ]
+            });
+          })
+          .then((personData) => {
+            // do we need to exclude not duplicates ?
+            if (
+              personData.notDuplicatesIds &&
+              personData.notDuplicatesIds.length > 0
+            ) {
+              // force proper indexes to be used
+              query = {
+                _id: {
+                  $nin: personData.notDuplicatesIds
+                },
+                $and: [
+                  query
+                ]
+              };
+            }
+          });
+      }
+
+      // finished
+      return promise
+        .then(() => {
+          return app.models.person.rawFind(query, {skip: filter.skip, limit: filter.limit});
+        });
     } else {
       // otherwise return empty list
       return Promise.resolve([]);
@@ -1890,5 +1910,197 @@ module.exports = function (Person) {
         }
       })
       .then(() => peopleMap);
+  };
+
+  /**
+   * Count contacts/exposures for a list of records
+   * @param outbreakId
+   * @param personId
+   * @param filter Where if count is true, Full filter otherwise
+   * @param count
+   */
+  Person.findMarkedAsNotDuplicates = function (
+    outbreakId,
+    personId,
+    filter,
+    count
+  ) {
+    return app.models.person
+      .findById(personId, {
+        fields: [
+          'id',
+          'notDuplicatesIds'
+        ]
+      })
+      .then((person) => {
+        // person found ?
+        if (!person) {
+          return Promise.reject(app.utils.apiError.getError('RECORD_NOT_FOUND'));
+        }
+
+        // we don't have any records marked as not duplicates
+        if (
+          !person.notDuplicatesIds ||
+          person.notDuplicatesIds.length < 1
+        ) {
+          return count ? 0 : [];
+        }
+
+        // construct query
+        const where = {
+          outbreakId: outbreakId,
+          id: {
+            inq: person.notDuplicatesIds
+          }
+        };
+
+        // merge filter
+        filter = filter || {};
+        if (filter.where) {
+          filter.where = {
+            and: [
+              where,
+              filter.where
+            ]
+          };
+        } else {
+          filter.where = where;
+        }
+
+        // return records marked as not duplicates
+        return count ?
+          app.models.person.count(filter.where) :
+          app.models.person.find(filter);
+      });
+  };
+
+  /**
+   * Count contacts/exposures for a list of records
+   * @param options
+   * @param outbreakId
+   * @param personType
+   * @param personId
+   * @param addRecords Persons record ids that should be *merged* into current list of items that aren't duplicates
+   * @param removeRecords Persons record ids that should be *removed* from the current list of items that aren't duplicates
+   */
+  Person.markAsOrNotADuplicate = function (
+    options,
+    outbreakId,
+    personType,
+    personId,
+    addRecords,
+    removeRecords
+  ) {
+    return app.models.person
+      .findOne({
+        where: {
+          _id: personId,
+          outbreakId: outbreakId,
+          type: personType
+        }
+      })
+      .then((person) => {
+        // person found ?
+        if (!person) {
+          return Promise.reject(app.utils.apiError.getError('RECORD_NOT_FOUND'));
+        }
+
+        // add records to list of duplicates
+        if (
+          addRecords &&
+          addRecords.length > 0
+        ) {
+          person.notDuplicatesIds = _.uniq([
+            ...(person.notDuplicatesIds || []),
+            ...addRecords
+          ]);
+        }
+
+        // remove records from list of duplicates
+        if (
+          removeRecords &&
+          removeRecords.length > 0
+        ) {
+          // map ids that we want to remove for easy access
+          const removeRecordsMap = {};
+          removeRecords.forEach((id) => {
+            removeRecordsMap[id] = true;
+          });
+
+          // remove records from list of duplicates
+          person.notDuplicatesIds = (person.notDuplicatesIds || []).filter((id) => {
+            return !removeRecordsMap[id];
+          });
+        }
+
+        // finished
+        return person;
+      })
+      .then((person) => {
+        // update record
+        return person.updateAttributes({
+          notDuplicatesIds: person.notDuplicatesIds || []
+        }, options);
+      })
+      .then((person) => {
+        // add record from list of duplicates
+        const jobs = [];
+        if (
+          addRecords &&
+          addRecords.length > 0
+        ) {
+          jobs.push(
+            ...addRecords.map((recordId) => {
+              return app.models.person
+                .findById(recordId)
+                .then((relatedRecord) => {
+                  // add record id
+                  relatedRecord.notDuplicatesIds = relatedRecord.notDuplicatesIds || [];
+                  relatedRecord.notDuplicatesIds.push(person.id);
+                  relatedRecord.notDuplicatesIds = _.uniq(relatedRecord.notDuplicatesIds);
+
+                  // update
+                  return relatedRecord.updateAttributes({
+                    notDuplicatesIds: relatedRecord.notDuplicatesIds
+                  }, options);
+                });
+            })
+          );
+        }
+
+        // remove record from list of duplicates
+        if (
+          removeRecords &&
+          removeRecords.length > 0
+        ) {
+          jobs.push(
+            ...removeRecords.map((recordId) => {
+              return app.models.person
+                .findById(recordId)
+                .then((relatedRecord) => {
+                  // remove record id
+                  relatedRecord.notDuplicatesIds = (relatedRecord.notDuplicatesIds || []).filter((notDuplicatesId) => {
+                    return notDuplicatesId !== person.id;
+                  });
+
+                  // update
+                  return relatedRecord.updateAttributes({
+                    notDuplicatesIds: relatedRecord.notDuplicatesIds
+                  }, options);
+                });
+            })
+          );
+        }
+
+        // execute all jobs
+        return Promise
+          .all(jobs)
+          .then(() => {
+            return person;
+          });
+      })
+      .then((person) => {
+        return person.notDuplicatesIds;
+      });
   };
 };

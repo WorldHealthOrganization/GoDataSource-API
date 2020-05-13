@@ -4893,6 +4893,12 @@
           "unauthenticated"
         ]
       },
+      "LNG_API_ERROR_CODE_RECORD_NOT_FOUND": {
+        "translation": "Record not found",
+        "modules": [
+          "unauthenticated"
+        ]
+      },
       "LNG_API_ERROR_CODE_DUPLICATE_VISUAL_ID": {
         "translation": "ID dupliqué",
         "modules": [
@@ -5432,6 +5438,9 @@
       },
       "LNG_ENTITY_FIELD_LABEL_VACCINE_STATUS": {
         "translation": "Vaccine status"
+      },
+      "LNG_ENTITY_FIELD_LABEL_PHONE_NUMBER": {
+        "translation": "Phone number"
       }
     },
     "addressFields": {
@@ -5853,6 +5862,9 @@
       "LNG_PAGE_LIST_CASES_ACTION_SEE_LAB_RESULTS": {
         "translation": "Voir les résultats de laboratoire"
       },
+      "LNG_PAGE_LIST_CASES_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
+        "translation": "See records marked as not duplicates"
+      },
       "LNG_PAGE_LIST_CASES_ACTION_VIEW_CHRONOLOGY": {
         "translation": "Voir la chronologie"
       },
@@ -5986,14 +5998,8 @@
       "LNG_PAGE_MODIFY_CASE_ACTION_VIEW_MOVEMENT": {
         "translation": "Voir le mouvement"
       },
-      "LNG_PAGE_MODIFY_CASE_DUPLICATES_DIALOG_ACTION_MERGE_AT_LEAST_ONE_ERROR_MESSAGE": {
-        "translation": "Veuillez sélectionner au moins un enregistrement avec lequel fusionner"
-      },
       "LNG_PAGE_MODIFY_CASE_DUPLICATES_DIALOG_CONFIRM_MSG": {
         "translation": "Ce cas est peut-être déjà dans le système (voir correspondances possibles ci-dessous). Voulez-vous toujours mettre à jour ce cas ou fusionner les correspondances possibles?"
-      },
-      "LNG_PAGE_MODIFY_CASE_DUPLICATES_DIALOG_LABEL_MERGE_WITH": {
-        "translation": "Fusionner avec?"
       },
       "LNG_PAGE_MODIFY_CASE_INVALID_CHILD_DATE_OF_ONSET": {
         "translation": "Date d'apparition du parent ({{date}})"
@@ -6018,6 +6024,9 @@
       },
       "LNG_PAGE_MODIFY_CASE_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
         "translation": "Record Details"
+      },
+      "LNG_PAGE_MODIFY_CASE_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
+        "translation": "Not duplicates"
       }
     },
     "uiEntityRelationshipsListPage": {
@@ -6519,6 +6528,9 @@
       },
       "LNG_PAGE_LIST_CONTACTS_ACTION_SEE_LAB_RESULTS": {
         "translation": "See lab results"
+      },
+      "LNG_PAGE_LIST_CONTACTS_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
+        "translation": "See records marked as not duplicates"
       }
     },
     "uiCreateContactPage": {
@@ -6575,14 +6587,8 @@
       "LNG_PAGE_MODIFY_CONTACT_ACTION_VIEW_MOVEMENT": {
         "translation": "Voir le mouvement"
       },
-      "LNG_PAGE_MODIFY_CONTACT_DUPLICATES_DIALOG_ACTION_MERGE_AT_LEAST_ONE_ERROR_MESSAGE": {
-        "translation": "Veuillez sélectionner au moins un enregistrement avec lequel fusionner"
-      },
       "LNG_PAGE_MODIFY_CONTACT_DUPLICATES_DIALOG_CONFIRM_MSG": {
         "translation": "Ce contact est peut-être déjà dans le système (voir correspondances possibles ci-dessous). Voulez-vous toujours mettre à jour ce contact ou fusionner des correspondances possibles?"
-      },
-      "LNG_PAGE_MODIFY_CONTACT_DUPLICATES_DIALOG_LABEL_MERGE_WITH": {
-        "translation": "Fusionner avec?"
       },
       "LNG_PAGE_MODIFY_CONTACT_TAB_ADDRESS_TITLE": {
         "translation": "Adresse"
@@ -6610,6 +6616,9 @@
       },
       "LNG_PAGE_MODIFY_CONTACT_ACTION_SEE_LAB_RESULTS": {
         "translation": "Lab results"
+      },
+      "LNG_PAGE_MODIFY_CONTACT_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
+        "translation": "Not duplicates"
       }
     },
     "uiRelationshipFields": {
@@ -16215,6 +16224,40 @@
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_PREGNANCY_STATUS_DESCRIPTION": {
         "translation": ""
+      }
+    },
+    "uiMarkedAsNotDuplicatesListPage": {
+      "LNG_PAGE_LIST_MARKED_AS_NOT_DUPLICATES_TITLE": {
+        "translation": "Records marked as not duplicates"
+      },
+      "LNG_PAGE_LIST_MARKED_AS_NOT_DUPLICATES_ACTION_VIEW_ENTITY": {
+        "translation": "View case"
+      },
+      "LNG_PAGE_LIST_MARKED_AS_NOT_DUPLICATES_ACTION_MODIFY_ENTITY": {
+        "translation": "Modify case"
+      },
+      "LNG_PAGE_LIST_MARKED_AS_NOT_DUPLICATES_ACTION_REMOVE_FROM_LIST_ENTITY": {
+        "translation": "Remove from not duplicate lists"
+      },
+      "LNG_PAGE_LIST_MARKED_AS_NOT_DUPLICATES_ACTION_REMOVE_FROM_LIST_ENTITY_CONFIRMATION": {
+        "translation": "Are you sure you want to remove tem from list of not duplicates ( if it matches again, it will be considered as a duplicate )?"
+      }
+    },
+    "uiDuplicates": {
+      "LNG_DUPLICATES_DIALOG_ACTION": {
+        "translation": "Action"
+      },
+      "LNG_DUPLICATES_DIALOG_ACTION_DESCRIPTION": {
+        "translation": "Mark as NOT a duplicate - won't be displayed as a potential duplicate in the future for this record\nMerge duplicate - This is a duplicate of the current record, and we need to merge it"
+      },
+      "LNG_DUPLICATES_DIALOG_ACTION_NONE": {
+        "translation": "No action"
+      },
+      "LNG_DUPLICATES_DIALOG_ACTION_MARK_AS_NOT_A_DUPLICATE": {
+        "translation": "Mark as NOT a duplicate"
+      },
+      "LNG_DUPLICATES_DIALOG_ACTION_MERGE_DUPLICATE": {
+        "translation": "Merge duplicate"
       }
     }
   }
