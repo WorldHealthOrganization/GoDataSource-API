@@ -54,7 +54,7 @@ function getEntryId(entry, keys) {
       )
     ) {
       // add it to the id
-      id += value.toString().trim().toLowerCase();
+      id += value.toString().trim().replace(/(\n|\r)/gm, '').toLowerCase();
     } else {
       allMatched = false;
     }
@@ -74,12 +74,11 @@ function getEntryId(entry, keys) {
 function addEntryToIndex(index, entry, keys, checkReversed) {
   // get index id for that key
   let id = getEntryId(entry, keys);
-  let idReversed = checkReversed ? getEntryId(entry, [...keys].reverse()) : '';
 
   // if the id is valid
   if (id.length) {
     // group people with same types
-    id = `${typeof entry.type === 'string' ? entry.type.toLowerCase() : 'unknown_type'}${id}`;
+    let idReversed = checkReversed ? getEntryId(entry, [...keys].reverse()) : '';
     idReversed = idReversed ? `${typeof entry.type === 'string' ? entry.type.toLowerCase() : 'unknown_type'}${idReversed}` : idReversed;
 
     // add the entry to the index using generated id
@@ -89,9 +88,17 @@ function addEntryToIndex(index, entry, keys, checkReversed) {
       idReversed &&
       index[idReversed]
     ) {
-      addEntryToIndexWithId(index, idReversed, entry);
+      addEntryToIndexWithId(
+        index,
+        idReversed,
+        entry
+      );
     } else {
-      addEntryToIndexWithId(index, id, entry);
+      addEntryToIndexWithId(
+        index,
+        `${typeof entry.type === 'string' ? entry.type.toLowerCase() : 'unknown_type'}${id}`,
+        entry
+      );
     }
   }
 }
@@ -102,8 +109,7 @@ const worker = {
     // keep a list of indices
     const index = {
       name: {},
-      documents: {},
-      phoneNumber: {}
+      documents: {}
     };
 
     // go through the list of people

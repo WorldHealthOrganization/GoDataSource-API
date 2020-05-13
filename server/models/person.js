@@ -693,25 +693,37 @@ module.exports = function (Person) {
       where = {
         $and: [
           {
-            $or: [
-              {
-                deleted: {
-                  $ne: true
-                }
-              },
-              {
-                deleted: {
-                  $exists: false
-                }
-              }
-            ],
+            deleted: {
+              $ne: true
+            }
           },
           where || {}
         ]
       };
+
       // use connector directly to bring big number of (raw) results
+      // #TODO:
+      // - move logic to worker
+      // - get data in batches
       app.dataSources.mongoDb.connector.collection('person')
-        .find(where)
+        .find(
+          where, {
+            projection: {
+              _id: 1,
+              type: 1,
+              visualId: 1,
+              name: 1,
+              firstName: 1,
+              lastName: 1,
+              middleName: 1,
+              documents: 1,
+              notDuplicatesIds: 1,
+              age: 1,
+              addresses: 1,
+              address: 1
+            }
+          }
+        )
         .toArray(function (error, people) {
           // handle eventual errors
           if (error) {
@@ -723,12 +735,14 @@ module.exports = function (Person) {
           } else {
             findOrCount = personDuplicate.find.bind(null, people, Object.assign({where: where}, filter));
           }
+
           // find or count duplicate groups
           findOrCount(function (error, duplicates) {
             // handle eventual errors
             if (error) {
               return reject(error);
             }
+
             // send back the result
             return resolve(duplicates);
           });
