@@ -790,7 +790,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Get hierarchical locations list for an outbreak
-   * @param filter Besides the default filter properties this request also accepts 'includeChildren' boolean on the first level in 'where'; this flag is taken into consideration only if other filters are applied
+   * @param filter Besides the default filter properties this request also accepts 'includeChildren' boolean on the first level in 'where'
    * @param callback
    */
   Outbreak.prototype.getLocationsHierarchicalList = function (filter, callback) {
@@ -806,8 +806,21 @@ module.exports = function (Outbreak) {
       // use global (unrestricted) locations hierarchical list
       return app.controllers.location.getHierarchicalList(filter, callback);
     }
-    // otherwise get a list of all allowed location IDs (all locations and sub-locations for the configured locations)
-    app.models.location.getSubLocations(outbreakLocationIds, [], function (error, allowedLocationIds) {
+
+    // initialize includeChildren filter
+    let includeChildren;
+    // check if the includeChildren filter was sent; accepting it only on the first level
+    includeChildren = _.get(filter, 'where.includeChildren');
+    if (typeof includeChildren !== 'undefined') {
+      // includeChildren was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.includeChildren;
+    } else {
+      // default value is true
+      includeChildren = true;
+    }
+
+    // get the allowed location IDs for the outbreak
+    const getAllowedLocationsCallback = function (error, allowedLocationIds) {
       // handle eventual errors
       if (error) {
         return callback(error);
@@ -818,18 +831,6 @@ module.exports = function (Outbreak) {
         allowedLocationsIndex[locationId] = true;
       });
 
-      // initialize includeChildren filter
-      let includeChildren;
-      // check if the includeChildren filter was sent; accepting it only on the first level
-      includeChildren = _.get(filter, 'where.includeChildren');
-      if (typeof includeChildren !== 'undefined') {
-        // includeChildren was sent; remove it from the filter as it shouldn't reach DB
-        delete filter.where.includeChildren;
-      } else {
-        // default value is true
-        includeChildren = true;
-      }
-
       // build the filter
       const _filter = app.utils.remote.mergeFilters({
         where: {
@@ -839,11 +840,8 @@ module.exports = function (Outbreak) {
         }
       }, filter || {});
 
-      // if include children was provided
-      if (includeChildren) {
-        //set it back on the first level of where (where the getHierarchicalList expects it to be)
-        _.set(_filter, 'where.includeChildren', includeChildren);
-      }
+      // set the includeChildren back on the first level of where (where the getHierarchicalList expects it to be)
+      _.set(_filter, 'where.includeChildren', includeChildren);
 
       // build hierarchical list of locations, restricting locations to the list of allowed ones
       return app.controllers.location.getHierarchicalList(
@@ -875,7 +873,15 @@ module.exports = function (Outbreak) {
           // return processed hierarchical location list
           callback(null, hierarchicalList);
         });
-    });
+    };
+
+    // if we need to include children the allowed locations will also include the children
+    // else the allowed locations are just the outbreak locations
+    if (includeChildren) {
+      app.models.location.getSubLocations(outbreakLocationIds, [], getAllowedLocationsCallback);
+    } else {
+      getAllowedLocationsCallback(null, outbreakLocationIds);
+    }
   };
 
   /**

@@ -32,7 +32,7 @@ module.exports = function (Location) {
 
   /**
    * Get hierarchical locations list
-   * @param filter Besides the default filter properties this request also accepts 'includeChildren' boolean on the first level in 'where'; this flag is taken into consideration only if other filters are applied
+   * @param filter Besides the default filter properties this request also accepts 'includeChildren' boolean on the first level in 'where'
    * @param callback
    */
   Location.getHierarchicalList = function (filter = {}, callback) {
@@ -54,42 +54,75 @@ module.exports = function (Location) {
       filter.fields = new Array(...new Set(filter.fields.concat(['id', 'parentLocationId'])));
     }
 
+    // initialize logic location filter
+    let logicLocationFilter = {
+      order: ['name ASC', 'parentLocationId ASC', 'id ASC']
+    };
+    // initialize flag in order to not repeat the same checks below in code
+    let getOtherLocationsForHierarchicalList = true;
+    // if there is no query sent we will not need to retrieve other locations in order to construct the hierarchy
+    // as we will either retrieve all locations or depending on includeChildren flag we will just retrieve top level locations
+    if (
+      !filter ||
+      !filter.where ||
+      !Object.keys(filter.where).length
+    ) {
+      // set flag to know that we will not need to make other location queries
+      getOtherLocationsForHierarchicalList = false;
+
+      if (!includeChildren) {
+        // we don't need to include children we will just retrieve top level locations
+        logicLocationFilter.where = {
+          parentLocationId: null
+        };
+      }
+    }
+
     Location
       .rawFindWithLoopbackFilter(app.utils.remote
-        .mergeFilters({
-          order: ['name ASC', 'parentLocationId ASC', 'id ASC']
-        }, filter || {}))
+        .mergeFilters(logicLocationFilter, filter || {}))
       .then(function (locations) {
-        // check for sent filters; if filters were sent we need to return hierarchical list for the found locations
-        // this means that we need to also retrieve parent locations and in case where includeChildren is true also retrieve children recursively
-        if (filter && filter.where && Object.keys(filter.where).length) {
-          // get locations IDs
-          let locationsIDs = locations.map(location => location.id);
+        if (!getOtherLocationsForHierarchicalList) {
+          // construct hierarchy only with the found locations
+          return callback(null, Location.buildHierarchicalLocationsList(locations));
+        }
 
-          // get parent locations
-          Location.getParentLocationsWithDetails(locationsIDs, locations, filter, function (error, locationsWithParents) {
+        // we need to retrieve the other locations to construct the needed hierarchy
+        // get found locations IDs
+        let foundLocationsIDs = locations.map(location => location.id);
+
+        // check for includeChildren flag
+        if (includeChildren) {
+          // we need to get children; first get the children and then get the not already found parents;
+          // the other way around would get all the children (not needed) for parents of the locations that we actually need
+          return Location.getSubLocationsWithDetails(foundLocationsIDs, locations, filter, function (error, locationsWithChildren) {
             if (error) {
-              throw error;
+              return callback(error);
             }
 
-            // check for includeChildren flag
-            if (includeChildren) {
-              // get sub locations
-              Location.getSubLocationsWithDetails(locationsIDs, locationsWithParents, filter, function (error, foundLocations) {
-                if (error) {
-                  throw error;
-                }
+            let locationsIDs = locationsWithChildren.map(location => location.id);
 
-                callback(null, Location.buildHierarchicalLocationsList(foundLocations));
-              });
-            } else {
+            // get parent locations
+            return Location.getParentLocationsWithDetails(locationsIDs, locationsWithChildren, filter, function (error, locationsWithParents) {
+              if (error) {
+                return callback(error);
+              }
+
               callback(null, Location.buildHierarchicalLocationsList(locationsWithParents));
-            }
+            });
           });
         } else {
-          callback(null, Location.buildHierarchicalLocationsList(locations));
+          // get parent locations
+          Location.getParentLocationsWithDetails(foundLocationsIDs, locations, filter, function (error, locationsWithParents) {
+            if (error) {
+              return callback(error);
+            }
+
+            callback(null, Location.buildHierarchicalLocationsList(locationsWithParents));
+          });
         }
-      }).catch(callback);
+      })
+      .catch(callback);
   };
 
   /**
