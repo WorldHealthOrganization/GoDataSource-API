@@ -6,6 +6,7 @@ const personDuplicate = require('../../components/workerRunner').personDuplicate
 const helpers = require('../../components/helpers');
 const _ = require('lodash');
 const moment = require('moment');
+const escapeStringRegexp = require('escape-string-regexp');
 
 module.exports = function (Person) {
 
@@ -1106,7 +1107,19 @@ module.exports = function (Person) {
   Person.findDuplicatesByType = function (filter, outbreakId, type, targetBody) {
     filter = filter || {};
     const buildRuleFilterPart = function (opts) {
-      return opts;
+      // construct regex condition for case insensitive match
+      // #TODO once we update mongo to min 3.4 we need to change this logic to use a case insensitive index instead of using ci regex which doesn't use indexes...
+      const props = Object.keys(opts);
+      const condition = {};
+      props.forEach((prop) => {
+        condition[prop] = {
+          $regex: `^${escapeStringRegexp(opts[prop])}$`,
+          $options: 'i'
+        };
+      });
+
+      // finished
+      return condition;
     };
 
     // remove end of line
@@ -1178,7 +1191,10 @@ module.exports = function (Person) {
             documents: {
               $elemMatch: {
                 type: doc.type,
-                number: doc.number
+                number: {
+                  $regex: `^${escapeStringRegexp(doc.number)}$`,
+                  $options: 'i'
+                }
               }
             }
           });
