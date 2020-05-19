@@ -29,6 +29,7 @@ module.exports = function (Outbreak) {
     frequencyOfFollowUpPerDay: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY_P-ER_DAY',
     generateFollowUpsOverwriteExisting: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING',
     generateFollowUpsKeepTeamAssignment: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT',
+    generateFollowUpsTeamAssignmentAlgorithm: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM',
     noDaysAmongContacts: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_AMONG_KNOWN_CONTACTS',
     noDaysInChains: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_IN_KNOWN_TRANSMISSION_CHAINS',
     noDaysNotSeen: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_NOT_SEEN',
@@ -49,7 +50,8 @@ module.exports = function (Outbreak) {
 
   Outbreak.referenceDataFieldsToCategoryMap = {
     disease: 'LNG_REFERENCE_DATA_CATEGORY_DISEASE',
-    'countries[].id': 'LNG_REFERENCE_DATA_CATEGORY_COUNTRY'
+    'countries[].id': 'LNG_REFERENCE_DATA_CATEGORY_COUNTRY',
+    generateFollowUpsTeamAssignmentAlgorithm: 'LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM',
   };
 
   Outbreak.referenceDataFields = Object.keys(Outbreak.referenceDataFieldsToCategoryMap);

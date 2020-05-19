@@ -4061,6 +4061,26 @@
         ]
       }
     },
+    "referenceDataCategoryFollowupGenerationTeamAssignmentAlgorithm": {
+      "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM": {
+        "translation": "Team assignment algorithm"
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_DESCRIPTION": {
+        "translation": "Option specifying whether the round-robin team assignment should be done taking in consideration all teams activating in the contact's location (via that location or parents) or just the nearest teams. Default: round-robin of all teams activating in the contact's location"
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS": {
+        "translation": "Round-robin of all teams activating in the contact's location"
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS_DESCRIPTION": {
+        "translation": "Round-robin of all teams activating in the contact's location via that location or parents. All teams from the location or parent locations will be added in the assignment pool"
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_NEAREST_FIT": {
+        "translation": "Round-robin of all teams activating in the contact's nearest fit location"
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_NEAREST_FIT_DESCRIPTION": {
+        "translation": "Round-robin of all teams activating in the contact's nearest fit location. Only teams from the nearest fit location (contact location or first found parent location) will be added in the assignment pool"
+      }
+    },
     "securityQuestions": {
       "LNG_SECURITY_QUESTION_1": {
         "translation": "Какое у вас в детстве было прозвище?",
@@ -5307,6 +5327,12 @@
       },
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT_DESCRIPTION": {
         "translation": "Flag specifying whether new generated follow-ups will be assigned to the same team as the last follow-up for a contact or the team assignment will be made through round-robin."
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM": {
+        "translation": "Team assignment algorithm"
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_DESCRIPTION": {
+        "translation": "Option specifying whether the round-robin team assignment should be done taking in consideration all teams activating in the contact's location (via that location or parents) or just the nearest teams. Default: round-robin of all teams activating in the contact's location"
       },
       "LNG_OUTBREAK_FIELD_LABEL_ID": {
         "translation": "Идентификатор"
