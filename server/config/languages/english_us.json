@@ -2313,6 +2313,12 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_EVENTS_DESCRIPTION": {
         "translation": "This permission allows merging event duplicates"
       },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_CONTACTS_OF_CONTACTS": {
+        "translation": "Duplicate - merge contacts of contacts"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_CONTACTS_OF_CONTACTS_DESCRIPTION": {
+        "translation": "This permission allows merging contact of contacts duplicates"
+      },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_DASHBOARD": {
         "translation": "Dashboard"
       },

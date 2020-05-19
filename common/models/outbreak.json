@@ -792,6 +792,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "duplicate_merge_contacts_of_contacts",
+      "permission": "ALLOW",
+      "property": "mergePeople"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "cot_view_bar_chart",
       "permission": "ALLOW",
       "property": "getBarsTransmissionChains"
