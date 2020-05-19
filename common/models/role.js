@@ -2957,6 +2957,15 @@ module.exports = function (Role) {
             'outbreak_view',
             'duplicate_list'
           ]
+        },
+        {
+          id: 'duplicate_merge_contacts_of_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_CONTACTS_OF_CONTACTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_CONTACTS_OF_CONTACTS_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'duplicate_list'
+          ]
         }
       ]
     },
