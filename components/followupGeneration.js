@@ -432,8 +432,11 @@ module.exports.getContactFollowupEligibleTeams = function (contact, teams, useLa
   // first get the contact's usual place of residence
   let contactResidence = contact.addresses.find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
 
-  // check for algorithm
-  if (eligibleTeamsAlgorithm === 'LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS') {
+  // check for algorithm; default round-robin of all teams
+  if (
+    !eligibleTeamsAlgorithm ||
+    eligibleTeamsAlgorithm === 'LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS'
+  ) {
     // "all teams" algorithm
     // all teams activating in the contact's location via that location or parents. All teams from the location or parent locations will be added in the assignment pool
     if (contactResidence) {
