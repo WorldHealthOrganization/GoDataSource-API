@@ -16237,16 +16237,16 @@
         "translation": "Records marked as not duplicates"
       },
       "LNG_PAGE_LIST_MARKED_AS_NOT_DUPLICATES_ACTION_VIEW_ENTITY": {
-        "translation": "View case"
+        "translation": "View item"
       },
       "LNG_PAGE_LIST_MARKED_AS_NOT_DUPLICATES_ACTION_MODIFY_ENTITY": {
-        "translation": "Modify case"
+        "translation": "Modify item"
       },
       "LNG_PAGE_LIST_MARKED_AS_NOT_DUPLICATES_ACTION_REMOVE_FROM_LIST_ENTITY": {
         "translation": "Remove from not duplicate lists"
       },
       "LNG_PAGE_LIST_MARKED_AS_NOT_DUPLICATES_ACTION_REMOVE_FROM_LIST_ENTITY_CONFIRMATION": {
-        "translation": "Are you sure you want to remove tem from list of not duplicates ( if it matches again, it will be considered as a duplicate )?"
+        "translation": "Are you sure you want to remove item from list of not duplicates ( if it matches again, it will be considered as a duplicate )?"
       }
     },
     "uiDuplicates": {
