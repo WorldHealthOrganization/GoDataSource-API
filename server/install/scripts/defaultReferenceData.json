@@ -1146,5 +1146,13 @@
       "readOnly": false
     }
   },
-  "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME": {}
+  "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME": {},
+  "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM": {
+    "ROUND_ROBIN_ALL_TEAMS": {
+      "readOnly": true
+    },
+    "ROUND_ROBIN_NEAREST_FIT": {
+      "readOnly": true
+    }
+  }
 }

@@ -72,6 +72,15 @@ module.exports = function (Outbreak) {
     // cache outbreak's follow up options
     let outbreakFollowUpFreq = this.frequencyOfFollowUp;
     let outbreakFollowUpPerDay = this.frequencyOfFollowUpPerDay;
+    let outbreakTeamAssignmentAlgorithm = this.generateFollowUpsTeamAssignmentAlgorithm;
+
+    // get other generate follow-ups options
+    let overwriteExistingFollowUps = typeof data.overwriteExistingFollowUps === 'boolean' ?
+      data.overwriteExistingFollowUps :
+      this.generateFollowUpsOverwriteExisting;
+    let keepTeamAssignment = typeof data.keepTeamAssignment === 'boolean' ?
+      data.keepTeamAssignment :
+      this.generateFollowUpsKeepTeamAssignment;
 
     // retrieve list of contacts that are eligible for follow up generation
     // and those that have last follow up inconclusive
@@ -96,7 +105,7 @@ module.exports = function (Outbreak) {
         // there are contacts for which we need to generate followups
         // get all teams and their locations to get eligible teams for each contact
         return FollowupGeneration
-          .getAllTeamsWithLocationsIncluded()
+          .getAllTeamsWithLocationsIncluded(outbreakTeamAssignmentAlgorithm === 'LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_NEAREST_FIT')
           .then((teams) => {
             // create functions to be used in handleActionsInBatches
             const getActionsCount = function () {
@@ -125,22 +134,12 @@ module.exports = function (Outbreak) {
                       contact.followUpsList = followUpGroups[contact.id] || [];
 
                       // get eligible teams for contact
-                      let getContactEligibleTeams = Promise.resolve();
-                      if (contact.followUpTeamId) {
-                        // contact has a default assigned team; use it
-                        contact.eligibleTeams = [contact.followUpTeamId];
-                      } else {
-                        // get contact eligible teams from all system teams
-                        getContactEligibleTeams = FollowupGeneration
-                          .getContactFollowupEligibleTeams(contact, teams)
-                          .then((eligibleTeams) => {
-                            contact.eligibleTeams = eligibleTeams;
-                          });
-                      }
+                      return FollowupGeneration
+                        .getContactFollowupEligibleTeams(contact, teams, !overwriteExistingFollowUps && keepTeamAssignment, outbreakTeamAssignmentAlgorithm)
+                        .then((eligibleTeams) => {
+                          contact.eligibleTeams = eligibleTeams;
 
-                      return getContactEligibleTeams
-                        .then(() => {
-                          // it returns a list of follow ups objects to insert and a list of ids to remove
+                          // get a list of follow ups objects to insert and a list of ids to update
                           let generateResult = FollowupGeneration.generateFollowupsForContact(
                             contact,
                             contact.eligibleTeams,
@@ -150,7 +149,8 @@ module.exports = function (Outbreak) {
                             },
                             outbreakFollowUpFreq,
                             outbreakFollowUpPerDay,
-                            targeted
+                            targeted,
+                            overwriteExistingFollowUps
                           );
 
                           dbOpsQueue.enqueueForInsert(generateResult.add);
