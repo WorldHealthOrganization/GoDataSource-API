@@ -5414,6 +5414,12 @@
       },
       "LNG_OUTBREAK_FIELD_LABEL_IS_CONTACT_LAB_RESULTS_ACTIVE_DESCRIPTION": {
         "translation": ""
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED": {
+        "translation": "Is case date of onset required?"
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED_DESCRIPTION": {
+        "translation": ""
       }
     },
     "uiEntityFields": {
@@ -6944,6 +6950,18 @@
       },
       "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_GENERATE_FOLLOW_UPS_DIALOG_TARGETED_LABEL": {
         "translation": "Visados "
+      },
+      "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_GENERATE_FOLLOW_UPS_DIALOG_OVERWRITE_EXISTING_LABEL": {
+        "translation": "Overwrite existing follow-ups"
+      },
+      "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_GENERATE_FOLLOW_UPS_DIALOG_OVERWRITE_EXISTING_LABEL_DESCRIPTION": {
+        "translation": "Flag specifying whether existing follow-ups in the specified period will be overwritten or not. Applies only to not performed follow-ups"
+      },
+      "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_GENERATE_FOLLOW_UPS_DIALOG_KEEP_TEAM_ASSIGNMENT_LABEL": {
+        "translation": "Keep latest follow-up team"
+      },
+      "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_GENERATE_FOLLOW_UPS_DIALOG_KEEP_TEAM_ASSIGNMENT_LABEL_DESCRIPTION": {
+        "translation": "Flag specifying whether new generated follow-ups will be assigned to the same team as the last follow-up for a contact or the team assignment will be made through round-robin."
       },
       "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_GENERATE_FOLLOW_UPS_DIALOG_TITLE": {
         "translation": "Gerar acompanhamentos"

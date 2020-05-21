@@ -82,7 +82,8 @@ function run(callback) {
               contactInvestigationTemplate: item.contactInvestigationTemplate,
               contactFollowUpTemplate: item.contactFollowUpTemplate,
               labResultsTemplate: item.labResultsTemplate,
-              isContactLabResultsActive: item.isContactLabResultsActive
+              isContactLabResultsActive: item.isContactLabResultsActive,
+              isDateOfOnsetRequired: item.isDateOfOnsetRequired
             });
 
             // translate tokens
