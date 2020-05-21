@@ -310,7 +310,7 @@ function run(callback) {
                       contactFollowUpTemplate: data.contactFollowUpTemplate,
                       labResultsTemplate: data.labResultsTemplate,
                       isContactLabResultsActive: !!data.isContactLabResultsActive,
-                      isCaseDateOfOnsetRequired: !!data.isCaseDateOfOnsetRequired,
+                      isDateOfOnsetRequired: !!data.isDateOfOnsetRequired,
                       deleted: false,
                       deletedAt: null
                     }, options)
@@ -360,7 +360,7 @@ function run(callback) {
                       contactFollowUpTemplate: newTemplateItem.contactFollowUpTemplate,
                       labResultsTemplate: newTemplateItem.labResultsTemplate,
                       isContactLabResultsActive: !!newTemplateItem.isContactLabResultsActive,
-                      isCaseDateOfOnsetRequired: !!newTemplateItem.isCaseDateOfOnsetRequired
+                      isDateOfOnsetRequired: !!newTemplateItem.isDateOfOnsetRequired
                     }, common.install.timestamps), options)
                     .then(() => {
                       // finished

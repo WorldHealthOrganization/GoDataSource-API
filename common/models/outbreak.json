@@ -168,7 +168,7 @@
       "type": "boolean",
       "default": true
     },
-    "isCaseDateOfOnsetRequired": {
+    "isDateOfOnsetRequired": {
       "description": "Flag specifying whether the case dateOfOnset property is required. Default: true",
       "type": "boolean",
       "default": true

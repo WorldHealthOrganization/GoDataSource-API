@@ -83,7 +83,7 @@ function run(callback) {
               contactFollowUpTemplate: item.contactFollowUpTemplate,
               labResultsTemplate: item.labResultsTemplate,
               isContactLabResultsActive: item.isContactLabResultsActive,
-              isCaseDateOfOnsetRequired: item.isCaseDateOfOnsetRequired
+              isDateOfOnsetRequired: item.isDateOfOnsetRequired
             });
 
             // translate tokens
