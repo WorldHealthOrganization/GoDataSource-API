@@ -74,16 +74,16 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
       // construct variable name
       const getVarName = (variable) => {
         return variable.name;
-          /*
-          // multi answers need to be basic data arrays which aren't handled by flat file types ( non flat file should work properly without this functionality )
-          + (
-            !['.json', '.xml'].includes(importType) &&
-            app.models[modelName].extendedForm.isBasicArray &&
-            app.models[modelName].extendedForm.isBasicArray(variable) ?
-              '_____A' :
-              ''
-          );
-           */
+        /*
+        // multi answers need to be basic data arrays which aren't handled by flat file types ( non flat file should work properly without this functionality )
+        + (
+          !['.json', '.xml'].includes(importType) &&
+          app.models[modelName].extendedForm.isBasicArray &&
+          app.models[modelName].extendedForm.isBasicArray(variable) ?
+            '_____A' :
+            ''
+        );
+         */
       };
 
       // extract variables from template
@@ -168,7 +168,7 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
 
             return r;
           }) : dataset,
-          { containerPropTranslation, questionToTranslationMap }
+          {containerPropTranslation, questionToTranslationMap}
         );
 
         for (let variable in maxAnswersMap) {
@@ -387,6 +387,60 @@ function getLocationAvailableValuesForModel(outbreakId, modelName) {
       });
     });
 }
+
+/**
+ * Get available values for foreign keys
+ * @param foreignKeysMap Map in format {foreignKey: {modelName: ..., labelProperty: ...}}
+ * @returns {Promise<unknown>}
+ */
+const getForeignKeysValues = function (foreignKeysMap) {
+  let foreignKeys = Object.keys(foreignKeysMap);
+
+  // initialize list of functions to be executed async
+  let jobs = {};
+
+  // construct jobs
+  foreignKeys.forEach(fKey => {
+    let foreignKeyInfo = foreignKeysMap[fKey];
+    if (!foreignKeyInfo.modelName || !foreignKeyInfo.labelProperty) {
+      // cannot get foreign key values as it is not defined correctly
+      // should not get here; dev error
+      return;
+    }
+
+    jobs[fKey] = function (callback) {
+      // Note: This query will retrieve all data from the related model
+      // depending on data quantity might cause javascript heap out of memory error
+      // should be used only for models with limited number of instances
+      return app.models[foreignKeyInfo.modelName]
+        .rawFind({}, {
+          projection: {[foreignKeyInfo.labelProperty]: 1}
+        })
+        .then(items => {
+          return callback(null, items.map(item => {
+            return {
+              id: item.id,
+              label: item[foreignKeyInfo.labelProperty],
+              value: item.id
+            };
+          }));
+        })
+        .catch(callback);
+    };
+  });
+
+  return new Promise((resolve, reject) => {
+    // execute jobs
+    async.series(jobs, function (error, result) {
+      // handle errors
+      if (error) {
+        return reject(error);
+      }
+
+      return resolve(result);
+    });
+  });
+};
 
 module.exports = function (ImportableFile) {
 
@@ -611,6 +665,24 @@ module.exports = function (ImportableFile) {
                             .then(function (locationValues) {
                               // update result
                               results[modelName] = Object.assign({}, results[modelName], {modelPropertyValues: _.merge(results[modelName].modelPropertyValues, locationValues)});
+                              callback(null, results[modelName]);
+                            })
+                            .catch(callback);
+                        });
+                      }
+
+                      // if the model uses locations for its properties
+                      if (app.models[modelName].foreignKeyFields) {
+                        // get distinct property values (if not taken already)
+                        if (!Object.keys(result.distinctFileColumnValues).length) {
+                          result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
+                        }
+                        steps.push(function (callback) {
+                          // get foreign keys values
+                          getForeignKeysValues(app.models[modelName].foreignKeyFields)
+                            .then(foreignKeysValues => {
+                              // update result
+                              results[modelName] = Object.assign({}, results[modelName], {modelPropertyValues: _.merge(results[modelName].modelPropertyValues, foreignKeysValues)});
                               callback(null, results[modelName]);
                             })
                             .catch(callback);

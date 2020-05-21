@@ -249,6 +249,14 @@ module.exports = function (Contact) {
     'isDateOfReportingApproximate'
   ];
 
+  // used on importable file logic
+  Contact.foreignKeyFields = {
+    'followUpTeamId': {
+      modelName: 'team',
+      labelProperty: 'name'
+    }
+  };
+
   Contact.locationFields = [
     'addresses[].locationId'
   ];
