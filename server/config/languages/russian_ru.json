@@ -4069,13 +4069,13 @@
         "translation": "Option specifying whether the round-robin team assignment should be done taking in consideration all teams activating in the contact's location (via that location or parents) or just the nearest teams. Default: round-robin of all teams activating in the contact's location"
       },
       "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS": {
-        "translation": "Round-robin of all teams activating in the contact's location"
+        "translation": "Round-robin - all teams"
       },
       "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS_DESCRIPTION": {
         "translation": "Round-robin of all teams activating in the contact's location via that location or parents. All teams from the location or parent locations will be added in the assignment pool"
       },
       "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_NEAREST_FIT": {
-        "translation": "Round-robin of all teams activating in the contact's nearest fit location"
+        "translation": "Round-robin - nearest fit teams"
       },
       "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_NEAREST_FIT_DESCRIPTION": {
         "translation": "Round-robin of all teams activating in the contact's nearest fit location. Only teams from the nearest fit location (contact location or first found parent location) will be added in the assignment pool"
@@ -11612,6 +11612,24 @@
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_FREQUENCY_DESCRIPTION": {
         "translation": "How many days should elapse between follow-ups?  Set this to 1 for daily follow-up, 2 for follow-up every two days etc."
+      },
+      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING": {
+        "translation": "Overwrite existing follow-ups"
+      },
+      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING_DESCRIPTION": {
+        "translation": "Flag specifying whether existing follow-ups in the specified period will be overwritten or not. Applies only to not performed follow-ups"
+      },
+      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT": {
+        "translation": "Keep team assignment"
+      },
+      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT_DESCRIPTION": {
+        "translation": "Flag specifying whether new generated follow-ups will be assigned to the same team as the last follow-up for a contact or the team assignment will be made through round-robin."
+      },
+      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM": {
+        "translation": "Team assignment algorithm"
+      },
+      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_DESCRIPTION": {
+        "translation": "Option specifying whether the round-robin team assignment should be done taking in consideration all teams activating in the contact's location (via that location or parents) or just the nearest teams. Default: round-robin of all teams activating in the contact's location"
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_LESS_THAN_X_CONTACTS": {
         "translation": "Less than X contacts"
