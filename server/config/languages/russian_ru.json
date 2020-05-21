@@ -4354,6 +4354,9 @@
       "LNG_STEPPER_FINAL_STEP_TEXT": {
         "translation": "Ввод данных завершен. Нажмите \"Создать\", чтобы завершить процесс."
       },
+      "LNG_STEPPER_FINAL_STEP_TEXT_UPDATE": {
+        "translation": "Data entry is now complete. Hit \"Update\" to finish the process."
+      },
       "LNG_STEPPER_LABEL_BACK": {
         "translation": "Назад"
       },
