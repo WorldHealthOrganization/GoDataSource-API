@@ -11669,6 +11669,12 @@
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_IS_CONTACT_LAB_RESULTS_ACTIVE_DESCRIPTION": {
         "translation": ""
+      },
+      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED": {
+        "translation": "Is case date of onset required?"
+      },
+      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED_DESCRIPTION": {
+        "translation": ""
       }
     },
     "uiOutbreakTemplateListPage": {
