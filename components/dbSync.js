@@ -499,22 +499,10 @@ const syncRecord = function (logger, model, record, options, done) {
           });
       }
 
-      // if record was created from third parties, it might not have updated/created timestamps
-      // in this case, just create a new record with new id
+      // if record was found in DB but we cannot figure out if the changes are newer or older skip record (updatedAt is missing)
       if (!record.updatedAt) {
-        // update geopoint properties
-        convertGeoPointToLoopbackFormat(record, model);
-
-        log('debug', `Record found (id: ${record.id}) but data received is missing updatedAt property, probably comes from external system, creating new record (with new id).`);
-        delete record.id;
-        return model
-          .create(record, options)
-          .then(function (dbRecord) {
-            return {
-              record: dbRecord,
-              flag: syncRecordFlags.CREATED
-            };
-          });
+        log('debug', `Record found (id: ${record.id}) but data received is missing updatedAt property. Skipped record`);
+        return Promise.reject({message: `Record found (id: ${record.id}) but data received is missing updatedAt property. Skipped record`});
       }
 
       // if updated timestamp is greater than the one in the main database, update
