@@ -4412,6 +4412,9 @@
       },
       "LNG_COMMON_LABEL_EXPORT_USE_QUESTION_VARIABLE_DESCRIPTION": {
         "translation": "Cuando se marca, los encabezados de columna del cuestionario usarán las variables de preguntas en lugar del texto de las preguntas"
+      },
+      "LNG_COMMON_LABEL_SEARCH": {
+        "translation": "Search"
       }
     },
     "uiGeneralActions": {

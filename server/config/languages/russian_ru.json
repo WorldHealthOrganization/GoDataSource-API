@@ -4412,6 +4412,9 @@
       },
       "LNG_COMMON_LABEL_EXPORT_USE_QUESTION_VARIABLE_DESCRIPTION": {
         "translation": "Если этот флажок установлен, то в заголовках столбцов анкеты вместо текста вопроса будут использоваться переменные вопроса"
+      },
+      "LNG_COMMON_LABEL_SEARCH": {
+        "translation": "Search"
       }
     },
     "uiGeneralActions": {
