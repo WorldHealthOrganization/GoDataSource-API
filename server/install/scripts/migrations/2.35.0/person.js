@@ -4,7 +4,7 @@ const MongoDBHelper = require('../../../../../components/mongoDBHelper');
 const Helpers = require('../../../../../components/helpers');
 const _ = require('lodash');
 const Config = require('../../../../config.json');
-const CaseConstants = require('../../../../../components/constants/case');
+const CaseConstants = require('../../../../../components/baseModelOptions/case').constants;
 
 // Note: we shouldn't set batchSize to more than ~27000 as in case all relationships participants are different
 // we would make a query in MongoDB with more than ~54000 person IDs which would exceed 16MB limit

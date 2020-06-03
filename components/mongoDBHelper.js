@@ -1,13 +1,30 @@
 'use strict';
 
+/**
+ * Helper for MongoDB actions
+ * Behaves as a singleton using a single connection for the entire process
+ */
+
 const MongoClient = require('mongodb').MongoClient;
 const dbConfig = require('./../server/datasources').mongoDb;
+const convertLoopbackQueryToMongo = require('./convertLoopbackFilterToMongo');
+const Timer = require('./Timer');
+const uuid = require('uuid');
+
+// initialize DB connection cache
+let mongoDBConnection;
 
 /**
  * Create MongoDB connection and return it
  * @returns {Promise<Db | never>}
  */
 function getMongoDBConnection(mongoOptions = {}) {
+  // use existing connection if one was already initialized
+  // this is in order to prevent creating new connections for different actions
+  if (mongoDBConnection) {
+    return Promise.resolve(mongoDBConnection);
+  }
+
   if (dbConfig.password) {
     mongoOptions = Object.assign(mongoOptions, {
       auth: {
@@ -20,12 +37,108 @@ function getMongoDBConnection(mongoOptions = {}) {
   return MongoClient
     .connect(`mongodb://${dbConfig.host}:${dbConfig.port}`, mongoOptions)
     .then(function (client) {
-      return client
+      // cache connection
+      mongoDBConnection = client
         .db(dbConfig.database);
+
+      return mongoDBConnection;
+    });
+}
+
+/**
+ * Parse Loopback fields property to MongoDB projection
+ * @param fields
+ * @returns {{}}
+ */
+function getMongoDBProjectionFromLoopbackFields(fields = []) {
+  let projection = {};
+  fields.forEach(field => projection[field] = 1);
+
+  return projection;
+}
+
+/**
+ * Parses a Loopback complete filter to mongoDB filter options
+ * @param filter Loopback filter
+ * @returns {{limit: number, where: {}, skip: number, sort: {}, projection: {}}}
+ */
+function getMongoDBOptionsFromLoopbackFilter(filter = {}) {
+  let parsedFilter = {
+    where: filter.where ? convertLoopbackQueryToMongo(filter.where) : {}
+  };
+
+  // skip
+  filter.skip && (parsedFilter.skip = filter.skip);
+
+  // limit
+  filter.limit && (parsedFilter.limit = filter.limit);
+
+  // projection
+  if (filter.fields) {
+    parsedFilter.projection = getMongoDBProjectionFromLoopbackFields(filter.fields);
+  }
+
+  // sort
+  if (filter.order) {
+    parsedFilter.sort = {};
+    filter.order.forEach(entry => {
+      let entryParts = entry.split(' ');
+      let field = entryParts[0];
+      // if field order was sent as DESC we will sort DESC else we will sort ASC
+      parsedFilter.sort[field] = entryParts[1] && ['desc', 'DESC'].indexOf(entryParts[1]) !== -1 ? -1 : 1;
+    });
+  }
+
+  return parsedFilter;
+}
+
+/**
+ * Wrapper for MongoDB action
+ * Adds identifiers and logs and mimics raw responses from Loopback (eg: replaces _id with id)
+ * @param collectionName Collection name on which the action should be executed
+ * @param actionName Action name to be executed on MongoDB collection
+ * @param params Array of parameters to be sent to the action
+ * @param logger
+ * @returns {*}
+ */
+function executeAction(collectionName, actionName, params, logger = console) {
+  // set queryId and start timer (for logging purposes)
+  const queryId = uuid.v4();
+  const timer = new Timer();
+  timer.start();
+
+  logger.debug(`[QueryId: ${queryId}] Performing MongoDB request on collection '${collectionName}': ${actionName} ${JSON.stringify(params)}`);
+
+  return getMongoDBConnection()
+    .then(dbConn => {
+      const collection = dbConn.collection(collectionName);
+      return actionName === 'find' ?
+        collection[actionName](...params).toArray() :
+        collection[actionName](...params);
+    })
+    .then(result => {
+      if (actionName === 'find') {
+        result.forEach(function (record) {
+          record.id = record._id;
+          delete record._id;
+        });
+      } else if (actionName === 'findOne') {
+        result.id = result._id;
+        delete result._id;
+      } else {
+        // no response parsing for other actions
+      }
+
+      return result;
+    })
+    .finally(() => {
+      logger.debug(`[QueryId: ${queryId}] MongoDB request completed after ${timer.getElapsedMilliseconds()} msec`);
     });
 }
 
 module.exports = {
-  getMongoDBConnection
+  getMongoDBConnection,
+  getMongoDBProjectionFromLoopbackFields,
+  getMongoDBOptionsFromLoopbackFilter,
+  executeAction
 };
-

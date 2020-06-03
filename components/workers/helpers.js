@@ -71,7 +71,11 @@ const worker = {
         return resolve(result);
       });
     });
-  }
+  },
+  /**
+   * Export a filtered list of models
+   */
+  exportFilteredModelsList: helpers.exportFilteredModelsList
 };
 
 process.on('message', function (message) {

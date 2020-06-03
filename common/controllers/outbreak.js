@@ -4877,7 +4877,7 @@ module.exports = function (Outbreak) {
                     // translate the values of the fields marked as reference data fields on the case/contact/event model
                     app.utils.helpers.translateDataSetReferenceDataValues(
                       relationshipMember,
-                      app.models[models.person.typeToModelMap[relationshipMemberType]],
+                      app.models[models.person.typeToModelMap[relationshipMemberType]].referenceDataFields,
                       dictionary
                     );
 
@@ -4889,7 +4889,7 @@ module.exports = function (Outbreak) {
                     );
 
                     // translate the values of the fields marked as reference data fields on the relationship model
-                    app.utils.helpers.translateDataSetReferenceDataValues(relationship, models.relationship, dictionary);
+                    app.utils.helpers.translateDataSetReferenceDataValues(relationship, models.relationship.referenceDataFields, dictionary);
 
                     // translate all remaining keys of the relationship model
                     relationship = app.utils.helpers.translateFieldLabels(app, relationship, models.relationship.modelName, dictionary);
@@ -4903,7 +4903,7 @@ module.exports = function (Outbreak) {
                   // prepare the case's lab results and lab results questionnaires for printing
                   person.labResults.forEach((labResult, labIndex) => {
                     // translate the values of the fields marked as reference data fields on the lab result model
-                    app.utils.helpers.translateDataSetReferenceDataValues(labResult, models.labResult, dictionary);
+                    app.utils.helpers.translateDataSetReferenceDataValues(labResult, models.labResult.referenceDataFields, dictionary);
 
                     // clone the questionnaires, as the function below is actually altering them
                     let labResultsQuestions = _.cloneDeep(labResultsQuestionnaire);
@@ -5189,10 +5189,9 @@ module.exports = function (Outbreak) {
                     }
 
                     // translate the values of the fields marked as reference data fields on the case/contact/event model
-                    // translate the values of the fields marked as reference data fields on the case/contact/event model
                     app.utils.helpers.translateDataSetReferenceDataValues(
                       relationshipMember,
-                      models[models.person.typeToModelMap[relationshipMemberType]],
+                      models[models.person.typeToModelMap[relationshipMemberType]].referenceDataFields,
                       dictionary
                     );
 
@@ -5206,7 +5205,7 @@ module.exports = function (Outbreak) {
                     // Translate the values of the fields marked as reference data fields on the relationship model
                     app.utils.helpers.translateDataSetReferenceDataValues(
                       relationship,
-                      models.relationship,
+                      models.relationship.referenceDataFields,
                       dictionary
                     );
 
@@ -5229,7 +5228,7 @@ module.exports = function (Outbreak) {
                     sanitizedContacts[contactIndex].followUps = [];
 
                     // Translate the values of the fields marked as reference data fields on the lab result model
-                    app.utils.helpers.translateDataSetReferenceDataValues(followUp, app.models.followUp, dictionary);
+                    app.utils.helpers.translateDataSetReferenceDataValues(followUp, app.models.followUp.referenceDataFields, dictionary);
 
                     // Translate the questions and the answers from the follow up
                     questions = Outbreak.helpers.parseTemplateQuestions(followUpQuestionnaire, dictionary);
@@ -8931,32 +8930,8 @@ module.exports = function (Outbreak) {
       delete filter.where.useQuestionVariable;
     }
 
-    new Promise((resolve, reject) => {
-      // load user language dictionary
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-        // handle errors
-        if (error) {
-          return reject(error);
-        }
-
-        // resolved
-        resolve(dictionary);
-      });
-    })
-      .then((dictionary) => {
-        return app.models.case.preFilterForOutbreak(this, filter)
-          .then((filter) => {
-            return {
-              dictionary: dictionary,
-              filter: filter
-            };
-          });
-      })
-      .then(function (data) {
-        const dictionary = data.dictionary;
-        const filter = data.filter;
-
+    app.models.case.preFilterForOutbreak(this, filter)
+      .then((filter) => {
         // if encrypt password is not valid, remove it
         if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
           encryptPassword = null;
@@ -8968,8 +8943,12 @@ module.exports = function (Outbreak) {
         }
 
         options.questionnaire = self.caseInvestigationTemplate;
-        options.dictionary = dictionary;
         options.useQuestionVariable = useQuestionVariable;
+
+        const CaseModel = app.models.case;
+        let model = {
+          arrayProps: ''
+        };
 
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
@@ -12402,7 +12381,7 @@ module.exports = function (Outbreak) {
                     // translate the values of the fields marked as reference data fields on the case/contact/event model
                     app.utils.helpers.translateDataSetReferenceDataValues(
                       relationshipMember,
-                      models[models.person.typeToModelMap[relationshipMemberType]],
+                      models[models.person.typeToModelMap[relationshipMemberType]].referenceDataFields,
                       dictionary
                     );
 
@@ -12416,7 +12395,7 @@ module.exports = function (Outbreak) {
                     // translate the values of the fields marked as reference data fields on the relationship model
                     app.utils.helpers.translateDataSetReferenceDataValues(
                       relationship,
-                      models.relationship,
+                      models.relationship.referenceDataFields,
                       dictionary
                     );
 
