@@ -4807,7 +4807,7 @@
         "translation": "Вы уверены, что хотите удалить выбранные связи?"
       },
       "LNG_DIALOG_CONFIRM_CHANGE_CASE_EPI_CLASSIFICATION": {
-        "translation": "Вы уверены, что хотите изменить классификацию '{{ caseName }}'на '{{ classification }}'?"
+        "translation": "Вы уверены, что хотите изменить классификацию '{{caseName}}'на '{{classification}}'?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_VACCINE": {
         "translation": "Вы уверены, что хотите удалить эту вакцинацию?"
@@ -11181,10 +11181,10 @@
         "translation": "Последующее наблюдение:"
       },
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_FOLLOW_UP_HISTORY_END_DATE": {
-        "translation": "Дата окончания статуса последующего наблюдения '{{ status }}' "
+        "translation": "Дата окончания статуса последующего наблюдения '{{status}}' "
       },
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_FOLLOW_UP_HISTORY_START_DATE": {
-        "translation": "Дата начала статуса последующего наблюдения '{{ status }}'"
+        "translation": "Дата начала статуса последующего наблюдения '{{status}}'"
       },
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_LAB_RESULT_DATE": {
         "translation": "Дата получения результатов лабораторных исследований"
@@ -16081,7 +16081,7 @@
         "translation": "Реквизиты"
       },
       "LNG_PAGE_MODIFY_LAB_RESULT_FIELD_LABEL_CONTACT_WITH_INFO": {
-        "translation": "* Данный человек в настоящее время относится к числу контактов, и лабораторные анализы были получены в момент регистрации '{{ caseName }}' в качестве случая"
+        "translation": "* Данный человек в настоящее время относится к числу контактов, и лабораторные анализы были получены в момент регистрации '{{caseName}}' в качестве случая"
       }
     },
     "uiImportContactLabData": {

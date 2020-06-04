@@ -4859,7 +4859,7 @@
         "translation": "لا توجد فاشيات"
       },
       "LNG_GENERIC_WARNING_SELECTED_OUTBREAK_NOT_ACTIVE": {
-        "translation": "الفاشية النشطة هي {{ اسم فاشية نشطة}} بينما الفاشية المختارة هي {{activeOutbreakName}}"
+        "translation": "الفاشية النشطة هي {{selectedOutbreakName}} بينما الفاشية المختارة هي {{activeOutbreakName}}"
       }
     },
     "uiFormErrorsWarningsSuccessMessages": {

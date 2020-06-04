@@ -4807,7 +4807,7 @@
         "translation": "Are you sure you want to delete selected relationships?"
       },
       "LNG_DIALOG_CONFIRM_CHANGE_CASE_EPI_CLASSIFICATION": {
-        "translation": "Are you sure you want to change '{{ caseName }}' classification to '{{ classification }}'?"
+        "translation": "Are you sure you want to change '{{caseName}}' classification to '{{classification}}'?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_VACCINE": {
         "translation": "Are you sure you want to delete this vaccine?"
@@ -11181,10 +11181,10 @@
         "translation": "Follow-up:"
       },
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_FOLLOW_UP_HISTORY_END_DATE": {
-        "translation": "Follow-up status '{{ status }}' End Date"
+        "translation": "Follow-up status '{{status}}' End Date"
       },
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_FOLLOW_UP_HISTORY_START_DATE": {
-        "translation": "Follow-up status '{{ status }}' Start Date"
+        "translation": "Follow-up status '{{status}}' Start Date"
       },
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_LAB_RESULT_DATE": {
         "translation": "Lab result date"
@@ -16081,7 +16081,7 @@
         "translation": "Record details"
       },
       "LNG_PAGE_MODIFY_LAB_RESULT_FIELD_LABEL_CONTACT_WITH_INFO": {
-        "translation": "* This person is now a contact and lab tests were performed at the time when '{{ caseName }}' was registered as a case"
+        "translation": "* This person is now a contact and lab tests were performed at the time when '{{caseName}}' was registered as a case"
       }
     },
     "uiImportContactLabData": {
