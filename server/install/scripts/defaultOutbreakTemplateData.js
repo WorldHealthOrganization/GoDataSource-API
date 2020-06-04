@@ -1,6 +1,7 @@
 'use strict';
 
 const app = require('../../server');
+const language = app.models.language;
 const languageToken = app.models.languageToken;
 const outbreakTemplate = app.models.template;
 const referenceData = app.models.referenceData;
@@ -23,14 +24,26 @@ function run(callback) {
   // make sure we have what we need :)
   const defaultOutbreakTemplateDataJson = defaultOutbreakTemplateData || [];
 
-  // ignore existing help items
-  languageToken
-    .find({
-      where: {
-        token: {
-          inq: Object.keys(defaultOutbreakTemplateDataJson.translations)
-        }
-      }
+  // retrieve all languages
+  const mappedLanguages = {};
+  language
+    .find()
+    .then((languages) => {
+      languages.forEach((language) => {
+        mappedLanguages[language.id] = true;
+      });
+    })
+
+    // ignore existing help items
+    .then(() => {
+      return languageToken
+        .find({
+          where: {
+            token: {
+              inq: Object.keys(defaultOutbreakTemplateDataJson.translations)
+            }
+          }
+        });
     })
 
     // determine which language tokens exist already and include them for update
@@ -89,6 +102,12 @@ function run(callback) {
           // go through each language token
           Object.keys(defaultOutbreakTemplateDataJson.translations[token] || {})
             .forEach((languageId) => {
+              // jump over if this isn't a language
+              if (!mappedLanguages[languageId]) {
+                return;
+              }
+
+              // create
               (function (newToken, newLanguageId, newTranslation, modules) {
                 // add to create list
                 createUpdateLanguageTokensJob.push((cb) => {
