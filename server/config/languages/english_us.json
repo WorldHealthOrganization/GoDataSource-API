@@ -11170,7 +11170,7 @@
         "translation": "Contact movement"
       },
       "LNG_PAGE_VIEW_MOVEMENT_CONTACT_EXPORT": {
-        "translation": "Export case movement map"
+        "translation": "Export contact movement map"
       }
     },
     "uiChronologyContactPage": {
@@ -13174,7 +13174,7 @@
         "translation": "Show vertical timeline"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_CONFIGURE_SETTINGS": {
-        "translation": "Configure cettings"
+        "translation": "Configure settings"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_RESET_SETTINGS": {
         "translation": "Reset settings"
