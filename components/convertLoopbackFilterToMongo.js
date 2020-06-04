@@ -31,8 +31,8 @@ const convertProps = function (obj) {
         }
         delete obj[prop];
       } else if (prop === '$regex') {
-        if (typeof obj[prop] === 'string' && /\/(.+)\/(.*)/.test(obj[prop])) {
-          let matches = /\/(.+)\/(.*)/.exec(obj[prop]);
+        if (typeof obj[prop] === 'string' && /^\/(.+)\/([gimusy]*)$/.test(obj[prop])) {
+          let matches = /^\/(.+)\/([gimusy]*)$/.exec(obj[prop]);
           obj[prop] = new RegExp(matches[1], matches[2]);
         }
       } else if (typeof obj[prop] == 'object' && obj[prop] !== null) {
