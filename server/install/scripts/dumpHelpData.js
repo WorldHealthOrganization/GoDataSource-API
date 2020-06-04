@@ -22,10 +22,10 @@ function run(callback) {
       }
 
       // determine files ids
-      const languageIds = {};
+      const languageIds = [];
       (files || []).forEach((fileName) => {
         const languageData = require(`../../../server/config/languages/${fileName}`);
-        languageIds[languageData.id] = true;
+        languageIds.push(languageData.id);
       });
 
       // retrieve category items
@@ -149,7 +149,7 @@ function run(callback) {
                     inq: tokensToTranslate.map((tokenData) => tokenData.token)
                   },
                   languageId: {
-                    in: Object.keys(languageIds)
+                    in: languageIds
                   }
                 }
               })
@@ -191,9 +191,8 @@ function run(callback) {
 
           // fill out with default values missing translations
           const tokens = Object.keys(exportData.translations);
-          const tokenLanguages = Object.keys(languageIds);
           tokens.forEach((token) => {
-            tokenLanguages.forEach((tokenLanguage) => {
+            languageIds.forEach((tokenLanguage) => {
               if (
                 !exportData.translations[token][tokenLanguage] &&
                 tokenLanguage !== defaultLanguage
