@@ -1109,6 +1109,8 @@ module.exports = function (Person) {
     const buildRuleFilterPart = function (opts) {
       // construct regex condition for case insensitive match
       // #TODO once we update mongo to min 3.4 we need to change this logic to use a case insensitive index instead of using ci regex which doesn't use indexes...
+      // #TODO must replace logic with a key generated when you update a case contact so we don't have to check many conditions like we have now ( combinations between first / last / middle name )
+      // #TODO we should have something in person like: uniqueKey array.sort([firstName.toLoweCase(), lastName.toLoweCase(), middleName.toLoweCase()]).join('') ..this isn't enough, but it is a start
       const props = Object.keys(opts);
       const condition = {};
       props.forEach((prop) => {
@@ -1142,43 +1144,34 @@ module.exports = function (Person) {
     // duplicate rules
     if (targetBody.firstName && targetBody.lastName) {
       query.$or.push(
-        buildRuleFilterPart({
-          firstName: targetBody.firstName,
-          lastName: targetBody.lastName
-        }),
-        // also do reverse checks
-        buildRuleFilterPart({
-          firstName: targetBody.lastName,
-          lastName: targetBody.firstName
-        })
+        buildRuleFilterPart({ firstName: targetBody.firstName, lastName: targetBody.lastName }),
+        buildRuleFilterPart({ firstName: targetBody.lastName, lastName: targetBody.firstName }),
+        buildRuleFilterPart({ firstName: targetBody.firstName, middleName: targetBody.lastName }),
+        buildRuleFilterPart({ firstName: targetBody.lastName, middleName: targetBody.firstName }),
+        buildRuleFilterPart({ lastName: targetBody.firstName, middleName: targetBody.lastName }),
+        buildRuleFilterPart({ lastName: targetBody.lastName, middleName: targetBody.firstName })
       );
     }
 
     if (targetBody.firstName && targetBody.middleName) {
       query.$or.push(
-        buildRuleFilterPart({
-          firstName: targetBody.firstName,
-          middleName: targetBody.middleName
-        }),
-        // reverse checks
-        buildRuleFilterPart({
-          firstName: targetBody.middleName,
-          middleName: targetBody.firstName
-        })
+        buildRuleFilterPart({ firstName: targetBody.firstName, middleName: targetBody.middleName }),
+        buildRuleFilterPart({ firstName: targetBody.middleName, middleName: targetBody.firstName }),
+        buildRuleFilterPart({ firstName: targetBody.firstName, lastName: targetBody.middleName }),
+        buildRuleFilterPart({ firstName: targetBody.middleName, lastName: targetBody.firstName }),
+        buildRuleFilterPart({ lastName: targetBody.firstName, middleName: targetBody.middleName }),
+        buildRuleFilterPart({ lastName: targetBody.middleName, middleName: targetBody.firstName })
       );
     }
 
     if (targetBody.middleName && targetBody.lastName) {
       query.$or.push(
-        buildRuleFilterPart({
-          middleName: targetBody.middleName,
-          lastName: targetBody.lastName
-        }),
-        // reverse checks
-        buildRuleFilterPart({
-          middleName: targetBody.lastName,
-          lastName: targetBody.middleName
-        })
+        buildRuleFilterPart({ middleName: targetBody.middleName, lastName: targetBody.lastName }),
+        buildRuleFilterPart({ middleName: targetBody.lastName, lastName: targetBody.middleName }),
+        buildRuleFilterPart({ middleName: targetBody.middleName, firstName: targetBody.lastName }),
+        buildRuleFilterPart({ middleName: targetBody.lastName, firstName: targetBody.middleName }),
+        buildRuleFilterPart({ lastName: targetBody.middleName, firstName: targetBody.lastName }),
+        buildRuleFilterPart({ lastName: targetBody.lastName, firstName: targetBody.middleName })
       );
     }
 
