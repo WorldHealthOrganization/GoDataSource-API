@@ -4402,7 +4402,7 @@
         "translation": "Nenhum registro selecionado"
       },
       "LNG_COMMON_LABEL_RECORDS_NUMBER": {
-        "translation": "{{ value}} RESULTADOS"
+        "translation": "{{value}} RESULTADOS"
       },
       "LNG_COMMON_LABEL_YES": {
         "translation": "Sim"
@@ -11181,10 +11181,10 @@
         "translation": "Acompanhamento"
       },
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_FOLLOW_UP_HISTORY_END_DATE": {
-        "translation": "Estado do acompanhamento: '{{ status }}' Data do fin"
+        "translation": "Estado do acompanhamento: '{{status}}' Data do fin"
       },
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_FOLLOW_UP_HISTORY_START_DATE": {
-        "translation": "Estado do acompanhamento: '{{ status }}' Data de inicion"
+        "translation": "Estado do acompanhamento: '{{status}}' Data de inicion"
       },
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_LAB_RESULT_DATE": {
         "translation": "Data de resultado do laboratório"
@@ -16081,7 +16081,7 @@
         "translation": "Detalhes do registo"
       },
       "LNG_PAGE_MODIFY_LAB_RESULT_FIELD_LABEL_CONTACT_WITH_INFO": {
-        "translation": "* This person is now a contact and lab tests were performed at the time when '{{ caseName }}' was registered as a case"
+        "translation": "* This person is now a contact and lab tests were performed at the time when '{{caseName}}' was registered as a case"
       }
     },
     "uiImportContactLabData": {

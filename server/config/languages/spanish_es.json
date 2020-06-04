@@ -11181,10 +11181,10 @@
         "translation": "Seguimiento"
       },
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_FOLLOW_UP_HISTORY_END_DATE": {
-        "translation": "Estado del seguimiento '{{ status }}' Fecha de fin"
+        "translation": "Estado del seguimiento '{{status}}' Fecha de fin"
       },
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_FOLLOW_UP_HISTORY_START_DATE": {
-        "translation": "Estado del seguimiento '{{ status }}' Fecha de inicio"
+        "translation": "Estado del seguimiento '{{status}}' Fecha de inicio"
       },
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_LAB_RESULT_DATE": {
         "translation": "Fecha de resultado de laboratorio"
@@ -16081,7 +16081,7 @@
         "translation": "Detalles del registro"
       },
       "LNG_PAGE_MODIFY_LAB_RESULT_FIELD_LABEL_CONTACT_WITH_INFO": {
-        "translation": "* This person is now a contact and lab tests were performed at the time when '{{ caseName }}' was registered as a case"
+        "translation": "* This person is now a contact and lab tests were performed at the time when '{{caseName}}' was registered as a case"
       }
     },
     "uiImportContactLabData": {
