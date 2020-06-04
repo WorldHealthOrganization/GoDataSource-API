@@ -24,6 +24,7 @@ function run(callback) {
   });
 
   // determine languages for which we need to export data
+  const defaultLanguage = 'english_us';
   fs.readdir(
     './server/config/languages',
     (err, files) => {
@@ -261,6 +262,19 @@ function run(callback) {
         .then((data) => {
           // data
           const exportData = data.exportData;
+
+          // fill out with default values missing translations
+          const tokens = Object.keys(exportData.translations);
+          tokens.forEach((token) => {
+            languageIds.forEach((tokenLanguage) => {
+              if (
+                !exportData.translations[token][tokenLanguage] &&
+                tokenLanguage !== defaultLanguage
+              ) {
+                exportData.translations[token][tokenLanguage] = exportData.translations[token][defaultLanguage];
+              }
+            });
+          });
 
           // export data
           fs.writeFile(

@@ -1,6 +1,7 @@
 'use strict';
 
 const app = require('../../server');
+const language = app.models.language;
 const languageToken = app.models.languageToken;
 const helpCategory = app.models.helpCategory;
 const helpItem = app.models.helpItem;
@@ -23,16 +24,25 @@ function run(callback) {
   // make sure we have what we need :)
   const defaultHelpDataJson = defaultHelpData || [];
 
-  // import help items
-  languageToken
-    .find({
-      where: {
-        token: {
-          inq: Object.keys(defaultHelpDataJson.translations)
-        }
-      }
+  // retrieve all languages
+  const mappedLanguages = {};
+  language
+    .find()
+    .then((languages) => {
+      languages.forEach((language) => {
+        mappedLanguages[language.id] = true;
+      });
     })
-
+    .then(() => {
+      return languageToken
+        .find({
+          where: {
+            token: {
+              inq: Object.keys(defaultHelpDataJson.translations)
+            }
+          }
+        });
+    })
     // determine which language tokens exist already and include them for update
     .then((langTokens) => {
       // map tokens for which we need to update data
@@ -89,6 +99,12 @@ function run(callback) {
           // go through each language token
           Object.keys(defaultHelpDataJson.translations[token] || {})
             .forEach((languageId) => {
+              // jump over if this isn't a language
+              if (!mappedLanguages[languageId]) {
+                return;
+              }
+
+              // create token
               (function (newToken, newLanguageId, newTranslation, modules) {
                 // add to create list
                 createUpdateLanguageTokensJob.push((cb) => {
