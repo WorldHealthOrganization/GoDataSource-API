@@ -41,7 +41,7 @@ function getMongoDBConnection(mongoOptions = {}) {
       mongoDBConnection = client
         .db(dbConfig.database);
 
-      return mongoDBConnection;
+      return Promise.resolve(mongoDBConnection);
     });
 }
 
@@ -117,6 +117,8 @@ function executeAction(collectionName, actionName, params, logger = console) {
         collection[actionName](...params);
     })
     .then(result => {
+      logger.debug(`[QueryId: ${queryId}] MongoDB request completed after ${timer.getElapsedMilliseconds()} msec`);
+
       if (actionName === 'find') {
         result.forEach(function (record) {
           record.id = record._id;
@@ -129,10 +131,11 @@ function executeAction(collectionName, actionName, params, logger = console) {
         // no response parsing for other actions
       }
 
-      return result;
+      return Promise.resolve(result);
     })
-    .finally(() => {
-      logger.debug(`[QueryId: ${queryId}] MongoDB request completed after ${timer.getElapsedMilliseconds()} msec`);
+    .catch(err => {
+      logger.debug(`[QueryId: ${queryId}] MongoDB request completed with error after ${timer.getElapsedMilliseconds()} msec`);
+      return Promise.reject(err);
     });
 }
 

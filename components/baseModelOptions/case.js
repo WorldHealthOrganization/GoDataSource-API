@@ -48,7 +48,7 @@ const constants = {
     'isDateOfReportingApproximate'
   ],
   // map language token labels for model properties
-  fieldLabelsMap: Object.assign({}, personConstants.fieldLabelsMap, {
+  fieldLabelsMap: Object.assign({}, personConstants.constants.fieldLabelsMap, {
     'firstName': 'LNG_CASE_FIELD_LABEL_FIRST_NAME',
     'middleName': 'LNG_CASE_FIELD_LABEL_MIDDLE_NAME',
     'lastName': 'LNG_CASE_FIELD_LABEL_LAST_NAME',
@@ -113,34 +113,42 @@ const constants = {
   foreignKeyResolverMap: {
     'burialLocationId': {
       modelName: 'location',
+      collectionName: 'location',
       useProperty: 'name'
     },
     'addresses[].locationId': {
       modelName: 'location',
+      collectionName: 'location',
       useProperty: 'name'
     },
     'dateRanges[].locationId': {
       modelName: 'location',
+      collectionName: 'location',
       useProperty: 'name'
     },
     'relationships[].clusterId': {
       modelName: 'cluster',
+      collectionName: 'cluster',
       useProperty: 'name'
     },
     'relationships[].people[].addresses[].locationId': {
       modelName: 'location',
+      collectionName: 'location',
       useProperty: 'name'
     },
     'relationships[].people[].address.locationId': {
       modelName: 'location',
+      collectionName: 'location',
       useProperty: 'name'
     },
     'relationships[].people[].burialLocationId': {
       modelName: 'location',
+      collectionName: 'location',
       useProperty: 'name'
     },
     'relationships[].people[].dateRanges[].locationId': {
       modelName: 'location',
+      collectionName: 'location',
       useProperty: 'name'
     }
   },

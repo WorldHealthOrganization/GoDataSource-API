@@ -8942,29 +8942,36 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        options.questionnaire = self.caseInvestigationTemplate;
-        options.useQuestionVariable = useQuestionVariable;
-
-        const CaseModel = app.models.case;
-        let model = {
-          arrayProps: ''
+        let exportOptions = {
+          questionnaire: self.caseInvestigationTemplate.toJSON(),
+          useQuestionVariable: useQuestionVariable,
+          contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
         };
 
-        app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.case,
+        const CaseModel = app.models.case;
+        let modelOptions = {
+          collectionName: 'person',
+          scopeQuery: CaseModel.definition.settings.scope,
+          arrayProps: CaseModel.arrayProps,
+          fieldLabelsMap: CaseModel.fieldLabelsMap,
+          exportFieldsOrder: CaseModel.exportFieldsOrder,
+          locationFields: CaseModel.locationFields,
+          foreignKeyResolverMap: CaseModel.foreignKeyResolverMap,
+          referenceDataFields: CaseModel.referenceDataFields
+        };
+
+        return WorkerRunner.helpers.exportFilteredModelsList(
+          modelOptions,
           {},
           filter,
           exportType,
-          'Case List',
           encryptPassword,
           anonymizeFields,
-          options,
-          function (results) {
-            return Promise.resolve(results);
-          },
-          callback
+          exportOptions
         );
+      })
+      .then((file) => {
+        return app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Case List.${file.extension}`, callback);
       })
       .catch(callback);
   };

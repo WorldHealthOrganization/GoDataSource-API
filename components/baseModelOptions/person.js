@@ -3,7 +3,7 @@
 const extendedPersistedModelConstants = require('./extendedPersistedModel');
 
 const constants = {
-  fieldLabelsMap: Object.assign({}, extendedPersistedModelConstants.fieldLabelsMap, {
+  fieldLabelsMap: Object.assign({}, extendedPersistedModelConstants.constants.fieldLabelsMap, {
     'firstName': 'LNG_CASE_FIELD_LABEL_FIRST_NAME',
     'middleName': 'LNG_CASE_FIELD_LABEL_MIDDLE_NAME',
     'lastName': 'LNG_CASE_FIELD_LABEL_LAST_NAME',
