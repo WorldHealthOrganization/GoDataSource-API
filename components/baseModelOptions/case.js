@@ -173,7 +173,7 @@ const constants = {
     pregnancyStatus: 'LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS'
   },
   get referenceDataFields() {
-    return Object.keys(this.referenceDataFieldsToCategoryMap)
+    return Object.keys(this.referenceDataFieldsToCategoryMap);
   }
 };
 

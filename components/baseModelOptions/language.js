@@ -28,15 +28,15 @@ function getLanguageDictionary(languageId, tokenQuery) {
     };
   }
 
-  return MongoDBHelper
-    .executeAction(
-      'languageToken',
-      'find',
-      [
-        query, {
+  return MongoDBHelper.executeAction(
+    'languageToken',
+    'find',
+    [
+      query,
+      {
         projection: {token: 1, translation: 1, languageId: 1}
-      }]
-    )
+      }
+    ])
     .then(function (languageTokens) {
       // build a language map for easy referencing language tokens
       const tokensMap = {};

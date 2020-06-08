@@ -1279,21 +1279,22 @@ const resolveModelForeignKeysNoModels = function (options, resultSet, languageDi
       Object.keys(foreignKeyQueryMap).forEach(function (modelName) {
         // add query operation (per model name)
         queryForeignKeys[modelName] = function (callback) {
-          MongoDBHelper
-            .executeAction(
-              modelToCollectionMap[modelName],
-              'find',
-              [{
+          MongoDBHelper.executeAction(
+            modelToCollectionMap[modelName],
+            'find',
+            [
+              {
                 _id: {
                   $in: foreignKeyQueryMap[modelName]
                 },
                 deleted: {
                   $ne: true
                 }
-              }, {
+              },
+              {
                 projection: foreignKeyProjectionMap[modelName]
-              }]
-            )
+              }
+            ])
             .then(function (results) {
               callback(null, results);
             })
@@ -2993,17 +2994,16 @@ function exportFilteredModelsList(
 
     // get MongoDB query options from Loopback filter
     let mongoDBOptions = MongoDBHelper.getMongoDBOptionsFromLoopbackFilter(query);
-    getRecordsPromise = MongoDBHelper
-      .executeAction(
-        modelOptions.collectionName,
-        'find',
-        [
-          mongoDBOptions.where,
-          {
-            projection: resultsProjection
-          }
-        ]
-      );
+    getRecordsPromise = MongoDBHelper.executeAction(
+      modelOptions.collectionName,
+      'find',
+      [
+        mongoDBOptions.where,
+        {
+          projection: resultsProjection
+        }
+      ]
+    );
   }
 
   return getRecordsPromise
@@ -3449,7 +3449,7 @@ function getQuestionnaireMaxAnswersMapNew(questionnaire, records) {
   });
 
   return multiDatequestionsList;
-};
+}
 
 /**
  * Retrieve list of questionnaire questions and their variables
@@ -3527,7 +3527,7 @@ function getQuestionnaireVariablesMapping(questionnaire, idHeaderPrefix, useVari
       // for multiple answers questions we need answers
       // nothing to do if none are defined
       if (_.isEmpty(question.answers)) {
-        return
+        return;
       }
 
       if (isMultiDate) {
@@ -3897,7 +3897,7 @@ function getParentLocationsWithDetails(locationsIds, allLocations, loopbackFilte
       }
     })
     .catch(callback);
-};
+}
 
 Object.assign(module.exports, {
   getDate: getDate,
