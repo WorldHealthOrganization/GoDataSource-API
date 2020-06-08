@@ -6305,7 +6305,7 @@
         "translation": "Follow-up assigned team"
       },
       "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_TEAM_ID_DESCRIPTION": {
-        "translation": ""
+        "translation": "Follow-up Team should be set only if you want all generated follow-ups to be assigned to a specific team (instead of using the nearest location auto-assign system)"
       },
       "LNG_CONTACT_FIELD_LABEL_GENDER": {
         "translation": "Gender"
