@@ -287,19 +287,11 @@ module.exports = function (Language) {
       const condition = {
         $or: [
           {
-            createdAt: {
-              $eq: null
-            }
-          }, {
-            createdAt: {
+            updatedAt: {
               $gte: updatedSince
             }
           }, {
-            updatedAt: {
-              $eq: null
-            }
-          }, {
-            updatedAt: {
+            createdAt: {
               $gte: updatedSince
             }
           }
@@ -310,38 +302,26 @@ module.exports = function (Language) {
       } else {
         whereFilter = {
           $and: [
-            whereFilter,
-            condition
+            condition,
+            whereFilter
           ]
         };
       }
     }
 
     // construct where condition
+    // retrieve only records from a specific language
+    // & retrieve only non-deleted records
     let where = {
-      $and: [
-        // retrieve only records from a specific language
-        { languageId: this.id },
-
-        // retrieve only non-deleted records
-        {
-          $or: [{
-            deleted: false
-          }, {
-            deleted: {
-              $eq: null
-            }
-          }]
-        }
-      ]
+      languageId: this.id,
+      deleted: {
+        $ne: true
+      }
     };
     if (!_.isEmpty(whereFilter)) {
-      where = {
-        $and: [
-          whereFilter,
-          where
-        ]
-      };
+      where.$and = [
+        whereFilter
+      ];
     }
 
     // construct what data should be retrieved
