@@ -6,21 +6,34 @@ const MongoDBHelper = require('./../mongoDBHelper');
  * TODO: Duplicated from Language model; doesn't use Loopback models. Should be used in Language model
  * Get language dictionary for the specified language (also include english as a fallback language)
  * @param languageId
+ * @param tokenQuery Query for token field
  */
-function getLanguageDictionary(languageId) {
+function getLanguageDictionary(languageId, tokenQuery) {
+  let query = {
+    $or: [
+      {languageId: languageId},
+      {languageId: 'english_us'}
+    ],
+    deleted: {
+      $ne: true
+    }
+  };
+
+  if (tokenQuery) {
+    query = {
+      $and: [
+        query,
+        tokenQuery
+      ]
+    };
+  }
+
   return MongoDBHelper
     .executeAction(
       'languageToken',
       'find',
-      [{
-        $or: [
-          {languageId: languageId},
-          {languageId: 'english_us'}
-        ],
-        deleted: {
-          $ne: true
-        }
-      }, {
+      [
+        query, {
         projection: {token: 1, translation: 1, languageId: 1}
       }]
     )

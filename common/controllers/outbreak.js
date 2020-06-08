@@ -8957,7 +8957,8 @@ module.exports = function (Outbreak) {
           exportFieldsOrder: CaseModel.exportFieldsOrder,
           locationFields: CaseModel.locationFields,
           foreignKeyResolverMap: CaseModel.foreignKeyResolverMap,
-          referenceDataFields: CaseModel.referenceDataFields
+          referenceDataFields: CaseModel.referenceDataFields,
+          referenceDataFieldsToCategoryMap: CaseModel.referenceDataFieldsToCategoryMap
         };
 
         return WorkerRunner.helpers.exportFilteredModelsList(

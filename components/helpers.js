@@ -23,6 +23,7 @@ const MongoDBHelper = require('./mongoDBHelper');
 const anonymizeDatasetFields = require('./anonymizeDatasetFields');
 const mergeFilters = require('./mergeFilters');
 const baseLanguageModel = require('./baseModelOptions/language');
+const aesCrypto = require('./aesCrypto');
 
 const arrayFields = {
   'addresses': 'address',
@@ -2703,69 +2704,193 @@ function exportFilteredModelsList(
 
   let modelPropertiesExpandOnFlatFilesKeys = [];
 
-  // get dictionary for required headers
-  // !options.useQuestionVariable -> options.questionnaire
-  //
+  // get fields that need to be exported from model options
+  const fieldLabelsMap = modelOptions.sanitizeFieldLabelsMapForExport ? modelOptions.sanitizeFieldLabelsMapForExport() : modelOptions.fieldLabelsMap;
+
+  // some models may have a specific order for headers
+  let originalFieldsList = Object.keys(fieldLabelsMap);
+  let fieldsList = [];
+  if (modelOptions.exportFieldsOrder) {
+    fieldsList = [...modelOptions.exportFieldsOrder];
+    // sometimes the order list contains only a subset of the actual fields list
+    if (modelOptions.exportFieldsOrder.length !== originalFieldsList.length) {
+      fieldsList.push(...originalFieldsList.filter(f => modelOptions.exportFieldsOrder.indexOf(f) === -1));
+    }
+  } else {
+    fieldsList = [...originalFieldsList];
+  }
+
+  // create results projection from fieldsList
+  let resultsProjection = {};
+  fieldsList.forEach(fieldRef => {
+    // get property projection by getting the first part of the fieldRef until a '.' or '[' is encountered
+    let propProjection = fieldRef.split(/[.\[]/g)[0];
+    if (!resultsProjection[propProjection]) {
+      resultsProjection[propProjection] = 1;
+    }
+  });
+
+  // initialize flag to know that model has array props defined separately
+  const arrayPropsDefined = !!modelOptions.arrayProps;
+
+  // cache results
+  let results;
 
   // cache dictionary
   let dictionary;
 
-  // load user language dictionary
-  return baseLanguageModel.helpers
-    .getLanguageDictionary(options.contextUserLanguageId)
-    .then(result => {
-      dictionary = result;
+  // get records
+  let getRecordsPromise;
+  // in some cases records might come from the calling function
+  if (options.records) {
+    getRecordsPromise = Promise.resolve(options.records);
+  } else {
+    // check for additional scope query that needs to be added
+    if (modelOptions.scopeQuery) {
+      query = mergeFilters(query, modelOptions.scopeQuery);
+    }
 
-      // get records
-      // in some cases records might come from the calling function
-      if (options.records) {
-        return options.records;
-      } else {
-        // check for additional scope query that needs to be added
-        if (modelOptions.scopeQuery) {
-          query = mergeFilters(query, modelOptions.scopeQuery);
+    // check for deleted flag; by default all items will be retrieved including deleted
+    if (!query.deleted) {
+      query = mergeFilters(query, {
+        where: {
+          deleted: {
+            ne: true
+          }
         }
+      });
+    }
 
-        // check for deleted flag; by default all items will be retrieved including deleted
-        if (!query.deleted) {
-          query = mergeFilters(query, {
-            where: {
-              deleted: {
-                ne: true
+    // get MongoDB query options from Loopback filter
+    let mongoDBOptions = MongoDBHelper.getMongoDBOptionsFromLoopbackFilter(query);
+    getRecordsPromise = MongoDBHelper
+      .executeAction(
+        modelOptions.collectionName,
+        'find',
+        [
+          mongoDBOptions.where,
+          {
+            projection: resultsProjection
+          }
+        ]
+      );
+  }
+
+  return getRecordsPromise
+    .then(res => {
+      // cache results
+      results = res;
+
+      // get dictionary for required headers
+      let tokensQuery = {};
+      // start with model fields
+      let neededTokens = Object.values(fieldLabelsMap);
+      // all tokens from arrayProps
+      if (arrayPropsDefined) {
+        Object.values(modelOptions.arrayProps).forEach(arrayPropMap => {
+          neededTokens.push(...Object.values(arrayPropMap));
+        });
+      }
+
+      // parent location tokens
+      neededTokens.push('LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL', 'LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION');
+
+      // referenceDataFields categories and allowed values
+      if (modelOptions.referenceDataFieldsToCategoryMap) {
+        let refDataValuesRegex = '';
+
+        Object.values(modelOptions.referenceDataFieldsToCategoryMap).forEach(refCategory => {
+          // retrieve category
+          neededTokens.push(refCategory);
+
+          // add to allowed values regex
+          refDataValuesRegex += refDataValuesRegex.length ? `|${refCategory}` : refCategory;
+        });
+
+        if (refDataValuesRegex.length) {
+          // add regex to query
+          tokensQuery['$or'] = [{
+            token: {
+              $regex: `^${refDataValuesRegex}`
+            }
+          }];
+        }
+      }
+
+      // parse questionnaire to get headers and tokens that need to be retrieved
+      let parsedQuestionnaire;
+      // TODO: loops through all records
+      if (!modelPropertiesExpandOnFlatFiles.questionnaireAnswers && options.questionnaire) {
+        parsedQuestionnaire = getQuestionnaireVariablesMapping(
+          options.questionnaire,
+          'questionnaireAnswers',
+          options.useQuestionVariable,
+          // get max number of answers for each questionnaire question
+          getQuestionnaireMaxAnswersMapNew(options.questionnaire, results)
+        );
+
+        modelPropertiesExpandOnFlatFiles.questionnaireAnswers = parsedQuestionnaire.questionsList;
+
+        // add the questionnaire tokens in neededTokens
+        neededTokens.push(...Object.keys(parsedQuestionnaire.tokensToQuestionsMap));
+      }
+
+      // complete the tokens query with the needed tokens
+      // Note: No need to split the $in query to prevent MongoDB query size limit error as there would need to be more than 20000 tokens queried which is not the case
+      if (tokensQuery['$or']) {
+        tokensQuery['$or'].push({
+          token: {
+            $in: [...new Set(neededTokens)]
+          }
+        });
+      } else {
+        tokensQuery.token = {
+          $in: [...new Set(neededTokens)]
+        };
+      }
+
+      // load user language dictionary
+      return baseLanguageModel.helpers
+        .getLanguageDictionary(options.contextUserLanguageId, tokensQuery)
+        .then(res => {
+          // cache dictionary
+          dictionary = res;
+
+          // add translations to questionnaire headers if needed
+          if (
+            parsedQuestionnaire &&
+            parsedQuestionnaire.tokensToQuestionsMap
+          ) {
+            // get token translation placeholder
+            const translationPlaceholder = parsedQuestionnaire.translationPlaceholder;
+
+            // loop through tokens
+            for (let token in parsedQuestionnaire.tokensToQuestionsMap) {
+              // get translation
+              let tokenTranslation = dictionary.getTranslation(token);
+
+              // get token map
+              let tokenMap = parsedQuestionnaire.tokensToQuestionsMap[token];
+
+              // loop through questions for token
+              for (let questionIndex in tokenMap) {
+                let propsToReplace = tokenMap[questionIndex];
+
+                // loop through props to replace
+                for (let prop in propsToReplace) {
+                  // replace props values with the calculated one for the translation
+                  _.set(modelPropertiesExpandOnFlatFiles.questionnaireAnswers, `${questionIndex}.${prop}`, propsToReplace[prop].replace(translationPlaceholder, tokenTranslation));
+                }
               }
             }
-          });
-        }
-
-        // get MongoDB query options from Loopback filter
-        let mongoDBOptions = MongoDBHelper.getMongoDBOptionsFromLoopbackFilter(query);
-        return MongoDBHelper
-          .executeAction(
-            modelOptions.collectionName,
-            'find',
-            [
-              mongoDBOptions.where
-            ]
-          );
-      }
+          }
+        });
     })
-    .then(function (results) {
+    .then(() => {
       // convert geo-points (if any)
       results.forEach(function (result) {
         covertAddressesGeoPointToLoopbackFormat(result);
       });
-
-      // get max number of answers for each questionnaire question
-      // TODO: loops through all records
-      if (!modelPropertiesExpandOnFlatFiles.questionnaireAnswers && options.questionnaire) {
-        modelPropertiesExpandOnFlatFiles.questionnaireAnswers = retrieveQuestionnaireVariables(
-          options.questionnaire,
-          'questionnaireAnswers',
-          dictionary,
-          options.useQuestionVariable,
-          getQuestionnaireMaxAnswersMap(options.questionnaire, results)
-        );
-      }
 
       // retrieve keys for expandable properties
       modelPropertiesExpandOnFlatFilesKeys = modelPropertiesExpandOnFlatFiles ?
@@ -2779,14 +2904,13 @@ function exportFilteredModelsList(
         exportType = exportType.toLowerCase();
       }
 
-      const ignoreArrayFieldLabels = !!modelOptions.arrayProps;
       const isJSONXMLExport = ['json', 'xml'].includes(exportType);
 
       // calculate maximum number of elements for array props
       // do this only if export type is flat
       // TODO: loops through all records
       let arrayPropsLengths = null;
-      if (!isJSONXMLExport && ignoreArrayFieldLabels) {
+      if (!isJSONXMLExport && arrayPropsDefined) {
         arrayPropsLengths = getMaximumLengthForArrays(results, Object.keys(modelOptions.arrayProps));
       }
 
@@ -2801,25 +2925,12 @@ function exportFilteredModelsList(
 
           // define a list of table headers
           const headers = [];
-          // headers come from model
-          const fieldLabelsMap = modelOptions.sanitizeFieldLabelsMapForExport ? modelOptions.sanitizeFieldLabelsMapForExport() : modelOptions.fieldLabelsMap;
 
-          // some models may have a specific order for headers
-          let originalFieldsList = Object.keys(fieldLabelsMap);
-          let fieldsList = [];
-          if (modelOptions.exportFieldsOrder) {
-            fieldsList = [...modelOptions.exportFieldsOrder];
-            // sometimes the order list contains only a subset of the actual fields list
-            if (modelOptions.exportFieldsOrder.length !== originalFieldsList.length) {
-              fieldsList.push(...originalFieldsList.filter(f => modelOptions.exportFieldsOrder.indexOf(f) === -1));
-            }
-          } else {
-            fieldsList = [...originalFieldsList];
-          }
-
+          // loop through the fields list to construct headers
           fieldsList.forEach(function (propertyName) {
             // new functionality, not supported by all models
-            if (!isJSONXMLExport && ignoreArrayFieldLabels) {
+            // if model has array props defined and we need to export a flat file construct headers for all elements in array props
+            if (!isJSONXMLExport && arrayPropsDefined) {
               if (modelOptions.arrayProps[propertyName]) {
                 // determine if we need to include parent token
                 const parentToken = fieldLabelsMap[propertyName];
@@ -2877,7 +2988,7 @@ function exportFilteredModelsList(
             }
 
             // do not handle array properties from field labels map when we have arrayProps set on the model
-            if (!isJSONXMLExport && propertyName.indexOf('[]') > -1 && ignoreArrayFieldLabels) {
+            if (!isJSONXMLExport && propertyName.indexOf('[]') > -1 && arrayPropsDefined) {
               return;
             }
 
@@ -3013,7 +3124,7 @@ function exportFilteredModelsList(
             })
             .then(function (file) {
               if (encryptPassword) {
-                return workerRunner.helpers.encrypt(encryptPassword, file.data)
+                return aesCrypto.encrypt(encryptPassword, file.data)
                   .then(function (data) {
                     file.data = data;
                     return file;
@@ -3024,6 +3135,424 @@ function exportFilteredModelsList(
             });
         });
     });
+}
+
+/**
+ * TODO: Duplicated from getQuestionnaireMaxAnswersMap; Should replace the usages considering the below note
+ * Note: Removed translationOpts logic as it was only used for importable files and affected performance of this function
+ * Loop through the records and get max answers number for multi date answer questions
+ * @param questionnaire
+ * @param records
+ * @returns {{}}
+ */
+function getQuestionnaireMaxAnswersMapNew(questionnaire, records) {
+  /**
+   * Parse questions and fill map for multi date questions
+   * @param questions
+   * @param map
+   * @returns {{}}
+   */
+  function parseQuestions(questions, map) {
+    if (!Array.isArray(questions)) {
+      questions = [questions];
+    }
+
+    questions.forEach((question => {
+      // initialize max number of answers for question to 0
+      map[question.variable] = 0;
+      (question.answers || []).forEach(answer => (answer.additionalQuestions && parseQuestions(answer.additionalQuestions, map)));
+    }));
+  }
+
+  // check if we have data
+  if (
+    !questionnaire ||
+    !questionnaire.length
+  ) {
+    // nothing to add in map
+    return {};
+  }
+
+  // initialize a map of all the multi date answer questions and their nested questions
+  let multiDatequestionsList = {};
+
+  // loop through the questionnaire and fill the multiDatequestionsList
+  (questionnaire || []).forEach(q => {
+    if (!q.multiAnswer) {
+      return;
+    }
+
+    // fill the multi date questions map
+    parseQuestions(q, multiDatequestionsList);
+  });
+
+  // get multi date questions identifiers
+  let multiDateQuestions = Object.keys(multiDatequestionsList);
+
+  // answers property on records
+  const propToIterate = 'questionnaireAnswers';
+
+  // get maximum number of multi date answers
+  records.forEach(record => {
+    if (!record[propToIterate]) {
+      // it doesn't have any questions, skip it
+      return;
+    }
+
+    // loop through the multi date questions as they are usually in less number than the record questionnaire answers
+    multiDateQuestions.forEach(q => {
+      if (!record[propToIterate][q]) {
+        return;
+      }
+
+      // check if record has a bigger number of answers than current max
+      if (multiDatequestionsList[q] < record[propToIterate][q].length) {
+        // new highest number of answers
+        multiDatequestionsList[q] = record[propToIterate][q].length;
+      }
+    });
+  });
+
+  return multiDatequestionsList;
+};
+
+/**
+ * Retrieve list of questionnaire questions and their variables
+ * @param questionnaire List of questions
+ * @param idHeaderPrefix Prefix for ID
+ * @param useVariable Flag specifying whether the question variable needs to be used of we need to get tokens translation
+ * @param multiDateLengthsMap Map of questions with multi date answers to max number of answers in the dataset
+ * @param questionsList List of questions with info; Will be updated in the function
+ * @param tokensToQuestionsMap Map of tokens to questions index in questions list; This map is filled in the function if useVariable is false
+ * @param isNestedMultiDate Flag specifying if the questionnaire received is nested in another question
+ * @param multiDateIndex Index for multi date answer
+ * @returns {*[]|{translationPlaceholder: string, questionsList: *[], tokensToQuestionsMap: {}}}
+ */
+function getQuestionnaireVariablesMapping(questionnaire, idHeaderPrefix, useVariable, multiDateLengthsMap, questionsList, tokensToQuestionsMap, isNestedMultiDate, multiDateIndex) {
+  if (_.isEmpty(questionnaire)) {
+    return [];
+  }
+
+  // initialize list of questions with info if not received
+  if (!questionsList) {
+    questionsList = [];
+  }
+
+  // initialize map of tokens to questions indexes in questionsList if not received
+  if (!tokensToQuestionsMap) {
+    tokensToQuestionsMap = {};
+  }
+
+  // initialize translation placeholder to be used in questions props values for the ones that need translation
+  const translationPlaceholder = '%%translation%%';
+
+  _.each(questionnaire, (question) => {
+    // markup questions
+    if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP') {
+      let index = questionsList.push({
+        expandKey: question.variable,
+        expandHeader: question.variable,
+        id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable,
+        header: question.variable
+      }) - 1;
+
+      if (!useVariable) {
+        // we should use translations; cache in map of tokens to be translated
+        if (!tokensToQuestionsMap[question.text]) {
+          tokensToQuestionsMap[question.text] = {
+            [index]: {
+              // properties to be updated for index
+              // use translation placeholder to know what value should be added after tokens are retrieve from DB
+              'expandHeader': translationPlaceholder,
+              'header': translationPlaceholder
+            }
+          };
+        } else {
+          tokensToQuestionsMap[question.text][index] = {
+            'expandHeader': translationPlaceholder,
+            'header': translationPlaceholder
+          };
+        }
+      }
+
+      return;
+    }
+
+    // no need to to any checks when the variable is missing
+    if (_.isEmpty(question.variable)) {
+      return;
+    }
+
+    // check for multi date questions
+    const isMultiDate = question.multiAnswer || isNestedMultiDate;
+    multiDateLengthsMap[question.variable] = multiDateLengthsMap[question.variable] || 0;
+
+    // multiple answers questions
+    if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
+      // for multiple answers questions we need answers
+      // nothing to do if none are defined
+      if (_.isEmpty(question.answers)) {
+        return
+      }
+
+      if (isMultiDate) {
+        // multi date answers
+        const addQuestionAndAnswers = (multiDateIndex) => {
+          _.each(question.answers, (answer, answerIndex) => {
+            let index = questionsList.push({
+              id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} date`,
+              header: `${question.variable} [MD ${multiDateIndex}]`
+            }) - 1;
+
+            if (!useVariable) {
+              // we should use translations; cache in map of tokens to be translated
+              if (!tokensToQuestionsMap[question.text]) {
+                tokensToQuestionsMap[question.text] = {
+                  [index]: {
+                    // properties to be updated for index
+                    // use translation placeholder to know what value should be added after tokens are retrieve from DB
+                    'header': `${translationPlaceholder} [MD ${multiDateIndex}]`
+                  }
+                };
+              } else {
+                tokensToQuestionsMap[question.text][index] = {
+                  'header': `${translationPlaceholder} [MD ${multiDateIndex}]`
+                };
+              }
+            }
+
+            index = questionsList.push({
+              expandKey: question.variable,
+              expandHeader: question.variable,
+              id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} value ${(answerIndex + 1)}`,
+              header: `${question.variable} ${(answerIndex + 1)} [MV ${multiDateIndex}]`
+            }) - 1;
+
+            if (!useVariable) {
+              // we should use translations; cache in map of tokens to be translated
+              if (!tokensToQuestionsMap[question.text]) {
+                tokensToQuestionsMap[question.text] = {
+                  [index]: {
+                    // properties to be updated for index
+                    // use translation placeholder to know what value should be added after tokens are retrieve from DB
+                    'expandHeader': translationPlaceholder,
+                    'header': `${translationPlaceholder} ${(answerIndex + 1)} [MV ${multiDateIndex}]`
+                  }
+                };
+              } else {
+                tokensToQuestionsMap[question.text][index] = {
+                  'expandHeader': translationPlaceholder,
+                  'header': `${translationPlaceholder} ${(answerIndex + 1)} [MV ${multiDateIndex}]`
+                };
+              }
+            }
+
+            if (!_.isEmpty(answer.additionalQuestions)) {
+              // questionsList and tokensToQuestionsMap will be updated in the function
+              getQuestionnaireVariablesMapping(
+                answer.additionalQuestions,
+                idHeaderPrefix,
+                useVariable,
+                multiDateLengthsMap,
+                questionsList,
+                tokensToQuestionsMap,
+                isMultiDate,
+                multiDateIndex
+              );
+            }
+          });
+        };
+
+        if (multiDateIndex) {
+          addQuestionAndAnswers(multiDateIndex);
+        } else {
+          for (let i = 0; i < multiDateLengthsMap[question.variable]; i++) {
+            addQuestionAndAnswers(i + 1);
+          }
+        }
+      } else {
+        // simple multiple answers questions; no multi date answers
+        _.each(question.answers, (answer, answerIndex) => {
+          // loop through the answers
+          let index = questionsList.push({
+            expandKey: question.variable,
+            expandHeader: question.variable,
+            id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} 1 value ${(answerIndex + 1)}`,
+            header: `${question.variable} ${(answerIndex + 1)}`
+          }) - 1;
+
+          if (!useVariable) {
+            // we should use translations; cache in map of tokens to be translated
+            if (!tokensToQuestionsMap[question.text]) {
+              tokensToQuestionsMap[question.text] = {
+                [index]: {
+                  // properties to be updated for index
+                  // use translation placeholder to know what value should be added after tokens are retrieve from DB
+                  'expandHeader': translationPlaceholder,
+                  'header': `${translationPlaceholder} ${(answerIndex + 1)}`
+                }
+              };
+            } else {
+              tokensToQuestionsMap[question.text][index] = {
+                'expandHeader': translationPlaceholder,
+                'header': `${translationPlaceholder} ${(answerIndex + 1)}`
+              };
+            }
+          }
+
+          if (!_.isEmpty(answer.additionalQuestions)) {
+            // questionsList and tokensToQuestionsMap will be updated in the function
+            getQuestionnaireVariablesMapping(
+              answer.additionalQuestions,
+              idHeaderPrefix,
+              useVariable,
+              multiDateLengthsMap,
+              questionsList,
+              tokensToQuestionsMap,
+              isMultiDate,
+              multiDateIndex
+            );
+          }
+        });
+      }
+    } else {
+      // no multiple answers question
+      if (isMultiDate) {
+        // multi date answers question
+        const addQuestionAndAnswers = (multiDateIndex) => {
+          let index = questionsList.push(
+            {
+              id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} date`,
+              header: `${question.variable} [MD ${multiDateIndex}]`
+            }
+          ) - 1;
+
+          if (!useVariable) {
+            // we should use translations; cache in map of tokens to be translated
+            if (!tokensToQuestionsMap[question.text]) {
+              tokensToQuestionsMap[question.text] = {
+                [index]: {
+                  // properties to be updated for index
+                  // use translation placeholder to know what value should be added after tokens are retrieve from DB
+                  'header': `${translationPlaceholder} [MD ${multiDateIndex}]`
+                }
+              };
+            } else {
+              tokensToQuestionsMap[question.text][index] = {
+                'header': `${translationPlaceholder} [MD ${multiDateIndex}]`
+              };
+            }
+          }
+
+          index = questionsList.push(
+            {
+              expandKey: question.variable,
+              expandHeader: question.variable,
+              id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} value`,
+              header: `${question.variable} [MV ${multiDateIndex}]`
+            }
+          ) - 1;
+
+          if (!useVariable) {
+            // we should use translations; cache in map of tokens to be translated
+            if (!tokensToQuestionsMap[question.text]) {
+              tokensToQuestionsMap[question.text] = {
+                [index]: {
+                  // properties to be updated for index
+                  // use translation placeholder to know what value should be added after tokens are retrieve from DB
+                  'expandHeader': translationPlaceholder,
+                  'header': `${translationPlaceholder} [MV ${multiDateIndex}]`
+                }
+              };
+            } else {
+              tokensToQuestionsMap[question.text][index] = {
+                'expandHeader': translationPlaceholder,
+                'header': `${translationPlaceholder} [MV ${multiDateIndex}]`
+              };
+            }
+          }
+
+          // add children questions
+          if (!_.isEmpty(question.answers)) {
+            _.each(question.answers, (answer) => {
+              if (!_.isEmpty(answer.additionalQuestions)) {
+                // questionsList and tokensToQuestionsMap will be updated in the function
+                getQuestionnaireVariablesMapping(
+                  answer.additionalQuestions,
+                  idHeaderPrefix,
+                  useVariable,
+                  multiDateLengthsMap,
+                  questionsList,
+                  tokensToQuestionsMap,
+                  isMultiDate,
+                  multiDateIndex
+                );
+              }
+            });
+          }
+        };
+
+        if (multiDateIndex) {
+          addQuestionAndAnswers(multiDateIndex);
+        } else {
+          for (let i = 0; i < multiDateLengthsMap[question.variable]; i++) {
+            addQuestionAndAnswers(i + 1);
+          }
+        }
+      } else {
+        // simple question with simple answer
+        let index = questionsList.push({
+          expandKey: question.variable,
+          expandHeader: question.variable,
+          id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable + ' 1 value',
+          header: question.variable
+        }) - 1;
+
+        if (!useVariable) {
+          // we should use translations; cache in map of tokens to be translated
+          if (!tokensToQuestionsMap[question.text]) {
+            tokensToQuestionsMap[question.text] = {
+              [index]: {
+                // properties to be updated for index
+                // use translation placeholder to know what value should be added after tokens are retrieve from DB
+                'expandHeader': translationPlaceholder,
+                'header': translationPlaceholder
+              }
+            };
+          } else {
+            tokensToQuestionsMap[question.text][index] = {
+              'expandHeader': translationPlaceholder,
+              'header': translationPlaceholder
+            };
+          }
+        }
+
+        if (!_.isEmpty(question.answers)) {
+          _.each(question.answers, (answer) => {
+            if (!_.isEmpty(answer.additionalQuestions)) {
+              // questionsList and tokensToQuestionsMap will be updated in the function
+              getQuestionnaireVariablesMapping(
+                answer.additionalQuestions,
+                idHeaderPrefix,
+                useVariable,
+                multiDateLengthsMap,
+                questionsList,
+                tokensToQuestionsMap,
+                isMultiDate,
+                multiDateIndex
+              );
+            }
+          });
+        }
+      }
+    }
+  });
+
+  return {
+    questionsList: questionsList,
+    tokensToQuestionsMap: tokensToQuestionsMap,
+    translationPlaceholder: translationPlaceholder
+  };
 }
 
 /**
