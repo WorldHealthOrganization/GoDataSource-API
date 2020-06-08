@@ -763,6 +763,236 @@ const exportListFileSync = function (headers, dataSet, fileType, title = 'List')
 const exportListFile = workerRunner.helpers.exportListFile;
 
 /**
+ * TODO: Duplicated from above; Current change consists in using another function for xlsx export
+ * Export a list in a file (synchronously)
+ * @param headers file list headers
+ * @param dataSet {Array} actual data set
+ * @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
+ * @return {Promise<any>}
+ */
+const exportListFileSyncNew = function (headers, dataSet, fileType, title = 'List') {
+
+  /**
+   * Build headers map in a way compatible with files that support hierarchical structures (XML, JSON)
+   * @param headers
+   */
+  function buildHeadersMap(headers, jsonHeadersMap = {}) {
+    // go trough the headers
+    headers.forEach(function (header) {
+      // get property level separator
+      const separatorIndex = header.id.indexOf('.');
+      // if the separator is found
+      if (separatorIndex !== -1) {
+        // get the property
+        let property = '';
+        // Different approaches for either objects or collections
+        if (/\[]/.test(header.id)) {
+          property = header.id.substring(0, separatorIndex);
+        } else {
+          property = header.id.substring(0, separatorIndex + 1);
+        }
+        // get the rest of the path
+        const leftPath = header.id.substring(separatorIndex + 1);
+        // if the property was not defined before
+        if (!jsonHeadersMap[property]) {
+          // define it
+          jsonHeadersMap[property] = {};
+        }
+        // remap sub-levels
+        jsonHeadersMap[property] = Object.assign({}, typeof (jsonHeadersMap[property]) === 'object' ? jsonHeadersMap[property] : {}, buildHeadersMap([{
+          id: leftPath,
+          header: header.header
+        }], jsonHeadersMap[property]));
+      } else {
+        // simple property (one level) map it directly
+        jsonHeadersMap[header.id] = header.header;
+      }
+    });
+    return jsonHeadersMap;
+  }
+
+  /**
+   * (deep) Remap object properties
+   * @param source
+   * @param headersMap
+   */
+  function objectRemap(source, headersMap) {
+    // define result
+    const result = {};
+    // go through the headers map
+    Object.keys(headersMap).forEach(function (header) {
+      // if the map is for an array of complex elements
+      if (header.endsWith('[]') && typeof headersMap[header] === 'object') {
+        // remove array marker
+        const _header = header.replace('[]', '');
+        // result should be an array
+        result[headersMap[_header]] = [];
+        // if there is data in the source object
+        if (source[_header]) {
+          // go through each element
+          source[_header].forEach(function (item) {
+            // remap it and store it in the result
+            result[headersMap[_header]].push(objectRemap(item, headersMap[header]));
+          });
+        } else {
+          // just copy empty element
+          result[headersMap[_header]] = source[_header];
+        }
+        // if the map is an object with mapped properties
+      } else if (header.endsWith('.') && typeof headersMap[header] === 'object') {
+        // remove array marker
+        const _header = header.replace('.', '');
+        // if there is data in the source object
+        if (source[_header]) {
+          // result should be an object
+          result[headersMap[_header]] = objectRemap(source[_header], headersMap[header]);
+        } else {
+          // just copy empty element
+          result[headersMap[_header]] = source[_header];
+        }
+        // type is an object
+      } else if (typeof headersMap[header] === 'object') {
+        // if the element is present in the source
+        if (source[header]) {
+          // remap it and add it in the result
+          result[header] = objectRemap(source[header], headersMap[header]);
+        } else {
+          // just copy empty element in the result
+          result[header] = source[header];
+        }
+        // array of simple elements
+      } else if (header.endsWith('[]')) {
+        // just copy them
+        result[headersMap[header]] = source[header.replace('[]', '')];
+        // simple element that was not yet mapped in the result (this is important as we may have labels for properties
+        // like "addresses" and "addresses[]" and we don't want simple types to overwrite complex types)
+      } else if (result[headersMap[header]] === undefined) {
+        // copy the element in the result
+        result[headersMap[header]] = source[header];
+        // handle dates separately
+        if (source[header] instanceof Date) {
+          result[headersMap[header]] = getDateDisplayValue(source[header]);
+        }
+      }
+    });
+    return result;
+  }
+
+  // define the file
+  const file = {
+    data: {},
+    mimeType: '',
+    extension: fileType
+  };
+
+  // promisify the file
+  return new Promise(function (resolve, reject) {
+    // data set must be an array
+    if (!Array.isArray(dataSet)) {
+      return reject(new Error('Invalid dataSet. DataSet must be an array.'));
+    }
+
+    let headersMap, remappedDataSet, builder;
+    // handle each file individually
+    switch (fileType) {
+      case 'json':
+        file.mimeType = 'application/json';
+        // build headers map
+        headersMap = buildHeadersMap(headers);
+        remappedDataSet = dataSet.map(item => objectRemap(item, headersMap));
+        file.data = JSON.stringify(remappedDataSet,
+          // replace undefined with null so the JSON will contain all properties
+          function (key, value) {
+            if (value === undefined) {
+              value = null;
+            }
+            return value;
+          }, 2);
+        resolve(file);
+        break;
+      case 'xml':
+        file.mimeType = 'text/xml';
+        builder = new xml2js.Builder();
+        // build headers map
+        headersMap = buildHeadersMap(headers);
+        remappedDataSet = dataSet.map(function (item) {
+          return {
+            // XML does not have an array data type, repeating an "entry" will simulate an array
+            entry: objectRemap(item, headersMap)
+          };
+        });
+        // Make sure the response looks the same for single element arrays (native library behaviour is weird in this case)
+        if (remappedDataSet.length === 1) {
+          remappedDataSet = {root: remappedDataSet[0]};
+        }
+        file.data = builder.buildObject(getXmlFriendlyJson(remappedDataSet));
+        resolve(file);
+        break;
+      case 'csv':
+        file.mimeType = 'text/csv';
+        spreadSheetFile.createCsvFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, csvFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = csvFile;
+          resolve(file);
+        });
+        break;
+      case 'xls':
+        file.mimeType = 'application/vnd.ms-excel';
+        spreadSheetFile.createXlsFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, xlsFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = xlsFile;
+          resolve(file);
+        });
+        break;
+      case 'xlsx':
+        file.mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        spreadSheetFile
+          .createAndSaveXlsxFile(
+            // map headers for exceljs format
+            headers.map(header => {
+              header.key = header.id;
+              delete header.id;
+              return header;
+            }),
+            dataSet.map(item => getFlatObject(item, null, true)))
+          .then(filename => {
+            file.name = filename;
+            resolve(file);
+          })
+          .catch(reject);
+        break;
+      case 'ods':
+        file.mimeType = 'application/vnd.oasis.opendocument.spreadsheet';
+        spreadSheetFile.createOdsFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, odsFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = odsFile;
+          resolve(file);
+        });
+        break;
+      case 'pdf':
+        file.mimeType = 'application/pdf';
+        pdfDoc.createPDFList(headers, dataSet.map(item => getFlatObject(item, null, true)), title, function (error, pdfFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = pdfFile;
+          resolve(file);
+        });
+        break;
+      default:
+        reject(apiError.getError('REQUEST_VALIDATION_ERROR', {errorMessages: `Invalid Export Type: ${fileType}. Supported options: json, xml, csv, xls, xlsx, ods, pdf`}));
+        break;
+    }
+  });
+};
+
+/**
  * Get a referenced value. Similar to loDash _.get but it can map properties from arrays also
  * @param data Source Object
  * @param path Path to property e.g. addresses[].locationId
@@ -3120,9 +3350,14 @@ function exportFilteredModelsList(
             })
             .then(function (results) {
               // create file with the results
-              return exportListFileSync(headers, results, exportType);
+              return exportListFileSyncNew(headers, results, exportType);
             })
             .then(function (file) {
+              if (file.name) {
+                // read file
+                file.data = fs.readFileSync(file.name);
+              }
+
               if (encryptPassword) {
                 return aesCrypto.encrypt(encryptPassword, file.data)
                   .then(function (data) {
