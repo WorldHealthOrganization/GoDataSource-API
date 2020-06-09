@@ -96,7 +96,8 @@ module.exports = function (Person) {
   Person.typeToModelMap = {
     'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'case',
     'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'contact',
-    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event'
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event',
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT': 'contactOfContact'
   };
 
   Person.dossierDateFields = [
