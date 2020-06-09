@@ -4576,7 +4576,7 @@
         "translation": "Tem certeza de que deseja excluir este backup \"{{location}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_BACKUP_RESTORE": {
-        "translation": "Restaurar Confirmação <br /> <br /> Aviso: A restauração dos dados do sistema para o estado selecionado reverterá todos os dados para o ponto do backup (removendo quaisquer novos dados adicionados). Você tem certeza que quer continuar?"
+        "translation": "Restaurar Confirmação <br/><br/> Aviso: A restauração dos dados do sistema para o estado selecionado reverterá todos os dados para o ponto do backup (removendo quaisquer novos dados adicionados). Você tem certeza que quer continuar?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_CASE": {
         "translation": "Tem certeza de que deseja excluir este caso: \"{{name}}\"?"
@@ -4693,7 +4693,7 @@
         "translation": "\"{{name}}\" não pode ser removida porque está sendo utilizada. Deseja ver onde?"
       },
       "LNG_DIALOG_CONFIRM_MAKE_OUTBREAK_ACTIVE": {
-        "translation": "Tem certeza de que deseja ativar este surto?  <br />  O surto ativo atual será desativado."
+        "translation": "Tem certeza de que deseja ativar este surto?  <br/>  O surto ativo atual será desativado."
       },
       "LNG_DIALOG_CONFIRM_MARK_CONTACT_AS_MISSING_FROM_FOLLOW_UP": {
         "translation": "Tem certeza de que deseja marcar o contato \"{{name}}\" como ausente de um acompanhamento?"
@@ -15493,7 +15493,7 @@
         "translation": "{{result}} (p)"
       },
       "LNG_PAGE_TRANSMISSION_CHAIN_BARS_LEGEND_DETAILS": {
-        "translation": "{{rectCD}} Case details: hs - Hospitalized / is - Isolated  <br/>{{rectLAB}} Lab result details: L? - unknown result / L- - negative result / L+ - positive result / (p) - waiting for result<br />{{rectOUT}} Outcome: oa - Alive / od - Deceased / or - Recovered<br />{{rectB}} Burial: bn - Buried no safe / bs - Buried safe"
+        "translation": "{{rectCD}} Case details: hs - Hospitalized / is - Isolated  <br/>{{rectLAB}} Lab result details: L? - unknown result / L- - negative result / L+ - positive result / (p) - waiting for result<br/>{{rectOUT}} Outcome: oa - Alive / od - Deceased / or - Recovered<br/>{{rectB}} Burial: bn - Buried no safe / bs - Buried safe"
       },
       "LNG_PAGE_TRANSMISSION_CHAIN_BARS_ISOLATED_CASE_LABEL": {
         "translation": "é"

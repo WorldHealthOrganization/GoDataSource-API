@@ -4693,7 +4693,7 @@
         "translation": "\"{{name}}\" no se puede eliminar porque se está utilizando. ¿Desea ver dónde?"
       },
       "LNG_DIALOG_CONFIRM_MAKE_OUTBREAK_ACTIVE": {
-        "translation": "¿Seguro que quieres activar este brote? <br /> El brote activo actual se desactivará."
+        "translation": "¿Seguro que quieres activar este brote? <br/> El brote activo actual se desactivará."
       },
       "LNG_DIALOG_CONFIRM_MARK_CONTACT_AS_MISSING_FROM_FOLLOW_UP": {
         "translation": "¿Está seguro de que desea marcar el contacto \"{{name}}\" como ausente de un seguimiento?"
@@ -15493,7 +15493,7 @@
         "translation": "{{result}} (p)"
       },
       "LNG_PAGE_TRANSMISSION_CHAIN_BARS_LEGEND_DETAILS": {
-        "translation": "{{rectCD}} Case details: hs - Hospitalized / is - Isolated  <br/>{{rectLAB}} Lab result details: L? - unknown result / L- - negative result / L+ - positive result / (p) - waiting for result<br />{{rectOUT}} Outcome: oa - Alive / od - Deceased / or - Recovered<br />{{rectB}} Burial: bn - Buried no safe / bs - Buried safe"
+        "translation": "{{rectCD}} Case details: hs - Hospitalized / is - Isolated  <br/>{{rectLAB}} Lab result details: L? - unknown result / L- - negative result / L+ - positive result / (p) - waiting for result<br/>{{rectOUT}} Outcome: oa - Alive / od - Deceased / or - Recovered<br/>{{rectB}} Burial: bn - Buried no safe / bs - Buried safe"
       },
       "LNG_PAGE_TRANSMISSION_CHAIN_BARS_ISOLATED_CASE_LABEL": {
         "translation": "es"
