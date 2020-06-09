@@ -6,6 +6,7 @@ const _ = require('lodash');
 const url = require('url');
 const path = require('path');
 const fs = require('fs');
+const extendedPersistedModelConstants = require('../../components/baseModelOptions/extendedPersistedModel').constants;
 
 module.exports = function (ExtendedPersistedModel) {
   // shortcut to Extended Persisted Model
@@ -13,16 +14,7 @@ module.exports = function (ExtendedPersistedModel) {
   // set flag to force writing a controller for each model or update the flag
   ExtendedPersistedModel.hasController = true;
 
-  ExtendedPersistedModel.fieldLabelsMap = {
-    id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
-    createdAt: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
-    createdBy: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_BY',
-    updatedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',
-    updatedBy: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
-    deleted: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
-    deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT',
-    createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON'
-  };
+  ExtendedPersistedModel.fieldLabelsMap = extendedPersistedModelConstants.fieldLabelsMap;
 
   // some models can be referenced by other models and they have restrictions on actions like delete
   // build a map of usages that can be checked later
@@ -313,14 +305,14 @@ module.exports = function (ExtendedPersistedModel) {
           );
         }
 
-      // retrieveCreatedUpdatedBy can be used to retrieve all relationships
+        // retrieveCreatedUpdatedBy can be used to retrieve all relationships
       } else if (_.get(context, 'req.query.retrieveCreatedUpdatedBy')) {
         _.set(
           context,
           'req.options._userRelations',
           _.map(
             ExtendedPersistedModel.userSupportedRelations,
-            (relName) => ({ relation: relName })
+            (relName) => ({relation: relName})
           )
         );
       }
@@ -361,8 +353,8 @@ module.exports = function (ExtendedPersistedModel) {
       delete context.req.options._userRelations;
 
       // determine relations for which we need to retrieve data
-      const includeCreatedByUser = !!_.find(userRelations, { relation: 'createdByUser' });
-      const includeUpdatedByUser = !!_.find(userRelations, { relation: 'updatedByUser' });
+      const includeCreatedByUser = !!_.find(userRelations, {relation: 'createdByUser'});
+      const includeUpdatedByUser = !!_.find(userRelations, {relation: 'updatedByUser'});
 
       // determine results for which we need to map the user data
       const result = _.isArray(returnedResult) ?

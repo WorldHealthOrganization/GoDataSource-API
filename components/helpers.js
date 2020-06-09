@@ -1,5 +1,7 @@
 'use strict';
 
+module.exports = {};
+
 // dependencies
 const momentLib = require('moment');
 const momentRange = require('moment-range');
@@ -17,6 +19,11 @@ const workerRunner = require('./workerRunner');
 const crypto = require('crypto');
 const EpiWeek = require('epi-week');
 const config = require('../server/config');
+const MongoDBHelper = require('./mongoDBHelper');
+const anonymizeDatasetFields = require('./anonymizeDatasetFields');
+const mergeFilters = require('./mergeFilters');
+const baseLanguageModel = require('./baseModelOptions/language');
+const aesCrypto = require('./aesCrypto');
 
 const arrayFields = {
   'addresses': 'address',
@@ -756,6 +763,236 @@ const exportListFileSync = function (headers, dataSet, fileType, title = 'List')
 const exportListFile = workerRunner.helpers.exportListFile;
 
 /**
+ * TODO: Duplicated from above; Current change consists in using another function for xlsx export
+ * Export a list in a file (synchronously)
+ * @param headers file list headers
+ * @param dataSet {Array} actual data set
+ * @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
+ * @return {Promise<any>}
+ */
+const exportListFileSyncNew = function (headers, dataSet, fileType, title = 'List') {
+
+  /**
+   * Build headers map in a way compatible with files that support hierarchical structures (XML, JSON)
+   * @param headers
+   */
+  function buildHeadersMap(headers, jsonHeadersMap = {}) {
+    // go trough the headers
+    headers.forEach(function (header) {
+      // get property level separator
+      const separatorIndex = header.id.indexOf('.');
+      // if the separator is found
+      if (separatorIndex !== -1) {
+        // get the property
+        let property = '';
+        // Different approaches for either objects or collections
+        if (/\[]/.test(header.id)) {
+          property = header.id.substring(0, separatorIndex);
+        } else {
+          property = header.id.substring(0, separatorIndex + 1);
+        }
+        // get the rest of the path
+        const leftPath = header.id.substring(separatorIndex + 1);
+        // if the property was not defined before
+        if (!jsonHeadersMap[property]) {
+          // define it
+          jsonHeadersMap[property] = {};
+        }
+        // remap sub-levels
+        jsonHeadersMap[property] = Object.assign({}, typeof (jsonHeadersMap[property]) === 'object' ? jsonHeadersMap[property] : {}, buildHeadersMap([{
+          id: leftPath,
+          header: header.header
+        }], jsonHeadersMap[property]));
+      } else {
+        // simple property (one level) map it directly
+        jsonHeadersMap[header.id] = header.header;
+      }
+    });
+    return jsonHeadersMap;
+  }
+
+  /**
+   * (deep) Remap object properties
+   * @param source
+   * @param headersMap
+   */
+  function objectRemap(source, headersMap) {
+    // define result
+    const result = {};
+    // go through the headers map
+    Object.keys(headersMap).forEach(function (header) {
+      // if the map is for an array of complex elements
+      if (header.endsWith('[]') && typeof headersMap[header] === 'object') {
+        // remove array marker
+        const _header = header.replace('[]', '');
+        // result should be an array
+        result[headersMap[_header]] = [];
+        // if there is data in the source object
+        if (source[_header]) {
+          // go through each element
+          source[_header].forEach(function (item) {
+            // remap it and store it in the result
+            result[headersMap[_header]].push(objectRemap(item, headersMap[header]));
+          });
+        } else {
+          // just copy empty element
+          result[headersMap[_header]] = source[_header];
+        }
+        // if the map is an object with mapped properties
+      } else if (header.endsWith('.') && typeof headersMap[header] === 'object') {
+        // remove array marker
+        const _header = header.replace('.', '');
+        // if there is data in the source object
+        if (source[_header]) {
+          // result should be an object
+          result[headersMap[_header]] = objectRemap(source[_header], headersMap[header]);
+        } else {
+          // just copy empty element
+          result[headersMap[_header]] = source[_header];
+        }
+        // type is an object
+      } else if (typeof headersMap[header] === 'object') {
+        // if the element is present in the source
+        if (source[header]) {
+          // remap it and add it in the result
+          result[header] = objectRemap(source[header], headersMap[header]);
+        } else {
+          // just copy empty element in the result
+          result[header] = source[header];
+        }
+        // array of simple elements
+      } else if (header.endsWith('[]')) {
+        // just copy them
+        result[headersMap[header]] = source[header.replace('[]', '')];
+        // simple element that was not yet mapped in the result (this is important as we may have labels for properties
+        // like "addresses" and "addresses[]" and we don't want simple types to overwrite complex types)
+      } else if (result[headersMap[header]] === undefined) {
+        // copy the element in the result
+        result[headersMap[header]] = source[header];
+        // handle dates separately
+        if (source[header] instanceof Date) {
+          result[headersMap[header]] = getDateDisplayValue(source[header]);
+        }
+      }
+    });
+    return result;
+  }
+
+  // define the file
+  const file = {
+    data: {},
+    mimeType: '',
+    extension: fileType
+  };
+
+  // promisify the file
+  return new Promise(function (resolve, reject) {
+    // data set must be an array
+    if (!Array.isArray(dataSet)) {
+      return reject(new Error('Invalid dataSet. DataSet must be an array.'));
+    }
+
+    let headersMap, remappedDataSet, builder;
+    // handle each file individually
+    switch (fileType) {
+      case 'json':
+        file.mimeType = 'application/json';
+        // build headers map
+        headersMap = buildHeadersMap(headers);
+        remappedDataSet = dataSet.map(item => objectRemap(item, headersMap));
+        file.data = JSON.stringify(remappedDataSet,
+          // replace undefined with null so the JSON will contain all properties
+          function (key, value) {
+            if (value === undefined) {
+              value = null;
+            }
+            return value;
+          }, 2);
+        resolve(file);
+        break;
+      case 'xml':
+        file.mimeType = 'text/xml';
+        builder = new xml2js.Builder();
+        // build headers map
+        headersMap = buildHeadersMap(headers);
+        remappedDataSet = dataSet.map(function (item) {
+          return {
+            // XML does not have an array data type, repeating an "entry" will simulate an array
+            entry: objectRemap(item, headersMap)
+          };
+        });
+        // Make sure the response looks the same for single element arrays (native library behaviour is weird in this case)
+        if (remappedDataSet.length === 1) {
+          remappedDataSet = {root: remappedDataSet[0]};
+        }
+        file.data = builder.buildObject(getXmlFriendlyJson(remappedDataSet));
+        resolve(file);
+        break;
+      case 'csv':
+        file.mimeType = 'text/csv';
+        spreadSheetFile.createCsvFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, csvFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = csvFile;
+          resolve(file);
+        });
+        break;
+      case 'xls':
+        file.mimeType = 'application/vnd.ms-excel';
+        spreadSheetFile.createXlsFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, xlsFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = xlsFile;
+          resolve(file);
+        });
+        break;
+      case 'xlsx':
+        file.mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        spreadSheetFile
+          .createAndSaveXlsxFile(
+            // map headers for exceljs format
+            headers.map(header => {
+              header.key = header.id;
+              delete header.id;
+              return header;
+            }),
+            dataSet.map(item => getFlatObject(item, null, true)))
+          .then(filename => {
+            file.name = filename;
+            resolve(file);
+          })
+          .catch(reject);
+        break;
+      case 'ods':
+        file.mimeType = 'application/vnd.oasis.opendocument.spreadsheet';
+        spreadSheetFile.createOdsFile(headers, dataSet.map(item => getFlatObject(item, null, true)), function (error, odsFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = odsFile;
+          resolve(file);
+        });
+        break;
+      case 'pdf':
+        file.mimeType = 'application/pdf';
+        pdfDoc.createPDFList(headers, dataSet.map(item => getFlatObject(item, null, true)), title, function (error, pdfFile) {
+          if (error) {
+            return reject(error);
+          }
+          file.data = pdfFile;
+          resolve(file);
+        });
+        break;
+      default:
+        reject(apiError.getError('REQUEST_VALIDATION_ERROR', {errorMessages: `Invalid Export Type: ${fileType}. Supported options: json, xml, csv, xls, xlsx, ods, pdf`}));
+        break;
+    }
+  });
+};
+
+/**
  * Get a referenced value. Similar to loDash _.get but it can map properties from arrays also
  * @param data Source Object
  * @param path Path to property e.g. addresses[].locationId
@@ -875,7 +1112,7 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
 
       // also resolve reference data if needed
       if (resolveReferenceData) {
-        translateDataSetReferenceDataValues(result, Model, languageDictionary);
+        translateDataSetReferenceDataValues(result, Model.referenceDataFields, languageDictionary);
       }
     });
 
@@ -892,6 +1129,172 @@ const resolveModelForeignKeys = function (app, Model, resultSet, languageDiction
                 inq: foreignKeyQueryMap[modelName]
               }
             })
+            .then(function (results) {
+              callback(null, results);
+            })
+            .catch(callback);
+        };
+      });
+
+      // query models to resolve foreign keys
+      async.parallelLimit(queryForeignKeys, 10, function (error, foreignKeyQueryResults) {
+        // handle error
+        if (error) {
+          return reject(error);
+        }
+        // map foreign key results to models and index them by recordId
+        let foreignKeyResultsMap = {};
+        Object.keys(foreignKeyQueryResults).forEach(function (modelName) {
+          // create container for records
+          foreignKeyResultsMap[modelName] = {};
+          // index each instance using record Id
+          foreignKeyQueryResults[modelName].forEach(function (modelInstance) {
+            foreignKeyResultsMap[modelName][modelInstance.id] = modelInstance;
+          });
+        });
+
+        // replace foreign key references with configured related model value
+        Object.keys(resultSetResolverMap).forEach(function (foreignKeyPath) {
+          // if there are more values that should be mapped for one foreign key
+          if (Array.isArray(resultSetResolverMap[foreignKeyPath].useProperty)) {
+            // build a container for resolved values, container name is resolved model name
+            let resolvedForeignKeyContainerPath = foreignKeyPath.replace(resultSetResolverMap[foreignKeyPath].key, resultSetResolverMap[foreignKeyPath].modelName);
+            // go through all values that need to be mapped
+            resultSetResolverMap[foreignKeyPath].useProperty.forEach(function (property) {
+              // use the values from foreignKeysResults map
+              _.set(
+                resultSet,
+                `${resolvedForeignKeyContainerPath}.${property}`,
+                _.get(
+                  foreignKeyResultsMap,
+                  `${resultSetResolverMap[foreignKeyPath].modelName}.${resultSetResolverMap[foreignKeyPath].value}.${property}`));
+            });
+          } else {
+            // use the values from foreignKeysResults map
+            _.set(
+              resultSet,
+              foreignKeyPath,
+              _.get(
+                foreignKeyResultsMap,
+                `${resultSetResolverMap[foreignKeyPath].modelName}.${resultSetResolverMap[foreignKeyPath].value}.${resultSetResolverMap[foreignKeyPath].useProperty}`));
+          }
+        });
+        // foreign keys resolved
+        resolve(resultSet);
+      });
+    } else {
+      // nothing more to resolve
+      resolve(resultSet);
+    }
+  });
+};
+
+/**
+ * TODO: Duplicated functionality from above without using Loopback models and app
+ * Resolve foreign keys for a model in a result set (this includes reference data)
+ * @param options Container for foreignKeyResolverMap and referenceDataFields
+ * @param resultSet
+ * @param languageDictionary
+ * @param [resolveReferenceData]
+ * @return {Promise<any>}
+ */
+const resolveModelForeignKeysNoModels = function (options, resultSet, languageDictionary, resolveReferenceData) {
+
+  // by default also resolve reference data
+  if (resolveReferenceData === undefined) {
+    resolveReferenceData = true;
+  }
+
+  // promisify the response
+  return new Promise(function (resolve, reject) {
+
+    // build a list of queries (per model) in order to resolve foreign keys
+    const foreignKeyQueryMap = {};
+    // container for model projection for MongoDB query
+    const foreignKeyProjectionMap = {};
+
+    // map model name to collection name
+    const modelToCollectionMap = {};
+
+    // keep a flag for resolving foreign keys
+    let resolveForeignKeys = false;
+
+    // if the model has a resolver map
+    if (options.foreignKeyResolverMap) {
+      // resolve foreign keys
+      resolveForeignKeys = true;
+    }
+
+    // build a map of entries in the result set that should be resolved once we have foreign key data
+    let resultSetResolverMap = {};
+
+    // go through the resultSet
+    resultSet.forEach(function (result, index) {
+      // check if foreign keys should be resolved
+      if (resolveForeignKeys) {
+        // go through the list of keys that needs to be resolved
+        Object.keys(options.foreignKeyResolverMap).forEach(function (foreignKey) {
+          let foreignKeyInfo = options.foreignKeyResolverMap[foreignKey];
+
+          // get foreign key value
+          let foreignKeyValues = getReferencedValue(result, foreignKey);
+          // if it's single value, convert it to array (simplify the code)
+          if (!Array.isArray(foreignKeyValues)) {
+            foreignKeyValues = [foreignKeyValues];
+          }
+          // go through all the foreign key values
+          foreignKeyValues.forEach(function (foreignKeyValue) {
+            // store the map for the result set entry, that will be resolved later
+            resultSetResolverMap[`[${index}].${foreignKeyValue.exactPath}`] = {
+              modelName: foreignKeyInfo.modelName,
+              key: foreignKey,
+              value: foreignKeyValue.value,
+              useProperty: foreignKeyInfo.useProperty
+            };
+            // update the query map with the data that needs to be queried
+            if (!foreignKeyQueryMap[foreignKeyInfo.modelName]) {
+              foreignKeyQueryMap[foreignKeyInfo.modelName] = [];
+
+              foreignKeyProjectionMap[foreignKeyInfo.modelName] = {};
+
+              // map MongoDB collection name to model name
+              modelToCollectionMap[foreignKeyInfo.modelName] = foreignKeyInfo.collectionName;
+            }
+            foreignKeyQueryMap[foreignKeyInfo.modelName].push(foreignKeyValue.value);
+            foreignKeyProjectionMap[foreignKeyInfo.modelName][foreignKeyInfo.useProperty] = 1;
+          });
+        });
+      }
+
+      // also resolve reference data if needed
+      if (resolveReferenceData) {
+        translateDataSetReferenceDataValues(result, options.referenceDataFields, languageDictionary);
+      }
+    });
+
+    if (resolveForeignKeys) {
+      // build a list of queries that will be executed to resolve foreign keys
+      const queryForeignKeys = {};
+      // go through the entries in the query map
+      Object.keys(foreignKeyQueryMap).forEach(function (modelName) {
+        // add query operation (per model name)
+        queryForeignKeys[modelName] = function (callback) {
+          MongoDBHelper.executeAction(
+            modelToCollectionMap[modelName],
+            'find',
+            [
+              {
+                _id: {
+                  $in: foreignKeyQueryMap[modelName]
+                },
+                deleted: {
+                  $ne: true
+                }
+              },
+              {
+                projection: foreignKeyProjectionMap[modelName]
+              }
+            ])
             .then(function (results) {
               callback(null, results);
             })
@@ -1123,17 +1526,17 @@ const formatUndefinedValues = function (model) {
 /**
  * Translate all marked referenceData fields of a dataSet
  * @param dataSet
- * @param Model
+ * @param referenceDataFields
  * @param dictionary
  */
-const translateDataSetReferenceDataValues = function (dataSet, Model, dictionary) {
-  if (Model.referenceDataFields) {
+const translateDataSetReferenceDataValues = function (dataSet, referenceDataFields, dictionary) {
+  if (referenceDataFields) {
     if (!Array.isArray(dataSet)) {
       dataSet = [dataSet];
     }
 
     dataSet.forEach((model) => {
-      Model.referenceDataFields.forEach((field) => {
+      referenceDataFields.forEach((field) => {
         let reference = getReferencedValue(model, field);
         if (Array.isArray(reference)) {
           reference.forEach((indicator) => {
@@ -2248,6 +2651,101 @@ const attachParentLocations = function (targetModel, locationModel, records, cal
   );
 };
 
+/**
+ * Attach parent locations for each of the target model locations
+ * @param locationFields Array of references to records location fields
+ * @param records
+ */
+const attachParentLocationsNoModels = function (locationFields, records) {
+  if (!locationFields || !locationFields.length) {
+    // no location fields for which to get parents
+    return Promise.resolve({records});
+  }
+
+  const parentLocationsSuffix = '_parentLocations';
+
+  // get all the location ids from all the passed records
+  const allLocations = [];
+  const recordsLocationsMap = {};
+  for (let record of records) {
+    recordsLocationsMap[record.id] = [];
+    for (let field of (locationFields || [])) {
+      let values = getReferencedValue(record, field);
+      if (!Array.isArray(values)) {
+        values = [values];
+      }
+      recordsLocationsMap[record.id].push(...values.filter(v => v.value));
+      for (let obj of values) {
+        if (obj.value) {
+          allLocations.push(obj.value);
+        }
+      }
+    }
+  }
+
+  if (!allLocations.length) {
+    return Promise.resolve({records});
+  }
+
+  return new Promise((resolve, reject) => {
+    return getParentLocationsWithDetails(
+      allLocations,
+      [],
+      {
+        fields: ['name', 'parentLocationId', 'geographicalLevelId']
+      },
+      (err, locations) => {
+        if (err) {
+          return reject(err);
+        }
+
+        const locationsMap = {};
+        for (let location of locations) {
+          locationsMap[location.id] = {
+            name: location.name,
+            parentLocationId: location.parentLocationId,
+            geographicalLevelId: location.geographicalLevelId,
+          };
+        }
+
+        // highest chain of parents
+        // used for flat files to know the highest number of columns needed
+        let highestParentsChain = 0;
+
+        // go through each of records location ids
+        // and build a list of each location's parents to be added into the print
+        for (let record of records) {
+          const recordLocationsMap = recordsLocationsMap[record.id];
+          for (let obj of recordLocationsMap) {
+            const parentLocations = [];
+            (function traverse(locationId) {
+              const locationMapDef = locationsMap[locationId];
+              if (locationMapDef) {
+                if (!locationMapDef.parentLocationId) {
+                  return null;
+                }
+                parentLocations.unshift(locationsMap[locationMapDef.parentLocationId].name);
+                traverse(locationMapDef.parentLocationId);
+              }
+            })(obj.value);
+
+            // add the actual location to the end of the parent locations chain
+            if (parentLocations.length) {
+              parentLocations.push(locationsMap[obj.value].name);
+            }
+            _.set(record, `${obj.exactPath}${parentLocationsSuffix}`, parentLocations);
+
+            if (parentLocations.length > highestParentsChain) {
+              highestParentsChain = parentLocations.length;
+            }
+          }
+        }
+        return resolve({records, highestParentsChain});
+      }
+    );
+  });
+};
+
 const removeFilterOptions = function (filter, options) {
   filter = filter || {};
   filter.where = filter.where || {};
@@ -2414,7 +2912,994 @@ const handleActionsInBatches = function (
     });
 };
 
-module.exports = {
+/**
+ * Export filtered model list
+ * @param modelOptions Options for the model that will be exported
+ * @param modelPropertiesExpandOnFlatFiles Headers for custom fields like questionnaireAnswers
+ * @param query
+ * @param exportType
+ * @param encryptPassword {string|null}
+ * @param anonymizeFields
+ * @param options
+ */
+function exportFilteredModelsList(
+  modelOptions,
+  modelPropertiesExpandOnFlatFiles,
+  query,
+  exportType,
+  encryptPassword,
+  anonymizeFields,
+  options
+) {
+  query = query || {};
+
+  let modelPropertiesExpandOnFlatFilesKeys = [];
+
+  // get fields that need to be exported from model options
+  const fieldLabelsMap = modelOptions.sanitizeFieldLabelsMapForExport ? modelOptions.sanitizeFieldLabelsMapForExport() : modelOptions.fieldLabelsMap;
+
+  // some models may have a specific order for headers
+  let originalFieldsList = Object.keys(fieldLabelsMap);
+  let fieldsList = [];
+  if (modelOptions.exportFieldsOrder) {
+    fieldsList = [...modelOptions.exportFieldsOrder];
+    // sometimes the order list contains only a subset of the actual fields list
+    if (modelOptions.exportFieldsOrder.length !== originalFieldsList.length) {
+      fieldsList.push(...originalFieldsList.filter(f => modelOptions.exportFieldsOrder.indexOf(f) === -1));
+    }
+  } else {
+    fieldsList = [...originalFieldsList];
+  }
+
+  // create results projection from fieldsList
+  let resultsProjection = {};
+  fieldsList.forEach(fieldRef => {
+    // get property projection by getting the first part of the fieldRef until a '.' or '[' is encountered
+    let propProjection = fieldRef.split(/[.\[]/g)[0];
+    if (!resultsProjection[propProjection]) {
+      resultsProjection[propProjection] = 1;
+    }
+  });
+
+  // initialize flag to know that model has array props defined separately
+  const arrayPropsDefined = !!modelOptions.arrayProps;
+
+  // cache results
+  let results;
+
+  // cache dictionary
+  let dictionary;
+
+  // get records
+  let getRecordsPromise;
+  // in some cases records might come from the calling function
+  if (options.records) {
+    getRecordsPromise = Promise.resolve(options.records);
+  } else {
+    // check for additional scope query that needs to be added
+    if (modelOptions.scopeQuery) {
+      query = mergeFilters(query, modelOptions.scopeQuery);
+    }
+
+    // check for deleted flag; by default all items will be retrieved including deleted
+    if (!query.deleted) {
+      query = mergeFilters(query, {
+        where: {
+          deleted: {
+            ne: true
+          }
+        }
+      });
+    }
+
+    // get MongoDB query options from Loopback filter
+    let mongoDBOptions = MongoDBHelper.getMongoDBOptionsFromLoopbackFilter(query);
+    getRecordsPromise = MongoDBHelper.executeAction(
+      modelOptions.collectionName,
+      'find',
+      [
+        mongoDBOptions.where,
+        {
+          projection: resultsProjection
+        }
+      ]
+    );
+  }
+
+  return getRecordsPromise
+    .then(res => {
+      // cache results
+      results = res;
+
+      // get dictionary for required headers
+      let tokensQuery = {};
+      // start with model fields
+      let neededTokens = Object.values(fieldLabelsMap);
+      // all tokens from arrayProps
+      if (arrayPropsDefined) {
+        Object.values(modelOptions.arrayProps).forEach(arrayPropMap => {
+          neededTokens.push(...Object.values(arrayPropMap));
+        });
+      }
+
+      // parent location tokens
+      neededTokens.push('LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL', 'LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION');
+
+      // referenceDataFields categories and allowed values
+      if (modelOptions.referenceDataFieldsToCategoryMap) {
+        let refDataValuesRegex = '';
+
+        Object.values(modelOptions.referenceDataFieldsToCategoryMap).forEach(refCategory => {
+          // retrieve category
+          neededTokens.push(refCategory);
+
+          // add to allowed values regex
+          refDataValuesRegex += refDataValuesRegex.length ? `|${refCategory}` : refCategory;
+        });
+
+        if (refDataValuesRegex.length) {
+          // add regex to query
+          tokensQuery['$or'] = [{
+            token: {
+              $regex: `^${refDataValuesRegex}`
+            }
+          }];
+        }
+      }
+
+      // parse questionnaire to get headers and tokens that need to be retrieved
+      let parsedQuestionnaire;
+      // TODO: loops through all records
+      if (!modelPropertiesExpandOnFlatFiles.questionnaireAnswers && options.questionnaire) {
+        parsedQuestionnaire = getQuestionnaireVariablesMapping(
+          options.questionnaire,
+          'questionnaireAnswers',
+          options.useQuestionVariable,
+          // get max number of answers for each questionnaire question
+          getQuestionnaireMaxAnswersMapNew(options.questionnaire, results)
+        );
+
+        modelPropertiesExpandOnFlatFiles.questionnaireAnswers = parsedQuestionnaire.questionsList;
+
+        // add the questionnaire tokens in neededTokens
+        neededTokens.push(...Object.keys(parsedQuestionnaire.tokensToQuestionsMap));
+      }
+
+      // complete the tokens query with the needed tokens
+      // Note: No need to split the $in query to prevent MongoDB query size limit error as there would need to be more than 20000 tokens queried which is not the case
+      if (tokensQuery['$or']) {
+        tokensQuery['$or'].push({
+          token: {
+            $in: [...new Set(neededTokens)]
+          }
+        });
+      } else {
+        tokensQuery.token = {
+          $in: [...new Set(neededTokens)]
+        };
+      }
+
+      // load user language dictionary
+      return baseLanguageModel.helpers
+        .getLanguageDictionary(options.contextUserLanguageId, tokensQuery)
+        .then(res => {
+          // cache dictionary
+          dictionary = res;
+
+          // add translations to questionnaire headers if needed
+          if (
+            parsedQuestionnaire &&
+            parsedQuestionnaire.tokensToQuestionsMap
+          ) {
+            // get token translation placeholder
+            const translationPlaceholder = parsedQuestionnaire.translationPlaceholder;
+
+            // loop through tokens
+            for (let token in parsedQuestionnaire.tokensToQuestionsMap) {
+              // get translation
+              let tokenTranslation = dictionary.getTranslation(token);
+
+              // get token map
+              let tokenMap = parsedQuestionnaire.tokensToQuestionsMap[token];
+
+              // loop through questions for token
+              for (let questionIndex in tokenMap) {
+                let propsToReplace = tokenMap[questionIndex];
+
+                // loop through props to replace
+                for (let prop in propsToReplace) {
+                  // replace props values with the calculated one for the translation
+                  _.set(modelPropertiesExpandOnFlatFiles.questionnaireAnswers, `${questionIndex}.${prop}`, propsToReplace[prop].replace(translationPlaceholder, tokenTranslation));
+                }
+              }
+            }
+          }
+        });
+    })
+    .then(() => {
+      // convert geo-points (if any)
+      results.forEach(function (result) {
+        covertAddressesGeoPointToLoopbackFormat(result);
+      });
+
+      // retrieve keys for expandable properties
+      modelPropertiesExpandOnFlatFilesKeys = modelPropertiesExpandOnFlatFiles ?
+        Object.keys(modelPropertiesExpandOnFlatFiles) : [];
+
+      // by default export CSV
+      if (!exportType) {
+        exportType = 'json';
+      } else {
+        // be more permissive, always convert to lowercase
+        exportType = exportType.toLowerCase();
+      }
+
+      const isJSONXMLExport = ['json', 'xml'].includes(exportType);
+
+      // calculate maximum number of elements for array props
+      // do this only if export type is flat
+      // TODO: loops through all records
+      let arrayPropsLengths = null;
+      if (!isJSONXMLExport && arrayPropsDefined) {
+        arrayPropsLengths = getMaximumLengthForArrays(results, Object.keys(modelOptions.arrayProps));
+      }
+
+      return attachParentLocationsNoModels(
+        modelOptions.locationFields,
+        results)
+        .then(result => {
+          let highestParentsChain = 0;
+          result = result || {};
+          results = result.records || results;
+          highestParentsChain = result.highestParentsChain || 0;
+
+          // define a list of table headers
+          const headers = [];
+
+          // loop through the fields list to construct headers
+          fieldsList.forEach(function (propertyName) {
+            // new functionality, not supported by all models
+            // if model has array props defined and we need to export a flat file construct headers for all elements in array props
+            if (!isJSONXMLExport && arrayPropsDefined) {
+              if (modelOptions.arrayProps[propertyName]) {
+                // determine if we need to include parent token
+                const parentToken = fieldLabelsMap[propertyName];
+
+                // array properties map
+                const map = modelOptions.arrayProps[propertyName];
+
+                // create headers
+                let maxElements = arrayPropsLengths[propertyName];
+                // pdf has a limited width, include only one element
+                if (exportType === 'pdf') {
+                  maxElements = 1;
+                }
+                for (let i = 1; i <= maxElements; i++) {
+                  for (let prop in map) {
+                    headers.push({
+                      id: `${propertyName} ${i} ${prop.replace(/\./g, ' ')}`,
+                      // use correct label translation for user language
+                      header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} [${i}]`
+                    });
+                    // include parent locations
+                    if (
+                      modelOptions.locationFields &&
+                      modelOptions.locationFields.indexOf(`${propertyName}[].${prop}`) !== -1
+                    ) {
+                      for (let j = 1; j <= highestParentsChain; j++) {
+                        headers.push({
+                          id: `${propertyName} ${i} ${prop}_parentLocations ${j}`,
+                          // use correct label translation for user language
+                          header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} [${i}] ${dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL')} [${j}]`
+                        });
+                      }
+                    }
+                  }
+                }
+                return;
+              }
+
+              if (propertyName.endsWith('[]') && modelOptions.arrayProps[propertyName.replace('[]', '')]) {
+                const tmpPropertyName = propertyName.replace('[]', '');
+                // array with primitive values
+                let maxElements = arrayPropsLengths[tmpPropertyName];
+                // pdf has a limited width, include only one element
+                if (exportType === 'pdf') {
+                  maxElements = 1;
+                }
+                for (let i = 1; i <= maxElements; i++) {
+                  headers.push({
+                    id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
+                    header: `${dictionary.getTranslation(fieldLabelsMap[propertyName])} [${i}]`
+                  });
+                }
+                return;
+              }
+            }
+
+            // do not handle array properties from field labels map when we have arrayProps set on the model
+            if (!isJSONXMLExport && propertyName.indexOf('[]') > -1 && arrayPropsDefined) {
+              return;
+            }
+
+            // if a flat file is exported, data needs to be flattened, include 3 elements for each array
+            if (!isJSONXMLExport && propertyName.indexOf('[]') > -1) {
+              // determine if we need to include parent token
+              let parentToken;
+              const parentIndex = propertyName.indexOf('.');
+              if (parentIndex >= -1) {
+                const parentKey = propertyName.substr(0, parentIndex);
+                parentToken = fieldLabelsMap[parentKey];
+              }
+
+              // create headers
+              let maxElements = 3;
+              // pdf has a limited width, include only one element
+              if (exportType === 'pdf') {
+                maxElements = 1;
+              }
+              for (let i = 1; i <= maxElements; i++) {
+                headers.push({
+                  id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
+                  // use correct label translation for user language
+                  header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(fieldLabelsMap[propertyName])}${/\[]/.test(propertyName) ? ' [' + i + ']' : ''}`
+                });
+              }
+            } else {
+              if (
+                !isJSONXMLExport &&
+                modelPropertiesExpandOnFlatFiles &&
+                modelPropertiesExpandOnFlatFiles[propertyName]
+              ) {
+                headers.push(...modelPropertiesExpandOnFlatFiles[propertyName]);
+              } else {
+                let headerTranslation = dictionary.getTranslation(fieldLabelsMap[propertyName]);
+
+                if (!isJSONXMLExport) {
+                  // determine if we need to include parent token
+                  let parentToken;
+                  const parentIndex = propertyName.indexOf('.');
+                  if (parentIndex >= -1) {
+                    const parentKey = propertyName.substr(0, parentIndex);
+                    parentToken = fieldLabelsMap[parentKey];
+                  }
+                  if (parentToken) {
+                    headerTranslation = dictionary.getTranslation(parentToken) + ' ' + headerTranslation;
+                  }
+                }
+
+                headers.push({
+                  id: !isJSONXMLExport ? propertyName.replace(/\./g, ' ') : propertyName,
+                  // use correct label translation for user language
+                  header: headerTranslation
+                });
+
+                // check if we need to include parent locations column
+                if (
+                  modelOptions.locationFields &&
+                  modelOptions.locationFields.indexOf(propertyName) !== -1
+                ) {
+                  if (isJSONXMLExport) {
+                    headers.push({
+                      id: `${propertyName}_parentLocations`,
+                      header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION')}`
+                    });
+                  } else {
+                    for (let i = 1; i <= highestParentsChain; i++) {
+                      headers.push({
+                        id: `${propertyName.replace(/\./g, ' ')}_parentLocations ${i}`,
+                        header: `${headerTranslation} ${dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL')} [${i}]`
+                      });
+                    }
+                  }
+                }
+              }
+            }
+          });
+
+          // resolve model foreign keys (if any)
+          return resolveModelForeignKeysNoModels({
+            foreignKeyResolverMap: modelOptions.foreignKeyResolverMap,
+            referenceDataFields: modelOptions.referenceDataFields
+          }, results, dictionary)
+            .then(function (results) {
+              // expand sub items for non-flat files
+              if (isJSONXMLExport) {
+                modelPropertiesExpandOnFlatFilesKeys.forEach((propertyName) => {
+                  // map properties to labels
+                  const propertyMap = {};
+                  (modelPropertiesExpandOnFlatFiles[propertyName] || []).forEach((headerData) => {
+                    propertyMap[headerData.expandKey ? headerData.expandKey : headerData.id] = headerData.expandHeader ? headerData.expandHeader : headerData.header;
+                  });
+
+                  // convert record data
+                  (results || []).forEach((record) => {
+                    // for now we handle only object expanses ( e.g. questionnaireAnswers ) and not array of objects
+                    if (
+                      record[propertyName] &&
+                      _.isObject(record[propertyName]) &&
+                      !_.isEmpty(record[propertyName])
+                    ) {
+                      // construct the new object
+                      const newValue = {};
+                      Object.keys(record[propertyName]).forEach((childPropName) => {
+                        if (propertyMap[childPropName] !== undefined) {
+                          newValue[propertyMap[childPropName]] = record[propertyName][childPropName];
+                        } else {
+                          newValue[childPropName] = record[propertyName][childPropName];
+                        }
+                      });
+
+                      // replace the old object
+                      record[propertyName] = newValue;
+                    }
+                  });
+                });
+              }
+
+              // finished
+              return results;
+            })
+            .then(function (results) {
+              // if a there are fields to be anonymized
+              if (anonymizeFields.length) {
+                // anonymize them
+                anonymizeDatasetFields.anonymize(results, anonymizeFields);
+              }
+              return results;
+            })
+            .then(function (results) {
+              // create file with the results
+              return exportListFileSyncNew(headers, results, exportType);
+            })
+            .then(function (file) {
+              if (file.name) {
+                // read file
+                file.data = fs.readFileSync(file.name);
+              }
+
+              if (encryptPassword) {
+                return aesCrypto.encrypt(encryptPassword, file.data)
+                  .then(function (data) {
+                    file.data = data;
+                    return file;
+                  });
+              } else {
+                return file;
+              }
+            });
+        });
+    });
+}
+
+/**
+ * TODO: Duplicated from getQuestionnaireMaxAnswersMap; Should replace the usages considering the below note
+ * Note: Removed translationOpts logic as it was only used for importable files and affected performance of this function
+ * Loop through the records and get max answers number for multi date answer questions
+ * @param questionnaire
+ * @param records
+ * @returns {{}}
+ */
+function getQuestionnaireMaxAnswersMapNew(questionnaire, records) {
+  /**
+   * Parse questions and fill map for multi date questions
+   * @param questions
+   * @param map
+   * @returns {{}}
+   */
+  function parseQuestions(questions, map) {
+    if (!Array.isArray(questions)) {
+      questions = [questions];
+    }
+
+    questions.forEach((question => {
+      // initialize max number of answers for question to 0
+      map[question.variable] = 0;
+      (question.answers || []).forEach(answer => (answer.additionalQuestions && parseQuestions(answer.additionalQuestions, map)));
+    }));
+  }
+
+  // check if we have data
+  if (
+    !questionnaire ||
+    !questionnaire.length
+  ) {
+    // nothing to add in map
+    return {};
+  }
+
+  // initialize a map of all the multi date answer questions and their nested questions
+  let multiDatequestionsList = {};
+
+  // loop through the questionnaire and fill the multiDatequestionsList
+  (questionnaire || []).forEach(q => {
+    if (!q.multiAnswer) {
+      return;
+    }
+
+    // fill the multi date questions map
+    parseQuestions(q, multiDatequestionsList);
+  });
+
+  // get multi date questions identifiers
+  let multiDateQuestions = Object.keys(multiDatequestionsList);
+
+  // answers property on records
+  const propToIterate = 'questionnaireAnswers';
+
+  // get maximum number of multi date answers
+  records.forEach(record => {
+    if (!record[propToIterate]) {
+      // it doesn't have any questions, skip it
+      return;
+    }
+
+    // loop through the multi date questions as they are usually in less number than the record questionnaire answers
+    multiDateQuestions.forEach(q => {
+      if (!record[propToIterate][q]) {
+        return;
+      }
+
+      // check if record has a bigger number of answers than current max
+      if (multiDatequestionsList[q] < record[propToIterate][q].length) {
+        // new highest number of answers
+        multiDatequestionsList[q] = record[propToIterate][q].length;
+      }
+    });
+  });
+
+  return multiDatequestionsList;
+}
+
+/**
+ * Retrieve list of questionnaire questions and their variables
+ * @param questionnaire List of questions
+ * @param idHeaderPrefix Prefix for ID
+ * @param useVariable Flag specifying whether the question variable needs to be used of we need to get tokens translation
+ * @param multiDateLengthsMap Map of questions with multi date answers to max number of answers in the dataset
+ * @param questionsList List of questions with info; Will be updated in the function
+ * @param tokensToQuestionsMap Map of tokens to questions index in questions list; This map is filled in the function if useVariable is false
+ * @param isNestedMultiDate Flag specifying if the questionnaire received is nested in another question
+ * @param multiDateIndex Index for multi date answer
+ * @returns {*[]|{translationPlaceholder: string, questionsList: *[], tokensToQuestionsMap: {}}}
+ */
+function getQuestionnaireVariablesMapping(questionnaire, idHeaderPrefix, useVariable, multiDateLengthsMap, questionsList, tokensToQuestionsMap, isNestedMultiDate, multiDateIndex) {
+  if (_.isEmpty(questionnaire)) {
+    return [];
+  }
+
+  // initialize list of questions with info if not received
+  if (!questionsList) {
+    questionsList = [];
+  }
+
+  // initialize map of tokens to questions indexes in questionsList if not received
+  if (!tokensToQuestionsMap) {
+    tokensToQuestionsMap = {};
+  }
+
+  // initialize translation placeholder to be used in questions props values for the ones that need translation
+  const translationPlaceholder = '%%translation%%';
+
+  _.each(questionnaire, (question) => {
+    // markup questions
+    if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP') {
+      let index = questionsList.push({
+        expandKey: question.variable,
+        expandHeader: question.variable,
+        id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable,
+        header: question.variable
+      }) - 1;
+
+      if (!useVariable) {
+        // we should use translations; cache in map of tokens to be translated
+        if (!tokensToQuestionsMap[question.text]) {
+          tokensToQuestionsMap[question.text] = {
+            [index]: {
+              // properties to be updated for index
+              // use translation placeholder to know what value should be added after tokens are retrieve from DB
+              'expandHeader': translationPlaceholder,
+              'header': translationPlaceholder
+            }
+          };
+        } else {
+          tokensToQuestionsMap[question.text][index] = {
+            'expandHeader': translationPlaceholder,
+            'header': translationPlaceholder
+          };
+        }
+      }
+
+      return;
+    }
+
+    // no need to to any checks when the variable is missing
+    if (_.isEmpty(question.variable)) {
+      return;
+    }
+
+    // check for multi date questions
+    const isMultiDate = question.multiAnswer || isNestedMultiDate;
+    multiDateLengthsMap[question.variable] = multiDateLengthsMap[question.variable] || 0;
+
+    // multiple answers questions
+    if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
+      // for multiple answers questions we need answers
+      // nothing to do if none are defined
+      if (_.isEmpty(question.answers)) {
+        return;
+      }
+
+      if (isMultiDate) {
+        // multi date answers
+        const addQuestionAndAnswers = (multiDateIndex) => {
+          _.each(question.answers, (answer, answerIndex) => {
+            let index = questionsList.push({
+              id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} date`,
+              header: `${question.variable} [MD ${multiDateIndex}]`
+            }) - 1;
+
+            if (!useVariable) {
+              // we should use translations; cache in map of tokens to be translated
+              if (!tokensToQuestionsMap[question.text]) {
+                tokensToQuestionsMap[question.text] = {
+                  [index]: {
+                    // properties to be updated for index
+                    // use translation placeholder to know what value should be added after tokens are retrieve from DB
+                    'header': `${translationPlaceholder} [MD ${multiDateIndex}]`
+                  }
+                };
+              } else {
+                tokensToQuestionsMap[question.text][index] = {
+                  'header': `${translationPlaceholder} [MD ${multiDateIndex}]`
+                };
+              }
+            }
+
+            index = questionsList.push({
+              expandKey: question.variable,
+              expandHeader: question.variable,
+              id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} value ${(answerIndex + 1)}`,
+              header: `${question.variable} ${(answerIndex + 1)} [MV ${multiDateIndex}]`
+            }) - 1;
+
+            if (!useVariable) {
+              // we should use translations; cache in map of tokens to be translated
+              if (!tokensToQuestionsMap[question.text]) {
+                tokensToQuestionsMap[question.text] = {
+                  [index]: {
+                    // properties to be updated for index
+                    // use translation placeholder to know what value should be added after tokens are retrieve from DB
+                    'expandHeader': translationPlaceholder,
+                    'header': `${translationPlaceholder} ${(answerIndex + 1)} [MV ${multiDateIndex}]`
+                  }
+                };
+              } else {
+                tokensToQuestionsMap[question.text][index] = {
+                  'expandHeader': translationPlaceholder,
+                  'header': `${translationPlaceholder} ${(answerIndex + 1)} [MV ${multiDateIndex}]`
+                };
+              }
+            }
+
+            if (!_.isEmpty(answer.additionalQuestions)) {
+              // questionsList and tokensToQuestionsMap will be updated in the function
+              getQuestionnaireVariablesMapping(
+                answer.additionalQuestions,
+                idHeaderPrefix,
+                useVariable,
+                multiDateLengthsMap,
+                questionsList,
+                tokensToQuestionsMap,
+                isMultiDate,
+                multiDateIndex
+              );
+            }
+          });
+        };
+
+        if (multiDateIndex) {
+          addQuestionAndAnswers(multiDateIndex);
+        } else {
+          for (let i = 0; i < multiDateLengthsMap[question.variable]; i++) {
+            addQuestionAndAnswers(i + 1);
+          }
+        }
+      } else {
+        // simple multiple answers questions; no multi date answers
+        _.each(question.answers, (answer, answerIndex) => {
+          // loop through the answers
+          let index = questionsList.push({
+            expandKey: question.variable,
+            expandHeader: question.variable,
+            id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} 1 value ${(answerIndex + 1)}`,
+            header: `${question.variable} ${(answerIndex + 1)}`
+          }) - 1;
+
+          if (!useVariable) {
+            // we should use translations; cache in map of tokens to be translated
+            if (!tokensToQuestionsMap[question.text]) {
+              tokensToQuestionsMap[question.text] = {
+                [index]: {
+                  // properties to be updated for index
+                  // use translation placeholder to know what value should be added after tokens are retrieve from DB
+                  'expandHeader': translationPlaceholder,
+                  'header': `${translationPlaceholder} ${(answerIndex + 1)}`
+                }
+              };
+            } else {
+              tokensToQuestionsMap[question.text][index] = {
+                'expandHeader': translationPlaceholder,
+                'header': `${translationPlaceholder} ${(answerIndex + 1)}`
+              };
+            }
+          }
+
+          if (!_.isEmpty(answer.additionalQuestions)) {
+            // questionsList and tokensToQuestionsMap will be updated in the function
+            getQuestionnaireVariablesMapping(
+              answer.additionalQuestions,
+              idHeaderPrefix,
+              useVariable,
+              multiDateLengthsMap,
+              questionsList,
+              tokensToQuestionsMap,
+              isMultiDate,
+              multiDateIndex
+            );
+          }
+        });
+      }
+    } else {
+      // no multiple answers question
+      if (isMultiDate) {
+        // multi date answers question
+        const addQuestionAndAnswers = (multiDateIndex) => {
+          let index = questionsList.push(
+            {
+              id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} date`,
+              header: `${question.variable} [MD ${multiDateIndex}]`
+            }
+          ) - 1;
+
+          if (!useVariable) {
+            // we should use translations; cache in map of tokens to be translated
+            if (!tokensToQuestionsMap[question.text]) {
+              tokensToQuestionsMap[question.text] = {
+                [index]: {
+                  // properties to be updated for index
+                  // use translation placeholder to know what value should be added after tokens are retrieve from DB
+                  'header': `${translationPlaceholder} [MD ${multiDateIndex}]`
+                }
+              };
+            } else {
+              tokensToQuestionsMap[question.text][index] = {
+                'header': `${translationPlaceholder} [MD ${multiDateIndex}]`
+              };
+            }
+          }
+
+          index = questionsList.push(
+            {
+              expandKey: question.variable,
+              expandHeader: question.variable,
+              id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} value`,
+              header: `${question.variable} [MV ${multiDateIndex}]`
+            }
+          ) - 1;
+
+          if (!useVariable) {
+            // we should use translations; cache in map of tokens to be translated
+            if (!tokensToQuestionsMap[question.text]) {
+              tokensToQuestionsMap[question.text] = {
+                [index]: {
+                  // properties to be updated for index
+                  // use translation placeholder to know what value should be added after tokens are retrieve from DB
+                  'expandHeader': translationPlaceholder,
+                  'header': `${translationPlaceholder} [MV ${multiDateIndex}]`
+                }
+              };
+            } else {
+              tokensToQuestionsMap[question.text][index] = {
+                'expandHeader': translationPlaceholder,
+                'header': `${translationPlaceholder} [MV ${multiDateIndex}]`
+              };
+            }
+          }
+
+          // add children questions
+          if (!_.isEmpty(question.answers)) {
+            _.each(question.answers, (answer) => {
+              if (!_.isEmpty(answer.additionalQuestions)) {
+                // questionsList and tokensToQuestionsMap will be updated in the function
+                getQuestionnaireVariablesMapping(
+                  answer.additionalQuestions,
+                  idHeaderPrefix,
+                  useVariable,
+                  multiDateLengthsMap,
+                  questionsList,
+                  tokensToQuestionsMap,
+                  isMultiDate,
+                  multiDateIndex
+                );
+              }
+            });
+          }
+        };
+
+        if (multiDateIndex) {
+          addQuestionAndAnswers(multiDateIndex);
+        } else {
+          for (let i = 0; i < multiDateLengthsMap[question.variable]; i++) {
+            addQuestionAndAnswers(i + 1);
+          }
+        }
+      } else {
+        // simple question with simple answer
+        let index = questionsList.push({
+          expandKey: question.variable,
+          expandHeader: question.variable,
+          id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable + ' 1 value',
+          header: question.variable
+        }) - 1;
+
+        if (!useVariable) {
+          // we should use translations; cache in map of tokens to be translated
+          if (!tokensToQuestionsMap[question.text]) {
+            tokensToQuestionsMap[question.text] = {
+              [index]: {
+                // properties to be updated for index
+                // use translation placeholder to know what value should be added after tokens are retrieve from DB
+                'expandHeader': translationPlaceholder,
+                'header': translationPlaceholder
+              }
+            };
+          } else {
+            tokensToQuestionsMap[question.text][index] = {
+              'expandHeader': translationPlaceholder,
+              'header': translationPlaceholder
+            };
+          }
+        }
+
+        if (!_.isEmpty(question.answers)) {
+          _.each(question.answers, (answer) => {
+            if (!_.isEmpty(answer.additionalQuestions)) {
+              // questionsList and tokensToQuestionsMap will be updated in the function
+              getQuestionnaireVariablesMapping(
+                answer.additionalQuestions,
+                idHeaderPrefix,
+                useVariable,
+                multiDateLengthsMap,
+                questionsList,
+                tokensToQuestionsMap,
+                isMultiDate,
+                multiDateIndex
+              );
+            }
+          });
+        }
+      }
+    }
+  });
+
+  return {
+    questionsList: questionsList,
+    tokensToQuestionsMap: tokensToQuestionsMap,
+    translationPlaceholder: translationPlaceholder
+  };
+}
+
+/**
+ * TODO: Duplicated from Locations model in order to not use Loopback models and app
+ * Get parent locations for a list of locations. Result is an array of location instances (not Loopback models)
+ * Result also includes the models with IDs in locationsIds
+ * @param locationsIds Array of location Ids for which to get the parent locations recursively
+ * @param allLocations Array on which to add the result; Must be an array of location models
+ * @param loopbackFilter Loopback filter; used for projection
+ * @param callback
+ */
+function getParentLocationsWithDetails(locationsIds, allLocations, loopbackFilter, callback) {
+  // initialize array of IDs for locations that need to be retrieved
+  let locationsToRetrieve = [];
+
+  // retrieve the start locations if the locationIds are not found in the allLocations array
+  // also retrieve the parent locations for the locationsIds that are found in allLocations array
+  let startLocationsIdsToRetrieve = [];
+  let parentLocationsIds = [];
+
+  // create map for allLocations to avoid multiple searches in the array
+  let allLocationsMap = {};
+  allLocations.forEach(location => {
+    allLocationsMap[location.id] = location;
+  });
+
+  locationsIds.forEach(function (locationId) {
+    if (!allLocationsMap[locationId]) {
+      // start location was not found in allLocations array; retrieve it
+      startLocationsIdsToRetrieve.push(locationId);
+    }
+    // start location is already retrieved; retrieve parent if not already in the list
+    else if (
+      allLocationsMap[locationId].parentLocationId &&
+      !allLocationsMap[allLocationsMap[locationId].parentLocationId]
+    ) {
+      parentLocationsIds.push(allLocationsMap[locationId].parentLocationId);
+    }
+  });
+
+  // we need to retrieve both the start locations as well as their parents
+  locationsToRetrieve = locationsToRetrieve.concat(startLocationsIdsToRetrieve, parentLocationsIds);
+
+  // retrieve locations only if there are IDs missing
+  let locationsToRetrievePromise = Promise.resolve([]);
+  if (locationsToRetrieve.length) {
+    // find not already retrieved locations
+    locationsToRetrievePromise = MongoDBHelper.executeAction(
+      'location',
+      'find',
+      [
+        // query
+        {
+          _id: {
+            $in: locationsToRetrieve
+          },
+          // add filter for not deleted entries
+          deleted: {
+            $ne: true
+          }
+        },
+        // query options
+        {
+          sort: {
+            name: 1
+          },
+          projection: loopbackFilter.fields ? MongoDBHelper.getMongoDBProjectionFromLoopbackFields(loopbackFilter.fields) : {}
+        }
+      ]
+    );
+  }
+
+  // find not already retrieved locations
+  locationsToRetrievePromise
+    .then(function (locations) {
+      // if locations found
+      if (locations.length) {
+        // initialize array of location IDs for which the parent still needs to be found
+        // will be composed of all retrieved locations IDs except the ones for which the parent is already retrieved
+        let locationsIdsToRetrieveParent = [];
+
+        locations.forEach(function (location) {
+          // get parentLocationId
+          let parentLocationId = location.parentLocationId;
+
+          // check if the parent location already exists in allLocations; if so do not retrieve it again.
+          if (
+            parentLocationId &&
+            !allLocationsMap[parentLocationId]
+          ) {
+            locationsIdsToRetrieveParent.push(location.id);
+          }
+        });
+        // consolidate them in the locations list
+        allLocations = allLocations.concat(locations);
+
+        if (locationsIdsToRetrieveParent.length) {
+          // go higher into the hierarchy
+          getParentLocationsWithDetails(locationsIdsToRetrieveParent, allLocations, loopbackFilter, callback);
+        } else {
+          // no need to continue searching
+          callback(null, allLocations);
+        }
+      } else {
+        // no more locations found, stop here
+        callback(null, allLocations);
+      }
+    })
+    .catch(callback);
+}
+
+Object.assign(module.exports, {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
   remapProperties: remapProperties,
@@ -2468,5 +3953,6 @@ module.exports = {
   attachCustomDeleteFilterOption: attachCustomDeleteFilterOption,
   getMaximumLengthForArrays: getMaximumLengthForArrays,
   getCaptchaConfig: getCaptchaConfig,
-  handleActionsInBatches: handleActionsInBatches
-};
+  handleActionsInBatches: handleActionsInBatches,
+  exportFilteredModelsList: exportFilteredModelsList
+});
