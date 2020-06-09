@@ -4576,7 +4576,7 @@
         "translation": "Вы уверены, что хотите удалить резервную копию \"{{location}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_BACKUP_RESTORE": {
-        "translation": "Подтверждение восстановления<br /> < br />Внимание! При восстановлении системы до выбранного состояния все данные будут возвращены к моменту резервного копирования (все добавленные новые данные будут удалены). Вы уверены, что хотите продолжить?"
+        "translation": "Подтверждение восстановления<br/> <br/>Внимание! При восстановлении системы до выбранного состояния все данные будут возвращены к моменту резервного копирования (все добавленные новые данные будут удалены). Вы уверены, что хотите продолжить?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_CASE": {
         "translation": "Вы уверены, что хотите удалить случай \"{{name}}\"?"
@@ -4693,7 +4693,7 @@
         "translation": "Местоположение \"{{name}} \" не может быть удалено, так как оно используется. Хотите увидеть записи, в которых оно используется?"
       },
       "LNG_DIALOG_CONFIRM_MAKE_OUTBREAK_ACTIVE": {
-        "translation": "Вы уверены, что хотите сделать эту вспышку активной? < br /> Статус текущей активной вспышки будет изменен на неактивный."
+        "translation": "Вы уверены, что хотите сделать эту вспышку активной? <br/> Статус текущей активной вспышки будет изменен на неактивный."
       },
       "LNG_DIALOG_CONFIRM_MARK_CONTACT_AS_MISSING_FROM_FOLLOW_UP": {
         "translation": "Вы уверены, что хотите отметить контакт \"{{name}}\" как отсутствующий на момент последующего наблюдения?"
@@ -4820,6 +4820,9 @@
       },
       "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_FOLLOW_UPS": {
         "translation": "Вы уверены, что хотите восстановить выбранные последующие наблюдения?"
+      },
+      "LNG_DIALOG_CONFIRM_CLONE_OUTBREAK_TEMPLATE": {
+        "translation": "Name the clone of the outbreak template"
       }
     },
     "uiLoginPage": {
@@ -6004,6 +6007,9 @@
       },
       "LNG_PAGE_LIST_CASES_DIALOG_ENTITY_RELATIONSHIPS_TITLE": {
         "translation": "Связи"
+      },
+      "LNG_PAGE_LIST_CASES_ACTION_SHOW_GROUP_BY_CLASSIFICATION_PILLS": {
+        "translation": "Show cases grouped by classification count"
       }
     },
     "uiCreateCasePage": {
@@ -6587,6 +6593,9 @@
       },
       "LNG_PAGE_LIST_CONTACTS_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
         "translation": "See records marked as not duplicates"
+      },
+      "LNG_PAGE_LIST_CONTACTS_ACTION_SHOW_GROUP_BY_RISK_PILLS": {
+        "translation": "Show contacts grouped by risk count"
       }
     },
     "uiCreateContactPage": {
@@ -6628,6 +6637,12 @@
       },
       "LNG_PAGE_CREATE_CONTACT_TAB_PERSONAL_SECTION_FLAG_CONTACT_TITLE": {
         "translation": "Пометить контакт повышенным уровнем риска как требующий дополнительного внимания"
+      },
+      "LNG_PAGE_CREATE_CONTACT_TAB_QUESTIONNAIRE_TITLE": {
+        "translation": "Questionnaire"
+      },
+      "LNG_PAGE_CREATE_CONTACT_CANT_SET_FOLLOW_UP_TEAM_TITLE": {
+        "translation": "You need Team - list permission to change contact follow-up team"
       }
     },
     "uiModifyContactPage": {
@@ -6675,6 +6690,12 @@
       },
       "LNG_PAGE_MODIFY_CONTACT_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
         "translation": "Not duplicates"
+      },
+      "LNG_PAGE_MODIFY_CONTACT_TAB_QUESTIONNAIRE_TITLE": {
+        "translation": "Questionnaire"
+      },
+      "LNG_PAGE_MODIFY_CONTACT_CANT_SET_FOLLOW_UP_TEAM_TITLE": {
+        "translation": "You need Team - list permission to change contact follow-up team"
       }
     },
     "uiRelationshipFields": {
@@ -6931,6 +6952,9 @@
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_FILL_LOCATION_NO_LOCATION": {
         "translation": "Недоступно"
+      },
+      "LNG_FOLLOW_UP_FIELD_LABEL_PHONE_NUMBER": {
+        "translation": "Phone Number"
       }
     },
     "uiTermsOfUsePage": {
@@ -7037,9 +7061,6 @@
       },
       "LNG_PAGE_LIST_FOLLOW_UPS_MISSED_TITLE": {
         "translation": "Пропущенные последующие наблюдения"
-      },
-      "LNG_PAGE_LIST_FOLLOW_UPS_MODIFY_FUTURE_FOLLOW_UPS": {
-        "translation": "Вы не можете изменять будущие последующие наблюдения"
       },
       "LNG_PAGE_LIST_FOLLOW_UPS_PAST_TITLE": {
         "translation": "Прошлые последующие наблюдения"
@@ -7708,6 +7729,9 @@
       },
       "LNG_PAGE_MODIFY_OUTBREAK_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
         "translation": "Данные записи"
+      },
+      "LNG_PAGE_MODIFY_OUTBREAK_ACTION_CONTACT_INVESTIGATION_QUESTIONNAIRE": {
+        "translation": "Contact form"
       }
     },
     "uiFormRangeFields": {
@@ -10623,6 +10647,12 @@
         "modules": [
           "unauthenticated"
         ]
+      },
+      "LNG_FORM_VALIDATION_ERROR_OUTBREAK_TEMPLATE_NAME_NOT_UNIQUE": {
+        "translation": "This name is already in use",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiDocumentFields": {
@@ -11211,9 +11241,6 @@
       "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_TAB_DETAILS_TITLE": {
         "translation": "Подробности"
       },
-      "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_TAB_QUESTIONNAIRE_TITLE": {
-        "translation": "Анкета"
-      },
       "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_TITLE": {
         "translation": "Изменить последующие наблюдения"
       },
@@ -11223,9 +11250,6 @@
       "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_CHANGES_FOR_SELECTED_FOLLOW_UPS": {
         "translation": "В выбранные последующие наблюдения будут внесены следующие изменения:"
       },
-      "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_CHANGES_FOR_SELECTED_FOLLOW_UPS_QUESTIONNAIRE": {
-        "translation": "Анкета:"
-      },
       "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_ACTION_MODIFY_MULTIPLE_FOLLOW_UPS_SUCCESS_MESSAGE": {
         "translation": "Последующие наблюдения обновлены"
       },
@@ -11234,6 +11258,9 @@
       },
       "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_MODIFY_DATA_INFO_LABEL": {
         "translation": "*Система заменяет только исправленные данные. Если данные введены не были, то система не произведет никаких изменений в выбранных последующих наблюдениях."
+      },
+      "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_MODIFY_DATA_IN_THE_FUTURE_LABEL": {
+        "translation": "*You can't modify some fields because at least one of the selected follow-ups is in the future"
       }
     },
     "uiEventsListPage": {
@@ -11707,6 +11734,12 @@
       },
       "LNG_PAGE_LIST_OUTBREAK_TEMPLATES_ACTION_CASE_LAB_RESULTS_QUESTIONNAIRE": {
         "translation": "Lab Results form"
+      },
+      "LNG_PAGE_LIST_OUTBREAK_TEMPLATES_ACTIONS_CLONE_OUTBREAK_TEMPLATE": {
+        "translation": "Clone outbreak template"
+      },
+      "LNG_PAGE_LIST_OUTBREAK_TEMPLATES_CLONE_NAME": {
+        "translation": "{{name}} Clone"
       }
     },
     "uiCreateOutbreakTemplatePage": {
@@ -11780,6 +11813,9 @@
       },
       "LNG_PAGE_VIEW_OUTBREAK_TEMPLATE_TITLE": {
         "translation": "View {{name}}"
+      },
+      "LNG_PAGE_MODIFY_OUTBREAK_TEMPLATE_ACTION_CONTACT_INVESTIGATION_QUESTIONNAIRE": {
+        "translation": "Contact form"
       }
     },
     "uiModifyOutbreakQuestionnairePage": {
@@ -12059,6 +12095,12 @@
       },
       "LNG_PAGE_DASHBOARD_CONTACT_FOLLOW_UP_REPORT_Y2_AXIS_LABEL": {
         "translation": "% случаев из числа контактов"
+      },
+      "LNG_PAGE_DASHBOARD_PIE_CHARTS_TITLE": {
+        "translation": "Summaries charts"
+      },
+      "LNG_PAGE_DASHBOARD_EPI_ELEMENT_NOT_VISIBLE_ERROR_MSG": {
+        "translation": "Please make sure that EPI chart is visible"
       }
     },
     "uiChainsOfTransmission": {
@@ -12390,6 +12432,9 @@
       },
       "LNG_SEARCH_LOCATIONS_AUTO_COMPLETE_TYPE_TO_SEARCH_TEXT": {
         "translation": "Поиск по типу"
+      },
+      "LNG_SEARCH_LOCATIONS_AUTO_COMPLETE_MINIMUM_SEARCH_LENGTH": {
+        "translation": "Enter at least {{minLength}} characters"
       }
     },
     "uiGoogleMapsMovement": {
@@ -12578,6 +12623,9 @@
     "uiDialogsFieldsPlaceholders": {
       "LNG_DIALOG_FIELD_PLACEHOLDER_CLONED_OUTBREAK_NAME": {
         "translation": "Название клонированной вспышки"
+      },
+      "LNG_DIALOG_FIELD_PLACEHOLDER_CLONED_OUTBREAK_TEMPLATE_NAME": {
+        "translation": "Cloned outbreak template name"
       }
     },
     "uiOutbreakDateInconsistenciesListPage": {
@@ -13397,6 +13445,12 @@
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_GROUP_DIALOG_PATHS_SECTION_TITLE": {
         "translation": "Связи"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_TOGGLE_FULL_SCREEN_LABEL": {
+        "translation": "Full screen"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LABEL_OPTION_VISUAL_ID_AND_LOCATION": {
+        "translation": "ID + Location"
       }
     },
     "uiInconsistencyLabels": {
@@ -13619,6 +13673,12 @@
       },
       "LNG_PAGE_LIST_LAB_RESULTS_IMPORT_CONTACT_LAB_RESULTS_BUTTON": {
         "translation": "Импортировать данные лабораторных исследований для контакта"
+      },
+      "LNG_PAGE_LIST_LAB_RESULTS_EXPORT_BUTTON": {
+        "translation": "Export lab result data"
+      },
+      "LNG_PAGE_LIST_LAB_RESULTS_EXPORT_TITLE": {
+        "translation": "Export lab result data"
       }
     },
     "uiEntityRelationshipsListShareAssignCreatePages": {
@@ -13721,6 +13781,9 @@
       },
       "LNG_PAGE_CONTACT_MERGE_DUPLICATE_RECORDS_TITLE": {
         "translation": "Контакты: объединить повторные записи"
+      },
+      "LNG_PAGE_CONTACT_MERGE_DUPLICATE_RECORDS_TAB_QUESTIONNAIRE_TITLE": {
+        "translation": "Questionnaire"
       }
     },
     "uiEventMergeDuplicateRecordsPage": {
@@ -14090,6 +14153,9 @@
       },
       "LNG_PAGE_WORLD_MAP_GROUP_DIALOG_TITLE": {
         "translation": "Сгруппированные элементы"
+      },
+      "LNG_PAGE_WORLD_MAP_FULL_SCREEN_LABEL": {
+        "translation": "Full screen"
       }
     },
     "uiWorldMapMovement": {
@@ -15493,7 +15559,7 @@
         "translation": "{{result}} (p)"
       },
       "LNG_PAGE_TRANSMISSION_CHAIN_BARS_LEGEND_DETAILS": {
-        "translation": "{{rectCD}} Информация о случае: hs – Госпитализирован / is – Изолирован <br/>{{rectLAB}} Информация о результатах лабораторных исследований: L? – результат неизвестен / L- – результат отрицательный / L+ – результат положительный / (p) – ожидание результата <br />{{rectOUT}} Исход: oa – Жив / od – Умер / or – Выздоровел <br />{{rectB}} Погребение: bn – Небезопасное погребение/ bs – Безопасное погребение"
+        "translation": "{{rectCD}} Информация о случае: hs – Госпитализирован / is – Изолирован <br/>{{rectLAB}} Информация о результатах лабораторных исследований: L? – результат неизвестен / L- – результат отрицательный / L+ – результат положительный / (p) – ожидание результата <br/>{{rectOUT}} Исход: oa – Жив / od – Умер / or – Выздоровел <br/>{{rectB}} Погребение: bn – Небезопасное погребение/ bs – Безопасное погребение"
       },
       "LNG_PAGE_TRANSMISSION_CHAIN_BARS_ISOLATED_CASE_LABEL": {
         "translation": "is"
@@ -15899,6 +15965,12 @@
       },
       "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_TITLE": {
         "translation": "Результаты лабораторных исследований"
+      },
+      "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_EXPORT_BUTTON": {
+        "translation": "Export lab result data"
+      },
+      "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_EXPORT_TITLE": {
+        "translation": "Export lab result data"
       }
     },
     "uiLabResultsFields": {
@@ -16030,6 +16102,9 @@
       },
       "LNG_LAB_RESULT_FIELD_LABEL_CASE_CLASSIFICATION_INFO": {
         "translation": "Текущая классификация случая:"
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_ID": {
+        "translation": "ID"
       }
     },
     "uiCreateLabResultPage": {
