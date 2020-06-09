@@ -4820,6 +4820,9 @@
       },
       "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_FOLLOW_UPS": {
         "translation": "Are you sure you want to restore selected follow-ups?"
+      },
+      "LNG_DIALOG_CONFIRM_CLONE_OUTBREAK_TEMPLATE": {
+        "translation": "Name the clone of the outbreak template"
       }
     },
     "uiLoginPage": {
@@ -6634,6 +6637,12 @@
       },
       "LNG_PAGE_CREATE_CONTACT_TAB_PERSONAL_SECTION_FLAG_CONTACT_TITLE": {
         "translation": "Flag this contact with a risk level for additional attention"
+      },
+      "LNG_PAGE_CREATE_CONTACT_TAB_QUESTIONNAIRE_TITLE": {
+        "translation": "Questionnaire"
+      },
+      "LNG_PAGE_CREATE_CONTACT_CANT_SET_FOLLOW_UP_TEAM_TITLE": {
+        "translation": "You need Team - list permission to change contact follow-up team"
       }
     },
     "uiModifyContactPage": {
@@ -6681,6 +6690,12 @@
       },
       "LNG_PAGE_MODIFY_CONTACT_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
         "translation": "Not duplicates"
+      },
+      "LNG_PAGE_MODIFY_CONTACT_TAB_QUESTIONNAIRE_TITLE": {
+        "translation": "Questionnaire"
+      },
+      "LNG_PAGE_MODIFY_CONTACT_CANT_SET_FOLLOW_UP_TEAM_TITLE": {
+        "translation": "You need Team - list permission to change contact follow-up team"
       }
     },
     "uiRelationshipFields": {
@@ -7046,9 +7061,6 @@
       },
       "LNG_PAGE_LIST_FOLLOW_UPS_MISSED_TITLE": {
         "translation": "Suivis manqués"
-      },
-      "LNG_PAGE_LIST_FOLLOW_UPS_MODIFY_FUTURE_FOLLOW_UPS": {
-        "translation": "Vous n'êtes pas autorisé à modifier les suivis futurs"
       },
       "LNG_PAGE_LIST_FOLLOW_UPS_PAST_TITLE": {
         "translation": "Suivis passés"
@@ -7717,6 +7729,9 @@
       },
       "LNG_PAGE_MODIFY_OUTBREAK_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
         "translation": "Record Details"
+      },
+      "LNG_PAGE_MODIFY_OUTBREAK_ACTION_CONTACT_INVESTIGATION_QUESTIONNAIRE": {
+        "translation": "Contact form"
       }
     },
     "uiFormRangeFields": {
@@ -10632,6 +10647,12 @@
         "modules": [
           "unauthenticated"
         ]
+      },
+      "LNG_FORM_VALIDATION_ERROR_OUTBREAK_TEMPLATE_NAME_NOT_UNIQUE": {
+        "translation": "This name is already in use",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiDocumentFields": {
@@ -11220,9 +11241,6 @@
       "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_TAB_DETAILS_TITLE": {
         "translation": "Détails"
       },
-      "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_TAB_QUESTIONNAIRE_TITLE": {
-        "translation": "Questionnaire"
-      },
       "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_TITLE": {
         "translation": "Modifier les suivis"
       },
@@ -11232,9 +11250,6 @@
       "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_CHANGES_FOR_SELECTED_FOLLOW_UPS": {
         "translation": "Les modifications suivantes seront apportées aux suivis sélectionnés:"
       },
-      "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_CHANGES_FOR_SELECTED_FOLLOW_UPS_QUESTIONNAIRE": {
-        "translation": "Questionnaire:"
-      },
       "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_ACTION_MODIFY_MULTIPLE_FOLLOW_UPS_SUCCESS_MESSAGE": {
         "translation": "Suivi mis à jour"
       },
@@ -11243,6 +11258,9 @@
       },
       "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_MODIFY_DATA_INFO_LABEL": {
         "translation": "* Le sytème remplacera seulement les données qui ont été changées. Si vous n'avait rentré aucune données, le système ne mettera à jour aucun suivi de contact."
+      },
+      "LNG_PAGE_MODIFY_FOLLOW_UPS_LIST_MODIFY_DATA_IN_THE_FUTURE_LABEL": {
+        "translation": "*You can't modify some fields because at least one of the selected follow-ups is in the future"
       }
     },
     "uiEventsListPage": {
@@ -11716,6 +11734,12 @@
       },
       "LNG_PAGE_LIST_OUTBREAK_TEMPLATES_ACTION_CASE_LAB_RESULTS_QUESTIONNAIRE": {
         "translation": "Formulaire de résultats de laboratoire"
+      },
+      "LNG_PAGE_LIST_OUTBREAK_TEMPLATES_ACTIONS_CLONE_OUTBREAK_TEMPLATE": {
+        "translation": "Clone outbreak template"
+      },
+      "LNG_PAGE_LIST_OUTBREAK_TEMPLATES_CLONE_NAME": {
+        "translation": "{{name}} Clone"
       }
     },
     "uiCreateOutbreakTemplatePage": {
@@ -11789,6 +11813,9 @@
       },
       "LNG_PAGE_VIEW_OUTBREAK_TEMPLATE_TITLE": {
         "translation": "Ouvrir {{name}}"
+      },
+      "LNG_PAGE_MODIFY_OUTBREAK_TEMPLATE_ACTION_CONTACT_INVESTIGATION_QUESTIONNAIRE": {
+        "translation": "Contact form"
       }
     },
     "uiModifyOutbreakQuestionnairePage": {
@@ -12405,6 +12432,9 @@
       },
       "LNG_SEARCH_LOCATIONS_AUTO_COMPLETE_TYPE_TO_SEARCH_TEXT": {
         "translation": "Tapez pour rechercher"
+      },
+      "LNG_SEARCH_LOCATIONS_AUTO_COMPLETE_MINIMUM_SEARCH_LENGTH": {
+        "translation": "Enter at least {{minLength}} characters"
       }
     },
     "uiGoogleMapsMovement": {
@@ -12593,6 +12623,9 @@
     "uiDialogsFieldsPlaceholders": {
       "LNG_DIALOG_FIELD_PLACEHOLDER_CLONED_OUTBREAK_NAME": {
         "translation": "Nom de l'épidémie clonée"
+      },
+      "LNG_DIALOG_FIELD_PLACEHOLDER_CLONED_OUTBREAK_TEMPLATE_NAME": {
+        "translation": "Cloned outbreak template name"
       }
     },
     "uiOutbreakDateInconsistenciesListPage": {
@@ -13412,6 +13445,12 @@
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_GROUP_DIALOG_PATHS_SECTION_TITLE": {
         "translation": "Relationships"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_TOGGLE_FULL_SCREEN_LABEL": {
+        "translation": "Full screen"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LABEL_OPTION_VISUAL_ID_AND_LOCATION": {
+        "translation": "ID + Location"
       }
     },
     "uiInconsistencyLabels": {
@@ -13742,6 +13781,9 @@
       },
       "LNG_PAGE_CONTACT_MERGE_DUPLICATE_RECORDS_TITLE": {
         "translation": "Contact - fusionner les enregistrements en double"
+      },
+      "LNG_PAGE_CONTACT_MERGE_DUPLICATE_RECORDS_TAB_QUESTIONNAIRE_TITLE": {
+        "translation": "Questionnaire"
       }
     },
     "uiEventMergeDuplicateRecordsPage": {
@@ -14111,6 +14153,9 @@
       },
       "LNG_PAGE_WORLD_MAP_GROUP_DIALOG_TITLE": {
         "translation": "Grouped items"
+      },
+      "LNG_PAGE_WORLD_MAP_FULL_SCREEN_LABEL": {
+        "translation": "Full screen"
       }
     },
     "uiWorldMapMovement": {
@@ -15920,6 +15965,12 @@
       },
       "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_TITLE": {
         "translation": "Lab results"
+      },
+      "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_EXPORT_BUTTON": {
+        "translation": "Export lab result data"
+      },
+      "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_EXPORT_TITLE": {
+        "translation": "Export lab result data"
       }
     },
     "uiLabResultsFields": {
@@ -16051,6 +16102,9 @@
       },
       "LNG_LAB_RESULT_FIELD_LABEL_CASE_CLASSIFICATION_INFO": {
         "translation": "Current classification of the case:"
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_ID": {
+        "translation": "ID"
       }
     },
     "uiCreateLabResultPage": {
