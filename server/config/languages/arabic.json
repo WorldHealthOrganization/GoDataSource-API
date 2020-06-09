@@ -4414,7 +4414,10 @@
         "translation": "عند فحصها، سوف تستخدم عناوين عمود الاستبيان متغيرات الأسئلة بدلاً من نص الأسئلة"
       },
       "LNG_COMMON_LABEL_SEARCH": {
-        "translation": "Search"
+        "translation": "Search",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiGeneralActions": {

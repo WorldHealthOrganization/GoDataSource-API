@@ -4414,7 +4414,10 @@
         "translation": "When checked, questionnaire column headers will use question variables instead of question text"
       },
       "LNG_COMMON_LABEL_SEARCH": {
-        "translation": "Search"
+        "translation": "Search",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiGeneralActions": {

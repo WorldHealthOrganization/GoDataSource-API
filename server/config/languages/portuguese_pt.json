@@ -4414,7 +4414,10 @@
         "translation": "Quando marcado, os cabeçalhos das colunas do questionário usarão variáveis de pergunta em vez do texto das perguntas"
       },
       "LNG_COMMON_LABEL_SEARCH": {
-        "translation": "Search"
+        "translation": "Search",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiGeneralActions": {
