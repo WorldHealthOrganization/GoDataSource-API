@@ -765,6 +765,12 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CASE_QUESTIONNAIRE_DESCRIPTION": {
         "translation": "Данное разрешение дает возможность изменить анкету случая во время вспышки"
       },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_QUESTIONNAIRE": {
+        "translation": "Outbreak - modify contact questionnaire"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_QUESTIONNAIRE_DESCRIPTION": {
+        "translation": "This permission allows modifying outbreak contact questionnaire"
+      },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_FOLLOW_UP_QUESTIONNAIRE": {
         "translation": "Вспышка – изменить анкету последующего наблюдения контакта "
       },
@@ -825,6 +831,12 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CASE_QUESTIONNAIRE_DESCRIPTION": {
         "translation": "This permission allows modifying outbreak template case questionnaire"
       },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_QUESTIONNAIRE": {
+        "translation": "Outbreak Template - modify contact questionnaire"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_QUESTIONNAIRE_DESCRIPTION": {
+        "translation": "This permission allows modifying outbreak template contact questionnaire"
+      },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_FOLLOW_UP_QUESTIONNAIRE": {
         "translation": "Outbreak Template - modify contact follow-up questionnaire"
       },
@@ -842,12 +854,6 @@
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_OUTBREAK_TEMPLATE_GENERATE_OUTBREAK_DESCRIPTION": {
         "translation": "This permission allows creating an outbreak from an outbreak template"
-      },
-      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_QUESTIONNAIRE": {
-        "translation": "Outbreak Template - modify contact questionnaire"
-      },
-      "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_QUESTIONNAIRE_DESCRIPTION": {
-        "translation": "This permission allows modifying outbreak template contact questionnaire"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_TEMPLATE_CLONE": {
         "translation": "Outbreak Template - create clone"
