@@ -573,7 +573,7 @@ module.exports = function (User) {
         app,
         app.models.user,
         {},
-        filter.where,
+        filter,
         exportType,
         'Users List',
         (typeof encryptPassword !== 'string' || !encryptPassword.length) ? null : encryptPassword,
