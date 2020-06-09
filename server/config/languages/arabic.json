@@ -6004,6 +6004,9 @@
       },
       "LNG_PAGE_LIST_CASES_DIALOG_ENTITY_RELATIONSHIPS_TITLE": {
         "translation": "العلاقات"
+      },
+      "LNG_PAGE_LIST_CASES_ACTION_SHOW_GROUP_BY_CLASSIFICATION_PILLS": {
+        "translation": "Show cases grouped by classification count"
       }
     },
     "uiCreateCasePage": {
@@ -6587,6 +6590,9 @@
       },
       "LNG_PAGE_LIST_CONTACTS_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
         "translation": "See records marked as not duplicates"
+      },
+      "LNG_PAGE_LIST_CONTACTS_ACTION_SHOW_GROUP_BY_RISK_PILLS": {
+        "translation": "Show contacts grouped by risk count"
       }
     },
     "uiCreateContactPage": {
@@ -6931,6 +6937,9 @@
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_FILL_LOCATION_NO_LOCATION": {
         "translation": "غير متاح"
+      },
+      "LNG_FOLLOW_UP_FIELD_LABEL_PHONE_NUMBER": {
+        "translation": "Phone Number"
       }
     },
     "uiTermsOfUsePage": {
@@ -12059,6 +12068,12 @@
       },
       "LNG_PAGE_DASHBOARD_CONTACT_FOLLOW_UP_REPORT_Y2_AXIS_LABEL": {
         "translation": "% للحالات من جهة الاتصال"
+      },
+      "LNG_PAGE_DASHBOARD_PIE_CHARTS_TITLE": {
+        "translation": "Summaries charts"
+      },
+      "LNG_PAGE_DASHBOARD_EPI_ELEMENT_NOT_VISIBLE_ERROR_MSG": {
+        "translation": "Please make sure that EPI chart is visible"
       }
     },
     "uiChainsOfTransmission": {
@@ -13619,6 +13634,12 @@
       },
       "LNG_PAGE_LIST_LAB_RESULTS_IMPORT_CONTACT_LAB_RESULTS_BUTTON": {
         "translation": "استيراد البيانات المختبرية  للاتصال"
+      },
+      "LNG_PAGE_LIST_LAB_RESULTS_EXPORT_BUTTON": {
+        "translation": "Export lab result data"
+      },
+      "LNG_PAGE_LIST_LAB_RESULTS_EXPORT_TITLE": {
+        "translation": "Export lab result data"
       }
     },
     "uiEntityRelationshipsListShareAssignCreatePages": {
