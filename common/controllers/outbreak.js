@@ -12628,22 +12628,23 @@ module.exports = function (Outbreak) {
     data = data || {};
 
     // make sure person is either a contact or was a contact
-    app.models.person.find({
-      where: {
-        outbreakId: outbreakId,
-        id: personId,
-        or: [
-          {
-            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-          },
-          {
-            wasContact: true
-          }
-        ]
-      }
-    })
-      .then(contact => {
-        if (!contact.length) {
+    app.models.person
+      .findOne({
+        where: {
+          id: personId,
+          outbreakId: outbreakId,
+          or: [
+            {
+              type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+            },
+            {
+              wasContact: true
+            }
+          ]
+        }
+      })
+      .then((contact) => {
+        if (!contact) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
             model: app.models.contact.modelName,
             id: personId
@@ -12651,22 +12652,23 @@ module.exports = function (Outbreak) {
         }
 
         // find the desired follow-up and modify it
-        app.models.followUp.find({
-          where: {
-            outbreakId: outbreakId,
-            id: followUpId,
-            personId: personId
-          }
-        })
-          .then(followUp => {
-            if (!followUp.length) {
+        return app.models.followUp
+          .findOne({
+            where: {
+              id: followUpId,
+              outbreakId: outbreakId,
+              personId: personId
+            }
+          })
+          .then((followUp) => {
+            if (!followUp) {
               throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
                 model: app.models.followUp.modelName,
                 id: followUpId
               });
             }
 
-            return followUp[0]
+            return followUp
               .updateAttributes(data, options)
               .then(updatedFollowUp => callback(null, updatedFollowUp));
           });
@@ -12685,22 +12687,23 @@ module.exports = function (Outbreak) {
     const outbreakId = this.id;
 
     // make sure person is either a contact or was a contact
-    app.models.person.find({
-      where: {
-        outbreakId: outbreakId,
-        id: personId,
-        or: [
-          {
-            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-          },
-          {
-            wasContact: true
-          }
-        ]
-      }
-    })
-      .then(contact => {
-        if (!contact.length) {
+    app.models.person
+      .findOne({
+        where: {
+          id: personId,
+          outbreakId: outbreakId,
+          or: [
+            {
+              type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+            },
+            {
+              wasContact: true
+            }
+          ]
+        }
+      })
+      .then((contact) => {
+        if (!contact) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
             model: app.models.contact.modelName,
             id: personId
@@ -12708,22 +12711,23 @@ module.exports = function (Outbreak) {
         }
 
         // find the desired follow-up and modify it
-        app.models.followUp.find({
-          where: {
-            outbreakId: outbreakId,
-            id: followUpId,
-            personId: personId
-          }
-        })
-          .then(followUp => {
-            if (!followUp.length) {
+        return app.models.followUp
+          .findOne({
+            where: {
+              id: followUpId,
+              outbreakId: outbreakId,
+              personId: personId
+            }
+          })
+          .then((followUp) => {
+            if (!followUp) {
               throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
                 model: app.models.followUp.modelName,
                 id: followUpId
               });
             }
 
-            return followUp[0]
+            return followUp
               .destroy(options)
               .then(() => callback());
           });
