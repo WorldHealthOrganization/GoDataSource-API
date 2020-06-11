@@ -510,18 +510,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "follow_up_modify",
-      "permission": "ALLOW",
-      "property": "__updateById__contacts__followUps"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "follow_up_delete",
-      "permission": "ALLOW",
-      "property": "__destroyById__contacts__followUps"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "follow_up_restore",
       "permission": "ALLOW",
       "property": "restoreContactFollowUp"
@@ -1767,6 +1755,18 @@
       "principalId": "contact_create_bulk_contact_of_contact",
       "permission": "ALLOW",
       "property": "createContactMultipleContactsOfContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_modify",
+      "permission": "ALLOW",
+      "property": "modifyContactFollowUp"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_delete",
+      "permission": "ALLOW",
+      "property": "deleteContactFollowUp"
     }
   ],
   "methods": {
@@ -8255,6 +8255,74 @@
       "http": {
         "verb": "post",
         "path": "/contacts/:nk/contacts-of-contacts"
+      }
+    },
+    "prototype.modifyContactFollowUp": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contact"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for follow-ups."
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "followUp",
+          "description": "Model instance data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "followUp",
+          "type": "followUp",
+          "description": "Updated Followup",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Update a contact's follow-up.",
+      "http": {
+        "verb": "put",
+        "path": "/contacts/:nk/follow-ups/:fk"
+      }
+    },
+    "prototype.deleteContactFollowUp": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contact"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for follow-ups."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "description": "Delete a contact's follow-up.",
+      "http": {
+        "verb": "del",
+        "path": "/contacts/:nk/follow-ups/:fk"
       }
     },
     "prototype.bulkModifyFollowUps": {
