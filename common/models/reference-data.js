@@ -166,6 +166,11 @@ module.exports = function (ReferenceData) {
       'id': 'LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME',
       'name': 'LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME',
       'description': 'LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME_DESCRIPTION'
+    },
+    {
+      'id': 'LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM',
+      'name': 'LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM',
+      'description': 'LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_DESCRIPTION'
     }
   ];
 
@@ -173,6 +178,7 @@ module.exports = function (ReferenceData) {
   ReferenceData.fieldLabelsMap = Object.assign({}, ReferenceData.fieldLabelsMap, {
     'categoryId': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CATEGORY_ID',
     'value': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_VALUE',
+    'code': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CODE',
     'description': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_DESCRIPTION',
     'iconId': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ICON',
     'order': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ORDER',
@@ -474,7 +480,7 @@ module.exports = function (ReferenceData) {
             }
 
             // allow customizing some safe properties
-            const customizableProperties = ['iconId', 'colorCode', 'order'];
+            const customizableProperties = ['iconId', 'colorCode', 'order', 'code'];
 
             // if model is editable but in use, also let it change the 'active', 'value', 'description' fields
             if (error.code === 'MODEL_IN_USE') {

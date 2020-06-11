@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const backupHelper = require('../../components/backup');
+const fs = require('fs');
 
 module.exports = function (Backup) {
   Backup.hasController = true;
@@ -22,12 +23,15 @@ module.exports = function (Backup) {
       'languageToken',
       'referenceData',
       'helpCategory',
+      'helpItem',
       'auditLog',
       'template',
       'icon',
       'device',
       'deviceHistory',
-      'importMapping'
+      'importMapping',
+      'filterMapping',
+      'migrationLog'
     ],
     'Data': [
       'outbreak',
@@ -51,9 +55,10 @@ module.exports = function (Backup) {
    * @param location
    * @param modules
    * @param userId
+   * @param description
    * @param done Optional callback; if sent will be called immediately after the backup creation is triggered
    */
-  Backup.createBackup = function (location, modules, userId, done) {
+  Backup.createBackup = function (location, modules, userId, description, done) {
     // create new backup record with pending status
     let createBackup = Backup
       .create({
@@ -61,7 +66,8 @@ module.exports = function (Backup) {
         modules: modules,
         location: null,
         userId: userId,
-        status: Backup.status.PENDING
+        status: Backup.status.PENDING,
+        description
       })
       .then((record) => {
         // send the response back to the user, do not wait for the backup to finish
@@ -108,5 +114,25 @@ module.exports = function (Backup) {
     } else {
       return createBackup;
     }
+  };
+
+  /**
+   * Attach custom properties
+   */
+  Backup.attachCustomProperties = function (record) {
+    // determine file size
+    let sizeBytes;
+    try {
+      if (fs.existsSync(record.location)) {
+        const stats = fs.statSync(record.location);
+        sizeBytes = stats.size;
+      }
+    } catch (e) {
+      app.logger.error(`Can't determine backup size ( ${record.id} )`);
+      sizeBytes = undefined;
+    }
+
+    // set backup size
+    record.sizeBytes = sizeBytes;
   };
 };

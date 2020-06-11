@@ -288,8 +288,7 @@
     "description": "Manages users and user roles.",
     "permissionIds": [
       "user_role_all",
-      "user_all",
-      "user_modify_own_account"
+      "user_all"
     ]
   },
   "Laboratory data manager": {

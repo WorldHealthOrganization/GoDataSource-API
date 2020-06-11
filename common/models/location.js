@@ -820,4 +820,69 @@ module.exports = function (Location) {
       });
     });
   };
+
+  /**
+   * Flatten a hierarchical locations list into an array with all locations references
+   * eg: [{
+   *  location: {
+   *    id: parent
+   *  },
+   *  children: [{
+   *    location: {
+   *      id: child
+   *    },
+   *    children: [{
+   *      location: {
+   *        id: grandson1
+   *      }
+   *    }, {
+   *      location: {
+   *        id: grandson2
+   *      }
+   *    }]
+   *  }]
+   * }] => [
+   *  parent
+   *  parent.child
+   *  parent.child.grandson1
+   *  parent.child.grandson2
+   * ]
+   * @param locationIds
+   * @param outbreakOpts Outbreak location options: locationIds, reportingGeographicalLevelId
+   */
+  Location.getReferencesFromHierarchicalList = function (hierarchicalList) {
+    let result = [];
+
+    /**
+     * Loop through a hierarchical list and add references in result
+     * @param locationRef
+     * @param children
+     */
+    const getReferencesForLocationChildren = function (locationRef, children) {
+      if (!children || !children.length) {
+        // no children to get references for
+        return;
+      }
+
+      // loop through the children and create references
+      children.forEach(child => {
+        let childId = _.get(child, 'location.id');
+        if (!childId) {
+          // shouldn't get here; making this check to avoid potential issues
+          return;
+        }
+
+        // add child ref
+        let childRef = `${locationRef ? (locationRef + '.') : ''}${childId}`;
+        result.push(childRef);
+
+        // get references for its children recursively
+        getReferencesForLocationChildren(childRef, child.children);
+      });
+    };
+
+    getReferencesForLocationChildren(null, hierarchicalList);
+
+    return result;
+  };
 };

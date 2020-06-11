@@ -48,7 +48,8 @@
         "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS",
         "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS",
         "LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME",
-        "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME"
+        "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME",
+        "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM"
       ]
     },
     "value": {
@@ -64,7 +65,9 @@
       "type": "string"
     },
     "code": {
-      "type": "string"
+      "type": "string",
+      "unique": true,
+      "ignoreCase": true
     },
     "colorCode": {
       "type": "string"
@@ -81,6 +84,17 @@
     },
     "order": {
       "type": "number"
+    }
+  },
+  "indexes": {
+    "value_index": {
+      "value": 1
+    },
+    "categoryId_index": {
+      "categoryId": 1
+    },
+    "code_index": {
+      "code": 1
     }
   },
   "validations": [],

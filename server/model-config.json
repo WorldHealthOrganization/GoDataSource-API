@@ -172,6 +172,10 @@
     "dataSource": null,
     "public": false
   },
+  "personRelationshipRepresentation": {
+    "dataSource": null,
+    "public": false
+  },
   "language": {
     "dataSource": "mongoDb",
     "public": true
@@ -370,6 +374,10 @@
   },
   "migrationLog": {
     "dataSource": "mongoDb",
+    "public": false
+  },
+  "personDuplicateParams": {
+    "dataSource": null,
     "public": false
   }
 }

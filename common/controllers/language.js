@@ -123,49 +123,109 @@ module.exports = function (Language) {
   Language.prototype.exportLanguageTokensFile = function (callback) {
     // make context available
     const self = this;
-    // get language tokens for this language
-    app.models.languageToken
-      .find({
-        where: {
-          languageId: this.id
-        },
-        order: 'token ASC'
-      })
-      .then(function (languageTokens) {
-        // keep a list of tokens
-        const tokens = [];
-        // define default translation file headers
-        const translationFileHeaders = {
-          token: 'Language Token',
-          translation: 'Translation'
-        };
 
-        // try and find translation file headers in the correct language
-        languageTokens.forEach(function (languageToken) {
+    // initialize filter
+    const languageTokenFilter = {
+      languageId: this.id
+    };
+
+    // define default translation file headers
+    const translationFileHeaders = {
+      token: 'Language Token',
+      translation: 'Translation'
+    };
+
+    // translate file headers
+    return app.models.languageToken
+      .rawFind(Object.assign({
+        token: {
+          $in: [
+            'LNG_TRANSLATION_FILE_LANGUAGE_TOKEN_HEADER',
+            'LNG_TRANSLATION_FILE_TRANSLATION_HEADER'
+          ]
+        }
+      }, languageTokenFilter), {
+        projection: {token: 1, translation: 1}
+      })
+      .then((headerTokens) => {
+        // determine header columns translations
+        (headerTokens || []).forEach((languageToken) => {
+          // token header
           if (languageToken.token === 'LNG_TRANSLATION_FILE_LANGUAGE_TOKEN_HEADER') {
             translationFileHeaders.token = languageToken.translation;
           }
+
+          // translation header
           if (languageToken.token === 'LNG_TRANSLATION_FILE_TRANSLATION_HEADER') {
             translationFileHeaders.translation = languageToken.translation;
           }
         });
-        // build the list of "rows" for the workbook
-        languageTokens.forEach(function (languageToken) {
-          tokens.push({
-            [translationFileHeaders.token]: languageToken.token,
-            [translationFileHeaders.translation]: languageToken.translation
+
+        // initialize parameters for handleActionsInBatches call
+        const getActionsCount = () => {
+          return Promise.resolve()
+            .then(() => {
+              // count language tokens that we need to update
+              return app.models.languageToken
+                .count(languageTokenFilter);
+            });
+        };
+
+        // get language tokens for batch
+        const getBatchData = (batchNo, batchSize) => {
+          return app.models.languageToken
+            .rawFind(
+              languageTokenFilter, {
+                order: {tokenSortKey: 1},
+                projection: {token: 1, translation: 1},
+                skip: (batchNo - 1) * batchSize,
+                limit: batchSize,
+              }
+            );
+        };
+
+        // batch item actions
+        // #TODO - must change this logic  to work with worker and write to stream and NOT to memory how it is right now
+        // keep a list of tokens that we will export
+        const tokens = [];
+        const batchItemsAction = (languageTokens) => {
+          // try and find translation file headers in the correct language
+          languageTokens.forEach(function (languageToken) {
+            // add to list of tokens to export
+            tokens.push({
+              [translationFileHeaders.token]: languageToken.token,
+              [translationFileHeaders.translation]: languageToken.translation
+            });
           });
-        });
-        // create XLSX file
-        app.utils.spreadSheetFile.createXlsxFile(null, tokens, function (error, file) {
-          // handle errors
-          if (error) {
-            return callback(error);
-          }
-          // offer file for download
-          app.utils.remote.helpers
-            .offerFileToDownload(file, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', `${self.name}.xlsx`, callback);
-        });
+
+          // finished
+          return Promise.resolve();
+        };
+
+        // execute jobs in batches
+        return app.utils.helpers
+          .handleActionsInBatches(
+            getActionsCount,
+            getBatchData,
+            batchItemsAction,
+            null,
+            10000,
+            10,
+            console
+          )
+          .then(() => {
+            // create XLSX file
+            app.utils.spreadSheetFile.createXlsxFile(null, tokens, function (error, file) {
+              // handle errors
+              if (error) {
+                return callback(error);
+              }
+
+              // offer file for download
+              app.utils.remote.helpers
+                .offerFileToDownload(file, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', `${self.name}.xlsx`, callback);
+            });
+          });
       })
       .catch(callback);
   };
@@ -227,19 +287,11 @@ module.exports = function (Language) {
       const condition = {
         $or: [
           {
-            createdAt: {
-              $eq: null
-            }
-          }, {
-            createdAt: {
+            updatedAt: {
               $gte: updatedSince
             }
           }, {
-            updatedAt: {
-              $eq: null
-            }
-          }, {
-            updatedAt: {
+            createdAt: {
               $gte: updatedSince
             }
           }
@@ -250,38 +302,26 @@ module.exports = function (Language) {
       } else {
         whereFilter = {
           $and: [
-            whereFilter,
-            condition
+            condition,
+            whereFilter
           ]
         };
       }
     }
 
     // construct where condition
+    // retrieve only records from a specific language
+    // & retrieve only non-deleted records
     let where = {
-      $and: [
-        // retrieve only records from a specific language
-        { languageId: this.id },
-
-        // retrieve only non-deleted records
-        {
-          $or: [{
-            deleted: false
-          }, {
-            deleted: {
-              $eq: null
-            }
-          }]
-        }
-      ]
+      languageId: this.id,
+      deleted: {
+        $ne: true
+      }
     };
     if (!_.isEmpty(whereFilter)) {
-      where = {
-        $and: [
-          whereFilter,
-          where
-        ]
-      };
+      where.$and = [
+        whereFilter
+      ];
     }
 
     // construct what data should be retrieved

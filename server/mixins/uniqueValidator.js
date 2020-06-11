@@ -6,8 +6,19 @@
  */
 module.exports = function (Model) {
   Model.forEachProperty(function (propertyName) {
+    // add unique validator
     if (Model.definition.properties[propertyName].unique) {
-      Model.validatesUniquenessOf(propertyName);
+      // case sensitive or not ?
+      const props = {};
+      if (Model.definition.properties[propertyName].ignoreCase !== undefined) {
+        props.ignoreCase = Model.definition.properties[propertyName].ignoreCase;
+      }
+
+      // validate
+      Model.validatesUniquenessOf(
+        propertyName,
+        props
+      );
     }
   });
 };

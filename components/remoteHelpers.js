@@ -108,6 +108,7 @@ function exportFilteredModelsList(
 
   Promise.resolve()
     .then(() => {
+      // in some cases records might come from the calling function
       if (options.records) {
         return options.records;
       } else {
@@ -120,6 +121,8 @@ function exportFilteredModelsList(
         helpers.covertAddressesGeoPointToLoopbackFormat(result);
       });
 
+      // get max number of answers for each questionnaire question
+      // TODO: loops through all records
       if (!modelPropertiesExpandOnFlatFiles.questionnaireAnswers && options.questionnaire) {
         modelPropertiesExpandOnFlatFiles.questionnaireAnswers = helpers.retrieveQuestionnaireVariables(
           options.questionnaire,
@@ -148,12 +151,14 @@ function exportFilteredModelsList(
 
       // calculate maximum number of elements for array props
       // do this only if export type is flat
+      // TODO: loops through all records
       let arrayPropsLengths = null;
       if (!isJSONXMLExport && ignoreArrayFieldLabels) {
         arrayPropsLengths = helpers.getMaximumLengthForArrays(results, Object.keys(Model.arrayProps));
       }
 
       // load user language dictionary
+      // TODO: dictionary might already be received in options
       app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
         // handle errors
         if (error) {

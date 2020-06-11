@@ -74,16 +74,16 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
       // construct variable name
       const getVarName = (variable) => {
         return variable.name;
-          /*
-          // multi answers need to be basic data arrays which aren't handled by flat file types ( non flat file should work properly without this functionality )
-          + (
-            !['.json', '.xml'].includes(importType) &&
-            app.models[modelName].extendedForm.isBasicArray &&
-            app.models[modelName].extendedForm.isBasicArray(variable) ?
-              '_____A' :
-              ''
-          );
-           */
+        /*
+        // multi answers need to be basic data arrays which aren't handled by flat file types ( non flat file should work properly without this functionality )
+        + (
+          !['.json', '.xml'].includes(importType) &&
+          app.models[modelName].extendedForm.isBasicArray &&
+          app.models[modelName].extendedForm.isBasicArray(variable) ?
+            '_____A' :
+            ''
+        );
+         */
       };
 
       // extract variables from template
@@ -168,7 +168,7 @@ function getMappingSuggestionsForModelExtendedForm(outbreakId, importType, model
 
             return r;
           }) : dataset,
-          { containerPropTranslation, questionToTranslationMap }
+          {containerPropTranslation, questionToTranslationMap}
         );
 
         for (let variable in maxAnswersMap) {
@@ -319,74 +319,58 @@ function getReferenceDataAvailableValuesForModel(outbreakId, modelName) {
 }
 
 /**
- * Get the list of available locations for for model properties that use locations
- * @param outbreakId
- * @param modelName
- * @returns {PromiseLike<any | never> | Promise<any | never> | *}
+ * Get available values for foreign keys
+ * @param foreignKeysMap Map in format {foreignKey: {modelName: ..., labelProperty: ...}}
+ * @returns {Promise<unknown>}
  */
-function getLocationAvailableValuesForModel(outbreakId, modelName) {
-  // get outbreak details
-  return app.models.outbreak
-    .findById(outbreakId)
-    .then(function (outbreak) {
-      if (!outbreak) {
-        throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.outbreak.modelName, id: outbreakId});
+const getForeignKeysValues = function (foreignKeysMap) {
+  let foreignKeys = Object.keys(foreignKeysMap);
+
+  // initialize list of functions to be executed async
+  let jobs = {};
+
+  // construct jobs
+  foreignKeys.forEach(fKey => {
+    let foreignKeyInfo = foreignKeysMap[fKey];
+    if (!foreignKeyInfo.modelName || !foreignKeyInfo.labelProperty) {
+      // cannot get foreign key values as it is not defined correctly
+      // should not get here; dev error
+      return;
+    }
+
+    jobs[fKey] = function (callback) {
+      // Note: This query will retrieve all data from the related model
+      // depending on data quantity might cause javascript heap out of memory error
+      // should be used only for models with limited number of instances
+      return app.models[foreignKeyInfo.modelName]
+        .rawFind({}, {
+          projection: {[foreignKeyInfo.labelProperty]: 1}
+        })
+        .then(items => {
+          return callback(null, items.map(item => {
+            return {
+              id: item.id,
+              label: item[foreignKeyInfo.labelProperty],
+              value: item.id
+            };
+          }));
+        })
+        .catch(callback);
+    };
+  });
+
+  return new Promise((resolve, reject) => {
+    // execute jobs
+    async.series(jobs, function (error, result) {
+      // handle errors
+      if (error) {
+        return reject(error);
       }
-      // get outbreak locations
-      let outbreakLocations;
-      // update filter only if outbreak has locations ids defined (otherwise leave it as undefined)
-      if (Array.isArray(outbreak.locationIds) && outbreak.locationIds.length) {
-        // get outbreak location Ids
-        outbreakLocations = outbreak.locationIds;
-      }
-      // promisify the result
-      return new Promise(function (resolve, reject) {
-        // get the list of locations
-        app.models.location.getSubLocationsWithDetails(outbreakLocations, [], {}, function (error, allLocations) {
-          // handle eventual errors
-          if (error) {
-            return reject(error);
-          }
-          // build a formatted list of locations
-          let locationList = [];
-          // go through all location entries
-          allLocations.forEach(function (location) {
-            // format each location entry
-            locationList.push({
-              id: location.id,
-              label: location.name,
-              value: location.id
-            });
-          });
-          // make sure locations are sorted
-          locationList = locationList.sort(function (a, b) {
-            return a.label.localeCompare(b.label);
-          });
-          const locationValues = {};
-          // keep a list of available values for each location related property
-          app.models[modelName].locationFields.forEach(function (modelProperty) {
-            // split the property in sub components
-            const propertyComponents = modelProperty.split('.');
-            // if there are sub components
-            if (propertyComponents.length > 1) {
-              // define parent component
-              if (!locationValues[propertyComponents[0]]) {
-                locationValues[propertyComponents[0]] = {};
-              }
-              // store the sub component under parent component
-              if (!locationValues[propertyComponents[0]][propertyComponents[1]]) {
-                locationValues[propertyComponents[0]][propertyComponents[1]] = locationList;
-              }
-            } else {
-              // no sub components, store property directly
-              locationValues[modelProperty] = locationList;
-            }
-          });
-          resolve(locationValues);
-        });
-      });
+
+      return resolve(result);
     });
-}
+  });
+};
 
 module.exports = function (ImportableFile) {
 
@@ -599,18 +583,19 @@ module.exports = function (ImportableFile) {
                             .catch(callback);
                         });
                       }
-                      // if the model uses locations for its properties
-                      if (app.models[modelName].locationFields) {
+
+                      // if the model has fk for its properties
+                      if (app.models[modelName].foreignKeyFields) {
                         // get distinct property values (if not taken already)
                         if (!Object.keys(result.distinctFileColumnValues).length) {
                           result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
                         }
                         steps.push(function (callback) {
-                          // get location values
-                          getLocationAvailableValuesForModel(outbreakId, modelName)
-                            .then(function (locationValues) {
+                          // get foreign keys values
+                          getForeignKeysValues(app.models[modelName].foreignKeyFields)
+                            .then(foreignKeysValues => {
                               // update result
-                              results[modelName] = Object.assign({}, results[modelName], {modelPropertyValues: _.merge(results[modelName].modelPropertyValues, locationValues)});
+                              results[modelName] = Object.assign({}, results[modelName], {modelPropertyValues: _.merge(results[modelName].modelPropertyValues, foreignKeysValues)});
                               callback(null, results[modelName]);
                             })
                             .catch(callback);

@@ -848,6 +848,15 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'outbreak_modify_contact_questionnaire',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_QUESTIONNAIRE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_QUESTIONNAIRE_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'outbreak_modify'
+          ]
+        },
+        {
           id: 'outbreak_modify_contact_follow_up_questionnaire',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_FOLLOW_UP_QUESTIONNAIRE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_FOLLOW_UP_QUESTIONNAIRE_DESCRIPTION',
@@ -925,6 +934,15 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'outbreak_template_modify_contact_questionnaire',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_QUESTIONNAIRE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_QUESTIONNAIRE_DESCRIPTION',
+          requires: [
+            'outbreak_template_view',
+            'outbreak_template_modify'
+          ]
+        },
+        {
           id: 'outbreak_template_modify_contact_follow_up_questionnaire',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_FOLLOW_UP_QUESTIONNAIRE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_TEMPLATE_FOLLOW_UP_QUESTIONNAIRE_DESCRIPTION',
@@ -949,15 +967,6 @@ module.exports = function (Role) {
           requires: [
             'outbreak_template_view',
             'outbreak_create'
-          ]
-        },
-        {
-          id: 'outbreak_template_modify_contact_questionnaire',
-          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_QUESTIONNAIRE',
-          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CCONTACT_QUESTIONNAIRE_DESCRIPTION',
-          requires: [
-            'outbreak_template_view',
-            'outbreak_template_modify'
           ]
         },
         {
@@ -1571,6 +1580,15 @@ module.exports = function (Role) {
             'outbreak_view'
           ],
           hidden: true
+        },
+        {
+          id: 'contact_bulk_delete_relationships_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_RELATIONSHIP_CONTACTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'relationship_bulk_delete'
+          ]
         },
         {
           id: 'contact_bulk_delete_relationships_exposures',
@@ -2948,6 +2966,15 @@ module.exports = function (Role) {
             'outbreak_view',
             'duplicate_list'
           ]
+        },
+        {
+          id: 'duplicate_merge_contacts_of_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_CONTACTS_OF_CONTACTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MERGE_DUPLICATE_CONTACTS_OF_CONTACTS_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'duplicate_list'
+          ]
         }
       ]
     },
@@ -3473,6 +3500,15 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'relationship_export'
+          ]
+        },
+        {
+          id: 'contact_of_contact_bulk_delete_relationships_exposures',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'relationship_bulk_delete'
           ]
         }
       ]

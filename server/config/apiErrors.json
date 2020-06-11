@@ -219,6 +219,10 @@
     "defaultStatusCode": 422,
     "messagePattern": "Cannot create/modify relationships with discarded cases (case id: `<%= id %>` )"
   },
+  "RECORD_NOT_FOUND": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Record not found"
+  },
   "INVALID_VISUAL_ID_MASK": {
     "defaultStatusCode": 422,
     "messagePattern": "Provided Visual ID template `<%= visualIdTemplate %>` does not match Visual ID mask set on outbreak level `<%= outbreakVisualIdMask %>`"

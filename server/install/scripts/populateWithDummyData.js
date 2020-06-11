@@ -29,7 +29,7 @@ const questionsTypesToAnswers = {
   'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_NUMERIC': false,
   'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME': false,
   'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER': true,
-  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWER': true,
+  'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS': true,
   'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD': false,
   'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP': false
 };
@@ -391,11 +391,10 @@ function run(callback) {
 
   // default relationship template
   const defaultRelationshipTemplate = {
-    contactDateEstimated: false,
-    active: true,
-    clusterId: undefined,
-    socialRelationshipTypeId: undefined,
-    socialRelationshipDetail: undefined
+    contactDateEstimated: false
+    // clusterId: undefined,
+    // socialRelationshipTypeId: undefined,
+    // socialRelationshipDetail: undefined
   };
 
   // initialize containers for generated data
@@ -1285,7 +1284,7 @@ function run(callback) {
                     retrieveDataPromise = app.models[res]
                       .rawFindWithLoopbackFilter({
                         where: personsFilter[res],
-                        fields: ['id', 'type'],
+                        fields: ['id', 'type', 'classification'],
                         skip: (jobNo - 1) * limits[res],
                         // no limit on last batch
                         limit: jobNo !== batches ? limits[res] : null,
@@ -1481,6 +1480,10 @@ function run(callback) {
                       }
                       existingRelationships[persons[0].id][persons[1].id] = true;
 
+                      // determine active flag
+                      const active = (personData.classification === 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_NOT_A_CASE_DISCARDED' ||
+                        otherPerson.classification === 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_NOT_A_CASE_DISCARDED') ? false : true;
+
                       // determine dates
                       const contactDate = outbreakStartDate.clone().add(randomFloatBetween(1, 120, 0), 'days');
 
@@ -1532,6 +1535,7 @@ function run(callback) {
                             defaultRelationshipTemplate, {
                               outbreakId: outbreakDataContainer.id,
                               persons: persons,
+                              active: active,
                               contactDate: contactDate ? contactDate.toISOString() : contactDate,
                               certaintyLevelId: certaintyLevelId,
                               exposureTypeId: exposureTypeId,
@@ -1544,20 +1548,34 @@ function run(callback) {
                             // log
                             app.logger.debug(`Relationship created => '${relationshipData.id}'`);
 
-                            // update relationship participants with hasRelationship flag
-                            return app.dataSources.mongoDb.connector.collection('person')
-                              .updateMany({
-                                _id: {
-                                  $in: relationshipData.persons.map(person => person.id)
-                                }
-                              }, {
-                                '$set': {
-                                  hasRelationships: true
-                                },
-                                'addToSet': {
-                                  relationshipsIds: relationshipData.id
-                                }
-                              });
+                            // create update participant jobs
+                            let updateParticipantsJobs = relationshipData.persons.map((person, index) => {
+                              // get other participant
+                              let otherParticipant = relationshipData.persons[index === 0 ? 1 : 0];
+
+                              // update relationship participants with hasRelationship flag
+                              return app.dataSources.mongoDb.connector.collection('person')
+                                .updateOne({
+                                  _id: person.id
+                                }, {
+                                  '$set': {
+                                    hasRelationships: true
+                                  },
+                                  '$addToSet': {
+                                    relationshipsRepresentation: {
+                                      id: relationshipData._id,
+                                      active: relationshipData.active,
+                                      otherParticipantType: otherParticipant.type,
+                                      otherParticipantId: otherParticipant.id,
+                                      target: person.target,
+                                      source: person.source
+                                    }
+                                  }
+                                });
+                            });
+
+                            // update relationship participants
+                            return Promise.all(updateParticipantsJobs);
                           })
                           .then(() => {
                             // finished

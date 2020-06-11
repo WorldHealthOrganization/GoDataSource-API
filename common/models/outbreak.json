@@ -58,6 +58,25 @@
       "required": true,
       "description": "Number of follow ups to be generated per day"
     },
+    "generateFollowUpsOverwriteExisting": {
+      "description": "Flag specifying whether existing follow-ups in the specified period will be overwritten or not. Applies only to not performed follow-ups",
+      "type": "boolean",
+      "default": false
+    },
+    "generateFollowUpsKeepTeamAssignment": {
+      "description": "Flag specifying whether new generated follow-ups will be assigned to the same team as the last follow-up for a contact or the team assignment will be made through round-robin (can be true only if 'generateFollowUpsOverwriteExisting' is false)",
+      "type": "boolean",
+      "default": true
+    },
+    "generateFollowUpsTeamAssignmentAlgorithm": {
+      "description": "Option specifying whether the round-robin team assignment should be done taking in consideration all teams activating in the contact's location (via that location or parents) or just the nearest teams. Default: round-robin of all teams activating in the contact's location",
+      "type": "string",
+      "enum": [
+        "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS",
+        "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_NEAREST_FIT"
+      ],
+      "default": "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS"
+    },
     "noDaysAmongContacts": {
       "type": "number",
       "required": true,
@@ -146,6 +165,11 @@
       "default": "9999999999"
     },
     "isContactsOfContactsActive": {
+      "type": "boolean",
+      "default": true
+    },
+    "isDateOfOnsetRequired": {
+      "description": "Flag specifying whether the case dateOfOnset property is required. Default: true",
       "type": "boolean",
       "default": true
     }
@@ -780,6 +804,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "duplicate_merge_contacts_of_contacts",
+      "permission": "ALLOW",
+      "property": "mergePeople"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "cot_view_bar_chart",
       "permission": "ALLOW",
       "property": "getBarsTransmissionChains"
@@ -1050,9 +1080,45 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "contact_list",
+      "permission": "ALLOW",
+      "property": "getContactMarkedAsNotDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_list",
+      "permission": "ALLOW",
+      "property": "getContactMarkedAsNotDuplicatesCount"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_modify",
+      "permission": "ALLOW",
+      "property": "contactMarkPersonAsOrNotADuplicate"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "case_list",
       "permission": "ALLOW",
       "property": "getCasePossibleDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list",
+      "permission": "ALLOW",
+      "property": "getCaseMarkedAsNotDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list",
+      "permission": "ALLOW",
+      "property": "getCaseMarkedAsNotDuplicatesCount"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_modify",
+      "permission": "ALLOW",
+      "property": "caseMarkPersonAsOrNotADuplicate"
     },
     {
       "principalType": "ROLE",
@@ -1071,6 +1137,12 @@
       "principalId": "follow_up_generate",
       "permission": "ALLOW",
       "property": "generateFollowups"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_bulk_modify",
+      "permission": "ALLOW",
+      "property": "bulkModifyFollowUps"
     },
     {
       "principalType": "ROLE",
@@ -1629,6 +1701,24 @@
       "principalId": "contact_of_contact_list",
       "permission": "ALLOW",
       "property": "getContactOfContactPossibleDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_list",
+      "permission": "ALLOW",
+      "property": "getContactOfContactMarkedAsNotDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_list",
+      "permission": "ALLOW",
+      "property": "getContactOfContactMarkedAsNotDuplicatesCount"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_modify",
+      "permission": "ALLOW",
+      "property": "contactOfContactMarkPersonAsOrNotADuplicate"
     },
     {
       "principalType": "ROLE",
@@ -2535,7 +2625,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'includeChildren' boolean on the first level in 'where'; this flag is taken into consideration only if other filters are applied"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'includeChildren' boolean on the first level in 'where'"
         }
       ],
       "returns": [
@@ -6364,6 +6454,107 @@
         "path": "/contacts/duplicates/find"
       }
     },
+    "prototype.getContactMarkedAsNotDuplicates": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Record primary key"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter offset and limit - must be a JSON-encoded string ({\"something\":\"value\"}).",
+          "http": {
+            "source": "query"
+          },
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "marked-as-not-duplicates",
+          "type": [
+            "contact"
+          ],
+          "description": "List of contacts that are marked as not being duplicates",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get list of contacts that are possible duplicates",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/duplicates/marked-as-not-duplicates"
+      }
+    },
+    "prototype.getContactMarkedAsNotDuplicatesCount": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Record primary key"
+        },
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of of people that match the search criteria",
+          "required": true
+        }
+      ],
+      "description": "Count list of contact of contacts that are possible duplicates",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:nk/duplicates/marked-as-not-duplicates/count"
+      }
+    },
+    "prototype.contactMarkPersonAsOrNotADuplicate": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Record primary key"
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "personDuplicateParams",
+          "description": "Duplicate data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "notDuplicates",
+          "type": [
+            "string"
+          ],
+          "description": "List of not duplicates for this record",
+          "root": true
+        }
+      ],
+      "description": "Update list of records that aren't duplicates for this record",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/:nk/duplicates/change"
+      }
+    },
     "prototype.getCasePossibleDuplicates": {
       "accepts": [
         {
@@ -6401,6 +6592,107 @@
       "http": {
         "verb": "post",
         "path": "/cases/duplicates/find"
+      }
+    },
+    "prototype.getCaseMarkedAsNotDuplicates": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Record primary key"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter offset and limit - must be a JSON-encoded string ({\"something\":\"value\"}).",
+          "http": {
+            "source": "query"
+          },
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "marked-as-not-duplicates",
+          "type": [
+            "case"
+          ],
+          "description": "List of cases that are marked as not being duplicates",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get list of cases that are possible duplicates",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/duplicates/marked-as-not-duplicates"
+      }
+    },
+    "prototype.getCaseMarkedAsNotDuplicatesCount": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Record primary key"
+        },
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of of people that match the search criteria",
+          "required": true
+        }
+      ],
+      "description": "Count list of contact of contacts that are possible duplicates",
+      "http": {
+        "verb": "get",
+        "path": "/cases/:nk/duplicates/marked-as-not-duplicates/count"
+      }
+    },
+    "prototype.caseMarkPersonAsOrNotADuplicate": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Record primary key"
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "personDuplicateParams",
+          "description": "Duplicate data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "notDuplicates",
+          "type": [
+            "string"
+          ],
+          "description": "List of not duplicates for this record",
+          "root": true
+        }
+      ],
+      "description": "Update list of records that aren't duplicates for this record",
+      "http": {
+        "verb": "post",
+        "path": "/cases/:nk/duplicates/change"
       }
     },
     "prototype.caseDelayBetweenOnsetAndHospitalizationIsolation": {
@@ -7508,6 +7800,107 @@
         "path": "/contacts-of-contacts/duplicates/find"
       }
     },
+    "prototype.getContactOfContactMarkedAsNotDuplicates": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Record primary key"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter offset and limit - must be a JSON-encoded string ({\"something\":\"value\"}).",
+          "http": {
+            "source": "query"
+          },
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "marked-as-not-duplicates",
+          "type": [
+            "contactOfContact"
+          ],
+          "description": "List of contacts that are marked as not being duplicates",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get list of contact of contacts that are possible duplicates",
+      "http": {
+        "verb": "get",
+        "path": "/contacts-of-contacts/:nk/duplicates/marked-as-not-duplicates"
+      }
+    },
+    "prototype.getContactOfContactMarkedAsNotDuplicatesCount": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Record primary key"
+        },
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of of people that match the search criteria",
+          "required": true
+        }
+      ],
+      "description": "Count list of contact of contacts that are possible duplicates",
+      "http": {
+        "verb": "get",
+        "path": "/contacts-of-contacts/:nk/duplicates/marked-as-not-duplicates/count"
+      }
+    },
+    "prototype.contactOfContactMarkPersonAsOrNotADuplicate": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Record primary key"
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "personDuplicateParams",
+          "description": "Duplicate data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "notDuplicates",
+          "type": [
+            "string"
+          ],
+          "description": "List of not duplicates for this record",
+          "root": true
+        }
+      ],
+      "description": "Update list of records that aren't duplicates for this record",
+      "http": {
+        "verb": "post",
+        "path": "/contacts-of-contacts/:nk/duplicates/change"
+      }
+    },
     "prototype.restoreContactOfContact": {
       "accepts": [
         {
@@ -7930,6 +8323,53 @@
       "http": {
         "verb": "del",
         "path": "/contacts/:nk/follow-ups/:fk"
+      }
+    },
+    "prototype.bulkModifyFollowUps": {
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances",
+          "http": {
+            "source": "query"
+          },
+          "required": true
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "followUp",
+          "description": "Follow-up properties",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "response",
+          "type": {
+            "count": {
+              "type": "number"
+            }
+          },
+          "description": "Number of updated follow ups",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Bulk update follow-ups",
+      "http": {
+        "verb": "put",
+        "path": "/follow-ups/bulk"
       }
     }
   }

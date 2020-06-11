@@ -42,6 +42,9 @@
     },
     "createdAt_index": {
       "createdAt": 1
+    },
+    "updatedAt_index": {
+      "updatedAt": 1
     }
   },
   "validations": [],

@@ -75,6 +75,7 @@ module.exports = function (Contact) {
     'followUp.startDate': 'LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_START_DATE',
     'followUp.endDate': 'LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_END_DATE',
     'followUp.status': 'LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_STATUS',
+    'followUpTeamId': 'LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_TEAM_ID',
     'dob': 'LNG_CONTACT_FIELD_LABEL_DOB',
     'documents': 'LNG_CONTACT_FIELD_LABEL_DOCUMENTS',
     'documents[].type': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE',
@@ -248,6 +249,14 @@ module.exports = function (Contact) {
     'isDateOfReportingApproximate'
   ];
 
+  // used on importable file logic
+  Contact.foreignKeyFields = {
+    'followUpTeamId': {
+      modelName: 'team',
+      labelProperty: 'name'
+    }
+  };
+
   Contact.locationFields = [
     'addresses[].locationId'
   ];
@@ -255,6 +264,10 @@ module.exports = function (Contact) {
   Contact.foreignKeyResolverMap = {
     'addresses[].locationId': {
       modelName: 'location',
+      useProperty: 'name'
+    },
+    'followUpTeamId': {
+      modelName: 'team',
       useProperty: 'name'
     },
     'followUps[].address.locationId': {

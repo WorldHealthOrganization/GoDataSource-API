@@ -82,7 +82,7 @@ module.exports = function (Backup) {
         }
 
         // backup setting are valid; create backup
-        backupModel.createBackup(backupLocation, backupModules, userId, done);
+        backupModel.createBackup(backupLocation, backupModules, userId, params.description, done);
       })
       .catch(function (err) {
         return done(err);
@@ -128,4 +128,17 @@ module.exports = function (Backup) {
       })
       .catch((err) => done(err));
   };
+
+  /**
+   * Go through all records and attach the custom properties
+   */
+  Backup.afterRemote('find', function (context, modelInstances, next) {
+    // go through all records and attach the custom properties
+    (modelInstances || []).forEach((filterMappingModel) => {
+      app.models.backup.attachCustomProperties(filterMappingModel);
+    });
+
+    // finished - continue
+    next();
+  });
 };

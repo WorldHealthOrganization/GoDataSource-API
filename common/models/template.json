@@ -24,6 +24,25 @@
     "frequencyOfFollowUpPerDay": {
       "type": "number"
     },
+    "generateFollowUpsOverwriteExisting": {
+      "description": "Flag specifying whether existing follow-ups in the specified period will be overwritten or not",
+      "type": "boolean",
+      "default": false
+    },
+    "generateFollowUpsKeepTeamAssignment": {
+      "description": "Flag specifying whether new generated follow-ups will be assigned to the same team as the last follow-up for a contact or the team assignment will be made through round-robin (can be true only if 'overwriteExistingFollowUps' is false)",
+      "type": "boolean",
+      "default": true
+    },
+    "generateFollowUpsTeamAssignmentAlgorithm": {
+      "description": "Option specifying whether the round-robin team assignment should be done taking in consideration all teams activating in the contact's location (via that location or parents) or just the nearest teams. Default: round-robin of all teams activating in the contact's location",
+      "type": "string",
+      "enum": [
+        "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS",
+        "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_NEAREST_FIT"
+      ],
+      "default": "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS"
+    },
     "noDaysAmongContacts": {
       "type": "number",
       "description": "Number of days used to calculate the proportion of new cases detected among known contacts"
@@ -70,6 +89,11 @@
     "isContactLabResultsActive": {
       "type": "boolean",
       "default": false
+    },
+    "isDateOfOnsetRequired": {
+      "description": "Flag specifying whether the case dateOfOnset property is required. Default: true",
+      "type": "boolean",
+      "default": true
     }
   },
   "validations": [],

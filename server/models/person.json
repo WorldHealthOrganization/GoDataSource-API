@@ -145,6 +145,10 @@
         }
       }
     },
+    "followUpTeamId": {
+      "description": "Contact property; Allocated team for contact follow-ups; Defining it here as on sync we use the person model and not the contact model",
+      "type": "string"
+    },
     "date": {
       "type": "date",
       "description": "Event property; Defining it here as on sync we use the person model and not the event model"
@@ -165,8 +169,14 @@
       "type": "boolean",
       "default": false
     },
-    "relationshipsIds": {
-      "description": "Array containing IDs for the relationships where the person is a participant",
+    "relationshipsRepresentation": {
+      "description": "Array containing entries for the relationships where the person is a participant",
+      "type": [
+        "personRelationshipRepresentation"
+      ]
+    },
+    "notDuplicatesIds": {
+      "description": "Array containing IDs for persons that system detected as possible duplicates but they aren't duplicates",
       "type": [
         "string"
       ]
@@ -232,6 +242,9 @@
     },
     "hasRelationships_index": {
       "hasRelationships": 1
+    },
+    "notDuplicatesIds_index": {
+      "notDuplicatesIds": 1
     }
   },
   "validations": [],

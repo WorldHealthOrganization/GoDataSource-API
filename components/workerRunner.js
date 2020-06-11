@@ -283,6 +283,24 @@ module.exports = {
           resolve(result);
         });
       });
+    },
+    exportFilteredModelsList: function () {
+      let originalArguments = arguments;
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('helpers', 'exportFilteredModelsList', [...originalArguments], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+          // if data was buffer, transform it back to buffer
+          if (
+            result &&
+            result.data &&
+            result.data.type === 'Buffer') {
+            result.data = Buffer.from(result.data.data);
+          }
+          resolve(result);
+        });
+      });
     }
   },
   getContactFollowUpReport: function (

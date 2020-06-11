@@ -6,6 +6,8 @@ const personDuplicate = require('../../components/workerRunner').personDuplicate
 const helpers = require('../../components/helpers');
 const _ = require('lodash');
 const moment = require('moment');
+const escapeStringRegexp = require('escape-string-regexp');
+const personConstants = require('../../components/baseModelOptions/person').constants;
 
 module.exports = function (Person) {
 
@@ -40,35 +42,7 @@ module.exports = function (Person) {
     }
   };
 
-  Person.fieldLabelsMap = Object.assign({}, Person.fieldLabelsMap, {
-    'firstName': 'LNG_CASE_FIELD_LABEL_FIRST_NAME',
-    'middleName': 'LNG_CASE_FIELD_LABEL_MIDDLE_NAME',
-    'lastName': 'LNG_CASE_FIELD_LABEL_LAST_NAME',
-    'gender': 'LNG_CASE_FIELD_LABEL_GENDER',
-    'occupation': 'LNG_CASE_FIELD_LABEL_OCCUPATION',
-    'age': 'LNG_CASE_FIELD_LABEL_AGE',
-    'age.years': 'LNG_CASE_FIELD_LABEL_AGE_YEARS',
-    'age.months': 'LNG_CASE_FIELD_LABEL_AGE_MONTHS',
-    'dob': 'LNG_CASE_FIELD_LABEL_DOB',
-    'classification': 'LNG_CASE_FIELD_LABEL_CLASSIFICATION',
-    'wasContact': 'LNG_CASE_FIELD_LABEL_WAS_CONTACT',
-    'dateBecomeCase': 'LNG_CASE_FIELD_LABEL_DATE_BECOME_CASE',
-    'wasCase': 'LNG_CONTACT_FIELD_LABEL_WAS_CASE',
-    'dateBecomeContact': 'LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT',
-    'dateOfInfection': 'LNG_CASE_FIELD_LABEL_DATE_OF_INFECTION',
-    'dateOfOnset': 'LNG_CASE_FIELD_LABEL_DATE_OF_ONSET',
-    'riskLevel': 'LNG_CASE_FIELD_LABEL_RISK_LEVEL',
-    'riskReason': 'LNG_CASE_FIELD_LABEL_RISK_REASON',
-    'outcomeId': 'LNG_CASE_FIELD_LABEL_OUTCOME_ID',
-    'dateOfOutcome': 'LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME',
-    'documents': 'LNG_CASE_FIELD_LABEL_DOCUMENTS',
-    'type': 'LNG_CASE_FIELD_LABEL_TYPE',
-    'dateRanges': 'LNG_CASE_FIELD_LABEL_DATE_RANGES',
-    'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
-    'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
-    'safeBurial': 'LNG_CASE_FIELD_LABEL_SAFE_BURIAL',
-    'dateOfBurial': 'LNG_CASE_FIELD_LABEL_DATE_OF_BURIAL'
-  });
+  Person.fieldLabelsMap = personConstants.fieldLabelsMap;
 
   Person.referenceDataFields = [
     'gender',
@@ -122,7 +96,8 @@ module.exports = function (Person) {
   Person.typeToModelMap = {
     'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'case',
     'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'contact',
-    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event'
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event',
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT': 'contactOfContact'
   };
 
   Person.dossierDateFields = [
@@ -336,8 +311,8 @@ module.exports = function (Person) {
       (
         !context.isNewInstance &&
         data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
-        && data.source.update
-        && data.source.update.classification
+        && data.source.updated
+        && data.source.updated.classification
         && data.source.existing.classification
         && data.source.existing.classification !== data.source.updated.classification
       ) &&
@@ -641,6 +616,8 @@ module.exports = function (Person) {
      */
     // if a case was updated and relationship updates need to be triggered
     if (!ctx.isNewInstance && instance.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' && ctx.options.triggerRelationshipUpdates) {
+      // reset flag
+      delete ctx.options.triggerRelationshipUpdates;
       // find all of its relationships with a contact
       app.models.relationship
         .find({
@@ -691,25 +668,37 @@ module.exports = function (Person) {
       where = {
         $and: [
           {
-            $or: [
-              {
-                deleted: {
-                  $ne: true
-                }
-              },
-              {
-                deleted: {
-                  $exists: false
-                }
-              }
-            ],
+            deleted: {
+              $ne: true
+            }
           },
           where || {}
         ]
       };
+
       // use connector directly to bring big number of (raw) results
+      // #TODO:
+      // - move logic to worker
+      // - get data in batches
       app.dataSources.mongoDb.connector.collection('person')
-        .find(where)
+        .find(
+          where, {
+            projection: {
+              _id: 1,
+              type: 1,
+              visualId: 1,
+              name: 1,
+              firstName: 1,
+              lastName: 1,
+              middleName: 1,
+              documents: 1,
+              notDuplicatesIds: 1,
+              age: 1,
+              addresses: 1,
+              address: 1
+            }
+          }
+        )
         .toArray(function (error, people) {
           // handle eventual errors
           if (error) {
@@ -721,12 +710,14 @@ module.exports = function (Person) {
           } else {
             findOrCount = personDuplicate.find.bind(null, people, Object.assign({where: where}, filter));
           }
+
           // find or count duplicate groups
           findOrCount(function (error, duplicates) {
             // handle eventual errors
             if (error) {
               return reject(error);
             }
+
             // send back the result
             return resolve(duplicates);
           });
@@ -1090,72 +1081,71 @@ module.exports = function (Person) {
   Person.findDuplicatesByType = function (filter, outbreakId, type, targetBody) {
     filter = filter || {};
     const buildRuleFilterPart = function (opts) {
-      let filter = {
-        $and: []
-      };
-      for (let prop in opts) {
-        filter.$and.push({
-          $and: [
-            {
-              // we don't do non-exist values
-              [prop]: {
-                $ne: null
-              }
-            },
-            {
-              // we do exact matches for now
-              [prop]: opts[prop]
-            }
-          ]
-        });
-      }
-      return filter;
+      // construct regex condition for case insensitive match
+      // #TODO once we update mongo to min 3.4 we need to change this logic to use a case insensitive index instead of using ci regex which doesn't use indexes...
+      // #TODO must replace logic with a key generated when you update a case contact so we don't have to check many conditions like we have now ( combinations between first / last / middle name )
+      // #TODO we should have something in person like: uniqueKey array.sort([firstName.toLoweCase(), lastName.toLoweCase(), middleName.toLoweCase()]).join('') ..this isn't enough, but it is a start
+      const props = Object.keys(opts);
+      const condition = {};
+      props.forEach((prop) => {
+        condition[prop] = {
+          $regex: `^${escapeStringRegexp(opts[prop])}$`,
+          $options: 'i'
+        };
+      });
+
+      // finished
+      return condition;
     };
-    const query = {
+
+    // remove end of line
+    const removeEOL = (value) => {
+      return value ? value.trim().replace(/(\n|\r)/gm, '') : value;
+    };
+
+    // init base query
+    let query = {
       outbreakId: outbreakId,
       type: type,
       $or: []
     };
 
+    // make sure we trim values
+    targetBody.firstName = removeEOL(targetBody.firstName);
+    targetBody.lastName = removeEOL(targetBody.lastName);
+    targetBody.middleName = removeEOL(targetBody.middleName);
+
+    // duplicate rules
     if (targetBody.firstName && targetBody.lastName) {
       query.$or.push(
-        buildRuleFilterPart({
-          firstName: targetBody.firstName,
-          lastName: targetBody.lastName
-        }),
-        // also do reverse checks
-        buildRuleFilterPart({
-          firstName: targetBody.lastName,
-          lastName: targetBody.firstName
-        })
+        buildRuleFilterPart({ firstName: targetBody.firstName, lastName: targetBody.lastName }),
+        buildRuleFilterPart({ firstName: targetBody.lastName, lastName: targetBody.firstName }),
+        buildRuleFilterPart({ firstName: targetBody.firstName, middleName: targetBody.lastName }),
+        buildRuleFilterPart({ firstName: targetBody.lastName, middleName: targetBody.firstName }),
+        buildRuleFilterPart({ lastName: targetBody.firstName, middleName: targetBody.lastName }),
+        buildRuleFilterPart({ lastName: targetBody.lastName, middleName: targetBody.firstName })
       );
     }
 
     if (targetBody.firstName && targetBody.middleName) {
       query.$or.push(
-        buildRuleFilterPart({
-          firstName: targetBody.firstName,
-          middleName: targetBody.middleName
-        }),
-        // reverse checks
-        buildRuleFilterPart({
-          firstName: targetBody.middleName,
-          middleName: targetBody.firstName
-        })
+        buildRuleFilterPart({ firstName: targetBody.firstName, middleName: targetBody.middleName }),
+        buildRuleFilterPart({ firstName: targetBody.middleName, middleName: targetBody.firstName }),
+        buildRuleFilterPart({ firstName: targetBody.firstName, lastName: targetBody.middleName }),
+        buildRuleFilterPart({ firstName: targetBody.middleName, lastName: targetBody.firstName }),
+        buildRuleFilterPart({ lastName: targetBody.firstName, middleName: targetBody.middleName }),
+        buildRuleFilterPart({ lastName: targetBody.middleName, middleName: targetBody.firstName })
       );
     }
 
     if (targetBody.middleName && targetBody.lastName) {
       query.$or.push(
-        buildRuleFilterPart({
-          middleName: targetBody.middleName,
-          lastName: targetBody.lastName
-        }),
-        // reverse checks
-        buildRuleFilterPart({
-          middleName: targetBody.lastName,
-          lastName: targetBody.middleName
-        })
+        buildRuleFilterPart({ middleName: targetBody.middleName, lastName: targetBody.lastName }),
+        buildRuleFilterPart({ middleName: targetBody.lastName, lastName: targetBody.middleName }),
+        buildRuleFilterPart({ middleName: targetBody.middleName, firstName: targetBody.lastName }),
+        buildRuleFilterPart({ middleName: targetBody.lastName, firstName: targetBody.middleName }),
+        buildRuleFilterPart({ lastName: targetBody.middleName, firstName: targetBody.lastName }),
+        buildRuleFilterPart({ lastName: targetBody.lastName, firstName: targetBody.middleName })
       );
     }
 
@@ -1167,32 +1157,11 @@ module.exports = function (Person) {
           query.$or.push({
             documents: {
               $elemMatch: {
-                $and: [
-                  {
-                    $and: [
-                      {
-                        type: {
-                          $ne: null
-                        }
-                      },
-                      {
-                        type: doc.type
-                      }
-                    ]
-                  },
-                  {
-                    $and: [
-                      {
-                        number: {
-                          $ne: null
-                        }
-                      },
-                      {
-                        number: doc.number
-                      }
-                    ]
-                  }
-                ]
+                type: doc.type,
+                number: {
+                  $regex: `^${escapeStringRegexp(doc.number)}$`,
+                  $options: 'i'
+                }
               }
             }
           });
@@ -1212,7 +1181,43 @@ module.exports = function (Person) {
 
     // find duplicates only if there is something to look for
     if (query.$or) {
-      return app.models.person.rawFind(query, {skip: filter.skip, limit: filter.limit});
+      // determine if we "duplicates" to exclude
+      // - we need the latest changes, this is why we can't use targetBody.notDuplicatesIds
+      let promise = Promise.resolve();
+      if (targetBody.id) {
+        promise = promise
+          .then(() => {
+            return app.models.person.findById(targetBody.id, {
+              fields: [
+                'id',
+                'notDuplicatesIds'
+              ]
+            });
+          })
+          .then((personData) => {
+            // do we need to exclude not duplicates ?
+            if (
+              personData.notDuplicatesIds &&
+              personData.notDuplicatesIds.length > 0
+            ) {
+              // force proper indexes to be used
+              query = {
+                _id: {
+                  $nin: personData.notDuplicatesIds
+                },
+                $and: [
+                  query
+                ]
+              };
+            }
+          });
+      }
+
+      // finished
+      return promise
+        .then(() => {
+          return app.models.person.rawFind(query, {skip: filter.skip, limit: filter.limit});
+        });
     } else {
       // otherwise return empty list
       return Promise.resolve([]);
@@ -1888,5 +1893,197 @@ module.exports = function (Person) {
         }
       })
       .then(() => peopleMap);
+  };
+
+  /**
+   * Count contacts/exposures for a list of records
+   * @param outbreakId
+   * @param personId
+   * @param filter Where if count is true, Full filter otherwise
+   * @param count
+   */
+  Person.findMarkedAsNotDuplicates = function (
+    outbreakId,
+    personId,
+    filter,
+    count
+  ) {
+    return app.models.person
+      .findById(personId, {
+        fields: [
+          'id',
+          'notDuplicatesIds'
+        ]
+      })
+      .then((person) => {
+        // person found ?
+        if (!person) {
+          return Promise.reject(app.utils.apiError.getError('RECORD_NOT_FOUND'));
+        }
+
+        // we don't have any records marked as not duplicates
+        if (
+          !person.notDuplicatesIds ||
+          person.notDuplicatesIds.length < 1
+        ) {
+          return count ? 0 : [];
+        }
+
+        // construct query
+        const where = {
+          outbreakId: outbreakId,
+          id: {
+            inq: person.notDuplicatesIds
+          }
+        };
+
+        // merge filter
+        filter = filter || {};
+        if (filter.where) {
+          filter.where = {
+            and: [
+              where,
+              filter.where
+            ]
+          };
+        } else {
+          filter.where = where;
+        }
+
+        // return records marked as not duplicates
+        return count ?
+          app.models.person.count(filter.where) :
+          app.models.person.find(filter);
+      });
+  };
+
+  /**
+   * Count contacts/exposures for a list of records
+   * @param options
+   * @param outbreakId
+   * @param personType
+   * @param personId
+   * @param addRecords Persons record ids that should be *merged* into current list of items that aren't duplicates
+   * @param removeRecords Persons record ids that should be *removed* from the current list of items that aren't duplicates
+   */
+  Person.markAsOrNotADuplicate = function (
+    options,
+    outbreakId,
+    personType,
+    personId,
+    addRecords,
+    removeRecords
+  ) {
+    return app.models.person
+      .findOne({
+        where: {
+          _id: personId,
+          outbreakId: outbreakId,
+          type: personType
+        }
+      })
+      .then((person) => {
+        // person found ?
+        if (!person) {
+          return Promise.reject(app.utils.apiError.getError('RECORD_NOT_FOUND'));
+        }
+
+        // add records to list of duplicates
+        if (
+          addRecords &&
+          addRecords.length > 0
+        ) {
+          person.notDuplicatesIds = _.uniq([
+            ...(person.notDuplicatesIds || []),
+            ...addRecords
+          ]);
+        }
+
+        // remove records from list of duplicates
+        if (
+          removeRecords &&
+          removeRecords.length > 0
+        ) {
+          // map ids that we want to remove for easy access
+          const removeRecordsMap = {};
+          removeRecords.forEach((id) => {
+            removeRecordsMap[id] = true;
+          });
+
+          // remove records from list of duplicates
+          person.notDuplicatesIds = (person.notDuplicatesIds || []).filter((id) => {
+            return !removeRecordsMap[id];
+          });
+        }
+
+        // finished
+        return person;
+      })
+      .then((person) => {
+        // update record
+        return person.updateAttributes({
+          notDuplicatesIds: person.notDuplicatesIds || []
+        }, options);
+      })
+      .then((person) => {
+        // add record from list of duplicates
+        const jobs = [];
+        if (
+          addRecords &&
+          addRecords.length > 0
+        ) {
+          jobs.push(
+            ...addRecords.map((recordId) => {
+              return app.models.person
+                .findById(recordId)
+                .then((relatedRecord) => {
+                  // add record id
+                  relatedRecord.notDuplicatesIds = relatedRecord.notDuplicatesIds || [];
+                  relatedRecord.notDuplicatesIds.push(person.id);
+                  relatedRecord.notDuplicatesIds = _.uniq(relatedRecord.notDuplicatesIds);
+
+                  // update
+                  return relatedRecord.updateAttributes({
+                    notDuplicatesIds: relatedRecord.notDuplicatesIds
+                  }, options);
+                });
+            })
+          );
+        }
+
+        // remove record from list of duplicates
+        if (
+          removeRecords &&
+          removeRecords.length > 0
+        ) {
+          jobs.push(
+            ...removeRecords.map((recordId) => {
+              return app.models.person
+                .findById(recordId)
+                .then((relatedRecord) => {
+                  // remove record id
+                  relatedRecord.notDuplicatesIds = (relatedRecord.notDuplicatesIds || []).filter((notDuplicatesId) => {
+                    return notDuplicatesId !== person.id;
+                  });
+
+                  // update
+                  return relatedRecord.updateAttributes({
+                    notDuplicatesIds: relatedRecord.notDuplicatesIds
+                  }, options);
+                });
+            })
+          );
+        }
+
+        // execute all jobs
+        return Promise
+          .all(jobs)
+          .then(() => {
+            return person;
+          });
+      })
+      .then((person) => {
+        return person.notDuplicatesIds;
+      });
   };
 };

@@ -1,6 +1,7 @@
 'use strict';
 
 const app = require('../../server');
+const language = app.models.language;
 const languageToken = app.models.languageToken;
 const outbreakTemplate = app.models.template;
 const referenceData = app.models.referenceData;
@@ -23,14 +24,26 @@ function run(callback) {
   // make sure we have what we need :)
   const defaultOutbreakTemplateDataJson = defaultOutbreakTemplateData || [];
 
-  // ignore existing help items
-  languageToken
-    .find({
-      where: {
-        token: {
-          inq: Object.keys(defaultOutbreakTemplateDataJson.translations)
-        }
-      }
+  // retrieve all languages
+  const mappedLanguages = {};
+  language
+    .find()
+    .then((languages) => {
+      languages.forEach((language) => {
+        mappedLanguages[language.id] = true;
+      });
+    })
+
+    // ignore existing help items
+    .then(() => {
+      return languageToken
+        .find({
+          where: {
+            token: {
+              inq: Object.keys(defaultOutbreakTemplateDataJson.translations)
+            }
+          }
+        });
     })
 
     // determine which language tokens exist already and include them for update
@@ -89,6 +102,12 @@ function run(callback) {
           // go through each language token
           Object.keys(defaultOutbreakTemplateDataJson.translations[token] || {})
             .forEach((languageId) => {
+              // jump over if this isn't a language
+              if (!mappedLanguages[languageId]) {
+                return;
+              }
+
+              // create
               (function (newToken, newLanguageId, newTranslation, modules) {
                 // add to create list
                 createUpdateLanguageTokensJob.push((cb) => {
@@ -296,6 +315,9 @@ function run(callback) {
                       periodOfFollowup: data.periodOfFollowup,
                       frequencyOfFollowUp: data.frequencyOfFollowUp,
                       frequencyOfFollowUpPerDay: data.frequencyOfFollowUpPerDay,
+                      generateFollowUpsOverwriteExisting: data.generateFollowUpsOverwriteExisting,
+                      generateFollowUpsKeepTeamAssignment: data.generateFollowUpsKeepTeamAssignment,
+                      generateFollowUpsTeamAssignmentAlgorithm: data.generateFollowUpsTeamAssignmentAlgorithm,
                       noDaysAmongContacts: data.noDaysAmongContacts,
                       noDaysInChains: data.noDaysInChains,
                       noDaysNotSeen: data.noDaysNotSeen,
@@ -307,6 +329,7 @@ function run(callback) {
                       contactFollowUpTemplate: data.contactFollowUpTemplate,
                       labResultsTemplate: data.labResultsTemplate,
                       isContactLabResultsActive: !!data.isContactLabResultsActive,
+                      isDateOfOnsetRequired: !!data.isDateOfOnsetRequired,
                       deleted: false,
                       deletedAt: null
                     }, options)
@@ -342,6 +365,9 @@ function run(callback) {
                       periodOfFollowup: newTemplateItem.periodOfFollowup,
                       frequencyOfFollowUp: newTemplateItem.frequencyOfFollowUp,
                       frequencyOfFollowUpPerDay: newTemplateItem.frequencyOfFollowUpPerDay,
+                      generateFollowUpsOverwriteExisting: newTemplateItem.generateFollowUpsOverwriteExisting,
+                      generateFollowUpsKeepTeamAssignment: newTemplateItem.generateFollowUpsKeepTeamAssignment,
+                      generateFollowUpsTeamAssignmentAlgorithm: newTemplateItem.generateFollowUpsTeamAssignmentAlgorithm,
                       noDaysAmongContacts: newTemplateItem.noDaysAmongContacts,
                       noDaysInChains: newTemplateItem.noDaysInChains,
                       noDaysNotSeen: newTemplateItem.noDaysNotSeen,
@@ -352,7 +378,8 @@ function run(callback) {
                       contactInvestigationTemplate: newTemplateItem.contactInvestigationTemplate,
                       contactFollowUpTemplate: newTemplateItem.contactFollowUpTemplate,
                       labResultsTemplate: newTemplateItem.labResultsTemplate,
-                      isContactLabResultsActive: !!newTemplateItem.isContactLabResultsActive
+                      isContactLabResultsActive: !!newTemplateItem.isContactLabResultsActive,
+                      isDateOfOnsetRequired: !!newTemplateItem.isDateOfOnsetRequired
                     }, common.install.timestamps), options)
                     .then(() => {
                       // finished
