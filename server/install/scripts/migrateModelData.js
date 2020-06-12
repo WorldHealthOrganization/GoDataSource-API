@@ -81,6 +81,18 @@ const migrationVersions = [{
       name: 'addMissingTokenSortKeys',
       buildNo: 1
     }]
+  }, {
+    fileName: 'outbreak.js',
+    actions: [{
+      name: 'addMissingDefaultValues',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'template.js',
+    actions: [{
+      name: 'addMissingDefaultValues',
+      buildNo: 1
+    }]
   }]
 }];
 
