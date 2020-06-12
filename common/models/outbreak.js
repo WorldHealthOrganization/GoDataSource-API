@@ -592,7 +592,9 @@ module.exports = function (Outbreak) {
       context.args.filter = app.utils.remote
         .mergeFilters({
           where: {
-            hasRelationships: false
+            hasRelationships: {
+              neq: true
+            }
           }
         }, context.args.filter);
     }
