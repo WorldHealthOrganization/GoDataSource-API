@@ -44,6 +44,13 @@ const setRelationshipsInformationOnPerson = (options, callback) => {
         }
       };
 
+      // initialize personsFilter
+      let personsFilter = {
+        deleted: {
+          $ne: true
+        }
+      };
+
       // initialize parameters for handleActionsInBatches call
       const getActionsCount = () => {
         // depending on given options we might just want to update persons on a given outbreak
@@ -68,8 +75,11 @@ const setRelationshipsInformationOnPerson = (options, callback) => {
 
         return getOutbreakId
           .then(outbreakId => {
-            // update relationships filter if needed
-            outbreakId && (relationshipsFilter.outbreakId = outbreakId);
+            // update relationships and persons filters if needed
+            if (outbreakId) {
+              relationshipsFilter.outbreakId = outbreakId;
+              personsFilter.outbreakId = outbreakId;
+            }
 
             // count not deleted relationships
             return relationshipsCollection
@@ -84,13 +94,16 @@ const setRelationshipsInformationOnPerson = (options, callback) => {
             // before going through batches reset persons data
             // Note: Currently we can use the relationshipsFilter also for persons
             return personCollection
-              .updateMany(relationshipsFilter, {
+              .updateMany(personsFilter, {
                 '$unset': {
-                  hasRelationships: '',
                   // unset the relationshipsIds array added in v1 of the script
-                  relationshipsIds: '',
-                  // unset the container that will be constructed again
-                  relationshipsRepresentation: ''
+                  relationshipsIds: ''
+                },
+                '$set': {
+                  // set flag to false in order to not need to do queries with $exists for it
+                  hasRelationships: false,
+                  // initialize relationshipsRepresentation container that will be filled again for the required persons
+                  relationshipsRepresentation: []
                 }
               })
               .then(() => {

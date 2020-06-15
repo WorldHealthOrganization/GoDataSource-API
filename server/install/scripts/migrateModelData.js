@@ -73,7 +73,7 @@ const migrationVersions = [{
     fileName: 'person.js',
     actions: [{
       name: 'setRelationshipsInformationOnPerson',
-      buildNo: 2
+      buildNo: 3
     }]
   }, {
     fileName: 'languageToken.js',
