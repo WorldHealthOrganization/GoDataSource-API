@@ -330,52 +330,50 @@ module.exports = function (Language) {
     // there is no need to retrieve the id
     projection._id = 0;
 
+    // convert where condition to mongo
+    where = app.utils.remote.convertLoopbackFilterToMongo(
+      where
+    );
+
     // retrieve language tokens
     // since we can't replace root we will need to go through tokens ourselves
     app.dataSources.mongoDb.connector
       .collection('languageToken')
-      .find(app.utils.remote.convertLoopbackFilterToMongo(
-        where
-      ), {
-        projection: Object.assign(
-          // we need createdAt & updatedAt because of mongo 3.2 limitations, check above & bellow for more details
-          projection, {
-            createdAt: 1,
-            updatedAt: 1
-          }
-        )
+      .find(where, {
+        projection: projection
       })
       .toArray()
       .then((tokens) => {
-        // determine max date
-        // since we can't do this with mongo 3.2 aggregation
-        let lastUpdateDate;
-        (tokens || []).forEach(function (token) {
-          // retrieve record create & update dates
-          const createdAt = token.createdAt ? moment(token.createdAt) : null;
-          delete token.createdAt;
-          const updatedAt = token.updatedAt ? moment(token.updatedAt) : null;
-          delete token.updatedAt;
-
-          // determine last update date
-          if (createdAt) {
-            lastUpdateDate = !lastUpdateDate ?
-              createdAt :
-              (createdAt.isAfter(lastUpdateDate) ? createdAt : lastUpdateDate);
-          }
-          if (updatedAt) {
-            lastUpdateDate = !lastUpdateDate ?
-              updatedAt :
-              (updatedAt.isAfter(lastUpdateDate) ? updatedAt : lastUpdateDate);
-          }
-        });
-
+        // use indexes to retrieve the last item instead of retrieving dates and determining the last item from nodejs
+        return app.dataSources.mongoDb.connector
+          .collection('languageToken')
+          .find(where, {
+            projection: {
+              _id: 0,
+              updatedAt: 1
+            },
+            order: {
+              updatedAt: -1
+            },
+            limit: 1
+          })
+          .toArray()
+          .then((lastToken) => {
+            return {
+              tokens: tokens,
+              lastToken: lastToken && lastToken.length > 0 && lastToken[0].updatedAt ?
+                lastToken[0] :
+                null
+            };
+          });
+      })
+      .then((data) => {
         // retrieve language tokens
         callback(
           null, {
             languageId: this.id,
-            lastUpdateDate: lastUpdateDate ? lastUpdateDate.toISOString() : null,
-            tokens: tokens
+            lastUpdateDate: data.lastToken ? moment(data.lastToken.updatedAt).toISOString() : null,
+            tokens: data.tokens
           }
         );
       })
