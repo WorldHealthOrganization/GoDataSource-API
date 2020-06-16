@@ -288,11 +288,11 @@ module.exports = function (Language) {
         $or: [
           {
             updatedAt: {
-              $gte: updatedSince
+              $gt: updatedSince
             }
           }, {
             createdAt: {
-              $gte: updatedSince
+              $gt: updatedSince
             }
           }
         ]
