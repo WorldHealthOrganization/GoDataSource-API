@@ -84,7 +84,8 @@ function run(callback) {
               contactFollowUpTemplate: item.contactFollowUpTemplate,
               labResultsTemplate: item.labResultsTemplate,
               isContactLabResultsActive: item.isContactLabResultsActive,
-              isDateOfOnsetRequired: item.isDateOfOnsetRequired
+              isDateOfOnsetRequired: item.isDateOfOnsetRequired,
+              applyGeographicRestrictions: item.applyGeographicRestrictions
             });
 
             // translate tokens

@@ -1,5 +1,7 @@
 'use strict';
 
+const app = require('../../server/server');
+
 module.exports = function (Team) {
 
   // define a list of custom (non-loopback-supported) relations
@@ -15,4 +17,28 @@ module.exports = function (Team) {
       foreignKey: 'locationIds'
     }
   };
+
+  /**
+   * After save hook
+   * @param ctx
+   * @param next
+   */
+  Team.observe('after save', function (ctx, next) {
+    // reset user cache
+    app.models.user.cache.reset();
+
+    return next();
+  });
+
+  /**
+   * After delete hook
+   * @param ctx
+   * @param next
+   */
+  Team.observe('after delete', function (ctx, next) {
+    // reset user cache
+    app.models.user.cache.reset();
+
+    return next();
+  });
 };

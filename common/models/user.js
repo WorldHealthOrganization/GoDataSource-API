@@ -5,6 +5,7 @@ const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
+const async = require('async');
 
 module.exports = function (User) {
   // set flag to force using the controller
@@ -134,6 +135,139 @@ module.exports = function (User) {
   };
 
   /**
+   * Check whether the team assignment concept (geographical restriction on resources) should be applied for user/outbreak combination
+   * @param user
+   * @param outbreak
+   * @returns {*}
+   */
+  User.helpers.applyGeographicRestrictions = function (user, outbreak) {
+    return user.disregardGeographicRestrictions ?
+      false :
+      outbreak.applyGeographicRestrictions
+  };
+
+  User.cache = {
+    // cache functions
+    /**
+     * Get user allowed locations
+     * Empty array means that all locations are allowed; Empty array is returned in the following cases:
+     * 1. User is not assigned to a team
+     * 2. At least one of the user's teams doesn't have locations assigned
+     * @param userId
+     * @returns {Promise<unknown>|Promise<unknown>|Promise<T>}
+     */
+    getUserLocationsIds: function (userId) {
+      // get cache
+      let userCache = this;
+
+      // check for already cached information
+      if (userCache.userLocationsIds[userId]) {
+        return Promise.resolve(userCache.userLocationsIds[userId]);
+      }
+
+      // get user teams
+      return app.models.team
+        .rawFind({
+          userIds: userId
+        }, {
+          projection: {
+            locationIds: 1
+          }
+        })
+        .then(function (teams) {
+          // requested user is not assigned to any team
+          if (!teams.length) {
+            // user will have access to all data; cache empty array
+            userCache.userLocationsIds[userId] = [];
+
+            return Promise.resolve([]);
+          }
+
+          // initialize flag for team without locations
+          let teamWithoutLocations = false;
+
+          // loop through the teams to create jobs for getting their allowed locations
+          let jobs = [];
+
+          for (let index in teams) {
+            let team = teams[index];
+
+            // check if team locations are not set or the array is empty
+            if (!team.locationIds || !team.locationIds.length) {
+              // found team without locations
+              teamWithoutLocations = true;
+
+              // no need to get locations for other teams
+              break;
+            }
+
+            // get team locations
+            if (userCache.teamLocationsIds[team.id]) {
+              // already cached locations
+              jobs.push(cb => {
+                return cb(null, userCache.teamLocationsIds[team.id]);
+              });
+            } else {
+              // get team locations and cache them
+              jobs.push(cb => {
+                return app.models.location.cache
+                  .getSublocationsIds(team.locationIds)
+                  .then(teamLocationsIds => {
+                    userCache.teamLocationsIds[team.id] = teamLocationsIds;
+
+                    return cb(null, teamLocationsIds);
+                  })
+                  .catch(cb);
+              });
+            }
+          }
+
+          // check if a team without locations was found
+          if (teamWithoutLocations) {
+            // user will have access to all data; cache empty array
+            userCache.userLocationsIds[userId] = [];
+
+            return Promise.resolve([]);
+          }
+
+          // execute jobs to find locations for all teams
+          return new Promise((resolve, reject) => {
+            return async.parallelLimit(jobs, 10, (err, results) => {
+              if (err) {
+                return reject(err);
+              }
+
+              // construct the result
+              let result = [];
+              results.forEach(res => {
+                result = result.concat(res);
+              });
+              result = [...new Set(result)];
+
+              // cache found user locations
+              userCache.userLocationsIds[userId] = result;
+              return resolve(result);
+            });
+          })
+        });
+    },
+    /**
+     * Reset cache
+     */
+    reset: function () {
+      // reset all cache properties
+      this.userLocationsIds = {};
+      this.teamLocationsIds = {};
+    },
+
+    // cache contents
+    // map of user ID to assigned locations IDs; empty array means the user has access to all locations
+    userLocationsIds: {},
+    // map of team ID to assigned locations IDs; empty array means the team has access to all locations
+    teamLocationsIds: {}
+  };
+
+  /**
    * Send password reset email
    */
   User.on('resetPasswordRequest', function (info) {
@@ -229,6 +363,7 @@ module.exports = function (User) {
     telephoneNumbers: 'LNG_USER_FIELD_LABEL_TELEPHONE_NUMBERS',
     'telephoneNumbers.LNG_USER_FIELD_LABEL_PRIMARY_TELEPHONE': 'LNG_USER_FIELD_LABEL_PRIMARY_TELEPHONE',
     'roleIds[]': 'LNG_USER_FIELD_LABEL_ROLES',
-    'outbreakIds[]': 'LNG_USER_FIELD_LABEL_AVAILABLE_OUTBREAKS'
+    'outbreakIds[]': 'LNG_USER_FIELD_LABEL_AVAILABLE_OUTBREAKS',
+    disregardGeographicRestrictions: 'LNG_USER_FIELD_LABEL_DISREGARD_GEOGRAPHIC_RESTRICTIONS'
   };
 };
