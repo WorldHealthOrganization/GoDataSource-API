@@ -349,10 +349,9 @@ module.exports = function (Language) {
           .collection('languageToken')
           .find(where, {
             projection: {
-              _id: 0,
               updatedAt: 1
             },
-            order: {
+            sort: {
               updatedAt: -1
             },
             limit: 1
