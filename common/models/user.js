@@ -143,7 +143,7 @@ module.exports = function (User) {
   User.helpers.applyGeographicRestrictions = function (user, outbreak) {
     return user.disregardGeographicRestrictions ?
       false :
-      outbreak.applyGeographicRestrictions
+      outbreak.applyGeographicRestrictions;
   };
 
   User.cache = {
@@ -248,7 +248,7 @@ module.exports = function (User) {
               userCache.userLocationsIds[userId] = result;
               return resolve(result);
             });
-          })
+          });
         });
     },
     /**
