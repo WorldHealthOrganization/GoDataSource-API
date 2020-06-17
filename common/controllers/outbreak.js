@@ -7419,7 +7419,12 @@ module.exports = function (Outbreak) {
                     // get all date values from row, keep only until last day in the table
                     // rest split among additional tables
                     for (let prop in row) {
-                      if (row.hasOwnProperty(prop) && row[prop].isDate) {
+                      if (
+                        row.hasOwnProperty(prop) &&
+                        row[prop] !== null &&
+                        row[prop] !== undefined &&
+                        row[prop].isDate
+                      ) {
                         let parsedDate = genericHelpers.convertToDate(prop);
                         if (parsedDate.isAfter(lastDayInMainTable)) {
                           // find the suitable additional table

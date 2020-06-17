@@ -110,7 +110,12 @@ const buildTableForContact = function (headers, partialRecord, followUpStatusMap
     // get all date values from row, keep only until last day in the table
     // rest split among additional tables
     for (let prop in partialRecord) {
-      if (partialRecord.hasOwnProperty(prop) && partialRecord[prop].isDate) {
+      if (
+        partialRecord.hasOwnProperty(prop) &&
+        partialRecord[prop] !== null &&
+        partialRecord[prop] !== undefined &&
+        partialRecord[prop].isDate
+      ) {
         let parsedDate = GenericHelpers.convertToDate(prop);
         if (parsedDate.isAfter(lastDayInMainTable)) {
           // find the suitable additional table
