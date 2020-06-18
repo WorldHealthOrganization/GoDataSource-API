@@ -12289,6 +12289,9 @@
     "uiTransmissionChainsGeoMap": {
       "LNG_PAGE_TRANSMISSION_CHAINS_GEO_MAP_EXPORT": {
         "translation": "Exporter une carte géospatiale"
+      },
+      "LNG_PAGE_TRANSMISSION_CHAINS_GEO_MAP_TITLE": {
+        "translation": "Geospatial map"
       }
     },
     "uiFormCaseQuick": {
