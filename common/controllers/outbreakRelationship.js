@@ -282,4 +282,67 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Find outbreak relationships
+   */
+  Outbreak.prototype.findRelationships = function (filter, callback) {
+    // make sure filter exists
+    filter = filter || {};
+
+    // required conditions
+    const requiredWhere = {
+      outbreakId: this.id
+    };
+
+    // merge where conditions ?
+    if (filter.where) {
+      filter.where = {
+        and: [
+          filter.where,
+          requiredWhere
+        ]
+      };
+    } else {
+      filter.where = requiredWhere;
+    }
+
+    // retrieve relationships
+    app.models.relationship
+      .find(filter)
+      .then((records) => {
+        return callback(null, records);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count outbreak relationships
+   */
+  Outbreak.prototype.countRelationships = function (where, callback) {
+    // required conditions
+    const requiredWhere = {
+      outbreakId: this.id
+    };
+
+    // merge where conditions ?
+    if (where) {
+      where = {
+        and: [
+          where,
+          requiredWhere
+        ]
+      };
+    } else {
+      where = requiredWhere;
+    }
+
+    // retrieve relationships
+    app.models.relationship
+      .count(where)
+      .then((count) => {
+        return callback(null, count);
+      })
+      .catch(callback);
+  };
 };
