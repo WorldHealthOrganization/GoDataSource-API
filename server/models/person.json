@@ -180,6 +180,10 @@
       "type": [
         "string"
       ]
+    },
+    "usualPlaceOfResidenceLocationId": {
+      "description": "Location ID for the usual place of residence address.",
+      "type": "string"
     }
   },
   "indexes": {
@@ -245,6 +249,9 @@
     },
     "notDuplicatesIds_index": {
       "notDuplicatesIds": 1
+    },
+    "usualPlaceOfResidenceLocationId_index": {
+      "usualPlaceOfResidenceLocationId": 1
     }
   },
   "validations": [],

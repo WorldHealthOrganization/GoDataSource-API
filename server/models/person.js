@@ -297,6 +297,64 @@ module.exports = function (Person) {
   }
 
   /**
+   * Set usualPlaceOfResidenceLocationId when addresses are updated
+   * @param context
+   */
+  function setUsualPlaceOfResidenceLocationId(context) {
+    // define person instance
+    let personInstance;
+    // if this is a new record
+    if (context.isNewInstance) {
+      // get instance data from the instance
+      personInstance = context.instance;
+    } else {
+      // existing instance, we're interested only in what is modified
+      personInstance = context.data;
+    }
+
+    // check if address/addresses field was touched
+    // if(personInstance)
+
+
+    /**
+     * Normalize address coordinates
+     * @param address
+     */
+    function normalizeAddressCoordinates(address) {
+      // check if both coordinates are available and not numbers; make sure they are numbers
+      if (address.geoLocation &&
+        address.geoLocation.lat &&
+        address.geoLocation.lng &&
+        (
+          isNaN(address.geoLocation.lat) ||
+          isNaN(address.geoLocation.lng)
+        )
+      ) {
+        address.geoLocation.lat = parseFloat(address.geoLocation.lat);
+        address.geoLocation.lng = parseFloat(address.geoLocation.lng);
+
+        // if sync action set flag for sync "before save" changes
+        if (context.options && context.options._sync) {
+          context.options._syncActionBeforeSaveChanges = true;
+        }
+      }
+    }
+
+    // if the record has a list of addresses
+    if (Array.isArray(personInstance.addresses) && personInstance.addresses.length) {
+      // normalize coordinates for each address
+      personInstance.addresses.forEach(function (address) {
+        normalizeAddressCoordinates(address);
+      });
+    }
+    // if the record has only one address (record is event)
+    if (personInstance.address) {
+      // normalize the address
+      normalizeAddressCoordinates(personInstance.address);
+    }
+  }
+
+  /**
    * Before save hooks
    */
   Person.observe('before save', function (context, next) {

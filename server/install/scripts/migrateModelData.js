@@ -74,6 +74,9 @@ const migrationVersions = [{
     actions: [{
       name: 'setRelationshipsInformationOnPerson',
       buildNo: 3
+    }, {
+      name: 'setUsualPlaceOfResidenceLocationIdOnPerson',
+      buildNo: 1
     }]
   }, {
     fileName: 'languageToken.js',

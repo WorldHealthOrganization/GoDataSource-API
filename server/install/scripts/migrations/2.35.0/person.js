@@ -4,11 +4,16 @@ const MongoDBHelper = require('../../../../../components/mongoDBHelper');
 const Helpers = require('../../../../../components/helpers');
 const _ = require('lodash');
 const Config = require('../../../../config.json');
+const AddressConstants = require('../../../../../components/baseModelOptions/address').constants;
 const CaseConstants = require('../../../../../components/baseModelOptions/case').constants;
 
+// used in setRelationshipInformationOnPerson function
 // Note: we shouldn't set batchSize to more than ~27000 as in case all relationships participants are different
 // we would make a query in MongoDB with more than ~54000 person IDs which would exceed 16MB limit
 const relationshipsFindBatchSize = _.get(Config, 'jobSettings.setRelationshipInformationOnPerson.batchSize', 1000);
+
+// used in setUsualPlaceOfResidenceLocationIdOnPerson function
+const personsFindBatchSize = _.get(Config, 'jobSettings.setUsualPlaceOfResidenceLocationIdOnPerson.batchSize', 1000);
 
 // set how many person update actions to run in parallel
 const personsUpdateBatchSize = 10;
@@ -283,7 +288,133 @@ const setRelationshipsInformationOnPerson = (options, callback) => {
     .catch(callback);
 };
 
+/**
+ * Set usualPlaceOfResidenceLocationId for all person
+ * @param [options] Optional
+ * @param [options.outbreakName] Outbreak for which to update required information
+ * @param callback
+ */
+const setUsualPlaceOfResidenceLocationIdOnPerson = (options, callback) => {
+  if (typeof options === 'function') {
+    callback = options;
+    options = {};
+  }
+
+  let outbreakCollection, personCollection;
+
+  // create Mongo DB connection
+  return MongoDBHelper
+    .getMongoDBConnection()
+    .then(dbConn => {
+      outbreakCollection = dbConn.collection('outbreak');
+      personCollection = dbConn.collection('person');
+
+      // initialize personsFilter; updating all persons including deleted
+      let personsFilter = {};
+
+      // initialize parameters for handleActionsInBatches call
+      const getActionsCount = () => {
+        // depending on given options we might just want to update persons on a given outbreak
+        let getOutbreakId = Promise.resolve();
+        if (options.outbreakName && options.outbreakName.length) {
+          getOutbreakId = outbreakCollection
+            .findOne({
+              name: options.outbreakName
+            }, {
+              projection: {
+                _id: 1
+              }
+            })
+            .then(outbreak => {
+              if (!outbreak) {
+                return Promise.reject(`Given outbreak ${options.outbreakName} was not found in system`);
+              }
+
+              return outbreak._id;
+            });
+        }
+
+        return getOutbreakId
+          .then(outbreakId => {
+            // update persons filter if needed
+            if (outbreakId) {
+              personsFilter.outbreakId = outbreakId;
+            }
+
+            // count persons
+            return personCollection
+              .countDocuments(personsFilter);
+          });
+      };
+
+      const getBatchData = (batchNo, batchSize) => {
+        // get persons for batch
+        return personCollection
+          .find(personsFilter, {
+            skip: (batchNo - 1) * batchSize,
+            limit: batchSize,
+            sort: {
+              createdAt: 1
+            },
+            projection: {
+              address: 1,
+              addresses: 1
+            }
+          })
+          .toArray();
+      };
+
+      const itemAction = (data) => {
+        // get person addresses
+        let personAddresses = data.addresses ?
+          // addresses for case/contact/contact of contact
+          data.addresses :
+          (
+            // address for event
+            data.address ?
+              // normalize to an array
+              [data.address] :
+              // no address set on person
+              []
+          );
+
+        // get usual place of residence address
+        let usualPlaceOfResidenceAddress = personAddresses.find(address => address.typeId === AddressConstants.usualPlaceOfResidenceType);
+
+        // get locationId from usual place of residence address
+        let usualPlaceOfResidenceLocationId = usualPlaceOfResidenceAddress && usualPlaceOfResidenceAddress.locationId ?
+          usualPlaceOfResidenceAddress.locationId :
+          null;
+
+        // update person
+        return personCollection
+          .updateOne({
+            _id: data._id
+          }, {
+            '$set': {
+              usualPlaceOfResidenceLocationId: usualPlaceOfResidenceLocationId
+            }
+          });
+      };
+
+      return Helpers.handleActionsInBatches(
+        getActionsCount,
+        getBatchData,
+        null,
+        itemAction,
+        personsFindBatchSize,
+        personsUpdateBatchSize,
+        console
+      );
+    })
+    .then(() => {
+      callback();
+    })
+    .catch(callback);
+};
+
 // export list of migration jobs; functions that receive a callback
 module.exports = {
-  setRelationshipsInformationOnPerson
+  setRelationshipsInformationOnPerson,
+  setUsualPlaceOfResidenceLocationIdOnPerson
 };

@@ -189,7 +189,7 @@ module.exports = function (User) {
           // loop through the teams to create jobs for getting their allowed locations
           let jobs = [];
 
-          for (let index in teams) {
+          for (let index = 0; index < teams.length; index++) {
             let team = teams[index];
 
             // check if team locations are not set or the array is empty
