@@ -6134,6 +6134,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship', 'where.labResult' MongoDB compatible queries, 'where.noRelationships' query and 'where.countRelations' query."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -6165,6 +6170,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship', 'where.labResult' MongoDB compatible queries and 'where.noRelationships' query"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [

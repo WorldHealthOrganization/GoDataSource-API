@@ -8,6 +8,7 @@ const _ = require('lodash');
 const moment = require('moment');
 const escapeStringRegexp = require('escape-string-regexp');
 const personConstants = require('../../components/baseModelOptions/person').constants;
+const addressConstants = require('../../components/baseModelOptions/address').constants;
 
 module.exports = function (Person) {
 
@@ -307,51 +308,61 @@ module.exports = function (Person) {
     if (context.isNewInstance) {
       // get instance data from the instance
       personInstance = context.instance;
+
+      // set usualPlaceOfResidenceLocationId as null by default
+      personInstance.usualPlaceOfResidenceLocationId = null;
     } else {
       // existing instance, we're interested only in what is modified
       personInstance = context.data;
     }
 
     // check if address/addresses field was touched
-    // if(personInstance)
+    if (personInstance.address === undefined && personInstance.addresses === undefined) {
+      return;
+    }
 
-
-    /**
-     * Normalize address coordinates
-     * @param address
-     */
-    function normalizeAddressCoordinates(address) {
-      // check if both coordinates are available and not numbers; make sure they are numbers
-      if (address.geoLocation &&
-        address.geoLocation.lat &&
-        address.geoLocation.lng &&
-        (
-          isNaN(address.geoLocation.lat) ||
-          isNaN(address.geoLocation.lng)
-        )
+    // person address was touched; get new usualPlaceOfResidenceLocationId
+    // event
+    if (personInstance.address !== undefined) {
+      // event address was changed
+      if (
+        // address was removed entirely
+        personInstance.address === null ||
+        // address is not usual place of residence
+        personInstance.address.typeId !== addressConstants.usualPlaceOfResidenceType ||
+        // locationId was removed or not set
+        !personInstance.address.locationId
       ) {
-        address.geoLocation.lat = parseFloat(address.geoLocation.lat);
-        address.geoLocation.lng = parseFloat(address.geoLocation.lng);
-
-        // if sync action set flag for sync "before save" changes
-        if (context.options && context.options._sync) {
-          context.options._syncActionBeforeSaveChanges = true;
-        }
+        // set usualPlaceOfResidenceLocationId
+        personInstance.usualPlaceOfResidenceLocationId = null;
+        return;
+      }
+      // address was updated, is usual place of residence and locationId was set
+      else {
+        // set usualPlaceOfResidenceLocationId
+        personInstance.usualPlaceOfResidenceLocationId = personInstance.address.locationId;
+        return;
       }
     }
 
-    // if the record has a list of addresses
-    if (Array.isArray(personInstance.addresses) && personInstance.addresses.length) {
-      // normalize coordinates for each address
-      personInstance.addresses.forEach(function (address) {
-        normalizeAddressCoordinates(address);
-      });
+    // case/contact/contact of contact
+    if (personInstance.addresses === null) {
+      // addresses were removed
+      // set usualPlaceOfResidenceLocationId
+      personInstance.usualPlaceOfResidenceLocationId = null;
+      return;
     }
-    // if the record has only one address (record is event)
-    if (personInstance.address) {
-      // normalize the address
-      normalizeAddressCoordinates(personInstance.address);
-    }
+
+    // loop through addresses and get usualPlaceOfResidenceLocationId
+    // get usual place of residence address
+    let usualPlaceOfResidenceAddress = personInstance.addresses.find(address => address.typeId === addressConstants.usualPlaceOfResidenceType);
+
+    // get locationId from usual place of residence address and set usualPlaceOfResidenceLocationId
+    personInstance.usualPlaceOfResidenceLocationId = usualPlaceOfResidenceAddress && usualPlaceOfResidenceAddress.locationId ?
+      usualPlaceOfResidenceAddress.locationId :
+      null;
+
+    return;
   }
 
   /**
@@ -360,6 +371,9 @@ module.exports = function (Person) {
   Person.observe('before save', function (context, next) {
     // normalize geo-points
     normalizeGeolocationCoordinates(context);
+
+    // set usual place of residence locationId
+    setUsualPlaceOfResidenceLocationId(context);
 
     // get context data
     const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
@@ -1176,34 +1190,34 @@ module.exports = function (Person) {
     // duplicate rules
     if (targetBody.firstName && targetBody.lastName) {
       query.$or.push(
-        buildRuleFilterPart({ firstName: targetBody.firstName, lastName: targetBody.lastName }),
-        buildRuleFilterPart({ firstName: targetBody.lastName, lastName: targetBody.firstName }),
-        buildRuleFilterPart({ firstName: targetBody.firstName, middleName: targetBody.lastName }),
-        buildRuleFilterPart({ firstName: targetBody.lastName, middleName: targetBody.firstName }),
-        buildRuleFilterPart({ lastName: targetBody.firstName, middleName: targetBody.lastName }),
-        buildRuleFilterPart({ lastName: targetBody.lastName, middleName: targetBody.firstName })
+        buildRuleFilterPart({firstName: targetBody.firstName, lastName: targetBody.lastName}),
+        buildRuleFilterPart({firstName: targetBody.lastName, lastName: targetBody.firstName}),
+        buildRuleFilterPart({firstName: targetBody.firstName, middleName: targetBody.lastName}),
+        buildRuleFilterPart({firstName: targetBody.lastName, middleName: targetBody.firstName}),
+        buildRuleFilterPart({lastName: targetBody.firstName, middleName: targetBody.lastName}),
+        buildRuleFilterPart({lastName: targetBody.lastName, middleName: targetBody.firstName})
       );
     }
 
     if (targetBody.firstName && targetBody.middleName) {
       query.$or.push(
-        buildRuleFilterPart({ firstName: targetBody.firstName, middleName: targetBody.middleName }),
-        buildRuleFilterPart({ firstName: targetBody.middleName, middleName: targetBody.firstName }),
-        buildRuleFilterPart({ firstName: targetBody.firstName, lastName: targetBody.middleName }),
-        buildRuleFilterPart({ firstName: targetBody.middleName, lastName: targetBody.firstName }),
-        buildRuleFilterPart({ lastName: targetBody.firstName, middleName: targetBody.middleName }),
-        buildRuleFilterPart({ lastName: targetBody.middleName, middleName: targetBody.firstName })
+        buildRuleFilterPart({firstName: targetBody.firstName, middleName: targetBody.middleName}),
+        buildRuleFilterPart({firstName: targetBody.middleName, middleName: targetBody.firstName}),
+        buildRuleFilterPart({firstName: targetBody.firstName, lastName: targetBody.middleName}),
+        buildRuleFilterPart({firstName: targetBody.middleName, lastName: targetBody.firstName}),
+        buildRuleFilterPart({lastName: targetBody.firstName, middleName: targetBody.middleName}),
+        buildRuleFilterPart({lastName: targetBody.middleName, middleName: targetBody.firstName})
       );
     }
 
     if (targetBody.middleName && targetBody.lastName) {
       query.$or.push(
-        buildRuleFilterPart({ middleName: targetBody.middleName, lastName: targetBody.lastName }),
-        buildRuleFilterPart({ middleName: targetBody.lastName, lastName: targetBody.middleName }),
-        buildRuleFilterPart({ middleName: targetBody.middleName, firstName: targetBody.lastName }),
-        buildRuleFilterPart({ middleName: targetBody.lastName, firstName: targetBody.middleName }),
-        buildRuleFilterPart({ lastName: targetBody.middleName, firstName: targetBody.lastName }),
-        buildRuleFilterPart({ lastName: targetBody.lastName, firstName: targetBody.middleName })
+        buildRuleFilterPart({middleName: targetBody.middleName, lastName: targetBody.lastName}),
+        buildRuleFilterPart({middleName: targetBody.lastName, lastName: targetBody.middleName}),
+        buildRuleFilterPart({middleName: targetBody.middleName, firstName: targetBody.lastName}),
+        buildRuleFilterPart({middleName: targetBody.lastName, firstName: targetBody.middleName}),
+        buildRuleFilterPart({lastName: targetBody.middleName, firstName: targetBody.lastName}),
+        buildRuleFilterPart({lastName: targetBody.lastName, firstName: targetBody.middleName})
       );
     }
 

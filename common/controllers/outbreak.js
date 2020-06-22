@@ -162,20 +162,6 @@ module.exports = function (Outbreak) {
   });
 
   /**
-   * Attach before remote (GET outbreaks/{id}/cases/filtered-count) hooks
-   */
-  Outbreak.beforeRemote('prototype.filteredCountCases', function (context, modelInstance, next) {
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
-  });
-  Outbreak.beforeRemote('prototype.filteredCountCases', (context, modelInstance, next) => {
-    // remove custom filter options
-    context.args = context.args || {};
-    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
-
-    Outbreak.helpers.findAndFilteredCountCasesBackCompat(context, modelInstance, next);
-  });
-
-  /**
    * Attach before remote (GET outbreaks/{id}/cases/per-classification/count) hooks
    */
   Outbreak.beforeRemote('prototype.countCasesPerClassification', function (context, modelInstance, next) {
@@ -8729,46 +8715,6 @@ module.exports = function (Outbreak) {
         } else {
           return callback(null, records);
         }
-      })
-      .catch(callback);
-  };
-
-  /**
-   * Count outbreak cases
-   * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
-   * @param callback
-   */
-  Outbreak.prototype.filteredCountCases = function (filter, callback) {
-    // pre-filter using related data (case)
-    app.models.case
-      .preFilterForOutbreak(this, filter)
-      .then(function (filter) {
-        // fix for some filter options received from web ( e.g $elemMatch search in array properties )
-        filter = filter || {};
-        Object.assign(
-          filter,
-          app.utils.remote.convertLoopbackFilterToMongo({
-            where: filter.where || {}
-          })
-        );
-
-        // replace nested geo points filters
-        app.utils.remote.convertNestedGeoPointsFilterToMongo(
-          app.models.case,
-          filter.where,
-          true,
-          undefined,
-          true
-        );
-
-        // handle custom filter options
-        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
-
-        // count using query
-        return app.models.case.count(filter.where);
-      })
-      .then(function (cases) {
-        callback(null, cases);
       })
       .catch(callback);
   };

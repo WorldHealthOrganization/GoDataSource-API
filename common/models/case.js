@@ -663,30 +663,81 @@ module.exports = function (Case) {
   };
 
   /**
-   * Pre-filter cases for an outbreak using related models (relationship)
+   * Pre-filter cases for an outbreak
+   * Pre-filter for geographical restrictions
+   * Pre-filter using related models (relationship, labResult)
    * @param outbreak
    * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
+   * @param options
    * @return {Promise<void | never>}
    */
-  Case.preFilterForOutbreak = function (outbreak, filter) {
+  Case.preFilterForOutbreak = function (outbreak, filter, options) {
     // set a default filter
     filter = filter || {};
+
     // get relationship query, if any
     let relationshipQuery = _.get(filter, 'where.relationship');
     // if found, remove it form main query
     if (relationshipQuery) {
       delete filter.where.relationship;
     }
+
     // get labResults query, if any
     let labResultsQuery = _.get(filter, 'where.labResult');
     // if found, remove it form main query
     if (labResultsQuery) {
       delete filter.where.labResult;
     }
+
+    /**
+     * Add geographical restriction on data for logged in user
+     * @param context
+     * @param where
+     * @returns {Promise<unknown>|Promise<T>|Promise<void>}
+     */
+    let addGeographicalRestrictions = (context, where) => {
+      let loggedInUser = context.req.authData.user;
+      let outbreak = context.instance;
+
+      if (!app.models.user.helpers.applyGeographicRestrictions(loggedInUser, outbreak)) {
+        // no need to apply geographic restrictions
+        return Promise.resolve();
+      }
+
+      // get user allowed locations
+      return app.models.user.cache
+        .getUserLocationsIds(loggedInUser.id)
+        .then(userAllowedLocationsIds => {
+          if (!userAllowedLocationsIds.length) {
+            // need to get data from all locations
+            return Promise.resolve();
+          }
+
+          // update where to only query for allowed locations
+          return Promise.resolve({
+            and: [
+              {
+                // get models for the calculated locations and the ones that don't have a usual place of residence location set
+                usualPlaceOfResidenceLocationId: {
+                  inq: userAllowedLocationsIds.concat([null])
+                }
+              },
+              where
+            ]
+          });
+        });
+    };
+
     // get main cases query
     let casesQuery = _.get(filter, 'where', {});
-    // start with a resolved promise (so we can link others)
-    let buildQuery = Promise.resolve();
+
+    // start with the geographical restrictions promise (so we can link others)
+    let buildQuery = addGeographicalRestrictions(options.remotingContext, casesQuery)
+      .then(updatedFilter => {
+        // update casesQuery if needed
+        updatedFilter && (casesQuery = updatedFilter);
+      });
+
     // if a relationship query is present
     if (relationshipQuery) {
       // restrict query to current outbreak
@@ -717,6 +768,7 @@ module.exports = function (Case) {
             });
         });
     }
+
     // if lab results query is present
     if (labResultsQuery) {
       // filter lab results based on query
@@ -751,6 +803,7 @@ module.exports = function (Case) {
             });
         });
     }
+
     return buildQuery
       .then(function (caseIds) {
         // if caseIds filter present
@@ -767,6 +820,7 @@ module.exports = function (Case) {
             ]
           };
         }
+
         // restrict cases query to current outbreak
         casesQuery = {
           and: [

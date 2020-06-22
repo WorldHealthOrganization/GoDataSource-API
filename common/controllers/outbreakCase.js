@@ -10,6 +10,61 @@ const genericHelpers = require('../../components/helpers');
 
 module.exports = function (Outbreak) {
   /**
+   * Attach before remote (GET outbreaks/{id}/cases/filtered-count) hooks
+   */
+  Outbreak.beforeRemote('prototype.filteredCountCases', function (context, modelInstance, next) {
+    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
+  });
+  Outbreak.beforeRemote('prototype.filteredCountCases', (context, modelInstance, next) => {
+    // remove custom filter options
+    context.args = context.args || {};
+    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+
+    Outbreak.helpers.findAndFilteredCountCasesBackCompat(context, modelInstance, next);
+  });
+
+  /**
+   * Count outbreak cases
+   * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountCases = function (filter, options, callback) {
+    // pre-filter using related data (case)
+    app.models.case
+      .preFilterForOutbreak(this, filter, options)
+      .then(function (filter) {
+        // fix for some filter options received from web ( e.g $elemMatch search in array properties )
+        filter = filter || {};
+        Object.assign(
+          filter,
+          app.utils.remote.convertLoopbackFilterToMongo({
+            where: filter.where || {}
+          })
+        );
+
+        // replace nested geo points filters
+        app.utils.remote.convertNestedGeoPointsFilterToMongo(
+          app.models.case,
+          filter.where,
+          true,
+          undefined,
+          true
+        );
+
+        // handle custom filter options
+        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
+
+        // count using query
+        return app.models.case.count(filter.where);
+      })
+      .then(function (cases) {
+        callback(null, cases);
+      })
+      .catch(callback);
+  };
+
+  /**
    * Attach before remote (GET outbreaks/{id}/cases) hooks
    */
   Outbreak.beforeRemote('prototype.findCases', function (context, modelInstance, next) {
@@ -32,45 +87,18 @@ module.exports = function (Outbreak) {
   });
 
   /**
-   * Add geographical restriction on data for logged in user
-   */
-  Outbreak.beforeRemote('prototype.findCases', (context, modelInstance, next) => {
-    let loggedInUser = context.req.authData.user;
-    let outbreak = context.instance;
-
-    if (!app.models.user.helpers.applyGeographicRestrictions(loggedInUser, outbreak)) {
-      // no need to apply geographic restrictions
-      return next();
-    }
-
-    // get user allowed locations
-    app.models.user.cache
-      .getUserLocationsIds(loggedInUser.id)
-      .then(userAllowedLocationsIds => {
-        if (!userAllowedLocationsIds.length) {
-          // need to get data from all locations
-          return next();
-        }
-
-        // update filter to only query for allowed locations
-
-        return next();
-      })
-      .catch(next);
-  });
-
-  /**
    * Find outbreak cases
    * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.findCases = function (filter, callback) {
+  Outbreak.prototype.findCases = function (filter, options, callback) {
     const outbreakId = this.outbreakId;
     const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
 
     // pre-filter using related data (case)
     app.models.case
-      .preFilterForOutbreak(this, filter)
+      .preFilterForOutbreak(this, filter, options)
       .then(function (filter) {
         // fix for some filter options received from web ( e.g $elemMatch search in array properties )
         filter = filter || {};
