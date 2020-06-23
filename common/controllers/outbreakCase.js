@@ -143,4 +143,28 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Get bars cot data
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.getBarsTransmissionChains = function (filter, options, callback) {
+    app.models.person.getBarsTransmissionChainsData(this.id, filter, options, callback);
+  };
+
+  /**
+   * Count cases stratified by classification over reporting time
+   * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.countCasesStratifiedByClassificationOverReportingTime = function (filter, options, callback) {
+    app.models.case.countStratifiedByClassificationOverReportingTime(this, filter, options)
+      .then(function (result) {
+        callback(null, result);
+      })
+      .catch(callback);
+  };
 };

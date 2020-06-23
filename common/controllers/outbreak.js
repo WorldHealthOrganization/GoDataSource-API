@@ -10058,19 +10058,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Count cases stratified by classification over reporting time
-   * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
-   * @param callback
-   */
-  Outbreak.prototype.countCasesStratifiedByClassificationOverReportingTime = function (filter, callback) {
-    app.models.case.countStratifiedByClassificationOverReportingTime(this, filter)
-      .then(function (result) {
-        callback(null, result);
-      })
-      .catch(callback);
-  };
-
-  /**
    * Get contacts follow up report per date range
    * @param dateRange
    * @param callback
@@ -10110,15 +10097,6 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countFollowUpsGroupedByContact = function (filter, callback) {
     app.models.followUp.getOrCountGroupedByPerson(this.id, filter, true, callback);
-  };
-
-  /**
-   * Get bars cot data
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.getBarsTransmissionChains = function (filter, callback) {
-    app.models.person.getBarsTransmissionChainsData(this.id, filter, callback);
   };
 
   /**

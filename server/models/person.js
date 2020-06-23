@@ -1436,193 +1436,230 @@ module.exports = function (Person) {
   };
 
   /**
+   * Add geographical restriction in where prop of the filter for logged in user
+   * Note: The updated where filter is returned by the Promise; If there filter doesn't need to be updated nothing will be returned
+   * @param context Remoting context from which to get logged in user and outbreak
+   * @param where Where filter from which to start
+   * @returns {Promise<unknown>|Promise<T>|Promise<void>}
+   */
+  Person.addGeographicalRestrictions = (context, where) => {
+    let loggedInUser = context.req.authData.user;
+    let outbreak = context.instance;
+
+    if (!app.models.user.helpers.applyGeographicRestrictions(loggedInUser, outbreak)) {
+      // no need to apply geographic restrictions
+      return Promise.resolve();
+    }
+
+    // get user allowed locations
+    return app.models.user.cache
+      .getUserLocationsIds(loggedInUser.id)
+      .then(userAllowedLocationsIds => {
+        if (!userAllowedLocationsIds.length) {
+          // need to get data from all locations
+          return Promise.resolve();
+        }
+
+        let updatedFilter;
+
+        // update where to only query for allowed locations
+        return Promise.resolve({
+          and: [
+            {
+              // get models for the calculated locations and the ones that don't have a usual place of residence location set
+              usualPlaceOfResidenceLocationId: {
+                inq: userAllowedLocationsIds.concat([null])
+              }
+            },
+            where
+          ]
+        });
+      });
+  };
+
+  /**
    * Get bar transmission chains data
    * @param outbreakId
    * @param filter
+   * @param options
    * @param callback
    */
-  Person.getBarsTransmissionChainsData = function (outbreakId, filter, callback) {
+  Person.getBarsTransmissionChainsData = function (outbreakId, filter, options, callback) {
     // convert filter to mongodb filter structure
     filter = filter || {};
     filter.where = filter.where || {};
 
-    // parse filter
-    const parsedFilter = app.utils.remote.convertLoopbackFilterToMongo(
-      {
-        $and: [
-          // make sure we're only retrieve cases from the current outbreak
+    // update filter for geographical restriction if needed
+    Person
+      .addGeographicalRestrictions(options.remotingContext, filter.where)
+      .then(updatedFilter => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        // parse filter
+        const parsedFilter = app.utils.remote.convertLoopbackFilterToMongo(
           {
-            outbreakId: outbreakId
-          },
+            $and: [
+              // make sure we're only retrieve cases from the current outbreak
+              {
+                outbreakId: outbreakId,
+                // retrieve only non-deleted records
+                deleted: {
+                  $ne: true
+                },
+                // retrieve cases & events
+                type: {
+                  $in: [
+                    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                  ]
+                },
+                // remove discarded cases
+                // shouldn't affect events since there we don't have classification and we use a nin condition
+                classification: {
+                  nin: app.models.case.discardedCaseClassifications
+                }
+              },
 
-          // retrieve only non-deleted records
+              // conditions coming from request
+              filter.where
+            ]
+          });
+
+        // query aggregation
+        const aggregatePipeline = [
+          // match conditions
           {
-            $or: [{
-              deleted: false
-            }, {
-              deleted: {
-                $eq: null
-              }
-            }]
+            $match: parsedFilter
           },
 
-          // retrieve cases & events
+          // retrieve lab results for cases
           {
-            type: {
-              $in: [
-                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
-              ]
+            $lookup: {
+              from: 'labResult',
+              localField: '_id',
+              foreignField: 'personId',
+              as: 'labResults'
             }
           },
 
-          // remove discarded cases
-          // shouldn't affect events since there we don't have classification and we use a nin condition
+          // retrieve relationships where case / event is source
           {
-            classification: {
-              nin: app.models.case.discardedCaseClassifications
+            $lookup: {
+              from: 'relationship',
+              localField: '_id',
+              foreignField: 'persons.id',
+              as: 'relationships'
             }
           },
 
-          // conditions coming from request
-          filter.where
-        ]
-      });
+          // filter & retrieve only needed data
+          {
+            $project: {
+              // case / event fields
+              id: '$_id',
+              visualId: 1,
+              type: 1,
+              firstName: {
+                $cond: {
+                  if: {$eq: ['$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']},
+                  then: '$name',
+                  else: '$firstName'
+                }
+              },
+              lastName: 1,
+              date: {
+                $cond: {
+                  if: {$eq: ['$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']},
+                  then: '$date',
+                  else: '$dateOfOnset'
+                }
+              },
+              outcomeId: 1,
+              dateOfOutcome: 1,
+              safeBurial: 1,
+              dateOfBurial: 1,
+              addresses: {
+                $cond: {
+                  if: {$eq: ['$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']},
+                  then: ['$address'],
+                  else: '$addresses'
+                }
+              },
+              dateRanges: {
+                $map: {
+                  input: '$dateRanges',
+                  as: 'dateRange',
+                  in: {
+                    typeId: '$$dateRange.typeId',
+                    locationId: '$$dateRange.locationId',
+                    startDate: '$$dateRange.startDate',
+                    endDate: '$$dateRange.endDate',
+                    centerName: '$$dateRange.centerName'
+                  }
+                }
+              },
 
-    // query aggregation
-    const aggregatePipeline = [
-      // match conditions
-      {
-        $match: parsedFilter
-      },
-
-      // retrieve lab results for cases
-      {
-        $lookup: {
-          from: 'labResult',
-          localField: '_id',
-          foreignField: 'personId',
-          as: 'labResults'
-        }
-      },
-
-      // retrieve relationships where case / event is source
-      {
-        $lookup: {
-          from: 'relationship',
-          localField: '_id',
-          foreignField: 'persons.id',
-          as: 'relationships'
-        }
-      },
-
-      // filter & retrieve only needed data
-      {
-        $project: {
-          // case / event fields
-          id: '$_id',
-          visualId: 1,
-          type: 1,
-          firstName: {
-            $cond: {
-              if: {$eq: ['$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']},
-              then: '$name',
-              else: '$firstName'
-            }
-          },
-          lastName: 1,
-          date: {
-            $cond: {
-              if: {$eq: ['$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']},
-              then: '$date',
-              else: '$dateOfOnset'
-            }
-          },
-          outcomeId: 1,
-          dateOfOutcome: 1,
-          safeBurial: 1,
-          dateOfBurial: 1,
-          addresses: {
-            $cond: {
-              if: {$eq: ['$type', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']},
-              then: ['$address'],
-              else: '$addresses'
-            }
-          },
-          dateRanges: {
-            $map: {
-              input: '$dateRanges',
-              as: 'dateRange',
-              in: {
-                typeId: '$$dateRange.typeId',
-                locationId: '$$dateRange.locationId',
-                startDate: '$$dateRange.startDate',
-                endDate: '$$dateRange.endDate',
-                centerName: '$$dateRange.centerName'
-              }
-            }
-          },
-
-          // lab results fields
-          labResults: {
-            $map: {
-              input: {
-                $filter: {
-                  input: '$labResults',
+              // lab results fields
+              labResults: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: '$labResults',
+                      as: 'lab',
+                      cond: {
+                        $or: [{
+                          $eq: ['$$lab.deleted', false]
+                        }, {
+                          $eq: ['$$lab.deleted', null]
+                        }]
+                      }
+                    }
+                  },
                   as: 'lab',
-                  cond: {
-                    $or: [{
-                      $eq: ['$$lab.deleted', false]
-                    }, {
-                      $eq: ['$$lab.deleted', null]
-                    }]
+                  in: {
+                    dateOfResult: '$$lab.dateOfResult',
+                    dateSampleTaken: '$$lab.dateSampleTaken',
+                    testType: '$$lab.testType',
+                    result: '$$lab.result'
                   }
                 }
               },
-              as: 'lab',
-              in: {
-                dateOfResult: '$$lab.dateOfResult',
-                dateSampleTaken: '$$lab.dateSampleTaken',
-                testType: '$$lab.testType',
-                result: '$$lab.result'
-              }
-            }
-          },
 
-          // relationship fields
-          relationships: {
-            $map: {
-              input: {
-                $filter: {
-                  input: '$relationships',
+              // relationship fields
+              relationships: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: '$relationships',
+                      as: 'rel',
+                      cond: {
+                        $or: [{
+                          $eq: ['$$rel.deleted', false]
+                        }, {
+                          $eq: ['$$rel.deleted', null]
+                        }]
+                      }
+                    }
+                  },
                   as: 'rel',
-                  cond: {
-                    $or: [{
-                      $eq: ['$$rel.deleted', false]
-                    }, {
-                      $eq: ['$$rel.deleted', null]
-                    }]
+                  in: {
+                    persons: '$$rel.persons'
                   }
                 }
-              },
-              as: 'rel',
-              in: {
-                persons: '$$rel.persons'
               }
             }
           }
-        }
-      }
-    ];
+        ];
 
-    // run request to db
-    const cursor = app.dataSources.mongoDb.connector
-      .collection('person')
-      .aggregate(aggregatePipeline);
+        // run request to db
+        const cursor = app.dataSources.mongoDb.connector
+          .collection('person')
+          .aggregate(aggregatePipeline);
 
-    // get the records from the cursor
-    cursor
-      .toArray()
+        // get the records from the cursor
+        return cursor.toArray();
+      })
       .then((records) => {
         // sort by date method
         const compareDates = (date1, date2) => {

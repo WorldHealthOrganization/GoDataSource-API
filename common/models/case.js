@@ -487,9 +487,10 @@ module.exports = function (Case) {
    * Count cases stratified by classification over reporting time
    * @param outbreak
    * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
+   * @param options Options from request
    * @return {PromiseLike<T | never>}
    */
-  Case.countStratifiedByClassificationOverReportingTime = function (outbreak, filter) {
+  Case.countStratifiedByClassificationOverReportingTime = function (outbreak, filter, options) {
     return Case.countStratifiedByCategoryOverTime(
       outbreak,
       'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION',
@@ -689,50 +690,11 @@ module.exports = function (Case) {
       delete filter.where.labResult;
     }
 
-    /**
-     * Add geographical restriction on data for logged in user
-     * @param context
-     * @param where
-     * @returns {Promise<unknown>|Promise<T>|Promise<void>}
-     */
-    let addGeographicalRestrictions = (context, where) => {
-      let loggedInUser = context.req.authData.user;
-      let outbreak = context.instance;
-
-      if (!app.models.user.helpers.applyGeographicRestrictions(loggedInUser, outbreak)) {
-        // no need to apply geographic restrictions
-        return Promise.resolve();
-      }
-
-      // get user allowed locations
-      return app.models.user.cache
-        .getUserLocationsIds(loggedInUser.id)
-        .then(userAllowedLocationsIds => {
-          if (!userAllowedLocationsIds.length) {
-            // need to get data from all locations
-            return Promise.resolve();
-          }
-
-          // update where to only query for allowed locations
-          return Promise.resolve({
-            and: [
-              {
-                // get models for the calculated locations and the ones that don't have a usual place of residence location set
-                usualPlaceOfResidenceLocationId: {
-                  inq: userAllowedLocationsIds.concat([null])
-                }
-              },
-              where
-            ]
-          });
-        });
-    };
-
     // get main cases query
     let casesQuery = _.get(filter, 'where', {});
 
     // start with the geographical restrictions promise (so we can link others)
-    let buildQuery = addGeographicalRestrictions(options.remotingContext, casesQuery)
+    let buildQuery = Case.addGeographicalRestrictions(options.remotingContext, casesQuery)
       .then(updatedFilter => {
         // update casesQuery if needed
         updatedFilter && (casesQuery = updatedFilter);
