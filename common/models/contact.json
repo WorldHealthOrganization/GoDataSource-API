@@ -53,6 +53,29 @@
               }
             }
           }
+        },
+        {
+          "relation": "labResults",
+          "operations": {
+            "restore": {
+              "where": {
+                "deletedByParent": ":FK_UUID"
+              },
+              "set": {
+                "deletedByParent": null
+              }
+            },
+            "delete": {
+              "where": {
+                "deletedByParent": {
+                  "eq": null
+                }
+              },
+              "set": {
+                "deletedByParent": ":FK_UUID"
+              }
+            }
+          }
         }
       ]
     }
