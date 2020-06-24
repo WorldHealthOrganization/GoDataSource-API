@@ -174,15 +174,20 @@ module.exports = function (LabResult) {
             ]
           };
         }
+
         // restrict lab results query to current outbreak
-        labResultsQuery = {
-          $and: [
-            labResultsQuery,
-            {
-              outbreakId: outbreak.id
-            }
-          ]
+        const labResultsDefaultQuery = {
+          outbreakId: outbreak.id
         };
+        labResultsQuery = _.isEmpty(labResultsQuery) ?
+          labResultsDefaultQuery : {
+            $and: [
+              labResultsQuery,
+              labResultsDefaultQuery
+            ]
+          };
+
+        // finished
         return Object.assign(filter, app.utils.remote.convertLoopbackFilterToMongo({where: labResultsQuery}));
       });
   };
