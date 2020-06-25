@@ -116,6 +116,9 @@
     },
     "setRelationshipInformationOnPerson": {
       "batchSize": 10000
+    },
+    "setUsualPlaceOfResidenceLocationIdOnPerson": {
+      "batchSize": 10000
     }
   }
 }
