@@ -46,6 +46,80 @@ module.exports = function (Location) {
     }
   };
 
+  // cache functionality for Location model
+  Location.cache = {
+    // cache functions
+    /**
+     * Given a location ID or an array of locations IDs return an array containing the given locations IDs and sub-locations IDs
+     * Also updates cache contents
+     * @param locationsIds Array or single location ID
+     * @returns {Promise<unknown>}
+     */
+    getSublocationsIds: function (locationsIds) {
+      // check input
+      if (!locationsIds || !locationsIds.length) {
+        // dev error; shouldn't get here
+        return Promise.reject(app.utils.apiError.getError('INTERNAL_ERROR'));
+      }
+
+      // normalize input so the code will always use array
+      (!Array.isArray(locationsIds)) && (locationsIds = [locationsIds]);
+
+      // get cache
+      let locationCache = this;
+
+      // construct returned promise
+      return new Promise((resolve, reject) => {
+        // loop through the locations IDs and run Async calculation jobs for retrieving sub-locations IDs
+        return async.parallelLimit(locationsIds.map(locationId => {
+          // check for cached entry
+          if (locationCache.subLocationsIds[locationId]) {
+            return cb => cb(null, locationCache.subLocationsIds[locationId]);
+          }
+
+          // no cached entry; get data and cache it
+          // Note: Could have called getSubLocations with an array of locations IDs
+          // however we wouldn't have been able to construct the cache from the result
+          return cb => {
+            return Location.getSubLocations([locationId], [], (err, result) => {
+              if (err) {
+                return cb(err);
+              }
+
+              // cache result
+              locationCache.subLocationsIds[locationId] = result;
+
+              return cb(null, result);
+            });
+          };
+        }), 10, (err, results) => {
+          if (err) {
+            return reject(err);
+          }
+
+          // construct the result
+          let result = [];
+          results.forEach(res => {
+            result = result.concat(res);
+          });
+
+          return resolve([...new Set(result)]);
+        });
+      });
+    },
+    /**
+     * Reset cache
+     */
+    reset: function () {
+      // reset all cache properties
+      this.subLocationsIds = {};
+    },
+
+    // cache contents
+    // map of location ID to getSubLocations function result
+    subLocationsIds: {}
+  };
+
   /**
    * Get sub-locations for a list of locations. Result is an array of location IDs
    * @param parentLocations Array of location Ids for which to get the sublocations
@@ -703,6 +777,21 @@ module.exports = function (Location) {
   });
 
   /**
+   * After save hook
+   * @param ctx
+   * @param next
+   */
+  Location.observe('after save', function (ctx, next) {
+    // reset location cache
+    Location.cache.reset();
+
+    // reset user cache
+    app.models.user.cache.reset();
+
+    return next();
+  });
+
+  /**
    * Do not allow the deletion of a location if it still has sub-locations
    * @param ctx
    * @param next
@@ -711,6 +800,21 @@ module.exports = function (Location) {
     Location.checkIfCanDelete(ctx.currentInstance.id)
       .then(() => next())
       .catch(next);
+  });
+
+  /**
+   * After delete hook
+   * @param ctx
+   * @param next
+   */
+  Location.observe('after delete', function (ctx, next) {
+    // reset cache
+    Location.cache.reset();
+
+    // reset user cache
+    app.models.user.cache.reset();
+
+    return next();
   });
 
   /**

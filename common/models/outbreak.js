@@ -47,7 +47,8 @@ module.exports = function (Outbreak) {
     'arcGisServers[].name': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_NAME',
     'arcGisServers[].url': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_URL',
     isContactLabResultsActive: 'LNG_OUTBREAK_FIELD_LABEL_IS_CONTACT_LAB_RESULTS_ACTIVE',
-    isDateOfOnsetRequired: 'LNG_OUTBREAK_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED'
+    isDateOfOnsetRequired: 'LNG_OUTBREAK_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED',
+    applyGeographicRestrictions: 'LNG_OUTBREAK_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS'
   });
 
   Outbreak.referenceDataFieldsToCategoryMap = {
@@ -1904,6 +1905,35 @@ module.exports = function (Outbreak) {
         }
       });
     });
+  };
+
+  /**
+   * Backwards compatibility for find, filtered-count and per-classification count cases filters
+   * @param context
+   * @param modelInstance
+   * @param next
+   */
+  Outbreak.helpers.findAndFilteredCountCasesBackCompat = function (context, modelInstance, next) {
+    // get filter
+    const filter = _.get(context, 'args.filter', {});
+    // convert filters from old format into the new one
+    let query = app.utils.remote.searchByRelationProperty
+      .convertIncludeQueryToFilterQuery(filter);
+    // get relationship query, if any
+    const queryRelationship = _.get(filter, 'where.relationship');
+    // if there is no relationship query, but there is an older version of the filter
+    if (!queryRelationship && query.relationships) {
+      // use that old version
+      _.set(filter, 'where.relationship', query.relationships);
+    }
+    // get relationship query, if any
+    const queryLabResults = _.get(filter, 'where.labResult');
+    // if there is no relationship query, but there is an older version of the filter
+    if (!queryLabResults && query.labResults) {
+      // use that old version
+      _.set(filter, 'where.labResult', query.labResults);
+    }
+    next();
   };
 
   /**

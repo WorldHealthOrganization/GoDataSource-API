@@ -47,6 +47,10 @@ const addMissingDefaultValues = (callback) => {
           isDateOfOnsetRequired: {
             $exists: false
           }
+        }, {
+          applyGeographicRestrictions: {
+            $exists: false
+          }
         }]
       };
 
@@ -70,7 +74,8 @@ const addMissingDefaultValues = (callback) => {
               generateFollowUpsKeepTeamAssignment: 1,
               generateFollowUpsTeamAssignmentAlgorithm: 1,
               isContactLabResultsActive: 1,
-              isDateOfOnsetRequired: 1
+              isDateOfOnsetRequired: 1,
+              applyGeographicRestrictions: 1
             }
           })
           .toArray();
@@ -104,6 +109,11 @@ const addMissingDefaultValues = (callback) => {
         // isDateOfOnsetRequired
         if (data.isDateOfOnsetRequired === undefined) {
           setData.isDateOfOnsetRequired = templateDefinition.properties.isDateOfOnsetRequired.default;
+        }
+
+        // applyGeographicRestrictions
+        if (data.applyGeographicRestrictions === undefined) {
+          setData.applyGeographicRestrictions = templateDefinition.properties.applyGeographicRestrictions.default;
         }
 
         // update

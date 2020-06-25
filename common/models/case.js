@@ -333,9 +333,12 @@ module.exports = function (Case) {
    * @param exportedPropertyName
    * @param counterFn
    * @param filter
+   * @param options Options from request
    * @returns {PromiseLike<any | never>}
    */
-  Case.countStratifiedByCategoryOverTime = function (outbreak, referenceDataCategoryId, timePropertyName, exportedPropertyName, counterFn, filter) {
+  Case.countStratifiedByCategoryOverTime = function (outbreak, referenceDataCategoryId, timePropertyName, exportedPropertyName, counterFn, filter, options) {
+    !filter && (filter = {});
+
     // initialize periodType filter; default is day; accepting day/week/month
     let periodType, weekType, endDate;
     let periodTypes = {
@@ -417,6 +420,13 @@ module.exports = function (Case) {
           });
       })
       .then(function () {
+        // add geographical restrictions if needed
+        return Case.addGeographicalRestrictions(options.remotingContext, filter.where);
+      })
+      .then(updatedFilter => {
+        // update filter.where if needed
+        updatedFilter && (filter.where = updatedFilter);
+
         // find cases that have <timePropertyName> earlier then end of the period interval
         return app.models.case
           .rawFind(
@@ -453,16 +463,18 @@ module.exports = function (Case) {
    * Count cases stratified by classification over time
    * @param outbreak
    * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
+   * @param options Options from request
    * @return {PromiseLike<T | never>}
    */
-  Case.countStratifiedByClassificationOverTime = function (outbreak, filter) {
+  Case.countStratifiedByClassificationOverTime = function (outbreak, filter, options) {
     return Case.countStratifiedByCategoryOverTime(
       outbreak,
       'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION',
       'dateOfOnset',
       'classification',
       casesWorker.countStratifiedByClassificationOverTime,
-      filter
+      filter,
+      options
     );
   };
 
@@ -470,16 +482,18 @@ module.exports = function (Case) {
    * Count cases stratified by outcome over time
    * @param outbreak
    * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
+   * @param options Options from request
    * @return {PromiseLike<T | never>}
    */
-  Case.countStratifiedByOutcomeOverTime = function (outbreak, filter) {
+  Case.countStratifiedByOutcomeOverTime = function (outbreak, filter, options) {
     return Case.countStratifiedByCategoryOverTime(
       outbreak,
       'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
       'dateOfOutcome',
       'outcome',
       casesWorker.countStratifiedByOutcomeOverTime,
-      filter
+      filter,
+      options
     );
   };
 
@@ -487,16 +501,18 @@ module.exports = function (Case) {
    * Count cases stratified by classification over reporting time
    * @param outbreak
    * @param filter This applies on case record. Additionally you can specify a periodType and endDate in where property
+   * @param options Options from request
    * @return {PromiseLike<T | never>}
    */
-  Case.countStratifiedByClassificationOverReportingTime = function (outbreak, filter) {
+  Case.countStratifiedByClassificationOverReportingTime = function (outbreak, filter, options) {
     return Case.countStratifiedByCategoryOverTime(
       outbreak,
       'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION',
       'dateOfReporting',
       'classification',
       casesWorker.countStratifiedByClassificationOverReportingTime,
-      filter
+      filter,
+      options
     );
   };
 
@@ -504,27 +520,38 @@ module.exports = function (Case) {
    * Get a list of entries that show the delay between date of symptom onset and the lab testing for a case
    * @param outbreakId
    * @param filter
+   * @param options Options from request
    * @return {*}
    */
-  Case.delayBetweenOnsetAndLabTesting = function (outbreakId, filter) {
-    // find all cases that have date of onset defined and include their first lab result
+  Case.delayBetweenOnsetAndLabTesting = function (outbreakId, filter, options) {
+    !filter && (filter = {});
+
+    // add geographical restrictions if needed
     return Case
-      .rawFind(
-        app.utils.remote.convertLoopbackFilterToMongo(
-          app.utils.remote.mergeFilters({
-            where: {
-              outbreakId: outbreakId,
-              dateOfOnset: {
-                ne: null
+      .addGeographicalRestrictions(options.remotingContext, filter.where)
+      .then(updatedFilter => {
+        // update filter.where if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        // find all cases that have date of onset defined and include their first lab result
+        return Case
+          .rawFind(
+            app.utils.remote.convertLoopbackFilterToMongo(
+              app.utils.remote.mergeFilters({
+                where: {
+                  outbreakId: outbreakId,
+                  dateOfOnset: {
+                    ne: null
+                  }
+                }
+              }, filter || {})
+            ).where, {
+              order: {
+                dateOfOnset: 1
               }
             }
-          }, filter || {})
-        ).where, {
-          order: {
-            dateOfOnset: 1
-          }
-        }
-      )
+          );
+      })
       .then(function (cases) {
         // build a list of caseIds to get their lab results
         const caseIds = cases.map(caseRecord => caseRecord.id);
@@ -600,27 +627,38 @@ module.exports = function (Case) {
    * Get a list of entries that show the delay between date of symptom onset and the hospitalization/isolation dates a case
    * @param outbreakId
    * @param filter
+   * @param options Options from request
    * @returns {Promise<Array | never>}
    */
-  Case.delayBetweenOnsetAndHospitalisationIsolation = function (outbreakId, filter) {
-    // find all cases that have date of onset defined
+  Case.delayBetweenOnsetAndHospitalisationIsolation = function (outbreakId, filter, options) {
+    !filter && (filter = {});
+
+    // add geographical restrictions if needed
     return Case
-      .rawFind(
-        app.utils.remote.convertLoopbackFilterToMongo(
-          app.utils.remote.mergeFilters({
-            where: {
-              outbreakId: outbreakId,
-              dateOfOnset: {
-                ne: null
+      .addGeographicalRestrictions(options.remotingContext, filter.where)
+      .then(updatedFilter => {
+        // update filter.where if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        // find all cases that have date of onset defined
+        return Case
+          .rawFind(
+            app.utils.remote.convertLoopbackFilterToMongo(
+              app.utils.remote.mergeFilters({
+                where: {
+                  outbreakId: outbreakId,
+                  dateOfOnset: {
+                    ne: null
+                  }
+                }
+              }, filter || {})
+            ).where, {
+              order: {
+                dateOfOnset: 1
               }
             }
-          }, filter || {})
-        ).where, {
-          order: {
-            dateOfOnset: 1
-          }
-        }
-      )
+          );
+      })
       .then(function (cases) {
         // build the list of results
         const results = [];
@@ -663,30 +701,42 @@ module.exports = function (Case) {
   };
 
   /**
-   * Pre-filter cases for an outbreak using related models (relationship)
+   * Pre-filter cases for an outbreak
+   * Pre-filter for geographical restrictions
+   * Pre-filter using related models (relationship, labResult)
    * @param outbreak
    * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
+   * @param options
    * @return {Promise<void | never>}
    */
-  Case.preFilterForOutbreak = function (outbreak, filter) {
+  Case.preFilterForOutbreak = function (outbreak, filter, options) {
     // set a default filter
     filter = filter || {};
+
     // get relationship query, if any
     let relationshipQuery = _.get(filter, 'where.relationship');
     // if found, remove it form main query
     if (relationshipQuery) {
       delete filter.where.relationship;
     }
+
     // get labResults query, if any
     let labResultsQuery = _.get(filter, 'where.labResult');
     // if found, remove it form main query
     if (labResultsQuery) {
       delete filter.where.labResult;
     }
+
     // get main cases query
     let casesQuery = _.get(filter, 'where', {});
-    // start with a resolved promise (so we can link others)
-    let buildQuery = Promise.resolve();
+
+    // start with the geographical restrictions promise (so we can link others)
+    let buildQuery = Case.addGeographicalRestrictions(options.remotingContext, casesQuery)
+      .then(updatedFilter => {
+        // update casesQuery if needed
+        updatedFilter && (casesQuery = updatedFilter);
+      });
+
     // if a relationship query is present
     if (relationshipQuery) {
       // restrict query to current outbreak
@@ -717,6 +767,7 @@ module.exports = function (Case) {
             });
         });
     }
+
     // if lab results query is present
     if (labResultsQuery) {
       // filter lab results based on query
@@ -751,6 +802,7 @@ module.exports = function (Case) {
             });
         });
     }
+
     return buildQuery
       .then(function (caseIds) {
         // if caseIds filter present
@@ -767,6 +819,7 @@ module.exports = function (Case) {
             ]
           };
         }
+
         // restrict cases query to current outbreak
         casesQuery = {
           and: [

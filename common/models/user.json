@@ -7,7 +7,10 @@
     "ttl": 600
   },
   "scope": {
-    "order": ["lastName ASC", "firstName ASC"]
+    "order": [
+      "lastName ASC",
+      "firstName ASC"
+    ]
   },
   "properties": {
     "id": {
@@ -26,11 +29,15 @@
       "required": true
     },
     "roleIds": {
-      "type": ["string"],
+      "type": [
+        "string"
+      ],
       "required": true
     },
     "outbreakIds": {
-      "type": ["string"]
+      "type": [
+        "string"
+      ]
     },
     "activeOutbreakId": {
       "type": "string"
@@ -60,12 +67,19 @@
         }
       }
     },
-    "securityQuestions": ["securityQuestion"],
+    "securityQuestions": [
+      "securityQuestion"
+    ],
     "loginRetriesCount": {
       "type": "number"
     },
     "lastLoginDate": {
       "type": "date"
+    },
+    "disregardGeographicRestrictions": {
+      "description": "Flag specifying whether the outbreak setting for geographical restriction of data will be disregarded for the user",
+      "type": "boolean",
+      "default": false
     }
   },
   "indexes": {
@@ -84,7 +98,7 @@
     "UniqueValidator": true,
     "AuthorTimeStamp": true,
     "AuditLogger": true,
-    "SoftDelete" : true,
+    "SoftDelete": true,
     "AttachController": true,
     "IncludeCustomRelations": true,
     "DateProperty": true,

@@ -5435,6 +5435,12 @@
       },
       "LNG_OUTBREAK_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED_DESCRIPTION": {
         "translation": ""
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS": {
+        "translation": "Apply geographic restrictions in this outbreak"
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS_DESCRIPTION": {
+        "translation": ""
       }
     },
     "uiEntityFields": {
@@ -11079,6 +11085,12 @@
         "translation": "Primary Telephone"
       },
       "LNG_USER_FIELD_LABEL_PRIMARY_TELEPHONE_DESCRIPTION": {
+        "translation": ""
+      },
+      "LNG_USER_FIELD_LABEL_DISREGARD_GEOGRAPHIC_RESTRICTIONS": {
+        "translation": "Disregard geographic restrictions for this user"
+      },
+      "LNG_USER_FIELD_LABEL_DISREGARD_GEOGRAPHIC_RESTRICTIONS_DESCRIPTION": {
         "translation": ""
       }
     },
