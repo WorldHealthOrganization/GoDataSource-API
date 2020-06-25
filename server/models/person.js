@@ -1460,8 +1460,6 @@ module.exports = function (Person) {
           return Promise.resolve();
         }
 
-        let updatedFilter;
-
         // update where to only query for allowed locations
         return Promise.resolve({
           and: [
@@ -1471,7 +1469,7 @@ module.exports = function (Person) {
                 inq: userAllowedLocationsIds.concat([null])
               }
             },
-            where
+            where || {}
           ]
         });
       });

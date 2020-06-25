@@ -3050,7 +3050,7 @@ function exportFilteredModelsList(
       // parse questionnaire to get headers and tokens that need to be retrieved
       let parsedQuestionnaire;
       // TODO: loops through all records
-      if (!modelPropertiesExpandOnFlatFiles.questionnaireAnswers && options.questionnaire) {
+      if (!modelPropertiesExpandOnFlatFiles.questionnaireAnswers && options.questionnaire && options.questionnaire.length) {
         parsedQuestionnaire = getQuestionnaireVariablesMapping(
           options.questionnaire,
           'questionnaireAnswers',
@@ -3461,11 +3461,11 @@ function getQuestionnaireMaxAnswersMapNew(questionnaire, records) {
  * @param tokensToQuestionsMap Map of tokens to questions index in questions list; This map is filled in the function if useVariable is false
  * @param isNestedMultiDate Flag specifying if the questionnaire received is nested in another question
  * @param multiDateIndex Index for multi date answer
- * @returns {*[]|{translationPlaceholder: string, questionsList: *[], tokensToQuestionsMap: {}}}
+ * @returns {{}|{translationPlaceholder: string, questionsList: *[], tokensToQuestionsMap: {}}}
  */
 function getQuestionnaireVariablesMapping(questionnaire, idHeaderPrefix, useVariable, multiDateLengthsMap, questionsList, tokensToQuestionsMap, isNestedMultiDate, multiDateIndex) {
   if (_.isEmpty(questionnaire)) {
-    return [];
+    return {};
   }
 
   // initialize list of questions with info if not received
