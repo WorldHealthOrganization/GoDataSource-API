@@ -1793,6 +1793,18 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'contact_create_contact_of_contact',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_OF_CONTACT_FROM_CONTACT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_OF_CONTACT_FROM_CONTACT_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'contact_of_contact_create',
+
+            // used by create contact of contact
+            'contact_of_contact_view'
+          ]
+        },
+        {
           id: 'contact_create_bulk_contact_of_contact',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_OF_CONTACT_FROM_CONTACT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_OF_CONTACT_FROM_CONTACT_DESCRIPTION',
