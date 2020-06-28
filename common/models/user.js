@@ -268,6 +268,34 @@ module.exports = function (User) {
   };
 
   /**
+   * Get User allowed locations IDs
+   * @param context Remoting context from which to get logged in user and outbreak
+   * @returns {Promise<unknown>|Promise<T>|Promise<void>}
+   */
+  User.helpers.getUserAllowedLocationsIds = (context) => {
+    let loggedInUser = context.req.authData.user;
+    let outbreak = context.instance;
+
+    if (!User.helpers.applyGeographicRestrictions(loggedInUser, outbreak)) {
+      // user has no locations restrictions
+      return Promise.resolve();
+    }
+
+    // get user allowed locations
+    return User.cache
+      .getUserLocationsIds(loggedInUser.id)
+      .then(userAllowedLocationsIds => {
+        if (!userAllowedLocationsIds.length) {
+          // user has no locations restrictions
+          return Promise.resolve();
+        }
+
+        // return user allowed locations IDs
+        return Promise.resolve(userAllowedLocationsIds);
+      });
+  };
+
+  /**
    * Send password reset email
    */
   User.on('resetPasswordRequest', function (info) {
