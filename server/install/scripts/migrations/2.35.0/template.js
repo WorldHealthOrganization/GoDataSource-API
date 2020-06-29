@@ -44,6 +44,10 @@ const addMissingDefaultValues = (callback) => {
             $exists: false
           }
         }, {
+          isContactsOfContactsActive: {
+            $exists: false
+          }
+        }, {
           isDateOfOnsetRequired: {
             $exists: false
           }
@@ -74,6 +78,7 @@ const addMissingDefaultValues = (callback) => {
               generateFollowUpsKeepTeamAssignment: 1,
               generateFollowUpsTeamAssignmentAlgorithm: 1,
               isContactLabResultsActive: 1,
+              isContactsOfContactsActive: 1,
               isDateOfOnsetRequired: 1,
               applyGeographicRestrictions: 1
             }
@@ -104,6 +109,11 @@ const addMissingDefaultValues = (callback) => {
         // isContactLabResultsActive
         if (data.isContactLabResultsActive === undefined) {
           setData.isContactLabResultsActive = templateDefinition.properties.isContactLabResultsActive.default;
+        }
+
+        // isContactsOfContactsActive
+        if (data.isContactsOfContactsActive === undefined) {
+          setData.isContactsOfContactsActive = templateDefinition.properties.isContactsOfContactsActive.default;
         }
 
         // isDateOfOnsetRequired
