@@ -11732,6 +11732,12 @@
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED_DESCRIPTION": {
         "translation": ""
+      },
+      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS": {
+        "translation": "Apply geographic restrictions in this outbreak"
+      },
+      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS_DESCRIPTION": {
+        "translation": ""
       }
     },
     "uiOutbreakTemplateListPage": {
