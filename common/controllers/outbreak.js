@@ -83,6 +83,7 @@ module.exports = function (Outbreak) {
   require('./outbreakCase')(Outbreak);
   require('./outbreakRelationship')(Outbreak);
   require('./outbreakFollowUp')(Outbreak);
+  require('./outbreakLocation')(Outbreak);
 
   /**
    * Allow changing follow-up status (only status property)

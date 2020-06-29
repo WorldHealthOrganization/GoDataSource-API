@@ -6,6 +6,7 @@
  */
 
 const app = require('../../server/server');
+const _ = require('lodash');
 
 module.exports = function (Outbreak) {
   /**
@@ -24,7 +25,7 @@ module.exports = function (Outbreak) {
     }
 
     // get user allowed locations IDs
-    app.user.helpers
+    app.models.user.helpers
       .getUserAllowedLocationsIds(options.remotingContext)
       .then(userAllowedLocationsIds => {
         // if neither outbreak or user have location restrictions
@@ -34,18 +35,27 @@ module.exports = function (Outbreak) {
         }
 
         // there are locations restrictions; either from outbreak or user or both
-        let allowedLocationsIds;
+        let getAllowedLocationsIdsPromise;
         if (outbreakLocationIds && !userAllowedLocationsIds) {
           // only outbreak has restrictions
-          allowedLocationsIds = outbreakLocationIds;
+          getAllowedLocationsIdsPromise = Promise.resolve(outbreakLocationIds);
         } else if (!outbreakLocationIds && userAllowedLocationsIds) {
           // only user has restrictions
-          allowedLocationsIds = userAllowedLocationsIds;
+          getAllowedLocationsIdsPromise = Promise.resolve(userAllowedLocationsIds);
         } else {
           // both have restrictions; use intersection
-
+          // first get outbreak locations including sub-locations
+          getAllowedLocationsIdsPromise = app.models.location.cache
+            .getSublocationsIds(outbreakLocationIds)
+            .then(allOutbreakLocationIds => {
+              // get intersection
+              return Promise.resolve(allOutbreakLocationIds.filter(locationId => userAllowedLocationsIds.indexOf(locationId) !== -1));
+            });
         }
 
+        return getAllowedLocationsIdsPromise;
+      })
+      .then(allowedLocationsIds => {
         // initialize includeChildren filter
         let includeChildren;
         // check if the includeChildren filter was sent; accepting it only on the first level
@@ -117,9 +127,9 @@ module.exports = function (Outbreak) {
         // if we need to include children the allowed locations will also include the children
         // else the allowed locations are just the outbreak locations
         if (includeChildren) {
-          app.models.location.getSubLocations(outbreakLocationIds, [], getAllowedLocationsCallback);
+          app.models.location.getSubLocations(allowedLocationsIds, [], getAllowedLocationsCallback);
         } else {
-          getAllowedLocationsCallback(null, outbreakLocationIds);
+          getAllowedLocationsCallback(null, allowedLocationsIds);
         }
       })
       .catch(callback);

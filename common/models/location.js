@@ -154,7 +154,7 @@ module.exports = function (Location) {
       let locationsIdsToGetFromDBMap = {};
       let locationsIdsToGetFromDB = [];
       locationsIds.forEach(locationId => {
-        if (locationCache[locationId]) {
+        if (locationCache.subLocationsIds[locationId]) {
           // locationId is found in cache; this means all sub-locations are found in cache
           locationsAlreadyInCache = locationsAlreadyInCache.concat(locationCache._contructSubLocationsIdsFromCache(locationId));
         } else {
@@ -251,7 +251,7 @@ module.exports = function (Location) {
         });
 
         // consolidate them in the locations list
-        allLocationsIds = allLocationsIds.concat(locationsIdsToBeRetrievedNext);
+        allLocationsIds.push(...locationsIdsToBeRetrievedNext);
 
         // scan their children
         return locationCache._getSubLocationsAndConstructCache(locationsIdsToBeRetrievedNext, allLocationsIds, false);
@@ -269,7 +269,10 @@ module.exports = function (Location) {
           app.logger
         )
         .then(() => {
-          return [...new Set(allLocationsIds.concat(locationsAlreadyInCache))];
+          // locations that were already in cache were not retrieved again; add them now to the result
+          allLocationsIds.push(...locationsAlreadyInCache);
+          // keep unique values
+          return [...new Set(allLocationsIds)];
         });
     },
 
