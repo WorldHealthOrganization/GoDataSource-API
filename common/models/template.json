@@ -90,6 +90,10 @@
       "type": "boolean",
       "default": false
     },
+    "isContactsOfContactsActive": {
+      "type": "boolean",
+      "default": false
+    },
     "isDateOfOnsetRequired": {
       "description": "Flag specifying whether the case dateOfOnset property is required. Default: true",
       "type": "boolean",
