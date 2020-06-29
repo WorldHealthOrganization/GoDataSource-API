@@ -166,7 +166,7 @@
     },
     "isContactsOfContactsActive": {
       "type": "boolean",
-      "default": true
+      "default": false
     },
     "isDateOfOnsetRequired": {
       "description": "Flag specifying whether the case dateOfOnset property is required. Default: true",
