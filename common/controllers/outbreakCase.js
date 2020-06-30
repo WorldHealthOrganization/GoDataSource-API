@@ -470,7 +470,7 @@ module.exports = function (Outbreak) {
     const languageId = options.remotingContext.req.authData.user.languageId;
     // Get the dictionary so we can translate the case classifications and other necessary fields
     app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
-      app.models.person.getPeoplePerLocation('case', filter, self)
+      app.models.person.getPeoplePerLocation('case', filter, self, options)
         .then((result) => {
           // Get all existing case classification so we know how many rows the list will have
           return app.models.referenceData
@@ -1138,6 +1138,49 @@ module.exports = function (Outbreak) {
               });
             });
         });
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Return a collection of items that contain a location and the cases that belong to that location.
+   * Structure the data so that the response is consistent with other similar requests.
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countCasesPerLocationLevel = function (filter, options, callback) {
+    // define additional filter to exclude cases of no interest
+    const additionalFilter = {
+      where: {
+        classification: {
+          nin: app.models.case.discardedCaseClassifications
+        }
+      }
+    };
+
+    // Merge the additional filter with the filter provided by the user
+    const _filter = app.utils.remote.mergeFilters(additionalFilter, filter || {});
+
+    // count people per location
+    app.models.person.getPeoplePerLocation('case', _filter, this, options)
+      .then((result) => {
+        let response = {locations: []};
+        let allCasesCount = 0;
+        result.peopleDistribution.forEach((dataSet) => {
+          // ignore no location records
+          if (dataSet.location.id === app.models.location.noLocation.id) {
+            return;
+          }
+
+          // set data
+          dataSet.casesCount = dataSet.people.length;
+          allCasesCount += dataSet.people.length;
+          dataSet.caseIds = dataSet.people.map(caseModel => caseModel.id);
+          delete dataSet.people;
+          response.locations.push(dataSet);
+        });
+        response.count = allCasesCount;
+        callback(null, response);
       })
       .catch(callback);
   };

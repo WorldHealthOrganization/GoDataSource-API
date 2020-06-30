@@ -55,12 +55,12 @@ module.exports = function (Location) {
 
     // cache functions
     /**
-     * Given a location ID and it's parentLocationId update the cache entry
+     * Given a location ID set the cache entry if not already set
+     * Note: We will add empty entries for locations that don't have any children
      * @param locationId
-     * @param parentLocationId
      * @private
      */
-    _setParentLocationId: function (locationId, parentLocationId) {
+    _setCacheEntry: function (locationId) {
       // don't keep data in cache if cache is disabled
       if (!this.enabled) {
         return;
@@ -68,11 +68,8 @@ module.exports = function (Location) {
 
       // update cache entry
       if (!this.subLocationsIds[locationId]) {
-        this.subLocationsIds[locationId] = {
-          childrenIds: []
-        };
+        this.subLocationsIds[locationId] = {};
       }
-      this.subLocationsIds[locationId].parentId = parentLocationId;
     },
     /**
      * Given a location ID and one or multiple children IDs add them in the cache
@@ -90,15 +87,15 @@ module.exports = function (Location) {
       !Array.isArray(childrenIds) && (childrenIds = [childrenIds]);
 
       // update cache entry
-      if (!this.subLocationsIds[locationId]) {
-        this.subLocationsIds[locationId] = {
-          childrenIds: []
-        };
+      this._setCacheEntry(locationId);
+      if (!this.subLocationsIds[locationId].childrenIds) {
+        this.subLocationsIds[locationId].childrenIds = [];
       }
       this.subLocationsIds[locationId].childrenIds = this.subLocationsIds[locationId].childrenIds.concat(childrenIds);
     },
     /**
      * Follow cache and construct array of sub-locations IDs
+     * Note: Will return results only when locationId is in cache
      * @param locationId
      * @returns {[*]|*[]}
      * @private
@@ -113,7 +110,10 @@ module.exports = function (Location) {
       // add locationId to result
       let result = [locationId];
 
-      if (!locationCache.subLocationsIds[locationId].childrenIds.length) {
+      if (
+        !locationCache.subLocationsIds[locationId].childrenIds ||
+        !locationCache.subLocationsIds[locationId].childrenIds.length
+      ) {
         // location has no children; stop here
         return result;
       }
@@ -129,23 +129,15 @@ module.exports = function (Location) {
      * Result is an array of location IDs
      * @param locationsIds Array of location Ids for which to get the sub-locations
      * @param allLocationsIds Array on which to add the result; Must be an array of location IDs
-     * @param retrieveLocationsIds Flag specifying if the locationsIds need to also be retrieved; This should happen on the first request in order to get data to add in cache
      * @private
      */
-    _getSubLocationsAndConstructCache: function (locationsIds, allLocationsIds, retrieveLocationsIds = true) {
+    _getSubLocationsAndConstructCache: function (locationsIds, allLocationsIds) {
       const locationCache = this;
 
       // defensive checks
       if (!locationsIds || !locationsIds.length) {
         return Promise.resolve(allLocationsIds);
       }
-
-      // all locations include parent locations
-      locationsIds.forEach(function (location) {
-        if (allLocationsIds.indexOf(location) === -1) {
-          allLocationsIds.push(location);
-        }
-      });
 
       // loop through the locationsIds for which to get sub-locations
       // for some we might already have them in cache
@@ -154,50 +146,39 @@ module.exports = function (Location) {
       let locationsIdsToGetFromDBMap = {};
       let locationsIdsToGetFromDB = [];
       locationsIds.forEach(locationId => {
+        // add locationId in allLocationsIds
+        if (allLocationsIds.indexOf(locationId) === -1) {
+          allLocationsIds.push(locationId);
+        }
+
+        // check cache
         if (locationCache.subLocationsIds[locationId]) {
           // locationId is found in cache; this means all sub-locations are found in cache
           locationsAlreadyInCache = locationsAlreadyInCache.concat(locationCache._contructSubLocationsIdsFromCache(locationId));
         } else {
+          // add location in cache
+          locationCache._setCacheEntry(locationId);
+
           // get sub-locations from DB
           locationsIdsToGetFromDBMap[locationId] = true;
           locationsIdsToGetFromDB.push(locationId);
         }
       });
 
+      if (!locationsIdsToGetFromDB.length) {
+        // no locations need to be retrieved; we found all in cache
+        allLocationsIds.push(...locationsAlreadyInCache);
+        // keep unique values
+        return Promise.resolve([...new Set(allLocationsIds)]);
+      }
+
+      // we need to query DB
       // construct filter
       let filter = {
         parentLocationId: {
           inq: locationsIdsToGetFromDB
         }
       };
-      let filterForGet = filter;
-
-      if (retrieveLocationsIds) {
-        // also retrieve the locationsIds
-        filter = {
-          or: [{
-            id: {
-              inq: locationsIdsToGetFromDB
-            }
-          }, {
-            parentLocationId: {
-              inq: locationsIdsToGetFromDB
-            }
-          }]
-        };
-
-        filterForGet = {
-          or: [{
-            _id: {
-              inq: locationsIdsToGetFromDB
-            }
-          }, {
-            parentLocationId: {
-              inq: locationsIdsToGetFromDB
-            }
-          }]
-        };
-      }
 
       // initialize parameters for handleActionsInBatches call
       const getActionsCount = () => {
@@ -208,7 +189,7 @@ module.exports = function (Location) {
       const getBatchData = (batchNo, batchSize) => {
         // find the locations as well as their children
         return Location
-          .rawFind(filterForGet, {
+          .rawFind(filter, {
             projection: {
               _id: 1,
               parentLocationId: 1
@@ -226,14 +207,6 @@ module.exports = function (Location) {
         let locationsIdsToBeRetrievedNext = [];
 
         locations.forEach(function (location) {
-          // check if location was searched location (parent)
-          if (locationsIdsToGetFromDBMap[location.id]) {
-            // add/update cache entry
-            locationCache._setParentLocationId(location.id, location.parentLocationId);
-            return;
-          }
-
-          // child location
           // avoid loops
           if (allLocationsIds.indexOf(location.id) !== -1) {
             app.logger.warn(`Detected loop in location hierarchy: location with id "${location.id}" is set as a child location for a location that is lower the hierarchy. Scanned locations ids: ${allLocationsIds.join(', ')}`);
@@ -246,15 +219,13 @@ module.exports = function (Location) {
           // update cache
           // add the location ID in the parent's children array
           locationCache._addChildrenIds(location.parentLocationId, location.id);
-          // add the location ID in cache
-          locationCache._setParentLocationId(location.id, location.parentLocationId);
         });
 
         // consolidate them in the locations list
         allLocationsIds.push(...locationsIdsToBeRetrievedNext);
 
         // scan their children
-        return locationCache._getSubLocationsAndConstructCache(locationsIdsToBeRetrievedNext, allLocationsIds, false);
+        return locationCache._getSubLocationsAndConstructCache(locationsIdsToBeRetrievedNext, allLocationsIds);
       };
 
       return Helpers
@@ -293,7 +264,7 @@ module.exports = function (Location) {
       (!Array.isArray(locationsIds)) && (locationsIds = [locationsIds]);
 
       // get sub-locations IDs either from cache or DB
-      return this._getSubLocationsAndConstructCache(locationsIds, [], true);
+      return this._getSubLocationsAndConstructCache(locationsIds, []);
     },
     /**
      * Reset cache
@@ -308,7 +279,6 @@ module.exports = function (Location) {
      * Map of location ID to parent and children
      * {
      *   locationId1: {
-     *     parentId: locationId2,
      *     childrenIds: [
      *       locationId3,
      *       locationId4
