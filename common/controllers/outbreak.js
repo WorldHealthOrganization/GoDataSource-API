@@ -10138,7 +10138,86 @@ module.exports = function (Outbreak) {
           encryptPassword,
           anonymizeFields,
           options,
-          results => Promise.resolve(results),
+          (results, dictionary) => {
+            return new Promise(function (resolve, reject) {
+              // determine contacts of contacts for which we need to retrieve the first relationship
+              const contactOfContactsMap = _.transform(
+                results,
+                (r, v) => {
+                  r[v.id] = v;
+                },
+                {}
+              );
+
+              // retrieve contact of contacts relationships ( sorted by creation date )
+              // only those for which source is a contact ( at this point it shouldn't be anything else than a contact, but we should handle this case since date & source flags should be enough... )
+              // in case we don't have any contact of contact Ids there is no point in searching for relationships
+              const contactOfContactIds = Object.keys(contactOfContactsMap);
+              const promise = contactOfContactIds.length < 1 ?
+                Promise.resolve([]) :
+                app.models.relationship.find({
+                  order: 'createdAt ASC',
+                  where: {
+                    'persons.id': {
+                      inq: contactOfContactIds
+                    }
+                  }
+                });
+
+              // handle exceptions
+              promise.catch(reject);
+
+              // retrieve contact of contacts relationships ( sorted by creation date )
+              const relationshipsPromises = [];
+              promise.then((relationshipResults) => {
+                // keep only the first relationship
+                // assign relationships to contacts
+                _.each(relationshipResults, (relationship) => {
+                  // incomplete relationship ?
+                  if (relationship.persons.length < 2) {
+                    return;
+                  }
+
+                  // determine contact of contacts & related ids
+                  let contactOfContactId, relatedId;
+                  if (relationship.persons[0].target) {
+                    contactOfContactId = relationship.persons[0].id;
+                    relatedId = relationship.persons[1].id;
+                  } else {
+                    contactOfContactId = relationship.persons[1].id;
+                    relatedId = relationship.persons[0].id;
+                  }
+
+                  // check if this is the first relationship for this contact of contacts
+                  // if it is, then we need to map information
+                  if (
+                    contactOfContactsMap[contactOfContactId] &&
+                    !contactOfContactsMap[contactOfContactId].relationship
+                  ) {
+                    // get relationship data
+                    contactOfContactsMap[contactOfContactId].relationship = relationship.toJSON();
+
+                    // set related ID
+                    contactOfContactsMap[contactOfContactId].relationship.relatedId = relatedId;
+
+                    // resolve relationship foreign keys here
+                    relationshipsPromises.push(genericHelpers.resolveModelForeignKeys(
+                      app,
+                      app.models.relationship,
+                      [contactOfContactsMap[contactOfContactId].relationship],
+                      dictionary
+                    ).then(relationship => {
+                      contactOfContactsMap[contactOfContactId].relationship = relationship[0];
+                    }));
+                  }
+                });
+
+                // finished
+                return Promise.all(relationshipsPromises).then(() => resolve(results));
+              });
+
+            });
+          },
           callback
         );
       })
