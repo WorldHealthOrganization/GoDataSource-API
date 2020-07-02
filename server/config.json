@@ -120,5 +120,13 @@
     "setUsualPlaceOfResidenceLocationIdOnPerson": {
       "batchSize": 10000
     }
+  },
+  "caching": {
+    "location": {
+      "enabled": true
+    },
+    "user": {
+      "enabled": true
+    }
   }
 }

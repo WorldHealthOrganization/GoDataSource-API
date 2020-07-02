@@ -872,202 +872,233 @@ module.exports = function (Person) {
    * @param personModel
    * @param filter
    * @param outbreak
+   * @param options Options from request
    * @returns {Promise} Returns => { peopleDistribution: [...], locationCorelationMap: { ... } }. People without an address are grouped under a dummy location with name '-'
    */
-  Person.getPeoplePerLocation = function (personModel, filter, outbreak) {
-    // Make function return a promise so we can easily link additional async code
-    return new Promise((resolve, reject) => {
-      // define outbreak locations filter
-      let outbreakLocations;
-      // update filter only if outbreak has locations ids defined (otherwise leave it as undefined)
-      if (Array.isArray(outbreak.locationIds) && outbreak.locationIds.length) {
-        // get outbreak location Ids
-        outbreakLocations = outbreak.locationIds;
-      }
-      // Avoid making secondary request to DB by using a collection of locations instead of an array of locationIds
-      app.models.location.getSubLocationsWithDetails(outbreakLocations, [], {}, function (error, allLocations) {
-        if (error) {
-          reject(error);
-        }
-        let allLocationIds = allLocations.map(location => location.id);
-
-        // ReportingGeographicalLevelId should be required in the model schema as well but it is not yet implemented
-        // that way because it would be a breaking change.
-        if (!outbreak.reportingGeographicalLevelId) {
-          reject(app.utils.apiError.getError('MISSING_REQUIRED_PROPERTY', {
-            model: app.models.outbreak.modelName,
-            properties: 'reportingGeographicalLevelId'
-          }));
+  Person.getPeoplePerLocation = function (personModel, filter, outbreak, options) {
+    // get user allowed locations IDs
+    return app.models.user.helpers
+      .getUserAllowedLocationsIds(options.remotingContext)
+      .then(userAllowedLocationsIds => {
+        let outbreakLocationIds;
+        // update filter only if outbreak has locations ids defined (otherwise leave it as undefined)
+        if (Array.isArray(outbreak.locationIds) && outbreak.locationIds.length) {
+          // get outbreak location Ids
+          outbreakLocationIds = outbreak.locationIds;
         }
 
-        let _filter;
+        // check for locations restrictions; either from outbreak or user or both
+        let getAllowedLocationsIdsPromise;
 
-        // Get all locations that are part of the outbreak's location hierarchy and have the
-        // same location level as the outbreak
-        app.models.location
-          .rawFind({
-            and: [
-              {
-                id: {
-                  inq: allLocationIds
-                }
-              },
-              {
-                geographicalLevelId: outbreak.reportingGeographicalLevelId
-              }
-            ]
-          })
-          .then((reportingLocations) => {
-            let reportingLocationIds = reportingLocations.map(location => location.id);
-            let locationHierarchy = app.models.location.buildHierarchicalLocationsList(allLocations, null, outbreak.reportingGeographicalLevelId);
-            let locationCorelationMap = {};
-
-            // Initiate peopleDistribution as an object so we can add locations/people to it easier
-            // we need an empty location for people without addresses
-            let peopleDistribution = {
-              [app.models.location.noLocation.id]: {
-                location: app.models.location.noLocation,
-                people: []
-              }
-            };
-
-            // Start building the peopleDistribution object by adding all reporting locations
-            reportingLocations.forEach((location) => {
-              peopleDistribution[location.id] = {location: location, people: []};
+        if (!outbreakLocationIds && !userAllowedLocationsIds) {
+          // neither outbreak nor user have location restrictions
+          getAllowedLocationsIdsPromise = Promise.resolve();
+        } else if (outbreakLocationIds && !userAllowedLocationsIds) {
+          // only outbreak has restrictions
+          getAllowedLocationsIdsPromise = Promise.resolve(outbreakLocationIds);
+        } else if (!outbreakLocationIds && userAllowedLocationsIds) {
+          // only user has restrictions
+          getAllowedLocationsIdsPromise = Promise.resolve(userAllowedLocationsIds);
+        } else {
+          // both have restrictions; use intersection
+          // first get outbreak locations including sub-locations
+          getAllowedLocationsIdsPromise = app.models.location.cache
+            .getSublocationsIds(outbreakLocationIds)
+            .then(allOutbreakLocationIds => {
+              // get intersection
+              return Promise.resolve(allOutbreakLocationIds.filter(locationId => userAllowedLocationsIds.indexOf(locationId) !== -1));
             });
+        }
 
-            // Link lower level locations to their reporting location parent
-            app.models.location.createLocationCorelationMap(locationHierarchy, reportingLocationIds, locationCorelationMap);
-            let additionalFilter = {};
+        return getAllowedLocationsIdsPromise;
+      })
+      .then(allowedLocationsIds => {
+        return new Promise((resolve, reject) => {
+          // Avoid making secondary request to DB by using a collection of locations instead of an array of locationIds
+          app.models.location.getSubLocationsWithDetails(allowedLocationsIds, [], {}, function (error, allLocations) {
+            if (error) {
+              reject(error);
+            }
+            let allLocationIds = allLocations.map(location => location.id);
 
-            if (personModel === 'case') {
-              // For cases, we just make sure that the cases are from the required outbreak
-              additionalFilter = {
-                where: {
-                  outbreakId: outbreak.id
-                }
-              };
-            } else {
-              let dateInterval = [];
-
-              if (filter) {
-                if (filter.dateOfFollowUp) {
-                  dateInterval = [helpers.getDate(filter.dateOfFollowUp), helpers.getDateEndOfDay(filter.dateOfFollowUp)];
-                  delete filter.dateOfFollowUp;
-                } else if (filter.startDate && filter.endDate) {
-                  dateInterval = [helpers.getDate(filter.startDate), helpers.getDateEndOfDay(filter.endDate)];
-                }
-              } else {
-                dateInterval = [helpers.getDate(), helpers.getDateEndOfDay()];
-              }
-
-              // For contacts, we also need the follow up from either the required date or today so the filter is
-              // a bit more complex.
-              additionalFilter = {
-                where: {
-                  outbreakId: outbreak.id
-                },
-                include: {
-                  relation: 'followUps',
-                  scope: {
-                    where: {
-                      date: {
-                        between: dateInterval
-                      }
-                    }
-                  }
-                }
-              };
+            // ReportingGeographicalLevelId should be required in the model schema as well but it is not yet implemented
+            // that way because it would be a breaking change.
+            if (!outbreak.reportingGeographicalLevelId) {
+              reject(app.utils.apiError.getError('MISSING_REQUIRED_PROPERTY', {
+                model: app.models.outbreak.modelName,
+                properties: 'reportingGeographicalLevelId'
+              }));
             }
 
-            // Merge the additional filter with the filter provided by the user
-            _filter = app.utils.remote.mergeFilters(additionalFilter, filter || {});
+            let _filter;
 
-            return app.models[personModel].rawFind(_filter.where, {order: {'followUp.endDate': -1}})
-              .then(people => [people, locationCorelationMap, peopleDistribution, _filter]);
-          })
-          .then((results) => {
-            let locationCorelationMap = results[1];
-            let peopleDistribution = results[2];
+            // Get all locations that are part of the outbreak's location hierarchy and have the
+            // same location level as the outbreak
+            app.models.location
+              .rawFind({
+                and: [
+                  {
+                    id: {
+                      inq: allLocationIds
+                    }
+                  },
+                  {
+                    geographicalLevelId: outbreak.reportingGeographicalLevelId
+                  }
+                ]
+              })
+              .then((reportingLocations) => {
+                let reportingLocationIds = reportingLocations.map(location => location.id);
+                let locationHierarchy = app.models.location.buildHierarchicalLocationsList(allLocations, null, outbreak.reportingGeographicalLevelId);
+                let locationCorelationMap = {};
 
-            return new Promise(function (resolve) {
-              // We do not apply filterParent logic to contacts because we are interested in the total number of contacts,
-              // whether they have follow-ups or not.
-              if (personModel === 'case') {
-                resolve(app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(results[0], results[3]));
-              } else {
-                // build a map of people
-                let peopleMap = {};
-                results[0].forEach(function (person) {
-                  peopleMap[person.id] = person;
-                  person.followUps = [];
+                // Initiate peopleDistribution as an object so we can add locations/people to it easier
+                // we need an empty location for people without addresses
+                let peopleDistribution = {
+                  [app.models.location.noLocation.id]: {
+                    location: app.models.location.noLocation,
+                    people: []
+                  }
+                };
+
+                // Start building the peopleDistribution object by adding all reporting locations
+                reportingLocations.forEach((location) => {
+                  peopleDistribution[location.id] = {location: location, people: []};
                 });
 
-                // get follow-up query
-                let query = app.utils.remote.searchByRelationProperty
-                  .convertIncludeQueryToFilterQuery(_filter, {}, false);
+                // Link lower level locations to their reporting location parent
+                app.models.location.createLocationCorelationMap(locationHierarchy, reportingLocationIds, locationCorelationMap);
+                let additionalFilter = {};
 
-                // find followUps for those people
-                return app.models.followUp
-                  .rawFind({
-                    and: [
-                      {
-                        personId: {
-                          inq: Object.keys(peopleMap)
-                        },
-                        outbreakId: outbreak.id,
-                      },
-                      query.followUps
-                    ]
-                  })
-                  .then(function (followUps) {
-                    // map follow-ups back to people
-                    followUps.forEach(function (followUp) {
-                      peopleMap[followUp.personId].followUps.push(followUp);
-                    });
-                    // return the list of people
-                    resolve(Object.values(peopleMap));
-                  });
-              }
-            })
-              .then(function (people) {
-                // Add the people that pass the filter to their relevant reporting level location
-                people.forEach((person) => {
-                  // get current person address
-                  const personCurrentAddress = Person.getCurrentAddress(person);
-                  // define current person location
-                  let personCurrentLocation;
-                  // if the person has a current address
-                  if (personCurrentAddress) {
-                    // get it's location
-                    personCurrentLocation = personCurrentAddress.locationId;
-                  }
-                  // if it has a current location, get it's correlated location
-                  if (personCurrentLocation) {
-                    if (locationCorelationMap[personCurrentLocation]) {
-                      peopleDistribution[locationCorelationMap[personCurrentLocation]].people.push(person);
-                    } else {
-                      // geographicalLevelId not matched
-                      // NOT HANDLED
+                if (personModel === 'case') {
+                  // For cases, we just make sure that the cases are from the required outbreak
+                  additionalFilter = {
+                    where: {
+                      outbreakId: outbreak.id
+                    }
+                  };
+                } else {
+                  let dateInterval = [];
+
+                  if (filter) {
+                    if (filter.dateOfFollowUp) {
+                      dateInterval = [helpers.getDate(filter.dateOfFollowUp), helpers.getDateEndOfDay(filter.dateOfFollowUp)];
+                      delete filter.dateOfFollowUp;
+                    } else if (filter.startDate && filter.endDate) {
+                      dateInterval = [helpers.getDate(filter.startDate), helpers.getDateEndOfDay(filter.endDate)];
                     }
                   } else {
-                    peopleDistribution[app.models.location.noLocation.id].people.push(person);
+                    dateInterval = [helpers.getDate(), helpers.getDateEndOfDay()];
                   }
-                });
 
-                // After the peopleDistribution object is fully populate it, use only it's values from now on.
-                // The keys were used only to easily distribute the locations/people
-                resolve({
-                  peopleDistribution: Object
-                    .values(peopleDistribution)
-                    .filter(entry => entry.people.length),
-                  locationCorelationMap: locationCorelationMap
-                });
-              });
-          })
-          .catch(error);
+                  // For contacts, we also need the follow up from either the required date or today so the filter is
+                  // a bit more complex.
+                  additionalFilter = {
+                    where: {
+                      outbreakId: outbreak.id
+                    },
+                    include: {
+                      relation: 'followUps',
+                      scope: {
+                        where: {
+                          date: {
+                            between: dateInterval
+                          }
+                        }
+                      }
+                    }
+                  };
+                }
+
+                // Merge the additional filter with the filter provided by the user
+                _filter = app.utils.remote.mergeFilters(additionalFilter, filter || {});
+
+                return app.models[personModel].rawFind(_filter.where, {order: {'followUp.endDate': -1}})
+                  .then(people => [people, locationCorelationMap, peopleDistribution, _filter]);
+              })
+              .then((results) => {
+                let locationCorelationMap = results[1];
+                let peopleDistribution = results[2];
+
+                return new Promise(function (resolve) {
+                  // We do not apply filterParent logic to contacts because we are interested in the total number of contacts,
+                  // whether they have follow-ups or not.
+                  if (personModel === 'case') {
+                    resolve(app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(results[0], results[3]));
+                  } else {
+                    // build a map of people
+                    let peopleMap = {};
+                    results[0].forEach(function (person) {
+                      peopleMap[person.id] = person;
+                      person.followUps = [];
+                    });
+
+                    // get follow-up query
+                    let query = app.utils.remote.searchByRelationProperty
+                      .convertIncludeQueryToFilterQuery(_filter, {}, false);
+
+                    // find followUps for those people
+                    return app.models.followUp
+                      .rawFind({
+                        and: [
+                          {
+                            personId: {
+                              inq: Object.keys(peopleMap)
+                            },
+                            outbreakId: outbreak.id,
+                          },
+                          query.followUps
+                        ]
+                      })
+                      .then(function (followUps) {
+                        // map follow-ups back to people
+                        followUps.forEach(function (followUp) {
+                          peopleMap[followUp.personId].followUps.push(followUp);
+                        });
+                        // return the list of people
+                        resolve(Object.values(peopleMap));
+                      });
+                  }
+                })
+                  .then(function (people) {
+                    // Add the people that pass the filter to their relevant reporting level location
+                    people.forEach((person) => {
+                      // get current person address
+                      const personCurrentAddress = Person.getCurrentAddress(person);
+                      // define current person location
+                      let personCurrentLocation;
+                      // if the person has a current address
+                      if (personCurrentAddress) {
+                        // get it's location
+                        personCurrentLocation = personCurrentAddress.locationId;
+                      }
+                      // if it has a current location, get it's correlated location
+                      if (personCurrentLocation) {
+                        if (locationCorelationMap[personCurrentLocation]) {
+                          peopleDistribution[locationCorelationMap[personCurrentLocation]].people.push(person);
+                        } else {
+                          // geographicalLevelId not matched
+                          // NOT HANDLED
+                        }
+                      } else {
+                        peopleDistribution[app.models.location.noLocation.id].people.push(person);
+                      }
+                    });
+
+                    // After the peopleDistribution object is fully populate it, use only it's values from now on.
+                    // The keys were used only to easily distribute the locations/people
+                    resolve({
+                      peopleDistribution: Object
+                        .values(peopleDistribution)
+                        .filter(entry => entry.people.length),
+                      locationCorelationMap: locationCorelationMap
+                    });
+                  });
+              })
+              .catch(error);
+          });
+        });
       });
-    });
   };
 
   /**

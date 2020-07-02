@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
 const async = require('async');
+const Config = require('./../../server/config.json');
 
 module.exports = function (User) {
   // set flag to force using the controller
@@ -147,7 +148,40 @@ module.exports = function (User) {
   };
 
   User.cache = {
+    // settings
+    enabled: _.get(Config, 'caching.user.enabled', false),
+
     // cache functions
+    /**
+     * Given a team ID and an array of locations IDs cache team entry
+     * @param teamId
+     * @param locationsIds
+     * @private
+     */
+    _setTeamLocationsIds: function (teamId, locationsIds) {
+      // don't keep data in cache if cache is disabled
+      if (!this.enabled) {
+        return;
+      }
+
+      // set cache entry
+      this.teamLocationsIds[teamId] = locationsIds;
+    },
+    /**
+     * Given a user ID and an array of locations IDs cache user entry
+     * @param userId
+     * @param locationsIds
+     * @private
+     */
+    _setUserLocationsIds: function (userId, locationsIds) {
+      // don't keep data in cache if cache is disabled
+      if (!this.enabled) {
+        return;
+      }
+
+      // set cache entry
+      this.userLocationsIds[userId] = locationsIds;
+    },
     /**
      * Get user allowed locations
      * Empty array means that all locations are allowed; Empty array is returned in the following cases:
@@ -178,7 +212,7 @@ module.exports = function (User) {
           // requested user is not assigned to any team
           if (!teams.length) {
             // user will have access to all data; cache empty array
-            userCache.userLocationsIds[userId] = [];
+            userCache._setUserLocationsIds(userId, []);
 
             return Promise.resolve([]);
           }
@@ -213,7 +247,7 @@ module.exports = function (User) {
                 return app.models.location.cache
                   .getSublocationsIds(team.locationIds)
                   .then(teamLocationsIds => {
-                    userCache.teamLocationsIds[team.id] = teamLocationsIds;
+                    userCache._setTeamLocationsIds(team.id, teamLocationsIds);
 
                     return cb(null, teamLocationsIds);
                   })
@@ -225,7 +259,7 @@ module.exports = function (User) {
           // check if a team without locations was found
           if (teamWithoutLocations) {
             // user will have access to all data; cache empty array
-            userCache.userLocationsIds[userId] = [];
+            userCache._setUserLocationsIds(userId, []);
 
             return Promise.resolve([]);
           }
@@ -245,7 +279,7 @@ module.exports = function (User) {
               result = [...new Set(result)];
 
               // cache found user locations
-              userCache.userLocationsIds[userId] = result;
+              userCache._setUserLocationsIds(userId, result);
               return resolve(result);
             });
           });
@@ -265,6 +299,34 @@ module.exports = function (User) {
     userLocationsIds: {},
     // map of team ID to assigned locations IDs; empty array means the team has access to all locations
     teamLocationsIds: {}
+  };
+
+  /**
+   * Get User allowed locations IDs
+   * @param context Remoting context from which to get logged in user and outbreak
+   * @returns {Promise<unknown>|Promise<T>|Promise<void>}
+   */
+  User.helpers.getUserAllowedLocationsIds = (context) => {
+    let loggedInUser = context.req.authData.user;
+    let outbreak = context.instance;
+
+    if (!User.helpers.applyGeographicRestrictions(loggedInUser, outbreak)) {
+      // user has no locations restrictions
+      return Promise.resolve();
+    }
+
+    // get user allowed locations
+    return User.cache
+      .getUserLocationsIds(loggedInUser.id)
+      .then(userAllowedLocationsIds => {
+        if (!userAllowedLocationsIds.length) {
+          // user has no locations restrictions
+          return Promise.resolve();
+        }
+
+        // return user allowed locations IDs
+        return Promise.resolve(userAllowedLocationsIds);
+      });
   };
 
   /**

@@ -436,9 +436,9 @@ module.exports = function (Contact) {
    * @param outbreak
    * @param date
    * @param groupBy
+   * @param options Options from request
    */
-  Contact.getGroupedByDate = function (outbreak, date, groupBy) {
-
+  Contact.getGroupedByDate = function (outbreak, date, groupBy, options) {
     // process date interval
     let dateInterval = [];
     if (typeof date === 'object' && date.startDate && date.endDate) {
@@ -602,7 +602,7 @@ module.exports = function (Contact) {
 
     // return contacts grouped by location that have follow ups in the given day
     return app.models.person
-      .getPeoplePerLocation('contact', dateFilter, outbreak)
+      .getPeoplePerLocation('contact', dateFilter, outbreak, options)
       .then((groups) => {
         // rebuild the result to match the structure resulted from 'case' grouping
         // doing this because we're reusing existing functionality that does not build the result the same way
