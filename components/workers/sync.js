@@ -247,6 +247,7 @@ const worker = {
           //    that user is assigned to.
           // Events: All events to which contacts as described above are exposed OR where the event occurred in a location which is responsibility of the team that
           //    the user is assigned to.
+          // Contact of Contacts: All contact of contacts related to retrieved contacts
           let filterDataGathering = Promise.resolve();
           filterDataGathering = filterDataGathering
             // retrieve outbreaks
@@ -480,6 +481,9 @@ const worker = {
 
             // map relationships
             .then((response) => {
+              // retrieve contact of contacts
+              response.contactsOfContacts = {};
+
               // get relationships
               response.relationships = {};
               response.retrievedRelationships.forEach((relationship) => {
@@ -495,7 +499,10 @@ const worker = {
                 // determine id for which we might need to retrieve person data
                 let relatedId;
                 let relatedType;
-                if (relationship.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' && response.contacts[relationship.persons[0].id]) {
+                if (
+                  relationship.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
+                  response.contacts[relationship.persons[0].id]
+                ) {
                   relatedId = relationship.persons[1].id;
                   relatedType = relationship.persons[1].type;
                 } else {
@@ -516,6 +523,10 @@ const worker = {
                     break;
                   case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT':
                     response.events[relatedId] = true;
+                    response.relationships[relationship._id] = true;
+                    break;
+                  case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT':
+                    response.contactsOfContacts[relatedId] = true;
                     response.relationships[relationship._id] = true;
                     break;
                 }
@@ -598,13 +609,15 @@ const worker = {
               filter.where.contactsIds = Object.keys(response.contacts);
               filter.where.casesIds = Object.keys(response.cases);
               filter.where.eventsIds = Object.keys(response.events);
+              filter.where.contactsOfContactsIds = Object.keys(response.contactsOfContacts);
               filter.where.relationshipsIds = Object.keys(response.relationships);
 
               // determine all persons that we need to retrieve
               filter.where.personsIds = [
                 ...filter.where.casesIds,
                 ...filter.where.contactsIds,
-                ...filter.where.eventsIds
+                ...filter.where.eventsIds,
+                ...filter.where.contactsOfContactsIds
               ];
             })
             .catch(reject);
