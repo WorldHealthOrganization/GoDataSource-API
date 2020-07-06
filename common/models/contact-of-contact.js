@@ -31,6 +31,14 @@ module.exports = function (ContactOfContact) {
       'socialRelationshipDetail': 'LNG_RELATIONSHIP_FIELD_LABEL_RELATION_DETAIL',
       'clusterId': 'LNG_RELATIONSHIP_FIELD_LABEL_CLUSTER',
       'comment': 'LNG_RELATIONSHIP_FIELD_LABEL_COMMENT',
+      'id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+      'createdAt': 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
+      'createdBy': 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_BY',
+      'updatedAt': 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',
+      'updatedBy': 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
+      'deleted': 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
+      'deletedAt': 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT',
+      'createdOn': 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON'
     };
 
     // append source export fields
@@ -65,7 +73,6 @@ module.exports = function (ContactOfContact) {
     'documents': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DOCUMENTS',
     'documents[].type': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DOCUMENT_TYPE',
     'documents[].number': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER',
-    'wasCase': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_WAS_CASE',
     'dateBecomeContact': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT',
     'dateOfReporting': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_REPORTING',
     'dateOfLastContact': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_LAST_CONTACT',
@@ -169,7 +176,6 @@ module.exports = function (ContactOfContact) {
     'documents',
     'riskLevel',
     'riskReason',
-    'wasCase',
     'outcomeId',
     'dateOfOutcome',
     'dateBecomeContact',
