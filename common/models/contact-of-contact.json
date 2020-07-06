@@ -70,10 +70,6 @@
       "type": "boolean",
       "default": false
     },
-    "wasCase": {
-      "type": "boolean",
-      "default": false
-    },
     "active": {
       "type": "boolean",
       "description": "A contact is active if at least one of the cases related to it has non-discarded classification",
