@@ -249,6 +249,31 @@ function addLanguageTokenMongoFilter(collectionName, baseFilter, filter) {
   // check for language token filter
   let languageTokenFilter = _.get(filter, 'where.languageTokens');
 
+  // check for languages filter
+  let languagesFilter = _.get(filter, 'where.languages');
+
+  // update filter only if languagesFilter is an array
+  if (Array.isArray(languagesFilter)) {
+    // construct languages filter
+    const languagesMongoFilter = {
+      languageId: {
+        $in: languagesFilter
+      }
+    };
+
+    // update result filter
+    if (_.isEmpty(result)) {
+      result = languagesMongoFilter;
+    } else {
+      result = {
+        '$and': [
+          result,
+          languagesMongoFilter
+        ]
+      };
+    }
+  }
+
   // update filter only if languageTokenFilter is an array
   if (Array.isArray(languageTokenFilter)) {
     // Note: should be in sync with the subTemplates names from templateParser.js
@@ -279,14 +304,19 @@ function addLanguageTokenMongoFilter(collectionName, baseFilter, filter) {
     };
 
     // update result filter
-    result = {
-      '$and': [
-        result,
-        languageTokenMongoFilter
-      ]
-    };
+    if (_.isEmpty(result)) {
+      result = languageTokenMongoFilter;
+    } else {
+      result = {
+        '$and': [
+          result,
+          languageTokenMongoFilter
+        ]
+      };
+    }
   }
 
+  // finished
   return result;
 }
 

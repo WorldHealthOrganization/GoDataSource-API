@@ -368,7 +368,7 @@
           },
           "root": true,
           "required": true,
-          "description": "Can contain languageTokens array; if present only those language tokens and the reference data related ones will be exported"
+          "description": "Can contain languageTokens array; if present only those language tokens and the reference data related ones will be exported; Can contain languages array; if present only tokens from these languages will be retrieved (can be used together with languageTokens)"
         },
         {
           "arg": "userEmail",
