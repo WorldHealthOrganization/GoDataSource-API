@@ -437,7 +437,7 @@ module.exports = function (Sync) {
    * @param password Encryption password
    * @param autoEncrypt Auto Encrypt
    * @param chunkSize Number of elements to be included in an archive. Default: 10000
-   * @param data Object; Can contain languageTokens array; if present only those language tokens and the reference data related ones will be exported
+   * @param data Object; Can contain languageTokens array; if present only those language tokens and the reference data related ones will be exported; Can contain languages array; if present only tokens from these languages will be retrieved (can be used together with languageTokens)
    * @param userEmail String; User email; used for filtering data based on user's teams locations
    * @param options Options from request
    * @param done
@@ -450,6 +450,16 @@ module.exports = function (Sync) {
       // add languageTokens filter; will be further processed before it reaches DB
       filter.where.languageTokens = data.languageTokens;
     }
+
+    // check if languages is present
+    if (Array.isArray(data.languages)) {
+      filter = filter || {};
+      filter.where = filter.where || {};
+      // add language filter; will be further processed before it reaches DB
+      filter.where.languages = data.languages;
+    }
+
+    // download snapshot
     getDatabaseSnapshot(filter, false, password, autoEncrypt, chunkSize, userEmail, options, done);
   };
 
