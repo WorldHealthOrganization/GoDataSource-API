@@ -1414,6 +1414,38 @@ module.exports = function (Outbreak) {
     // if contacts of contacts is disabled on the outbreak, do not include them in CoT
     const isContactsOfContactsActive = this.isContactsOfContactsActive;
 
+    // #TODO: proper way to do it is to use projection, but for this we need to make sure we merge what is used on API side when we build cot
+    // #TODO: - and so on, we will this change later when time allows as to do this change
+    // determine if we need to send to client just some specific fields
+    const edgeFields = {};
+    const nodeFields = {};
+    if (
+      filter.fields &&
+      filter.fields.length > 0
+    ) {
+      const edgesName = 'edges.';
+      const nodesName = 'nodes.';
+      filter.fields = filter.fields.filter((field) => {
+        // check if we have fields for our objects
+        if (field.toLowerCase().startsWith(edgesName)) {
+          // push to fields array
+          edgeFields[field.substring(edgesName.length)] = true;
+
+          // remove from fields
+          return false;
+        } else if (field.toLowerCase().startsWith(nodesName)) {
+          // push to fields array
+          nodeFields[field.substring(nodesName.length)] = true;
+
+          // remove from fields
+          return false;
+        }
+
+        // keep in fields array
+        return true;
+      });
+    }
+
     // process filters
     this.preProcessTransmissionChainsFilter(filter).then(function (processedFilter) {
       // use processed filters
@@ -1561,6 +1593,44 @@ module.exports = function (Outbreak) {
                 isolatedNodes.forEach(function (isolatedNode) {
                   transmissionChains.nodes[isolatedNode.id] = isolatedNode;
                 });
+
+                // #TODO - not necessary anymore after we use projection as it was described in TODO above
+                // remove unnecessary EDGE data
+                if (
+                  !_.isEmpty(edgeFields) &&
+                  !_.isEmpty(transmissionChains.edges)
+                ) {
+                  Object.keys(transmissionChains.edges).forEach((edgeKey) => {
+                    const edge = transmissionChains.edges[edgeKey];
+                    if (edge) {
+                      Object.keys(edge).forEach((edgeProperty) => {
+                        if (!edgeFields[edgeProperty]) {
+                          delete edge[edgeProperty];
+                        }
+                      });
+                    }
+                  });
+                }
+
+                // #TODO - not necessary anymore after we use projection as it was described in TODO above
+                // remove unnecessary NODE data
+                if (
+                  !_.isEmpty(nodeFields) &&
+                  !_.isEmpty(transmissionChains.nodes)
+                ) {
+                  Object.keys(transmissionChains.nodes).forEach((nodeKey) => {
+                    const node = transmissionChains.nodes[nodeKey];
+                    if (node) {
+                      Object.keys(node).forEach((nodeProperty) => {
+                        if (!nodeFields[nodeProperty]) {
+                          delete node[nodeProperty];
+                        }
+                      });
+                    }
+                  });
+                }
+
+                // send answer to client
                 callback(null, transmissionChains);
               })
               .catch(callback);
