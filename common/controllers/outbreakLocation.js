@@ -58,6 +58,13 @@ module.exports = function (Outbreak) {
 
         return getAllowedLocationsIdsPromise
           .then(allowedLocationsIds => {
+            // check if we have allowed locations
+            if (!allowedLocationsIds || !allowedLocationsIds.length) {
+              // no hierarchy needs to be created
+              // reject the promise in order to skip following logic
+              return Promise.reject('noAllowedLocations');
+            }
+
             // check if the includeChildren filter was sent; accepting it only on the first level
             includeChildren = _.get(filter, 'where.includeChildren');
             if (typeof includeChildren !== 'undefined') {
@@ -127,6 +134,15 @@ module.exports = function (Outbreak) {
               });
           });
       })
-      .catch(callback);
+      .catch(err => {
+        // check for no locations error
+        if (err === 'noAllowedLocations') {
+          options.remotingContext.req.logger.debug('Following geographic restrictions, Outbreak and User don\'t have any locations in common. Hierarchical list will be empty');
+          // return success with no locations
+          return callback(null, []);
+        }
+
+        callback(err);
+      });
   };
 };
