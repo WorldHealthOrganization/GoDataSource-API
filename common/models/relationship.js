@@ -4,6 +4,7 @@ const transmissionChain = require('../../components/workerRunner').transmissionC
 const app = require('../../server/server');
 const _ = require('lodash');
 const async = require('async');
+const config = require('../../server/config.json');
 
 module.exports = function (Relationship) {
   // set flag to not get controller
@@ -164,6 +165,7 @@ module.exports = function (Relationship) {
     }
 
     // build a filter: get all relations between non-discarded cases and contacts + events from current outbreak
+    const originalFilter = filter;
     filter = app.utils.remote
       .mergeFilters({
         where: {
@@ -201,16 +203,27 @@ module.exports = function (Relationship) {
 
     // use raw queries for relationships
     app.models.relationship
-      .rawFind(app.utils.remote.convertLoopbackFilterToMongo(filter.where))
+      .rawFind(
+        app.utils.remote.convertLoopbackFilterToMongo(filter.where),
+        Object.assign(
+          originalFilter.retrieveFields && originalFilter.retrieveFields.edges ? {
+            projection: originalFilter.retrieveFields.edges
+          } : {}, {
+            limit: config.cot && config.cot.maxRelationships ?
+              config.cot.maxRelationships :
+              1000
+          }
+        )
+      )
       .then(function (relationships) {
         // build a list of people ids (to query related data later)
-        const peopleIds = [];
+        const peopleIds = {};
         // go through all relationships
         relationships.forEach(function (relationship) {
           // go through relationship persons
           Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
             // store person ids
-            peopleIds.push(person.id);
+            peopleIds[person.id] = true;
           });
         });
         // get person query from include filters
@@ -223,10 +236,13 @@ module.exports = function (Relationship) {
               {
                 where: {
                   id: {
-                    inq: peopleIds
+                    inq: Object.keys(peopleIds)
                   }
                 }
-              }).where
+              }).where,
+            originalFilter.retrieveFields && originalFilter.retrieveFields.nodes ? {
+              projection: originalFilter.retrieveFields.nodes
+            } : {}
           )
           .then(function (people) {
             // build a map of people to easily connect them to relations

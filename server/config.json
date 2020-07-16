@@ -128,5 +128,8 @@
     "user": {
       "enabled": true
     }
+  },
+  "cot": {
+    "maxRelationships": 1000
   }
 }
