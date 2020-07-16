@@ -16824,6 +16824,20 @@
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_OF_CONTACT_TITLE": {
         "translation": "Contact of contact chronology"
       }
+    },
+    "uiMultipleSnackbar": {
+      "LNG_MULTIPLE_SNACKBAR_BUTTON_CLOSE": {
+        "translation": "Close",
+        "modules": [
+          "unauthenticated"
+        ]
+      },
+      "LNG_MULTIPLE_SNACKBAR_BUTTON_CLOSE_ALL": {
+        "translation": "Close all",
+        "modules": [
+          "unauthenticated"
+        ]
+      }
     }
   }
 }
