@@ -1491,18 +1491,25 @@ module.exports = function (Person) {
           return Promise.resolve();
         }
 
+        // get query for allowed locations
+        const allowedLocationsQuery = {
+          // get models for the calculated locations and the ones that don't have a usual place of residence location set
+          usualPlaceOfResidenceLocationId: {
+            inq: userAllowedLocationsIds.concat([null])
+          }
+        };
+
         // update where to only query for allowed locations
-        return Promise.resolve({
-          and: [
+        return Promise.resolve(
+          where && Object.keys(where).length ?
             {
-              // get models for the calculated locations and the ones that don't have a usual place of residence location set
-              usualPlaceOfResidenceLocationId: {
-                inq: userAllowedLocationsIds.concat([null])
-              }
-            },
-            where || {}
-          ]
-        });
+              and: [
+                allowedLocationsQuery,
+                where
+              ]
+            } :
+            allowedLocationsQuery
+        );
       });
   };
 

@@ -66,9 +66,10 @@ module.exports = function (LabResult) {
    * Pre-filter lab-results for an outbreak using related models (case)
    * @param outbreak
    * @param filter Supports 'where.case' MongoDB compatible queries
+   * @param options Options from request
    * @return {Promise<void | never>}
    */
-  LabResult.preFilterForOutbreak = function (outbreak, filter) {
+  LabResult.preFilterForOutbreak = function (outbreak, filter, options) {
     // set a default filter
     filter = filter || {};
     let contactQuery = _.get(filter, 'where.contact');
@@ -92,6 +93,12 @@ module.exports = function (LabResult) {
     let buildQuery = Promise.resolve();
 
     const personIds = [];
+
+    // check for personId filter; if not present we need to check if geographical restriction need to be applied
+    if (!_.get(filter, 'where.personId')) {
+      // start with the geographical restrictions promise (so we can link others)
+
+    }
 
     // if a case query is present
     if (caseQuery) {
