@@ -1921,9 +1921,10 @@ module.exports = function (Outbreak) {
    * Count the cases with less than X contacts
    * Note: Besides the count the response also contains a list with the counted cases IDs
    * @param filter Besides the default filter properties this request also accepts 'noLessContacts': number on the first level in 'where'
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.countCasesWithLessThanXContacts = function (filter, callback) {
+  Outbreak.prototype.countCasesWithLessThanXContacts = function (filter, options, callback) {
     // initialize noLessContacts filter
     let noLessContacts;
     // check if the noLessContacts filter was sent; accepting it only on the first level
@@ -1941,7 +1942,7 @@ module.exports = function (Outbreak) {
 
     // get cases with contacts
     app.models.relationship
-      .getCasesWithContacts(outbreakId, filter)
+      .getCasesWithContacts(outbreakId, filter, options)
       .then(function (casesWithContacts) {
         // initialize result
         let result = {
@@ -2268,15 +2269,16 @@ module.exports = function (Outbreak) {
   /**
    * Count the contacts for each case; Also calculate mean/median
    * @param filter
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.countCasesContacts = function (filter, callback) {
+  Outbreak.prototype.countCasesContacts = function (filter, options, callback) {
     // get outbreakId
     let outbreakId = this.id;
 
     // get cases with contacts
     app.models.relationship
-      .getCasesWithContacts(outbreakId, filter)
+      .getCasesWithContacts(outbreakId, filter, options)
       .then(function (casesWithContacts) {
         // initialize result
         let result = {

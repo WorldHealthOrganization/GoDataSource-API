@@ -438,8 +438,9 @@ module.exports = function (Relationship) {
    * Also count cases and contacts linked to cases
    * @param outbreakId
    * @param filter
+   * @param options Options from request
    */
-  Relationship.getCasesWithContacts = function (outbreakId, filter) {
+  Relationship.getCasesWithContacts = function (outbreakId, filter, options) {
     filter = filter || {};
     // initialize result
     let result = {
@@ -477,9 +478,16 @@ module.exports = function (Relationship) {
       };
     }
 
-    // find the people that match the query
-    filterPeople = app.models.person
-      .rawFind(peopleQuery, {projection: {_id: 1}})
+    // add geographic restriction if needed
+    filterPeople = app.models.case
+      .addGeographicalRestrictions(options.remotingContext, peopleQuery)
+      .then(updatedFilter => {
+        updatedFilter && (peopleQuery = updatedFilter);
+
+        // find the people that match the query
+        return app.models.person
+          .rawFind(peopleQuery, {projection: {_id: 1}});
+      })
       .then(function (people) {
         // return a list of people ids
         return people.map((person) => person.id);
