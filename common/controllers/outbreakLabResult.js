@@ -6,7 +6,7 @@
  */
 
 const app = require('../../server/server');
-const _ = require('lodash');
+const genericHelpers = require('../../components/helpers');
 
 module.exports = function (Outbreak) {
   /**
@@ -168,15 +168,21 @@ module.exports = function (Outbreak) {
       delete filter.where.useQuestionVariable;
     }
 
-    new Promise((resolve, reject) => {
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      app.models.language.getLanguageDictionary(contextUser.languageId, (err, dictionary) => {
-        if (err) {
-          return reject(err);
-        }
-        return resolve(dictionary);
-      });
-    })
+    // update filter for outbreak and geographical restriction
+    app.models.labResult.preFilterForOutbreak(this, filter, options)
+      .then(updatedFilter => {
+        filter = updatedFilter;
+
+        return new Promise((resolve, reject) => {
+          const contextUser = app.utils.remote.getUserFromOptions(options);
+          app.models.language.getLanguageDictionary(contextUser.languageId, (err, dictionary) => {
+            if (err) {
+              return reject(err);
+            }
+            return resolve(dictionary);
+          });
+        });
+      })
       .then(dictionary => {
         if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
           encryptPassword = null;

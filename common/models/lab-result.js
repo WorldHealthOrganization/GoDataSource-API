@@ -97,75 +97,108 @@ module.exports = function (LabResult) {
     // check for personId filter; if not present we need to check if geographical restriction need to be applied
     if (!_.get(filter, 'where.personId')) {
       // start with the geographical restrictions promise (so we can link others)
-
+      buildQuery = app.models.person
+        .addGeographicalRestrictions(options.remotingContext);
     }
 
-    // if a case query is present
-    if (caseQuery) {
-      // restrict query to current outbreak
-      caseQuery = {
-        $and: [
-          caseQuery,
-          {
-            outbreakId: outbreak.id
-          }
-        ]
-      };
-      // filter cases based on query
-      buildQuery = buildQuery
-        .then(function () {
-          return app.models.case
-            .rawFind(caseQuery, {projection: {_id: 1}})
-            .then(function (cases) {
-              // build a list of case ids that passed the filter
-              personIds.push(...cases.map(caseRecord => caseRecord.id));
-            });
-        });
-    }
-    // if a contact query is present
-    if (contactQuery) {
-      // restrict query to current outbreak
-      contactQuery = {
-        $and: [
-          contactQuery,
-          {
-            outbreakId: outbreak.id
-          }
-        ]
-      };
-      // filter cases based on query
-      buildQuery = buildQuery
-        .then(function () {
-          return app.models.contact
-            .rawFind(contactQuery, {projection: {_id: 1}})
-            .then(function (contacts) {
-              // build a list of case ids that passed the filter
-              personIds.push(...contacts.map(contact => contact.id));
-            });
-        });
-    }
-    // if a person query is present
-    if (personQuery) {
-      // restrict query to current outbreak
-      personQuery = {
-        $and: [
-          personQuery,
-          {
-            outbreakId: outbreak.id
-          }
-        ]
-      };
-      // filter people based on query
-      buildQuery = buildQuery
-        .then(() => {
-          return app.models.person
-            .rawFind(personQuery, {projection: {_id: 1}})
-            .then(people => {
-              personIds.push(...people.map(person => person.id));
-            });
-        });
-    }
     return buildQuery
+      .then(geographicalRestrictionQuery => {
+        // initialize person IDs gathering promise
+        let getPersonIds = Promise.resolve();
+        if (caseQuery || contactQuery || personQuery) {
+          // if a case query is present
+          if (caseQuery) {
+            // restrict query to current outbreak
+            caseQuery = {
+              $and: [
+                caseQuery,
+                {
+                  outbreakId: outbreak.id
+                }
+              ]
+            };
+
+            // add geographical restriction query
+            geographicalRestrictionQuery && (caseQuery['$and'].push(geographicalRestrictionQuery));
+
+            // filter cases based on query
+            getPersonIds = getPersonIds
+              .then(function () {
+                return app.models.case
+                  .rawFind(caseQuery, {projection: {_id: 1}})
+                  .then(function (cases) {
+                    // build a list of case ids that passed the filter
+                    personIds.push(...cases.map(caseRecord => caseRecord.id));
+                  });
+              });
+          }
+          // if a contact query is present
+          if (contactQuery) {
+            // restrict query to current outbreak
+            contactQuery = {
+              $and: [
+                contactQuery,
+                {
+                  outbreakId: outbreak.id
+                }
+              ]
+            };
+
+            // add geographical restriction query
+            geographicalRestrictionQuery && (contactQuery['$and'].push(geographicalRestrictionQuery));
+
+            // filter cases based on query
+            getPersonIds = getPersonIds
+              .then(function () {
+                return app.models.contact
+                  .rawFind(contactQuery, {projection: {_id: 1}})
+                  .then(function (contacts) {
+                    // build a list of case ids that passed the filter
+                    personIds.push(...contacts.map(contact => contact.id));
+                  });
+              });
+          }
+          // if a person query is present
+          if (personQuery) {
+            // restrict query to current outbreak
+            personQuery = {
+              $and: [
+                personQuery,
+                {
+                  outbreakId: outbreak.id
+                }
+              ]
+            };
+
+            // add geographical restriction query
+            geographicalRestrictionQuery && (personQuery['$and'].push(geographicalRestrictionQuery));
+
+            // filter people based on query
+            getPersonIds = getPersonIds
+              .then(() => {
+                return app.models.person
+                  .rawFind(personQuery, {projection: {_id: 1}})
+                  .then(people => {
+                    personIds.push(...people.map(person => person.id));
+                  });
+              });
+          }
+        } else if (geographicalRestrictionQuery) {
+          // no queries are being done on related person; we need to add default query for geographical restriction
+          personQuery = geographicalRestrictionQuery;
+          // filter people based on query
+          getPersonIds = getPersonIds
+            .then(() => {
+              return app.models.person
+                .rawFind(personQuery, {projection: {_id: 1}})
+                .then(people => {
+                  personIds.push(...people.map(person => person.id));
+                });
+            });
+        }
+
+        return getPersonIds;
+      })
       .then(() => {
         // if person ids filter present
         if (personQuery || contactQuery || caseQuery) {
