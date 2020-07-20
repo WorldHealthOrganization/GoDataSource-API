@@ -403,6 +403,9 @@ module.exports = function (Case) {
       .find({
         where: {
           categoryId: referenceDataCategoryId
+        },
+        fields: {
+          id: true
         }
       })
       .then(function (categoryItems) {
@@ -414,7 +417,7 @@ module.exports = function (Case) {
         Object.keys(periodMap)
           .forEach(function (periodMapIndex) {
             Object.assign(periodMap[periodMapIndex], {
-              [exportedPropertyName]: categoryList,
+              [exportedPropertyName]: Object.assign({}, categoryList),
               total: 0
             });
           });
@@ -440,7 +443,15 @@ module.exports = function (Case) {
                   }
                 }
               }, filter || {}).where
-            )
+            ), {
+              projection: {
+                dateOfOnset: 1,
+                classification: 1,
+                dateOfOutcome: 1,
+                outcomeId: 1,
+                dateOfReporting: 1
+              }
+            }
           )
           .then(function (cases) {
             return new Promise(function (resolve, reject) {
