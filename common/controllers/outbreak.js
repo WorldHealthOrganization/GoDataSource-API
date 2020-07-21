@@ -15,7 +15,6 @@ const templateParser = require('./../../components/templateParser');
 const fork = require('child_process').fork;
 const WorkerRunner = require('./../../components/workerRunner');
 const Platform = require('../../components/platform');
-const config = require('../../server/config.json');
 
 module.exports = function (Outbreak) {
 
@@ -87,6 +86,7 @@ module.exports = function (Outbreak) {
   require('./outbreakFollowUp')(Outbreak);
   require('./outbreakLocation')(Outbreak);
   require('./outbreakLabResult')(Outbreak);
+  require('./outbreakCOT')(Outbreak);
 
   /**
    * Allow changing follow-up status (only status property)
@@ -1790,134 +1790,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Count new cases in known transmission chains
-   * @param filter Besides the default filter properties this request also accepts 'noDaysInChains': number on the first level in 'where'
-   * @param callback
-   */
-  Outbreak.prototype.countNewCasesInKnownTransmissionChains = function (filter, callback) {
-    // default number of day used to determine new cases
-    let noDaysInChains = this.noDaysInChains;
-    // check if a different number was sent in the filter
-    if (filter && filter.where && filter.where.noDaysInChains) {
-      noDaysInChains = filter.where.noDaysInChains;
-      delete filter.where.noDaysInChains;
-    }
-    // start building a result
-    const result = {
-      newCases: 0,
-      total: 0,
-      caseIDs: []
-    };
-
-    // use a cases index to make sure we don't count a case multiple times
-    const casesIndex = {};
-    // calculate date used to compare contact date of onset with
-    const newCasesFromDate = new Date();
-    newCasesFromDate.setDate(newCasesFromDate.getDate() - noDaysInChains);
-
-    // get known transmission chains (case-case relationships)
-    app.models.relationship
-      .filterKnownTransmissionChains(this.id, filter)
-      .then(function (relationships) {
-        // go trough all relations
-        relationships.forEach(function (relation) {
-          // go trough all the people
-          if (Array.isArray(relation.people)) {
-            relation.people.forEach(function (person) {
-              // count each case only once (do a specific check for person type as transmission chains may include events)
-              if (!casesIndex[person.id] && person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
-                casesIndex[person.id] = true;
-                result.total++;
-                // check if the case is new (date of reporting is later than the threshold date)
-                if ((new Date(person.dateOfReporting)) >= newCasesFromDate) {
-                  result.newCases++;
-                  result.caseIDs.push(person.id);
-                }
-              }
-            });
-          }
-        });
-        callback(null, result);
-      })
-      .catch(callback);
-  };
-
-  /**
-   * Count new cases outside known transmission chains
-   * @param filter Besides the default filter properties this request also accepts 'noDaysInChains': number on the first level in 'where'
-   * @param callback
-   */
-  Outbreak.prototype.countNewCasesOutsideKnownTransmissionChains = function (filter, callback) {
-    const self = this;
-    // default number of day used to determine new cases
-    let noDaysInChains = this.noDaysInChains;
-    // check if a different number was sent in the filter
-    if (filter && filter.where && filter.where.noDaysInChains) {
-      noDaysInChains = filter.where.noDaysInChains;
-      delete filter.where.noDaysInChains;
-    }
-    // start building a result
-    const result = {
-      newCases: 0,
-      total: 0,
-      caseIDs: []
-    };
-
-    // use a cases index to make sure we don't count a case multiple times
-    const casesIndex = {};
-    // calculate date used to compare contact date of onset with
-    const newCasesFromDate = new Date();
-    newCasesFromDate.setDate(newCasesFromDate.getDate() - noDaysInChains);
-
-    // get known transmission chains (case-case relationships)
-    app.models.relationship
-      .filterKnownTransmissionChains(this.id, filter)
-      .then(function (relationships) {
-        // go trough all relations
-        relationships.forEach(function (relation) {
-          // go trough all the people
-          if (Array.isArray(relation.people)) {
-            relation.people.forEach(function (person) {
-              // count each case only once (do a specific check for person type as transmission chains may include events)
-              if (!casesIndex[person.id] && person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
-                casesIndex[person.id] = true;
-              }
-            });
-          }
-        });
-        // find cases that are not part of known transmission chains
-        return app.models.case
-          .rawFind({
-            outbreakId: self.id,
-            _id: {
-              nin: Object.keys(casesIndex)
-            },
-            classification: {
-              nin: app.models.case.discardedCaseClassifications
-            }
-          }, {
-            projection: {
-              dateOfReporting: 1
-            }
-          })
-          .then(function (cases) {
-            cases.forEach(function (caseRecord) {
-              // check if the case is new (date of reporting is later than the threshold date)
-              if ((new Date(caseRecord.dateOfReporting)) >= newCasesFromDate) {
-                result.newCases++;
-                result.caseIDs.push(caseRecord.id);
-              }
-              result.total++;
-            });
-          });
-      })
-      .then(function () {
-        callback(null, result);
-      })
-      .catch(callback);
-  };
-
-  /**
    * Count the cases with less than X contacts
    * Note: Besides the count the response also contains a list with the counted cases IDs
    * @param filter Besides the default filter properties this request also accepts 'noLessContacts': number on the first level in 'where'
@@ -2105,80 +1977,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Get a list of relationships that links cases with long periods between the dates of onset
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.longPeriodsBetweenDatesOfOnsetInTransmissionChains = function (filter, callback) {
-    // get longPeriodsBetweenCaseOnset
-    const longPeriodsBetweenCaseOnset = this.longPeriodsBetweenCaseOnset;
-    // keep a list of relations that match the criteria
-    const relationshipsWithLongPeriodsBetweenDatesOfOnset = [];
-    // get known transmission chains
-    app.models.relationship
-      .filterKnownTransmissionChains(this.id, app.utils.remote
-        // were only interested in cases
-        .mergeFilters({
-          where: {
-            'persons.0.type': {
-              inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
-            },
-            'persons.1.type': {
-              inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
-            }
-          },
-          // we're only interested in the cases that have dateOfOnset set
-          include: {
-            relation: 'people',
-            scope: {
-              where: {
-                dateOfOnset: {
-                  neq: null
-                }
-              },
-              filterParent: true
-            }
-          }
-        }, filter || {}))
-      .then(function (relationships) {
-        // go trough all relations
-        relationships.forEach(function (relation) {
-          // we're only interested in the cases that have dateOfOnset set (this should be already done by the query, but double-check)
-          if (relation.people[0].dateOfOnset && relation.people[1].dateOfOnset) {
-            const case1Date = new Date(relation.people[0].dateOfOnset);
-            const case2Date = new Date(relation.people[1].dateOfOnset);
-            // get time difference in days
-            const timeDifferenceInDays = Math.ceil(Math.abs(case1Date.getTime() - case2Date.getTime()) / (1000 * 3600 * 24));
-            // if the time difference is bigger then the threshold
-            if (timeDifferenceInDays > longPeriodsBetweenCaseOnset) {
-              // add time difference information
-              relation.differenceBetweenDatesOfOnset = timeDifferenceInDays;
-              // and save the relation
-              relationshipsWithLongPeriodsBetweenDatesOfOnset.push(relation);
-            }
-          }
-        });
-        callback(null, relationshipsWithLongPeriodsBetweenDatesOfOnset);
-      })
-      .catch(callback);
-  };
-
-  /**
-   * Since this endpoint returns person data without checking if the user has the required read permissions,
-   * check the user's permissions and return only the fields he has access to
-   */
-  Outbreak.afterRemote('prototype.longPeriodsBetweenDatesOfOnsetInTransmissionChains', function (context, modelInstance, next) {
-    let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
-
-    modelInstance.forEach((relationship) => {
-      relationship.people.forEach((person) => {
-        Outbreak.helpers.limitPersonInformation(person, personTypesWithReadAccess);
-      });
-    });
-    next();
-  });
-
-  /**
    * Build new transmission chains from registered contacts who became cases
    * @param filter
    * @param callback
@@ -2320,87 +2118,6 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
-
-  /**
-   * Get a list of secondary cases that have date of onset before the date of onset of primary cases
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.findSecondaryCasesWithDateOfOnsetBeforePrimaryCase = function (filter, callback) {
-    const results = [];
-    // get known transmission chains
-    app.models.relationship
-      .filterKnownTransmissionChains(this.id, app.utils.remote
-        // were only interested in cases
-        .mergeFilters({
-          where: {
-            'persons.0.type': {
-              inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
-            },
-            'persons.1.type': {
-              inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
-            }
-          },
-          // we're only interested in the cases that have dateOfOnset set
-          include: {
-            relation: 'people',
-            scope: {
-              where: {
-                dateOfOnset: {
-                  neq: null
-                }
-              },
-              filterParent: true
-            }
-          }
-        }, filter || {}))
-      .then(function (relationships) {
-        // go trough all relations
-        relationships.forEach(function (relationship) {
-          // we're only interested in the cases that have dateOfOnset set (this should be already done by the query, but double-check)
-          if (relationship.people[0].dateOfOnset && relationship.people[1].dateOfOnset) {
-            // find source person index (in persons)
-            const _sourceIndex = relationship.persons.findIndex(person => person.source);
-            // find source person index
-            const sourceIndex = relationship.people.findIndex(person => person.id === relationship.persons[_sourceIndex].id);
-            // find source person
-            const sourcePerson = relationship.people[sourceIndex];
-            // get target person (the other person from people list)
-            const targetPerson = relationship.people[sourceIndex ? 0 : 1];
-            // if target person's date of onset is earlier than the source's person
-            if ((new Date(targetPerson.dateOfOnset)) < (new Date(sourcePerson.dateOfOnset))) {
-              //store info about both people and their relationship
-              const result = {
-                primaryCase: sourcePerson,
-                secondaryCase: targetPerson,
-                relationship: Object.assign({}, relationship)
-              };
-              // remove extra info
-              delete result.relationship.people;
-              results.push(result);
-            }
-          }
-        });
-        callback(null, results);
-      })
-      .catch(callback);
-  };
-
-
-  /**
-   * Since this endpoint returns person data without checking if the user has the required read permissions,
-   * check the user's permissions and return only the fields he has access to
-   */
-  Outbreak.afterRemote('prototype.findSecondaryCasesWithDateOfOnsetBeforePrimaryCase', function (context, modelInstance, next) {
-    let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
-
-    modelInstance.forEach((personPair) => {
-      Outbreak.helpers.limitPersonInformation(personPair.primaryCase, personTypesWithReadAccess);
-      Outbreak.helpers.limitPersonInformation(personPair.secondaryCase, personTypesWithReadAccess);
-    });
-
-    next();
-  });
 
   /**
    * Count the contacts not seen in the past X days
@@ -7596,142 +7313,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Export filtered relationships to file
-   * @param filter Supports 'where.person' & 'where.followUp' MongoDB compatible queries. For person please include type in case you want to filter only cases, contacts etc.
-   * If you include both person & followUp conditions, then and AND will be applied between them.
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
-   * @param encryptPassword
-   * @param anonymizeFields
-   * @param options
-   * @param callback
-   */
-  Outbreak.prototype.exportFilteredRelationships = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
-    // const self = this;
-    app.models.relationship
-      .preFilterForOutbreak(this, filter)
-      .then(function (filter) {
-        // if encrypt password is not valid, remove it
-        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-          encryptPassword = null;
-        }
-
-        // make sure anonymizeFields is valid
-        if (!Array.isArray(anonymizeFields)) {
-          anonymizeFields = [];
-        }
-
-        // export list of relationships
-        app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.relationship,
-          {},
-          filter,
-          exportType,
-          'Relationship List',
-          encryptPassword,
-          anonymizeFields,
-          options,
-          function (results) {
-            // construct unique list of persons that we need to retrieve
-            let personIds = {};
-            results.forEach((relationship) => {
-              if (
-                relationship.persons &&
-                relationship.persons.length > 1
-              ) {
-                personIds[relationship.persons[0].id] = true;
-                personIds[relationship.persons[1].id] = true;
-              }
-            });
-
-            // flip object to array
-            personIds = Object.keys(personIds);
-
-            // start with a resolved promise (so we can link others)
-            let buildQuery = Promise.resolve();
-
-            // retrieve list of persons
-            const mappedPersons = {};
-            if (!_.isEmpty(personIds)) {
-              buildQuery = app.models.person
-                .rawFind({
-                  id: {
-                    inq: personIds
-                  }
-                })
-                .then((personRecords) => {
-                  // map list of persons ( ID => persons model )
-                  personRecords.forEach((personData) => {
-                    mappedPersons[personData.id] = personData;
-                  });
-                });
-            }
-
-            // attach persons to the list of relationships
-            return buildQuery
-              .then(() => {
-                // retrieve dictionary
-                return new Promise(function (resolve, reject) {
-                  // load context user
-                  const contextUser = app.utils.remote.getUserFromOptions(options);
-
-                  // load user language dictionary
-                  app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-                    // handle errors
-                    if (error) {
-                      return reject(error);
-                    }
-
-                    // finished
-                    resolve(dictionary);
-                  });
-                });
-              })
-              .then((dictionary) => {
-                // add source & target objects
-                results.forEach((relationship) => {
-                  // map source & target
-                  if (
-                    relationship.persons &&
-                    relationship.persons.length > 1
-                  ) {
-                    // retrieve person models
-                    const firstPerson = mappedPersons[relationship.persons[0].id];
-                    const secondPerson = mappedPersons[relationship.persons[1].id];
-                    if (
-                      firstPerson &&
-                      secondPerson
-                    ) {
-                      // attach target
-                      relationship.sourcePerson = relationship.persons[0].source ? firstPerson : secondPerson;
-                      relationship.targetPerson = relationship.persons[0].target ? firstPerson : secondPerson;
-                    } else {
-                      // relationship doesn't have source & target ( it should've been deleted ( cascade ... ) )
-                      relationship.sourcePerson = {};
-                      relationship.targetPerson = {};
-                    }
-                  }
-
-                  // translate data
-                  if (relationship.sourcePerson.gender) {
-                    relationship.sourcePerson.gender = dictionary.getTranslation(relationship.sourcePerson.gender);
-                  }
-                  if (relationship.targetPerson.gender) {
-                    relationship.targetPerson.gender = dictionary.getTranslation(relationship.targetPerson.gender);
-                  }
-                });
-
-                // return results once we map everything we need
-                return results;
-              });
-          },
-          callback
-        );
-      })
-      .catch(callback);
-  };
-
-  /**
    * Backwards compatibility for find, filtered-count and per-classification count contacts filters
    * @param context
    * @param modelInstance
@@ -7785,18 +7366,6 @@ module.exports = function (Outbreak) {
   });
   Outbreak.beforeRemote('prototype.exportFilteredContactsOfContacts', function (context, modelInstance, next) {
     findAndFilteredCountContactsBackCompat(context, modelInstance, next);
-  });
-
-  Outbreak.beforeRemote('prototype.exportFilteredRelationships', function (context, modelInstance, next) {
-    // remove custom filter options
-    // technical debt from front end
-    context.args = context.args || {};
-    context.args.filter = context.args.filter || {};
-    context.args.filter.where = context.args.filter.where || {};
-    context.args.filter.where.person = context.args.filter.where.person || {};
-    delete context.args.filter.where.person.countRelations;
-
-    return next();
   });
 
   /**

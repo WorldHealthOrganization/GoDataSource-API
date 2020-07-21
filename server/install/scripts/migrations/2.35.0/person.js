@@ -46,6 +46,9 @@ const setRelationshipsInformationOnPerson = (options, callback) => {
       let relationshipsFilter = {
         deleted: {
           $ne: true
+        },
+        persons: {
+          $size: 2
         }
       };
 

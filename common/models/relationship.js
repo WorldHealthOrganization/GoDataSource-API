@@ -319,37 +319,56 @@ module.exports = function (Relationship) {
    * Filter known transmission chains
    * @param outbreakId
    * @param filter
+   * @param options Options from request
    * @return {*|PromiseLike<T>|Promise<T>} Promise that resolves a list of relationships
    */
-  Relationship.filterKnownTransmissionChains = function (outbreakId, filter) {
-    // transmission chains are formed by case-case relations of non-discarded cases
-    let _filter = app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: outbreakId,
-          'persons.0.type': {
-            inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
-          },
-          'persons.1.type': {
-            inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+  Relationship.filterKnownTransmissionChains = function (outbreakId, filter, options) {
+    let _filter;
+
+    // check for geographical restrictions
+    return app.models.person
+      .addGeographicalRestrictions(options.remotingContext)
+      .then(geographicalRestricationsQuery => {
+        // initialize people query
+        let peopleQuery = {
+          classification: {
+            nin: app.models.case.discardedCaseClassifications
           }
-        },
-        include: {
-          relation: 'people',
-          scope: {
+        };
+
+        // add geographical restrictions if needed
+        geographicalRestricationsQuery && (peopleQuery = {
+          and: [
+            peopleQuery,
+            geographicalRestricationsQuery
+          ]
+        });
+
+        // transmission chains are formed by case-case relations of non-discarded cases
+        _filter = app.utils.remote
+          .mergeFilters({
             where: {
-              classification: {
-                nin: app.models.case.discardedCaseClassifications
+              outbreakId: outbreakId,
+              'persons.0.type': {
+                inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+              },
+              'persons.1.type': {
+                inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
               }
             },
-            filterParent: true
-          }
-        }
-      }, filter || {});
+            include: {
+              relation: 'people',
+              scope: {
+                where: peopleQuery,
+                filterParent: true
+              }
+            }
+          }, filter || {});
 
-    // find relationships
-    return Relationship
-      .rawFind(_filter.where)
+        // find relationships
+        return Relationship
+          .rawFind(_filter.where);
+      })
       .then(function (relationships) {
         // build a list of people ids that are part of found relationships
         let peopleIds = [];
@@ -1160,9 +1179,10 @@ module.exports = function (Relationship) {
    * @param outbreak
    * @param filter Supports 'where.person' & 'where.followUp' MongoDB compatible queries. For person please include type in case you want to filter only cases, contacts etc.
    * If you include both person & followUp conditions, then and AND will be applied between them.
+   * @param options Options from request
    * @return {Promise<void | never>}
    */
-  Relationship.preFilterForOutbreak = function (outbreak, filter) {
+  Relationship.preFilterForOutbreak = function (outbreak, filter, options) {
     // set a default filter
     filter = filter || {};
 
@@ -1185,96 +1205,108 @@ module.exports = function (Relationship) {
     // get main relationship query
     let relationshipQuery = _.get(filter, 'where');
 
-    // start with a resolved promise (so we can link others)
-    let buildQuery = Promise.resolve();
+    // start geographical restriction promise
+    return app.models.person
+      .addGeographicalRestrictions(options.remotingContext, personQuery)
+      .then(geographicalRestrictionsQuery => {
+        // initialize promise chain for additional resources filtering
+        let buildQuery = Promise.resolve();
 
-    // if a person query is present
-    if (personQuery) {
-      // restrict query to current outbreak
-      personQuery = {
-        $and: [
-          personQuery,
-          {
-            outbreakId: outbreak.id
-          }
-        ]
-      };
+        // if a person query is present
+        if (personQuery) {
+          // restrict query to current outbreak
+          personQuery = {
+            $and: [
+              // if geographical restriction query was constructed it started from person query;
+              // use it instead of person query
+              geographicalRestrictionsQuery || personQuery,
+              {
+                outbreakId: outbreak.id
+              }
+            ]
+          };
+        } else if (geographicalRestrictionsQuery) {
+          // no person query was present in filter but we need to apply geographical restrictions
+          personQuery = geographicalRestrictionsQuery;
+        }
 
-      // filter person based on query
-      buildQuery = buildQuery
-        .then(function () {
-          return app.models.person
-            .rawFind(personQuery, {projection: {_id: 1}})
-            .then(function (personRecords) {
-              // build a list of personIds that passed the filter
-              const personIds = [];
-              personRecords.forEach(function (person) {
-                personIds.push(person.id);
-              });
-              return Array.from(new Set(personIds));
+        if (personQuery) {
+          // filter person based on query
+          buildQuery = buildQuery
+            .then(function () {
+              return app.models.person
+                .rawFind(personQuery, {projection: {_id: 1}})
+                .then(function (personRecords) {
+                  // build a list of personIds that passed the filter
+                  const personIds = [];
+                  personRecords.forEach(function (person) {
+                    personIds.push(person.id);
+                  });
+                  return Array.from(new Set(personIds));
+                });
             });
-        });
-    }
+        }
 
-    // if a follow-up query is present
-    if (followUpQuery) {
-      // restrict query to current outbreak
-      followUpQuery = {
-        $and: [
-          followUpQuery,
-          {
-            outbreakId: outbreak.id
-          }
-        ]
-      };
+        // if a follow-up query is present
+        if (followUpQuery) {
+          // restrict query to current outbreak
+          followUpQuery = {
+            $and: [
+              followUpQuery,
+              {
+                outbreakId: outbreak.id
+              }
+            ]
+          };
 
-      // filter follow-ups based on query
-      buildQuery = buildQuery
-        .then((personIds) => {
-          // in case we triggered person query and no results were returned, then there is no point in triggering a follow-up query since an AND is applied between these two
-          if (
-            personIds &&
-            personIds.length < 1
-          ) {
-            return [];
-          }
-
-          // either person query returned something, or we didn't call a person query
-          return app.models.followUp
-            .rawFind(followUpQuery, {projection: {personId: 1}})
-            .then(function (followUpRecords) {
-              // did we filter by person as well, then we need to do an intersection between ids which
-              // translates into both person and follow-up conditions must match ?
-              if (!personIds) {
-                personIds = [];
-                followUpRecords.forEach((followUp) => {
-                  personIds.push(followUp.personId);
-                });
-              } else {
-                // build a list of personIds that passed the filter
-                const localPersonIds = {};
-                followUpRecords.forEach((followUp) => {
-                  localPersonIds[followUp.personId] = true;
-                });
-
-                // we need to make sure that both conditions match
-                const personIdsTmp = personIds;
-                personIds = [];
-                personIdsTmp.forEach((personId) => {
-                  if (localPersonIds[personId]) {
-                    personIds.push(personId);
-                  }
-                });
+          // filter follow-ups based on query
+          buildQuery = buildQuery
+            .then((personIds) => {
+              // in case we triggered person query and no results were returned, then there is no point in triggering a follow-up query since an AND is applied between these two
+              if (
+                personIds &&
+                personIds.length < 1
+              ) {
+                return [];
               }
 
-              // finished => make sure we return unique values
-              return Array.from(new Set(personIds));
-            });
-        });
-    }
+              // either person query returned something, or we didn't call a person query
+              return app.models.followUp
+                .rawFind(followUpQuery, {projection: {personId: 1}})
+                .then(function (followUpRecords) {
+                  // did we filter by person as well, then we need to do an intersection between ids which
+                  // translates into both person and follow-up conditions must match ?
+                  if (!personIds) {
+                    personIds = [];
+                    followUpRecords.forEach((followUp) => {
+                      personIds.push(followUp.personId);
+                    });
+                  } else {
+                    // build a list of personIds that passed the filter
+                    const localPersonIds = {};
+                    followUpRecords.forEach((followUp) => {
+                      localPersonIds[followUp.personId] = true;
+                    });
 
-    // return relationships
-    return buildQuery
+                    // we need to make sure that both conditions match
+                    const personIdsTmp = personIds;
+                    personIds = [];
+                    personIdsTmp.forEach((personId) => {
+                      if (localPersonIds[personId]) {
+                        personIds.push(personId);
+                      }
+                    });
+                  }
+
+                  // finished => make sure we return unique values
+                  return Array.from(new Set(personIds));
+                });
+            });
+        }
+
+        return buildQuery;
+      })
+      // return relationships
       .then(function (personIds) {
         // if personIds filter present
         if (personIds) {
