@@ -4903,31 +4903,6 @@
         "path": "/events/:nk/contacts"
       }
     },
-    "prototype.findLabResults": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "labResults",
-          "type": [
-            "labResult"
-          ],
-          "description": "List of labResults that match the search criteria",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Queries labResults of outbreak.",
-      "http": {
-        "verb": "get",
-        "path": "/labResults"
-      }
-    },
     "prototype.filteredCountLabResults": {
       "accepts": [
         {

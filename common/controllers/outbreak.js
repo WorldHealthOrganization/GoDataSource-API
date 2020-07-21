@@ -56,6 +56,7 @@ module.exports = function (Outbreak) {
     'prototype.__destroyById__people',
     'prototype.__create__labResults',
     'prototype.__delete__labResults',
+    'prototype.__count__labResults',
     'prototype.__create__attachments',
     'prototype.__get__attachments',
     'prototype.__delete__attachments',
