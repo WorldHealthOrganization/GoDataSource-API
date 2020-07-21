@@ -1937,6 +1937,35 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Backwards compatibility for find and filtered count lab results filters
+   * @param context
+   * @param modelInstance
+   * @param next
+   */
+  Outbreak.helpers.findAndFilteredCountLabResultsBackCompat = function (context, modelInstance, next) {
+    // get filter
+    const filter = _.get(context, 'args.filter', {});
+    // convert filters from old format into the new one
+    let query = app.utils.remote.searchByRelationProperty
+      .convertIncludeQueryToFilterQuery(filter);
+    // get case query, if any
+    const queryCase = _.get(filter, 'where.case');
+    // if there is no case query, but there is an older version of the filter
+    if (!queryCase && query.case) {
+      // use that old version
+      _.set(filter, 'where.case', query.case);
+    }
+
+    // be backwards compatible
+    const personQuery = _.get(filter, 'where.person');
+    if (!personQuery && query.person) {
+      _.set(filter, 'where.person', query.person);
+    }
+
+    next();
+  };
+
+  /**
    * Do not allow deletion of a active Outbreak
    * @param ctx
    * @param next

@@ -1321,18 +1321,6 @@
       "principalType": "ROLE",
       "principalId": "lab_result_list",
       "permission": "ALLOW",
-      "property": "findLabResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "lab_result_list",
-      "permission": "ALLOW",
-      "property": "__count__labResults"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "lab_result_list",
-      "permission": "ALLOW",
       "property": "filteredCountLabResults"
     },
     {
@@ -4915,37 +4903,17 @@
         "path": "/events/:nk/contacts"
       }
     },
-    "prototype.findLabResults": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "labResults",
-          "type": [
-            "labResult"
-          ],
-          "description": "List of labResults that match the search criteria",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Queries labResults of outbreak.",
-      "http": {
-        "verb": "get",
-        "path": "/labResults"
-      }
-    },
     "prototype.filteredCountLabResults": {
       "accepts": [
         {
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -4973,6 +4941,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -5000,6 +4973,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -5022,6 +5000,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, order, skip, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'case.field' conditions, case being another property from lab result"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -5047,6 +5030,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, order, skip, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'case.field' MongoDB compatible queries"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
