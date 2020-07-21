@@ -4859,6 +4859,12 @@
       },
       "LNG_DIALOG_CONFIRM_CLONE_OUTBREAK_TEMPLATE": {
         "translation": "Name the clone of the outbreak template"
+      },
+      "LNG_DIALOG_CONFIRM_DELETE_CONTACT_OF_CONTACT": {
+        "translation": "Are you sure you want to delete this contact of contact: '{{name}}'?"
+      },
+      "LNG_DIALOG_CONFIRM_RESTORE_CONTACT_OF_CONTACT": {
+        "translation": "Are you sure tou want to restore this contact of contact: '{{name}}'?"
       }
     },
     "uiLoginPage": {
@@ -16604,6 +16610,12 @@
       },
       "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_SHOW_GROUP_BY_RISK_PILLS": {
         "translation": "Show contacts of contacts grouped by risk count"
+      },
+      "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_DELETE_SUCCESS_MESSAGE": {
+        "translation": "Contact of contact deleted"
+      },
+      "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_RESTORE_SUCCESS_MESSAGE": {
+        "translation": "Contact of contact restored"
       }
     },
     "uiContactOfContactListPage": {
@@ -16625,7 +16637,7 @@
       "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_VIEW_CHRONOLOGY": {
         "translation": "View chronology"
       },
-      "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_RESTORE_CONTACT": {
+      "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_RESTORE_CONTACT_OF_CONTACTS": {
         "translation": "Restore contact of contact"
       },
       "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_GROUP_ACTION_EXPORT_SELECTED_CONTACTS_OF_CONTACTS": {

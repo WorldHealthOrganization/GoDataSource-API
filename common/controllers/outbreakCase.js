@@ -14,6 +14,10 @@ const tmp = require('tmp');
 const fs = require('fs');
 const AdmZip = require('adm-zip');
 const moment = require('moment');
+const Config = require('../../server/config.json');
+
+// used in getCaseCountMap function
+const caseCountMapBatchSize = _.get(Config, 'jobSettings.caseCountMap.batchSize', 10000);
 
 module.exports = function (Outbreak) {
   /**
@@ -1181,6 +1185,132 @@ module.exports = function (Outbreak) {
         });
         response.count = allCasesCount;
         callback(null, response);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Find list of case main addresses that have geo location and match search criteria
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.getCaseCountMap = function (where, options, callback) {
+    // construct case count map filter
+    const whereCaseCountMap = {
+      classification: {
+        $nin: app.models.case.discardedCaseClassifications
+      },
+      addresses: {
+        $elemMatch: {
+          typeId: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
+          'geoLocation.coordinates': {
+            $exists: true
+          }
+        }
+      }
+    };
+
+    // merge conditions
+    if (where) {
+      where = {
+        $and: [
+          whereCaseCountMap,
+          where
+        ]
+      };
+    } else {
+      where = whereCaseCountMap;
+    }
+
+    // pre-filter using related data (case)
+    // IMPORTANT: required to add geographical restrictions filters
+    app.models.case
+      .preFilterForOutbreak(this, { where: where }, options)
+      .then(function (filter) {
+        // retrieve in bulks
+        filter = filter || {};
+        Object.assign(
+          filter,
+          app.utils.remote.convertLoopbackFilterToMongo({
+            where: filter.where || {}
+          })
+        );
+
+        // initialize parameters for handleActionsInBatches call
+        const getActionsCount = () => {
+          return Promise.resolve()
+            .then(() => {
+              // count cases that match search criteria
+              return app.models.case
+                .count(filter.where);
+            });
+        };
+
+        // get cases for batch
+        const getBatchData = (batchNo, batchSize) => {
+          return app.models.case
+            .rawFind(
+              filter.where, {
+                order: {
+                  createdAt: 1
+                },
+                projection: {
+                  addresses: 1
+                },
+                skip: (batchNo - 1) * batchSize,
+                limit: batchSize,
+              }
+            );
+        };
+
+        // batch item actions
+        // keep a list of addresses that we need to return
+        const geoPoints = [];
+        const batchItemsAction = (cases) => {
+          // go through cases and determine main addresses
+          cases.forEach(function (caseData) {
+            // find usual place of residence
+            const caseAddresses = caseData.addresses || [];
+            for (const addressIndex in caseAddresses) {
+              // found ?
+              const address = caseAddresses[addressIndex];
+              if (
+                address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE' &&
+                address.geoLocation &&
+                address.geoLocation.coordinates &&
+                address.geoLocation.coordinates.length > 1
+              ) {
+                // add point
+                geoPoints.push({
+                  lat: address.geoLocation.coordinates[1],
+                  lng: address.geoLocation.coordinates[0]
+                });
+
+                // finished
+                break;
+              }
+            }
+          });
+
+          // finished
+          return Promise.resolve();
+        };
+
+        // execute jobs in batches
+        return app.utils.helpers
+          .handleActionsInBatches(
+            getActionsCount,
+            getBatchData,
+            batchItemsAction,
+            null,
+            caseCountMapBatchSize,
+            10,
+            console
+          )
+          .then(() => {
+            return callback(null, geoPoints);
+          });
       })
       .catch(callback);
   };

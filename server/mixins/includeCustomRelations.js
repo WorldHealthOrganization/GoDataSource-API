@@ -77,23 +77,31 @@ module.exports = function (Model) {
       switch (customRelation.definition.type) {
         // base model contains a list of references to related model
         case 'belongsToMany':
-          query = {
-            where: {
-              id: {
-                inq: _.get(modelInstance, customRelation.definition.foreignKey) || []
+          referencedIds = _.get(modelInstance, customRelation.definition.foreignKey);
+          if (
+            referencedIds &&
+            Array.isArray(referencedIds) &&
+            referencedIds.length > 0
+          ) {
+            query = {
+              where: {
+                id: {
+                  inq: referencedIds
+                }
               }
-            }
-          };
+            };
+          }
           break;
         // belongs to with nested foreign key
         case 'belongsToEmbedded':
-          query = {
-            where: {
-              id: {
-                inq: [_.get(modelInstance, customRelation.definition.foreignKey)]
+          const foreignKey = _.get(modelInstance, customRelation.definition.foreignKey);
+          if (foreignKey) {
+            query = {
+              where: {
+                id: foreignKey
               }
-            }
-          };
+            };
+          }
           break;
         // base model contains a list of references to related model
         case 'belongsToManyComplex':
@@ -104,13 +112,16 @@ module.exports = function (Model) {
             referencedIds.push(_.get(property, customRelation.definition.foreignKey));
           });
           // build query
-          query = {
-            where: {
-              id: {
-                inq: referencedIds
+          // there is no point to construct query if there is nothing to retrieve
+          if (referencedIds.length > 0) {
+            query = {
+              where: {
+                id: {
+                  inq: referencedIds
+                }
               }
-            }
-          };
+            };
+          }
           break;
         // related model contains a list of references to base model
         case 'hasManyEmbedded':
@@ -130,13 +141,24 @@ module.exports = function (Model) {
         default:
           throw new Error(`Unsupported custom relation type: ${customRelation.definition.type}`);
       }
-      // if a scope was include in the relation
-      if (customRelation.scope) {
-        // merge it in the query
-        query = app.utils.remote.mergeFilters(query, customRelation.scope);
-      }
+
       // regular relation, execute search
       if (customRelation.definition.type !== 'function') {
+        // if a scope was include in the relation
+        // there is no point to include scope if we don't have a condition resulted from definition - type
+        if (
+          query &&
+          customRelation.scope
+        ) {
+          // merge it in the query
+          query = app.utils.remote.mergeFilters(query, customRelation.scope);
+        }
+
+        // nothing to filter for ?
+        if (!query) {
+          return;
+        }
+
         // search for the related information
         promises.push(
           app.models[customRelation.definition.model]
@@ -158,6 +180,13 @@ module.exports = function (Model) {
         );
       }
     });
+
+    // no promises to execute ?
+    if (promises.length < 1) {
+      return Promise.resolve();
+    }
+
+    // execute promisses
     return Promise.all(promises);
   }
 
