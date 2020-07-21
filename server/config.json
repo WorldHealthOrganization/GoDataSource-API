@@ -119,6 +119,9 @@
     },
     "setUsualPlaceOfResidenceLocationIdOnPerson": {
       "batchSize": 10000
+    },
+    "caseCountMap": {
+      "batchSize": 10000
     }
   },
   "caching": {

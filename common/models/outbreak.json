@@ -359,6 +359,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "case_list",
+      "permission": "ALLOW",
+      "property": "getCaseCountMap"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "case_create",
       "permission": "ALLOW",
       "property": "__create__cases"
@@ -8502,6 +8508,38 @@
         "verb": "put",
         "path": "/follow-ups/bulk"
       }
+    },
+    "prototype.getCaseCountMap": {
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "geoPoints",
+          "type": [
+            "customGeoPoint"
+          ],
+          "description": "List of case main addresses geo points that have geo location and match search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries cases of outbreak.",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/cases/count-map"
+        }
+      ]
     }
   }
 }
