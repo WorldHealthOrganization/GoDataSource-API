@@ -149,7 +149,15 @@ module.exports = function (Relationship) {
    * @param noContactChains
    * @param callback
    */
-  Relationship.buildOrCountTransmissionChains = function (outbreakId, followUpPeriod, filter, countOnly, countContacts, noContactChains, callback) {
+  Relationship.buildOrCountTransmissionChains = function (
+    outbreakId,
+    followUpPeriod,
+    filter,
+    countOnly,
+    countContacts,
+    noContactChains,
+    callback
+  ) {
     // define an endDate filter
     let endDate;
     // if there's a filter
@@ -208,7 +216,8 @@ module.exports = function (Relationship) {
         Object.assign(
           originalFilter.retrieveFields && originalFilter.retrieveFields.edges ? {
             projection: originalFilter.retrieveFields.edges
-          } : {}, {
+          } : {},
+          originalFilter.dontLimitRelationships ? {} : {
             limit: config.cot && config.cot.maxRelationships ?
               config.cot.maxRelationships :
               1000
