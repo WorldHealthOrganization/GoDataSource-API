@@ -1436,6 +1436,11 @@ module.exports = function (Outbreak) {
       const noContactChains = processedFilter.noContactChains;
       const includeContactsOfContacts = processedFilter.includeContactsOfContacts;
 
+      // if we need to display specific chains then we need to remove the maxRelationship constraint
+      if (sizeFilter !== undefined) {
+        processedFilter.filter.dontLimitRelationships = true;
+      }
+
       // flag that indicates that contacts should be counted per chain
       const countContacts = processedFilter.countContacts;
 
@@ -1461,7 +1466,8 @@ module.exports = function (Outbreak) {
             {
               includeContacts: includeContacts,
               includeContactsOfContacts: isContactsOfContactsActive && includeContactsOfContacts && includeContacts
-            });
+            }
+          );
 
           // determine if isolated nodes should be included
           const cotMaxRelationships = config.cot && config.cot.maxRelationships ?
