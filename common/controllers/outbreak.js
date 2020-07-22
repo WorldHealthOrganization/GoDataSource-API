@@ -1312,16 +1312,37 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countIndependentTransmissionChains = function (filter, callback) {
+    // outbreak instance
     const self = this;
+
+    // we don't need to retrieve all fields from database to determine the number of chains
+    filter.retrieveFields = {
+      edges: {
+        id: 1,
+        contactDate: 1,
+        persons: 1
+      },
+      nodes: {
+        id: 1,
+        type: 1
+      }
+    };
+
     // processed filter
     this.preProcessTransmissionChainsFilter(filter)
       .then(function (processedFilter) {
+        // we don't need to retrieve all fields from database to determine the number of chains
+        // & don't limit relationships
+        Object.assign(
+          processedFilter.filter, {
+            retrieveFields: filter.retrieveFields,
+            dontLimitRelationships: true
+          }
+        );
 
         // use processed filters
         filter = processedFilter.filter;
-        const personIds = processedFilter.personIds;
         const endDate = processedFilter.endDate;
-        const includedPeopleFilter = processedFilter.includedPeopleFilter;
 
         // end date is supported only one first level of where in transmission chains
         _.set(filter, 'where.endDate', endDate);
@@ -1333,75 +1354,10 @@ module.exports = function (Outbreak) {
               return callback(error);
             }
 
-            // if we have includedPeopleFilter, we don't need isolated nodes
-            if (includedPeopleFilter) {
-
-              delete noOfChains.isolatedNodes;
-              delete noOfChains.nodes;
-              callback(null, noOfChains);
-
-              // no includedPeopleFilter, add isolated nodes
-            } else {
-              // get node IDs
-              const nodeIds = Object.keys(noOfChains.nodes);
-              // count isolated nodes
-              const isolatedNodesNo = Object.keys(noOfChains.isolatedNodes).reduce(function (accumulator, currentValue) {
-                if (noOfChains.isolatedNodes[currentValue]) {
-                  accumulator++;
-                }
-                return accumulator;
-              }, 0);
-
-              // build a filter of isolated nodes
-              let isolatedNodesFilter = {
-                outbreakId: self.id,
-                or: [
-                  {
-                    type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                    classification: {
-                      nin: app.models.case.discardedCaseClassifications
-                    }
-                  },
-                  {
-                    type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
-                  }
-                ],
-                id: {
-                  nin: nodeIds
-                },
-                dateOfReporting: {
-                  lte: endDate
-                }
-              };
-
-              // if there was a people filter
-              if (personIds) {
-                // use it for isolated nodes as well
-                // merge filter knows how to handle filters, but count accepts only 'where'
-                const filter = app.utils.remote
-                  .mergeFilters({
-                    where: {
-                      id: {
-                        inq: personIds
-                      }
-                    }
-                  }, {where: isolatedNodesFilter});
-                // extract merged 'where' property
-                isolatedNodesFilter = filter.where;
-              }
-              // find other isolated nodes (nodes that were never in a relationship)
-              app.models.person
-                .count(isolatedNodesFilter)
-                .then(function (isolatedNodesCount) {
-                  // total list of isolated nodes is composed by the nodes that were never in a relationship + the ones that
-                  // come from relationships that were invalidated as part of the chain
-                  noOfChains.isolatedNodesCount = isolatedNodesCount + isolatedNodesNo;
-                  delete noOfChains.isolatedNodes;
-                  delete noOfChains.nodes;
-                  callback(null, noOfChains);
-                })
-                .catch(callback);
-            }
+            // we don't require to count isolated nodes
+            delete noOfChains.isolatedNodes;
+            delete noOfChains.nodes;
+            callback(null, noOfChains);
           });
       });
   };
