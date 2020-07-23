@@ -1419,9 +1419,19 @@ module.exports = function (Outbreak) {
       };
     }
 
-    // process filters
+    // don't limit by relationships ?
+    if (
+      filter.where &&
+      filter.where.dontLimitRelationships !== undefined
+    ) {
+      filter.dontLimitRelationships = filter.where.dontLimitRelationships;
+      delete filter.where.dontLimitRelationships;
+    }
+
+      // process filters
     this.preProcessTransmissionChainsFilter(filter).then(function (processedFilter) {
       // use processed filters
+      const dontLimitRelationships = filter.dontLimitRelationships;
       filter = Object.assign(
         processedFilter.filter, {
           retrieveFields: filter.retrieveFields
@@ -1435,6 +1445,11 @@ module.exports = function (Outbreak) {
       const includeContacts = processedFilter.includeContacts;
       const noContactChains = processedFilter.noContactChains;
       const includeContactsOfContacts = processedFilter.includeContactsOfContacts;
+
+      // don't limit by relationships ?
+      if (dontLimitRelationships !== undefined) {
+        processedFilter.filter.dontLimitRelationships = dontLimitRelationships;
+      }
 
       // if we need to display specific chains then we need to remove the maxRelationship constraint
       if (
