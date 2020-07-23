@@ -1212,8 +1212,8 @@ module.exports = function (Relationship) {
         // initialize promise chain for additional resources filtering
         let buildQuery = Promise.resolve();
 
-        // if a person query is present
-        if (personQuery) {
+        // if a person query is present or geographical restrictions apply
+        if (personQuery || geographicalRestrictionsQuery) {
           // restrict query to current outbreak
           personQuery = {
             $and: [
@@ -1225,9 +1225,6 @@ module.exports = function (Relationship) {
               }
             ]
           };
-        } else if (geographicalRestrictionsQuery) {
-          // no person query was present in filter but we need to apply geographical restrictions
-          personQuery = geographicalRestrictionsQuery;
         }
 
         if (personQuery) {

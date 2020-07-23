@@ -14,9 +14,10 @@ module.exports = function (Outbreak) {
   /**
    * Get independent transmission chains
    * @param filter Note: also accepts 'active' boolean on the first level in 'where'. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.getIndependentTransmissionChains = function (filter, callback) {
+  Outbreak.prototype.getIndependentTransmissionChains = function (filter, options, callback) {
     const self = this;
 
     // if contacts of contacts is disabled on the outbreak, do not include them in CoT
@@ -68,9 +69,19 @@ module.exports = function (Outbreak) {
       };
     }
 
+    // don't limit by relationships ?
+    if (
+      filter.where &&
+      filter.where.dontLimitRelationships !== undefined
+    ) {
+      filter.dontLimitRelationships = filter.where.dontLimitRelationships;
+      delete filter.where.dontLimitRelationships;
+    }
+
     // process filters
-    this.preProcessTransmissionChainsFilter(filter).then(function (processedFilter) {
+    this.preProcessTransmissionChainsFilter(filter, options).then(function (processedFilter) {
       // use processed filters
+      const dontLimitRelationships = filter.dontLimitRelationships;
       filter = Object.assign(
         processedFilter.filter, {
           retrieveFields: filter.retrieveFields
@@ -84,6 +95,21 @@ module.exports = function (Outbreak) {
       const includeContacts = processedFilter.includeContacts;
       const noContactChains = processedFilter.noContactChains;
       const includeContactsOfContacts = processedFilter.includeContactsOfContacts;
+
+      // don't limit by relationships ?
+      if (dontLimitRelationships !== undefined) {
+        processedFilter.filter.dontLimitRelationships = dontLimitRelationships;
+      }
+
+      // if we need to display specific chains then we need to remove the maxRelationship constraint
+      if (
+        sizeFilter !== undefined || (
+          includedPeopleFilter !== undefined &&
+          includedPeopleFilter.length > 0
+        )
+      ) {
+        processedFilter.filter.dontLimitRelationships = true;
+      }
 
       // flag that indicates that contacts should be counted per chain
       const countContacts = processedFilter.countContacts;
@@ -103,14 +129,14 @@ module.exports = function (Outbreak) {
             {
               active: activeFilter,
               size: sizeFilter,
-              includedPeopleFilter:
-              includedPeopleFilter
+              includedPeopleFilter: includedPeopleFilter
             },
             transmissionChains,
             {
               includeContacts: includeContacts,
               includeContactsOfContacts: isContactsOfContactsActive && includeContactsOfContacts && includeContacts
-            });
+            }
+          );
 
           // determine if isolated nodes should be included
           const cotMaxRelationships = config.cot && config.cot.maxRelationships ?
@@ -151,6 +177,7 @@ module.exports = function (Outbreak) {
             };
 
             // if there was a people filter
+            // from preprocess function the personIds are already geographically restricted so no need to apply geographic restriction here
             if (personIds) {
               // use it for isolated nodes as well
               isolatedNodesFilter = app.utils.remote
@@ -254,6 +281,63 @@ module.exports = function (Outbreak) {
     });
     next();
   });
+
+  /**
+   * Count independent transmission chains
+   * @param filter Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.countIndependentTransmissionChains = function (filter, options, callback) {
+    // outbreak instance
+    const self = this;
+
+    // we don't need to retrieve all fields from database to determine the number of chains
+    filter.retrieveFields = {
+      edges: {
+        id: 1,
+        contactDate: 1,
+        persons: 1
+      },
+      nodes: {
+        id: 1,
+        type: 1
+      }
+    };
+
+    // processed filter
+    this.preProcessTransmissionChainsFilter(filter, options)
+      .then(function (processedFilter) {
+        // we don't need to retrieve all fields from database to determine the number of chains
+        // & don't limit relationships
+        Object.assign(
+          processedFilter.filter, {
+            retrieveFields: filter.retrieveFields,
+            dontLimitRelationships: true
+          }
+        );
+
+        // use processed filters
+        filter = processedFilter.filter;
+        const endDate = processedFilter.endDate;
+
+        // end date is supported only one first level of where in transmission chains
+        _.set(filter, 'where.endDate', endDate);
+
+        // count transmission chains
+        app.models.relationship
+          .countTransmissionChains(self.id, self.periodOfFollowup, filter, function (error, noOfChains) {
+            if (error) {
+              return callback(error);
+            }
+
+            // we don't require to count isolated nodes
+            delete noOfChains.isolatedNodes;
+            delete noOfChains.nodes;
+            callback(null, noOfChains);
+          });
+      });
+  };
 
   /**
    * Count new cases in known transmission chains

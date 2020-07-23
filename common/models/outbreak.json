@@ -3231,6 +3231,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a 'where.person', 'where.chainIncludesPerson', 'where.endDate' (used to provide a snapshot of chains until the specified end date), where.includeContacts (default false) queries."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -3272,6 +3277,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'where.active' boolean, 'where.size' number, 'where.person', 'where.chainIncludesPerson', 'where.endDate' (used to provide a snapshot of chains until the specified end date), where.includeContacts (default false) queries."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
