@@ -1146,14 +1146,39 @@ module.exports = function (Outbreak) {
                 });
               }
             });
-            // build/count transmission chains starting from the found relationIds
-            app.models.relationship.buildOrCountTransmissionChains(outbreak.id, outbreak.periodOfFollowup, app.utils.remote.mergeFilters({
-              where: {
-                id: {
-                  inq: relationshipIds
+
+            // construct filter that will be used to construct cot data
+            const cotFilter = app.utils.remote.mergeFilters(
+              {
+                where: {
+                  id: {
+                    inq: relationshipIds
+                  }
                 }
-              }
-            }, filter || {}), countOnly, false, true, callback);
+              },
+              filter || {}
+            );
+
+            // do we need to restrict cot field ?
+            if (filter.retrieveFields !== undefined) {
+              cotFilter.retrieveFields = filter.retrieveFields;
+            }
+
+            // do we need to look though all relationships ?
+            if (filter.dontLimitRelationships !== undefined) {
+              cotFilter.dontLimitRelationships = filter.dontLimitRelationships;
+            }
+
+            // build/count transmission chains starting from the found relationIds
+            app.models.relationship.buildOrCountTransmissionChains(
+              outbreak.id,
+              outbreak.periodOfFollowup,
+              cotFilter,
+              countOnly,
+              false,
+              true,
+              callback
+            );
           });
       })
       .catch(callback);
