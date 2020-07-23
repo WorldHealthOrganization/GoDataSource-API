@@ -1437,7 +1437,12 @@ module.exports = function (Outbreak) {
       const includeContactsOfContacts = processedFilter.includeContactsOfContacts;
 
       // if we need to display specific chains then we need to remove the maxRelationship constraint
-      if (sizeFilter !== undefined) {
+      if (
+        sizeFilter !== undefined || (
+          includedPeopleFilter !== undefined &&
+          includedPeopleFilter.length > 0
+        )
+      ) {
         processedFilter.filter.dontLimitRelationships = true;
       }
 
@@ -2163,6 +2168,39 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.buildNewChainsFromRegisteredContactsWhoBecameCases = function (filter, callback) {
+    // determine if we need to send to client just some specific fields
+    filter.dontLimitRelationships = true;
+    filter.retrieveFields = {
+      edges: {
+        id: 1,
+        contactDate: 1,
+        persons: 1
+      },
+      nodes: {
+        id: 1,
+        type: 1
+      }
+    };
+    if (
+      filter.fields &&
+      filter.fields.length > 0
+    ) {
+      // determine visible and format visible fields
+      const edgesName = 'edges.';
+      const nodesName = 'nodes.';
+      filter.fields.forEach((field) => {
+        // check if we have fields for our objects
+        if (field.toLowerCase().startsWith(edgesName)) {
+          // push to fields array
+          filter.retrieveFields.edges[field.substring(edgesName.length)] = 1;
+        } else if (field.toLowerCase().startsWith(nodesName)) {
+          // push to fields array
+          filter.retrieveFields.nodes[field.substring(nodesName.length)] = 1;
+        }
+      });
+    }
+
+    // build cot data
     Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases(this, filter, false, callback);
   };
 
@@ -2185,19 +2223,27 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countNewChainsFromRegisteredContactsWhoBecameCases = function (filter, callback) {
+    // we don't need to retrieve all fields from database to determine the number of chains
+    filter.dontLimitRelationships = true;
+    filter.retrieveFields = {
+      edges: {
+        id: 1,
+        contactDate: 1,
+        persons: 1
+      },
+      nodes: {
+        id: 1,
+        type: 1
+      }
+    };
+
+    // build cot
     Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases(this, filter, true, function (error, result) {
       if (error) {
         return callback(error);
       }
       // there is no need for the nodes, it's just a count
       delete result.nodes;
-      // count isolated nodes
-      result.isolatedNodesCount = Object.keys(result.isolatedNodes).reduce(function (accumulator, currentValue) {
-        if (result.isolatedNodes[currentValue]) {
-          accumulator++;
-        }
-        return accumulator;
-      }, 0);
       delete result.isolatedNodes;
       callback(null, result);
     });
