@@ -1176,7 +1176,7 @@ module.exports = function (Outbreak) {
               cotFilter,
               countOnly,
               false,
-              true,
+              false,
               callback
             );
           });
