@@ -37,6 +37,8 @@ module.exports = function (Outbreak) {
     'prototype.__findById__clusters__relationships',
     'prototype.__updateById__clusters__relationships',
     'prototype.__destroyById__clusters__relationships',
+    'prototype.__get__clusters__relationships',
+    'prototype.__count__clusters__relationships',
     'prototype.__delete__contacts__relationships',
     'prototype.__get__referenceData',
     'prototype.__delete__referenceData',
@@ -1202,7 +1204,8 @@ module.exports = function (Outbreak) {
           countContacts: countContacts,
           includeContacts: includeContacts,
           noContactChains: noContactChains,
-          includeContactsOfContacts: includeContactsOfContacts
+          includeContactsOfContacts: includeContactsOfContacts,
+          geographicalRestrictionsQuery: geographicalRestrictionsQueryCache
         };
       });
   };
@@ -1684,94 +1687,6 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
-
-  /**
-   * Build new transmission chains from registered contacts who became cases
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.buildNewChainsFromRegisteredContactsWhoBecameCases = function (filter, callback) {
-    // determine if we need to send to client just some specific fields
-    filter.dontLimitRelationships = true;
-    filter.retrieveFields = {
-      edges: {
-        id: 1,
-        contactDate: 1,
-        persons: 1
-      },
-      nodes: {
-        id: 1,
-        type: 1
-      }
-    };
-    if (
-      filter.fields &&
-      filter.fields.length > 0
-    ) {
-      // determine visible and format visible fields
-      const edgesName = 'edges.';
-      const nodesName = 'nodes.';
-      filter.fields.forEach((field) => {
-        // check if we have fields for our objects
-        if (field.toLowerCase().startsWith(edgesName)) {
-          // push to fields array
-          filter.retrieveFields.edges[field.substring(edgesName.length)] = 1;
-        } else if (field.toLowerCase().startsWith(nodesName)) {
-          // push to fields array
-          filter.retrieveFields.nodes[field.substring(nodesName.length)] = 1;
-        }
-      });
-    }
-
-    // build cot data
-    Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases(this, filter, false, callback);
-  };
-
-  /**
-   * Since this endpoint returns person data without checking if the user has the required read permissions,
-   * check the user's permissions and return only the fields he has access to
-   */
-  Outbreak.afterRemote('prototype.buildNewChainsFromRegisteredContactsWhoBecameCases', function (context, modelInstance, next) {
-    let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
-
-    Object.keys(modelInstance.nodes).forEach((key) => {
-      Outbreak.helpers.limitPersonInformation(modelInstance.nodes[key], personTypesWithReadAccess);
-    });
-    next();
-  });
-
-  /**
-   * Count new transmission chains from registered contacts who became cases
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.countNewChainsFromRegisteredContactsWhoBecameCases = function (filter, callback) {
-    // we don't need to retrieve all fields from database to determine the number of chains
-    filter.dontLimitRelationships = true;
-    filter.retrieveFields = {
-      edges: {
-        id: 1,
-        contactDate: 1,
-        persons: 1
-      },
-      nodes: {
-        id: 1,
-        type: 1
-      }
-    };
-
-    // build cot
-    Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases(this, filter, true, function (error, result) {
-      if (error) {
-        return callback(error);
-      }
-      // there is no need for the nodes, it's just a count
-      delete result.nodes;
-      delete result.isolatedNodes;
-      callback(null, result);
-    });
-  };
-
 
   /**
    * Count the contacts for each case; Also calculate mean/median

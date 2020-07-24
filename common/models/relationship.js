@@ -147,6 +147,7 @@ module.exports = function (Relationship) {
    * @param countOnly
    * @param countContacts Flag that indicates that contacts too should be counted per chain
    * @param noContactChains
+   * @param geographicalRestrictionsQuery Geographical restriction query for user and outbreak
    * @param callback
    */
   Relationship.buildOrCountTransmissionChains = function (
@@ -156,6 +157,7 @@ module.exports = function (Relationship) {
     countOnly,
     countContacts,
     noContactChains,
+    geographicalRestrictionsQuery,
     callback
   ) {
     // define an endDate filter
@@ -237,18 +239,25 @@ module.exports = function (Relationship) {
         });
         // get person query from include filters
         let personQuery = app.utils.remote.searchByRelationProperty.convertIncludeQueryToFilterQuery(filter).people;
+        personQuery = app.utils.remote.mergeFilters(
+          personQuery,
+          {
+            where: {
+              id: {
+                inq: Object.keys(peopleIds)
+              }
+            }
+          }).where;
+        geographicalRestrictionsQuery && (personQuery = {
+          and: [
+            personQuery,
+            geographicalRestrictionsQuery
+          ]
+        });
         // use raw queries for related people
         return app.models.person
           .rawFind(
-            app.utils.remote.mergeFilters(
-              personQuery,
-              {
-                where: {
-                  id: {
-                    inq: Object.keys(peopleIds)
-                  }
-                }
-              }).where,
+            personQuery,
             originalFilter.retrieveFields && originalFilter.retrieveFields.nodes ? {
               projection: originalFilter.retrieveFields.nodes
             } : {}
@@ -298,10 +307,11 @@ module.exports = function (Relationship) {
    * @param filter Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
    * @param countContacts
    * @param noContactChains
+   * @param geographicalRestrictionsQuery Geographical restrictions query for user and outbreak
    * @param callback
    */
-  Relationship.getTransmissionChains = function (outbreakId, followUpPeriod, filter, countContacts, noContactChains, callback) {
-    Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, filter, false, countContacts, noContactChains, callback);
+  Relationship.getTransmissionChains = function (outbreakId, followUpPeriod, filter, countContacts, noContactChains, geographicalRestrictionsQuery, callback) {
+    Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, filter, false, countContacts, noContactChains, geographicalRestrictionsQuery, callback);
   };
 
   /**
@@ -309,10 +319,11 @@ module.exports = function (Relationship) {
    * @param outbreakId
    * @param followUpPeriod
    * @param filter Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
+   * @param geographicalRestrictionsQuery Geographical restrictions query for user and outbreak
    * @param callback
    */
-  Relationship.countTransmissionChains = function (outbreakId, followUpPeriod, filter, callback) {
-    Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, filter, true, false, true, callback);
+  Relationship.countTransmissionChains = function (outbreakId, followUpPeriod, filter, geographicalRestrictionsQuery, callback) {
+    Relationship.buildOrCountTransmissionChains(outbreakId, followUpPeriod, filter, true, false, true, geographicalRestrictionsQuery, callback);
   };
 
   /**

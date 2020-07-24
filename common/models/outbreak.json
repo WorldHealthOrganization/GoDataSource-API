@@ -767,18 +767,6 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "cluster_list_people",
-      "permission": "ALLOW",
-      "property": "__get__clusters__relationships"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "cluster_list_people",
-      "permission": "ALLOW",
-      "property": "__count__clusters__relationships"
-    },
-    {
-      "principalType": "ROLE",
       "principalId": "contact_convert_to_case",
       "permission": "ALLOW",
       "property": "convertContactToCase"
@@ -3566,6 +3554,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -3629,6 +3622,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
