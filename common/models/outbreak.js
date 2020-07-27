@@ -1062,9 +1062,10 @@ module.exports = function (Outbreak) {
    * @param outbreak
    * @param filter
    * @param countOnly
+   * @param options Options from request
    * @param callback
    */
-  Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases = function (outbreak, filter, countOnly, callback) {
+  Outbreak.helpers.buildOrCountNewChainsFromRegisteredContactsWhoBecameCases = function (outbreak, filter, countOnly, options, callback) {
     // build a filter for finding cases who came from registered contacts and their relationships that appeared happened after they became cases
     const _filter =
       {
@@ -1102,9 +1103,31 @@ module.exports = function (Outbreak) {
       };
     }
 
-    // find the cases
-    app.models.case
-      .rawFind(_filter.where, {projection: {dateBecomeCase: 1}})
+    // start geographical restriction promise
+    let geographicalRestrictionsQueryCache;
+    app.models.person
+      .addGeographicalRestrictions(options.remotingContext)
+      .then(geographicalRestrictionsQuery => {
+        geographicalRestrictionsQueryCache = geographicalRestrictionsQuery;
+
+        // add geographical restrictions to case query
+        if (geographicalRestrictionsQuery) {
+          if (_filter.where.and) {
+            _filter.where.and.push(geographicalRestrictionsQuery);
+          } else {
+            _filter.where = {
+              and: [
+                _filter.where,
+                geographicalRestrictionsQuery
+              ]
+            };
+          }
+        }
+
+        // find the cases
+        return app.models.case
+          .rawFind(_filter.where, {projection: {dateBecomeCase: 1}});
+      })
       .then(function (cases) {
         // build a case map
         const caseMap = {};
@@ -1177,6 +1200,7 @@ module.exports = function (Outbreak) {
               countOnly,
               false,
               false,
+              geographicalRestrictionsQueryCache,
               callback
             );
           });
