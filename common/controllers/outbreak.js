@@ -9535,6 +9535,9 @@ module.exports = function (Outbreak) {
           true
         );
 
+        // handle custom filter options
+        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
+
         // count using query
         return app.models.contactOfContact.count(filter.where);
       })
