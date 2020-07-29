@@ -631,7 +631,7 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.exportDailyContactFollowUpList = function (res, groupBy, filter, options, callback) {
     let self = this;
     app.models.contact
-      .preFilterForOutbreak(this, filter)
+      .preFilterForOutbreak(this, filter, options)
       .then(function (filter) {
         // get language id
         const languageId = options.remotingContext.req.authData.user.languageId;
@@ -1120,288 +1120,306 @@ module.exports = function (Outbreak) {
     let questions = [];
     let tmpDir = tmp.dirSync({unsafeCleanup: true});
     let tmpDirName = tmpDir.name;
-    // Get all requested contacts, including their relationships and followUps
-    this.__get__contacts({
-      where: {
-        id: {
-          inq: contacts
-        }
-      },
-      include: [
-        {
-          relation: 'relationships',
-          scope: {
+
+    let contactQuery = {
+      id: {
+        inq: contacts
+      }
+    };
+
+    let that = this;
+
+    // add geographical restriction to filter if needed
+    app.models.contact
+      .addGeographicalRestrictions(options.remotingContext, contactQuery)
+      .then(updatedFilter => {
+        updatedFilter && (contactQuery = updatedFilter);
+
+        return new Promise((resolve, reject) => {
+          // Get all requested contacts, including their relationships and followUps
+          that.__get__contacts({
+            where: contactQuery,
             include: [
               {
-                relation: 'people'
+                relation: 'relationships',
+                scope: {
+                  include: [
+                    {
+                      relation: 'people'
+                    },
+                    {
+                      relation: 'cluster'
+                    }
+                  ]
+                }
               },
               {
-                relation: 'cluster'
+                relation: 'followUps'
               }
             ]
-          }
-        },
-        {
-          relation: 'followUps'
-        }
-      ]
-    }, function (error, results) {
-      if (error) {
-        return callback(error);
-      }
-
-      const pdfUtils = app.utils.pdfDoc;
-      const languageId = options.remotingContext.req.authData.user.languageId;
-      let sanitizedContacts = [];
-
-      genericHelpers.attachParentLocations(
-        app.models.case,
-        app.models.location,
-        results,
-        (err, result) => {
-          if (!err) {
-            result = result || {};
-            results = result.records || results;
-          }
-
-          // Get the language dictionary
-          app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
-            // handle errors
+          }, function (error, results) {
             if (error) {
-              return callback(error);
+              return reject(error);
             }
 
-            // Transform all DB models into JSONs for better handling
-            results.forEach((contact, contactIndex) => {
-              results[contactIndex] = contact.toJSON();
-
-              // this is needed because loopback doesn't return hidden fields from definition into the toJSON call
-              // might be removed later
-              results[contactIndex].type = contact.type;
-
-              // since relationships is a custom relation, the relationships collection is included differently in the case model,
-              // and not converted by the initial toJSON method.
-              contact.relationships.forEach((relationship, relationshipIndex) => {
-                contact.relationships[relationshipIndex] = relationship.toJSON();
-                contact.relationships[relationshipIndex].people.forEach((member, memberIndex) => {
-                  contact.relationships[relationshipIndex].people[memberIndex] = member.toJSON();
-                });
-              });
-            });
-
-            // Replace all foreign keys with readable data
-            genericHelpers.resolveModelForeignKeys(app, app.models.contact, results, dictionary)
-              .then((results) => {
-                results.forEach((contact, contactIndex) => {
-                  // keep the initial data of the contact (we currently use it to generate the QR code only)
-                  sanitizedContacts[contactIndex] = {
-                    rawData: contact
-                  };
-
-                  // Anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
-                  // and format date type fields
-                  if (anonymousFields) {
-                    app.utils.anonymizeDatasetFields.anonymize(contact, anonymousFields);
-                  }
-                  app.utils.helpers.formatDateFields(contact, app.models.person.dossierDateFields);
-                  app.utils.helpers.formatUndefinedValues(contact);
-
-                  // Prepare the contact's relationships for printing
-                  contact.relationships.forEach((relationship, relationshipIndex) => {
-                    sanitizedContacts[contactIndex].relationships = [];
-
-                    // extract the person with which the contact has a relationship
-                    let relationshipMember = _.find(relationship.people, (member) => {
-                      return member.id !== contact.id;
-                    });
-
-                    // if relationship member was not found
-                    if (!relationshipMember) {
-                      // stop here (invalid relationship)
-                      return;
-                    }
-
-                    // needed for checks below
-                    const relationshipMemberType = relationshipMember.type;
-                    const isEvent = relationshipMember.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT';
-
-                    // for events, keep only the properties needed to be printed
-                    // because we don't ever fill inherited person's properties for events
-                    if (isEvent) {
-                      let tmpObject = {};
-                      for (let prop in relationshipMember) {
-                        if (app.models.event.printFieldsinOrder.indexOf(prop) !== -1) {
-                          tmpObject[prop] = relationshipMember[prop];
-                        }
-                      }
-                      relationshipMember = tmpObject;
-                    }
-
-                    // translate the values of the fields marked as reference data fields on the case/contact/event model
-                    app.utils.helpers.translateDataSetReferenceDataValues(
-                      relationshipMember,
-                      models[models.person.typeToModelMap[relationshipMemberType]].referenceDataFields,
-                      dictionary
-                    );
-
-                    relationshipMember = app.utils.helpers.translateFieldLabels(
-                      app,
-                      relationshipMember,
-                      models[models.person.typeToModelMap[relationshipMemberType]].modelName,
-                      dictionary
-                    );
-
-                    // Translate the values of the fields marked as reference data fields on the relationship model
-                    app.utils.helpers.translateDataSetReferenceDataValues(
-                      relationship,
-                      models.relationship.referenceDataFields,
-                      dictionary
-                    );
-
-                    // Translate all remaining keys of the relationship model
-                    relationship = app.utils.helpers.translateFieldLabels(
-                      app,
-                      relationship,
-                      models.relationship.modelName,
-                      dictionary
-                    );
-
-                    relationship[dictionary.getTranslation('LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON')] = relationshipMember;
-
-                    // Add the sanitized relationship to the object to be printed
-                    sanitizedContacts[contactIndex].relationships[relationshipIndex] = relationship;
-                  });
-
-                  // Prepare the contact's followUps for printing
-                  contact.followUps.forEach((followUp, followUpIndex) => {
-                    sanitizedContacts[contactIndex].followUps = [];
-
-                    // Translate the values of the fields marked as reference data fields on the lab result model
-                    app.utils.helpers.translateDataSetReferenceDataValues(followUp, app.models.followUp.referenceDataFields, dictionary);
-
-                    // Translate the questions and the answers from the follow up
-                    questions = Outbreak.helpers.parseTemplateQuestions(followUpQuestionnaire, dictionary);
-
-                    // translate follow up questionnaire answers to general format
-                    let followUpAnswers = followUp.questionnaireAnswers || {};
-
-                    // Since we are presenting all the answers, mark the one that was selected, for each question
-                    questions = Outbreak.helpers.prepareQuestionsForPrint(followUpAnswers, questions);
-
-                    // Translate the remaining fields on the follow up model
-                    followUp = app.utils.helpers.translateFieldLabels(app, followUp, app.models.followUp.modelName, dictionary);
-
-                    // Add the questionnaire separately (after field translations) because it will be displayed separately
-                    followUp.questionnaire = questions;
-
-                    // Add the sanitized follow ups to the object to be printed
-                    sanitizedContacts[contactIndex].followUps[followUpIndex] = followUp;
-                  });
-
-                  // Translate all remaining keys
-                  contact = app.utils.helpers.translateFieldLabels(
-                    app,
-                    contact,
-                    app.models.contact.modelName,
-                    dictionary,
-                    true
-                  );
-
-                  // Add the sanitized contact to the object to be printed
-                  sanitizedContacts[contactIndex].data = contact;
-                });
-
-                const relationshipsTitle = dictionary.getTranslation('LNG_PAGE_ACTION_RELATIONSHIPS');
-                const followUpsTitle = dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE');
-                const followUpQuestionnaireTitle = dictionary.getTranslation('LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE');
-
-                let pdfPromises = [];
-
-                // Print all the data
-                sanitizedContacts.forEach((sanitizedContact) => {
-                  pdfPromises.push(
-                    new Promise((resolve, reject) => {
-                      // generate pdf document
-                      let doc = pdfUtils.createPdfDoc({
-                        fontSize: 7,
-                        layout: 'portrait',
-                        margin: 20,
-                        lineGap: 0,
-                        wordSpacing: 0,
-                        characterSpacing: 0,
-                        paragraphGap: 0
-                      });
-
-                      // add a top margin of 2 lines for each page
-                      doc.on('pageAdded', () => {
-                        doc.moveDown(2);
-                      });
-
-                      // set margin top for first page here, to not change the entire createPdfDoc functionality
-                      doc.moveDown(2);
-                      // write this as a separate function to easily remove it's listener
-                      let addQrCode = function () {
-                        app.utils.qrCode.addPersonQRCode(doc, sanitizedContact.rawData.outbreakId, 'contact', sanitizedContact.rawData);
-                      };
-
-                      // add the QR code to the first page (this page has already been added and will not be covered by the next line)
-                      addQrCode();
-
-                      // set a listener on pageAdded to add the QR code to every new page
-                      doc.on('pageAdded', addQrCode);
-
-                      pdfUtils.displayModelDetails(doc, sanitizedContact.data, true, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
-                      pdfUtils.displayPersonRelationships(doc, sanitizedContact.relationships, relationshipsTitle);
-                      pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedContact.followUps, followUpsTitle, followUpQuestionnaireTitle);
-
-                      // add an additional empty page that contains only the QR code as per requirements
-                      doc.addPage();
-
-                      // stop adding this QR code. The next contact will need to have a different QR code
-                      doc.removeListener('pageAdded', addQrCode);
-                      doc.end();
-
-                      // convert pdf stream to buffer and send it as response
-                      genericHelpers.streamToBuffer(doc, (err, buffer) => {
-                        if (err) {
-                          callback(err);
-                        } else {
-                          const lastName = sanitizedContact.rawData.lastName ? sanitizedContact.rawData.lastName.replace(/\r|\n|\s/g, '').toUpperCase() + ' ' : '';
-                          const firstName = sanitizedContact.rawData.firstName ? sanitizedContact.rawData.firstName.replace(/\r|\n|\s/g, '') : '';
-                          fs.writeFile(`${tmpDirName}/${lastName}${firstName} - ${sanitizedContact.rawData.id}.pdf`, buffer, (err) => {
-                            if (err) {
-                              reject(err);
-                            } else {
-                              resolve();
-                            }
-                          });
-                        }
-                      });
-                    })
-                  );
-                });
-                return Promise.all(pdfPromises);
-              })
-              .then(() => {
-                let archiveName = `contactDossiers_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
-                let archivePath = `${tmpDirName}/${archiveName}`;
-                let zip = new AdmZip();
-
-                zip.addLocalFolder(tmpDirName);
-                zip.writeZip(archivePath);
-
-                fs.readFile(archivePath, (err, data) => {
-                  if (err) {
-                    callback(err);
-                  } else {
-                    tmpDir.removeCallback();
-                    app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
-                  }
-                });
-              });
+            return resolve(results);
           });
         });
-    });
+      })
+      .then(results => {
+        const pdfUtils = app.utils.pdfDoc;
+        const languageId = options.remotingContext.req.authData.user.languageId;
+        let sanitizedContacts = [];
+
+        genericHelpers.attachParentLocations(
+          app.models.case,
+          app.models.location,
+          results,
+          (err, result) => {
+            if (!err) {
+              result = result || {};
+              results = result.records || results;
+            }
+
+            // Get the language dictionary
+            app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
+              // handle errors
+              if (error) {
+                return callback(error);
+              }
+
+              // Transform all DB models into JSONs for better handling
+              results.forEach((contact, contactIndex) => {
+                results[contactIndex] = contact.toJSON();
+
+                // this is needed because loopback doesn't return hidden fields from definition into the toJSON call
+                // might be removed later
+                results[contactIndex].type = contact.type;
+
+                // since relationships is a custom relation, the relationships collection is included differently in the case model,
+                // and not converted by the initial toJSON method.
+                contact.relationships.forEach((relationship, relationshipIndex) => {
+                  contact.relationships[relationshipIndex] = relationship.toJSON();
+                  contact.relationships[relationshipIndex].people.forEach((member, memberIndex) => {
+                    contact.relationships[relationshipIndex].people[memberIndex] = member.toJSON();
+                  });
+                });
+              });
+
+              // Replace all foreign keys with readable data
+              genericHelpers.resolveModelForeignKeys(app, app.models.contact, results, dictionary)
+                .then((results) => {
+                  results.forEach((contact, contactIndex) => {
+                    // keep the initial data of the contact (we currently use it to generate the QR code only)
+                    sanitizedContacts[contactIndex] = {
+                      rawData: contact
+                    };
+
+                    // Anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
+                    // and format date type fields
+                    if (anonymousFields) {
+                      app.utils.anonymizeDatasetFields.anonymize(contact, anonymousFields);
+                    }
+                    app.utils.helpers.formatDateFields(contact, app.models.person.dossierDateFields);
+                    app.utils.helpers.formatUndefinedValues(contact);
+
+                    // Prepare the contact's relationships for printing
+                    contact.relationships.forEach((relationship, relationshipIndex) => {
+                      sanitizedContacts[contactIndex].relationships = [];
+
+                      // extract the person with which the contact has a relationship
+                      let relationshipMember = _.find(relationship.people, (member) => {
+                        return member.id !== contact.id;
+                      });
+
+                      // if relationship member was not found
+                      if (!relationshipMember) {
+                        // stop here (invalid relationship)
+                        return;
+                      }
+
+                      // needed for checks below
+                      const relationshipMemberType = relationshipMember.type;
+                      const isEvent = relationshipMember.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT';
+
+                      // for events, keep only the properties needed to be printed
+                      // because we don't ever fill inherited person's properties for events
+                      if (isEvent) {
+                        let tmpObject = {};
+                        for (let prop in relationshipMember) {
+                          if (app.models.event.printFieldsinOrder.indexOf(prop) !== -1) {
+                            tmpObject[prop] = relationshipMember[prop];
+                          }
+                        }
+                        relationshipMember = tmpObject;
+                      }
+
+                      // translate the values of the fields marked as reference data fields on the case/contact/event model
+                      app.utils.helpers.translateDataSetReferenceDataValues(
+                        relationshipMember,
+                        models[models.person.typeToModelMap[relationshipMemberType]].referenceDataFields,
+                        dictionary
+                      );
+
+                      relationshipMember = app.utils.helpers.translateFieldLabels(
+                        app,
+                        relationshipMember,
+                        models[models.person.typeToModelMap[relationshipMemberType]].modelName,
+                        dictionary
+                      );
+
+                      // Translate the values of the fields marked as reference data fields on the relationship model
+                      app.utils.helpers.translateDataSetReferenceDataValues(
+                        relationship,
+                        models.relationship.referenceDataFields,
+                        dictionary
+                      );
+
+                      // Translate all remaining keys of the relationship model
+                      relationship = app.utils.helpers.translateFieldLabels(
+                        app,
+                        relationship,
+                        models.relationship.modelName,
+                        dictionary
+                      );
+
+                      relationship[dictionary.getTranslation('LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON')] = relationshipMember;
+
+                      // Add the sanitized relationship to the object to be printed
+                      sanitizedContacts[contactIndex].relationships[relationshipIndex] = relationship;
+                    });
+
+                    // Prepare the contact's followUps for printing
+                    contact.followUps.forEach((followUp, followUpIndex) => {
+                      sanitizedContacts[contactIndex].followUps = [];
+
+                      // Translate the values of the fields marked as reference data fields on the lab result model
+                      app.utils.helpers.translateDataSetReferenceDataValues(followUp, app.models.followUp.referenceDataFields, dictionary);
+
+                      // Translate the questions and the answers from the follow up
+                      questions = Outbreak.helpers.parseTemplateQuestions(followUpQuestionnaire, dictionary);
+
+                      // translate follow up questionnaire answers to general format
+                      let followUpAnswers = followUp.questionnaireAnswers || {};
+
+                      // Since we are presenting all the answers, mark the one that was selected, for each question
+                      questions = Outbreak.helpers.prepareQuestionsForPrint(followUpAnswers, questions);
+
+                      // Translate the remaining fields on the follow up model
+                      followUp = app.utils.helpers.translateFieldLabels(app, followUp, app.models.followUp.modelName, dictionary);
+
+                      // Add the questionnaire separately (after field translations) because it will be displayed separately
+                      followUp.questionnaire = questions;
+
+                      // Add the sanitized follow ups to the object to be printed
+                      sanitizedContacts[contactIndex].followUps[followUpIndex] = followUp;
+                    });
+
+                    // Translate all remaining keys
+                    contact = app.utils.helpers.translateFieldLabels(
+                      app,
+                      contact,
+                      app.models.contact.modelName,
+                      dictionary,
+                      true
+                    );
+
+                    // Add the sanitized contact to the object to be printed
+                    sanitizedContacts[contactIndex].data = contact;
+                  });
+
+                  const relationshipsTitle = dictionary.getTranslation('LNG_PAGE_ACTION_RELATIONSHIPS');
+                  const followUpsTitle = dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE');
+                  const followUpQuestionnaireTitle = dictionary.getTranslation('LNG_PAGE_CREATE_FOLLOW_UP_TAB_QUESTIONNAIRE_TITLE');
+
+                  let pdfPromises = [];
+
+                  // Print all the data
+                  sanitizedContacts.forEach((sanitizedContact) => {
+                    pdfPromises.push(
+                      new Promise((resolve, reject) => {
+                        // generate pdf document
+                        let doc = pdfUtils.createPdfDoc({
+                          fontSize: 7,
+                          layout: 'portrait',
+                          margin: 20,
+                          lineGap: 0,
+                          wordSpacing: 0,
+                          characterSpacing: 0,
+                          paragraphGap: 0
+                        });
+
+                        // add a top margin of 2 lines for each page
+                        doc.on('pageAdded', () => {
+                          doc.moveDown(2);
+                        });
+
+                        // set margin top for first page here, to not change the entire createPdfDoc functionality
+                        doc.moveDown(2);
+                        // write this as a separate function to easily remove it's listener
+                        let addQrCode = function () {
+                          app.utils.qrCode.addPersonQRCode(doc, sanitizedContact.rawData.outbreakId, 'contact', sanitizedContact.rawData);
+                        };
+
+                        // add the QR code to the first page (this page has already been added and will not be covered by the next line)
+                        addQrCode();
+
+                        // set a listener on pageAdded to add the QR code to every new page
+                        doc.on('pageAdded', addQrCode);
+
+                        pdfUtils.displayModelDetails(doc, sanitizedContact.data, true, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_DETAILS'));
+                        pdfUtils.displayPersonRelationships(doc, sanitizedContact.relationships, relationshipsTitle);
+                        pdfUtils.displayPersonSectionsWithQuestionnaire(doc, sanitizedContact.followUps, followUpsTitle, followUpQuestionnaireTitle);
+
+                        // add an additional empty page that contains only the QR code as per requirements
+                        doc.addPage();
+
+                        // stop adding this QR code. The next contact will need to have a different QR code
+                        doc.removeListener('pageAdded', addQrCode);
+                        doc.end();
+
+                        // convert pdf stream to buffer and send it as response
+                        genericHelpers.streamToBuffer(doc, (err, buffer) => {
+                          if (err) {
+                            callback(err);
+                          } else {
+                            const lastName = sanitizedContact.rawData.lastName ? sanitizedContact.rawData.lastName.replace(/\r|\n|\s/g, '').toUpperCase() + ' ' : '';
+                            const firstName = sanitizedContact.rawData.firstName ? sanitizedContact.rawData.firstName.replace(/\r|\n|\s/g, '') : '';
+                            fs.writeFile(`${tmpDirName}/${lastName}${firstName} - ${sanitizedContact.rawData.id}.pdf`, buffer, (err) => {
+                              if (err) {
+                                reject(err);
+                              } else {
+                                resolve();
+                              }
+                            });
+                          }
+                        });
+                      })
+                    );
+                  });
+                  return Promise.all(pdfPromises);
+                })
+                .then(() => {
+                  let archiveName = `contactDossiers_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+                  let archivePath = `${tmpDirName}/${archiveName}`;
+                  let zip = new AdmZip();
+
+                  zip.addLocalFolder(tmpDirName);
+                  zip.writeZip(archivePath);
+
+                  fs.readFile(archivePath, (err, data) => {
+                    if (err) {
+                      callback(err);
+                    } else {
+                      tmpDir.removeCallback();
+                      app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
+                    }
+                  });
+                });
+            });
+          });
+      })
+      .catch(callback);
   };
 
   /**
@@ -2121,9 +2139,10 @@ module.exports = function (Outbreak) {
    * Count contacts that are on the follow up list when generating
    * Also custom filtered
    * @param filter
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.filteredCountContactsOnFollowUpList = function (filter = {}, callback) {
+  Outbreak.prototype.filteredCountContactsOnFollowUpList = function (filter = {}, options, callback) {
     // defensive checks
     filter.where = filter.where || {};
     let startDate = genericHelpers.getDate().toDate();
@@ -2244,8 +2263,14 @@ module.exports = function (Outbreak) {
       }
     }, filter);
 
+    // add geographical restriction to filter if needed
+    let promise = app.models.contact
+      .addGeographicalRestrictions(options.remotingContext, mergedFilter.where)
+      .then(updatedFilter => {
+        updatedFilter && (mergedFilter.where = updatedFilter);
+      });
+
     // do we need to filter contacts by case classification ?
-    let promise = Promise.resolve();
     if (classification) {
       // retrieve cases
       promise = promise
@@ -2461,12 +2486,13 @@ module.exports = function (Outbreak) {
   /**
    * Count contacts by case risk level
    * @param filter
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.countContactsPerRiskLevel = function (filter, callback) {
+  Outbreak.prototype.countContactsPerRiskLevel = function (filter, options, callback) {
     // pre-filter using related data (case, followUps)
     app.models.contact
-      .preFilterForOutbreak(this, filter)
+      .preFilterForOutbreak(this, filter, options)
       .then(function (filter) {
         // find follow-ups using filter
         return app.models.contact.rawFind(filter.where, {
