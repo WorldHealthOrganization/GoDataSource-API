@@ -84,6 +84,8 @@ module.exports = function (Outbreak) {
   // load controller extensions (other files that contain outbreak related actions)
   require('./outbreakCase')(Outbreak);
   require('./outbreakContact')(Outbreak);
+  require('./outbreakEvent')(Outbreak);
+  require('./outbreakContactOfContact')(Outbreak);
   require('./outbreakRelationship')(Outbreak);
   require('./outbreakFollowUp')(Outbreak);
   require('./outbreakLocation')(Outbreak);
@@ -6134,26 +6136,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Retrieve available people for a case
-   * @param caseId
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.getCaseRelationshipsAvailablePeople = function (caseId, filter, callback) {
-    // retrieve available people
-    app.models.person
-      .getAvailablePeople(
-        this.id,
-        caseId,
-        filter
-      )
-      .then((records) => {
-        callback(null, records);
-      })
-      .catch(callback);
-  };
-
-  /**
    * Count available people for a case
    * @param caseId
    * @param where
@@ -6174,26 +6156,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Retrieve available people for a contact
-   * @param contactId
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.getContactRelationshipsAvailablePeople = function (contactId, filter, callback) {
-    // retrieve available people
-    app.models.person
-      .getAvailablePeople(
-        this.id,
-        contactId,
-        filter
-      )
-      .then((records) => {
-        callback(null, records);
-      })
-      .catch(callback);
-  };
-
-  /**
    * Count available people for a contact
    * @param contactId
    * @param where
@@ -6209,26 +6171,6 @@ module.exports = function (Outbreak) {
       )
       .then((counted) => {
         callback(null, counted);
-      })
-      .catch(callback);
-  };
-
-  /**
-   * Retrieve available people for a case
-   * @param eventId
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.getEventRelationshipsAvailablePeople = function (eventId, filter, callback) {
-    // retrieve available people
-    app.models.person
-      .getAvailablePeople(
-        this.id,
-        eventId,
-        filter
-      )
-      .then((records) => {
-        callback(null, records);
       })
       .catch(callback);
   };
@@ -6737,37 +6679,6 @@ module.exports = function (Outbreak) {
           }));
         }
         helpers.countPersonRelationships(contactOfContactId, where, callback);
-      })
-      .catch(callback);
-  };
-
-  /**
-   * Retrieve available people for a contact of contact
-   * @param contactOfContactId
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.getContactOfContactRelationshipsAvailablePeople = function (contactOfContactId, filter, callback) {
-    // we only make relations with contacts
-    filter = filter || {};
-    filter.where = filter.where || {};
-    filter.where = {
-      and: [
-        {
-          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-        },
-        filter.where
-      ]
-    };
-
-    app.models.person
-      .getAvailablePeople(
-        this.id,
-        contactOfContactId,
-        filter
-      )
-      .then((records) => {
-        callback(null, records);
       })
       .catch(callback);
   };

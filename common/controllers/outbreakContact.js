@@ -2930,4 +2930,26 @@ module.exports = function (Outbreak) {
           );
       });
   };
+
+  /**
+   * Retrieve available people for a contact
+   * @param contactId
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.getContactRelationshipsAvailablePeople = function (contactId, filter, options, callback) {
+    // retrieve available people
+    app.models.person
+      .getAvailablePeople(
+        this.id,
+        contactId,
+        filter,
+        options
+      )
+      .then((records) => {
+        callback(null, records);
+      })
+      .catch(callback);
+  };
 };

@@ -1359,12 +1359,14 @@ module.exports = function (Person) {
    * @param outbreakId
    * @param personId
    * @param filter
+   * @param options Options from request
    * @returns {Promise<any>}
    */
   Person.getAvailablePeople = function (
     outbreakId,
     personId,
-    filter
+    filter,
+    options
   ) {
     filter = filter || {};
     // attach our conditions
@@ -1383,9 +1385,17 @@ module.exports = function (Person) {
       ]
     };
 
-    // retrieve data
+    // update filter for geographical restriction if needed
     return Person
-      .find(filter)
+      .addGeographicalRestrictions(options.remotingContext, filter.where)
+      .then(updatedFilter => {
+        // update filter if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        // retrieve data
+        return Person
+          .find(filter);
+      })
       .then((records) => {
         return Person.determineIfRelationshipsExist(
           outbreakId,
