@@ -32,15 +32,16 @@ module.exports = function (Outbreak) {
   /**
    * Find outbreak contacts
    * @param filter Supports 'where.case', 'where.followUp' MongoDB compatible queries
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.findContacts = function (filter, callback) {
+  Outbreak.prototype.findContacts = function (filter, options, callback) {
     const outbreakId = this.outbreakId;
     const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
 
     // pre-filter using related data (case, followUps)
     app.models.contact
-      .preFilterForOutbreak(this, filter)
+      .preFilterForOutbreak(this, filter, options)
       .then(function (filter) {
         // find follow-ups using filter
         return app.models.contact.find(filter);
@@ -1450,7 +1451,7 @@ module.exports = function (Outbreak) {
       });
     })
       .then(dictionary => {
-        return app.models.contact.preFilterForOutbreak(this, filter)
+        return app.models.contact.preFilterForOutbreak(this, filter, options)
           .then((filter) => {
             return {
               dictionary: dictionary,
@@ -1596,25 +1597,35 @@ module.exports = function (Outbreak) {
       };
     };
 
-    // get list of contacts based on the filter passed on request
+    // construct contacts query
+    let contactQuery = app.utils.remote.mergeFilters({
+      where: {
+        outbreakId: outbreak.id,
+      }
+    }, filter || {}).where;
+
+    // add geographical restriction to filter if needed
     app.models.contact
-      .rawFind(
-        app.utils.remote.mergeFilters({
-          where: {
-            outbreakId: outbreak.id,
-          }
-        }, filter || {}).where, {
-          projection: {
-            id: 1,
-            firstName: 1,
-            middleName: 1,
-            lastName: 1,
-            gender: 1,
-            age: 1,
-            addresses: 1
-          }
-        }
-      )
+      .addGeographicalRestrictions(reqOptions.remotingContext, contactQuery)
+      .then(updatedFilter => {
+        // update contactQuery if needed
+        updatedFilter && (contactQuery = updatedFilter);
+
+        // get list of contacts based on the filter passed on request
+        return app.models.contact
+          .rawFind(contactQuery, {
+              projection: {
+                id: 1,
+                firstName: 1,
+                middleName: 1,
+                lastName: 1,
+                gender: 1,
+                age: 1,
+                addresses: 1
+              }
+            }
+          );
+      })
       .then((contacts) => {
         // map contacts
         const contactsMap = {};
@@ -2052,12 +2063,13 @@ module.exports = function (Outbreak) {
   /**
    * Count outbreak contacts
    * @param filter Supports 'where.case', 'where.followUp' MongoDB compatible queries
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.filteredCountContacts = function (filter, callback) {
+  Outbreak.prototype.filteredCountContacts = function (filter, options, callback) {
     // pre-filter using related data (case, followUps)
     app.models.contact
-      .preFilterForOutbreak(this, filter)
+      .preFilterForOutbreak(this, filter, options)
       .then(function (filter) {
         // replace nested geo points filters
         filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(

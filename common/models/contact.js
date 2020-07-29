@@ -622,9 +622,10 @@ module.exports = function (Contact) {
    * Pre-filter contact for an outbreak using related models (case, followUp)
    * @param outbreak
    * @param filter Supports 'where.case', 'where.followUp' MongoDB compatible queries
+   * @param options Options from request
    * @return {Promise<void | never>}
    */
-  Contact.preFilterForOutbreak = function (outbreak, filter) {
+  Contact.preFilterForOutbreak = function (outbreak, filter, options) {
     // set a default filter
     filter = filter || {};
     // get cases query, if any
@@ -641,8 +642,14 @@ module.exports = function (Contact) {
     }
     // get main contact query
     let contactQuery = _.get(filter, 'where', {});
-    // start with a resolved promise (so we can link others)
-    let buildQuery = Promise.resolve();
+
+    // start with the geographical restrictions promise (so we can link others)
+    let buildQuery = Contact.addGeographicalRestrictions(options.remotingContext, contactQuery)
+      .then(updatedFilter => {
+        // update contactQuery if needed
+        updatedFilter && (contactQuery = updatedFilter);
+      });
+
     // if a cases query is present
     if (casesQuery) {
       // restrict query to current outbreak
