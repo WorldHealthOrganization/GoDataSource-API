@@ -726,13 +726,13 @@ module.exports = function (Person) {
    * Find or count possible person duplicates
    * @param filter
    * @param [countOnly]
+   * @param options
    * @return {Promise<any>}
    */
-  Person.findOrCountPossibleDuplicates = function (filter, countOnly) {
+  Person.findOrCountPossibleDuplicates = function (filter, countOnly, options) {
     // define default filter
-    if (filter == null) {
-      filter = {};
-    }
+    filter = filter || {};
+
     // promisify the response
     return new Promise(function (resolve, reject) {
       let where = filter.where || {};
@@ -748,52 +748,62 @@ module.exports = function (Person) {
         ]
       };
 
-      // use connector directly to bring big number of (raw) results
-      // #TODO:
-      // - move logic to worker
-      // - get data in batches
-      app.dataSources.mongoDb.connector.collection('person')
-        .find(
-          where, {
-            projection: {
-              _id: 1,
-              type: 1,
-              visualId: 1,
-              name: 1,
-              firstName: 1,
-              lastName: 1,
-              middleName: 1,
-              documents: 1,
-              notDuplicatesIds: 1,
-              age: 1,
-              addresses: 1,
-              address: 1
-            }
-          }
-        )
-        .toArray(function (error, people) {
-          // handle eventual errors
-          if (error) {
-            return reject(error);
-          }
-          let findOrCount;
-          if (countOnly) {
-            findOrCount = personDuplicate.count.bind(null, people);
-          } else {
-            findOrCount = personDuplicate.find.bind(null, people, Object.assign({where: where}, filter));
-          }
+      // add geographical restrictions if needed
+      Person.addGeographicalRestrictions(options.remotingContext, where)
+        .then(updatedFilter => {
+          // update where if needed
+          updatedFilter && (where = updatedFilter);
+          where = app.utils.remote.convertLoopbackFilterToMongo(where);
 
-          // find or count duplicate groups
-          findOrCount(function (error, duplicates) {
-            // handle eventual errors
-            if (error) {
-              return reject(error);
-            }
+          // use connector directly to bring big number of (raw) results
+          // #TODO:
+          // - move logic to worker
+          // - get data in batches
+          app.dataSources.mongoDb.connector
+            .collection('person')
+            .find(
+              where, {
+                projection: {
+                  _id: 1,
+                  type: 1,
+                  visualId: 1,
+                  name: 1,
+                  firstName: 1,
+                  lastName: 1,
+                  middleName: 1,
+                  documents: 1,
+                  notDuplicatesIds: 1,
+                  age: 1,
+                  addresses: 1,
+                  address: 1
+                }
+              }
+            )
+            .toArray(function (error, people) {
+              // handle eventual errors
+              if (error) {
+                return reject(error);
+              }
+              let findOrCount;
+              if (countOnly) {
+                findOrCount = personDuplicate.count.bind(null, people);
+              } else {
+                findOrCount = personDuplicate.find.bind(null, people, Object.assign({where: where}, filter));
+              }
 
-            // send back the result
-            return resolve(duplicates);
-          });
-        });
+              // find or count duplicate groups
+              findOrCount(function (error, duplicates) {
+                // handle eventual errors
+                if (error) {
+                  return reject(error);
+                }
+
+                // send back the result
+                return resolve(duplicates);
+              });
+            });
+        })
+        .catch(reject);
     });
   };
 

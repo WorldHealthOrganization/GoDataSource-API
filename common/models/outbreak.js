@@ -1574,9 +1574,10 @@ module.exports = function (Outbreak) {
    * @param clusterId
    * @param filter
    * @param countOnly
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.findOrCountPeopleInCluster = function (clusterId, filter, countOnly, callback) {
+  Outbreak.prototype.findOrCountPeopleInCluster = function (clusterId, filter, countOnly, options, callback) {
     // find the requested cluster
     app.models.cluster
       .findOne({
@@ -1594,8 +1595,9 @@ module.exports = function (Outbreak) {
             id: clusterId
           }));
         }
+
         // otherwise find people in that cluster
-        cluster.findOrCountPeople(filter, countOnly, callback);
+        cluster.findOrCountPeople(filter, countOnly, options, callback);
       });
   };
 

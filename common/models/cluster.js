@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const app = require('../../server/server');
 
 module.exports = function (Cluster) {
@@ -11,30 +10,17 @@ module.exports = function (Cluster) {
    * Find or count people in a cluster
    * @param filter
    * @param countOnly
+   * @param options
    * @param callback
    */
-  Cluster.prototype.findOrCountPeople = function (filter, countOnly, callback) {
-
+  Cluster.prototype.findOrCountPeople = function (filter, countOnly, options, callback) {
     // define default relationship filter
     let relationshipFilter = {
       fields: ['id', 'persons'],
       where: {
-        clusterId: this.id,
+        clusterId: this.id
       }
     };
-
-    // read relationship filter from the main filter
-    if (filter) {
-      const _relationshipFilter = _.get(filter, 'where.relationship');
-      // if a filter was sent
-      if (_relationshipFilter) {
-        // remove relationship filter
-        delete filter.where.relationship;
-        // merge the default filter with the one that was sent
-        relationshipFilter = app.utils.remote
-          .mergeFilters(relationshipFilter, {where: _relationshipFilter});
-      }
-    }
 
     // find relationships that match the filter
     app.models.relationship
@@ -62,13 +48,21 @@ module.exports = function (Cluster) {
           },
           filter || {});
 
-        // check if this is only a count
-        if (countOnly) {
-          return app.models.person.count(_filter.where);
-        } else {
-          // find people that match the filter and belong to the relationships matched earlier
-          return app.models.person.find(_filter);
-        }
+        // add geographical restrictions if needed
+        return app.models.person
+          .addGeographicalRestrictions(options.remotingContext, _filter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (_filter.where = updatedFilter);
+
+            // check if this is only a count
+            if (countOnly) {
+              return app.models.person.count(_filter.where);
+            }
+
+            // find people that match the filter and belong to the relationships matched earlier
+            return app.models.person.find(_filter);
+          });
       })
       .then(function (people) {
         callback(null, people);
