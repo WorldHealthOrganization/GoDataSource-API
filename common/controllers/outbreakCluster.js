@@ -1,7 +1,5 @@
 'use strict';
 
-const app = require('../../server/server');
-
 /**
  * Note: It is not exposed as an actual controller
  * It extends the Outbreak controller with case related actions
