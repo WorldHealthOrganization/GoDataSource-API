@@ -2,7 +2,7 @@
 
 /**
  * Note: It is not exposed as an actual controller
- * It extends the Outbreak controller with case related actions
+ * It extends the Outbreak controller with cluster related actions
  */
 
 module.exports = function (Outbreak) {
