@@ -1207,8 +1207,9 @@ module.exports = function (Person) {
    * @param outbreakId Outbreak id, used to narrow the searches
    * @param type Contact/Case
    * @param targetBody Target body properties (this is used for checking duplicates)
+   * @param options Options from request
    */
-  Person.findDuplicatesByType = function (filter, outbreakId, type, targetBody) {
+  Person.findDuplicatesByType = function (filter, outbreakId, type, targetBody, options) {
     filter = filter || {};
     const buildRuleFilterPart = function (opts) {
       // construct regex condition for case insensitive match
@@ -1312,8 +1313,15 @@ module.exports = function (Person) {
     // find duplicates only if there is something to look for
     if (query.$or) {
       // determine if we "duplicates" to exclude
+      // update filter for geographical restriction if needed
+      let promise = Person
+        .addGeographicalRestrictions(options.remotingContext, query)
+        .then(updatedFilter => {
+          // update filter if needed
+          updatedFilter && (query = updatedFilter);
+        });
+
       // - we need the latest changes, this is why we can't use targetBody.notDuplicatesIds
-      let promise = Promise.resolve();
       if (targetBody.id) {
         promise = promise
           .then(() => {
