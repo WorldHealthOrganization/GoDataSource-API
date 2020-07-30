@@ -225,6 +225,7 @@ module.exports = function (ContactOfContact) {
    * Pre-filter contact of contacts for an outbreak using related contact
    * @param outbreak
    * @param filter Supports 'where.contact' MongoDB compatible queries
+   * @param options
    * @return {Promise<void | never>}
    */
   ContactOfContact.preFilterForOutbreak = function (outbreak, filter, options) {

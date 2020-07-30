@@ -7,6 +7,11 @@
 
 const app = require('../../server/server');
 const genericHelpers = require('../../components/helpers');
+const _ = require('lodash');
+const tmp = require('tmp');
+const fs = require('fs');
+const AdmZip = require('adm-zip');
+const moment = require('moment');
 
 module.exports = function (Outbreak) {
   /**
@@ -86,13 +91,14 @@ module.exports = function (Outbreak) {
    * Find outbreak contacts of contacts
    * @param filter Supports 'where.contact'
    * @param callback
+   * @param options
    */
-  Outbreak.prototype.findContactsOfContacts = function (filter, callback) {
+  Outbreak.prototype.findContactsOfContacts = function (filter, options, callback) {
     const outbreakId = this.outbreakId;
     const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
 
     app.models.contactOfContact
-      .preFilterForOutbreak(this, filter)
+      .preFilterForOutbreak(this, filter, options)
       .then(app.models.contactOfContact.find)
       .then(records => {
         if (countRelations) {
@@ -122,12 +128,13 @@ module.exports = function (Outbreak) {
   /**
    * Count outbreak contacts of contacts
    * @param filter
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.filteredCountContactsOfContacts = function (filter, callback) {
+  Outbreak.prototype.filteredCountContactsOfContacts = function (filter, options, callback) {
     // pre-filter using related data
     app.models.contactOfContact
-      .preFilterForOutbreak(this, filter)
+      .preFilterForOutbreak(this, filter, options)
       .then(function (filter) {
         // replace nested geo points filters
         filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
@@ -151,6 +158,10 @@ module.exports = function (Outbreak) {
       .catch(callback);
   };
 
+  Outbreak.beforeRemote('prototype.exportFilteredContactsOfContacts', function (context, modelInstance, next) {
+    Outbreak.helpers.findAndFilteredCountContactsBackCompat(context, modelInstance, next);
+  });
+
   /**
    * Export filtered contacts of contacts to file
    * @param filter
@@ -162,7 +173,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.exportFilteredContactsOfContacts = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
     app.models.contactOfContact
-      .preFilterForOutbreak(this, filter)
+      .preFilterForOutbreak(this, filter, options)
       .then(filter => {
         // if encrypt password is not valid, remove it
         if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
@@ -275,9 +286,9 @@ module.exports = function (Outbreak) {
    * @param filter
    * @param callback
    */
-  Outbreak.prototype.countContactsOfContactsPerRiskLevel = function (filter, callback) {
+  Outbreak.prototype.countContactsOfContactsPerRiskLevel = function (filter, options, callback) {
     app.models.contactOfContact
-      .preFilterForOutbreak(this, filter)
+      .preFilterForOutbreak(this, filter, options)
       .then(filter => app.models.contactOfContact.rawFind(
         filter.where,
         {
@@ -322,5 +333,270 @@ module.exports = function (Outbreak) {
       .findDuplicatesByType(filter, this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT', model, options)
       .then(duplicates => callback(null, duplicates))
       .catch(callback);
+  };
+
+  /**
+   * Build and return a pdf containing a contact of contact's information and relationships (dossier)
+   * @param contactsOfContacts
+   * @param anonymousFields
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.contactOfContactDossier = function (contactsOfContacts, anonymousFields, options, callback) {
+    const models = app.models;
+
+    let tmpDir = tmp.dirSync({unsafeCleanup: true});
+    let tmpDirName = tmpDir.name;
+
+    const filter = {
+      where: {
+        id: {
+          inq: contactsOfContacts
+        }
+      },
+      include: [
+        {
+          relation: 'relationships',
+          scope: {
+            include: [
+              {
+                relation: 'people'
+              },
+              {
+                relation: 'cluster'
+              }
+            ]
+          }
+        }
+      ]
+    };
+
+    // add geographical restrictions if needed
+    // Note: even though the given cases should already be in the geographical restriction
+    // we are adding this additional condition to prevent security breaches
+    app.models.contactOfContact
+      .addGeographicalRestrictions(options.remotingContext, filter.where)
+      .then(updatedFilter => {
+        // update filter.where if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        // get all requested contact of contacts, including their relationships and followUps
+        models.contactOfContact.find(filter, (err, results) => {
+          if (err) {
+            return callback(err);
+          }
+
+          const pdfUtils = app.utils.pdfDoc;
+          const languageId = options.remotingContext.req.authData.user.languageId;
+
+          // list of records ready to be printed
+          let sanitizedRecords = [];
+
+          genericHelpers.attachParentLocations(
+            app.models.contactOfContact,
+            app.models.location,
+            results,
+            (err, result) => {
+              if (!err) {
+                result = result || {};
+                results = result.records || results;
+              }
+
+              // get the language dictionary
+              app.models.language.getLanguageDictionary(languageId, (err, dictionary) => {
+                if (err) {
+                  return callback(err);
+                }
+
+                // transform all DB models into JSONs for better handling
+                results.forEach((record, recordIndex) => {
+                  results[recordIndex] = record.toJSON();
+
+                  // this is needed because loopback doesn't return hidden fields from definition into the toJSON call
+                  // might be removed later
+                  results[recordIndex].type = record.type;
+
+                  // since relationships is a custom relation, the relationships collection is included differently in the model,
+                  // and not converted by the initial toJSON method.
+                  record.relationships.forEach((relationship, relationshipIndex) => {
+                    record.relationships[relationshipIndex] = relationship.toJSON();
+                    record.relationships[relationshipIndex].people.forEach((member, memberIndex) => {
+                      record.relationships[relationshipIndex].people[memberIndex] = member.toJSON();
+                    });
+                  });
+                });
+
+                // replace all foreign keys with readable data
+                genericHelpers.resolveModelForeignKeys(app, app.models.contactOfContact, results, dictionary)
+                  .then((results) => {
+                    results.forEach((contact, contactIndex) => {
+                      // keep the initial data of the contact (we currently use it to generate the QR code only)
+                      sanitizedRecords[contactIndex] = {
+                        rawData: contact
+                      };
+
+                      // anonymize the required fields and prepare the fields for print (currently, that means eliminating undefined values,
+                      // and format date type fields
+                      if (anonymousFields) {
+                        app.utils.anonymizeDatasetFields.anonymize(contact, anonymousFields);
+                      }
+                      app.utils.helpers.formatDateFields(contact, app.models.person.dossierDateFields);
+                      app.utils.helpers.formatUndefinedValues(contact);
+
+                      // prepare the contact's relationships for printing
+                      contact.relationships.forEach((relationship, relationshipIndex) => {
+                        sanitizedRecords[contactIndex].relationships = [];
+
+                        // extract the person with which the contact has a relationship
+                        let relationshipMember = _.find(relationship.people, (member) => {
+                          return member.id !== contact.id;
+                        });
+
+                        // if relationship member was not found
+                        if (!relationshipMember) {
+                          // stop here (invalid relationship)
+                          return;
+                        }
+
+                        // needed for checks below
+                        const relationshipMemberType = relationshipMember.type;
+
+                        // translate the values of the fields marked as reference data fields on the case/contact/event model
+                        app.utils.helpers.translateDataSetReferenceDataValues(
+                          relationshipMember,
+                          models[models.person.typeToModelMap[relationshipMemberType]].referenceDataFields,
+                          dictionary
+                        );
+
+                        relationshipMember = app.utils.helpers.translateFieldLabels(
+                          app,
+                          relationshipMember,
+                          models[models.person.typeToModelMap[relationshipMemberType]].modelName,
+                          dictionary
+                        );
+
+                        // translate the values of the fields marked as reference data fields on the relationship model
+                        app.utils.helpers.translateDataSetReferenceDataValues(
+                          relationship,
+                          models.relationship.referenceDataFields,
+                          dictionary
+                        );
+
+                        // translate all remaining keys of the relationship model
+                        relationship = app.utils.helpers.translateFieldLabels(
+                          app,
+                          relationship,
+                          models.relationship.modelName,
+                          dictionary
+                        );
+
+                        relationship[dictionary.getTranslation('LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON')] = relationshipMember;
+
+                        // add the sanitized relationship to the object to be printed
+                        sanitizedRecords[contactIndex].relationships[relationshipIndex] = relationship;
+                      });
+
+                      // translate all remaining keys
+                      contact = app.utils.helpers.translateFieldLabels(
+                        app,
+                        contact,
+                        app.models.contactOfContact.modelName,
+                        dictionary,
+                        true
+                      );
+
+                      // add the sanitized contact to the object to be printed
+                      sanitizedRecords[contactIndex].data = contact;
+                    });
+
+                    const relationshipsTitle = dictionary.getTranslation('LNG_PAGE_ACTION_RELATIONSHIPS');
+
+                    let pdfPromises = [];
+
+                    // print all the data
+                    sanitizedRecords.forEach((sanitizedContact) => {
+                      pdfPromises.push(
+                        new Promise((resolve, reject) => {
+                          // generate pdf document
+                          let doc = pdfUtils.createPdfDoc({
+                            fontSize: 7,
+                            layout: 'portrait',
+                            margin: 20,
+                            lineGap: 0,
+                            wordSpacing: 0,
+                            characterSpacing: 0,
+                            paragraphGap: 0
+                          });
+
+                          // add a top margin of 2 lines for each page
+                          doc.on('pageAdded', () => {
+                            doc.moveDown(2);
+                          });
+
+                          // set margin top for first page here, to not change the entire createPdfDoc functionality
+                          doc.moveDown(2);
+                          // write this as a separate function to easily remove it's listener
+                          let addQrCode = function () {
+                            app.utils.qrCode.addPersonQRCode(doc, sanitizedContact.rawData.outbreakId, 'contactOfContact', sanitizedContact.rawData);
+                          };
+
+                          // add the QR code to the first page (this page has already been added and will not be covered by the next line)
+                          addQrCode();
+
+                          // set a listener on pageAdded to add the QR code to every new page
+                          doc.on('pageAdded', addQrCode);
+
+                          pdfUtils.displayModelDetails(doc, sanitizedContact.data, true, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_OF_CONTACT_DETAILS'));
+                          pdfUtils.displayPersonRelationships(doc, sanitizedContact.relationships, relationshipsTitle);
+
+                          // add an additional empty page that contains only the QR code as per requirements
+                          doc.addPage();
+
+                          // stop adding this QR code. The next contact will need to have a different QR code
+                          doc.removeListener('pageAdded', addQrCode);
+                          doc.end();
+
+                          // convert pdf stream to buffer and send it as response
+                          genericHelpers.streamToBuffer(doc, (err, buffer) => {
+                            if (err) {
+                              callback(err);
+                            } else {
+                              const lastName = sanitizedContact.rawData.lastName ? sanitizedContact.rawData.lastName.replace(/\r|\n|\s/g, '').toUpperCase() + ' ' : '';
+                              const firstName = sanitizedContact.rawData.firstName ? sanitizedContact.rawData.firstName.replace(/\r|\n|\s/g, '') : '';
+                              fs.writeFile(`${tmpDirName}/${lastName}${firstName} - ${sanitizedContact.rawData.id}.pdf`, buffer, (err) => {
+                                if (err) {
+                                  reject(err);
+                                } else {
+                                  resolve();
+                                }
+                              });
+                            }
+                          });
+                        })
+                      );
+                    });
+                    return Promise.all(pdfPromises);
+                  })
+                  .then(() => {
+                    let archiveName = `contactOfContactDossiers_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+                    let archivePath = `${tmpDirName}/${archiveName}`;
+                    let zip = new AdmZip();
+
+                    zip.addLocalFolder(tmpDirName);
+                    zip.writeZip(archivePath);
+
+                    fs.readFile(archivePath, (err, data) => {
+                      if (err) {
+                        callback(err);
+                      } else {
+                        tmpDir.removeCallback();
+                        app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
+                      }
+                    });
+                  });
+              });
+            });
+        });
+      });
   };
 };
