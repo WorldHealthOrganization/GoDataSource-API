@@ -1632,17 +1632,16 @@ module.exports = function (Outbreak) {
         // get list of contacts based on the filter passed on request
         return app.models.contact
           .rawFind(contactQuery, {
-              projection: {
-                id: 1,
-                firstName: 1,
-                middleName: 1,
-                lastName: 1,
-                gender: 1,
-                age: 1,
-                addresses: 1
-              }
+            projection: {
+              id: 1,
+              firstName: 1,
+              middleName: 1,
+              lastName: 1,
+              gender: 1,
+              age: 1,
+              addresses: 1
             }
-          );
+          });
       })
       .then((contacts) => {
         // map contacts

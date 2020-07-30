@@ -5,6 +5,8 @@
  * It extends the Outbreak controller with event related actions
  */
 
+const app = require('../../server/server');
+
 module.exports = function (Outbreak) {
   /**
    * Retrieve available people for a case

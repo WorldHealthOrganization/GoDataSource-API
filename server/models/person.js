@@ -1037,7 +1037,7 @@ module.exports = function (Person) {
                         }
                       }
                     ]
-                  }
+                  };
                 }
 
                 return app.models[personModel].rawFind(_filter.where, {order: {'followUp.endDate': -1}})
@@ -1549,13 +1549,13 @@ module.exports = function (Person) {
         // update where to only query for allowed locations
         return Promise.resolve(
           where && Object.keys(where).length ?
-            {
-              and: [
-                allowedLocationsQuery,
-                where
-              ]
-            } :
-            allowedLocationsQuery
+          {
+            and: [
+              allowedLocationsQuery,
+              where
+            ]
+          } :
+          allowedLocationsQuery
         );
       });
   };

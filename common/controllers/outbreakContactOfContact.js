@@ -5,6 +5,8 @@
  * It extends the Outbreak controller with contact of contact related actions
  */
 
+const app = require('../../server/server');
+
 module.exports = function (Outbreak) {
   /**
    * Retrieve available people for a contact of contact
