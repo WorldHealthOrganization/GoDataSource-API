@@ -449,172 +449,193 @@ module.exports = function (Contact) {
       dateInterval = [helpers.getDate(), helpers.getDateEndOfDay()];
     }
 
-    if (groupBy === 'case') {
-      let filter = {
-        where: {
-          outbreakId: outbreak.id
-        },
-        include: [
-          {
-            relation: 'followUps',
-            scope: {
-              where: {
-                date: {
-                  between: dateInterval
-                }
-              },
-              // remove the contacts that don't have follow ups in the given day
-              filterParent: true,
-            }
-          },
-          {
-            relation: 'relationships',
-            scope: {
-              where: {
-                'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
-              },
-              order: 'contactDate DESC',
-              limit: 1,
-              // remove the contacts that don't have relationships to cases
-              filterParent: true,
-              // include the case model
-              include: [
-                {
-                  relation: 'people',
-                  scope: {
-                    where: {
-                      type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        ]
-      };
-
-      return Contact
-        .find(filter)
-        .then((contacts) => {
-          // add support for filter parent
-          contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
-
-          // expose case id to first level, to easily group the contacts
-          contacts = contacts.map((contact) => {
-            let caseItem = contact.relationships[0].persons
-              .find(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE');
-            // check for relation integrity (has a case id)
-            // if it doesn't just set it to null and remove the entire 'null' group altogether
-            contact.caseId = caseItem ? caseItem.id : null;
-            return contact;
+    // check for geographical restriction
+    return Contact.addGeographicalRestrictions(options.remotingContext)
+      .then(geographicalRestrictionQuery => {
+        if (groupBy === 'case') {
+          let contactQuery = {
+            outbreakId: outbreak.id,
+          };
+          geographicalRestrictionQuery && (contactQuery = {
+            and: [
+              contactQuery,
+              geographicalRestrictionQuery
+            ]
           });
 
-          // retrieve contact's first address location
-          return Promise
-            .all(contacts.map((contact) => {
-              // get contact address
-              let contactAddress = app.models.person.getCurrentAddress(contact);
-              if (contactAddress && contactAddress.locationId) {
-                return app.models.location
-                  .findById(contactAddress.locationId)
-                  .then((location) => {
-                    if (location) {
-                      contactAddress.locationName = location.name;
+          let filter = {
+            where: contactQuery,
+            include: [
+              {
+                relation: 'followUps',
+                scope: {
+                  where: {
+                    date: {
+                      between: dateInterval
                     }
-                    return contact;
-                  });
+                  },
+                  // remove the contacts that don't have follow ups in the given day
+                  filterParent: true,
+                }
+              },
+              {
+                relation: 'relationships',
+                scope: {
+                  where: {
+                    'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+                  },
+                  order: 'contactDate DESC',
+                  limit: 1,
+                  // remove the contacts that don't have relationships to cases
+                  filterParent: true,
+                  // include the case model
+                  include: [
+                    {
+                      relation: 'people',
+                      scope: {
+                        where: {
+                          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+                        }
+                      }
+                    }
+                  ]
+                }
               }
-              return contact;
-            }))
-            .then((contacts) => {
-              // group them by case id
-              return _.groupBy(contacts, (c) => c.caseId);
-            });
-        });
-    }
+            ]
+          };
 
-    // group by risk level
-    if (groupBy === 'riskLevel') {
-      // find follow-ups for specified date interval
-      return app.models.followUp
-        .rawFind({
-          date: {
-            between: dateInterval
-          },
-          outbreakId: outbreak.id,
-        }, {
-          order: {date: 1}
-        })
-        .then(function (followUps) {
-          // build a followUp map, to easily link them to contacts later
-          const followUpMap = {};
-          // go through the follow-ups
-          followUps.forEach(function (followUp) {
-            // add follow-ups to the map
-            if (!followUpMap[followUp.personId]) {
-              followUpMap[followUp.personId] = [];
-            }
-            followUpMap[followUp.personId].push(followUp);
-          });
-          // find the contacts associated with the follow-ups
-          return app.models.contact
+          return Contact
+            .find(filter)
+            .then((contacts) => {
+              // add support for filter parent
+              contacts = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(contacts, filter);
+
+              // expose case id to first level, to easily group the contacts
+              contacts = contacts.map((contact) => {
+                let caseItem = contact.relationships[0].persons
+                  .find(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE');
+                // check for relation integrity (has a case id)
+                // if it doesn't just set it to null and remove the entire 'null' group altogether
+                contact.caseId = caseItem ? caseItem.id : null;
+                return contact;
+              });
+
+              // retrieve contact's first address location
+              return Promise
+                .all(contacts.map((contact) => {
+                  // get contact address
+                  let contactAddress = app.models.person.getCurrentAddress(contact);
+                  if (contactAddress && contactAddress.locationId) {
+                    return app.models.location
+                      .findById(contactAddress.locationId)
+                      .then((location) => {
+                        if (location) {
+                          contactAddress.locationName = location.name;
+                        }
+                        return contact;
+                      });
+                  }
+                  return contact;
+                }))
+                .then((contacts) => {
+                  // group them by case id
+                  return _.groupBy(contacts, (c) => c.caseId);
+                });
+            });
+        }
+
+        // group by risk level
+        if (groupBy === 'riskLevel') {
+          // find follow-ups for specified date interval
+          return app.models.followUp
             .rawFind({
-              _id: {
-                inq: Array.from(new Set(Object.keys(followUpMap)))
+              date: {
+                between: dateInterval
               },
               outbreakId: outbreak.id,
+            }, {
+              order: {date: 1}
             })
-            .then(function (contacts) {
-              // build contact groups
-              const contactGroups = {};
-              // go through the contacts
-              contacts.forEach(function (contact) {
-                // add their follow-ups
-                contact.followUps = followUpMap[contact.id];
-                // risk level is optional
-                if (contact.riskLevel == null) {
-                  contact.riskLevel = 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED';
+            .then(function (followUps) {
+              // build a followUp map, to easily link them to contacts later
+              const followUpMap = {};
+              // go through the follow-ups
+              followUps.forEach(function (followUp) {
+                // add follow-ups to the map
+                if (!followUpMap[followUp.personId]) {
+                  followUpMap[followUp.personId] = [];
                 }
-                // group contacts by risk level
-                if (!contactGroups[contact.riskLevel]) {
-                  contactGroups[contact.riskLevel] = [];
-                }
-                contactGroups[contact.riskLevel].push(contact);
+                followUpMap[followUp.personId].push(followUp);
               });
-              // sort groups by risk level
-              const _contactGroups = {};
-              Object.keys(contactGroups).sort().forEach(function (key) {
-                _contactGroups[key] = contactGroups[key];
+
+              // find the contacts associated with the follow-ups
+              let contactQuery = {
+                _id: {
+                  inq: Array.from(new Set(Object.keys(followUpMap)))
+                },
+                outbreakId: outbreak.id,
+              };
+              geographicalRestrictionQuery && (contactQuery = {
+                and: [
+                  contactQuery,
+                  geographicalRestrictionQuery
+                ]
               });
-              return _contactGroups;
+
+              return app.models.contact
+                .rawFind(contactQuery)
+                .then(function (contacts) {
+                  // build contact groups
+                  const contactGroups = {};
+                  // go through the contacts
+                  contacts.forEach(function (contact) {
+                    // add their follow-ups
+                    contact.followUps = followUpMap[contact.id];
+                    // risk level is optional
+                    if (contact.riskLevel == null) {
+                      contact.riskLevel = 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED';
+                    }
+                    // group contacts by risk level
+                    if (!contactGroups[contact.riskLevel]) {
+                      contactGroups[contact.riskLevel] = [];
+                    }
+                    contactGroups[contact.riskLevel].push(contact);
+                  });
+                  // sort groups by risk level
+                  const _contactGroups = {};
+                  Object.keys(contactGroups).sort().forEach(function (key) {
+                    _contactGroups[key] = contactGroups[key];
+                  });
+                  return _contactGroups;
+                });
             });
-        });
-    }
+        }
 
-    // check if we need to send an interval of dates or a single date
-    let dateFilter = {dateOfFollowUp: date};
-    if (typeof date === 'object') {
-      dateFilter = {
-        startDate: date.startDate,
-        endDate: date.endDate
-      };
-    }
+        // check if we need to send an interval of dates or a single date
+        let dateFilter = {dateOfFollowUp: date};
+        if (typeof date === 'object') {
+          dateFilter = {
+            startDate: date.startDate,
+            endDate: date.endDate
+          };
+        }
 
-    // return contacts grouped by location that have follow ups in the given day
-    return app.models.person
-      .getPeoplePerLocation('contact', dateFilter, outbreak, options)
-      .then((groups) => {
-        // rebuild the result to match the structure resulted from 'case' grouping
-        // doing this because we're reusing existing functionality that does not build the result the same way
-        let contactGroups = {};
+        // return contacts grouped by location that have follow ups in the given day
+        return app.models.person
+          .getPeoplePerLocation('contact', dateFilter, outbreak, options)
+          .then((groups) => {
+            // rebuild the result to match the structure resulted from 'case' grouping
+            // doing this because we're reusing existing functionality that does not build the result the same way
+            let contactGroups = {};
 
-        groups.peopleDistribution.forEach((group) => {
-          if (group.people.length) {
-            contactGroups[group.location.name] = group.people;
-          }
-        });
+            groups.peopleDistribution.forEach((group) => {
+              if (group.people.length) {
+                contactGroups[group.location.name] = group.people;
+              }
+            });
 
-        return contactGroups;
+            return contactGroups;
+          });
       });
   };
 
@@ -622,9 +643,10 @@ module.exports = function (Contact) {
    * Pre-filter contact for an outbreak using related models (case, followUp)
    * @param outbreak
    * @param filter Supports 'where.case', 'where.followUp' MongoDB compatible queries
+   * @param options Options from request
    * @return {Promise<void | never>}
    */
-  Contact.preFilterForOutbreak = function (outbreak, filter) {
+  Contact.preFilterForOutbreak = function (outbreak, filter, options) {
     // set a default filter
     filter = filter || {};
     // get cases query, if any
@@ -641,8 +663,14 @@ module.exports = function (Contact) {
     }
     // get main contact query
     let contactQuery = _.get(filter, 'where', {});
-    // start with a resolved promise (so we can link others)
-    let buildQuery = Promise.resolve();
+
+    // start with the geographical restrictions promise (so we can link others)
+    let buildQuery = Contact.addGeographicalRestrictions(options.remotingContext, contactQuery)
+      .then(updatedFilter => {
+        // update contactQuery if needed
+        updatedFilter && (contactQuery = updatedFilter);
+      });
+
     // if a cases query is present
     if (casesQuery) {
       // restrict query to current outbreak

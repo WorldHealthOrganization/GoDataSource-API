@@ -1314,4 +1314,48 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Retrieve available people for a case
+   * @param caseId
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.getCaseRelationshipsAvailablePeople = function (caseId, filter, options, callback) {
+    // retrieve available people
+    app.models.person
+      .getAvailablePeople(
+        this.id,
+        caseId,
+        filter,
+        options
+      )
+      .then((records) => {
+        callback(null, records);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count available people for a case
+   * @param caseId
+   * @param where
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.countCaseRelationshipsAvailablePeople = function (caseId, where, options, callback) {
+    // count available people
+    app.models.person
+      .getAvailablePeopleCount(
+        this.id,
+        caseId,
+        where,
+        options
+      )
+      .then((counted) => {
+        callback(null, counted);
+      })
+      .catch(callback);
+  };
 };

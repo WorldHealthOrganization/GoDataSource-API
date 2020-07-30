@@ -1023,6 +1023,23 @@ module.exports = function (Person) {
                 // Merge the additional filter with the filter provided by the user
                 _filter = app.utils.remote.mergeFilters(additionalFilter, filter || {});
 
+                // add geographical restriction for person query if needed
+                // allowedLocationsIds exist only if user or outbreak restrictions exist
+                if (allowedLocationsIds) {
+                  _filter.where = {
+                    and: [
+                      _filter.where,
+                      {
+                        // get models for the calculated locations and the ones that don't have a usual place of residence location set
+                        usualPlaceOfResidenceLocationId: {
+                          // using reportingLocationIds as the allowed location were processed above into reporting locations
+                          inq: reportingLocationIds.concat([null])
+                        }
+                      }
+                    ]
+                  };
+                }
+
                 return app.models[personModel].rawFind(_filter.where, {order: {'followUp.endDate': -1}})
                   .then(people => [people, locationCorelationMap, peopleDistribution, _filter]);
               })
@@ -1342,12 +1359,14 @@ module.exports = function (Person) {
    * @param outbreakId
    * @param personId
    * @param filter
+   * @param options Options from request
    * @returns {Promise<any>}
    */
   Person.getAvailablePeople = function (
     outbreakId,
     personId,
-    filter
+    filter,
+    options
   ) {
     filter = filter || {};
     // attach our conditions
@@ -1366,9 +1385,17 @@ module.exports = function (Person) {
       ]
     };
 
-    // retrieve data
+    // update filter for geographical restriction if needed
     return Person
-      .find(filter)
+      .addGeographicalRestrictions(options.remotingContext, filter.where)
+      .then(updatedFilter => {
+        // update filter if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        // retrieve data
+        return Person
+          .find(filter);
+      })
       .then((records) => {
         return Person.determineIfRelationshipsExist(
           outbreakId,
@@ -1383,12 +1410,14 @@ module.exports = function (Person) {
    * @param outbreakId
    * @param personId
    * @param where
+   * @param options Options from request
    * @returns {Promise<any>}
    */
   Person.getAvailablePeopleCount = function (
     outbreakId,
     personId,
-    where
+    where,
+    options
   ) {
     // attach our conditions
     where = {
@@ -1404,8 +1433,16 @@ module.exports = function (Person) {
       ]
     };
 
-    // retrieve data
-    return Person.count(where);
+    // update filter for geographical restriction if needed
+    return Person
+      .addGeographicalRestrictions(options.remotingContext, where)
+      .then(updatedFilter => {
+        // update filter if needed
+        updatedFilter && (where = updatedFilter);
+
+        // retrieve data
+        return Person.count(where);
+      });
   };
 
   /**
