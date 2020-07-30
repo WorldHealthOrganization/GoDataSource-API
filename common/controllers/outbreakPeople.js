@@ -6,7 +6,7 @@ const moment = require('moment');
 
 /**
  * Note: It is not exposed as an actual controller
- * It extends the Outbreak controller with case related actions
+ * It extends the Outbreak controller with people related actions
  */
 
 module.exports = function (Outbreak) {
