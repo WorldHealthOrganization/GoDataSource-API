@@ -71,4 +71,18 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Get all duplicates based on hardcoded rules against a model props
+   * @param filter pagination props (skip, limit)
+   * @param model
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.getContactOfContactPossibleDuplicates = function (filter = {}, model = {}, options, callback) {
+    app.models.person
+      .findDuplicatesByType(filter, this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT', model, options)
+      .then(duplicates => callback(null, duplicates))
+      .catch(callback);
+  };
 };
