@@ -1851,6 +1851,11 @@
           "arg": "where",
           "type": "object",
           "description": "Criteria to match model instances"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -2118,6 +2123,11 @@
           "arg": "where",
           "type": "object",
           "description": "Criteria to match model instances"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -2385,6 +2395,11 @@
           "arg": "where",
           "type": "object",
           "description": "Criteria to match model instances"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -7676,6 +7691,11 @@
           "arg": "where",
           "type": "object",
           "description": "Criteria to match model instances"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [

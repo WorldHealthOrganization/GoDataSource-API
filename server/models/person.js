@@ -1410,12 +1410,14 @@ module.exports = function (Person) {
    * @param outbreakId
    * @param personId
    * @param where
+   * @param options Options from request
    * @returns {Promise<any>}
    */
   Person.getAvailablePeopleCount = function (
     outbreakId,
     personId,
-    where
+    where,
+    options
   ) {
     // attach our conditions
     where = {
@@ -1431,8 +1433,16 @@ module.exports = function (Person) {
       ]
     };
 
-    // retrieve data
-    return Person.count(where);
+    // update filter for geographical restriction if needed
+    return Person
+      .addGeographicalRestrictions(options.remotingContext, where)
+      .then(updatedFilter => {
+        // update filter if needed
+        updatedFilter && (where = updatedFilter);
+
+        // retrieve data
+        return Person.count(where);
+      });
   };
 
   /**

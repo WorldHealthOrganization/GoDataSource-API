@@ -1336,4 +1336,26 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Count available people for a case
+   * @param caseId
+   * @param where
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.countCaseRelationshipsAvailablePeople = function (caseId, where, options, callback) {
+    // count available people
+    app.models.person
+      .getAvailablePeopleCount(
+        this.id,
+        caseId,
+        where,
+        options
+      )
+      .then((counted) => {
+        callback(null, counted);
+      })
+      .catch(callback);
+  };
 };

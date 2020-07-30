@@ -38,4 +38,35 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Count available people for a contact of contact
+   * @param contactOfContactId
+   * @param where
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.countContactOfContactRelationshipsAvailablePeople = function (contactOfContactId, where, options, callback) {
+    // we only make relations with contacts
+    where = {
+      and: [
+        {
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+        },
+        where || {}
+      ]
+    };
+
+    app.models.person
+      .getAvailablePeopleCount(
+        this.id,
+        contactOfContactId,
+        where,
+        options
+      )
+      .then((counted) => {
+        callback(null, counted);
+      })
+      .catch(callback);
+  };
 };

@@ -6136,66 +6136,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Count available people for a case
-   * @param caseId
-   * @param where
-   * @param callback
-   */
-  Outbreak.prototype.countCaseRelationshipsAvailablePeople = function (caseId, where, callback) {
-    // count available people
-    app.models.person
-      .getAvailablePeopleCount(
-        this.id,
-        caseId,
-        where
-      )
-      .then((counted) => {
-        callback(null, counted);
-      })
-      .catch(callback);
-  };
-
-  /**
-   * Count available people for a contact
-   * @param contactId
-   * @param where
-   * @param callback
-   */
-  Outbreak.prototype.countContactRelationshipsAvailablePeople = function (contactId, where, callback) {
-    // count available people
-    app.models.person
-      .getAvailablePeopleCount(
-        this.id,
-        contactId,
-        where
-      )
-      .then((counted) => {
-        callback(null, counted);
-      })
-      .catch(callback);
-  };
-
-  /**
-   * Count available people for an event
-   * @param eventId
-   * @param where
-   * @param callback
-   */
-  Outbreak.prototype.countEventRelationshipsAvailablePeople = function (eventId, where, callback) {
-    // count available people
-    app.models.person
-      .getAvailablePeopleCount(
-        this.id,
-        eventId,
-        where
-      )
-      .then((counted) => {
-        callback(null, counted);
-      })
-      .catch(callback);
-  };
-
-  /**
    * Change source and targets of a relationship
    * @param relationshipId
    * @param sourceTargetIds
@@ -6679,35 +6619,6 @@ module.exports = function (Outbreak) {
           }));
         }
         helpers.countPersonRelationships(contactOfContactId, where, callback);
-      })
-      .catch(callback);
-  };
-
-  /**
-   * Count available people for a contact of contact
-   * @param contactOfContactId
-   * @param where
-   * @param callback
-   */
-  Outbreak.prototype.countContactOfContactRelationshipsAvailablePeople = function (contactOfContactId, where, callback) {
-    // we only make relations with contacts
-    where = {
-      and: [
-        {
-          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-        },
-        where || {}
-      ]
-    };
-
-    app.models.person
-      .getAvailablePeopleCount(
-        this.id,
-        contactOfContactId,
-        where
-      )
-      .then((counted) => {
-        callback(null, counted);
       })
       .catch(callback);
   };

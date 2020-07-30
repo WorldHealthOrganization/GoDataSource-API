@@ -2952,4 +2952,26 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Count available people for a contact
+   * @param contactId
+   * @param where
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.countContactRelationshipsAvailablePeople = function (contactId, where, options, callback) {
+    // count available people
+    app.models.person
+      .getAvailablePeopleCount(
+        this.id,
+        contactId,
+        where,
+        options
+      )
+      .then((counted) => {
+        callback(null, counted);
+      })
+      .catch(callback);
+  };
 };
