@@ -227,7 +227,7 @@ module.exports = function (ContactOfContact) {
    * @param filter Supports 'where.contact' MongoDB compatible queries
    * @return {Promise<void | never>}
    */
-  ContactOfContact.preFilterForOutbreak = function (outbreak, filter) {
+  ContactOfContact.preFilterForOutbreak = function (outbreak, filter, options) {
     // defensive checks
     filter = filter || {};
     filter.where = filter.where || {};
@@ -242,7 +242,11 @@ module.exports = function (ContactOfContact) {
     let mainFilter = filter.where;
 
     // we build the final query object, by chaining few async jobs
-    let resultQuery = Promise.resolve();
+    let resultQuery = ContactOfContact.addGeographicalRestrictions(options.remotingContext, mainFilter)
+      .then(updatedFilter => {
+        // update contact of contacts main filter if needed
+        updatedFilter && (mainFilter = updatedFilter);
+      });
 
     // find related contacts in the current outbreak
     if (relatedContactFilter) {

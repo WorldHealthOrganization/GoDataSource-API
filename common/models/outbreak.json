@@ -7462,10 +7462,6 @@
         {
           "verb": "get",
           "path": "/contacts-of-contacts"
-        },
-        {
-          "verb": "post",
-          "path": "/contacts-of-contacts/filter"
         }
       ]
     },
