@@ -118,54 +118,6 @@ module.exports = function (Outbreak) {
   });
 
   /**
-   * Allows count requests with advanced filters (like the ones we can use on GET requests)
-   * to be mode on outbreak/{id}/events.
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.filteredCountEvents = function (filter, callback) {
-    // set default filter value
-    filter = filter || {};
-    filter.where = filter.where || {};
-    filter.where.outbreakId = this.id;
-
-    // check if deep count should be used (this is expensive, should be avoided if possible)
-    if (app.utils.remote.searchByRelationProperty.shouldUseDeepCount(filter)) {
-      this.findEvents(filter, function (err, res) {
-        if (err) {
-          return callback(err);
-        }
-        callback(null, app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(res, filter).length);
-      });
-    } else {
-      return app.models.event.count(filter.where);
-    }
-  };
-
-  /**
-   * Attach before remote (GET outbreaks/{id}/events) hooks
-   */
-  Outbreak.beforeRemote('prototype.findEvents', function (context, modelInstance, next) {
-    // filter information based on available permissions
-    Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', context);
-    // Enhance events list request to support optional filtering of events that don't have any relations
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', context, modelInstance, next);
-  });
-
-  /**
-   * Attach before remote (GET outbreaks/{id}/events/filtered-count) hooks
-   */
-  Outbreak.beforeRemote('prototype.filteredCountEvents', function (context, modelInstance, next) {
-    // remove custom filter options
-    context.args = context.args || {};
-    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
-    // handle custom filter options
-    context.args.filter = genericHelpers.attachCustomDeleteFilterOption(context.args.filter);
-
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', context, modelInstance, next);
-  });
-
-  /**
    * Restrict the list of outbreaks only to what's accessible to current logged in user
    */
   Outbreak.beforeRemote('find', function (context, modelInstance, next) {
