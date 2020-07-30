@@ -63,8 +63,9 @@ module.exports = function (Outbreak) {
     'prototype.__get__followUps',
     'prototype.__get__labResults',
     'prototype.__get__cases',
-    'prototype.__get__contacts',
     'prototype.__get__events',
+    'prototype.__count__events',
+    'prototype.__get__contacts',
     'prototype.__count__contacts',
     'prototype.__get__contactsOfContacts',
     'prototype.__count__contactsOfContacts',
@@ -4982,54 +4983,6 @@ module.exports = function (Outbreak) {
       })
       .then(function (results) {
         callback(null, results);
-      })
-      .catch(callback);
-  };
-
-  /**
-   * Find outbreak events
-   * @param filter
-   * @param callback
-   */
-  Outbreak.prototype.findEvents = function (filter, callback) {
-    filter = filter || {};
-    filter.where = filter.where || {};
-
-    const outbreakId = this.id;
-    const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
-
-    filter.where = {
-      and: [
-        filter.where, {
-          outbreakId: outbreakId
-        }
-      ]
-    };
-
-    app.models.event
-      .find(filter)
-      .then((records) => {
-        if (countRelations) {
-          // create a map of ids and their corresponding record
-          // to easily manipulate the records below
-          const eventsMap = {};
-          for (let record of records) {
-            eventsMap[record.id] = record;
-          }
-
-          // determine number of contacts/exposures
-          app.models.person.getPeopleContactsAndExposures(outbreakId, Object.keys(eventsMap))
-            .then((relationsCountMap) => {
-              for (let recordId in relationsCountMap) {
-                const record = eventsMap[recordId];
-                record.numberOfContacts = relationsCountMap[recordId].numberOfContacts;
-                record.numberOfExposures = relationsCountMap[recordId].numberOfExposures;
-              }
-              return callback(null, records);
-            });
-        } else {
-          return callback(null, records);
-        }
       })
       .catch(callback);
   };
