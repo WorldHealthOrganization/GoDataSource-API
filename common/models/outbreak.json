@@ -851,6 +851,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "contact_of_contact_list",
+      "permission": "ALLOW",
+      "property": "__get__people"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "case_list",
       "permission": "ALLOW",
       "property": "__count__people"
@@ -864,6 +870,12 @@
     {
       "principalType": "ROLE",
       "principalId": "event_list",
+      "permission": "ALLOW",
+      "property": "__count__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_list",
       "permission": "ALLOW",
       "property": "__count__people"
     },
@@ -4004,6 +4016,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -4505,7 +4522,12 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts a 'where.relationship' query."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -4535,7 +4557,12 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). This accepts 'where.relationship' query."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -4794,6 +4821,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note that filter.where needs to be a valid MongoDB where condition, not loopback, because the query is ran directly on MongoDB for performance reasons."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -4840,6 +4872,11 @@
           "arg": "where",
           "type": "object",
           "description": "Criteria to match model instances. Note that this needs to be a valid MongoDB where condition, not loopback, because the query is ran directly on MongoDB for performance reasons."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
