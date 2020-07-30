@@ -709,12 +709,6 @@
       "principalType": "ROLE",
       "principalId": "event_list",
       "permission": "ALLOW",
-      "property": "__count__events"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "event_list",
-      "permission": "ALLOW",
       "property": "filteredCountEvents"
     },
     {
@@ -2877,6 +2871,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts a `noRelationships` flag on the first level of `where`."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -6190,6 +6189,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). It also supports custom filter option: 'where.countRelations' for count number of exposures/contacts."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
