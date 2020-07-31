@@ -456,14 +456,22 @@ module.exports = function (Case) {
           .then(function (cases) {
             return new Promise(function (resolve, reject) {
               // count categories over time
-              counterFn(cases, periodInterval, periodType, periodMap, categoryList, function (error, periodMap) {
-                // handle errors
-                if (error) {
-                  return reject(error);
+              counterFn(
+                cases,
+                periodInterval,
+                periodType,
+                weekType,
+                periodMap,
+                categoryList,
+                function (error, periodMap) {
+                  // handle errors
+                  if (error) {
+                    return reject(error);
+                  }
+                  // send back the result
+                  return resolve(periodMap);
                 }
-                // send back the result
-                return resolve(periodMap);
-              });
+              );
             });
           });
       });
